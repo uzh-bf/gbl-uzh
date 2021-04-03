@@ -1,11 +1,15 @@
 import hydrate from 'next-mdx-remote/hydrate'
 import Head from 'next/head'
-
 import * as Util from '../../lib/util'
+
+interface Props {
+  source: any
+  frontMatter: any
+}
 
 const components = {}
 
-export default function Game({ source, frontMatter }) {
+export default function Game({ source, frontMatter }: Props) {
   const content = hydrate(source, { components })
 
   return (
@@ -17,7 +21,12 @@ export default function Game({ source, frontMatter }) {
       <main className="p-4">
         <h1>{frontMatter.title}</h1>
         <h2>{frontMatter.subtitle}</h2>
-        <img src={frontMatter.thumbnail} height="200px" width="300px" />
+        <img
+          src={frontMatter.thumbnail}
+          height="200px"
+          width="300px"
+          alt="thumbnail"
+        />
         <ul>
           {frontMatter.objectives.map((item) => (
             <li>{item}</li>

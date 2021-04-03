@@ -1,7 +1,7 @@
 import fs from 'fs'
-import path from 'path'
 import matter from 'gray-matter'
 import renderToString from 'next-mdx-remote/render-to-string'
+import path from 'path'
 
 export function getStaticProps(dir_name, components = {}) {
   return async ({ params }) => {
@@ -27,8 +27,8 @@ export function getStaticPaths(dir_name) {
   return async () => {
     const paths = fs
       .readdirSync(path.join(process.cwd(), `content/${dir_name}/`))
-      .filter((path) => /\.mdx?$/.test(path))
-      .map((path) => path.replace(/\.mdx?$/, ''))
+      .filter((p) => /\.mdx?$/.test(p))
+      .map((p) => p.replace(/\.mdx?$/, ''))
       .map((slug) => ({ params: { slug } }))
 
     return { paths, fallback: false }

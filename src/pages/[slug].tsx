@@ -1,11 +1,15 @@
 import hydrate from 'next-mdx-remote/hydrate'
 import Head from 'next/head'
-
 import * as Util from '../lib/util'
+
+interface Props {
+  source: any
+  frontMatter: any
+}
 
 const components = {}
 
-export default function Page({ source, frontMatter }) {
+export default function Page({ source, frontMatter }: Props) {
   const content = hydrate(source, { components })
 
   return (

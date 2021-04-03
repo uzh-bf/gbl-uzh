@@ -5,7 +5,7 @@ export default function Home() {
     <div>
       <Head>
         <title>GBL@UZH</title>
-        <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+        <script src="https://identity.netlify.com/v1/netlify-identity-widget.js" />
       </Head>
     </div>
   )
