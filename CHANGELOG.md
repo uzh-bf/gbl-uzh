@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5](https://github.com/uzh-bf/gbl-web/compare/v0.0.4...v0.0.5) (2021-04-03)
+
+
+### Features
+
+* add games collection, refactor: extract getStaticPaths and getStaticProps into Util ([e164d87](https://github.com/uzh-bf/gbl-web/commit/e164d87cbe9af4047252ea6c864448c8961e5575))
+
 ### [0.0.4](https://github.com/uzh-bf/gbl-web/compare/v0.0.3...v0.0.4) (2021-04-03)
 
 
