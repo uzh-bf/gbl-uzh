@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.8](https://github.com/uzh-bf/gbl-web/compare/v0.0.7...v0.0.8) (2021-04-03)
+
+
+### Features
+
+* setup tailwind and basic page for games ([85739f0](https://github.com/uzh-bf/gbl-web/commit/85739f026265ac6b4bb089157f09c0ea4bf378fd))
+
 ### [0.0.7](https://github.com/uzh-bf/gbl-web/compare/v0.0.6...v0.0.7) (2021-04-03)
 
 
