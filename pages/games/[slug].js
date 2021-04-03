@@ -1,7 +1,7 @@
 import hydrate from 'next-mdx-remote/hydrate'
 import Head from 'next/head'
 
-import * as Util from '../lib/util'
+import * as Util from '../../lib/util'
 
 const components = {}
 
