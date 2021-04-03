@@ -5,7 +5,7 @@ import * as Util from '../lib/util'
 
 const components = {}
 
-export default function Page({ source, frontMatter }) {
+export default function Game({ source, frontMatter }) {
   const content = hydrate(source, { components })
 
   return (
@@ -22,5 +22,5 @@ export default function Page({ source, frontMatter }) {
   )
 }
 
-export const getStaticProps = Util.getStaticProps('pages')
-export const getStaticPaths = Util.getStaticPaths('pages')
+export const getStaticProps = Util.getStaticProps('games')
+export const getStaticPaths = Util.getStaticPaths('games')
