@@ -1,13 +1,31 @@
 backend:
   name: git-gateway
+  # name: test-repo
   branch: master
 
 publish_mode: editorial_workflow
-media_folder: 'public/images/uploads'
-public_folder: '/images/uploads'
+media_folder: public/images/uploads
+public_folder: /images/uploads
 
 collections:
-  - name: 'games'
-    label: 'Games'
-    folder: '_games'
+  - name: pages
+    label: Pages
+    folder: content/pages/
+    extension: mdx
+    format: frontmatter
     create: true
+    slug: '{{slug}}'
+    identifier_field: slug
+    summary: '{{title}}'
+    fields:
+      - label: 'Slug'
+        name: 'slug'
+        widget: 'string'
+      - { label: Title, name: title, widget: string }
+      - { label: Body, name: body, widget: markdown }
+      - label: Cats
+        name: cats
+        widget: list
+        fields:
+          - { label: Name, name: name, widget: string }
+          - { label: Description, name: description, widget: text }
