@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.6](https://github.com/uzh-bf/gbl-web/compare/v0.0.5...v0.0.6) (2021-04-03)
+
+
+### Bug Fixes
+
+* path resolution to Util ([032ae3a](https://github.com/uzh-bf/gbl-web/commit/032ae3ac3f0ca2b663782fdba0271e05838c4544))
+
 ### [0.0.5](https://github.com/uzh-bf/gbl-web/compare/v0.0.4...v0.0.5) (2021-04-03)
 
 
