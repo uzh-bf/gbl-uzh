@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.7](https://github.com/uzh-bf/gbl-web/compare/v0.0.6...v0.0.7) (2021-04-03)
+
+
+### Features
+
+* add content fields for game pages ([e6e7e1e](https://github.com/uzh-bf/gbl-web/commit/e6e7e1e8f320ebae76bdb8d457fae2aac4f9cfab))
+
 ### [0.0.6](https://github.com/uzh-bf/gbl-web/compare/v0.0.5...v0.0.6) (2021-04-03)
 
 
