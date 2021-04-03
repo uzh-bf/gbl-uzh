@@ -14,15 +14,17 @@ collections:
     format: frontmatter
     identifier_field: slug
     fields:
-      - { label: Slug, name: slug, widget: string }
-      - { label: Title, name: title, widget: string }
-      - { label: Body, name: body, widget: markdown }
-      - label: Cats
-        name: cats
-        widget: list
-        fields:
-          - { label: Name, name: name, widget: string }
-          - { label: Description, name: description, widget: text }
+      - label: Slug
+        name: slug
+        widget: string
+
+      - label: Title
+        name: title
+        widget: string
+
+      - label: Body
+        name: body
+        widget: markdown
 
   - name: games
     label: Games
@@ -32,9 +34,56 @@ collections:
     create: true
     identifier_field: slug
     fields:
-      - { label: Slug, name: slug, widget: string }
-      - { label: Thumbnail, name: thumbnail, widget: image }
-      - { label: Title, name: title, widget: string }
-      - { label: Subtitle, name: subtitle, widget: string }
-      - { label: Content, name: body, widget: markdown }
-      - { label: Learning Objectives, name: objectives, widget: list }
+      - label: Slug
+        name: slug
+        widget: string
+
+      - label: Thumbnail
+        name: thumbnail
+        widget: image
+
+      - label: Title
+        name: title
+        widget: string
+
+      - label: Subtitle
+        name: subtitle
+        widget: string
+
+      - label: Content
+        name: body
+        widget: markdown
+
+      - label: Learning Objectives
+        name: objectives
+        widget: list
+        field:
+          label: Name
+          name: Name
+          widget: string
+
+      - label: Usage Scenarios
+        name: scenarios
+        widget: list
+        field:
+          label: Name
+          name: Name
+          widget: string
+
+      - label: Content Language(s)
+        name: language
+        widget: select
+        options: ['de', 'en', 'fr', 'it']
+        multiple: true
+
+      - label: Keywords
+        name: keywords
+        widget: list
+
+      - label: Imprint
+        name: imprint
+        widget: markdown
+
+      - label: Contact
+        name: contact
+        widget: markdown
