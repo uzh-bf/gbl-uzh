@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.4](https://github.com/uzh-bf/gbl-web/compare/v0.0.3...v0.0.4) (2021-04-03)
+
+
+### Bug Fixes
+
+* ensure that empty directories are kept in git ([79be05a](https://github.com/uzh-bf/gbl-web/commit/79be05a51b5b47b22755a4c3bdeabe974c6b2894))
+
 ### [0.0.3](https://github.com/uzh-bf/gbl-web/compare/v0.0.2...v0.0.3) (2021-04-03)
 
 
