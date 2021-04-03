@@ -1,6 +1,5 @@
 import hydrate from 'next-mdx-remote/hydrate'
 import Head from 'next/head'
-import Image from 'next/image'
 
 import * as Util from '../../lib/util'
 
@@ -18,12 +17,7 @@ export default function Game({ source, frontMatter }) {
       <main className="p-4">
         <h1>{frontMatter.title}</h1>
         <h2>{frontMatter.subtitle}</h2>
-        <Image
-          src={frontMatter.thumbnail}
-          height="200px"
-          width="300px"
-          layout="intrinsic"
-        />
+        <img src={frontMatter.thumbnail} height="200px" width="300px" />
         <ul>
           {frontMatter.objectives.map((item) => (
             <li>{item}</li>
