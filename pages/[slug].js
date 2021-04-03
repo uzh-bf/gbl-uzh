@@ -25,7 +25,7 @@ export default function Page({ source, frontMatter }) {
 }
 
 export async function getStaticProps({ params }) {
-  const mdxPath = path.resolve(`content/pages/${params.slug}.mdx`)
+  const mdxPath = path.join(process.cwd(), `content/pages/${params.slug}.mdx`)
   const source = fs.readFileSync(mdxPath)
   const { content, data } = matter(source)
   const mdxSource = await renderToString(content, {
@@ -41,7 +41,7 @@ export async function getStaticProps({ params }) {
 
 export async function getStaticPaths() {
   const paths = fs
-    .readdirSync('content/pages/')
+    .readdirSync(path.join(process.cwd(), 'content/pages/'))
     .filter((path) => /\.mdx?$/.test(path))
     .map((path) => path.replace(/\.mdx?$/, ''))
     .map((slug) => ({ params: { slug } }))
