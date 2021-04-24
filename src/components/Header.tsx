@@ -10,7 +10,7 @@ function NavigationItem({ children, href }): ReactElement {
 
 function Navigation() {
   return (
-    <div className="flex flex-col md:flex-row">
+    <nav className="flex flex-col md:flex-row">
       <NavigationItem href="/">Home</NavigationItem>
       <NavigationItem href="kb">Knowledge Base</NavigationItem>
       <NavigationItem href="dbf">GBL @ IBF</NavigationItem>
@@ -18,13 +18,13 @@ function Navigation() {
       <NavigationItem href="roadmap">Roadmap</NavigationItem>
       <NavigationItem href="resources">Resources</NavigationItem>
       <NavigationItem href="about">About Us</NavigationItem>
-    </div>
+    </nav>
   )
 }
 
 function Header() {
   return (
-    <div className="flex flex-col justify-between border-blue-700 md:border-b-8 md:items-end md:flex-row">
+    <header className="flex flex-col justify-between border-blue-700 md:border-b-8 md:items-end md:flex-row">
       <div className="flex-1 mb-4 md:flex-initial md:mb-0">
         <Link href="/">
           <img
@@ -39,7 +39,7 @@ function Header() {
       <div className="flex-initial border-l-8 border-blue-700 md:border-none">
         <Navigation />
       </div>
-    </div>
+    </header>
   )
 }
 

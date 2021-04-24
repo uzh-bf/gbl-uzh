@@ -1,10 +1,14 @@
+import Footer from './Footer'
 import Header from './Header'
 
 function PageWithHeader({ children }) {
   return (
-    <div className="p-4">
-      <Header />
-      <div className="pt-4 md:pt-8">{children}</div>
+    <div className="flex flex-col h-full">
+      <div className="flex-1 p-4">
+        <Header />
+        <div className="py-4 md:py-8">{children}</div>
+      </div>
+      <Footer />
     </div>
   )
 }
