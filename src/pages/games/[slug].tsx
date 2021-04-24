@@ -18,7 +18,7 @@ export default function Game({ source, frontMatter }: Props) {
         <title>GBL@UZH - {frontMatter.title}</title>
       </Head>
 
-      <main className="p-4">
+      <main className="p-4 prose">
         <h1>{frontMatter.title}</h1>
         <h2>{frontMatter.subtitle}</h2>
         <img

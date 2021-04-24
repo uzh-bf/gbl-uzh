@@ -3,8 +3,8 @@
   "version": "0.0.9",
   "private": true,
   "scripts": {
-    "dev": "next",
-    "build": "next build",
+    "dev": "NODE_ENV=development next",
+    "build": "NODE_ENV=production next build",
     "start": "next start",
     "export": "npm run build && next export",
     "release": "standard-version",
@@ -18,23 +18,22 @@
     "lint:fix": "eslint --fix --ext .js,.ts,.tsx src/"
   },
   "dependencies": {
-    "@tailwindcss/jit": "0.1.18",
     "@tailwindcss/typography": "0.4.0",
     "autoprefixer": "10.2.5",
-    "gray-matter": "4.0.2",
+    "gray-matter": "4.0.3",
     "next": "10.1.3",
-    "next-mdx-remote": "2.1.3",
-    "postcss": "8.2.9",
+    "next-mdx-remote": "2.1.4",
+    "postcss": "8.2.12",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "tailwindcss": "2.0.4"
+    "tailwindcss": "2.1.2"
   },
   "devDependencies": {
-    "@types/node": "14.14.37",
+    "@types/node": "14.14.41",
     "@types/react": "17.0.3",
     "@uzh-bf/code-style-react-ts": "0.0.13",
     "npm-run-all": "4.1.5",
-    "standard-version": "9.1.1",
-    "typescript": "4.2.3"
+    "standard-version": "9.2.0",
+    "typescript": "4.2.4"
   }
 }
