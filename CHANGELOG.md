@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11](https://github.com/uzh-bf/gbl-web/compare/v0.0.10...v0.0.11) (2021-04-24)
+
+
+### Features
+
+* generalize the page title ([ccbe26a](https://github.com/uzh-bf/gbl-web/commit/ccbe26a2d1bac7af3ca1357555b51f98ca585371))
+* prepare pages for the overall site structure ([930911d](https://github.com/uzh-bf/gbl-web/commit/930911de8f7897344e777aac4bb09ac4341a9c86))
+* working navigation ([6cfc762](https://github.com/uzh-bf/gbl-web/commit/6cfc762071d3d28ad2249d4520b470970b7b9e0e))
+
 ### [0.0.10](https://github.com/uzh-bf/gbl-web/compare/v0.0.9...v0.0.10) (2021-04-24)
 
 
