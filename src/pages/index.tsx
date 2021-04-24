@@ -1,7 +1,12 @@
 import Head from 'next/head'
 import PageWithHeader from '../components/PageWithHeader'
 
-function HomeSection({ title, children }) {
+interface HomeSectionProps {
+  title: string
+  children: React.ReactNode
+}
+
+function HomeSection({ title, children }: HomeSectionProps) {
   return (
     <div className="mt-4 md:mt-8">
       <h1 className="mb-1 text-xl md:text-3xl md:mb-2">{title}</h1>

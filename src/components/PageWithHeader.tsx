@@ -2,7 +2,12 @@ import Head from 'next/head'
 import Footer from './Footer'
 import Header from './Header'
 
-function PageWithHeader({ title, children }) {
+interface Props {
+  title: string
+  children: React.ReactNode
+}
+
+function PageWithHeader({ title, children }: Props) {
   return (
     <div className="flex flex-col h-full ">
       <Head>
