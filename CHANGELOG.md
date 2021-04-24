@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.10](https://github.com/uzh-bf/gbl-web/compare/v0.0.9...v0.0.10) (2021-04-24)
+
+
+### Features
+
+* add footer ([4fe8791](https://github.com/uzh-bf/gbl-web/commit/4fe8791980b4eab4dce803eda9c8f9c44ca560ba))
+* add initial links to navigation items ([a1157c2](https://github.com/uzh-bf/gbl-web/commit/a1157c2c8db66b6c76da1f8d4b697a141c9846cc))
+* restrict the maximum width of the page ([cc0d42c](https://github.com/uzh-bf/gbl-web/commit/cc0d42cfc93b5de3afd486efd55632a201b53b06))
+* structural rework and initial homepage structure ([0bf0f13](https://github.com/uzh-bf/gbl-web/commit/0bf0f136cac382e13b82d0f6e5316c6d3ecd4ec2))
+
+
+### Bug Fixes
+
+* the max-width should not apply to the footer ([d960a7b](https://github.com/uzh-bf/gbl-web/commit/d960a7b55ca4e6542d4c266ebef9ecfc33b05c24))
+* update purge paths to src/ directory ([e95ede0](https://github.com/uzh-bf/gbl-web/commit/e95ede02e34249b54efdb427aa498fab4a874c12))
+
 ### [0.0.9](https://github.com/uzh-bf/gbl-web/compare/v0.0.8...v0.0.9) (2021-04-03)
 
 ### [0.0.8](https://github.com/uzh-bf/gbl-web/compare/v0.0.7...v0.0.8) (2021-04-03)
