@@ -13,7 +13,7 @@ function NavigationItem({ isActive, children, href }: NavigationItemProps) {
     <div
       className={clsx(
         'flex-1 p-1 mb-1 text-center md:shadow text-gray-700 md:flex-initial md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-2',
-        isActive && 'border-blue-800 '
+        isActive && 'border-blue-900 '
       )}
     >
       <Link href={href}>{children}</Link>
@@ -51,7 +51,7 @@ function Navigation() {
 
 function Header() {
   return (
-    <header className="flex flex-col justify-between border-blue-800 md:border-b-8 md:items-end md:flex-row">
+    <header className="flex flex-col justify-between border-blue-900 md:border-b-8 md:items-end md:flex-row">
       <div className="flex-1 mb-4 md:flex-initial md:mb-0">
         <Link href="/">
           <img
@@ -63,7 +63,7 @@ function Header() {
           />
         </Link>
       </div>
-      <div className="flex-initial border-l-8 border-blue-800 md:border-none">
+      <div className="flex-initial border-l-4 border-blue-900 md:border-none">
         <Navigation />
       </div>
     </header>
