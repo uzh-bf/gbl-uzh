@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.12](https://github.com/uzh-bf/gbl-web/compare/v0.0.11...v0.0.12) (2021-04-24)
+
+
+### Features
+
+* stubs for breadcrumbs and footer, dynamic navigation ([b4adbdb](https://github.com/uzh-bf/gbl-web/commit/b4adbdb8c9298a8780761ed214c8a3ba2ab24006))
+
 ### [0.0.11](https://github.com/uzh-bf/gbl-web/compare/v0.0.10...v0.0.11) (2021-04-24)
 
 
