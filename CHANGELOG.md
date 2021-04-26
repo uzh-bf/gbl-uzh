@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.13](https://github.com/uzh-bf/gbl-web/compare/v0.0.12...v0.0.13) (2021-04-26)
+
+
+### Features
+
+* add link to hypernotes to the KB page ([6fa5d18](https://github.com/uzh-bf/gbl-web/commit/6fa5d1846546ac34a75def14f58b8d82783c002e))
+* initial page ideas for dbf ([e448321](https://github.com/uzh-bf/gbl-web/commit/e4483210166e9df75bef946e34be5040fd30194c))
+* initial stub structure for the main page ([950136d](https://github.com/uzh-bf/gbl-web/commit/950136db9b3eda8e6232d3afc966a8f6f78505d4))
+
 ### [0.0.12](https://github.com/uzh-bf/gbl-web/compare/v0.0.11...v0.0.12) (2021-04-24)
 
 
