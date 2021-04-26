@@ -15,7 +15,7 @@ function PageWithHeader({ title, children }: Props) {
       </Head>
       <div className="flex-1 w-full max-w-6xl p-4 m-auto">
         <Header />
-        <div className="py-4 md:py-8">{children}</div>
+        <div className="h-full py-4 md:py-8">{children}</div>
       </div>
       <Footer />
     </div>

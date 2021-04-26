@@ -6,6 +6,6 @@
   html,
   body,
   #__next {
-    height: 100%;
+    @apply h-full;
   }
 }
