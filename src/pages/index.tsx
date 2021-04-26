@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import Button from '../components/Button'
+import Button from '../components/common/Button'
+import Header from '../components/common/Header'
 import PageWithHeader from '../components/PageWithHeader'
 
 interface HomeSectionProps {
@@ -10,8 +11,8 @@ interface HomeSectionProps {
 
 function HomeSection({ title, children }: HomeSectionProps) {
   return (
-    <div className="mt-4 md:mt-8">
-      <h1 className="mb-1 ml-2 text-xl md:text-2xl md:ml-4 md:mb-2">{title}</h1>
+    <div className="mt-8 md:mt-16">
+      <Header.H1 className="ml-2 md:ml-4">{title}</Header.H1>
       <div className="p-2 rounded shadow md:rounded-lg md:p-4">{children}</div>
     </div>
   )
@@ -53,7 +54,7 @@ function Home() {
       <HomeSection title="GBL @ DBF">
         <div className="flex flex-col md:flex-row">
           <div className="flex-1 mb-4 md:mb-0">
-            <h2 className="mb-1 text-lg md:text-xl">Games</h2>
+            <Header.H2>Games</Header.H2>
             <div className="mb-2 md:mb-4">...</div>
             <Button onClick={() => router.push('/dbf')}>
               <Button.Arrow />
@@ -61,7 +62,7 @@ function Home() {
             </Button>
           </div>
           <div className="flex-1">
-            <h2 className="mb-1 text-lg md:text-xl">Courses</h2>
+            <Header.H2>Courses</Header.H2>
             <div className="mb-2 md:mb-4">...</div>
             <div>
               <Button onClick={() => router.push('/dbf')}>
