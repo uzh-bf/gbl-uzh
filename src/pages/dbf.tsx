@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import Header from '../components/common/Header'
 import PageWithHeader from '../components/PageWithHeader'
 
@@ -9,6 +10,10 @@ const GAMES = [
   {
     name: 'Derivatives Game',
     tags: ['simulation', 'basic'],
+  },
+  {
+    name: 'uFin',
+    tags: ['serious game', 'advanced'],
   },
 ]
 const COURSES = [
@@ -53,7 +58,11 @@ function GameCard({ name, tags }) {
       </div>
 
       <img src="https://place-hold.it/300x100/D3D3D3?text=SCREENSHOT" />
-      <Header.H3 className="mt-2 md:text-base">{name}</Header.H3>
+      <Header.H3 className="mt-2 md:text-base">
+        {name}
+        <Link href="/games/ufin"> [TO]</Link>
+      </Header.H3>
+
       <div className="flex flex-row flex-wrap">
         {tags.map((tag) => (
           <div className="px-2 mr-1 text-sm border rounded">{tag}</div>
