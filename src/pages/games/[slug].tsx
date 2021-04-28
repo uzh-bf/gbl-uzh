@@ -27,7 +27,8 @@ function Game({ source, frontMatter }: Props) {
         <div className="flex-1 p-4 border rounded md:flex-initial md:w-96">
           <div>
             <Header.H3>Competencies</Header.H3>
-            <div>
+            <div className="flex flex-row">
+              <RadarChart width={150} height={150} />
               <RadarChart width={150} height={150} />
             </div>
           </div>

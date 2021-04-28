@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Button from '../components/common/Button'
@@ -7,15 +8,22 @@ import PageWithHeader from '../components/PageWithHeader'
 interface HomeSectionProps {
   title: string
   children: React.ReactNode
+  className?: string
 }
 
-function HomeSection({ title, children }: HomeSectionProps) {
+function HomeSection({ title, children, className }: HomeSectionProps) {
   return (
-    <div className="mt-8 md:mt-16">
-      <Header.H1 className="ml-2 md:ml-4">{title}</Header.H1>
-      <div className="p-2 rounded shadow md:rounded-lg md:p-4">{children}</div>
+    <div className={clsx('py-16', className)}>
+      <div className="max-w-6xl m-auto">
+        <Header.H1>{title}</Header.H1>
+        <div>{children}</div>
+      </div>
     </div>
   )
+}
+
+HomeSection.defaultProps = {
+  className: undefined,
 }
 
 function Home() {
@@ -27,22 +35,85 @@ function Home() {
         <script src="https://identity.netlify.com/v1/netlify-identity-widget.js" />
       </Head>
 
-      <img
-        className="hidden md:block"
-        width="1200"
-        height="250"
-        src="https://place-hold.it/1200x250/D3D3D3?text=HERO"
-        alt=""
-      />
+      <div className="relative hidden md:block">
+        <div className="absolute w-full p-4 bg-white bottom-10 bg-opacity-60">
+          <div className="max-w-6xl m-auto font-medium text-center text-uzh-red-80 text-7xl">
+            Digital Game-Based Learning
+          </div>
+        </div>
+        <img width="100%" src="/images/hero2.jpg" alt="" />
+      </div>
+
+      <div className="py-4 bg-gray-200 md:py-16">
+        <div className="max-w-3xl px-8 pb-3 m-auto prose prose-lg text-center border-b border-gray-300 md:px-0">
+          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
+          expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
+          sint maiores aliquam facilis accusantium vel voluptas consequatur
+          voluptatum molestiae exercitationem!
+        </div>
+      </div>
+
+      <div className="py-4 md:py-16">
+        <div className="flex flex-row justify-between max-w-3xl pb-8 m-auto">
+          <div className="text-xl text-center text-uzh-red-100">
+            <img width="150" src="/images/vorlesung_icon.png" />
+            for teachers
+          </div>
+          <div className="text-xl text-center text-uzh-red-100">
+            <img width="150" src="/images/gruppenarbeit_icon.png" />
+            for students
+          </div>
+          <div className="text-xl text-center text-uzh-red-100">
+            <img width="150" src="/images/einzelarbeit_icon.png" />
+            for developers
+          </div>
+        </div>
+      </div>
+
+      <HomeSection title="GBL @ DBF" className="bg-gray-100">
+        <div className="flex flex-col md:flex-row">
+          <div className="flex-1 mb-4 md:mb-0">
+            <div className="mb-2 md:mb-4">
+              <div className="flex flex-col md:flex-wrap md:flex-row">
+                {[
+                  'Portfolio Management Simulation',
+                  'Derivatives Game',
+                  'Banking Game',
+                ].map((game) => (
+                  <div className="relative flex-1 mr-2 border rounded-lg last:mr-0">
+                    <div className="absolute left-0 right-0 py-1 text-base text-center text-white bg-gray-600 bottom-2">
+                      {game}
+                    </div>
+                    <img
+                      width="100%"
+                      src="https://place-hold.it/400x200/D3D3D3?text=SCREENSHOT"
+                      alt={game}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <Button onClick={() => router.push('/dbf')}>
+              <Button.Arrow />
+              Our Games and Courses
+            </Button>
+          </div>
+        </div>
+      </HomeSection>
 
       <HomeSection title="GBL Knowledge Base">
-        <div className="flex flex-row mb-2 md:mb-4">
+        <div className="relative flex flex-row mb-2 md:mb-4">
           <img
-            className="w-32 border md:w-56"
-            src="images/knowledge_base.png"
+            className="w-24 md:w-40"
+            src="images/netzwerk_icon.png"
             alt="Knowledge Graph"
           />
-          <p className="px-2 prose md:px-4">hello world</p>
+          <p className="p-2 prose md:p-4">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem,
+            enim aspernatur! Vero laboriosam reprehenderit at, architecto odio
+            deleniti mollitia illum cupiditate suscipit rerum accusantium sint
+            inventore nostrum ad eveniet perferendis.
+          </p>
         </div>
 
         <Button onClick={() => router.push('/kb')}>
@@ -51,28 +122,17 @@ function Home() {
         </Button>
       </HomeSection>
 
-      <HomeSection title="GBL @ DBF">
-        <div className="flex flex-col md:flex-row">
-          <div className="flex-1 mb-4 md:mb-0">
-            <Header.H2>Games</Header.H2>
-            <div className="mb-2 md:mb-4">...</div>
-            <Button onClick={() => router.push('/dbf')}>
-              <Button.Arrow />
-              Game Overview
-            </Button>
-          </div>
-          <div className="flex-1">
-            <Header.H2>Courses</Header.H2>
-            <div className="mb-2 md:mb-4">...</div>
-            <div>
-              <Button onClick={() => router.push('/dbf')}>
-                <Button.Arrow />
-                Course Overview
-              </Button>
-            </div>
+      <div className="py-4 bg-gray-100 md:py-16">
+        <div className="relative">
+          <img src="/images/hero3.jpg" className="opacity-20" />
+          <div className="absolute max-w-3xl p-4 m-auto prose prose-lg text-center bottom-5 rounded-xl md:px-0 bg-opacity-40">
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
+            expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
+            sint maiores aliquam facilis accusantium vel voluptas consequatur
+            voluptatum molestiae exercitationem!
           </div>
         </div>
-      </HomeSection>
+      </div>
 
       <HomeSection title="Development Workflow">
         <img

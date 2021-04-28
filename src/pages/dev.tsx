@@ -12,9 +12,30 @@ function WorkflowSVG() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <circle cx="136" cy="768" r="136" fill="#385D8A" />
-      <circle cx="136" cy="452" r="136" fill="#385D8A" />
-      <circle cx="136" cy="136" r="136" fill="#385D8A" />
+      <circle
+        cx="136"
+        cy="768"
+        r="136"
+        fill="#385D8A"
+        className="cursor-pointer hover:stroke-current hover:stroke-2"
+        onClick={() => router.push('/dev/topic')}
+      />
+      <circle
+        cx="136"
+        cy="452"
+        r="136"
+        fill="#385D8A"
+        className="cursor-pointer hover:stroke-current hover:stroke-2"
+        onClick={() => router.push('/dev/development')}
+      />
+      <circle
+        cx="136"
+        cy="136"
+        r="136"
+        fill="#385D8A"
+        className="cursor-pointer hover:stroke-current hover:stroke-2"
+        onClick={() => router.push('/dev/execution')}
+      />
       <rect
         x="62"
         y="55"

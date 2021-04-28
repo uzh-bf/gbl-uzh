@@ -22,8 +22,8 @@ function NavigationItem({ isActive, children, href }: NavigationItemProps) {
   return (
     <div
       className={clsx(
-        'flex-1 p-1 mb-1 text-center text-sm md:shadow text-gray-700 md:flex-initial md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-2',
-        isActive && 'border-blue-900 '
+        'flex-1 p-1 mb-1 text-center text-sm text-gray-700 md:flex-initial md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
+        isActive && 'border-uzh-red-100'
       )}
     >
       <Link href={href}>{children}</Link>
@@ -77,7 +77,7 @@ function Logo() {
 
 function Header() {
   return (
-    <header className="flex flex-col justify-between border-blue-900 md:border-b-8 md:flex-row">
+    <header className="flex flex-col justify-between max-w-6xl pt-4 m-auto md:flex-row">
       <Logo />
       <div className="flex flex-col justify-between flex-initial md:items-end md:border-none">
         <Breadcrumbs />

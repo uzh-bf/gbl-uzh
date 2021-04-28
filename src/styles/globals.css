@@ -9,3 +9,141 @@
     @apply h-full;
   }
 }
+
+@layer components {
+  .text-uzh-blue-100 {
+    @apply text-[#0028a5];
+  }
+
+  .border-uzh-blue-100 {
+    @apply border-[#0028a5];
+  }
+
+  .text-uzh-blue-80 {
+    @apply text-[#3353b7];
+  }
+
+  .border-uzh-blue-80 {
+    @apply border-[#3353b7];
+  }
+
+  .text-uzh-blue-60 {
+    @apply text-[#667ec9];
+  }
+
+  .border-uzh-blue-60 {
+    @apply border-[#667ec9];
+  }
+
+  .text-uzh-blue-40 {
+    @apply text-[#99a9db];
+  }
+
+  .border-uzh-blue-40 {
+    @apply border-[#99a9db];
+  }
+
+  .text-uzh-blue-20 {
+    @apply text-[#ccd4ed];
+  }
+
+  .border-uzh-blue-20 {
+    @apply border-[#ccd4ed];
+  }
+
+  .bg-uzh-blue-20 {
+    @apply bg-[#ccd4ed];
+  }
+
+  .text-uzh-gray-100 {
+    @apply text-[#a3adb7];
+  }
+
+  .border-uzh-gray-100 {
+    @apply border-[#a3adb7];
+  }
+
+  .text-uzh-gray-80 {
+    @apply text-[#b5bdc5];
+  }
+
+  .border-uzh-gray-80 {
+    @apply border-[#b5bdc5];
+  }
+
+  .text-uzh-gray-60 {
+    @apply text-[#c8ced4];
+  }
+
+  .border-uzh-gray-60 {
+    @apply border-[#c8ced4];
+  }
+
+  .text-uzh-gray-40 {
+    @apply text-[#dadee2];
+  }
+
+  .border-uzh-gray-40 {
+    @apply border-[#dadee2];
+  }
+
+  .text-uzh-gray-20 {
+    @apply text-[#edeff1];
+  }
+
+  .border-uzh-gray-20 {
+    @apply border-[#edeff1];
+  }
+
+  .bg-uzh-gray-20 {
+    @apply bg-[#edeff1];
+  }
+
+  .text-uzh-red-100 {
+    @apply text-[#dc6027];
+  }
+
+  .border-uzh-red-100 {
+    @apply border-[#dc6027];
+  }
+
+  .text-uzh-red-80 {
+    @apply text-[#e38052];
+  }
+
+  .border-uzh-red-80 {
+    @apply border-[#e38052];
+  }
+
+  .text-uzh-red-60 {
+    @apply text-[#eaa07d];
+  }
+
+  .border-uzh-red-60 {
+    @apply border-[#eaa07d];
+  }
+
+  .text-uzh-red-40 {
+    @apply text-[#f1bfa9];
+  }
+
+  .border-uzh-red-40 {
+    @apply border-[#f1bfa9];
+  }
+
+  .text-uzh-red-20 {
+    @apply text-[#f8dfd4];
+  }
+
+  .border-uzh-red-20 {
+    @apply border-[#f8dfd4];
+  }
+
+  .border-primary {
+    @apply border-[#566684];
+  }
+
+  .text-primary {
+    @apply text-[#566684];
+  }
+}
