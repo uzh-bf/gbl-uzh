@@ -14,7 +14,7 @@ interface HomeSectionProps {
 function HomeSection({ title, children, className }: HomeSectionProps) {
   return (
     <div className={clsx('py-16', className)}>
-      <div className="max-w-6xl m-auto">
+      <div className="max-w-6xl px-4 m-auto md:px-8">
         <Header.H1>{title}</Header.H1>
         <div>{children}</div>
       </div>
