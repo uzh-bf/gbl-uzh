@@ -1,30 +1,9 @@
-import clsx from 'clsx'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Button from '../components/common/Button'
-import Header from '../components/common/Header'
+import HomeSection from '../components/common/HomeSection'
+import PaddedSection from '../components/common/PaddedSection'
 import PageWithHeader from '../components/PageWithHeader'
-
-interface HomeSectionProps {
-  title: string
-  children: React.ReactNode
-  className?: string
-}
-
-function HomeSection({ title, children, className }: HomeSectionProps) {
-  return (
-    <div className={clsx('py-16', className)}>
-      <div className="max-w-6xl px-4 m-auto md:px-8">
-        <Header.H1>{title}</Header.H1>
-        <div>{children}</div>
-      </div>
-    </div>
-  )
-}
-
-HomeSection.defaultProps = {
-  className: undefined,
-}
 
 function Home() {
   const router = useRouter()
@@ -35,25 +14,25 @@ function Home() {
         <script src="https://identity.netlify.com/v1/netlify-identity-widget.js" />
       </Head>
 
-      <div className="relative hidden md:block">
-        <div className="absolute w-full p-4 bg-white bottom-10 bg-opacity-60">
-          <div className="max-w-6xl m-auto font-medium text-center text-uzh-red-80 text-7xl">
+      <div className="relative">
+        <div className="absolute w-full p-4 bg-white top-5 sm:top-auto sm:bottom-10 bg-opacity-60">
+          <div className="max-w-6xl m-auto text-3xl font-medium text-center text-uzh-red-80 sm:text-4xl lg:text-6xl">
             Digital Game-Based Learning
           </div>
         </div>
         <img width="100%" src="/images/hero2.jpg" alt="" />
       </div>
 
-      <div className="py-4 bg-gray-200 md:py-16">
-        <div className="max-w-3xl px-8 pb-3 m-auto prose prose-lg text-center border-b border-gray-300 md:px-0">
+      <PaddedSection className="bg-gray-200">
+        <div className="max-w-3xl px-8 pb-3 m-auto prose prose-lg text-center border-b border-gray-300">
           Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
           expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
           sint maiores aliquam facilis accusantium vel voluptas consequatur
           voluptatum molestiae exercitationem!
         </div>
-      </div>
+      </PaddedSection>
 
-      <div className="py-4 md:py-16">
+      <PaddedSection>
         <div className="flex flex-row justify-between max-w-3xl pb-8 m-auto">
           <div className="text-xl text-center text-uzh-red-100">
             <img width="150" src="/images/vorlesung_icon.png" />
@@ -68,7 +47,7 @@ function Home() {
             for developers
           </div>
         </div>
-      </div>
+      </PaddedSection>
 
       <HomeSection title="GBL @ DBF" className="bg-gray-100">
         <div className="flex flex-col md:flex-row">

@@ -18,7 +18,7 @@
     "lint:fix": "eslint --fix --ext .js,.ts,.tsx src/"
   },
   "dependencies": {
-    "@headlessui/react": "1.0.0",
+    "@headlessui/react": "1.1.1",
     "@heroicons/react": "1.0.1",
     "@tailwindcss/typography": "0.4.0",
     "@visx/group": "1.7.0",
@@ -29,16 +29,16 @@
     "autoprefixer": "10.2.5",
     "clsx": "1.1.1",
     "gray-matter": "4.0.3",
-    "next": "10.1.3",
+    "next": "10.2.0",
     "next-mdx-remote": "2.1.4",
-    "postcss": "8.2.12",
+    "postcss": "8.2.13",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "tailwindcss": "2.1.2"
   },
   "devDependencies": {
-    "@types/node": "14.14.41",
-    "@types/react": "17.0.3",
+    "@types/node": "15.0.1",
+    "@types/react": "17.0.4",
     "@uzh-bf/code-style-react-ts": "0.0.13",
     "npm-run-all": "4.1.5",
     "standard-version": "9.2.0",
