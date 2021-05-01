@@ -38,7 +38,9 @@ HomeSection.IconContent = function IconContent({
       <div className="flex items-center justify-center w-full md:w-40">
         <img src={iconSrc} alt={iconAlt} />
       </div>
-      <p className="p-2 prose md:p-4 md:pl-16">{children}</p>
+      <p className="p-2 prose-sm prose md:prose-lg md:p-4 md:pl-16">
+        {children}
+      </p>
     </div>
   )
 }
