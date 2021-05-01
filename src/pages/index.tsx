@@ -35,15 +35,15 @@ function Home() {
 
       <PaddedSection>
         <div className="flex flex-row justify-between max-w-3xl pb-8 m-auto">
-          <div className="text-xl text-center text-uzh-red-100">
+          <div className="p-2 text-xl text-center rounded cursor-pointer text-uzh-red-100 hover:shadow-lg">
             <img width="150" src="/images/vorlesung_icon.png" />
             for teachers
           </div>
-          <div className="text-xl text-center text-uzh-red-100">
+          <div className="p-2 text-xl text-center rounded cursor-pointer text-uzh-red-100 hover:shadow-lg">
             <img width="150" src="/images/gruppenarbeit_icon.png" />
             for students
           </div>
-          <div className="text-xl text-center text-uzh-red-100">
+          <div className="p-2 text-xl text-center rounded cursor-pointer text-uzh-red-100 hover:shadow-lg">
             <img width="150" src="/images/einzelarbeit_icon.png" />
             for developers
           </div>
