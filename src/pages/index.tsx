@@ -15,16 +15,21 @@ function Home() {
         <script src="https://identity.netlify.com/v1/netlify-identity-widget.js" />
       </Head>
 
-      <div className="relative">
-        <div className="absolute w-full p-4 bg-white top-5 sm:top-auto sm:bottom-10 bg-opacity-60">
-          <div className="max-w-6xl m-auto text-3xl font-medium text-center text-uzh-red-80 sm:text-4xl lg:text-6xl">
+      <div className="relative shadow-lg">
+        <div className="absolute z-10 w-full p-4 shadow bg-uzh-gray-20 top-5 sm:top-auto sm:bottom-10 bg-opacity-60">
+          <div className="max-w-6xl m-auto font-mono text-3xl text-center text-uzh-red-80 sm:text-4xl lg:text-6xl">
             Digital Game-Based Learning
           </div>
         </div>
-        <img width="100%" src="/images/hero2.jpg" alt="" />
+        <img
+          className="z-0 opacity-80"
+          width="100%"
+          src="/images/hero2.jpg"
+          alt=""
+        />
       </div>
 
-      <PaddedSection className="bg-gray-200">
+      <PaddedSection className="bg-uzh-gray-20">
         <div className="max-w-3xl px-8 pb-3 m-auto prose prose-lg text-center border-b border-gray-300">
           Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
           expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
@@ -50,7 +55,7 @@ function Home() {
         </div>
       </PaddedSection>
 
-      <HomeSection title="GBL @ DBF" className="bg-gray-100">
+      <HomeSection title="GBL @ DBF" className="bg-uzh-gray-20">
         <div className="flex flex-col md:flex-row">
           <div className="flex-1 mb-4 md:mb-0">
             <div className="mb-2 md:mb-4">
@@ -60,8 +65,8 @@ function Home() {
                   'Derivatives Game',
                   'Banking Game',
                 ].map((game) => (
-                  <div className="relative flex-1 mr-2 border rounded-lg last:mr-0">
-                    <div className="absolute left-0 right-0 z-10 py-1 text-base text-center text-white bg-uzh-blue-60 bottom-2">
+                  <div className="relative flex-1 mb-4 shadow md:mr-4 last:mr-0">
+                    <div className="absolute left-0 right-0 z-10 py-1 text-base text-center text-white border-l-8 border-r-8 border-uzh-red-60 bg-uzh-blue-60 bottom-2">
                       {game}
                     </div>
                     <img
@@ -123,7 +128,7 @@ function Home() {
         </Button>
       </HomeSection>
 
-      <HomeSection title="Roadmap" className="bg-gray-100">
+      <HomeSection title="Roadmap" className="bg-uzh-gray-20">
         <HomeSection.IconContent
           iconSrc="images/lernziele_icon.svg"
           iconAlt="Roadmap"
