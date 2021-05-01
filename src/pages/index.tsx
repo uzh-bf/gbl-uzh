@@ -133,7 +133,10 @@ function Home() {
           iconSrc="images/lernziele_icon.svg"
           iconAlt="Roadmap"
         >
-          ...
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem,
+          enim aspernatur! Vero laboriosam reprehenderit at, architecto odio
+          deleniti mollitia illum cupiditate suscipit rerum accusantium sint
+          inventore nostrum ad eveniet perferendis.
         </HomeSection.IconContent>
 
         <Button onClick={() => router.push('/roadmap')}>
