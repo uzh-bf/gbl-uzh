@@ -6,6 +6,15 @@ import HomeSection from '../components/common/HomeSection'
 import PaddedSection from '../components/common/PaddedSection'
 import PageWithHeader from '../components/PageWithHeader'
 
+function HeroImage({ imgSrc, label }) {
+  return (
+    <div className="flex flex-row items-center px-2 mb-4 text-xl text-center border cursor-pointer last:mb-0 md:mb-0 md:mr-8 md:last:mr-0 rounded-xl md:p-4 md:flex-1 md:flex-col text-uzh-red-100 hover:shadow">
+      <img width="150" src={imgSrc} alt="Hero" />
+      <p className="pl-8 md:pl-0">{label}</p>
+    </div>
+  )
+}
+
 function Home() {
   const router = useRouter()
 
@@ -39,19 +48,16 @@ function Home() {
       </PaddedSection>
 
       <PaddedSection>
-        <div className="flex flex-row justify-between max-w-3xl m-auto">
-          <div className="p-8 text-xl text-center border cursor-pointer rounded-3xl text-uzh-red-100 hover:shadow">
-            <img width="150" src="/images/vorlesung_icon.png" />
-            for teachers
-          </div>
-          <div className="p-8 text-xl text-center border cursor-pointer rounded-3xl text-uzh-red-100 hover:shadow">
-            <img width="150" src="/images/gruppenarbeit_icon.png" />
-            for students
-          </div>
-          <div className="p-8 text-xl text-center border cursor-pointer rounded-3xl text-uzh-red-100 hover:shadow">
-            <img width="150" src="/images/einzelarbeit_icon.png" />
-            for developers
-          </div>
+        <div className="flex flex-col max-w-3xl md:m-auto md:justify-between md:flex-row">
+          <HeroImage imgSrc="/images/vorlesung_icon.svg" label="for teachers" />
+          <HeroImage
+            imgSrc="/images/gruppenarbeit_icon.svg"
+            label="for students"
+          />
+          <HeroImage
+            imgSrc="/images/einzelarbeit_icon.svg"
+            label="for developers"
+          />
         </div>
       </PaddedSection>
 
