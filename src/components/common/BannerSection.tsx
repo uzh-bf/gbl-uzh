@@ -1,16 +1,26 @@
-function BannerSection({ children }) {
+import clsx from 'clsx'
+
+interface Props {
+  className?: string
+  children: React.ReactNode
+  imgSrc: string
+}
+
+function BannerSection({ children, className, imgSrc }: Props) {
   return (
-    <div className="py-4 bg-red-uzh-20 md:py-8">
-      <div className="relative">
-        <img src="/images/hero3.jpg" className="opacity-20" />
-        <div className="absolute left-0 right-0 p-4 bottom-5 rounded-xl md:px-0 bg-opacity-40">
-          <p className="max-w-3xl m-auto prose prose-lg text-center">
-            {children}
-          </p>
-        </div>
-      </div>
+    <div
+      className={clsx('px-4 py-4 md:py-8 bg-clip-padding', className)}
+      style={{ backgroundImage: `url(${imgSrc})` }}
+    >
+      <p className="max-w-3xl p-4 m-auto prose-sm prose text-center rounded shadow-lg md:prose-lg bg-uzh-gray-20 bg-opacity-70">
+        {children}
+      </p>
     </div>
   )
+}
+
+BannerSection.defaultProps = {
+  className: undefined,
 }
 
 export default BannerSection
