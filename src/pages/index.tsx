@@ -61,12 +61,13 @@ function Home() {
                   'Banking Game',
                 ].map((game) => (
                   <div className="relative flex-1 mr-2 border rounded-lg last:mr-0">
-                    <div className="absolute left-0 right-0 py-1 text-base text-center text-white bg-gray-600 bottom-2">
+                    <div className="absolute left-0 right-0 z-10 py-1 text-base text-center text-white bg-uzh-blue-60 bottom-2">
                       {game}
                     </div>
                     <img
+                      className="z-0 grayscale filter"
                       width="100%"
-                      src="https://place-hold.it/400x200/D3D3D3?text=SCREENSHOT"
+                      src="images/pfm_game.png"
                       alt={game}
                     />
                   </div>
