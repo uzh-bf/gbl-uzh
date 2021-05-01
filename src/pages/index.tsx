@@ -39,7 +39,7 @@ function Home() {
       </div>
 
       <PaddedSection className="bg-uzh-gray-20">
-        <div className="max-w-3xl px-8 pb-4 m-auto prose prose-lg text-center text-gray-600 border-b-2 md:px-0 border-uzh-gray-100">
+        <div className="max-w-3xl px-8 pb-4 m-auto prose text-center text-gray-600 border-b-2 md:prose-lg md:px-0 border-uzh-gray-100">
           Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
           expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
           sint maiores aliquam facilis accusantium vel voluptas consequatur
