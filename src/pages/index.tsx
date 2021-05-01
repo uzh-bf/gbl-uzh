@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import BannerSection from '../components/common/BannerSection'
 import Button from '../components/common/Button'
 import HomeSection from '../components/common/HomeSection'
 import PaddedSection from '../components/common/PaddedSection'
@@ -81,19 +82,15 @@ function Home() {
       </HomeSection>
 
       <HomeSection title="GBL Knowledge Base">
-        <div className="relative flex flex-row mb-2 md:mb-4">
-          <img
-            className="w-24 md:w-40"
-            src="images/netzwerk_icon.png"
-            alt="Knowledge Graph"
-          />
-          <p className="p-2 prose md:p-4">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem,
-            enim aspernatur! Vero laboriosam reprehenderit at, architecto odio
-            deleniti mollitia illum cupiditate suscipit rerum accusantium sint
-            inventore nostrum ad eveniet perferendis.
-          </p>
-        </div>
+        <HomeSection.IconContent
+          iconSrc="images/netzwerk_icon.png"
+          iconAlt="Knowledge Graph"
+        >
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem,
+          enim aspernatur! Vero laboriosam reprehenderit at, architecto odio
+          deleniti mollitia illum cupiditate suscipit rerum accusantium sint
+          inventore nostrum ad eveniet perferendis.
+        </HomeSection.IconContent>
 
         <Button onClick={() => router.push('/kb')}>
           <Button.Arrow />
@@ -101,37 +98,44 @@ function Home() {
         </Button>
       </HomeSection>
 
-      <div className="py-4 bg-gray-100 md:py-16">
-        <div className="relative">
-          <img src="/images/hero3.jpg" className="opacity-20" />
-          <div className="absolute max-w-3xl p-4 m-auto prose prose-lg text-center bottom-5 rounded-xl md:px-0 bg-opacity-40">
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
-            expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
-            sint maiores aliquam facilis accusantium vel voluptas consequatur
-            voluptatum molestiae exercitationem!
-          </div>
-        </div>
-      </div>
+      <BannerSection>
+        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
+        expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
+        sint maiores aliquam facilis accusantium vel voluptas consequatur
+        voluptatum molestiae exercitationem!
+      </BannerSection>
 
       <HomeSection title="Development Workflow">
-        <img
-          className="mb-2 md:mb-4"
-          src="images/dev_workflow.png"
-          alt="Knowledge Graph"
-        />
+        <HomeSection.IconContent
+          iconSrc="images/dev_workflow.png"
+          iconAlt="Knowledge Graph"
+        >
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem,
+          enim aspernatur! Vero laboriosam reprehenderit at, architecto odio
+          deleniti mollitia illum cupiditate suscipit rerum accusantium sint
+          inventore nostrum ad eveniet perferendis.
+        </HomeSection.IconContent>
+
         <Button onClick={() => router.push('/dev')}>
           <Button.Arrow />
           Development Workflow
         </Button>
       </HomeSection>
 
-      <HomeSection title="Roadmap">
+      <HomeSection title="Roadmap" className="bg-gray-100">
         <div className="mb-2 md:mb-4">...</div>
         <Button onClick={() => router.push('/roadmap')}>
           <Button.Arrow />
           Roadmap
         </Button>
       </HomeSection>
+
+      <BannerSection>
+        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
+        expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
+        sint maiores aliquam facilis accusantium vel voluptas consequatur
+        voluptatum molestiae exercitationem!
+      </BannerSection>
     </PageWithHeader>
   )
 }
