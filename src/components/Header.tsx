@@ -22,7 +22,7 @@ function NavigationItem({ isActive, children, href }: NavigationItemProps) {
   return (
     <div
       className={clsx(
-        'flex-1 p-1 mb-1 text-center text-sm text-gray-700 md:flex-initial md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
+        'flex-1 p-1 mb-1 text-center text-sm text-gray-500 hover:text-uzh-blue-80 md:flex-initial md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
         isActive && 'border-uzh-red-100'
       )}
     >
