@@ -83,7 +83,7 @@ function Home() {
 
       <HomeSection title="GBL Knowledge Base">
         <HomeSection.IconContent
-          iconSrc="images/netzwerk_icon.png"
+          iconSrc="images/netzwerk_icon.svg"
           iconAlt="Knowledge Graph"
         >
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem,
@@ -108,7 +108,7 @@ function Home() {
       <HomeSection title="Development Workflow">
         <HomeSection.IconContent
           iconSrc="images/dev_workflow.png"
-          iconAlt="Knowledge Graph"
+          iconAlt="Development Workflow"
         >
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem,
           enim aspernatur! Vero laboriosam reprehenderit at, architecto odio
@@ -123,7 +123,13 @@ function Home() {
       </HomeSection>
 
       <HomeSection title="Roadmap" className="bg-gray-100">
-        <div className="mb-2 md:mb-4">...</div>
+        <HomeSection.IconContent
+          iconSrc="images/lernziele_icon.svg"
+          iconAlt="Roadmap"
+        >
+          ...
+        </HomeSection.IconContent>
+
         <Button onClick={() => router.push('/roadmap')}>
           <Button.Arrow />
           Roadmap
