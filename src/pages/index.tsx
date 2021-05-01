@@ -30,7 +30,7 @@ function Home() {
       </div>
 
       <PaddedSection className="bg-uzh-gray-20">
-        <div className="max-w-3xl px-8 pb-3 m-auto prose prose-lg text-center border-b border-gray-300">
+        <div className="max-w-3xl px-8 pb-4 m-auto prose prose-lg text-center text-gray-600 border-b-2 md:px-0 border-uzh-gray-100">
           Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
           expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
           sint maiores aliquam facilis accusantium vel voluptas consequatur
@@ -39,16 +39,16 @@ function Home() {
       </PaddedSection>
 
       <PaddedSection>
-        <div className="flex flex-row justify-between max-w-3xl pb-8 m-auto">
-          <div className="p-2 text-xl text-center rounded cursor-pointer text-uzh-red-100 hover:shadow-lg">
+        <div className="flex flex-row justify-between max-w-3xl m-auto">
+          <div className="p-8 text-xl text-center border cursor-pointer rounded-3xl text-uzh-red-100 hover:shadow">
             <img width="150" src="/images/vorlesung_icon.png" />
             for teachers
           </div>
-          <div className="p-2 text-xl text-center rounded cursor-pointer text-uzh-red-100 hover:shadow-lg">
+          <div className="p-8 text-xl text-center border cursor-pointer rounded-3xl text-uzh-red-100 hover:shadow">
             <img width="150" src="/images/gruppenarbeit_icon.png" />
             for students
           </div>
-          <div className="p-2 text-xl text-center rounded cursor-pointer text-uzh-red-100 hover:shadow-lg">
+          <div className="p-8 text-xl text-center border cursor-pointer rounded-3xl text-uzh-red-100 hover:shadow">
             <img width="150" src="/images/einzelarbeit_icon.png" />
             for developers
           </div>
@@ -65,8 +65,8 @@ function Home() {
                   'Derivatives Game',
                   'Banking Game',
                 ].map((game) => (
-                  <div className="relative flex-1 mb-4 shadow md:mr-4 last:mr-0">
-                    <div className="absolute left-0 right-0 z-10 py-1 text-base text-center text-white border-l-8 border-r-8 border-uzh-red-60 bg-uzh-blue-60 bottom-2">
+                  <div className="relative flex-1 mb-4 shadow md:mb-0 md:mr-4 last:mr-0">
+                    <div className="absolute left-0 right-0 z-10 py-1 text-base text-center text-white bg-uzh-blue-60 bottom-2">
                       {game}
                     </div>
                     <img
