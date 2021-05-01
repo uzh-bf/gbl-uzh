@@ -1,23 +1,27 @@
 function Footer() {
   return (
     <footer className="flex flex-col justify-between flex-initial p-4 text-sm text-gray-600 border-t-2 border-uzh-red-100 md:flex-row border-top md:text-base">
-      <div className="flex flex-row items-center">
-        <div className="w-full md:w-40 md:mr-8">
-          <img width="100%" src="images/logo_uzh.jpeg" />
+      <div className="flex flex-col items-center order-1 mb-4 md:order-2 md:flex-row md:mb-0">
+        <div className="w-40 mb-4 md:mb-0 md:mr-8">
+          <img width="100%" src="images/logo_uzh.jpeg" alt="UZH Logo" />
         </div>
-        <div className="w-full md:w-40">
-          <img width="100%" src="images/logo_swissuniversities.png" />
+        <div className="w-40">
+          <img
+            width="100%"
+            src="images/logo_swissuniversities.png"
+            alt="Swissuniversities Logo"
+          />
         </div>
       </div>
 
-      <div>
-        <div className="mb-1 font-bold">GBL @ DBF</div>
-        <div className="mb-1">
-          &copy; {new Date().getFullYear()} Department of Banking and Finance,
-          University of Zurich
-        </div>
-        <div>Created with &#9825; in Bärn</div>
-      </div>
+      <p className="order-2 prose-sm prose text-center text-gray-600 md:order-1 md:text-left">
+        <span className="font-bold">GBL @ DBF</span>
+        <br />
+        &copy; {new Date().getFullYear()} Department of Banking and Finance,
+        University of Zurich
+        <br />
+        Created with &#9825; in Bärn
+      </p>
     </footer>
   )
 }
