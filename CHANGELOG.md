@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.15](https://github.com/uzh-bf/gbl-web/compare/v0.0.13...v0.0.15) (2021-05-01)
+
+
+### Features
+
+* add banner sections and updated home section contents ([6b6b1b3](https://github.com/uzh-bf/gbl-web/commit/6b6b1b3b86583abc8e33c4848e1a22ff20f4dad0))
+* add pfm image with grayscale filter and uzh blues ([9ca878c](https://github.com/uzh-bf/gbl-web/commit/9ca878c865e01e697e868c55ec1c14713224756f))
+* add stub page for a single game ([56332e7](https://github.com/uzh-bf/gbl-web/commit/56332e7c341bad75a9ec9569f54811e9d9c4912f))
+* add uzh and swissuni logo to footer ([e1de69b](https://github.com/uzh-bf/gbl-web/commit/e1de69bb724e4508c689baca8657ad334dedd71b))
+* base content structure for about and resources ([c69f726](https://github.com/uzh-bf/gbl-web/commit/c69f7260ca9c2302c75dfbfb91630fbda7e84951))
+* basic structure for a page on workflow step ([d0433b2](https://github.com/uzh-bf/gbl-web/commit/d0433b2e04a67fedc5707df3d575fe6872ca73d9))
+* create banner section component ([a3fc006](https://github.com/uzh-bf/gbl-web/commit/a3fc00650a48910e0df9fd826587a8897ad1fbfc))
+* embed the knowledge base ([ae434a0](https://github.com/uzh-bf/gbl-web/commit/ae434a049a01515bb057193821a56845219b09e6))
+* extend home section with icon content subcomponent ([6b48eda](https://github.com/uzh-bf/gbl-web/commit/6b48edac786a3312d7a2caf4053591e38ce8aab1))
+* hover the navigation in uzh blue ([d106baf](https://github.com/uzh-bf/gbl-web/commit/d106baf788fbad06d2629f08bf91d233fee6fa3d))
+* improve footer styling on mobile ([d1ddb0a](https://github.com/uzh-bf/gbl-web/commit/d1ddb0add9abd5c0cc54c98d505435310c22ddd2))
+* improve header styling on mobile ([ee8e697](https://github.com/uzh-bf/gbl-web/commit/ee8e6972ab16d789d79b07d758e8d0163935afca))
+* improve responsiveness of hero images and replace with SVG ([92aca62](https://github.com/uzh-bf/gbl-web/commit/92aca62c1a32f9ab26de3feb68a8dff20349b8f0))
+* improve styling of hero image on index ([80f0bad](https://github.com/uzh-bf/gbl-web/commit/80f0bad1821d1b65b6614ac8298a88fc243c2c85))
+* index page with heros and layouting changes ([8f55af0](https://github.com/uzh-bf/gbl-web/commit/8f55af015804abc9bac471402e43690eba997319))
+* redesign banner sections ([eb05483](https://github.com/uzh-bf/gbl-web/commit/eb05483287f61e1d21c95966d922a7ce5b5cd922))
+* replace div icons with SVG and add icon layout for roadmap section ([ef0a932](https://github.com/uzh-bf/gbl-web/commit/ef0a9327908c3fcd8d33419fefa0535ffb62e4f3))
+* update stakeholder icons to look clickable ([c39ffab](https://github.com/uzh-bf/gbl-web/commit/c39ffab17ebc5a0029537a5bfa78d04c9370366a))
+* use uzh blue and bold font for buttons ([220bc2d](https://github.com/uzh-bf/gbl-web/commit/220bc2dfdb7009862e3b9560fef66ab1e6820966))
+* use uzh blue for headers ([a66ea42](https://github.com/uzh-bf/gbl-web/commit/a66ea42a4316bdef20b987137743c78afb68af08))
+
+
+### Bug Fixes
+
+* improve responsiveness of leading quote ([ca26bc7](https://github.com/uzh-bf/gbl-web/commit/ca26bc73a63f55e2c3ade3146c1d7227e61e295c))
+* improvements to index consistency ([6bd2b95](https://github.com/uzh-bf/gbl-web/commit/6bd2b958a77c7db45b3449481125a52938c7b80e))
+* reduce distance of quote border ([bd2e185](https://github.com/uzh-bf/gbl-web/commit/bd2e18537dbcf9971f7b49773abb1b1fb1bd04cf))
+
 ### [0.0.14](https://github.com/uzh-bf/gbl-web/compare/v0.0.13...v0.0.14) (2021-05-01)
 
 
