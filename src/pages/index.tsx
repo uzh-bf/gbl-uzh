@@ -1,15 +1,15 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import BannerSection from '../components/common/BannerSection'
 import Button from '../components/common/Button'
-import CitationSection from '../components/common/CitationSection'
 import HeroImage from '../components/common/HeroImage'
-import HomeSection from '../components/common/HomeSection'
-import PaddedSection from '../components/common/PaddedSection'
 import Title from '../components/common/Title'
 import TitleImage from '../components/common/TitleImage'
 import GameCard from '../components/games/GameCard'
 import PageWithHeader from '../components/PageWithHeader'
+import BannerSection from '../components/sections/BannerSection'
+import CitationSection from '../components/sections/CitationSection'
+import HomeSection from '../components/sections/HomeSection'
+import PaddedSection from '../components/sections/PaddedSection'
 
 function Home() {
   const router = useRouter()

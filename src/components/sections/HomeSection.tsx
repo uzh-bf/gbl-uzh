@@ -1,4 +1,4 @@
-import Header from './Header'
+import Header from '../common/Header'
 import PaddedSection from './PaddedSection'
 
 interface Props {
