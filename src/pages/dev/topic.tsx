@@ -1,12 +1,10 @@
-import { useRouter } from 'next/router'
-import Button from '../../components/common/Button'
 import Header from '../../components/common/Header'
 import Title from '../../components/common/Title'
 import TitleBackground from '../../components/common/TitleBackground'
 import PageWithHeader from '../../components/PageWithHeader'
 
 function GameConcept() {
-  const router = useRouter()
+  // const router = useRouter()
 
   return (
     <PageWithHeader title="Development Workflow">
@@ -16,8 +14,13 @@ function GameConcept() {
 
       <div className="max-w-6xl py-8 m-auto">
         <div className="flex flex-col justify-between md:flex-row">
-          <div className="flex-initial w-full h-64 shadow md:w-1/2 md:h-80">
-            <iframe
+          <div className="flex-initial w-full h-64 border rounded shadow md:w-1/2 md:h-auto">
+            <img
+              src="/images/gbl_video_thumb.png"
+              width="100%"
+              alt="Video Thumbnail"
+            />
+            {/* <iframe
               title="Video"
               width="100%"
               height="100%"
@@ -25,15 +28,19 @@ function GameConcept() {
               frameBorder="0"
               allow="fullscreen"
               allowFullScreen
-            />
+            /> */}
           </div>
           <div className="flex-1 mt-4 md:mt-0 md:pl-8">
-            <img src="/images/dev_workflow.png" className="p-2 m-auto w-96" />
-            <Button onClick={() => router.push('/dev/development')}>
+            <img
+              src="/images/dev_workflow_small.png"
+              className="p-2 m-auto w-60"
+              alt="Workflow Step"
+            />
+            {/* <Button onClick={() => router.push('/dev/development')}>
               <Button.Arrow />
               Game Development
-            </Button>
-            <p className="p-4 mt-4 prose text-justify border rounded shadow max-w-none">
+            </Button> */}
+            <p className="p-4 mt-4 prose prose-lg text-justify max-w-none">
               Lorem, ipsum dolor sit amet consectetur adipisicing elit. Laborum
               temporibus, quasi quos laboriosam deleniti optio soluta quam nihil
               saepe veritatis minus ipsum modi non vero enim, labore, beatae
@@ -42,7 +49,7 @@ function GameConcept() {
           </div>
         </div>
 
-        <div className="py-8">
+        <div className="pt-8">
           <Header.H2 className="border-b">Conceptualize Game Ideas</Header.H2>
           <div className="flex flex-col py-1 md:flex-row">
             <p className="flex-1 prose max-w-none">
