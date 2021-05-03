@@ -6,7 +6,7 @@ const NAVIGATION_ITEMS = [
   { href: '/', label: 'Home' },
   { href: '/kb', label: 'Knowledge Base' },
   { href: '/dbf', label: 'GBL @ DBF' },
-  { href: '/dev', label: 'Development Workflow' },
+  // { href: '/dev', label: 'Development Workflow' },
   { href: '/roadmap', label: 'Roadmap' },
   { href: '/resources', label: 'Resources' },
   { href: '/about', label: 'About Us' },
