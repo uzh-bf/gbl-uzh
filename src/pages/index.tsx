@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Button from '../components/common/Button'
 import HeroImage from '../components/common/HeroImage'
@@ -35,15 +36,27 @@ function Home() {
 
       <PaddedSection>
         <HeroImage.Group>
-          <HeroImage imgSrc="/images/vorlesung_icon.svg" label="for teachers" />
-          <HeroImage
-            imgSrc="/images/gruppenarbeit_icon.svg"
-            label="for students"
-          />
-          <HeroImage
-            imgSrc="/images/einzelarbeit_icon.svg"
-            label="for developers"
-          />
+          <Link href="/kb">
+            <HeroImage
+              href="/kb"
+              imgSrc="/images/vorlesung_icon.svg"
+              label="for teachers"
+            />
+          </Link>
+          <Link href="/dbf">
+            <HeroImage
+              href="/dbf"
+              imgSrc="/images/gruppenarbeit_icon.svg"
+              label="for students"
+            />
+          </Link>
+          <Link href="/resources">
+            <HeroImage
+              href="/resources"
+              imgSrc="/images/einzelarbeit_icon.svg"
+              label="for developers"
+            />
+          </Link>
         </HeroImage.Group>
       </PaddedSection>
 
