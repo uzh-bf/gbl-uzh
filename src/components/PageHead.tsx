@@ -4,9 +4,9 @@ import { useRouter } from 'next/router'
 
 const NAVIGATION_ITEMS = [
   { href: '/', label: 'Home' },
-  { href: '/kb', label: 'Knowledge Base' },
   { href: '/dbf', label: 'GBL @ DBF' },
-  // { href: '/dev', label: 'Development Workflow' },
+  { href: '/kb', label: 'Knowledge Base' },
+  { href: '/dev', label: 'Development' },
   { href: '/roadmap', label: 'Roadmap' },
   { href: '/resources', label: 'Resources' },
   { href: '/about', label: 'About Us' },
