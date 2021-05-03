@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.17](https://github.com/uzh-bf/gbl-web/compare/v0.0.16...v0.0.17) (2021-05-03)
+
+
+### Features
+
+* add about us page and gbl video thumb ([b6edc13](https://github.com/uzh-bf/gbl-web/commit/b6edc13d59f92ded137ac621a0f101b2b5354573))
+* draft an initial roadmap structure ([52f10b4](https://github.com/uzh-bf/gbl-web/commit/52f10b4eeb23737b66c1c67f0e1dd203fdf64f2c))
+* draft initial game dev pages ([4cca8f3](https://github.com/uzh-bf/gbl-web/commit/4cca8f3505bc695952486fc027aade061c6a790d))
+
+
+### Bug Fixes
+
+* add type declaration for easy forms ([07577cc](https://github.com/uzh-bf/gbl-web/commit/07577cc846cb096e06c8c852ca57cdb22ea51af3))
+* ensure that the type for isHoverable is a boolean ([e694698](https://github.com/uzh-bf/gbl-web/commit/e694698862dce8a2cc44f714af2ec4885821945e))
+
+
+* bump version ([f60affe](https://github.com/uzh-bf/gbl-web/commit/f60affe7cda7a6ef0c6732aad154d26aebfe5fd1))
+* remove dev workflow from navigation ([4170ad4](https://github.com/uzh-bf/gbl-web/commit/4170ad43ea80b9383d6a798052b414c14a62a40c))
+* set the base path for deployment ([abee119](https://github.com/uzh-bf/gbl-web/commit/abee11906228d086f6f7eeda576924c8e925f812))
+
 ### [0.0.16](https://github.com/uzh-bf/gbl-web/compare/v0.0.13...v0.0.16) (2021-05-03)
 
 
