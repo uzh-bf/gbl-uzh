@@ -75,7 +75,7 @@ function Logo() {
   )
 }
 
-function Header() {
+function PageHead() {
   return (
     <header className="flex flex-col justify-between max-w-6xl pt-4 m-auto md:flex-row">
       <Logo />
@@ -87,4 +87,4 @@ function Header() {
   )
 }
 
-export default Header
+export default PageHead

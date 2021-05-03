@@ -8,6 +8,7 @@ function KnowledgeBase() {
       <TitleBackground>
         <Title title="Knowledge Base" />
       </TitleBackground>
+
       <iframe
         src="https://www.gbl.uzh.ch/md/"
         title="Game-Based Learning"

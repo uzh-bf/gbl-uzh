@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Footer from './Footer'
-import Header from './Header'
+import PageHead from './PageHead'
 
 interface Props {
   title: string
@@ -14,7 +14,7 @@ function PageWithHeader({ title, children }: Props) {
         <title>GBL@DBF - {title}</title>
       </Head>
       <div className="flex-1 w-full">
-        <Header />
+        <PageHead />
         <div className="h-full md:border-t-2 border-uzh-red-100">
           {children}
         </div>

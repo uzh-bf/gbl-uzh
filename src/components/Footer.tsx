@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 function Footer() {
   return (
     <footer className="z-10 flex flex-col justify-between flex-initial p-4 text-sm text-gray-600 bg-white border-t-2 border-uzh-red-100 md:flex-row border-top md:text-base">
@@ -14,13 +16,19 @@ function Footer() {
         </div>
       </div>
 
-      <p className="order-2 prose-sm prose text-center text-gray-600 md:order-1 md:text-left">
+      <p className="order-2 text-center text-gray-600 md:order-1 md:text-left">
         <span className="font-bold">GBL @ DBF</span>
         <br />
         &copy; {new Date().getFullYear()} Department of Banking and Finance,
         University of Zurich
         <br />
-        Created with &#9825; in Bärn
+        Created with &#9825; in Bärn.
+        <br />
+        <Link href="/about">
+          <a href="/about" className="no-underline text-uzh-red-100">
+            Contact Us
+          </a>
+        </Link>
       </p>
     </footer>
   )
