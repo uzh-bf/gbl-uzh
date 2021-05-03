@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Tag from '../common/Tag'
 
 interface Props {
   name: string
@@ -26,9 +27,7 @@ function GameCard({ name, tags, linkHref }: Props) {
         {tags?.length > 0 && (
           <div className="flex flex-row flex-wrap p-1 bg-gray-100">
             {tags.map((tag) => (
-              <div className="px-2 mr-1 text-sm bg-white border rounded">
-                {tag}
-              </div>
+              <Tag label={tag} />
             ))}
           </div>
         )}
