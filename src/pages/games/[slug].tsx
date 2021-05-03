@@ -58,7 +58,7 @@ function Game({ source, frontMatter }: Props) {
               <Header.H3>Keywords</Header.H3>
               <div className="flex flex-row flex-wrap">
                 {frontMatter.keywords.map((item) => (
-                  <Tag label={item} />
+                  <Tag label={item} className="mb-1" />
                 ))}
               </div>
             </div>
@@ -67,7 +67,7 @@ function Game({ source, frontMatter }: Props) {
               <Header.H3>Languages</Header.H3>
               <div className="flex flex-row flex-wrap">
                 {frontMatter.language.map((item) => (
-                  <Tag label={item} />
+                  <Tag label={item} className="mb-1" />
                 ))}
               </div>
             </div>

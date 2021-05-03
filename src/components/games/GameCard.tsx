@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import Tag from '../common/Tag'
+import Card from '../common/Card'
 
 interface Props {
   name: string
@@ -10,28 +10,7 @@ interface Props {
 function GameCard({ name, tags, linkHref }: Props) {
   return (
     <Link href={linkHref}>
-      <div className="flex-1 mb-4 border rounded shadow cursor-pointer hover:shadow-lg md:mb-0 md:mr-4 last:mr-0">
-        <div className="relative">
-          <div className="absolute left-0 right-0 z-10 py-1 text-base text-center text-white bg-uzh-blue-60 bottom-3">
-            {name}
-          </div>
-
-          <img
-            className="z-0 grayscale filter"
-            width="100%"
-            src="images/pfm_game.png"
-            alt={`Screenshot of ${name}`}
-          />
-        </div>
-
-        {tags?.length > 0 && (
-          <div className="flex flex-row flex-wrap p-1 bg-gray-100">
-            {tags.map((tag) => (
-              <Tag label={tag} />
-            ))}
-          </div>
-        )}
-      </div>
+      <Card isHoverable name={name} tags={tags} />
     </Link>
   )
 }
