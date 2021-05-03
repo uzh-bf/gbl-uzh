@@ -6,7 +6,9 @@ import CitationSection from '../components/common/CitationSection'
 import HeroImage from '../components/common/HeroImage'
 import HomeSection from '../components/common/HomeSection'
 import PaddedSection from '../components/common/PaddedSection'
+import Title from '../components/common/Title'
 import TitleImage from '../components/common/TitleImage'
+import GameCard from '../components/games/GameCard'
 import PageWithHeader from '../components/PageWithHeader'
 
 function Home() {
@@ -18,10 +20,9 @@ function Home() {
         <script src="https://identity.netlify.com/v1/netlify-identity-widget.js" />
       </Head>
 
-      <TitleImage
-        imgSrc="/images/hero2.jpg"
-        title="Digital Game-Based Learning"
-      />
+      <TitleImage imgSrc="/images/hero2.jpg">
+        <Title title="Digital Game-Based Learning" />
+      </TitleImage>
 
       <PaddedSection className="bg-uzh-gray-20">
         <CitationSection>
@@ -52,24 +53,15 @@ function Home() {
             <div className="mb-2 md:mb-4">
               <div className="flex flex-col md:flex-wrap md:flex-row">
                 {[
-                  'Portfolio Management Simulation',
-                  'Derivatives Game',
-                  'Banking Game',
-                ].map((game) => (
-                  <div className="relative flex-1 mb-4 border shadow cursor-pointer hover:shadow-lg md:mb-0 md:mr-8 last:mr-0">
-                    <div className="absolute left-0 right-0 z-10 py-1 text-base text-center text-white bg-uzh-blue-60 bottom-2">
-                      {game}
-                    </div>
-                    <img
-                      className="z-0 grayscale filter"
-                      width="100%"
-                      src="images/pfm_game.png"
-                      alt={game}
-                    />
-                  </div>
+                  ['Portfolio Management Simulation', '/games/pfm'],
+                  ['Derivatives Game', '/games/derivatives'],
+                  ['Banking Game', '/games/banking'],
+                ].map(([name, href]) => (
+                  <GameCard name={name} linkHref={href} />
                 ))}
               </div>
             </div>
+
             <Button onClick={() => router.push('/dbf')}>
               <Button.Arrow />
               Our Games and Courses

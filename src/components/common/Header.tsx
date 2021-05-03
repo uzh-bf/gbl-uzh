@@ -39,7 +39,7 @@ function H3({ children, className }: Props) {
   return (
     <h3
       className={clsx(
-        'mb-2 text-base md:text-lg md:mb-4 text-uzh-blue-60 font-bold text-center md:text-left',
+        'mb-2 text-base md:text-lg md:mb-4 text-gray-700 font-bold text-center md:text-left',
         className
       )}
     >
