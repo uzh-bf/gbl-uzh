@@ -13,7 +13,7 @@ function PageWithHeader({ title, children }: Props) {
       <Head>
         <title>GBL@DBF - {title}</title>
       </Head>
-      <div className="flex-1 w-full overflow-hidden">
+      <div className="flex-1 w-full">
         <Header />
         <div className="h-full md:border-t-2 border-uzh-red-100">
           {children}
