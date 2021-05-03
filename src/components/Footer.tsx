@@ -1,6 +1,6 @@
 function Footer() {
   return (
-    <footer className="flex flex-col justify-between flex-initial p-4 text-sm text-gray-600 border-t-2 border-uzh-red-100 md:flex-row border-top md:text-base">
+    <footer className="z-10 flex flex-col justify-between flex-initial p-4 text-sm text-gray-600 bg-white border-t-2 border-uzh-red-100 md:flex-row border-top md:text-base">
       <div className="flex flex-col items-center order-1 mb-4 md:order-2 md:flex-row md:mb-0">
         <div className="w-40 mb-4 md:mb-0 md:mr-8">
           <img width="100%" src="images/logo_uzh.jpeg" alt="UZH Logo" />
