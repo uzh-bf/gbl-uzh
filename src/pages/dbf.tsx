@@ -34,7 +34,7 @@ function GBLAtDBF() {
         <Title title="Our Games and Courses" />
       </TitleBackground>
 
-      <div className="p-4">
+      <div className="max-w-6xl p-4 m-auto">
         <Header.H2>Games</Header.H2>
         <div className="flex flex-col md:flex-row">
           {GAMES.map((game) => (
