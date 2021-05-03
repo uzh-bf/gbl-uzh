@@ -4,7 +4,7 @@ import Tag from './Tag'
 interface Props {
   name: string
   tags?: string[]
-  isHoverable?: string
+  isHoverable?: boolean
   className?: string
 }
 
