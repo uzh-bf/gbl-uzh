@@ -46,5 +46,52 @@
     "npm-run-all": "4.1.5",
     "standard-version": "9.2.0",
     "typescript": "4.2.4"
+  },
+  "standard-version": {
+    "types": [
+      {
+        "type": "docs",
+        "section": "Documentation"
+      },
+      {
+        "type": "enhance",
+        "section": "Enhancements"
+      },
+      {
+        "type": "feat",
+        "section": "Features"
+      },
+      {
+        "type": "fix",
+        "section": "Bug Fixes"
+      },
+      {
+        "type": "refactor",
+        "section": "Refactors"
+      },
+      {
+        "type": "wip",
+        "section": "Work in Progress"
+      },
+      {
+        "type": "perf",
+        "section": "Performance"
+      },
+      {
+        "type": "style"
+      },
+      {
+        "type": "chore"
+      },
+      {
+        "type": "test"
+      },
+      {
+        "type": "build"
+      },
+      {
+        "type": "ci"
+      }
+    ]
   }
 }
