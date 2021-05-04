@@ -1,3 +1,3 @@
 module.exports = {
-  basePath: '/v2',
+  // basePath: '/v2',
 }
