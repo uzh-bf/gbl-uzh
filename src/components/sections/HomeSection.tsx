@@ -35,10 +35,10 @@ HomeSection.IconContent = function IconContent({
 }: IconContentProps) {
   return (
     <div className="relative flex flex-col items-center mb-2 md:flex-row md:mb-4">
-      <div className="flex justify-center w-full md:w-48">
+      <div className="flex justify-center w-full md:w-40">
         <img src={iconSrc} alt={iconAlt} />
       </div>
-      <p className="p-2 prose-sm text-gray-600 md:prose md:p-0 md:pl-24">
+      <p className="p-2 prose text-gray-600 md:prose-ld md:p-0 md:pl-16">
         {children}
       </p>
     </div>

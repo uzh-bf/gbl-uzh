@@ -22,15 +22,18 @@ function Home() {
       </Head>
 
       <TitleImage imgSrc="/images/hero2.jpg">
-        <Title title="Digital Game-Based Learning" />
+        <Title isCentered title="Digital Game-Based Learning" />
       </TitleImage>
 
       <PaddedSection className="bg-uzh-gray-20">
         <CitationSection>
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
-          expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
-          sint maiores aliquam facilis accusantium vel voluptas consequatur
-          voluptatum molestiae exercitationem!
+          Current research in the field of Game-Based Learning shows that
+          learning complex topics as well as gaining experience in realistic,
+          digital business games increases learning success among students. The
+          aim of our Game-Based Learning project is to apply the experience
+          gained so far when using and developing games to develop materials and
+          frameworks supporting teachers in the design and creation of their own
+          browser-based simulations and serious games.
         </CitationSection>
       </PaddedSection>
 
@@ -60,9 +63,13 @@ function Home() {
         </HeroImage.Group>
       </PaddedSection>
 
-      <HomeSection title="GBL @ DBF" className="bg-uzh-gray-20">
+      <HomeSection title="GBL in Use" className="bg-uzh-gray-20">
         <div className="flex flex-col md:flex-row">
           <div className="flex-1 mb-4 md:mb-0">
+            <div className="mb-2 prose md:prose-lg max-w-none">
+              Games and simulations developed at the Department of Banking and
+              Finance, as well as courses supported with Game-Based Learning.
+            </div>
             <div className="mb-2 md:mb-4">
               <div className="flex flex-col md:flex-wrap md:flex-row">
                 {[
@@ -74,7 +81,6 @@ function Home() {
                 ))}
               </div>
             </div>
-
             <Button onClick={() => router.push('/dbf')}>
               <Button.Arrow />
               Our Games and Courses
@@ -88,10 +94,10 @@ function Home() {
           iconSrc="images/netzwerk_icon.svg"
           iconAlt="Knowledge Graph"
         >
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem,
-          enim aspernatur! Vero laboriosam reprehenderit at, architecto odio
-          deleniti mollitia illum cupiditate suscipit rerum accusantium sint
-          inventore nostrum ad eveniet perferendis.
+          Get to know the various terms and definitions in the fields of
+          gamification and Game-Based Learning. Our knowledge base contains
+          information on basic terms as well as a compilation of our best
+          practices.
         </HomeSection.IconContent>
 
         <Button onClick={() => router.push('/kb')}>
@@ -101,23 +107,24 @@ function Home() {
       </HomeSection>
 
       <BannerSection imgSrc="/images/hero3.jpg">
-        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
-        expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
-        sint maiores aliquam facilis accusantium vel voluptas consequatur
-        voluptatum molestiae exercitationem!
+        &ldquo;Traditional learning has provided superficial learning through
+        text books. Games are best at teaching a deeper level of
+        learning.&rdquo; Eric Klopfer, MIT
       </BannerSection>
 
       <HomeSection title="Development Workflow">
-        <HomeSection.IconContent
-          iconSrc="images/dev_workflow.png"
-          iconAlt="Development Workflow"
-        >
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem,
-          enim aspernatur! Vero laboriosam reprehenderit at, architecto odio
-          deleniti mollitia illum cupiditate suscipit rerum accusantium sint
-          inventore nostrum ad eveniet perferendis.
-        </HomeSection.IconContent>
-
+        <div className="mb-2 prose md:prose-lg max-w-none">
+          Learn how you can proceed if you want to develop your own simulation
+          or serious game. Use our resources as a support and for guidance in
+          your own development.
+        </div>
+        <div className="max-w-xl mt-4 mb-8">
+          <img
+            alt="Development Workflow"
+            width="100%"
+            src="/images/dev_workflow.png"
+          />
+        </div>
         <Button onClick={() => router.push('/dev')}>
           <Button.Arrow />
           Development Workflow
@@ -129,10 +136,10 @@ function Home() {
           iconSrc="images/lernziele_icon.svg"
           iconAlt="Roadmap"
         >
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem,
-          enim aspernatur! Vero laboriosam reprehenderit at, architecto odio
-          deleniti mollitia illum cupiditate suscipit rerum accusantium sint
-          inventore nostrum ad eveniet perferendis.
+          We are working on a Game-Based Learning project supported by the
+          University of Zurich and Swissuniversities. Get involved now: Ask
+          questions, let us know what would be useful for you in terms of
+          content, exchange game ideas, and join our community!
         </HomeSection.IconContent>
 
         <Button onClick={() => router.push('/roadmap')}>
@@ -141,12 +148,12 @@ function Home() {
         </Button>
       </HomeSection>
 
-      <BannerSection imgSrc="/images/hero3.jpg">
+      {/* <BannerSection imgSrc="/images/hero3.jpg">
         Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
         expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
         sint maiores aliquam facilis accusantium vel voluptas consequatur
         voluptatum molestiae exercitationem!
-      </BannerSection>
+      </BannerSection> */}
     </PageWithHeader>
   )
 }
