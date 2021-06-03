@@ -7,7 +7,7 @@ interface Props {
 
 function PaddedSection({ className, children }: Props) {
   return (
-    <div className={clsx('sm:px-4 px-8 py-4 md:py-16 md:px-16', className)}>
+    <div className={clsx('sm:px-16 px-16 py-4 md:py-16 md:px-16', className)}>
       {children}
     </div>
   )
