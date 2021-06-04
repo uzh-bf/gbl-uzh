@@ -21,8 +21,9 @@ function Home() {
         <script src="https://identity.netlify.com/v1/netlify-identity-widget.js" />
       </Head>
 
-      <TitleImage imgSrc="/images/hero2.jpg">
-        <Title isCentered title="Digital Game-Based Learning" />
+      <TitleImage imgSrc="/images/header_temp.jpg">
+        <Title  title="Learning-by-doing" />
+        <Title  title="Literally" />
       </TitleImage>
 
       <PaddedSection className="bg-uzh-gray-20">

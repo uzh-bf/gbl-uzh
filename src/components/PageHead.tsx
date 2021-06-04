@@ -61,17 +61,13 @@ function Breadcrumbs() {
 
 function Logo() {
   return (
-    <div className="flex-1 mb-4 md:flex-initial md:mb-0">
-      <Link href="/">
         <img
-          className="m-auto cursor-pointer md:m-0"
+          className="p-2 m-auto cursor-pointer md:m-2"
           width="150"
           height="75"
-          src="https://place-hold.it/150x75/D3D3D3?text=GBL @ DBF"
+          src="/images/logo_temp.jpg"
           alt=""
         />
-      </Link>
-    </div>
   )
 }
 

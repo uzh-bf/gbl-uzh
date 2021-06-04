@@ -9,7 +9,7 @@ function Title({ title, isCentered }: Props) {
   return (
     <h1
       className={clsx(
-        'max-w-6xl m-auto font-mono text-2xl font-bold text-uzh-red-80 sm:text-4xl lg:text-5xl',
+        'max-w-6xl m-auto font-mono text-2xl font-bold text-uzh-gray-20 sm:text-4xl lg:text-5xl',
         isCentered ? 'text-center' : 'text-left'
       )}
     >
