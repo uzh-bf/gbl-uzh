@@ -22,8 +22,8 @@ function Home() {
       </Head>
 
       <TitleImage imgSrc="/images/header_temp.jpg">
-        <Title  title="Learning-by-doing" />
-        <Title  title="Literally" />
+        <Title  title="Learning-by-doing." />
+        <Title  title="Literally." />
       </TitleImage>
 
       <PaddedSection className="bg-uzh-gray-20">
