@@ -89,7 +89,6 @@ function Home() {
           </div>
         </div>
       </HomeSection>
-
       <HomeSection title="GBL Knowledge Base">
         <HomeSection.IconContent
           iconSrc="images/netzwerk_icon.svg"
