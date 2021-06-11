@@ -1,4 +1,4 @@
-import hydrate from 'next-mdx-remote/hydrate'
+import { MDXRemote } from 'next-mdx-remote'
 import RadarChart from '../../components/charts/RadarChart'
 import Header from '../../components/common/Header'
 import Tag from '../../components/common/Tag'
@@ -13,8 +13,6 @@ interface Props {
 const components = {}
 
 function Game({ source, frontMatter }: Props) {
-  const content = hydrate(source, { components })
-
   return (
     <PageWithHeader title={frontMatter.title}>
       <div className="bg-uzh-gray-20">
@@ -32,7 +30,9 @@ function Game({ source, frontMatter }: Props) {
             <Header.H2 className="mb-2 md:mb-4">
               {frontMatter.subtitle}
             </Header.H2>
-            <p className="prose max-w-none">{content}</p>
+            <p className="prose max-w-none">
+              <MDXRemote {...source} components={components} />
+            </p>
           </div>
           <div className="flex-1 p-4 border rounded md:flex-initial md:w-96">
             <div>

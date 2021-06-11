@@ -1,4 +1,4 @@
-import hydrate from 'next-mdx-remote/hydrate'
+import { MDXRemote } from 'next-mdx-remote'
 import Head from 'next/head'
 import * as Util from '../lib/util'
 
@@ -10,8 +10,6 @@ interface Props {
 const components = {}
 
 export default function Page({ source, frontMatter }: Props) {
-  const content = hydrate(source, { components })
-
   return (
     <div>
       <Head>
@@ -20,7 +18,7 @@ export default function Page({ source, frontMatter }: Props) {
 
       <main>
         <h1>{frontMatter.title}</h1>
-        {content}
+        <MDXRemote {...source} components={components} />
       </main>
     </div>
   )

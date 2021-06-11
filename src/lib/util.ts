@@ -1,6 +1,6 @@
 import fs from 'fs'
 import matter from 'gray-matter'
-import renderToString from 'next-mdx-remote/render-to-string'
+import { serialize } from 'next-mdx-remote/serialize'
 import path from 'path'
 
 export function getStaticProps(dir_name, components = {}) {
@@ -11,14 +11,7 @@ export function getStaticProps(dir_name, components = {}) {
     )
     const source = fs.readFileSync(mdxPath)
     const { content, data } = matter(source)
-    const mdxSource = await renderToString(content, {
-      components,
-      mdxOptions: {
-        remarkPlugins: [],
-        rehypePlugins: [],
-      },
-      scope: data,
-    })
+    const mdxSource = await serialize(content)
     return { props: { source: mdxSource, frontMatter: data } }
   }
 }
