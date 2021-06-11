@@ -1,11 +1,10 @@
 backend:
-  name: git-gateway
+  name: github
   branch: master
   squash_merges: true
-
-repo: https://github.com/uzh-bf/gbl-web
-base_url: https://gbl-web.vercel.app/
-auth_endpoint: api/auth
+  repo: uzh-bf/gbl-web
+  base_url: https://gbl-web.vercel.app/
+  auth_endpoint: api/auth
 
 local_backend: true
 
