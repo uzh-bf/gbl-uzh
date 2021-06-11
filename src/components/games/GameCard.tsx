@@ -10,14 +10,7 @@ interface Props {
 function GameCard({ name, tags, linkHref }: Props) {
   const router = useRouter()
 
-  return (
-    <Card
-      isHoverable
-      name={name}
-      tags={tags}
-      onClick={() => router.push(linkHref)}
-    />
-  )
+  return <Card name={name} tags={tags} onClick={() => router.push(linkHref)} />
 }
 
 GameCard.defaultProps = {

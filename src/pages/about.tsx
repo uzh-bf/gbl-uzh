@@ -12,8 +12,7 @@ function About() {
       theme: 0,
       container: 'c7',
       height: '479px',
-      form:
-        '//www.bf-tools.uzh.ch/applications/easyforms/index.php?r=app%2Fembed',
+      form: '//www.bf-tools.uzh.ch/applications/easyforms/index.php?r=app%2Fembed',
     }
     s.type = 'text/javascript'
     s.src =
