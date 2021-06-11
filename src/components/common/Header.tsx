@@ -13,7 +13,7 @@ function H1({ children, className }: Props) {
   return (
     <h1
       className={clsx(
-        'mb-2 text-xl font-kollektif-bold md:text-2xl md:mb-4 text-uzh-blue-60 text-center md:text-left',
+        'mb-2 text-xl font-kollektif-bold md:text-2xl md:mb-4 text-center md:text-left',
         className
       )}
     >
@@ -26,7 +26,7 @@ function H2({ children, className }: Props) {
   return (
     <h2
       className={clsx(
-        'mb-2 text-xl md:text-xl md:mb-4 text-uzh-blue-60 font-kollektif-bold text-center md:text-left',
+        'mb-2 text-xl md:text-xl md:mb-4 font-kollektif-bold text-center md:text-left',
         className
       )}
     >

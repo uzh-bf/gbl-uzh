@@ -1,6 +1,3 @@
-import Header from '../common/Header'
-import PaddedSection from './PaddedSection'
-
 interface Props {
   title: string
   children: React.ReactNode
@@ -9,12 +6,14 @@ interface Props {
 
 function HomeSection({ title, children, className }: Props) {
   return (
-    <PaddedSection className={className}>
+    <div className="py-16">
       <div className="max-w-6xl m-auto">
-        <Header.H1>{title}</Header.H1>
+        <h1 className="mb-2 text-4xl text-center font-kollektif-bold md:mb-4 text-uzh-red-100 md:text-left">
+          {title}
+        </h1>
         <div>{children}</div>
       </div>
-    </PaddedSection>
+    </div>
   )
 }
 

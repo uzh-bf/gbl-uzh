@@ -20,7 +20,11 @@ function Card({ name, tags, className, onClick }: Props) {
       )}
     >
       <div className="relative">
-        <div className="absolute left-0 right-0 z-10 py-1 text-base text-center text-white bg-uzh-blue-60 bottom-3">
+        {/* <div className="absolute left-0 right-0 z-10 py-1 text-base text-center text-white bg-uzh-red-100 bottom-3">
+          {name}
+        </div> */}
+
+        <div className="absolute left-0 right-0 z-10 py-1 text-lg prose text-center bg-white bg-opacity-80 bottom-3">
           {name}
         </div>
 
