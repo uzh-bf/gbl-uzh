@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.19](https://github.com/uzh-bf/gbl-web/compare/v0.0.18...v0.0.19) (2021-06-11)
+
+
+### Bug Fixes
+
+* type issues ([0759a31](https://github.com/uzh-bf/gbl-web/commit/0759a3186c3405441a6fc5e52f33ab9908c38094))
+
 ### [0.0.18](https://github.com/uzh-bf/gbl-web/compare/v0.0.17...v0.0.18) (2021-06-11)
 
 
