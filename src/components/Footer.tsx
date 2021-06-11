@@ -5,12 +5,12 @@ function Footer() {
     <footer className="z-10 flex flex-col justify-between flex-initial p-4 text-sm text-gray-600 bg-white border-t-2 border-uzh-red-100 md:flex-row border-top md:text-base">
       <div className="flex flex-col items-center order-1 mb-4 md:order-2 md:flex-row md:mb-0">
         <div className="w-40 mb-3 md:mb-0 md:mr-8">
-          <img width="100%" src="images/logo_uzh.jpeg" alt="UZH Logo" />
+          <img width="100%" src="/images/logo_uzh.jpeg" alt="UZH Logo" />
         </div>
         <div className="w-40">
           <img
             width="100%"
-            src="images/logo_swissuniversities.png"
+            src="/images/logo_swissuniversities.png"
             alt="Swissuniversities Logo"
           />
         </div>
@@ -21,8 +21,6 @@ function Footer() {
         <br />
         &copy; {new Date().getFullYear()} Department of Banking and Finance,
         University of Zurich
-        <br />
-        Created with &#9825; in Bärn.
         <br />
         <Link href="/about">
           <a href="/about" className="no-underline text-uzh-red-100">
