@@ -1,7 +1,6 @@
 import PaddedSection from './PaddedSection'
 
 interface Props {
-  title: string
   className?: string
   children: React.ReactNode
 }
@@ -20,11 +19,17 @@ HomeSection2.defaultProps = {
   className: undefined,
 }
 
+interface HomeSectionContentProps {
+  title: string
+  content: string
+  children?: React.ReactNode
+}
+
 HomeSection2.Content = function HomeSectionContent({
   title,
   content,
   children,
-}) {
+}: HomeSectionContentProps) {
   return (
     <div className="flex-1 w-1/2 bg-gray-50">
       <div className="p-16">
@@ -38,7 +43,11 @@ HomeSection2.Content = function HomeSectionContent({
   )
 }
 
-HomeSection2.Hero = function HomeSectionHero({ src }) {
+interface HomeSectionHeroProps {
+  src: string
+}
+
+HomeSection2.Hero = function HomeSectionHero({ src }: HomeSectionHeroProps) {
   return (
     <div className="items-center flex-1 hidden w-1/2 md:flex justify-items-center">
       <img className="w-full h-full" src={src} />

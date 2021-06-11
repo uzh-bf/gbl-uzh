@@ -84,7 +84,7 @@ function Home() {
           title="Knowledge Base"
           content="Get to know the various terms and definitions in the fields of gamification and Game-Based Learning. Our knowledge base contains information on basic terms as well as a compilation of our best practices."
         >
-          <Button className="mt-4">
+          <Button className="mt-4" onClick={() => router.push('/kb')}>
             <Button.Arrow />
             Knowledge Base
           </Button>
@@ -98,7 +98,7 @@ function Home() {
           title="Development Workflow"
           content="Learn how you can proceed if you want to develop your own simulation or serious game. Use our resources as a support and for guidance in your own development."
         >
-          <Button className="mt-4">
+          <Button className="mt-4" onClick={() => router.push('/dev')}>
             <Button.Arrow />
             Development Workflow
           </Button>
@@ -113,7 +113,7 @@ function Home() {
           questions, let us know what would be useful for you in terms of
           content, exchange game ideas, and join our community!"
         >
-          <Button className="mt-4">
+          <Button className="mt-4" onClick={() => router.push('/roadmap')}>
             <Button.Arrow />
             Roadmap
           </Button>
