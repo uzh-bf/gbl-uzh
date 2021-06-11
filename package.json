@@ -78,6 +78,10 @@
         "section": "Performance"
       },
       {
+        "type": "deps",
+        "section": "Dependencies"
+      },
+      {
         "type": "style"
       },
       {
