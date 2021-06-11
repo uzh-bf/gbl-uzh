@@ -8,6 +8,14 @@
   #__next {
     @apply h-full;
   }
+
+  @font-face {
+    font-family: 'kollektif-bold';
+    src: url('/kollektif-bold-webfont.woff2') format('woff2'),
+      url('/kollektif-bold-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
 }
 
 @layer components {

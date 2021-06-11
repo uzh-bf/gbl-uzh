@@ -3,10 +3,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 const NAVIGATION_ITEMS = [
-  { href: '/', label: 'Home' },
-  { href: '/kb', label: 'Knowledge Base' },
   { href: '/dbf', label: 'GBL @ DBF' },
-  { href: '/dev', label: 'Development Workflow' },
+  { href: '/kb', label: 'Knowledge Base' },
+  { href: '/dev', label: 'Development' },
   { href: '/roadmap', label: 'Roadmap' },
   { href: '/resources', label: 'Resources' },
   { href: '/about', label: 'About Us' },
@@ -40,8 +39,11 @@ function Navigation() {
 
   return (
     <nav className="flex flex-col order-1 md:order-2 md:flex-row">
+      <NavigationItem isActive={router.pathname === '/'} href="/">
+        Home
+      </NavigationItem>
       {NAVIGATION_ITEMS.map(({ href, label }) => (
-        <NavigationItem isActive={router.pathname === href} href={href}>
+        <NavigationItem isActive={router.pathname.includes(href)} href={href}>
           {label}
         </NavigationItem>
       ))}
@@ -61,21 +63,19 @@ function Breadcrumbs() {
 
 function Logo() {
   return (
-    <div className="flex-1 mb-4 md:flex-initial md:mb-0">
-      <Link href="/">
-        <img
-          className="m-auto cursor-pointer md:m-0"
-          width="150"
-          height="75"
-          src="https://place-hold.it/150x75/D3D3D3?text=GBL @ DBF"
-          alt=""
-        />
-      </Link>
-    </div>
+    <Link href="/">
+      <img
+        className="p-2 m-auto cursor-pointer md:m-2"
+        width="150"
+        height="75"
+        src="/images/logo_temp.jpg"
+        alt=""
+      />
+    </Link>
   )
 }
 
-function Header() {
+function PageHead() {
   return (
     <header className="flex flex-col justify-between max-w-6xl pt-4 m-auto md:flex-row">
       <Logo />
@@ -87,4 +87,4 @@ function Header() {
   )
 }
 
-export default Header
+export default PageHead

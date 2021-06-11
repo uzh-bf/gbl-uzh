@@ -1,19 +1,16 @@
 import Head from 'next/head'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
-import BannerSection from '../components/common/BannerSection'
 import Button from '../components/common/Button'
-import HomeSection from '../components/common/HomeSection'
-import PaddedSection from '../components/common/PaddedSection'
+import HeroImage from '../components/common/HeroImage'
+import Title from '../components/common/Title'
+import TitleImage from '../components/common/TitleImage'
+import GameCard from '../components/games/GameCard'
 import PageWithHeader from '../components/PageWithHeader'
-
-function HeroImage({ imgSrc, label }) {
-  return (
-    <div className="flex flex-row items-center px-2 mb-4 text-xl text-center border cursor-pointer last:mb-0 md:mb-0 md:mr-8 md:last:mr-0 rounded-xl md:p-4 md:flex-1 md:flex-col text-uzh-red-100 hover:shadow">
-      <img width="150" src={imgSrc} alt="Hero" />
-      <p className="pl-8 md:pl-0">{label}</p>
-    </div>
-  )
-}
+import BannerSection from '../components/sections/BannerSection'
+import CitationSection from '../components/sections/CitationSection'
+import HomeSection from '../components/sections/HomeSection'
+import PaddedSection from '../components/sections/PaddedSection'
 
 function Home() {
   const router = useRouter()
@@ -24,64 +21,64 @@ function Home() {
         <script src="https://identity.netlify.com/v1/netlify-identity-widget.js" />
       </Head>
 
-      <div className="relative shadow-lg">
-        <div className="absolute z-10 w-full p-4 shadow bg-uzh-gray-20 bottom-5 sm:top-auto sm:bottom-10 bg-opacity-80">
-          <div className="max-w-6xl m-auto font-mono text-2xl font-bold text-center text-uzh-red-80 sm:text-4xl lg:text-6xl">
-            Digital Game-Based Learning
-          </div>
-        </div>
-        <img
-          className="z-0 opacity-80"
-          width="100%"
-          src="/images/hero2.jpg"
-          alt=""
-        />
-      </div>
+      <TitleImage imgSrc="/images/header_temp.jpg">
+        <Title  title="Learning-by-doing." />
+        <Title  title="Literally." />
+      </TitleImage>
 
       <PaddedSection className="bg-uzh-gray-20">
-        <div className="max-w-3xl px-8 pb-2 m-auto prose text-center text-gray-600 border-b-2 md:prose-lg md:px-0 border-uzh-gray-100">
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
-          expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
-          sint maiores aliquam facilis accusantium vel voluptas consequatur
-          voluptatum molestiae exercitationem!
-        </div>
+        <CitationSection>
+          Current research in the field of Game-Based Learning shows that
+          learning complex topics as well as gaining experience in realistic,
+          digital business games increases learning success among students. The
+          aim of our Game-Based Learning project is to apply the experience
+          gained so far when using and developing games to develop materials and
+          frameworks supporting teachers in the design and creation of their own
+          browser-based simulations and serious games.
+        </CitationSection>
       </PaddedSection>
 
       <PaddedSection>
-        <div className="flex flex-col max-w-3xl md:m-auto md:justify-between md:flex-row">
-          <HeroImage imgSrc="/images/vorlesung_icon.svg" label="for teachers" />
-          <HeroImage
-            imgSrc="/images/gruppenarbeit_icon.svg"
-            label="for students"
-          />
-          <HeroImage
-            imgSrc="/images/einzelarbeit_icon.svg"
-            label="for developers"
-          />
-        </div>
+        <HeroImage.Group>
+          <Link href="/kb">
+            <HeroImage
+              href="/kb"
+              imgSrc="/images/vorlesung_icon.svg"
+              label="for teachers"
+            />
+          </Link>
+          <Link href="/dbf">
+            <HeroImage
+              href="/dbf"
+              imgSrc="/images/gruppenarbeit_icon.svg"
+              label="for students"
+            />
+          </Link>
+          <Link href="/resources">
+            <HeroImage
+              href="/resources"
+              imgSrc="/images/einzelarbeit_icon.svg"
+              label="for developers"
+            />
+          </Link>
+        </HeroImage.Group>
       </PaddedSection>
 
-      <HomeSection title="GBL @ DBF" className="bg-uzh-gray-20">
+      <HomeSection title="GBL in Use" className="bg-uzh-gray-20">
         <div className="flex flex-col md:flex-row">
           <div className="flex-1 mb-4 md:mb-0">
+            <div className="mb-2 prose md:prose-lg max-w-none">
+              Games and simulations developed at the Department of Banking and
+              Finance, as well as courses supported with Game-Based Learning.
+            </div>
             <div className="mb-2 md:mb-4">
               <div className="flex flex-col md:flex-wrap md:flex-row">
                 {[
-                  'Portfolio Management Simulation',
-                  'Derivatives Game',
-                  'Banking Game',
-                ].map((game) => (
-                  <div className="relative flex-1 mb-4 shadow md:mb-0 md:mr-4 last:mr-0">
-                    <div className="absolute left-0 right-0 z-10 py-1 text-base text-center text-white bg-uzh-blue-60 bottom-2">
-                      {game}
-                    </div>
-                    <img
-                      className="z-0 grayscale filter"
-                      width="100%"
-                      src="images/pfm_game.png"
-                      alt={game}
-                    />
-                  </div>
+                  ['Portfolio Management Simulation', '/games/pfm'],
+                  ['Derivatives Game', '/games/derivatives'],
+                  ['Banking Game', '/games/banking'],
+                ].map(([name, href]) => (
+                  <GameCard name={name} linkHref={href} />
                 ))}
               </div>
             </div>
@@ -98,10 +95,10 @@ function Home() {
           iconSrc="images/netzwerk_icon.svg"
           iconAlt="Knowledge Graph"
         >
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem,
-          enim aspernatur! Vero laboriosam reprehenderit at, architecto odio
-          deleniti mollitia illum cupiditate suscipit rerum accusantium sint
-          inventore nostrum ad eveniet perferendis.
+          Get to know the various terms and definitions in the fields of
+          gamification and Game-Based Learning. Our knowledge base contains
+          information on basic terms as well as a compilation of our best
+          practices.
         </HomeSection.IconContent>
 
         <Button onClick={() => router.push('/kb')}>
@@ -111,23 +108,24 @@ function Home() {
       </HomeSection>
 
       <BannerSection imgSrc="/images/hero3.jpg">
-        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
-        expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
-        sint maiores aliquam facilis accusantium vel voluptas consequatur
-        voluptatum molestiae exercitationem!
+        &ldquo;Traditional learning has provided superficial learning through
+        text books. Games are best at teaching a deeper level of
+        learning.&rdquo; Eric Klopfer, MIT
       </BannerSection>
 
       <HomeSection title="Development Workflow">
-        <HomeSection.IconContent
-          iconSrc="images/dev_workflow.png"
-          iconAlt="Development Workflow"
-        >
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem,
-          enim aspernatur! Vero laboriosam reprehenderit at, architecto odio
-          deleniti mollitia illum cupiditate suscipit rerum accusantium sint
-          inventore nostrum ad eveniet perferendis.
-        </HomeSection.IconContent>
-
+        <div className="mb-2 prose md:prose-lg max-w-none">
+          Learn how you can proceed if you want to develop your own simulation
+          or serious game. Use our resources as a support and for guidance in
+          your own development.
+        </div>
+        <div className="max-w-xl mt-4 mb-8">
+          <img
+            alt="Development Workflow"
+            width="100%"
+            src="/images/dev_workflow.png"
+          />
+        </div>
         <Button onClick={() => router.push('/dev')}>
           <Button.Arrow />
           Development Workflow
@@ -139,10 +137,10 @@ function Home() {
           iconSrc="images/lernziele_icon.svg"
           iconAlt="Roadmap"
         >
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem,
-          enim aspernatur! Vero laboriosam reprehenderit at, architecto odio
-          deleniti mollitia illum cupiditate suscipit rerum accusantium sint
-          inventore nostrum ad eveniet perferendis.
+          We are working on a Game-Based Learning project supported by the
+          University of Zurich and Swissuniversities. Get involved now: Ask
+          questions, let us know what would be useful for you in terms of
+          content, exchange game ideas, and join our community!
         </HomeSection.IconContent>
 
         <Button onClick={() => router.push('/roadmap')}>
@@ -151,12 +149,12 @@ function Home() {
         </Button>
       </HomeSection>
 
-      <BannerSection imgSrc="/images/hero3.jpg">
+      {/* <BannerSection imgSrc="/images/hero3.jpg">
         Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum
         expedita fugiat ipsum est non minus aspernatur suscipit, soluta ipsa
         sint maiores aliquam facilis accusantium vel voluptas consequatur
         voluptatum molestiae exercitationem!
-      </BannerSection>
+      </BannerSection> */}
     </PageWithHeader>
   )
 }
