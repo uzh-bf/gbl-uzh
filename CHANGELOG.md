@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.18](https://github.com/uzh-bf/gbl-web/compare/v0.0.17...v0.0.18) (2021-06-11)
+
+
+### Features
+
+* add font-kollektif-bold ([aa17171](https://github.com/uzh-bf/gbl-web/commit/aa171715cfa3e7cac8143e78dab78eb8bbee7d6e))
+* setup oauth with github and local repo mode for netlify ([d93b538](https://github.com/uzh-bf/gbl-web/commit/d93b5381dbff02fa394af3b74b889cca4ef93ec6))
+* update text contents of the start page ([14ec920](https://github.com/uzh-bf/gbl-web/commit/14ec9206fcf11b63cf254a7a01ccac8f66b65049))
+
+
+### Bug Fixes
+
+* broken base path ([8db0a94](https://github.com/uzh-bf/gbl-web/commit/8db0a949eeec8497e7c8a4df312be5bab145964f))
+* ensure that navigation items are also highlighted on subpages ([997cc94](https://github.com/uzh-bf/gbl-web/commit/997cc94ef8bdb7515fab9ebbfce0ba7648f83f3d))
+* ensure that the hero image does not scale infinitely ([1a2703b](https://github.com/uzh-bf/gbl-web/commit/1a2703b0e98dbe43fc20af3df18c50c2d71e93b5))
+* images in footer ([b440060](https://github.com/uzh-bf/gbl-web/commit/b4400604f584d0ec337d39077ac324838b8cc00a))
+* make game cards clickable ([d7ae326](https://github.com/uzh-bf/gbl-web/commit/d7ae326a15753289647acb29e09b8fc1c22bb752))
+* make icon content description the same text size as the other intro text ([dd78f3d](https://github.com/uzh-bf/gbl-web/commit/dd78f3d1a2c7fdc820ee8e1a66c331abe7952da8))
+
+
+### Dependencies
+
+* upgrade next-mdx-remote ([243b5a4](https://github.com/uzh-bf/gbl-web/commit/243b5a4185c0469b1a14e8ef6740c493ad716647))
+* upgrade packages ([988e230](https://github.com/uzh-bf/gbl-web/commit/988e230fc62a70b273ff8b6fc0cb5b5392bcbf87))
+
+
+* add deps to standard-version ([acaaf6f](https://github.com/uzh-bf/gbl-web/commit/acaaf6f920912e2d39ae209c73895f3f2f230a77))
+* use kollektif font for all headers ([89940ef](https://github.com/uzh-bf/gbl-web/commit/89940efab918cdc7e7f1017618570f7e9997cedb))
+
+### [0.0.15](https://github.com/uzh-bf/gbl-web/compare/v0.0.13...v0.0.15) (2021-05-01)
+
+
+* **release:** 0.0.14 ([b16eb06](https://github.com/uzh-bf/gbl-web/commit/b16eb0622ed0920e005f7009d4e61fc747de6f99))
+* **release:** 0.0.15 ([347db8f](https://github.com/uzh-bf/gbl-web/commit/347db8fef85d1827f89527aa6ac4040aaaf1f2a9))
+
 ### [0.0.17](https://github.com/uzh-bf/gbl-web/compare/v0.0.16...v0.0.17) (2021-05-03)
 
 
