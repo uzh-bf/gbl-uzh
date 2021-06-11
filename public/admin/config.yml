@@ -1,6 +1,13 @@
 backend:
   name: git-gateway
   branch: master
+  squash_merges: true
+
+repo: https://github.com/uzh-bf/gbl-web
+base_url: https://gbl-web.vercel.app/
+auth_endpoint: api/auth
+
+local_backend: true
 
 publish_mode: editorial_workflow
 media_folder: public/images/uploads
