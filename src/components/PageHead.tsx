@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 const NAVIGATION_ITEMS = [
-  { href: '/', label: 'Home' },
   { href: '/dbf', label: 'GBL @ DBF' },
   { href: '/kb', label: 'Knowledge Base' },
   { href: '/dev', label: 'Development' },
@@ -40,8 +39,11 @@ function Navigation() {
 
   return (
     <nav className="flex flex-col order-1 md:order-2 md:flex-row">
+      <NavigationItem isActive={router.pathname === '/'} href="/">
+        Home
+      </NavigationItem>
       {NAVIGATION_ITEMS.map(({ href, label }) => (
-        <NavigationItem isActive={router.pathname === href} href={href}>
+        <NavigationItem isActive={router.pathname.includes(href)} href={href}>
           {label}
         </NavigationItem>
       ))}
@@ -61,13 +63,15 @@ function Breadcrumbs() {
 
 function Logo() {
   return (
-        <img
-          className="p-2 m-auto cursor-pointer md:m-2"
-          width="150"
-          height="75"
-          src="/images/logo_temp.jpg"
-          alt=""
-        />
+    <Link href="/">
+      <img
+        className="p-2 m-auto cursor-pointer md:m-2"
+        width="150"
+        height="75"
+        src="/images/logo_temp.jpg"
+        alt=""
+      />
+    </Link>
   )
 }
 
