@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { useRouter } from 'next/router'
 import Card from '../common/Card'
 
 interface Props {
@@ -8,10 +8,15 @@ interface Props {
 }
 
 function GameCard({ name, tags, linkHref }: Props) {
+  const router = useRouter()
+
   return (
-    <Link href={linkHref}>
-      <Card isHoverable name={name} tags={tags} />
-    </Link>
+    <Card
+      isHoverable
+      name={name}
+      tags={tags}
+      onClick={() => router.push(linkHref)}
+    />
   )
 }
 

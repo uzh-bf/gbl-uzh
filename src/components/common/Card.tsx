@@ -4,17 +4,19 @@ import Tag from './Tag'
 interface Props {
   name: string
   tags?: string[]
-  isHoverable?: boolean
   className?: string
+  onClick?: () => void
 }
 
-function Card({ name, tags, className, isHoverable }: Props) {
+function Card({ name, tags, className, onClick }: Props) {
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
       className={clsx(
         'flex-1 mb-4 border rounded shadow md:mb-0 md:mr-4 last:mr-0',
         className,
-        isHoverable && 'cursor-pointer hover:shadow-lg'
+        onClick && 'cursor-pointer hover:shadow-lg'
       )}
     >
       <div className="relative">
@@ -37,14 +39,14 @@ function Card({ name, tags, className, isHoverable }: Props) {
           ))}
         </div>
       )}
-    </div>
+    </button>
   )
 }
 
 Card.defaultProps = {
   className: undefined,
   tags: [],
-  isHoverable: false,
+  onClick: undefined,
 }
 
 export default Card
