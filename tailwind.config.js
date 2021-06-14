@@ -4,6 +4,9 @@ module.exports = {
   darkMode: 'media',
   theme: {
     extend: {
+      screens: {
+        lg: '72rem',
+      },
       fontFamily: {
         'kollektif-bold': [
           'kollektif-bold',

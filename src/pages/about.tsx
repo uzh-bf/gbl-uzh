@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import Header from '../components/common/Header'
 import Title from '../components/common/Title'
 import TitleBackground from '../components/common/TitleBackground'
+import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
 
 function About() {
@@ -35,7 +36,7 @@ function About() {
         <Title title="About Us" />
       </TitleBackground>
 
-      <div className="max-w-6xl py-8 m-auto">
+      <Content>
         <Header.H2>Projects</Header.H2>
         <img src="/images/projects.png" alt="Projects" />
 
@@ -56,7 +57,7 @@ function About() {
             .
           </div>
         </div>
-      </div>
+      </Content>
     </PageWithHeader>
   )
 }

@@ -1,6 +1,7 @@
 import Header from '../components/common/Header'
 import Title from '../components/common/Title'
 import TitleBackground from '../components/common/TitleBackground'
+import Content from '../components/Content'
 import CourseEntry from '../components/courses/CourseEntry'
 import GameCard from '../components/games/GameCard'
 import PageWithHeader from '../components/PageWithHeader'
@@ -34,7 +35,7 @@ function GBLAtDBF() {
         <Title title="Our Games and Courses" />
       </TitleBackground>
 
-      <div className="max-w-6xl p-4 m-auto">
+      <Content>
         <Header.H2>Games</Header.H2>
         <div className="flex flex-col md:flex-row">
           {GAMES.map((game) => (
@@ -48,7 +49,7 @@ function GBLAtDBF() {
             <CourseEntry name={course.name} ects={course.ects} />
           ))}
         </div>
-      </div>
+      </Content>
     </PageWithHeader>
   )
 }

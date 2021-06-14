@@ -7,14 +7,16 @@ interface Props {
 
 function Title({ title, isCentered }: Props) {
   return (
-    <h1
-      className={clsx(
-        'max-w-6xl m-auto font-kollektif-bold text-2xl sm:text-4xl lg:text-6xl',
-        isCentered ? 'text-center' : 'text-left'
-      )}
-    >
-      {title}
-    </h1>
+    <div className="max-w-6xl m-auto">
+      <h1
+        className={clsx(
+          'font-kollektif-bold text-2xl sm:text-3xl lg:text-4xl lg:pl-8',
+          isCentered ? 'text-center' : 'text-left'
+        )}
+      >
+        {title}
+      </h1>
+    </div>
   )
 }
 

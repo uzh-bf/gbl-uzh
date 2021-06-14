@@ -38,7 +38,7 @@ function Navigation() {
   const router = useRouter()
 
   return (
-    <nav className="flex flex-col order-1 md:order-2 md:flex-row">
+    <nav className="flex flex-col order-1 mt-8 md:order-2 md:flex-row">
       <NavigationItem isActive={router.pathname === '/'} href="/">
         Home
       </NavigationItem>
@@ -65,7 +65,7 @@ function Logo() {
   return (
     <Link href="/">
       <img
-        className="p-2 m-auto cursor-pointer md:m-2"
+        className="self-center cursor-pointer md:pl-8"
         width="150"
         height="75"
         src="/images/logo_temp.jpg"
