@@ -13,7 +13,7 @@ function TitleImage({ imgSrc, children }: Props) {
       </TitleBackground>
       <div className="bg-gray-100">
         <img
-          className="z-0 w-auto m-auto opacity-100 max-h-[40rem]"
+          className="z-0 w-auto m-auto opacity-100 max-h-[35rem]"
           width="100%"
           height="100%"
           src={imgSrc}

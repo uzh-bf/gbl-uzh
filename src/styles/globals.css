@@ -207,3 +207,11 @@
     @apply text-[#566684];
   }
 }
+
+.three-items {
+  flex-basis: 26%;
+}
+
+.four-items {
+  flex-basis: 21%;
+}

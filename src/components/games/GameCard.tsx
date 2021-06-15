@@ -3,17 +3,26 @@ import Card from '../common/Card'
 
 interface Props {
   name: string
-  linkHref: string
+  linkHref?: string
+  imgSrc: string
   tags?: string[]
 }
 
-function GameCard({ name, tags, linkHref }: Props) {
+function GameCard({ name, tags, linkHref, imgSrc }: Props) {
   const router = useRouter()
 
-  return <Card name={name} tags={tags} onClick={() => router.push(linkHref)} />
+  return (
+    <Card
+      name={name}
+      tags={tags}
+      imgSrc={imgSrc}
+      onClick={linkHref ? () => router.push(linkHref) : undefined}
+    />
+  )
 }
 
 GameCard.defaultProps = {
+  linkHref: undefined,
   tags: [],
 }
 

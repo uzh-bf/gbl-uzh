@@ -1,6 +1,7 @@
 import Header from '../components/common/Header'
 import Title from '../components/common/Title'
 import TitleBackground from '../components/common/TitleBackground'
+import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
 
 function Resources() {
@@ -10,7 +11,7 @@ function Resources() {
         <Title title="Resources" />
       </TitleBackground>
 
-      <div className="max-w-6xl py-8 m-auto">
+      <Content>
         <Header.H2>Videos</Header.H2>
 
         <Header.H2>Workshop Materials</Header.H2>
@@ -39,7 +40,7 @@ function Resources() {
         <Header.H3>Development Tooling</Header.H3>
 
         <Header.H2>Literature</Header.H2>
-      </div>
+      </Content>
     </PageWithHeader>
   )
 }
