@@ -77,7 +77,7 @@ function Home() {
                         ['uFin: The Challenge', uFinImage],
                         ['Portfolio Management Simulation', PFMImage],
                         ['Derivatives Game', UnderConstructionImage],
-                      ].map(([name, imgSrc]) => (
+                      ].map(([name, imgSrc]: [string, StaticImageData]) => (
                         <GameCard key="name" name={name} imgSrc={imgSrc} />
                       ))}
                     </div>

@@ -26,6 +26,8 @@ Button.defaultProps = {
   className: '',
 }
 
-Button.Arrow = () => <ArrowRightIcon className="h-4 mr-2" />
+Button.Arrow = function ButtonArrow() {
+  return <ArrowRightIcon className="h-4 mr-2" />
+}
 
 export default Button

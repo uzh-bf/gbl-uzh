@@ -4,7 +4,7 @@ import Tag from './Tag'
 
 interface Props {
   name: string
-  imgSrc: any
+  imgSrc: StaticImageData
   tags?: string[]
   className?: string
   onClick?: () => void
@@ -26,7 +26,7 @@ function Card({ name, tags, className, imgSrc, onClick }: Props) {
         {tags?.length > 0 && (
           <div className="absolute top-0 z-10 flex flex-row flex-wrap p-2">
             {tags.map((tag) => (
-              <Tag label={tag} />
+              <Tag key={tag} label={tag} />
             ))}
           </div>
         )}

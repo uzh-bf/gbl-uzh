@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import PlaceholderImage from '../../public/images/Unbenannt-2.png'
 import Card from '../components/common/Card'
 import Header from '../components/common/Header'
 import Title from '../components/common/Title'
@@ -50,7 +51,7 @@ function Roadmap() {
         <div>
           <div className="flex flex-col md:flex-row">
             <div className="flex-1 md:flex-initial md:w-60">
-              <Card name="GBL @ UZH" imgSrc="/images/Unbenannt-2.png" />
+              <Card name="GBL @ UZH" imgSrc={PlaceholderImage} />
             </div>
             <p className="flex-1 prose md:pl-4 max-w-none">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
@@ -66,10 +67,7 @@ function Roadmap() {
 
           <div className="flex flex-col mt-4 md:flex-row">
             <div className="flex-1 md:flex-initial md:w-60">
-              <Card
-                name="Game Development Process"
-                imgSrc="/images/Unbenannt-2.png"
-              />
+              <Card name="Game Development Process" imgSrc={PlaceholderImage} />
             </div>
             <p className="flex-1 prose md:pl-4 max-w-none">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
@@ -85,10 +83,7 @@ function Roadmap() {
 
           <div className="flex flex-col mt-4 md:flex-row">
             <div className="flex-1 md:flex-initial md:w-60">
-              <Card
-                name="Game Development Toolbox"
-                imgSrc="/images/Unbenannt-2.png"
-              />
+              <Card name="Game Development Toolbox" imgSrc={PlaceholderImage} />
             </div>
             <p className="flex-1 prose md:pl-4 max-w-none">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
@@ -104,10 +99,7 @@ function Roadmap() {
 
           <div className="flex flex-col mt-4 md:flex-row">
             <div className="flex-1 md:flex-initial md:w-60">
-              <Card
-                name="Simulation Platform"
-                imgSrc="/images/Unbenannt-2.png"
-              />
+              <Card name="Simulation Platform" imgSrc={PlaceholderImage} />
             </div>
             <p className="flex-1 prose md:pl-4 max-w-none">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
@@ -123,7 +115,7 @@ function Roadmap() {
 
           <div className="flex flex-col mt-4 md:flex-row">
             <div className="flex-1 md:flex-initial md:w-60">
-              <Card name="GBL Community" imgSrc="/images/Unbenannt-2.png" />
+              <Card name="GBL Community" imgSrc={PlaceholderImage} />
             </div>
             <p className="flex-1 prose md:pl-4 max-w-none">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora

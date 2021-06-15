@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import Image from 'next/image'
 
 interface Props {
-  imgSrc: any
+  imgSrc: StaticImageData
   label: string
   href: string
   className?: string
