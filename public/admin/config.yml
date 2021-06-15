@@ -47,6 +47,7 @@ collections:
       - label: Thumbnail
         name: thumbnail
         widget: image
+        required: false
 
       - label: Title
         name: title
@@ -81,6 +82,14 @@ collections:
         widget: select
         options: ['de', 'en', 'fr', 'it']
         multiple: true
+
+      - label: Used In
+        name: usedIn
+        widget: list
+        fields:
+          - label: Name
+            name: name
+            widget: string
 
       - label: Keywords
         name: keywords

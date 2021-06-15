@@ -15,8 +15,8 @@ function CourseEntry({ name, ects, level, href }: Props) {
           </h3>
         </div>
         <div className="text-right">
-          <div>{ects} ECTS</div>
-          <div>{level}</div>
+          {ects && <div>{ects} ECTS</div>}
+          {level && <div>{level}</div>}
         </div>
       </div>
     </a>
