@@ -15,19 +15,19 @@ const GAMES = [
   },
   {
     name: 'Portfolio Management Simulation',
-    href: '/games/pfm',
+    href: '/games/portfolio-management-simulation',
     imgSrc: '/images/pfm_game.png',
     tags: ['simulation', 'investing'],
   },
   {
     name: 'Derivatives Game',
-    href: '/games/derivatives',
+    href: '/games/derivatives-game',
     imgSrc: '/images/under_construction.jpg',
     tags: ['simulation', 'trading'],
   },
   {
     name: 'Private Banking Game',
-    href: '/games/pb',
+    href: '/games/private-banking-game',
     imgSrc: '/images/under_construction.jpg',
     tags: ['serious game', 'banking'],
   },
