@@ -1,7 +1,8 @@
 import clsx from 'clsx'
+import Image from 'next/image'
 
 interface Props {
-  imgSrc: string
+  imgSrc: any
   label: string
   href: string
   className?: string
@@ -16,7 +17,7 @@ function HeroImage({ imgSrc, label, href, className }: Props) {
         className
       )}
     >
-      <img width="150" src={imgSrc} alt="Hero" />
+      <Image height={200} width={250} src={imgSrc} alt="Hero" />
       <p className="pl-8 md:pl-0">{label}</p>
     </a>
   )

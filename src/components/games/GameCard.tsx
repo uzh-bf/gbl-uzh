@@ -4,7 +4,7 @@ import Card from '../common/Card'
 interface Props {
   name: string
   linkHref?: string
-  imgSrc: string
+  imgSrc: any
   tags?: string[]
 }
 

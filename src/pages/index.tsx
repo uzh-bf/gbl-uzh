@@ -1,6 +1,12 @@
-import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import Script from 'next/script'
+import DevIcon from '../../public/images/einzelarbeit_icon.svg'
+import StudentIcon from '../../public/images/gruppenarbeit_icon.svg'
+import PFMImage from '../../public/images/pfm_game.png'
+import uFinImage from '../../public/images/ufin.jpg'
+import UnderConstructionImage from '../../public/images/under_construction.jpg'
+import TeacherIcon from '../../public/images/vorlesung_icon.svg'
 import Button from '../components/common/Button'
 import HeroImage from '../components/common/HeroImage'
 import Title from '../components/common/Title'
@@ -15,9 +21,7 @@ function Home() {
 
   return (
     <PageWithHeader title="Home">
-      <Head>
-        <script src="https://identity.netlify.com/v1/netlify-identity-widget.js" />
-      </Head>
+      <Script src="https://identity.netlify.com/v1/netlify-identity-widget.js" />
 
       <TitleImage imgSrc="/images/hero5.jpg">
         <Title title="Learning-by-doing." />
@@ -26,27 +30,27 @@ function Home() {
 
       <div className="px-8 py-8 md:py-16 bg-uzh-gray-20">
         <HeroImage.Group>
-          <Link href="/kb">
+          <Link href="/kb" passHref>
             <HeroImage
               className="bg-white bg-opacity-70"
               href="/kb"
-              imgSrc="/images/vorlesung_icon.svg"
+              imgSrc={TeacherIcon}
               label="for teachers"
             />
           </Link>
-          <Link href="/games">
+          <Link href="/games" passHref>
             <HeroImage
               className="bg-white bg-opacity-70"
               href="/games"
-              imgSrc="/images/gruppenarbeit_icon.svg"
+              imgSrc={StudentIcon}
               label="for students"
             />
           </Link>
-          <Link href="/dev">
+          <Link href="/dev" passHref>
             <HeroImage
               className="bg-white bg-opacity-70"
               href="/dev"
-              imgSrc="/images/einzelarbeit_icon.svg"
+              imgSrc={DevIcon}
               label="for developers"
             />
           </Link>
@@ -70,14 +74,11 @@ function Home() {
                   <div className="mt-4">
                     <div className="sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
                       {[
-                        ['uFin: The Challenge', '/images/ufin.jpg'],
-                        [
-                          'Portfolio Management Simulation',
-                          '/images/pfm_game.png',
-                        ],
-                        ['Derivatives Game', '/images/under_construction.jpg'],
+                        ['uFin: The Challenge', uFinImage],
+                        ['Portfolio Management Simulation', PFMImage],
+                        ['Derivatives Game', UnderConstructionImage],
                       ].map(([name, imgSrc]) => (
-                        <GameCard name={name} imgSrc={imgSrc} />
+                        <GameCard key="name" name={name} imgSrc={imgSrc} />
                       ))}
                     </div>
                   </div>

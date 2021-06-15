@@ -1,3 +1,6 @@
+import PFMImage from '../../public/images/pfm_game.png'
+import uFinImage from '../../public/images/ufin.jpg'
+import UnderConstructionImage from '../../public/images/under_construction.jpg'
 import Header from '../components/common/Header'
 import Title from '../components/common/Title'
 import TitleBackground from '../components/common/TitleBackground'
@@ -10,25 +13,25 @@ const GAMES = [
   {
     name: 'uFin: The Challenge',
     href: '/games/ufin',
-    imgSrc: '/images/ufin.jpg',
+    imgSrc: uFinImage,
     tags: ['serious game', 'ethics'],
   },
   {
     name: 'Portfolio Management Simulation',
     href: '/games/portfolio-management-simulation',
-    imgSrc: '/images/pfm_game.png',
+    imgSrc: PFMImage,
     tags: ['simulation', 'investing'],
   },
   {
     name: 'Derivatives Game',
     href: '/games/derivatives-game',
-    imgSrc: '/images/under_construction.jpg',
+    imgSrc: UnderConstructionImage,
     tags: ['simulation', 'trading'],
   },
   {
     name: 'Private Banking Game',
     href: '/games/private-banking-game',
-    imgSrc: '/images/under_construction.jpg',
+    imgSrc: UnderConstructionImage,
     tags: ['serious game', 'banking'],
   },
 ]
@@ -44,6 +47,12 @@ const COURSES = [
     ects: 3,
     level: 'Bachelor',
     href: 'https://studentservices.uzh.ch/uzh/anonym/vvz/?sap-language=EN&sap-ui-language=EN#/details/2020/004/SM/50354580',
+  },
+  {
+    name: 'Behavioral Ethics (S)',
+    ects: 3,
+    level: 'Bachelor',
+    href: 'https://studentservices.uzh.ch/uzh/anonym/vvz/?sap-language=EN&sap-ui-language=EN#/details/2020/004/SM/50821473',
   },
   {
     name: 'Business- & Finance-Game (S)',
@@ -78,6 +87,7 @@ function GBLinUse() {
           <div className="sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
             {GAMES.map((game) => (
               <GameCard
+                key={game.name}
                 name={game.name}
                 tags={game.tags}
                 linkHref={game.href}
@@ -92,6 +102,7 @@ function GBLinUse() {
           <div className="flex flex-col">
             {COURSES.map((course) => (
               <CourseEntry
+                key={course.name}
                 name={course.name}
                 ects={course.ects}
                 level={course.level}

@@ -1,6 +1,8 @@
 import clsx from 'clsx'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import LogoImage from '../../public/images/logo_temp_beta.jpg'
 
 const NAVIGATION_ITEMS = [
   { href: '/games', label: 'GBL in Use' },
@@ -43,7 +45,11 @@ function Navigation() {
         Home
       </NavigationItem>
       {NAVIGATION_ITEMS.map(({ href, label }) => (
-        <NavigationItem isActive={router.pathname.includes(href)} href={href}>
+        <NavigationItem
+          key={href}
+          isActive={router.pathname.includes(href)}
+          href={href}
+        >
           {label}
         </NavigationItem>
       ))}
@@ -63,14 +69,16 @@ function Breadcrumbs() {
 
 function Logo() {
   return (
-    <Link href="/">
-      <img
-        className="self-center cursor-pointer md:pl-8"
-        width="150"
-        height="75"
-        src="/images/logo_temp_beta.jpg"
-        alt=""
-      />
+    <Link href="/" passHref>
+      <a className="self-center md:pl-8">
+        <Image
+          height={75}
+          width={150}
+          src={LogoImage}
+          alt="Logo"
+          layout="intrinsic"
+        />
+      </a>
     </Link>
   )
 }

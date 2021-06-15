@@ -1,7 +1,7 @@
 import TitleBackground from './TitleBackground'
 
 interface Props {
-  imgSrc: string
+  imgSrc: any
   children: React.ReactNode
 }
 

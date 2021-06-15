@@ -1,9 +1,10 @@
 import clsx from 'clsx'
+import Image from 'next/image'
 import Tag from './Tag'
 
 interface Props {
   name: string
-  imgSrc: string
+  imgSrc: any
   tags?: string[]
   className?: string
   onClick?: () => void
@@ -21,7 +22,7 @@ function Card({ name, tags, className, imgSrc, onClick }: Props) {
         onClick ? 'cursor-pointer hover:shadow-lg' : 'cursor-default'
       )}
     >
-      <div className="w-full h-full relative min-h-[100px]">
+      <div className="w-full h-full relative min-h-[250px]">
         {tags?.length > 0 && (
           <div className="absolute top-0 z-10 flex flex-row flex-wrap p-2">
             {tags.map((tag) => (
@@ -34,11 +35,12 @@ function Card({ name, tags, className, imgSrc, onClick }: Props) {
           {name}
         </div>
 
-        <img
-          className="z-0 object-cover w-full h-full rounded opacity-80 grayscale filter"
-          width="100%"
+        <Image
+          className="z-0 w-full min-h-[20rem] rounded opacity-80 grayscale filter"
           src={imgSrc}
           alt={`Screenshot of ${name}`}
+          layout="fill"
+          objectFit="cover"
         />
       </div>
     </button>

@@ -1,4 +1,7 @@
+import Image from 'next/image'
 import { useEffect } from 'react'
+import ProjectImage from '../../public/images/projects.png'
+import TeamImage from '../../public/images/team.png'
 import Header from '../components/common/Header'
 import Title from '../components/common/Title'
 import TitleBackground from '../components/common/TitleBackground'
@@ -37,10 +40,10 @@ function About() {
       </TitleBackground>
 
       <Content>
-        <img src="/images/projects.png" alt="Projects" />
+        <Image src={ProjectImage} alt="Projects" placeholder="blur" />
 
         <Header.H2 className="mt-16">Project Team</Header.H2>
-        <img src="/images/team.png" alt="Team" />
+        <Image src={TeamImage} alt="Team" placeholder="blur" />
 
         <Header.H2 className="mt-16">Get In Touch</Header.H2>
         <p className="mb-4 prose max-w-none">

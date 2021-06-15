@@ -1,3 +1,5 @@
 module.exports = {
-  // basePath: '/v2',
+  experimental: {
+    scriptLoader: true,
+  },
 }

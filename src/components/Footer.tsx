@@ -1,4 +1,7 @@
+import Image from 'next/image'
 import Link from 'next/link'
+import SwissUniLogo from '../../public/images/logo_swissuniversities.png'
+import UZHLogo from '../../public/images/logo_uzh.jpeg'
 
 function Footer() {
   return (
@@ -6,14 +9,10 @@ function Footer() {
       <div className="flex flex-col justify-between flex-initial max-w-6xl px-4 py-16 m-auto md:px-8 md:flex-row">
         <div className="flex flex-col items-center order-1 mb-4 md:order-2 md:flex-row md:mb-0">
           <div className="w-40 mb-3 md:mb-0 md:mr-8">
-            <img width="100%" src="/images/logo_uzh.jpeg" alt="UZH Logo" />
+            <Image src={UZHLogo} alt="UZH Logo" />
           </div>
           <div className="w-40">
-            <img
-              width="100%"
-              src="/images/logo_swissuniversities.png"
-              alt="Swissuniversities Logo"
-            />
+            <Image src={SwissUniLogo} alt="Swissuniversities Logo" />
           </div>
         </div>
 
@@ -23,10 +22,8 @@ function Footer() {
           &copy; {new Date().getFullYear()} Department of Banking and Finance,
           University of Zurich
           <br />
-          <Link href="/about">
-            <a href="/about" className="no-underline text-uzh-red-100">
-              Contact Us
-            </a>
+          <Link href="/about" passHref>
+            <div className="no-underline text-uzh-red-100">Contact Us</div>
           </Link>
         </p>
       </div>
