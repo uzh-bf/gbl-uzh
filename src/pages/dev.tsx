@@ -21,19 +21,18 @@ function DevelopmentWorkflow() {
           Principles of Game-Based Learning
         </Header.H2>
         <p className="prose max-w-none">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis
-          nostrum praesentium vitae reprehenderit incidunt libero. Fugit harum,
-          aut repellendus impedit tempore cum iure, alias ipsam earum facere
-          praesentium doloribus deserunt.
+          To get started with game development in the context of game-based
+          learning, it is important to first understand the terminology, as well
+          as its key effects. Our resources will help you understand if you
+          should apply game-based learning to your use case and what results you
+          can expect.
         </p>
         <Button className="mt-4" onClick={() => router.push('/dev/intro')}>
           <Button.Arrow />
           Details
         </Button>
-
         <Header.H2 className="mt-16">Game Development Workflow</Header.H2>
         <Image src={WorkflowImage} alt="Game Development Workflow" />
-
         <Header.H3 className="mt-8">Game Topic</Header.H3>
         <p className="prose max-w-none">
           Before starting with the actual game development, it is necessary to
@@ -49,7 +48,6 @@ function DevelopmentWorkflow() {
           <Button.Arrow />
           Coming Soon
         </Button>
-
         <Header.H3 className="mt-8">Game Development</Header.H3>
         <p className="prose max-w-none">
           After the decision to implement a particular game idea, the actual
@@ -62,7 +60,6 @@ function DevelopmentWorkflow() {
           <Button.Arrow />
           Coming Soon
         </Button>
-
         <Header.H3 className="mt-8">Game Execution</Header.H3>
         <p className="prose max-w-none">
           When a game (part) is ready to play, it should be implemented in a
