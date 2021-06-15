@@ -3,14 +3,15 @@ import Image from 'next/image'
 import Tag from './Tag'
 
 interface Props {
-  name: string
+  name?: string
   imgSrc: StaticImageData
   tags?: string[]
   className?: string
   onClick?: () => void
+  minHeight?: string
 }
 
-function Card({ name, tags, className, imgSrc, onClick }: Props) {
+function Card({ name, tags, className, imgSrc, onClick, minHeight }: Props) {
   return (
     <button
       disabled={!onClick}
@@ -22,7 +23,9 @@ function Card({ name, tags, className, imgSrc, onClick }: Props) {
         onClick ? 'cursor-pointer hover:shadow-lg' : 'cursor-default'
       )}
     >
-      <div className="w-full h-full relative min-h-[250px]">
+      <div
+        className={clsx('w-full h-full relative', minHeight || 'min-h-[200px]')}
+      >
         {tags?.length > 0 && (
           <div className="absolute top-0 z-10 flex flex-row flex-wrap p-2">
             {tags.map((tag) => (
@@ -31,12 +34,14 @@ function Card({ name, tags, className, imgSrc, onClick }: Props) {
           </div>
         )}
 
-        <div className="absolute left-0 right-0 z-10 py-1 text-lg font-bold prose text-center bg-white bg-opacity-70 bottom-3">
-          {name}
-        </div>
+        {name && (
+          <div className="absolute left-0 right-0 z-10 py-1 text-lg font-bold prose text-center bg-white bg-opacity-70 bottom-3">
+            {name}
+          </div>
+        )}
 
         <Image
-          className="z-0 w-full min-h-[20rem] rounded opacity-80 grayscale filter"
+          className="z-0 w-full rounded opacity-80 grayscale filter"
           src={imgSrc}
           alt={`Screenshot of ${name}`}
           layout="fill"
@@ -48,9 +53,11 @@ function Card({ name, tags, className, imgSrc, onClick }: Props) {
 }
 
 Card.defaultProps = {
+  name: undefined,
   className: undefined,
   tags: [],
   onClick: undefined,
+  minHeight: undefined,
 }
 
 export default Card
