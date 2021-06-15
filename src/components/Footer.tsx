@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 function Footer() {
   return (
-    <footer className="z-10 mt-16 text-sm text-gray-600 bg-white border-t-2 border-uzh-red-100 border-top md:text-base">
+    <footer className="z-10 mt-8 text-sm text-gray-600 bg-white border-t-2 border-uzh-red-100 border-top md:text-base">
       <div className="flex flex-col justify-between flex-initial max-w-6xl px-4 py-16 m-auto md:px-8 md:flex-row">
         <div className="flex flex-col items-center order-1 mb-4 md:order-2 md:flex-row md:mb-0">
           <div className="w-40 mb-3 md:mb-0 md:mr-8">

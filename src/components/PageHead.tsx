@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 const NAVIGATION_ITEMS = [
-  { href: '/dbf', label: 'GBL @ DBF' },
+  { href: '/games', label: 'GBL in Use' },
   { href: '/kb', label: 'Knowledge Base' },
   { href: '/dev', label: 'Development' },
   { href: '/roadmap', label: 'Roadmap' },
-  { href: '/resources', label: 'Resources' },
+  // { href: '/resources', label: 'Resources' },
   { href: '/about', label: 'About Us' },
 ]
 
@@ -68,7 +68,7 @@ function Logo() {
         className="self-center cursor-pointer md:pl-8"
         width="150"
         height="75"
-        src="/images/logo_temp.jpg"
+        src="/images/logo_temp_beta.jpg"
         alt=""
       />
     </Link>

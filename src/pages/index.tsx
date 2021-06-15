@@ -33,18 +33,18 @@ function Home() {
               label="for teachers"
             />
           </Link>
-          <Link href="/dbf">
+          <Link href="/games">
             <HeroImage
               className="bg-white bg-opacity-70"
-              href="/dbf"
+              href="/games"
               imgSrc="/images/gruppenarbeit_icon.svg"
               label="for students"
             />
           </Link>
-          <Link href="/resources">
+          <Link href="/dev">
             <HeroImage
               className="bg-white bg-opacity-70"
-              href="/resources"
+              href="/dev"
               imgSrc="/images/einzelarbeit_icon.svg"
               label="for developers"
             />
@@ -66,19 +66,22 @@ function Home() {
                   Learning.
                 </div>
                 <div className="mt-4">
-                  <div className="flex flex-col md:flex-wrap md:flex-row">
+                  <div className="sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
                     {[
-                      ['Portfolio Management Simulation', '/games/pfm'],
-                      ['Derivatives Game', '/games/derivatives'],
-                      ['Banking Game', '/games/banking'],
-                    ].map(([name, href]) => (
-                      <GameCard name={name} linkHref={href} />
+                      ['uFin: The Challenge', '/images/ufin.jpg'],
+                      [
+                        'Portfolio Management Simulation',
+                        '/images/pfm_game.png',
+                      ],
+                      ['Derivatives Game', '/images/under_construction.jpg'],
+                    ].map(([name, imgSrc]) => (
+                      <GameCard name={name} imgSrc={imgSrc} />
                     ))}
                   </div>
                 </div>
-                <Button className="mt-4" onClick={() => router.push('/dbf')}>
+                <Button className="mt-4" onClick={() => router.push('/games')}>
                   <Button.Arrow />
-                  Our Games and Courses
+                  Games and Courses
                 </Button>
               </div>
             </div>
@@ -102,12 +105,12 @@ function Home() {
       <HomeSection>
         <HomeSection.Hero padded contain src="/images/dev_workflow.png" />
         <HomeSection.Content
-          title="Development Workflow"
+          title="Development Practices"
           content="Learn how you can proceed if you want to develop your own simulation or serious game. Use our resources as a support and for guidance in your own development."
         >
           <Button className="mt-4" onClick={() => router.push('/dev')}>
             <Button.Arrow />
-            Development Workflow
+            Development Practices
           </Button>
         </HomeSection.Content>
       </HomeSection>

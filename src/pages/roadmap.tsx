@@ -50,7 +50,7 @@ function Roadmap() {
         <div>
           <div className="flex flex-col md:flex-row">
             <div className="flex-1 md:flex-initial md:w-60">
-              <Card name="GBL @ UZH" />
+              <Card name="GBL @ UZH" imgSrc="/images/Unbenannt-2.png" />
             </div>
             <p className="flex-1 prose md:pl-4 max-w-none">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
@@ -66,7 +66,10 @@ function Roadmap() {
 
           <div className="flex flex-col mt-4 md:flex-row">
             <div className="flex-1 md:flex-initial md:w-60">
-              <Card name="Game Development Process" />
+              <Card
+                name="Game Development Process"
+                imgSrc="/images/Unbenannt-2.png"
+              />
             </div>
             <p className="flex-1 prose md:pl-4 max-w-none">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
@@ -82,7 +85,10 @@ function Roadmap() {
 
           <div className="flex flex-col mt-4 md:flex-row">
             <div className="flex-1 md:flex-initial md:w-60">
-              <Card name="Game Development Toolbox" />
+              <Card
+                name="Game Development Toolbox"
+                imgSrc="/images/Unbenannt-2.png"
+              />
             </div>
             <p className="flex-1 prose md:pl-4 max-w-none">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
@@ -98,7 +104,10 @@ function Roadmap() {
 
           <div className="flex flex-col mt-4 md:flex-row">
             <div className="flex-1 md:flex-initial md:w-60">
-              <Card name="Simulation Platform" />
+              <Card
+                name="Simulation Platform"
+                imgSrc="/images/Unbenannt-2.png"
+              />
             </div>
             <p className="flex-1 prose md:pl-4 max-w-none">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
@@ -114,7 +123,7 @@ function Roadmap() {
 
           <div className="flex flex-col mt-4 md:flex-row">
             <div className="flex-1 md:flex-initial md:w-60">
-              <Card name="GBL Community" />
+              <Card name="GBL Community" imgSrc="/images/Unbenannt-2.png" />
             </div>
             <p className="flex-1 prose md:pl-4 max-w-none">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
