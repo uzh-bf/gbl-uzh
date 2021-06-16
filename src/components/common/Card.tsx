@@ -9,9 +9,18 @@ interface Props {
   className?: string
   onClick?: () => void
   minHeight?: string
+  colored?: boolean
 }
 
-function Card({ name, tags, className, imgSrc, onClick, minHeight }: Props) {
+function Card({
+  name,
+  tags,
+  className,
+  imgSrc,
+  onClick,
+  minHeight,
+  colored,
+}: Props) {
   return (
     <button
       disabled={!onClick}
@@ -41,7 +50,10 @@ function Card({ name, tags, className, imgSrc, onClick, minHeight }: Props) {
         )}
 
         <Image
-          className="z-0 w-full rounded opacity-80 grayscale filter"
+          className={clsx(
+            'z-0 w-full rounded opacity-80 ',
+            !colored && 'grayscale filter'
+          )}
           src={imgSrc}
           alt={`Screenshot of ${name}`}
           layout="fill"
@@ -58,6 +70,7 @@ Card.defaultProps = {
   tags: [],
   onClick: undefined,
   minHeight: undefined,
+  colored: false,
 }
 
 export default Card

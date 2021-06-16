@@ -1,5 +1,9 @@
 import { useEffect } from 'react'
-import PlaceholderImage from '../../public/images/Unbenannt-2.png'
+import TreeIcon from '../../public/images/baum_icon.svg'
+import ToolboxIcon from '../../public/images/innovation_icon.svg'
+import NetworkIcon from '../../public/images/netzwerk_icon.svg'
+import ProcessIcon from '../../public/images/prozess_icon.svg'
+import UZHIcon from '../../public/images/uzh_icon.svg'
 import FocusArea from '../components/common/FocusArea'
 import Header from '../components/common/Header'
 import Title from '../components/common/Title'
@@ -52,7 +56,7 @@ function Roadmap() {
         <Header.H2>Focus Areas</Header.H2>
         <div>
           <FocusArea
-            imgSrc={PlaceholderImage}
+            imgSrc={UZHIcon}
             title="GBL @ UZH"
             description="Establish an overview of how game-based learning is being used at the
                 University of Zurich."
@@ -60,28 +64,28 @@ function Roadmap() {
 
           <FocusArea
             className="mt-4"
-            imgSrc={PlaceholderImage}
+            imgSrc={NetworkIcon}
             title="GBL Knowledge Base"
             description="Develop a knowledge base and learning resources with know-how and best practices on game-based learning and game development."
           />
 
           <FocusArea
             className="mt-4"
-            imgSrc={PlaceholderImage}
+            imgSrc={ToolboxIcon}
             title="Game Development Toolbox"
             description="Develop technical and content-related resources that can be used when designing and developing learning games."
           />
 
           <FocusArea
             className="mt-4"
-            imgSrc={PlaceholderImage}
+            imgSrc={ProcessIcon}
             title="Simulation Platform"
             description="Create a foundational framework that can be applied when implementing simulations."
           />
 
           <FocusArea
             className="mt-4"
-            imgSrc={PlaceholderImage}
+            imgSrc={TreeIcon}
             title="GBL Community"
             description="Establish and foster a game-based learning community at the University of Zurich and connect with interested external parties."
           />
