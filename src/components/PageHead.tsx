@@ -61,7 +61,7 @@ function Breadcrumbs() {
   const router = useRouter()
 
   return (
-    <div className="flex-initial order-2 mt-4 text-sm text-gray-500 md:mt-0 md:order-1">
+    <div className="flex-initial order-2 mt-4 mb-4 ml-8 text-sm text-gray-500 md:mb-0 md:mt-0 md:order-1">
       Location: {router.pathname}
     </div>
   )
@@ -70,14 +70,16 @@ function Breadcrumbs() {
 function Logo() {
   return (
     <Link href="/" passHref>
-      <a className="self-center md:pl-8">
-        <Image
-          height={75}
-          width={150}
-          src={LogoImage}
-          alt="Logo"
-          layout="intrinsic"
-        />
+      <a className="flex-1 md:pl-8">
+        <div className="relative w-full h-16 md:w-40 md:h-full">
+          <Image
+            src={LogoImage}
+            alt="Logo"
+            layout="fill"
+            objectFit="contain"
+            priority
+          />
+        </div>
       </a>
     </Link>
   )
@@ -87,7 +89,7 @@ function PageHead() {
   return (
     <header className="flex flex-col justify-between max-w-6xl pt-4 m-auto md:flex-row">
       <Logo />
-      <div className="flex flex-col justify-between flex-initial md:items-end md:border-none">
+      <div className="flex flex-col justify-between flex-initial md:items-end md:border-none md:pr-8">
         <Breadcrumbs />
         <Navigation />
       </div>

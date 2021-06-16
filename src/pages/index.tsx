@@ -74,12 +74,31 @@ function Home() {
                   <div className="mt-4">
                     <div className="sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
                       {[
-                        ['uFin: The Challenge', uFinImage],
-                        ['Portfolio Management Simulation', PFMImage],
-                        ['Derivatives Game', UnderConstructionImage],
-                      ].map(([name, imgSrc]: [string, StaticImageData]) => (
-                        <GameCard key="name" name={name} imgSrc={imgSrc} />
-                      ))}
+                        ['uFin: The Challenge', '/games/ufin', uFinImage],
+                        [
+                          'Portfolio Management Simulation',
+                          '/games/portfolio-management-simulation',
+                          PFMImage,
+                        ],
+                        [
+                          'Derivatives Game',
+                          '/games/derivatives-game',
+                          UnderConstructionImage,
+                        ],
+                      ].map(
+                        ([name, href, imgSrc]: [
+                          string,
+                          string,
+                          StaticImageData
+                        ]) => (
+                          <GameCard
+                            key="name"
+                            name={name}
+                            imgSrc={imgSrc}
+                            linkHref={href}
+                          />
+                        )
+                      )}
                     </div>
                   </div>
                   <Button
