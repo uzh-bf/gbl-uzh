@@ -1,13 +1,15 @@
 import clsx from 'clsx'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import LogoImage from '../../public/images/logo_temp_beta.jpg'
 
 const NAVIGATION_ITEMS = [
-  { href: '/dbf', label: 'GBL @ DBF' },
+  { href: '/games', label: 'GBL in Use' },
   { href: '/kb', label: 'Knowledge Base' },
   { href: '/dev', label: 'Development' },
   { href: '/roadmap', label: 'Roadmap' },
-  { href: '/resources', label: 'Resources' },
+  // { href: '/resources', label: 'Resources' },
   { href: '/about', label: 'About Us' },
 ]
 
@@ -38,12 +40,16 @@ function Navigation() {
   const router = useRouter()
 
   return (
-    <nav className="flex flex-col order-1 md:order-2 md:flex-row">
+    <nav className="flex flex-col order-1 mt-8 md:order-2 md:flex-row">
       <NavigationItem isActive={router.pathname === '/'} href="/">
         Home
       </NavigationItem>
       {NAVIGATION_ITEMS.map(({ href, label }) => (
-        <NavigationItem isActive={router.pathname.includes(href)} href={href}>
+        <NavigationItem
+          key={href}
+          isActive={router.pathname.includes(href)}
+          href={href}
+        >
           {label}
         </NavigationItem>
       ))}
@@ -63,14 +69,16 @@ function Breadcrumbs() {
 
 function Logo() {
   return (
-    <Link href="/">
-      <img
-        className="p-2 m-auto cursor-pointer md:m-2"
-        width="150"
-        height="75"
-        src="/images/logo_temp.jpg"
-        alt=""
-      />
+    <Link href="/" passHref>
+      <a className="self-center md:pl-8">
+        <Image
+          height={75}
+          width={150}
+          src={LogoImage}
+          alt="Logo"
+          layout="intrinsic"
+        />
+      </a>
     </Link>
   )
 }

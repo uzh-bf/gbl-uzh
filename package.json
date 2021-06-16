@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "npm-run-all --parallel dev:cms dev:next",
-    "dev:cms": "npx -y netlify-cms-proxy-server",
+    "dev:cms": "npx netlify-cms-proxy-server -y",
     "dev:next": "NODE_ENV=development next",
     "build": "NODE_ENV=production next build",
     "start": "next start",
@@ -35,17 +35,19 @@
     "clsx": "1.1.1",
     "gray-matter": "4.0.3",
     "netlify-cms-oauth-provider-node": "2.0.0",
-    "next": "10.2.3",
+    "next": "11.0.0",
     "next-mdx-remote": "3.0.2",
     "postcss": "8.3.2",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "react-markdown": "6.0.2",
     "tailwindcss": "2.1.4"
   },
   "devDependencies": {
     "@types/node": "15.12.2",
     "@types/react": "17.0.11",
     "@uzh-bf/code-style-react-ts": "0.0.13",
+    "eslint-config-next": "11.0.0",
     "npm-run-all": "4.1.5",
     "standard-version": "9.3.0",
     "typescript": "4.3.2"

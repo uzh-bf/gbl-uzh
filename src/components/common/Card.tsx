@@ -1,52 +1,76 @@
 import clsx from 'clsx'
+import Image from 'next/image'
 import Tag from './Tag'
 
 interface Props {
-  name: string
+  name?: string
+  imgSrc: StaticImageData
   tags?: string[]
   className?: string
   onClick?: () => void
+  minHeight?: string
+  colored?: boolean
 }
 
-function Card({ name, tags, className, onClick }: Props) {
+function Card({
+  name,
+  tags,
+  className,
+  imgSrc,
+  onClick,
+  minHeight,
+  colored,
+}: Props) {
   return (
     <button
+      disabled={!onClick}
       type="button"
       onClick={onClick}
       className={clsx(
-        'flex-1 mb-4 border rounded shadow md:mb-0 md:mr-4 last:mr-0',
+        'border rounded shadow w-full',
         className,
-        onClick && 'cursor-pointer hover:shadow-lg'
+        onClick ? 'cursor-pointer hover:shadow-lg' : 'cursor-default'
       )}
     >
-      <div className="relative">
-        <div className="absolute left-0 right-0 z-10 py-1 text-base text-center text-white bg-uzh-blue-60 bottom-3">
-          {name}
-        </div>
+      <div
+        className={clsx('w-full h-full relative', minHeight || 'min-h-[200px]')}
+      >
+        {tags?.length > 0 && (
+          <div className="absolute top-0 z-10 flex flex-row flex-wrap p-2">
+            {tags.map((tag) => (
+              <Tag key={tag} label={tag} />
+            ))}
+          </div>
+        )}
 
-        <img
-          className="z-0 grayscale filter"
-          width="100%"
-          src="images/pfm_game.png"
+        {name && (
+          <div className="absolute left-0 right-0 z-10 py-1 text-lg font-bold prose text-center bg-white bg-opacity-70 bottom-3">
+            {name}
+          </div>
+        )}
+
+        <Image
+          className={clsx(
+            'z-0 w-full rounded opacity-80 ',
+            !colored && 'grayscale filter'
+          )}
+          src={imgSrc}
           alt={`Screenshot of ${name}`}
+          layout="fill"
+          objectFit="cover"
         />
       </div>
-
-      {tags?.length > 0 && (
-        <div className="flex flex-row flex-wrap p-1 bg-gray-100">
-          {tags.map((tag) => (
-            <Tag label={tag} />
-          ))}
-        </div>
-      )}
     </button>
   )
 }
 
 Card.defaultProps = {
+  name: undefined,
   className: undefined,
   tags: [],
   onClick: undefined,
+  minHeight: undefined,
+  colored: false,
 }
 
 export default Card

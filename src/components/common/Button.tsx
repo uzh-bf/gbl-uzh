@@ -1,22 +1,38 @@
 import { ArrowRightIcon } from '@heroicons/react/solid'
+import clsx from 'clsx'
 
 interface Props {
+  disabled?: boolean
   children: React.ReactNode
-  onClick: () => void
+  className?: string
+  onClick?: () => void
 }
 
-function Button({ children, onClick }: Props) {
+function Button({ disabled, children, onClick, className }: Props) {
   return (
     <button
+      disabled={disabled}
       onClick={onClick}
       type="button"
-      className="inline-flex items-center px-4 py-2 text-sm font-bold bg-white border border-gray-300 rounded-md shadow-sm text-uzh-blue-60 hover:bg-gray-50"
+      className={clsx(
+        'inline-flex items-center px-4 py-2 text-sm font-bold bg-white border border-gray-300 rounded-md shadow-sm ',
+        className,
+        disabled ? 'bg-gray-200 cursor-default' : 'hover:bg-gray-50'
+      )}
     >
       {children}
     </button>
   )
 }
 
-Button.Arrow = () => <ArrowRightIcon className="h-4 mr-2" />
+Button.defaultProps = {
+  disabled: false,
+  className: '',
+  onClick: undefined,
+}
+
+Button.Arrow = function ButtonArrow() {
+  return <ArrowRightIcon className="h-4 mr-2" />
+}
 
 export default Button

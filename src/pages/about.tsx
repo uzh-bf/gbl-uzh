@@ -1,7 +1,11 @@
+import Image from 'next/image'
 import { useEffect } from 'react'
+import ProjectImage from '../../public/images/projects.png'
+import TeamImage from '../../public/images/team.png'
 import Header from '../components/common/Header'
 import Title from '../components/common/Title'
 import TitleBackground from '../components/common/TitleBackground'
+import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
 
 function About() {
@@ -35,14 +39,13 @@ function About() {
         <Title title="About Us" />
       </TitleBackground>
 
-      <div className="max-w-6xl py-8 m-auto">
-        <Header.H2>Projects</Header.H2>
-        <img src="/images/projects.png" alt="Projects" />
+      <Content>
+        <Image src={ProjectImage} alt="Projects" placeholder="blur" />
 
-        <Header.H2 className="mt-8">Project Team</Header.H2>
-        <img src="/images/team.png" alt="Team" />
+        <Header.H2 className="mt-16">Project Team</Header.H2>
+        <Image src={TeamImage} alt="Team" placeholder="blur" />
 
-        <Header.H2 className="mt-8">Get In Touch</Header.H2>
+        <Header.H2 className="mt-16">Get In Touch</Header.H2>
         <p className="mb-4 prose max-w-none">
           If you would like to contact our project team, please fill out the
           following form and we will gladly get in touch.
@@ -56,7 +59,7 @@ function About() {
             .
           </div>
         </div>
-      </div>
+      </Content>
     </PageWithHeader>
   )
 }

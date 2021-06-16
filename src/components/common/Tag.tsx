@@ -8,7 +8,10 @@ interface Props {
 function Tag({ label, className }: Props) {
   return (
     <div
-      className={clsx('px-2 mr-1 text-sm bg-white border rounded', className)}
+      className={clsx(
+        'bg-white px-2 mr-2 text-sm prose text-gray-600 border rounded shadow bg-opacity-95',
+        className
+      )}
     >
       {label}
     </div>

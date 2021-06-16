@@ -1,8 +1,14 @@
 import { useEffect } from 'react'
-import Card from '../components/common/Card'
+import TreeIcon from '../../public/images/baum_icon.svg'
+import ToolboxIcon from '../../public/images/innovation_icon.svg'
+import NetworkIcon from '../../public/images/netzwerk_icon.svg'
+import ProcessIcon from '../../public/images/prozess_icon.svg'
+import UZHIcon from '../../public/images/uzh_icon.svg'
+import FocusArea from '../components/common/FocusArea'
 import Header from '../components/common/Header'
 import Title from '../components/common/Title'
 import TitleBackground from '../components/common/TitleBackground'
+import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
 
 function Roadmap() {
@@ -36,106 +42,63 @@ function Roadmap() {
         <Title title="Project Roadmap" />
       </TitleBackground>
 
-      <div className="max-w-6xl p-4 m-auto">
+      <Content>
         <Header.H2>Vision</Header.H2>
         <p className="mb-8 prose max-w-none">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis, hic
-          et. Dolorem, consectetur explicabo corporis omnis repudiandae autem
-          repellendus voluptatum quam id magni provident dolorum, aliquid fugit
-          saepe? Quaerat, eligendi.
+          Game-based learning has many benefits for lecturers and students.
+          However, it can be difficult to get started with developing learning
+          games and integrating games with other curricular activities. We want
+          to foster the application of game-based learning in the university
+          context by providing foundational resources for game usage and
+          development based on what we have learned on our own journey.
         </p>
 
         <Header.H2>Focus Areas</Header.H2>
         <div>
-          <div className="flex flex-col md:flex-row">
-            <div className="flex-1 md:flex-initial md:w-60">
-              <Card name="GBL @ UZH" />
-            </div>
-            <p className="flex-1 prose md:pl-4 max-w-none">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
-              rerum ea assumenda temporibus incidunt ratione recusandae est
-              officiis sapiente, quos quia sint delectus, nobis eum repudiandae
-              aliquid reiciendis nam nesciunt?
-              <ul>
-                <li>...</li>
-                <li>...</li>
-              </ul>
-            </p>
-          </div>
+          <FocusArea
+            imgSrc={UZHIcon}
+            title="GBL @ UZH"
+            description="Establish an overview of how game-based learning is being used at the
+                University of Zurich."
+          />
 
-          <div className="flex flex-col mt-4 md:flex-row">
-            <div className="flex-1 md:flex-initial md:w-60">
-              <Card name="Game Development Process" />
-            </div>
-            <p className="flex-1 prose md:pl-4 max-w-none">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
-              rerum ea assumenda temporibus incidunt ratione recusandae est
-              officiis sapiente, quos quia sint delectus, nobis eum repudiandae
-              aliquid reiciendis nam nesciunt?
-              <ul>
-                <li>...</li>
-                <li>...</li>
-              </ul>
-            </p>
-          </div>
+          <FocusArea
+            className="mt-4"
+            imgSrc={NetworkIcon}
+            title="GBL Knowledge Base"
+            description="Develop a knowledge base and learning resources with know-how and best practices on game-based learning and game development."
+          />
 
-          <div className="flex flex-col mt-4 md:flex-row">
-            <div className="flex-1 md:flex-initial md:w-60">
-              <Card name="Game Development Toolbox" />
-            </div>
-            <p className="flex-1 prose md:pl-4 max-w-none">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
-              rerum ea assumenda temporibus incidunt ratione recusandae est
-              officiis sapiente, quos quia sint delectus, nobis eum repudiandae
-              aliquid reiciendis nam nesciunt?
-              <ul>
-                <li>...</li>
-                <li>...</li>
-              </ul>
-            </p>
-          </div>
+          <FocusArea
+            className="mt-4"
+            imgSrc={ToolboxIcon}
+            title="Game Development Toolbox"
+            description="Develop technical and content-related resources that can be used when designing and developing learning games."
+          />
 
-          <div className="flex flex-col mt-4 md:flex-row">
-            <div className="flex-1 md:flex-initial md:w-60">
-              <Card name="Simulation Platform" />
-            </div>
-            <p className="flex-1 prose md:pl-4 max-w-none">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
-              rerum ea assumenda temporibus incidunt ratione recusandae est
-              officiis sapiente, quos quia sint delectus, nobis eum repudiandae
-              aliquid reiciendis nam nesciunt?
-              <ul>
-                <li>...</li>
-                <li>...</li>
-              </ul>
-            </p>
-          </div>
+          <FocusArea
+            className="mt-4"
+            imgSrc={ProcessIcon}
+            title="Simulation Platform"
+            description="Create a foundational framework that can be applied when implementing simulations."
+          />
 
-          <div className="flex flex-col mt-4 md:flex-row">
-            <div className="flex-1 md:flex-initial md:w-60">
-              <Card name="GBL Community" />
-            </div>
-            <p className="flex-1 prose md:pl-4 max-w-none">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
-              rerum ea assumenda temporibus incidunt ratione recusandae est
-              officiis sapiente, quos quia sint delectus, nobis eum repudiandae
-              aliquid reiciendis nam nesciunt?
-              <ul>
-                <li>...</li>
-                <li>...</li>
-              </ul>
-            </p>
-          </div>
+          <FocusArea
+            className="mt-4"
+            imgSrc={TreeIcon}
+            title="GBL Community"
+            description="Establish and foster a game-based learning community at the University of Zurich and connect with interested external parties."
+          />
         </div>
 
         <Header.H2 className="mt-8">Get Involved</Header.H2>
-        <p className="mb-4 prose max-w-none">
+        <p className="prose max-w-none">
           We strive to develop our roadmap and goals based on the needs of the
           community. If you are interested in game-based learning and would like
           to be involved in the project, please fill out the following form to
           join our user group.
         </p>
-        <div className="max-w-lg border">
+        <div className="max-w-lg mt-4 border">
           <div id="c7">
             Fill in the{' '}
             <a href="https://www.bf-tools.uzh.ch/applications/easyforms/index.php?r=app%2Fform&id=12">
@@ -144,7 +107,7 @@ function Roadmap() {
             .
           </div>
         </div>
-      </div>
+      </Content>
     </PageWithHeader>
   )
 }
