@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/uzh-bf/gbl-web/compare/v0.0.20...v0.1.1) (2021-06-16)
+
+
+### Features
+
+* add contents for game details and update layout ([65d154b](https://github.com/uzh-bf/gbl-web/commit/65d154b9265c809a70ab172f1763588afe685521))
+* add icons to roadmap page ([ffb20a9](https://github.com/uzh-bf/gbl-web/commit/ffb20a967bb168d81505968b069098c210e1f72a))
+* contents for the dev page ([8618a91](https://github.com/uzh-bf/gbl-web/commit/8618a9182fb39f2ce807d274032db01685f13fa9))
+* draft contents of the roadmap page ([234921d](https://github.com/uzh-bf/gbl-web/commit/234921db5f90d6d309cf09ba6312b2b47fe0e8e5))
+* easy image optimizations ([9da65ee](https://github.com/uzh-bf/gbl-web/commit/9da65ee7927a928b509d4608e4b055de53a1504d))
+* full layout rework ([#6](https://github.com/uzh-bf/gbl-web/issues/6)) ([f3df95a](https://github.com/uzh-bf/gbl-web/commit/f3df95a372c17896655d4152b3e272291e513c6f))
+* small text for principles of GBL ([1cdf34a](https://github.com/uzh-bf/gbl-web/commit/1cdf34ab459bb9b0c5f7b3dacd8b29ed43ade69e))
+
+
+### Bug Fixes
+
+* ensure logo is not warped with next/image, fix: add links to the games on the index page ([29112f5](https://github.com/uzh-bf/gbl-web/commit/29112f5454c354d642d8af3f03f7f141b1ec524b))
+* game links to detail pages ([a8bce26](https://github.com/uzh-bf/gbl-web/commit/a8bce2608fd07760f9140760a3cb1898f3df8b72))
+* missing space in pb game description ([41b5cb2](https://github.com/uzh-bf/gbl-web/commit/41b5cb24a0d097ec4c2c25752a5abc3195ba0627))
+* type issues in build ([c4ecb3a](https://github.com/uzh-bf/gbl-web/commit/c4ecb3a1e9b2b9c1512af880dba33e69f20ab9dd))
+
+
+* **release:** 0.1.0 ([6bcc712](https://github.com/uzh-bf/gbl-web/commit/6bcc71227542a12df0d12e4cccbddf4d67e8b398))
+
 ## [0.1.0](https://github.com/uzh-bf/gbl-web/compare/v0.0.20...v0.1.0) (2021-06-16)
 
 ### Features
