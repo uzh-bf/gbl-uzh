@@ -1,6 +1,3 @@
 /// <reference types="next" />
 /// <reference types="next/types/global" />
-
-declare interface Window {
-  EasyForms: any
-}
+/// <reference types="next/image-types/global" />
