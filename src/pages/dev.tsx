@@ -18,7 +18,7 @@ function DevelopmentWorkflow() {
       </TitleBackground>
       <Content>
         <Header.H2 className="mt-4">
-          Principles of Game-Based Learning
+          Introduction to Digital Game-Based Learning
         </Header.H2>
         <p className="prose max-w-none">
           To get started with game development in the context of game-based
