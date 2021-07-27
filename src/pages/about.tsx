@@ -1,7 +1,11 @@
 import Image from 'next/image'
 import { useEffect } from 'react'
 import ProjectImage from '../../public/images/projects.png'
-import TeamImage from '../../public/images/team.png'
+import RolandImage from '../../public/images/schlaefli_roland.jpg'
+import DavidImage from '../../public/images/schmocker_david.jpg'
+import BenjaminImage from '../../public/images/wilding_benjamin.jpg'
+import AnjaImage from '../../public/images/zgraggen_anja.jpg'
+import Contact from '../components/common/Contact'
 import Header from '../components/common/Header'
 import Title from '../components/common/Title'
 import TitleBackground from '../components/common/TitleBackground'
@@ -43,7 +47,49 @@ function About() {
         <Image src={ProjectImage} alt="Projects" placeholder="blur" />
 
         <Header.H2 className="mt-16">Project Team</Header.H2>
-        <Image src={TeamImage} alt="Team" placeholder="blur" />
+        <div>
+          <div className="flex flex-col md:flex-row">
+            <div className="flex-1">
+              <Contact
+                name="Dr. Benjaming Wilding"
+                institution="Department of Banking and Finance, University of Zurich"
+                role="Managing Director and Head of Teaching"
+                link="https://www.bf.uzh.ch/en/persons/wilding-benjamin"
+                imgSrc={BenjaminImage}
+              />
+            </div>
+
+            <div className="flex-1 mt-8 sm:mt-0">
+              <Contact
+                name="Dr. David Schmocker"
+                institution="Center for University Teaching and Learning, Digitalization and Innovation, University of Zurich"
+                role=""
+                link="https://www.hochschuldidaktik.uzh.ch/de/aboutus/team/schmocker-david.html"
+                imgSrc={DavidImage}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col mt-4 md:flex-row">
+            <div className="flex-1 mt-8 sm:mt-0">
+              <Contact
+                name="Anja Zgraggen"
+                institution="Department of Banking and Finance, University of Zurich"
+                role="Program and Project Manager"
+                link="https://www.bf.uzh.ch/en/persons/zgraggen-anja"
+                imgSrc={AnjaImage}
+              />
+            </div>
+            <div className="flex-1 mt-8 sm:mt-0">
+              <Contact
+                name="Roland Schläfli"
+                institution="Department of Banking and Finance, University of Zurich"
+                role="IT Project Manager and Developer"
+                link="https://www.bf.uzh.ch/en/persons/schlaefli-roland"
+                imgSrc={RolandImage}
+              />
+            </div>
+          </div>
+        </div>
 
         <Header.H2 className="mt-16">Get In Touch</Header.H2>
         <p className="mb-4 prose max-w-none">
