@@ -1,4 +1,4 @@
-import { CheckIcon } from '@heroicons/react/solid'
+import { CheckIcon, PresentationChartBarIcon } from '@heroicons/react/outline'
 import Image from 'next/image'
 import { useState } from 'react'
 import WorkflowImage from '../../public/images/dev_workflow.png'
@@ -55,11 +55,12 @@ function Panel({
                     {resources.map((item) => (
                       <li key={item.name}>
                         <a
-                          className="hover:text-uzh-blue-100"
+                          className="flex flex-row items-center hover:text-uzh-blue-100"
                           target="_blank"
                           href={item.href}
                           rel="noreferrer"
                         >
+                          <PresentationChartBarIcon className="h-4 mr-1" />
                           {item.name}
                         </a>
                       </li>
