@@ -1,5 +1,6 @@
 import { MDXRemote } from 'next-mdx-remote'
 import ReactMarkdown from 'react-markdown'
+import RadarChart from '../../components/charts/RadarChart'
 import Header from '../../components/common/Header'
 import Tag from '../../components/common/Tag'
 import Title from '../../components/common/Title'
@@ -48,13 +49,12 @@ function Game({ source, frontMatter }: Props) {
             )}
           </div>
           <div className="flex-1 p-4 border rounded md:flex-initial md:w-96">
-            {/* <div>
+            <div>
               <Header.H3>Competencies</Header.H3>
               <div className="flex flex-row">
                 <RadarChart width={150} height={150} />
-                <RadarChart width={150} height={150} />
               </div>
-            </div> */}
+            </div>
 
             <Header.H3>Learning Objectives</Header.H3>
             <p className="prose-sm prose">

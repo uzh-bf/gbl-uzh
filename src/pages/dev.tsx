@@ -15,6 +15,7 @@ function Panel({
   videoSrc,
   duration,
   keyTakeaways,
+  resources,
   isOpen,
   isCompleted,
   onNext,
@@ -45,25 +46,38 @@ function Panel({
           >
             {children}
           </VideoWithSummary>
-          <div className="pt-4 mt-4 border-t">
-            <div className="flex flex-col md:flex-row">
-              <div className="flex-1">
-                <div className="font-bold">Resources</div>
-                <ul>
-                  <li>TBD Slides</li>
-                </ul>
-              </div>
-              <div className="flex-1 pt-4 md:pt-0 md:pl-6">
+          {Array.isArray(resources) && (
+            <div className="pt-4 mt-4 border-t">
+              <div className="flex flex-col md:flex-row">
+                <div className="flex-1">
+                  <div className="font-bold">Resources</div>
+                  <ul>
+                    {resources.map((item) => (
+                      <li key={item.name}>
+                        <a
+                          className="hover:text-uzh-blue-100"
+                          target="_blank"
+                          href={item.href}
+                          rel="noreferrer"
+                        >
+                          {item.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                {/* <div className="flex-1 pt-4 md:pt-0 md:pl-6">
                 <div className="font-bold">References</div>
                 <ul>
                   <li>TBD References</li>
                 </ul>
-              </div>
-              {/* <div className="flex-1">
+              </div> */}
+                {/* <div className="flex-1">
                 <div className="font-bold">Resources</div>
               </div> */}
+              </div>
             </div>
-          </div>
+          )}
           <div className="flex justify-between pt-4 mt-4 border-t">
             <div>
               {onPrevious && (
@@ -92,6 +106,7 @@ Panel.defaultProps = {
   isOpen: false,
   onNext: undefined,
   onPrevious: undefined,
+  resources: undefined,
 }
 
 function DevelopmentWorkflow() {
@@ -122,6 +137,12 @@ function DevelopmentWorkflow() {
             learning matter and because intrinsic motivation is fostered by
             the gamified approach.`,
           ]}
+          resources={[
+            {
+              name: 'Slides (PDF)',
+              href: '/assets/Introduction_to_DGBL.pdf',
+            },
+          ]}
           onNext={() => setActivePanel(1)}
           onActivate={() => setActivePanel(0)}
         >
@@ -137,10 +158,16 @@ function DevelopmentWorkflow() {
           isOpen={activePanel === 1}
           isCompleted={activePanel > 1}
           title="Game Development Workflow"
-          videoSrc="https://tube.switch.ch/embed/doOa7SQ29C"
+          videoSrc="https://tube.switch.ch/embed/2wGzCrU0Vm"
           keyTakeaways={
             <Image src={WorkflowImage} alt="Game Development Workflow" />
           }
+          resources={[
+            {
+              name: 'Slides (PDF)',
+              href: '/assets/Game_Development_Workflow.pdf',
+            },
+          ]}
           onNext={() => setActivePanel(2)}
           onPrevious={() => setActivePanel(0)}
           onActivate={() => setActivePanel(1)}
@@ -155,12 +182,18 @@ function DevelopmentWorkflow() {
           isOpen={activePanel === 2}
           isCompleted={activePanel > 2}
           title="Game Topic"
-          videoSrc="https://tube.switch.ch/embed/vFz5RH5Hcs"
+          videoSrc="https://tube.switch.ch/embed/mnDicHBlUI"
           keyTakeaways={[
             `Evaluate first whether a learning game is a good fit for your problem,
             as other teaching methods can work better depending on your use case.`,
             `Involve potential users in the idea generation process to get a broader perspective.`,
             `Ensure that the knowledge level of the potential users and the learning goals of your game match well.`,
+          ]}
+          resources={[
+            {
+              name: 'Slides (PDF)',
+              href: '/assets/Game_Topic.pdf',
+            },
           ]}
           onNext={() => setActivePanel(3)}
           onPrevious={() => setActivePanel(1)}
@@ -181,7 +214,7 @@ function DevelopmentWorkflow() {
           isOpen={activePanel === 3}
           isCompleted={activePanel > 3}
           title="Game Development"
-          videoSrc="https://tube.switch.ch/embed/GqFr8VbS2b"
+          videoSrc="https://tube.switch.ch/embed/DzvtvEspwp"
           keyTakeaways={[
             `Let potential users test your game regularly throughout the development process.
             Organize small testing sessions with a few participants to evaluate interactions.`,
@@ -189,6 +222,12 @@ function DevelopmentWorkflow() {
             Investigate how players approach and reach their learning objectives during play.`,
             `Focus on your prioritized development goals and keep a wish list for further development.
             Ensure that what is built is of high quality and fits together well.`,
+          ]}
+          resources={[
+            {
+              name: 'Slides (PDF)',
+              href: '/assets/Game_Development.pdf',
+            },
           ]}
           onNext={() => setActivePanel(4)}
           onPrevious={() => setActivePanel(2)}
@@ -206,12 +245,18 @@ function DevelopmentWorkflow() {
           isOpen={activePanel === 4}
           isCompleted={activePanel > 4}
           title="Game Execution"
-          videoSrc="https://tube.switch.ch/embed/YaQzh7J34g"
+          videoSrc="https://tube.switch.ch/embed/9noiwL00Oi"
           keyTakeaways={[
             `Ensure that the students have the relevant theoretical background before they play the game
             (e.g., provide prerequisites, readings, or an introductory session).`,
             `Prepare a sound didactical concept that embes the game into your course or similar setting.`,
             `Provide regular feedback to the players so that they can continuously improve their knowledge throughout the game.`,
+          ]}
+          resources={[
+            {
+              name: 'Slides (PDF)',
+              href: '/assets/Game_Execution.pdf',
+            },
           ]}
           onPrevious={() => setActivePanel(3)}
           onActivate={() => setActivePanel(4)}
