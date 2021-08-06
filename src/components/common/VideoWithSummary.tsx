@@ -1,6 +1,13 @@
 import clsx from 'clsx'
 
-function VideoWithSummary({ title, videoSrc, children, keyTakeaways }) {
+interface Props {
+  title: string
+  videoSrc?: string
+  children: React.ReactNode
+  keyTakeaways?: any[]
+}
+
+function VideoWithSummary({ title, videoSrc, children, keyTakeaways }: Props) {
   return (
     <div>
       <p className="prose text-justify max-w-none">{children}</p>
@@ -36,6 +43,11 @@ function VideoWithSummary({ title, videoSrc, children, keyTakeaways }) {
       )}
     </div>
   )
+}
+
+VideoWithSummary.defaultProps = {
+  videoSrc: undefined,
+  keyTakeaways: undefined,
 }
 
 export default VideoWithSummary

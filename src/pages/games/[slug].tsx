@@ -6,7 +6,6 @@ import Tag from '../../components/common/Tag'
 import Title from '../../components/common/Title'
 import TitleImage from '../../components/common/TitleImage'
 import Content from '../../components/Content'
-import CourseEntry from '../../components/courses/CourseEntry'
 import PageWithHeader from '../../components/PageWithHeader'
 import * as Util from '../../lib/util'
 
@@ -25,38 +24,88 @@ function Game({ source, frontMatter }: Props) {
       </TitleImage>
 
       <Content>
-        <div className="flex flex-col md:flex-row">
-          <div className="flex-1 pb-4 md:pb-0 md:pr-4">
-            <Header.H2 className="mb-2 md:mb-4">
-              {frontMatter.subtitle}
-            </Header.H2>
+        <Header.H2 className="mb-2 md:mb-4">{frontMatter.subtitle}</Header.H2>
+        <div className="flex flex-col items-start md:flex-row">
+          <div className="flex-1 pb-4 md:pb-0 md:pr-8">
             <p className="prose max-w-none">
               <MDXRemote {...source} components={components} />
             </p>
-            {frontMatter['usedIn'] && (
-              <>
-                <Header.H3 className="mt-8">Used In</Header.H3>
-                {frontMatter['usedIn'].map((course) => (
-                  <CourseEntry
-                    key={course.name}
-                    name={course.name}
-                    ects={course.ects}
-                    level={course.level}
-                    href={course.href}
-                  />
-                ))}
-              </>
-            )}
-          </div>
-          <div className="flex-1 p-4 border rounded md:flex-initial md:w-96">
+
             <div>
-              <Header.H3>Competencies</Header.H3>
-              <div className="flex flex-row">
-                <RadarChart width={150} height={150} />
+              <div className="flex-1 mt-8">
+                <Header.H3>Characteristics</Header.H3>
+                <div className="flex flex-row">
+                  <p className="flex-1 prose-sm prose">
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                    Ipsum blanditiis corrupti porro tempore necessitatibus
+                    dolorem dolor, animi nihil nam pariatur libero quos commodi
+                    iste ipsa quae adipisci qui suscipit. Sint?
+                  </p>
+                  <div className="flex-1">
+                    <RadarChart
+                      data={[
+                        {
+                          subject: 'Analytic Thinking',
+                          value: 6,
+                        },
+                        {
+                          subject: 'Collaboration',
+                          value: 2,
+                        },
+                        {
+                          subject: 'Competition',
+                          value: 2,
+                        },
+                        {
+                          subject: 'Entertainment',
+                          value: 7,
+                        },
+                        {
+                          subject: 'Precognition',
+                          value: 4,
+                        },
+                        {
+                          subject: 'Soft Skills',
+                          value: 9,
+                        },
+                      ]}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 mt-4">
+                <Header.H3>Gamification Elements</Header.H3>
+                <div className="flex flex-row">
+                  <p className="flex-1 prose-sm prose">
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                    Illum sint consequuntur, id ducimus eius aperiam dicta
+                    sapiente, error et obcaecati temporibus soluta molestias
+                    placeat. Ad quisquam impedit beatae libero quam!
+                  </p>
+                  <div className="flex-1">
+                    <RadarChart
+                      data={[
+                        'Epic Meaning',
+                        'Empowerment',
+                        'Social Influence',
+                        'Unpredictability',
+                        'Avoidance',
+                        'Scarcity',
+                        'Ownership',
+                        'Accomplishment',
+                      ].map((subject) => ({ subject, value: 5 }))}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
 
-            <Header.H3>Learning Objectives</Header.H3>
+          <div className="flex-1 p-4 border rounded md:flex-initial md:w-96 bg-uzh-gray-20">
+            <Header.H3 className="!text-gray-600">
+              Learning Objectives
+            </Header.H3>
             <p className="prose-sm prose">
               <ul>
                 {frontMatter.objectives.map((item) => (
@@ -65,29 +114,40 @@ function Game({ source, frontMatter }: Props) {
               </ul>
             </p>
 
-            <Header.H3 className="mt-4">Keywords</Header.H3>
+            <Header.H3 className="mt-6 !text-gray-600">Keywords</Header.H3>
             <div className="flex flex-row flex-wrap">
               {frontMatter.keywords.map((item) => (
                 <Tag key={item} label={item} className="mb-2" />
               ))}
             </div>
 
-            <Header.H3 className="mt-4">Languages</Header.H3>
+            <Header.H3 className="mt-6 !text-gray-600">Languages</Header.H3>
             <div className="flex flex-row flex-wrap">
               {frontMatter.language.map((item) => (
                 <Tag key={item} label={item} className="mb-1" />
               ))}
             </div>
 
-            <Header.H3 className="mt-4">Imprint</Header.H3>
+            <Header.H3 className="mt-6 !text-gray-600">Imprint</Header.H3>
             <p className="prose-sm prose">
               <ReactMarkdown>{frontMatter.imprint}</ReactMarkdown>
             </p>
 
-            <Header.H3 className="mt-4">Contact</Header.H3>
+            <Header.H3 className="mt-6 !text-gray-600">Contact</Header.H3>
             <p className="prose-sm prose">
               <ReactMarkdown>{frontMatter.contact}</ReactMarkdown>
             </p>
+
+            {frontMatter['usedIn'] && (
+              <div>
+                <Header.H3 className="mt-6 !text-gray-600">Used In</Header.H3>
+                <ul className="prose-sm prose">
+                  {frontMatter['usedIn'].map((course) => (
+                    <li key={course.name}>{course.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </Content>

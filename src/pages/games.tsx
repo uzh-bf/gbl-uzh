@@ -84,7 +84,7 @@ function GBLinUse() {
       <Content>
         <div>
           <Header.H2>Games</Header.H2>
-          <p className="p-4 border rounded bg-gray-50">
+          <p className="text-gray-600">
             Simulations and Serious Games that have been developed or are being
             developed at the Department of Banking and Finance of the University
             of Zurich.
@@ -104,7 +104,7 @@ function GBLinUse() {
 
         <div className="mt-4 md:mt-8">
           <Header.H2>Courses</Header.H2>
-          <p className="p-4 border rounded bg-gray-50">
+          <p className="text-gray-600">
             A selection of lectures and seminars that contain Game-Based
             Learning elements at the Department of Banking and Finance of the
             University of Zurich.

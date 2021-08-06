@@ -7,7 +7,7 @@ interface Props {
 function ProjectPhase({ title, duration, children }: Props) {
   return (
     <div className="flex flex-col flex-1 last:mt-2 sm:last:mt-0 sm:last:ml-4">
-      <div className="flex-initial p-2 font-bold text-center text-white bg-uzh-blue-80">
+      <div className="flex-initial p-2 font-bold text-center text-white bg-uzh-red-80">
         {title}
       </div>
       <div className="flex-1 p-4 prose bg-uzh-gray-20">

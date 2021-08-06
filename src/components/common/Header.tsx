@@ -48,12 +48,27 @@ function H3({ children, className }: Props) {
   )
 }
 
+function H4({ children, className }: Props) {
+  return (
+    <h4
+      className={clsx(
+        'mb-2 text-sm sm:text-base lg:text-lg text-gray-600 font-kollektif text-center md:text-left',
+        className
+      )}
+    >
+      {children}
+    </h4>
+  )
+}
+
 H1.defaultProps = defaultProps
 H2.defaultProps = defaultProps
 H3.defaultProps = defaultProps
+H4.defaultProps = defaultProps
 
 export default {
   H1,
   H2,
   H3,
+  H4,
 }
