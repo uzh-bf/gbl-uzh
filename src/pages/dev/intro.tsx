@@ -1,7 +1,6 @@
 import ContentBlock from '../../components/common/ContentBlock'
 import Title from '../../components/common/Title'
 import TitleBackground from '../../components/common/TitleBackground'
-import VideoWithSummary from '../../components/common/VideoWithSummary'
 import Content from '../../components/Content'
 import PageWithHeader from '../../components/PageWithHeader'
 
@@ -14,16 +13,6 @@ function GameConcept() {
         <Title title="Introduction to Game-Based Learning" />
       </TitleBackground>
       <Content>
-        <VideoWithSummary
-          title="GBL Introduction"
-          videoSrc="https://tube.switch.ch/embed/fZLlA3PQVf"
-        >
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Laborum
-          temporibus, quasi quos laboriosam deleniti optio soluta quam nihil
-          saepe veritatis minus ipsum modi non vero enim, labore, beatae aperiam
-          corrupti.
-        </VideoWithSummary>
-
         <ContentBlock title="Gamification in Context">
           Lorem ipsum dolor sit, amet consectetur adipisicing elit. Debitis,
           modi totam rem quos cumque minus doloremque? Aut, culpa asperiores non

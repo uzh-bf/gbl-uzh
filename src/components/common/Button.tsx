@@ -1,4 +1,4 @@
-import { ArrowRightIcon } from '@heroicons/react/solid'
+import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/solid'
 import clsx from 'clsx'
 
 interface Props {
@@ -33,6 +33,10 @@ Button.defaultProps = {
 
 Button.Arrow = function ButtonArrow() {
   return <ArrowRightIcon className="h-4 mr-2" />
+}
+
+Button.ArrowLeft = function ButtonArrowLeft() {
+  return <ArrowLeftIcon className="h-4 mr-2" />
 }
 
 export default Button
