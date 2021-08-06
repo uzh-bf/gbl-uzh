@@ -84,7 +84,12 @@ function GBLinUse() {
       <Content>
         <div>
           <Header.H2>Games</Header.H2>
-          <div className="sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
+          <p className="p-4 border rounded bg-gray-50">
+            Simulations and Serious Games that have been developed or are being
+            developed at the Department of Banking and Finance of the University
+            of Zurich.
+          </p>
+          <div className="mt-4 sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
             {GAMES.map((game) => (
               <GameCard
                 key={game.name}
@@ -99,7 +104,12 @@ function GBLinUse() {
 
         <div className="mt-4 md:mt-8">
           <Header.H2>Courses</Header.H2>
-          <div className="flex flex-col">
+          <p className="p-4 border rounded bg-gray-50">
+            A selection of lectures and seminars that contain Game-Based
+            Learning elements at the Department of Banking and Finance of the
+            University of Zurich.
+          </p>
+          <div className="flex flex-col mt-4">
             {COURSES.map((course) => (
               <CourseEntry
                 key={course.name}
