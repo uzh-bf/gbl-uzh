@@ -151,7 +151,7 @@ function DevelopmentWorkflow() {
         </Panel>
 
         <Panel
-          duration="15min"
+          duration="10min"
           isOpen={activePanel === 2}
           isCompleted={activePanel > 2}
           title="Game Topic"
