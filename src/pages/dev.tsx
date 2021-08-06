@@ -1,4 +1,5 @@
 import { CheckIcon, PresentationChartBarIcon } from '@heroicons/react/outline'
+import clsx from 'clsx'
 import Image from 'next/image'
 import { useState } from 'react'
 import WorkflowImage from '../../public/images/dev_workflow.png'
@@ -46,8 +47,9 @@ function Panel({
           >
             {children}
           </VideoWithSummary>
+
           {Array.isArray(resources) && (
-            <div className="pt-4 mt-4 border-t">
+            <div className={clsx('mt-4', videoSrc && 'pt-4 border-t')}>
               <div className="flex flex-col md:flex-row">
                 <div className="flex-1">
                   <div className="font-bold">Resources</div>
@@ -259,6 +261,7 @@ function DevelopmentWorkflow() {
               href: '/assets/Game_Execution.pdf',
             },
           ]}
+          onNext={() => setActivePanel(5)}
           onPrevious={() => setActivePanel(3)}
           onActivate={() => setActivePanel(4)}
         >
@@ -271,6 +274,25 @@ function DevelopmentWorkflow() {
           find a suitable game setting and to further develop the game (part),
           it is helpful to always ask for feedback and to regularly evaluate the
           game and the game setting.
+        </Panel>
+
+        <Panel
+          isOpen={activePanel === 5}
+          isCompleted={activePanel > 5}
+          title="Further Resources and References"
+          resources={[
+            {
+              name: 'Slides (PDF)',
+              href: '/assets/Sources.pdf',
+            },
+          ]}
+          onPrevious={() => setActivePanel(4)}
+          onActivate={() => setActivePanel(5)}
+        >
+          Our workflow and best practices are based on the works of many
+          practicioners and researchers. For an overview of our references, as
+          well as further resources, we have prepared a short summary for you to
+          look at.
         </Panel>
       </Content>
     </PageWithHeader>
