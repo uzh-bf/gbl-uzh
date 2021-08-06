@@ -2,6 +2,66 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0](https://github.com/uzh-bf/gbl-web/compare/v0.0.17...v0.1.0) (2021-08-06)
+
+
+### Features
+
+* add contents for game details and update layout ([65d154b](https://github.com/uzh-bf/gbl-web/commit/65d154b9265c809a70ab172f1763588afe685521))
+* add display components for project team ([532487c](https://github.com/uzh-bf/gbl-web/commit/532487c25e1d2d1ef9f59acbe0397f39a87e1cbb))
+* add font-kollektif-bold ([aa17171](https://github.com/uzh-bf/gbl-web/commit/aa171715cfa3e7cac8143e78dab78eb8bbee7d6e))
+* add icons to roadmap page ([ffb20a9](https://github.com/uzh-bf/gbl-web/commit/ffb20a967bb168d81505968b069098c210e1f72a))
+* add initial recharts radar charts on game detail page ([a76b988](https://github.com/uzh-bf/gbl-web/commit/a76b98849dec20003d262af6c5d7ba35e70121c4))
+* add references module ([a1067e5](https://github.com/uzh-bf/gbl-web/commit/a1067e5eb8e61fbe8ad6c244795eda665567001c))
+* add slidesets for development videos, fix: update video ids for new versions ([87efdb8](https://github.com/uzh-bf/gbl-web/commit/87efdb8b48a8a99908cffcabad77875e1e66b135))
+* contents for the dev page ([8618a91](https://github.com/uzh-bf/gbl-web/commit/8618a9182fb39f2ce807d274032db01685f13fa9))
+* draft contents of the roadmap page ([234921d](https://github.com/uzh-bf/gbl-web/commit/234921db5f90d6d309cf09ba6312b2b47fe0e8e5))
+* easy image optimizations ([9da65ee](https://github.com/uzh-bf/gbl-web/commit/9da65ee7927a928b509d4608e4b055de53a1504d))
+* full layout rework ([#6](https://github.com/uzh-bf/gbl-web/issues/6)) ([f3df95a](https://github.com/uzh-bf/gbl-web/commit/f3df95a372c17896655d4152b3e272291e513c6f))
+* initial draft for project overview ([08328cb](https://github.com/uzh-bf/gbl-web/commit/08328cb48578bdd01b63d3a535561d9a920ccf22))
+* rework structure of development page ([ede27e3](https://github.com/uzh-bf/gbl-web/commit/ede27e30bb73a1443945fd6ee6a169aed96bfb9c))
+* setup analytics ([3c79e2e](https://github.com/uzh-bf/gbl-web/commit/3c79e2eba99c32f1a8d53ea0e2f2793276a136b5))
+* setup oauth with github and local repo mode for netlify ([d93b538](https://github.com/uzh-bf/gbl-web/commit/d93b5381dbff02fa394af3b74b889cca4ef93ec6))
+* small text for principles of GBL ([1cdf34a](https://github.com/uzh-bf/gbl-web/commit/1cdf34ab459bb9b0c5f7b3dacd8b29ed43ade69e))
+* update text contents of the start page ([14ec920](https://github.com/uzh-bf/gbl-web/commit/14ec9206fcf11b63cf254a7a01ccac8f66b65049))
+
+
+### Bug Fixes
+
+* add icon for resources ([6e312d3](https://github.com/uzh-bf/gbl-web/commit/6e312d3b1488d249ab1d53f2cccf340213bbbede))
+* add type declaration for easy forms ([4a232c6](https://github.com/uzh-bf/gbl-web/commit/4a232c6a78aa9226661438175f1ec68c1ec1c184))
+* broken base path ([8db0a94](https://github.com/uzh-bf/gbl-web/commit/8db0a949eeec8497e7c8a4df312be5bab145964f))
+* duration of game topic module ([4171ca9](https://github.com/uzh-bf/gbl-web/commit/4171ca9bd7abd299bac19f88be11a48ef1d8328d))
+* ensure logo is not warped with next/image, fix: add links to the games on the index page ([29112f5](https://github.com/uzh-bf/gbl-web/commit/29112f5454c354d642d8af3f03f7f141b1ec524b))
+* ensure that navigation items are also highlighted on subpages ([997cc94](https://github.com/uzh-bf/gbl-web/commit/997cc94ef8bdb7515fab9ebbfce0ba7648f83f3d))
+* ensure that the hero image does not scale infinitely ([1a2703b](https://github.com/uzh-bf/gbl-web/commit/1a2703b0e98dbe43fc20af3df18c50c2d71e93b5))
+* ensure that types are included in d.ts ([aa3481a](https://github.com/uzh-bf/gbl-web/commit/aa3481a0c27b483e9ed312e47b039f16d0b7d2cc))
+* game links to detail pages ([a8bce26](https://github.com/uzh-bf/gbl-web/commit/a8bce2608fd07760f9140760a3cb1898f3df8b72))
+* images in footer ([b440060](https://github.com/uzh-bf/gbl-web/commit/b4400604f584d0ec337d39077ac324838b8cc00a))
+* make game cards clickable ([d7ae326](https://github.com/uzh-bf/gbl-web/commit/d7ae326a15753289647acb29e09b8fc1c22bb752))
+* make icon content description the same text size as the other intro text ([dd78f3d](https://github.com/uzh-bf/gbl-web/commit/dd78f3d1a2c7fdc820ee8e1a66c331abe7952da8))
+* missing space in pb game description ([41b5cb2](https://github.com/uzh-bf/gbl-web/commit/41b5cb24a0d097ec4c2c25752a5abc3195ba0627))
+* type issues ([0759a31](https://github.com/uzh-bf/gbl-web/commit/0759a3186c3405441a6fc5e52f33ab9908c38094))
+* type issues in build ([c4ecb3a](https://github.com/uzh-bf/gbl-web/commit/c4ecb3a1e9b2b9c1512af880dba33e69f20ab9dd))
+* type issues in dev page ([90cc317](https://github.com/uzh-bf/gbl-web/commit/90cc3178c4f4a7abcfc4aaed66863a1950ba720c))
+* use github provider with config settings ([82f380b](https://github.com/uzh-bf/gbl-web/commit/82f380b15c9b5738de5c3d8a1ad0ec30147d1690))
+
+
+* add deps to standard-version ([acaaf6f](https://github.com/uzh-bf/gbl-web/commit/acaaf6f920912e2d39ae209c73895f3f2f230a77))
+* use kollektif font for all headers ([89940ef](https://github.com/uzh-bf/gbl-web/commit/89940efab918cdc7e7f1017618570f7e9997cedb))
+
+
+### Dependencies
+
+* upgrade next-mdx-remote ([243b5a4](https://github.com/uzh-bf/gbl-web/commit/243b5a4185c0469b1a14e8ef6740c493ad716647))
+* upgrade packages ([988e230](https://github.com/uzh-bf/gbl-web/commit/988e230fc62a70b273ff8b6fc0cb5b5392bcbf87))
+* upgrade remaining packages and node version ([78abae0](https://github.com/uzh-bf/gbl-web/commit/78abae09fbfa34dfce798195c72d5cb6f5fa5a59))
+
+
+### Refactors
+
+* extract ProjectPhase into component, fix: add descriptive text for game and course overview sections ([408506b](https://github.com/uzh-bf/gbl-web/commit/408506bba1a03d1663bb69b53e79ba8807a2a390))
+
 ### [0.0.17](https://github.com/uzh-bf/gbl-web/compare/v0.0.16...v0.0.17) (2021-05-03)
 
 
