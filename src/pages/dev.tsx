@@ -110,6 +110,9 @@ Panel.defaultProps = {
   onNext: undefined,
   onPrevious: undefined,
   resources: undefined,
+  videoSrc: undefined,
+  duration: undefined,
+  keyTakeaways: undefined,
 }
 
 function DevelopmentWorkflow() {
