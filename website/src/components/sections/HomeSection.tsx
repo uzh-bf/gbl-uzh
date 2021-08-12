@@ -47,12 +47,14 @@ interface HomeSectionHeroProps {
   src: string
   padded?: boolean
   contain?: boolean
+  className?: string
 }
 
 HomeSection.Hero = function HomeSectionHero({
   padded,
   src,
   contain,
+  className,
 }: HomeSectionHeroProps) {
   return (
     <div className="items-center flex-1 hidden w-1/2 md:flex justify-items-center">
@@ -61,7 +63,8 @@ HomeSection.Hero = function HomeSectionHero({
         className={clsx(
           'w-full h-full opacity-90',
           padded && 'p-4',
-          contain ? 'object-contain' : 'object-cover'
+          contain ? 'object-contain' : 'object-cover',
+          className
         )}
         src={src}
       />

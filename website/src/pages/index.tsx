@@ -152,11 +152,17 @@ function Home() {
               Roadmap
             </Button>
           </HomeSection.Content>
-          <HomeSection.Hero src="/images/matt-duncan-IUY_3DvM__w-unsplash.jpg" />
+          <HomeSection.Hero
+            src="/images/matt-duncan-IUY_3DvM__w-unsplash.jpg"
+            className="opacity-70"
+          />
         </HomeSection>
 
         <HomeSection>
-          <HomeSection.Hero src="/images/Unbenannt-2.png" />
+          <HomeSection.Hero
+            src="/images/group_play.png"
+            className="opacity-70"
+          />
           <HomeSection.Content
             title="“"
             content="“Traditional learning has provided superficial learning through text books. Games are best at teaching a deeper level of learning.” Eric Klopfer, MIT"
