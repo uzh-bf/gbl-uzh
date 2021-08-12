@@ -66,9 +66,11 @@ H2.defaultProps = defaultProps
 H3.defaultProps = defaultProps
 H4.defaultProps = defaultProps
 
-export default {
+const elements = {
   H1,
   H2,
   H3,
   H4,
 }
+
+export default elements
