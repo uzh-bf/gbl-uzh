@@ -25,8 +25,8 @@ function NavigationItem({ isActive, children, href }: NavigationItemProps) {
   return (
     <div
       className={clsx(
-        'flex-1 p-1 mb-1 text-center text-sm text-gray-500 hover:text-uzh-blue-80 md:flex-initial md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
-        isActive && 'border-uzh-red-100'
+        'flex-1 p-1 mb-1 ml-3 mr-3 text-left text-sm text-gray-500 hover:text-uzh-blue-80 md:flex-initial md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
+        isActive && 'border-uzh-red-100 text-gray-800 font-bold'
       )}
     >
       <Link href={href}>{children}</Link>
@@ -45,7 +45,7 @@ function Navigation({ isOpen }: NavigationProps) {
   const router = useRouter()
 
   const mobileMenu = (
-    <nav className="flex flex-col order-1 mt-8 md:hidden isOpen:hidden">
+    <nav className="flex flex-col order-1 mt-8 md:hidden">
       <NavigationItem isActive={router.pathname === '/'} href="/">
         Home
       </NavigationItem>
