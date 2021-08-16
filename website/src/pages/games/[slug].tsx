@@ -42,14 +42,14 @@ function Game({ source, frontMatter }: Props) {
             <div>
               <div className="flex-1 mt-8">
                 <Header.H3>Characteristics</Header.H3>
-                <div className="flex flex-row">
+                <div className="inline md:flex md:flex-row">
                   <p className="flex-1 prose-sm prose">
                     Lorem ipsum dolor sit amet consectetur adipisicing elit.
                     Ipsum blanditiis corrupti porro tempore necessitatibus
                     dolorem dolor, animi nihil nam pariatur libero quos commodi
                     iste ipsa quae adipisci qui suscipit. Sint?
                   </p>
-                  <div className="flex-1">
+                  <div className="mt-4 mb-6 flex-1 md:mt-0">
                     <RadarChart data={radarChartData[0]} />
                   </div>
                 </div>
@@ -57,14 +57,14 @@ function Game({ source, frontMatter }: Props) {
 
               <div className="flex-1 mt-4">
                 <Header.H3>Gamification Elements</Header.H3>
-                <div className="flex flex-row">
+                <div className="inline md:flex md:flex-row">
                   <p className="flex-1 prose-sm prose">
                     Lorem ipsum dolor sit amet consectetur adipisicing elit.
                     Illum sint consequuntur, id ducimus eius aperiam dicta
                     sapiente, error et obcaecati temporibus soluta molestias
                     placeat. Ad quisquam impedit beatae libero quam!
                   </p>
-                  <div className="flex-1">
+                  <div className="mt-4 mb-6 flex-1 md:mt-0">
                     <RadarChart data={radarChartData[1]} />
                   </div>
                 </div>
@@ -78,45 +78,45 @@ function Game({ source, frontMatter }: Props) {
             </Header.H3>
             <p className="prose-sm prose">
               <ul>
-                {frontMatter.objectives.map((item) => (
+                {frontMatter.objectives.map((item: any) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
             </p>
 
             <Header.H3 className="mt-6 !text-gray-600">Keywords</Header.H3>
-            <div className="flex flex-row flex-wrap">
-              {frontMatter.keywords.map((item) => (
+            <div className="flex flex-row flex-wrap justify-center md:justify-start">
+              {frontMatter.keywords.map((item: any) => (
                 <Tag key={item} label={item} className="mb-2" />
               ))}
             </div>
 
             <Header.H3 className="mt-6 !text-gray-600">Languages</Header.H3>
-            <div className="flex flex-row flex-wrap">
-              {frontMatter.language.map((item) => (
+            <div className="flex flex-row flex-wrap justify-center md:justify-start">
+              {frontMatter.language.map((item: any) => (
                 <Tag key={item} label={item} className="mb-1" />
               ))}
             </div>
 
             <Header.H3 className="mt-6 !text-gray-600">Imprint</Header.H3>
-            <p className="prose-sm prose">
+            <p className="prose-sm prose text-center md:text-left">
               <ReactMarkdown>{frontMatter.imprint}</ReactMarkdown>
             </p>
 
             <Header.H3 className="mt-6 !text-gray-600">Contact</Header.H3>
-            <p className="prose-sm prose">
+            <p className="prose-sm prose text-center md:text-left">
               <ReactMarkdown>{frontMatter.contact}</ReactMarkdown>
             </p>
 
             {frontMatter['usedIn'] && (
-              <div>
+              <>
                 <Header.H3 className="mt-6 !text-gray-600">Used In</Header.H3>
-                <ul className="prose-sm prose">
-                  {frontMatter['usedIn'].map((course) => (
+                <ul className="prose-sm prose text-center md:text-left">
+                  {frontMatter['usedIn'].map((course: any) => (
                     <li key={course.name}>{course.name}</li>
                   ))}
                 </ul>
-              </div>
+              </>
             )}
           </div>
         </div>
