@@ -135,7 +135,7 @@ function PageHead() {
       <div className="flex relative items-center md:items-stretch">
         <Logo />
         <MenuIcon
-          className="absolute right-0 w-10 mr-4 md:hidden"
+          className="absolute right-0 w-10 mr-4 hover:cursor-pointer md:hidden"
           onClick={() => setOpen(!isOpen)}
         />
       </div>
