@@ -17,20 +17,12 @@ interface Props {
 const components = {}
 
 function Game({ source, frontMatter }: Props) {
-  var radarChartCharacteristics = []
-  frontMatter.radarChartCharacteristics.map((item: any) => {
-    radarChartCharacteristics.push({
+  const radarChartData = frontMatter.radarCharts.map((singleChart: any) => {
+    const temp = singleChart.content.map((item: any) => ({
       subject: item.name,
       value: item.value,
-    })
-  })
-
-  var radarChartGamificationElements = []
-  frontMatter.radarChartGamificationElements.map((item: any) => {
-    radarChartGamificationElements.push({
-      subject: item.name,
-      value: item.value,
-    })
+    }))
+    return temp
   })
 
   return (
@@ -58,7 +50,7 @@ function Game({ source, frontMatter }: Props) {
                     iste ipsa quae adipisci qui suscipit. Sint?
                   </p>
                   <div className="flex-1">
-                    <RadarChart data={radarChartCharacteristics} />
+                    <RadarChart data={radarChartData[0]} />
                   </div>
                 </div>
               </div>
@@ -73,7 +65,7 @@ function Game({ source, frontMatter }: Props) {
                     placeat. Ad quisquam impedit beatae libero quam!
                   </p>
                   <div className="flex-1">
-                    <RadarChart data={radarChartGamificationElements} />
+                    <RadarChart data={radarChartData[1]} />
                   </div>
                 </div>
               </div>
