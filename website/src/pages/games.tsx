@@ -26,13 +26,13 @@ const GAMES = [
     name: 'Derivatives Game',
     href: '/games/derivatives-game',
     imgSrc: UnderConstructionImage,
-    tags: ['simulation', 'trading'],
+    tags: ['simulation', 'trading', 'work in progress'],
   },
   {
     name: 'Private Banking Game',
     href: '/games/private-banking-game',
     imgSrc: UnderConstructionImage,
-    tags: ['serious game', 'banking'],
+    tags: ['serious game', 'banking', 'work in progress'],
   },
 ]
 const COURSES = [
