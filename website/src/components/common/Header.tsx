@@ -3,10 +3,12 @@ import clsx from 'clsx'
 interface Props {
   children: React.ReactNode
   className?: string
+  align?: string
 }
 
 const defaultProps = {
   className: undefined,
+  align: undefined,
 }
 
 function H1({ children, className }: Props) {
@@ -22,17 +24,20 @@ function H1({ children, className }: Props) {
   )
 }
 
-function H2({ children, className }: Props) {
-  return (
-    <h2
-      className={clsx(
-        'mb-2 text-xl sm:text-2xl lg:text-3xl md:mb-4 font-kollektif-bold text-center md:text-left',
-        className
-      )}
-    >
-      {children}
-    </h2>
-  )
+function H2({ children, className, align }: Props) {
+  let styles = ''
+  if (align === 'left') {
+    styles =
+      'mb-2 text-xl sm:text-2xl lg:text-3xl md:mb-4 text-left font-kollektif-bold md:text-left'
+  } else if (align === 'right') {
+    styles =
+      'mb-2 text-xl sm:text-2xl lg:text-3xl md:mb-4 text-left font-kollektif-bold md:text-right'
+  } else {
+    styles =
+      'mb-2 text-xl sm:text-2xl lg:text-3xl md:mb-4 font-kollektif-bold text-center md:text-left'
+  }
+
+  return <h2 className={clsx(styles, className)}>{children}</h2>
 }
 
 function H3({ children, className }: Props) {
