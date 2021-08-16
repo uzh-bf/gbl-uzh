@@ -24,6 +24,9 @@ function Game({ source, frontMatter }: Props) {
     }))
     return temp
   })
+  const radarCartTexts = frontMatter.radarCharts.map(
+    (singleChart: any) => singleChart.text
+  )
 
   return (
     <PageWithHeader title={frontMatter.title}>
@@ -32,7 +35,9 @@ function Game({ source, frontMatter }: Props) {
       </TitleImage>
 
       <Content>
-        <Header.H2 className="mb-2 md:mb-4">{frontMatter.subtitle}</Header.H2>
+        <Header.H2 className="mb-2 md:mb-4" align="left">
+          {frontMatter.subtitle}
+        </Header.H2>
         <div className="flex flex-col items-start md:flex-row">
           <div className="flex-1 pb-4 md:pb-0 md:pr-8">
             <p className="prose max-w-none">
@@ -43,12 +48,7 @@ function Game({ source, frontMatter }: Props) {
               <div className="flex-1 mt-8">
                 <Header.H3>Characteristics</Header.H3>
                 <div className="inline md:flex md:flex-row">
-                  <p className="flex-1 prose-sm prose">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Ipsum blanditiis corrupti porro tempore necessitatibus
-                    dolorem dolor, animi nihil nam pariatur libero quos commodi
-                    iste ipsa quae adipisci qui suscipit. Sint?
-                  </p>
+                  <p className="flex-1 prose-sm prose">{radarCartTexts[0]}</p>
                   <div className="mt-4 mb-6 flex-1 md:mt-0">
                     <RadarChart data={radarChartData[0]} />
                   </div>
@@ -58,12 +58,7 @@ function Game({ source, frontMatter }: Props) {
               <div className="flex-1 mt-4">
                 <Header.H3>Gamification Elements</Header.H3>
                 <div className="inline md:flex md:flex-row">
-                  <p className="flex-1 prose-sm prose">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Illum sint consequuntur, id ducimus eius aperiam dicta
-                    sapiente, error et obcaecati temporibus soluta molestias
-                    placeat. Ad quisquam impedit beatae libero quam!
-                  </p>
+                  <p className="flex-1 prose-sm prose">{radarCartTexts[1]}</p>
                   <div className="mt-4 mb-6 flex-1 md:mt-0">
                     <RadarChart data={radarChartData[1]} />
                   </div>
@@ -99,21 +94,25 @@ function Game({ source, frontMatter }: Props) {
             </div>
 
             <Header.H3 className="mt-6 !text-gray-600">Imprint</Header.H3>
-            <p className="prose-sm prose text-center md:text-left">
-              <ReactMarkdown>{frontMatter.imprint}</ReactMarkdown>
-            </p>
+            <ReactMarkdown className="prose-sm prose text-center md:text-left">
+              {frontMatter.imprint}
+            </ReactMarkdown>
 
             <Header.H3 className="mt-6 !text-gray-600">Contact</Header.H3>
-            <p className="prose-sm prose text-center md:text-left">
-              <ReactMarkdown>{frontMatter.contact}</ReactMarkdown>
-            </p>
+            <ReactMarkdown className="prose-sm prose text-center md:text-left">
+              {frontMatter.contact}
+            </ReactMarkdown>
 
             {frontMatter['usedIn'] && (
               <>
                 <Header.H3 className="mt-6 !text-gray-600">Used In</Header.H3>
-                <ul className="prose-sm prose text-center md:text-left">
+                <ul>
                   {frontMatter['usedIn'].map((course: any) => (
-                    <li key={course.name}>{course.name}</li>
+                    <li key={course.name}>
+                      <p className="prose-sm prose text-center md:text-left">
+                        {course.name}
+                      </p>
+                    </li>
                   ))}
                 </ul>
               </>
