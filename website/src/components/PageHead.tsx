@@ -1,7 +1,9 @@
+import { MenuIcon } from '@heroicons/react/solid'
 import clsx from 'clsx'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import React, { useState } from 'react'
 import LogoImage from '../../public/images/logo_temp_beta.jpg'
 
 const NAVIGATION_ITEMS = [
@@ -36,11 +38,14 @@ NavigationItem.defaultProps = {
   isActive: false,
 }
 
-function Navigation() {
+interface NavigationProps {
+  isOpen: boolean
+}
+function Navigation({ isOpen }: NavigationProps) {
   const router = useRouter()
 
-  return (
-    <nav className="flex flex-col order-1 mt-8 md:order-2 md:flex-row">
+  const mobileMenu = (
+    <nav className="flex flex-col order-1 mt-8 md:hidden isOpen:hidden">
       <NavigationItem isActive={router.pathname === '/'} href="/">
         Home
       </NavigationItem>
@@ -55,6 +60,41 @@ function Navigation() {
       ))}
     </nav>
   )
+
+  const mobileMenuDrawer = (isOpen: boolean) => {
+    if (isOpen) {
+      return mobileMenu
+    } else {
+      return <></>
+    }
+  }
+
+  return (
+    <>
+      {/* Menu for medium / large screens */}
+      <nav className="hidden flex-col order-1 mt-8 md:order-2 md:flex-row md:flex">
+        <NavigationItem isActive={router.pathname === '/'} href="/">
+          Home
+        </NavigationItem>
+        {NAVIGATION_ITEMS.map(({ href, label }) => (
+          <NavigationItem
+            key={href}
+            isActive={router.pathname.includes(href)}
+            href={href}
+          >
+            {label}
+          </NavigationItem>
+        ))}
+      </nav>
+
+      {/* Menu for mobile device screens */}
+      {mobileMenuDrawer(isOpen)}
+    </>
+  )
+}
+
+Navigation.defaultProps = {
+  isOpen: false,
 }
 
 function Breadcrumbs() {
@@ -86,12 +126,20 @@ function Logo() {
 }
 
 function PageHead() {
+  const [isOpen, setOpen] = useState(false)
+
   return (
     <header className="flex flex-col justify-between max-w-6xl pt-4 m-auto md:flex-row">
-      <Logo />
+      <div className="flex relative items-center md:items-stretch">
+        <Logo />
+        <MenuIcon
+          className="absolute right-0 w-10 mr-4 md:hidden"
+          onClick={() => setOpen(!isOpen)}
+        />
+      </div>
       <div className="flex flex-col justify-between flex-initial md:items-end md:border-none md:pr-8">
         <Breadcrumbs />
-        <Navigation />
+        <Navigation isOpen={isOpen} />
       </div>
     </header>
   )
