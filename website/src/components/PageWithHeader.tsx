@@ -4,12 +4,17 @@ import PageHead from './PageHead'
 
 interface Props {
   title: string
+  withFooter?: boolean
   children: React.ReactNode
 }
 
-function PageWithHeader({ title, children }: Props) {
+const defaultProps = {
+  withFooter: true,
+}
+
+function PageWithHeader({ title, children, withFooter }: Props) {
   return (
-    <div className="flex flex-col h-full ">
+    <div className="flex flex-col h-full">
       <Head>
         <title>GBL@DBF - {title}</title>
       </Head>
@@ -20,9 +25,11 @@ function PageWithHeader({ title, children }: Props) {
         </div>
         {/* <div className="h-full">{children}</div> */}
       </div>
-      <Footer />
+      {withFooter && <Footer />}
     </div>
   )
 }
+
+PageWithHeader.defaultProps = defaultProps
 
 export default PageWithHeader

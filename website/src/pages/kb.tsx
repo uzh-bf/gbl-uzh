@@ -4,7 +4,7 @@ import PageWithHeader from '../components/PageWithHeader'
 
 function KnowledgeBase() {
   return (
-    <PageWithHeader title="Knowledge Base">
+    <PageWithHeader title="Knowledge Base" withFooter={false}>
       <TitleBackground>
         <Title title="Knowledge Base" />
       </TitleBackground>
