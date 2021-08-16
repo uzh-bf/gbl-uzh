@@ -1,6 +1,6 @@
 ---
 slug: private-banking-game
-thumbnail: ""
+thumbnail: ''
 title: Private Banking Advisory Game
 subtitle: A serious game to enhance your understanding of risk and return in an
   investment context
@@ -23,7 +23,38 @@ keywords:
 imprint: Department of Banking and Finance
 contact: Dr. Benjamin Wilding,
   <https://www.bf.uzh.ch/de/persons/wilding-benjamin>[](mailto:benjamin.wilding@bf.uzh.ch)
+radarChartCharacteristics:
+  - name: Analytic Thinking
+    value: 6
+  - name: Collaboration
+    value: 2
+  - name: Competition
+    value: 2
+  - name: Entertainment
+    value: 7
+  - name: Precognition
+    value: 4
+  - name: Soft skills
+    value: 9
+radarChartGamificationElements:
+  - name: Epic Meaning
+    value: 5
+  - name: Empowerment
+    value: 5
+  - name: Social Influence
+    value: 5
+  - name: Unpredictability
+    value: 5
+  - name: Avoidance
+    value: 5
+  - name: Scarcity
+    value: 5
+  - name: Ownership
+    value: 5
+  - name: Accomplishment
+    value: 5
 ---
+
 The Private Banking Advisory Game helps players to learn how to carry out holistic investment advisory discussions. The game design requires the player to manage the triangular relationship between profits (thinking in terms of the company), customer satisfaction (thinking in terms of the customer), and soft skills (being friendly and empathetic).​
 
 Client satisfaction is highly dependent on choosing the right investment strategy. Therefore, the client-advisor must determine the client’s needs (risk, return, unique circumstances) with the client and propose the right strategy. This strategy forms the bridge between the client and asset management. This serious game intends to train people for the holistic consulting process.​

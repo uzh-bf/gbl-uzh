@@ -17,6 +17,22 @@ interface Props {
 const components = {}
 
 function Game({ source, frontMatter }: Props) {
+  var radarChartCharacteristics = []
+  frontMatter.radarChartCharacteristics.map((item: any) => {
+    radarChartCharacteristics.push({
+      subject: item.name,
+      value: item.value,
+    })
+  })
+
+  var radarChartGamificationElements = []
+  frontMatter.radarChartGamificationElements.map((item: any) => {
+    radarChartGamificationElements.push({
+      subject: item.name,
+      value: item.value,
+    })
+  })
+
   return (
     <PageWithHeader title={frontMatter.title}>
       <TitleImage imgSrc={frontMatter.thumbnail}>
@@ -42,34 +58,7 @@ function Game({ source, frontMatter }: Props) {
                     iste ipsa quae adipisci qui suscipit. Sint?
                   </p>
                   <div className="flex-1">
-                    <RadarChart
-                      data={[
-                        {
-                          subject: 'Analytic Thinking',
-                          value: 6,
-                        },
-                        {
-                          subject: 'Collaboration',
-                          value: 2,
-                        },
-                        {
-                          subject: 'Competition',
-                          value: 2,
-                        },
-                        {
-                          subject: 'Entertainment',
-                          value: 7,
-                        },
-                        {
-                          subject: 'Precognition',
-                          value: 4,
-                        },
-                        {
-                          subject: 'Soft Skills',
-                          value: 9,
-                        },
-                      ]}
-                    />
+                    <RadarChart data={radarChartCharacteristics} />
                   </div>
                 </div>
               </div>
@@ -84,18 +73,7 @@ function Game({ source, frontMatter }: Props) {
                     placeat. Ad quisquam impedit beatae libero quam!
                   </p>
                   <div className="flex-1">
-                    <RadarChart
-                      data={[
-                        'Epic Meaning',
-                        'Empowerment',
-                        'Social Influence',
-                        'Unpredictability',
-                        'Avoidance',
-                        'Scarcity',
-                        'Ownership',
-                        'Accomplishment',
-                      ].map((subject) => ({ subject, value: 5 }))}
-                    />
+                    <RadarChart data={radarChartGamificationElements} />
                   </div>
                 </div>
               </div>
