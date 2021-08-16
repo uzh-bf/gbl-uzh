@@ -12,7 +12,7 @@ import PageWithHeader from '../components/PageWithHeader'
 const GAMES = [
   {
     name: 'uFin: The Challenge',
-    href: '/games/ufin',
+    href: '/games/u-fin',
     imgSrc: uFinImage,
     tags: ['serious game', 'ethics'],
   },
