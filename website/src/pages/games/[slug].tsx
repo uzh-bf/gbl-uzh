@@ -24,7 +24,7 @@ function Game({ source, frontMatter }: Props) {
     }))
     return temp
   })
-  const radarCartTexts = frontMatter.radarCharts.map(
+  const radarChartTexts = frontMatter.radarCharts.map(
     (singleChart: any) => singleChart.text
   )
 
@@ -48,7 +48,7 @@ function Game({ source, frontMatter }: Props) {
               <div className="flex-1 mt-8">
                 <Header.H3>Characteristics</Header.H3>
                 <div className="inline md:flex md:flex-row">
-                  <p className="flex-1 prose-sm prose">{radarCartTexts[0]}</p>
+                  <p className="flex-1 prose-sm prose">{radarChartTexts[0]}</p>
                   <div className="mt-4 mb-6 flex-1 md:mt-0">
                     <RadarChart data={radarChartData[0]} />
                   </div>
@@ -58,7 +58,7 @@ function Game({ source, frontMatter }: Props) {
               <div className="flex-1 mt-4">
                 <Header.H3>Gamification Elements</Header.H3>
                 <div className="inline md:flex md:flex-row">
-                  <p className="flex-1 prose-sm prose">{radarCartTexts[1]}</p>
+                  <p className="flex-1 prose-sm prose">{radarChartTexts[1]}</p>
                   <div className="mt-4 mb-6 flex-1 md:mt-0">
                     <RadarChart data={radarChartData[1]} />
                   </div>

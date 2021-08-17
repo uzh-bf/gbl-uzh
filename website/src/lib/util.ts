@@ -20,8 +20,13 @@ export function getStaticProps(dir_name) {
     )
     const source = fs.readFileSync(mdxPath)
     const { content, data } = matter(source)
-    const mdxSource = await serialize(content, { scope: data })
-    return { props: { source: mdxSource, frontMatter: data } }
+    const mdxSource = await serialize(content)
+    return {
+      props: {
+        source: mdxSource,
+        frontMatter: data,
+      },
+    }
   }
 }
 
