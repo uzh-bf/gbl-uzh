@@ -3,7 +3,7 @@ import matter from 'gray-matter'
 import { serialize } from 'next-mdx-remote/serialize'
 import path from 'path'
 
-export function getStaticProps(dir_name) {
+export function getStaticProps(dir_name: string) {
   return async ({ params }) => {
     // slugs come in like "portfolio-management-game"
     // but we want to read from files like "Portfolio Management Game.md"
@@ -30,7 +30,7 @@ export function getStaticProps(dir_name) {
   }
 }
 
-export function getStaticPaths(dir_name) {
+export function getStaticPaths(dir_name: string) {
   return async () => {
     const paths = fs
       .readdirSync(path.join(process.cwd(), `../kb/${dir_name}/`))
@@ -44,5 +44,20 @@ export function getStaticPaths(dir_name) {
       .map((slug) => ({ params: { slug } }))
 
     return { paths, fallback: false }
+  }
+}
+
+export function getStaticPropsSinglePage(dir_name: string, slug: string) {
+  return async () => {
+    const mdxPath = path.join(process.cwd(), `../kb/${dir_name}/${slug}.md`)
+    const source = fs.readFileSync(mdxPath)
+    const { content, data } = matter(source)
+    const mdxSource = await serialize(content)
+    return {
+      props: {
+        source: mdxSource,
+        frontMatter: data,
+      },
+    }
   }
 }

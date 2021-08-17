@@ -4,7 +4,7 @@ import Tag from './Tag'
 
 interface Props {
   name?: string
-  imgSrc: StaticImageData
+  imgSrc: StaticImageData | string
   tags?: string[]
   className?: string
   onClick?: () => void
