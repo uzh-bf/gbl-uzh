@@ -35,7 +35,7 @@ function VideoWithSummary({ title, videoSrc, children, keyTakeaways }: Props) {
                   ))}
                 </ul>
               ) : (
-                keyTakeaways
+                <div className="relative">{keyTakeaways}</div>
               )}
             </p>
           </div>
