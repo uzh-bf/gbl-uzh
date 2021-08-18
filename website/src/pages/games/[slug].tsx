@@ -35,7 +35,7 @@ function Game({ source, frontMatter }: Props) {
 
   return (
     <>
-      <div className="z-0 absolute">
+      <div className="absolute w-screen">
         <PageWithHeader title={frontMatter.title}>
           <TitleImage imgSrc={frontMatter.thumbnail}>
             <Title title={frontMatter.title} />
