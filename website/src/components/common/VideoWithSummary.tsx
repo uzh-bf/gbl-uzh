@@ -10,7 +10,9 @@ interface Props {
 function VideoWithSummary({ title, videoSrc, children, keyTakeaways }: Props) {
   return (
     <div>
-      <p className="prose text-justify max-w-none">{children}</p>
+      <p className="hidden prose text-justify max-w-none md:block">
+        {children}
+      </p>
       {videoSrc && (
         <div className="flex flex-col justify-between mt-4 md:flex-row">
           <div className="flex-initial w-full border rounded shadow h-80 md:flex-1">
@@ -25,6 +27,9 @@ function VideoWithSummary({ title, videoSrc, children, keyTakeaways }: Props) {
             />
           </div>
           <div className="flex-1 mt-4 md:mt-0 md:pl-6">
+            <p className="prose text-justify max-w-none md:hidden mb-5">
+              {children}
+            </p>
             <p className="prose">
               {Array.isArray(keyTakeaways) ? (
                 <ul className="!mt-0">

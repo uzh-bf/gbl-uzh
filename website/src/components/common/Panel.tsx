@@ -95,14 +95,11 @@ function Panel({
                   <li>TBD References</li>
                 </ul>
               </div> */}
-                {/* <div className="flex-1">
-                <div className="font-bold">Resources</div>
-              </div> */}
               </div>
             </div>
           )}
           <div className="flex justify-between pt-4 mt-4 border-t">
-            <div>
+            <div className="w-1/2 mr-4">
               {onPrevious && (
                 <Button onClick={onPrevious}>
                   <Button.ArrowLeft />
@@ -110,7 +107,7 @@ function Panel({
                 </Button>
               )}
             </div>
-            <div>
+            <div className="w-1/2 ml-4">
               {onNext && (
                 <Button onClick={onNext}>
                   <Button.Arrow />
