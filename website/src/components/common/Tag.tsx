@@ -23,11 +23,11 @@ function Tag({ label, className }: Props) {
   return (
     <div
       className={clsx(
-        'flex mb-1 bg-yellow-400 px-2 mr-2 text-sm prose text-gray-600 border rounded shadow bg-opacity-95',
+        'flex mb-1 bg-yellow-400 px-2 mr-2 text-sm prose text-gray-600 border rounded shadow bg-opacity-95 h-6',
         className
       )}
     >
-      <ExclamationIcon className="w-4 mr-1 bottom-0" />{' '}
+      <ExclamationIcon className="w-4 mr-1 bottom-0" />
       {'In Progress / Development'}
     </div>
   )
