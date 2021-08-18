@@ -70,7 +70,10 @@ function Game({ source, frontMatter }: Props) {
                   <Header.H3>Gallery</Header.H3>
                   <div className="container grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 mx-auto">
                     {frontMatter.gallery.map((image: any) => (
-                      <div className="rounded m-auto hover:opacity-70">
+                      <div
+                        className="rounded m-auto hover:opacity-70"
+                        key={frontMatter.gallery.indexOf(image)}
+                      >
                         <img
                           className="rounded shadow-md"
                           src={image.imgSrc}
