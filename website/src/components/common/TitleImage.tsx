@@ -11,7 +11,7 @@ function TitleImage({ imgSrc, children }: Props) {
     <div className={clsx(imgSrc && 'relative shadow-lg')}>
       <TitleBackground
         className={clsx(
-          'p-8 bg-opacity-80',
+          'md:p-8 bg-opacity-80',
           imgSrc && 'p-4 absolute z-10 bottom-5 sm:top-auto sm:bottom-10 '
         )}
       >

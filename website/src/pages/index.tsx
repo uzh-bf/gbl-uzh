@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import Script from 'next/script'
 import DevIcon from '../../public/images/einzelarbeit_icon.svg'
 import StudentIcon from '../../public/images/gruppenarbeit_icon.svg'
 import PFMImage from '../../public/images/pfm_game.png'
@@ -21,8 +20,6 @@ function Home() {
 
   return (
     <PageWithHeader title="Home">
-      <Script src="https://identity.netlify.com/v1/netlify-identity-widget.js" />
-
       <TitleImage imgSrc="/images/hero5.jpg">
         <Title title="Learning-by-doing." />
         <Title title="Literally." />
@@ -74,7 +71,7 @@ function Home() {
                   <div className="mt-4">
                     <div className="sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
                       {[
-                        ['uFin: The Challenge', '/games/ufin', uFinImage],
+                        ['uFin: The Challenge', '/games/u-fin', uFinImage],
                         [
                           'Portfolio Management Simulation',
                           '/games/portfolio-management-simulation',
