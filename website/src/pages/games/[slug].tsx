@@ -1,4 +1,4 @@
-import { XIcon } from '@heroicons/react/solid'
+import { PresentationChartBarIcon, XIcon } from '@heroicons/react/solid'
 import { MDXRemote } from 'next-mdx-remote'
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
@@ -76,8 +76,9 @@ function Game({ source, frontMatter }: Props) {
                     </div>
                   </div>
 
-                  {frontMatter.gallery !== '' ? (
-                    <div className="flex-1 mt-4 justify-center">
+                  {frontMatter.gallery !== '' &&
+                  frontMatter.gallery !== undefined ? (
+                    <div className="flex-1 mt-8 justify-center">
                       <Header.H3>Gallery</Header.H3>
                       <div className="container grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 mx-auto">
                         {frontMatter.gallery.map((image: any) => (
@@ -97,6 +98,31 @@ function Game({ source, frontMatter }: Props) {
                             />
                           </div>
                         ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <></>
+                  )}
+                  {frontMatter.resources !== '' &&
+                  frontMatter.resources !== undefined ? (
+                    <div className="flex-1 mt-8">
+                      <Header.H3>Resources</Header.H3>
+                      <div className="inline md:flex md:flex-row">
+                        <ul>
+                          {frontMatter.resources.map((item: any) => (
+                            <li key={item.name}>
+                              <a
+                                className="flex flex-row items-center hover:text-uzh-blue-100"
+                                target="_blank"
+                                href={item.href}
+                                rel="noreferrer"
+                              >
+                                <PresentationChartBarIcon className="h-4 mr-1" />
+                                {item.name}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     </div>
                   ) : (
