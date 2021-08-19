@@ -52,7 +52,7 @@ function Panel({
       >
         <div className="flex flex-row items-center justify-between">
           <div>
-            <Header.H2 className="flex-1 !mb-0">{title}</Header.H2>
+            <Header.H2 className="flex-1 !mb-0 !text-left">{title}</Header.H2>
             <div className="text-left text-gray-700">{duration}</div>
           </div>
           <div className="flex-initial w-6">{isCompleted && <CheckIcon />}</div>
@@ -70,9 +70,7 @@ function Panel({
             </VideoWithSummary>
           )}
           {!videoSrc && (
-            <p className="hidden prose text-justify max-w-none md:block">
-              {children}
-            </p>
+            <p className="block prose text-justify max-w-none">{children}</p>
           )}
 
           {Array.isArray(resources) && (
