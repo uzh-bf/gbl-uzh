@@ -105,7 +105,7 @@ function Panel({
           )}
           <div className="flex justify-between pt-4 mt-4 border-t">
             {onPrevious && (
-              <Button onClick={onPrevious}>
+              <Button onClick={onPrevious} className="w-1/2 md:w-auto">
                 <Button.ArrowLeft />
                 Previous Module
               </Button>
@@ -113,14 +113,14 @@ function Panel({
             {onNext && !onPrevious && (
               <>
                 <div className="flex-1"></div>
-                <Button onClick={onNext}>
+                <Button onClick={onNext} className="w-1/2 md:w-auto">
                   <Button.Arrow />
                   Next Module
                 </Button>
               </>
             )}
             {onNext && onPrevious && (
-              <Button onClick={onNext}>
+              <Button onClick={onNext} className="w-1/2 md:w-auto">
                 <Button.Arrow />
                 Next Module
               </Button>
