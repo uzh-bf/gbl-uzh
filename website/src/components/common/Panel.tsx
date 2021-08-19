@@ -99,22 +99,18 @@ function Panel({
             </div>
           )}
           <div className="flex justify-between pt-4 mt-4 border-t">
-            <div className="w-1/2 mr-4">
-              {onPrevious && (
-                <Button onClick={onPrevious}>
-                  <Button.ArrowLeft />
-                  Previous Module
-                </Button>
-              )}
-            </div>
-            <div className="w-1/2 ml-4">
-              {onNext && (
-                <Button onClick={onNext}>
-                  <Button.Arrow />
-                  Next Module
-                </Button>
-              )}
-            </div>
+            {onPrevious && (
+              <Button onClick={onPrevious}>
+                <Button.ArrowLeft />
+                Previous Module
+              </Button>
+            )}
+            {onNext && (
+              <Button onClick={onNext}>
+                <Button.Arrow />
+                Next Module
+              </Button>
+            )}
           </div>
         </div>
       )}
