@@ -55,6 +55,25 @@ function DevelopmentWorkflow({ frontMatter, source }: Props) {
                 {module.description}
               </Panel>
             )
+          } else if (index == frontMatter.modules.length - 1) {
+            return (
+              <Panel
+                duration={module.duration}
+                isOpen={activePanel === index}
+                isCompleted={activePanel > index}
+                title={module.title}
+                videoSrc={module.videoSrc}
+                keyTakeaways={keyTakeaways()}
+                resources={module.resources.map((resource: any) => ({
+                  name: resource.name,
+                  href: resource.href,
+                }))}
+                onPrevious={() => setActivePanel(index - 1)}
+                onActivate={() => setActivePanel(index)}
+              >
+                {module.description}
+              </Panel>
+            )
           } else {
             return (
               <Panel

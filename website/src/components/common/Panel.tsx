@@ -60,13 +60,20 @@ function Panel({
       </button>
       {isOpen && (
         <div className="p-4 border border-t-0">
-          <VideoWithSummary
-            title={title}
-            videoSrc={videoSrc}
-            keyTakeaways={keyTakeaways}
-          >
-            {children}
-          </VideoWithSummary>
+          {videoSrc && (
+            <VideoWithSummary
+              title={title}
+              videoSrc={videoSrc}
+              keyTakeaways={keyTakeaways}
+            >
+              {children}
+            </VideoWithSummary>
+          )}
+          {!videoSrc && (
+            <p className="hidden prose text-justify max-w-none md:block">
+              {children}
+            </p>
+          )}
 
           {Array.isArray(resources) && (
             <div className={clsx('mt-4', videoSrc && 'pt-4 border-t')}>
@@ -105,7 +112,16 @@ function Panel({
                 Previous Module
               </Button>
             )}
-            {onNext && (
+            {onNext && !onPrevious && (
+              <>
+                <div className="flex-1"></div>
+                <Button onClick={onNext}>
+                  <Button.Arrow />
+                  Next Module
+                </Button>
+              </>
+            )}
+            {onNext && onPrevious && (
               <Button onClick={onNext}>
                 <Button.Arrow />
                 Next Module
