@@ -26,7 +26,7 @@ function NavigationItem({ isActive, children, href }: NavigationItemProps) {
     <Link href={href}>
       <div
         className={clsx(
-          'flex-1 p-1 mb-1 ml-3 mr-3 text-left text-sm text-gray-500 hover:text-uzh-blue-80 hover:cursor-pointer md:flex-initial md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
+          'flex-1 p-1 mb-1 ml-3 mr-3 text-left text-sm text-gray-500 hover:text-uzh-blue-80 hover:cursor-pointer md:flex-initial md:ml-0 md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
           isActive && 'border-uzh-red-100 text-gray-800 font-bold'
         )}
       >
@@ -74,7 +74,7 @@ function Navigation({ isOpen }: NavigationProps) {
   return (
     <>
       {/* Menu for medium / large screens */}
-      <nav className="hidden flex-col order-1 mt-8 md:order-2 md:flex-row md:flex">
+      <nav className="flex-col order-1 hidden mt-8 md:order-2 md:flex-row md:flex">
         <NavigationItem isActive={router.pathname === '/'} href="/">
           Home
         </NavigationItem>
@@ -132,7 +132,7 @@ function PageHead() {
 
   return (
     <header className="flex flex-col justify-between max-w-6xl pt-4 m-auto md:flex-row">
-      <div className="flex relative items-center md:items-stretch">
+      <div className="relative flex items-center md:items-stretch">
         <Logo />
         <MenuIcon
           className="absolute right-0 w-10 mr-4 hover:cursor-pointer md:hidden"
