@@ -8,24 +8,26 @@ interface Props {
 
 function TitleImage({ imgSrc, children }: Props) {
   return (
-    <div className={clsx(imgSrc && 'relative shadow-lg')}>
-      <TitleBackground
-        className={clsx(
-          'md:p-8 bg-opacity-80',
-          imgSrc && 'p-4 absolute z-10 bottom-5 sm:top-auto sm:bottom-10 '
-        )}
-      >
-        {children}
-      </TitleBackground>
+    <div className={clsx(imgSrc && 'border-uzh-red-100 bg-uzh-gray-20')}>
+      <div className="flex justify-center">
+        <div className="relative">
+          <TitleBackground
+            className={clsx(
+              'md:p-4 bg-opacity-70',
+              imgSrc && 'p-4 absolute z-10 bottom-5 sm:top-auto sm:bottom-10 '
+            )}
+          >
+            {children}
+          </TitleBackground>
 
-      <div className="bg-gray-100">
-        <img
-          className="z-0 w-auto m-auto opacity-100 max-h-[28rem]"
-          width="100%"
-          height="100%"
-          src={imgSrc}
-          alt=""
-        />
+          <img
+            className="z-0 opacity-100 saturate-50 w-auto max-h-[23rem] min-h-[10rem]"
+            width="100%"
+            height="100%"
+            src={imgSrc}
+            alt=""
+          />
+        </div>
       </div>
     </div>
   )
