@@ -103,29 +103,90 @@ function Panel({
               </div>
             </div>
           )}
+          {/* Simpler Layout on Mobile devices (only arrows without text are visible) */}
           <div className="flex justify-between pt-4 mt-4 border-t">
             {onPrevious && (
-              <Button onClick={onPrevious} className="w-1/2 md:w-auto">
+              <Button onClick={onPrevious}>
                 <Button.ArrowLeft />
-                Previous Module
+                <div className="hidden md:block">Previous Module</div>
               </Button>
             )}
             {onNext && !onPrevious && (
               <>
                 <div className="flex-1"></div>
-                <Button onClick={onNext} className="w-1/2 md:w-auto">
+                <Button onClick={onNext}>
+                  <Button.Arrow />
+                  <div className="hidden md:block">Next Module</div>
+                </Button>
+              </>
+            )}
+            {onNext && onPrevious && (
+              <Button onClick={onNext}>
+                <Button.Arrow />
+                <div className="hidden md:block">Next Module</div>
+              </Button>
+            )}
+          </div>
+          {/* Stacking Layout for buttons on mobile devices
+          <div className="hidden justify-between pt-4 mt-4 border-t md:flex">
+            {onPrevious && (
+              <Button onClick={onPrevious}>
+                <Button.ArrowLeft />
+                <div className="hidden md:block">Previous Module</div>
+              </Button>
+            )}
+            {onNext && !onPrevious && (
+              <>
+                <div className="flex-1"></div>
+                <Button onClick={onNext}>
+                  <Button.Arrow />
+                  <div className="hidden md:block">Next Module</div>
+                </Button>
+              </>
+            )}
+            {onNext && onPrevious && (
+              <Button onClick={onNext}>
+                <Button.Arrow />
+                <div className="hidden md:block">Next Module</div>
+              </Button>
+            )}
+          </div>
+          <div className="pt-4 mt-4 border-t md:hidden">
+            {onPrevious && (
+              <Button
+                onClick={onPrevious}
+                className="w-full justify-center md:w-auto"
+              >
+                <Button.ArrowLeft />
+                Previous Module
+              </Button>
+            )}
+          </div>
+          <div className="mt-1 md:hidden">
+            {onNext && !onPrevious && (
+              <>
+                <div className="flex-1"></div>
+                <Button
+                  onClick={onNext}
+                  className="w-full justify-center md:w-auto"
+                >
                   <Button.Arrow />
                   Next Module
                 </Button>
               </>
             )}
+          </div>
+          <div className="pt-1 mt-1 md:hidden">
             {onNext && onPrevious && (
-              <Button onClick={onNext} className="w-1/2 md:w-auto">
+              <Button
+                onClick={onNext}
+                className="w-full justify-center md:w-auto"
+              >
                 <Button.Arrow />
                 Next Module
               </Button>
             )}
-          </div>
+            </div> */}
         </div>
       )}
     </div>
