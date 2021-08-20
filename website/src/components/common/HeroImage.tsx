@@ -13,12 +13,16 @@ function HeroImage({ imgSrc, label, href, className }: Props) {
     <a
       href={href}
       className={clsx(
-        'flex flex-row items-center px-2 mb-4 text-xl text-center border cursor-pointer last:mb-0 md:mb-0 md:mr-8 md:last:mr-0 rounded-xl md:p-4 md:flex-1 md:flex-col text-uzh-red-100 hover:shadow',
+        'rounded-xl flex flex-row items-center px-2 mb-4 text-center cursor-pointer last:mb-0 md:mb-0 md:last:mr-0 md:p-4 md:flex-1 md:flex-col text-uzh-red-100 hover:bg-uzh-gray-20',
         className
       )}
     >
-      <Image height={200} width={250} src={imgSrc} alt="Hero" />
-      <p className="pl-8 md:pl-0">{label}</p>
+      <div className="relative flex-1">
+        <Image src={imgSrc} alt="Hero" layout="intrinsic" />
+      </div>
+      <p className="flex-1 pl-8 text-2xl font-kollektif-bold md:pl-0">
+        {label}
+      </p>
     </a>
   )
 }
@@ -31,7 +35,7 @@ HeroImage.Group = function HeroImageGroup({
   children,
 }: React.PropsWithChildren<{}>) {
   return (
-    <div className="flex flex-col max-w-3xl md:m-auto md:justify-between md:flex-row">
+    <div className="flex flex-col md:m-auto md:justify-between md:flex-row">
       {children}
     </div>
   )
