@@ -20,41 +20,37 @@ function Home() {
 
   return (
     <PageWithHeader title="Home">
-      <TitleImage imgSrc="/images/hero5.jpg">
-        <Title title="Learning-by-doing." />
-        <Title title="Literally." />
+      <TitleImage imgSrc="/images/DSC01864_cut4.jpg">
+        <Title title="Game-Based Learning" className="mb-4" size="large" />
+        <Title title="Learning-by-doing. Literally." size="medium" />
       </TitleImage>
 
-      <div className="px-8 py-8 md:py-16 bg-uzh-gray-20">
-        <HeroImage.Group>
-          <Link href="/kb" passHref>
-            <HeroImage
-              className="bg-white bg-opacity-70"
-              href="/kb"
-              imgSrc={TeacherIcon}
-              label="for teachers"
-            />
-          </Link>
-          <Link href="/games" passHref>
-            <HeroImage
-              className="bg-white bg-opacity-70"
-              href="/games"
-              imgSrc={StudentIcon}
-              label="for students"
-            />
-          </Link>
-          <Link href="/dev" passHref>
-            <HeroImage
-              className="bg-white bg-opacity-70"
-              href="/dev"
-              imgSrc={DevIcon}
-              label="for developers"
-            />
-          </Link>
-        </HeroImage.Group>
-      </div>
-
       <Content>
+        <div className="py-8 md:py-16">
+          <HeroImage.Group>
+            <Link href="/kb" passHref>
+              <HeroImage
+                href="/kb"
+                imgSrc={TeacherIcon}
+                label="GBL for teachers"
+              />
+            </Link>
+            <Link href="/games" passHref>
+              <HeroImage
+                href="/games"
+                imgSrc={StudentIcon}
+                label="GBL for students"
+              />
+            </Link>
+            <Link href="/dev" passHref>
+              <HeroImage
+                href="/dev"
+                imgSrc={DevIcon}
+                label="GBL for developers"
+              />
+            </Link>
+          </HeroImage.Group>
+        </div>
         <div className="py-8 md:py-16">
           <div className="max-w-6xl m-auto">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
@@ -110,7 +106,6 @@ function Home() {
             </div>
           </div>
         </div>
-
         <HomeSection>
           <HomeSection.Content
             title="Knowledge Base"
@@ -123,7 +118,6 @@ function Home() {
           </HomeSection.Content>
           <HomeSection.Hero src="/images/kma-SiOJXlWeWc0-unsplash.jpg" />
         </HomeSection>
-
         <HomeSection>
           <HomeSection.Hero padded contain src="/images/dev_workflow.png" />
           <HomeSection.Content
@@ -136,7 +130,6 @@ function Home() {
             </Button>
           </HomeSection.Content>
         </HomeSection>
-
         <HomeSection>
           <HomeSection.Content
             title="Roadmap"
@@ -150,19 +143,42 @@ function Home() {
             </Button>
           </HomeSection.Content>
           <HomeSection.Hero
-            src="/images/matt-duncan-IUY_3DvM__w-unsplash.jpg"
-            className="opacity-70"
+            // src="/images/DSC01773_cut1.jpg"
+            src="/images/DSC01773_cut1.jpg"
+            className="saturate-50"
           />
         </HomeSection>
 
         <HomeSection>
           <HomeSection.Hero
             src="/images/group_play.png"
-            className="opacity-70"
+            className="saturate-50"
           />
-          <HomeSection.Content
-            title="“"
-            content="“Traditional learning has provided superficial learning through text books. Games are best at teaching a deeper level of learning.” Eric Klopfer, MIT"
+          <HomeSection.Content title="“">
+            <p className="prose prose-lg">
+              “I absolutely loved the Portfolio Management Game, it was great
+              fun and required us to apply our knowledge and to work
+              meticulously to come up with good decisions for our portfolio, our
+              customers, and our bank in general. It&apos;s a very educational,
+              fun tool.”
+            </p>
+            <p className="mt-4 italic prose">
+              Student from our International Summer School in 2020
+            </p>
+          </HomeSection.Content>
+        </HomeSection>
+        <HomeSection>
+          <HomeSection.Content title="“">
+            <p className="prose prose-lg">
+              “Traditional learning has provided superficial learning through
+              text books. Games are best at teaching a deeper level of
+              learning.”
+            </p>
+            <p className="mt-4 italic prose">Eric Klopfer, MIT</p>
+          </HomeSection.Content>
+          <HomeSection.Hero
+            src="/images/DSC01645_cut1.jpg"
+            className="saturate-50"
           />
         </HomeSection>
       </Content>
