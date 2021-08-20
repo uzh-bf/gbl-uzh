@@ -21,7 +21,7 @@ HomeSection.defaultProps = {
 
 interface HomeSectionContentProps {
   title: string
-  content: string
+  content?: string
   children?: React.ReactNode
 }
 
@@ -36,7 +36,7 @@ HomeSection.Content = function HomeSectionContent({
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
           {title}
         </h1>
-        <p className="mt-4 prose md:prose-lg">{content}</p>
+        {content && <p className="mt-4 prose md:prose-lg">{content}</p>}
         {children}
       </div>
     </div>
