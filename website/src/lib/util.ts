@@ -61,3 +61,103 @@ export function getStaticPropsSinglePage(dir_name: string, slug: string) {
     }
   }
 }
+
+// getStaticProps function to parse all files within one folder
+export function getStaticPropsFolder(folder: string) {
+  return async () => {
+    let mdxSources = new Array()
+    let dataHandles = new Array()
+    let fileMissingArr = new Array()
+
+    const slugArr = fs
+      .readdirSync('../kb/' + folder)
+      .map((item) => item.split('.')[0])
+
+    for (let i = 0; i < slugArr.length; i++) {
+      const mdxPath = path.join(
+        process.cwd(),
+        `../kb/${folder}/${slugArr[i]}.md`
+      )
+
+      let source: Buffer
+      try {
+        source = fs.readFileSync(mdxPath)
+        fileMissingArr.push(false)
+      } catch (e) {
+        source = Buffer.from('no data available')
+        fileMissingArr.push(true)
+      }
+
+      const { content, data } = matter(source)
+      dataHandles.push(data)
+      let temp2 = await serialize(content)
+      mdxSources.push(temp2)
+    }
+
+    let outputArr = new Array(10)
+    dataHandles.forEach((element: any) =>
+      outputArr.splice(element.order, 1, element)
+    )
+
+    return {
+      props: {
+        sourceArr: mdxSources,
+        frontMatterArr: dataHandles,
+        filenames: slugArr,
+        fileMissingArr: fileMissingArr,
+      },
+    }
+  }
+}
+
+// getStaticPropsFunction to parse the content of multiple folders
+/*export function getStaticPropsFolders(folders: Array<string>) {
+  return async () => {
+    let mdxSources = new Array()
+    let dataHandles = new Array()
+    let fileSlugs = new Array()
+    let fileMissingArr = new Array()
+
+    for (let k = 0; k < folders.length; k++) {
+      const slugArr = fs
+        .readdirSync('../kb/' + folders[k])
+        .map((item) => item.split('.')[0])
+
+      fileSlugs.splice(k, 1, slugArr)
+      dataHandles[k] = new Array()
+      mdxSources[k] = new Array()
+      let fileMissing = []
+
+      for (let i = 0; i < slugArr.length; i++) {
+        const mdxPath = path.join(
+          process.cwd(),
+          `content/${folders[k]}/${slugArr[i]}.md`
+        )
+
+        let source: Buffer
+        try {
+          source = fs.readFileSync(mdxPath)
+          fileMissing.push(false)
+        } catch (e) {
+          source = Buffer.from('no data available')
+          fileMissing.push(true)
+        }
+
+        const { content, data } = matter(source)
+        dataHandles[k].push(data)
+        let temp2 = await serialize(content)
+        mdxSources[k].push(temp2)
+      }
+      fileMissingArr.push(fileMissing)
+    }
+
+    return {
+      props: {
+        sourceArr: mdxSources,
+        frontMatterArr: dataHandles,
+        filenames: fileSlugs,
+        fileMissingArr: fileMissingArr,
+      },
+    }
+  }
+}*/
