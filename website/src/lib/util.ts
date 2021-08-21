@@ -94,15 +94,18 @@ export function getStaticPropsFolder(folder: string) {
       mdxSources.push(temp2)
     }
 
-    let outputArr = new Array(10)
-    dataHandles.forEach((element: any) =>
-      outputArr.splice(element.order, 1, element)
-    )
+    // order based on ordering attribute, if one is available
+    let outputArr = new Array(dataHandles.length)
+    if (dataHandles[0].order) {
+      dataHandles.forEach((element: any) =>
+        outputArr.splice(element.order, 1, element)
+      )
+    }
 
     return {
       props: {
         sourceArr: mdxSources,
-        frontMatterArr: dataHandles,
+        frontMatterArr: outputArr,
         filenames: slugArr,
         fileMissingArr: fileMissingArr,
       },

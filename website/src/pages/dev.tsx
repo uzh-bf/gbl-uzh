@@ -7,100 +7,6 @@ import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
 import * as Util from '../lib/util'
 
-const Modules = (
-  frontMatterArr: any,
-  activePanel: number,
-  setActivePanel: any
-) => {
-  let output = new Array(frontMatterArr.length)
-  frontMatterArr.forEach((module: any) => {
-    const keyTakeaways = () => {
-      if (module.keyTakeawayList) {
-        return module.keyTakeawayList
-      } else {
-        return (
-          <Image
-            src={module.keyTakeawayImage.src}
-            alt={module.title}
-            width={module.keyTakeawayImage.width}
-            height={module.keyTakeawayImage.height}
-          />
-        )
-      }
-    }
-
-    if (module.order < 1) {
-      output.splice(
-        module.order,
-        1,
-        <Panel
-          key={module.order}
-          duration={module.duration}
-          isOpen={activePanel === module.order}
-          isCompleted={activePanel > module.order}
-          title={module.title}
-          videoSrc={module.videoSrc}
-          keyTakeaways={keyTakeaways()}
-          resources={module.resources.map((resource: any) => ({
-            name: resource.name,
-            href: resource.href,
-          }))}
-          onNext={() => setActivePanel(module.order + 1)}
-          onActivate={() => setActivePanel(module.order)}
-        >
-          {module.description}
-        </Panel>
-      )
-    } else if (module.order == frontMatterArr.length - 1) {
-      output.splice(
-        module.order,
-        1,
-        <Panel
-          key={module.order}
-          duration={module.duration}
-          isOpen={activePanel === module.order}
-          isCompleted={activePanel > module.order}
-          title={module.title}
-          videoSrc={module.videoSrc}
-          keyTakeaways={keyTakeaways()}
-          resources={module.resources.map((resource: any) => ({
-            name: resource.name,
-            href: resource.href,
-          }))}
-          onPrevious={() => setActivePanel(module.order - 1)}
-          onActivate={() => setActivePanel(module.order)}
-        >
-          {module.description}
-        </Panel>
-      )
-    } else {
-      output.splice(
-        module.order,
-        1,
-        <Panel
-          key={module.order}
-          duration={module.duration}
-          isOpen={activePanel === module.order}
-          isCompleted={activePanel > module.order}
-          title={module.title}
-          videoSrc={module.videoSrc}
-          keyTakeaways={keyTakeaways()}
-          resources={module.resources.map((resource: any) => ({
-            name: resource.name,
-            href: resource.href,
-          }))}
-          onNext={() => setActivePanel(module.order + 1)}
-          onPrevious={() => setActivePanel(module.order - 1)}
-          onActivate={() => setActivePanel(module.order)}
-        >
-          {module.description}
-        </Panel>
-      )
-    }
-  })
-  return output
-}
-
 interface Props {
   sourceArr: any
   frontMatterArr: any
@@ -114,12 +20,96 @@ function DevelopmentWorkflow({
   fileMissingArr,
 }: Props) {
   const [activePanel, setActivePanel] = useState(0)
+  console.log(frontMatterArr)
   return (
     <PageWithHeader title="Game Development">
       <TitleBackground>
         <Title title="Game Development" />
       </TitleBackground>
-      <Content>{Modules(frontMatterArr, activePanel, setActivePanel)}</Content>
+      <Content>
+        {frontMatterArr.map((module: any) => {
+          const keyTakeaways = () => {
+            if (module.keyTakeawayList) {
+              return module.keyTakeawayList
+            } else {
+              return (
+                <Image
+                  src={module.keyTakeawayImage.src}
+                  alt={module.title}
+                  width={module.keyTakeawayImage.width}
+                  height={module.keyTakeawayImage.height}
+                />
+              )
+            }
+          }
+          const index = frontMatterArr.indexOf(module)
+
+          if (index < 1) {
+            console.log('here')
+            console.log(module)
+            return (
+              <Panel
+                key={index}
+                duration={module.duration}
+                isOpen={activePanel === index}
+                isCompleted={activePanel > index}
+                title={module.title}
+                videoSrc={module.videoSrc}
+                keyTakeaways={keyTakeaways()}
+                resources={module.resources.map((resource: any) => ({
+                  name: resource.name,
+                  href: resource.href,
+                }))}
+                onNext={() => setActivePanel(index + 1)}
+                onActivate={() => setActivePanel(index)}
+              >
+                {module.description}
+              </Panel>
+            )
+          } else if (index == frontMatterArr.length - 1) {
+            return (
+              <Panel
+                key={index}
+                duration={module.duration}
+                isOpen={activePanel === index}
+                isCompleted={activePanel > index}
+                title={module.title}
+                videoSrc={module.videoSrc}
+                keyTakeaways={keyTakeaways()}
+                resources={module.resources.map((resource: any) => ({
+                  name: resource.name,
+                  href: resource.href,
+                }))}
+                onPrevious={() => setActivePanel(index - 1)}
+                onActivate={() => setActivePanel(index)}
+              >
+                {module.description}
+              </Panel>
+            )
+          } else {
+            return (
+              <Panel
+                key={index}
+                duration={module.duration}
+                isOpen={activePanel === index}
+                isCompleted={activePanel > index}
+                title={module.title}
+                videoSrc={module.videoSrc}
+                keyTakeaways={keyTakeaways()}
+                resources={module.resources.map((resource: any) => ({
+                  name: resource.name,
+                  href: resource.href,
+                }))}
+                onNext={() => setActivePanel(index + 1)}
+                onPrevious={() => setActivePanel(index - 1)}
+                onActivate={() => setActivePanel(index)}
+              >
+                {module.description}
+              </Panel>
+            )
+          }
+        })}
+      </Content>
 
       {/*
       <PageWithHeader title={frontMatter.title}><TitleBackground>
