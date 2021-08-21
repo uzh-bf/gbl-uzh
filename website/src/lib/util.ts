@@ -137,55 +137,59 @@ export function getStaticPropsFolder(
 export function getStaticPropsFolders(folders: Array<string>) {
   return async () => {
     let mdxSources = new Array()
-    let dataHandles = new Array()
+    let dataHandlesArr = new Array()
     let fileMissingArr = new Array()
 
     const slugArrs = folders.map((folder: string) =>
       fs.readdirSync('../kb/' + folder).map((item) => item.split('.')[0])
     )
 
-    slugArrs.forEach((slugArr: any) => {
-      const slugArrIndex = slugArrs.indexOf(slugArr)
-      mdxSources[slugArrIndex] = new Array()
-      dataHandles[slugArrIndex] = new Array()
-      fileMissingArr[slugArrIndex] = new Array()
+    // attention: for loop is required in order to enable async functions such as 'serialize'
+    for (let k = 0; k < slugArrs.length; k++) {
+      mdxSources[k] = new Array()
+      dataHandlesArr[k] = new Array()
+      fileMissingArr[k] = new Array()
 
-      for (let i = 0; i < slugArr.length; i++) {
+      for (let i = 0; i < slugArrs[k].length; i++) {
         const mdxPath = path.join(
           process.cwd(),
-          `../kb/${folders[slugArrIndex]}/${slugArr[i]}.md`
+          `../kb/${folders[k]}/${slugArrs[k][i]}.md`
         )
 
         let source: Buffer
         try {
           source = fs.readFileSync(mdxPath)
-          fileMissingArr[slugArrIndex].push(false)
+          fileMissingArr[k].push(false)
         } catch (e) {
           source = Buffer.from('no data available')
-          fileMissingArr[slugArrIndex].push(true)
+          fileMissingArr[k].push(true)
         }
 
         const { content, data } = matter(source)
-        dataHandles[slugArrIndex].push(data)
-        //let temp2 = serialize(content)
-        //mdxSources[slugArrIndex].push(temp2)
+        dataHandlesArr[k].push(data)
+        let temp2 = await serialize(content)
+        mdxSources[k].push(temp2)
+      }
+    }
+
+    // order based on ordering attribute, if one is available (is decided separately for each folder)
+    let outputArr = new Array()
+    dataHandlesArr.forEach((dataHandles: any) => {
+      const index = dataHandlesArr.indexOf(dataHandles)
+      outputArr[index] = new Array(dataHandles.length)
+      if (dataHandles[0].order) {
+        dataHandles.forEach((element: any) => {
+          outputArr[index].splice(element.order, 1, element)
+        })
+      } else {
+        outputArr[index] = [...dataHandlesArr[index]]
       }
     })
-
-    // order based on ordering attribute, if one is available
-    /*let outputArr = new Array(dataHandles.length)
-    if (dataHandles[0].order) {
-      dataHandles.forEach((element: any) =>
-        outputArr.splice(element.order, 1, element)
-      )
-    } else {
-      outputArr = [...dataHandles]
-    }*/
 
     return {
       props: {
         sourceArr: mdxSources,
-        frontMatterArr: dataHandles,
+        frontMatterArr: outputArr,
         filenames: slugArrs,
         fileMissingArr: fileMissingArr,
       },

@@ -20,56 +20,6 @@ function GBLinUse({
   filenames,
   fileMissingArr,
 }: Props) {
-  //console.log(frontMatterArr)
-  /*return {
-    <PageWithHeader title="GBL in Use">
-      <TitleBackground>
-        <Title title="GBL in Use" />
-      </TitleBackground>
-
-      <Content>
-        <div>
-          <Header.H2>Games</Header.H2>
-          <p className="text-gray-600">
-            Simulations and Serious Games that have been developed or are being
-            developed at the Department of Banking and Finance of the University
-            of Zurich.
-          </p>
-          <div className="mt-4 sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
-            {frontMatter[0].map((game: any) => (
-              <GameCard
-                key={game.name}
-                name={game.name}
-                tags={game.tags}
-                linkHref={game.href}
-                imgSrc={game.imgSrc}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-4 md:mt-8">
-          <Header.H2>Courses</Header.H2>
-          <p className="text-gray-600">
-            A selection of lectures and seminars that contain Game-Based
-            Learning elements at the Department of Banking and Finance of the
-            University of Zurich.
-          </p>
-          <div className="flex flex-col mt-4">
-            {frontMatter[1].map((course: any) => (
-              <CourseEntry
-                key={course.name}
-                name={course.name}
-                ects={course.ects}
-                level={course.level}
-                href={course.href}
-              />
-            ))}
-          </div>
-        </div>
-      </Content>
-            </PageWithHeader>
-  }*/
   return (
     <PageWithHeader title="GBL in Use">
       <TitleBackground>
