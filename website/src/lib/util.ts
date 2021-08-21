@@ -63,15 +63,33 @@ export function getStaticPropsSinglePage(dir_name: string, slug: string) {
 }
 
 // getStaticProps function to parse all files within one folder
-export function getStaticPropsFolder(folder: string) {
+export function getStaticPropsFolder(
+  folder: string,
+  parentfile_dir?: string,
+  parentfile?: string
+) {
   return async () => {
     let mdxSources = new Array()
     let dataHandles = new Array()
     let fileMissingArr = new Array()
 
-    const slugArr = fs
-      .readdirSync('../kb/' + folder)
-      .map((item) => item.split('.')[0])
+    let slugArr = []
+
+    // get filenames directly from parent config list (including correct order)
+    if (parentfile_dir && parentfile) {
+      const mdxPathParent = path.join(
+        process.cwd(),
+        `../kb/${parentfile_dir}/${parentfile}.md`
+      )
+      const sourceParent = fs.readFileSync(mdxPathParent)
+      slugArr = matter(sourceParent).data.childrenFiles.map(
+        (filename: any) => filename.name
+      )
+    } else {
+      slugArr = fs
+        .readdirSync('../kb/' + folder)
+        .map((item) => item.split('.')[0])
+    }
 
     for (let i = 0; i < slugArr.length; i++) {
       const mdxPath = path.join(
@@ -100,12 +118,14 @@ export function getStaticPropsFolder(folder: string) {
       dataHandles.forEach((element: any) =>
         outputArr.splice(element.order, 1, element)
       )
+    } else {
+      outputArr = [...dataHandles]
     }
 
     return {
       props: {
         sourceArr: mdxSources,
-        frontMatterArr: outputArr,
+        frontMatterArr: parentfile_dir && parentfile ? dataHandles : outputArr,
         filenames: slugArr,
         fileMissingArr: fileMissingArr,
       },
