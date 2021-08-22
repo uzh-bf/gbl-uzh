@@ -15,7 +15,7 @@ function CourseEntry({ name, ects, level, href }: Props) {
     >
       <div className="flex flex-row items-center justify-between px-2 py-1 bg-white border rounded cursor-pointer hover:shadow">
         <div className="flex">
-          <h3 className="text-base text-center text-gray-700 sm:text-lg lg:text-xl font-kollektif-bold md:text-left">
+          <h3 className="text-base text-left text-gray-700 sm:text-lg lg:text-xl font-kollektif-bold md:text-left">
             {name}
           </h3>
         </div>
