@@ -54,11 +54,11 @@ function Game({ source, frontMatter }: Props) {
                 <div>
                   <div className="flex-1 mt-8">
                     <Header.H3>Characteristics</Header.H3>
-                    <div className="inline md:flex md:flex-row">
+                    <div className="inline lg:flex lg:flex-row">
                       <p className="flex-1 prose-sm prose">
                         {radarChartTexts[0]}
                       </p>
-                      <div className="mt-4 mb-6 flex-1 md:mt-0">
+                      <div className="mt-3 mb-6 flex-1 lg:mt-0">
                         <RadarChart data={radarChartData[0]} />
                       </div>
                     </div>
@@ -66,11 +66,11 @@ function Game({ source, frontMatter }: Props) {
 
                   <div className="flex-1 mt-4">
                     <Header.H3>Gamification Elements</Header.H3>
-                    <div className="inline md:flex md:flex-row">
+                    <div className="inline lg:flex lg:flex-row">
                       <p className="flex-1 prose-sm prose">
                         {radarChartTexts[1]}
                       </p>
-                      <div className="mt-4 mb-6 flex-1 md:mt-0">
+                      <div className="mt-3 mb-6 flex-1 lg:mt-0">
                         <RadarChart data={radarChartData[1]} />
                       </div>
                     </div>
@@ -80,29 +80,23 @@ function Game({ source, frontMatter }: Props) {
                   frontMatter.gallery !== undefined ? (
                     <div className="flex-1 mt-8 justify-center">
                       <Header.H3>Gallery</Header.H3>
-                      <div className="container grid grid-cols-3 sm:grid-cols-4  gap-2 mx-auto">
+                      <div className="container grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 gap-2 mx-auto">
                         {frontMatter.gallery.map((image: any) => (
                           <div
                             className="rounded m-auto hover:opacity-70"
                             key={frontMatter.gallery.indexOf(image)}
-                            onClick={() => {
-                              setZoomedImage(image.imgSrc)
-                              setZoom(true)
-                            }}
                           >
                             <div
-                              className="inline-block bg-center bg-cover rounded shadow-md w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:h-36 lg:h-36"
+                              className="inline-block bg-center bg-cover rounded shadow-md w-1/4vw h-1/4vw sm:w-28 sm:h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:h-36 lg:h-36"
                               style={{
                                 cursor: 'zoom-in',
                                 backgroundImage: 'url("' + image.imgSrc + '")',
                               }}
+                              onClick={() => {
+                                setZoomedImage(image.imgSrc)
+                                setZoom(true)
+                              }}
                             ></div>
-                            {/*<img
-                              className="rounded shadow-md"
-                              style={{ cursor: 'zoom-in' }}
-                              src={image.imgSrc}
-                              alt={image.alt}
-                            />*/}
                           </div>
                         ))}
                       </div>
@@ -138,7 +132,7 @@ function Game({ source, frontMatter }: Props) {
                 </div>
               </div>
 
-              <div className="flex-1 p-4 border rounded md:flex-initial md:w-96 bg-uzh-gray-20">
+              <div className="flex-1 p-4 border rounded md:flex-initial md:w-96 bg-uzh-gray-20 md:max-w-1/3 lg:max-w-full">
                 <Header.H3 className="!text-gray-600">
                   Learning Objectives
                 </Header.H3>

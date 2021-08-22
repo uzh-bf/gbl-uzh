@@ -4,6 +4,15 @@ module.exports = {
   darkMode: 'media',
   theme: {
     extend: {
+      maxWidth: {
+        '1/3': '33%',
+      },
+      width: {
+        '1/4vw': '28vw',
+      },
+      height: {
+        '1/4vw': '28vw',
+      },
       screens: {
         lg: '72rem',
       },
