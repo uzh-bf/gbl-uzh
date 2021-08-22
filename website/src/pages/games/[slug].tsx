@@ -42,6 +42,14 @@ function Game({ source, frontMatter }: Props) {
     alt: 'demo image',
   })
 
+  function handlePropagationStop(e: any) {
+    setZoomedImage(
+      frontMatter.gallery[frontMatter.gallery.indexOf(zoomedImage) - 1]
+    )
+    const event = e || window.event
+    event.stopPropagation()
+  }
+
   return (
     <>
       <div className="absolute w-screen">
@@ -199,7 +207,10 @@ function Game({ source, frontMatter }: Props) {
         </PageWithHeader>
       </div>
       {zoom ? (
-        <div className="bg-gray-900 bg-opacity-60 z-10 w-full h-full fixed">
+        <div
+          className="bg-gray-900 bg-opacity-60 z-10 w-full h-full fixed"
+          onClick={() => setZoom(false)}
+        >
           <XIcon
             className="mt-2 mr-2 w-8 h-8 md:w-12 md:h-12 float-right hover:cursor-pointer"
             onClick={() => setZoom(false)}
@@ -214,13 +225,7 @@ function Game({ source, frontMatter }: Props) {
                   'relative hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
                 )}
                 style={{ flex: '0 0 50px', height: '60vh' }}
-                onClick={() => {
-                  setZoomedImage(
-                    frontMatter.gallery[
-                      frontMatter.gallery.indexOf(zoomedImage) - 1
-                    ]
-                  )
-                }}
+                onClick={handlePropagationStop}
               >
                 <ChevronLeftIcon className="absolute top-1/2 -translate-y-2/4 w-16 -left-1 md:-left-2" />
               </div>
