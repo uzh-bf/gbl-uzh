@@ -108,7 +108,7 @@ function Panel({
             {onPrevious && (
               <Button onClick={onPrevious}>
                 <Button.ArrowLeft />
-                <div className="hidden md:block">Previous Module</div>
+                <div className="hidden ml-2 md:block">Previous Module</div>
               </Button>
             )}
             {onNext && !onPrevious && (
@@ -116,14 +116,14 @@ function Panel({
                 <div className="flex-1"></div>
                 <Button onClick={onNext}>
                   <Button.Arrow />
-                  <div className="hidden md:block">Next Module</div>
+                  <div className="hidden ml-2 md:block">Next Module</div>
                 </Button>
               </>
             )}
             {onNext && onPrevious && (
               <Button onClick={onNext}>
                 <Button.Arrow />
-                <div className="hidden md:block">Next Module</div>
+                <div className="hidden ml-2 md:block">Next Module</div>
               </Button>
             )}
           </div>
@@ -132,7 +132,7 @@ function Panel({
             {onPrevious && (
               <Button onClick={onPrevious}>
                 <Button.ArrowLeft />
-                <div className="hidden md:block">Previous Module</div>
+                <div className="hidden ml-2 md:block">Previous Module</div>
               </Button>
             )}
             {onNext && !onPrevious && (
@@ -140,14 +140,14 @@ function Panel({
                 <div className="flex-1"></div>
                 <Button onClick={onNext}>
                   <Button.Arrow />
-                  <div className="hidden md:block">Next Module</div>
+                  <div className="hidden ml-2 md:block">Next Module</div>
                 </Button>
               </>
             )}
             {onNext && onPrevious && (
               <Button onClick={onNext}>
                 <Button.Arrow />
-                <div className="hidden md:block">Next Module</div>
+                <div className="hidden ml-2 md:block">Next Module</div>
               </Button>
             )}
           </div>
@@ -158,7 +158,7 @@ function Panel({
                 className="w-full justify-center md:w-auto"
               >
                 <Button.ArrowLeft />
-                Previous Module
+                <div className="ml-2">Previous Module</div>
               </Button>
             )}
           </div>
@@ -171,7 +171,7 @@ function Panel({
                   className="w-full justify-center md:w-auto"
                 >
                   <Button.Arrow />
-                  Next Module
+                  <div className="ml-2">Next Module</div>
                 </Button>
               </>
             )}
@@ -183,7 +183,7 @@ function Panel({
                 className="w-full justify-center md:w-auto"
               >
                 <Button.Arrow />
-                Next Module
+                <div className="ml-2">Next Module</div>
               </Button>
             )}
             </div> */}

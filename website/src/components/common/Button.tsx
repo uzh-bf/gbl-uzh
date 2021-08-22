@@ -32,11 +32,11 @@ Button.defaultProps = {
 }
 
 Button.Arrow = function ButtonArrow() {
-  return <ArrowRightIcon className="h-4 mr-2" />
+  return <ArrowRightIcon className="h-4" />
 }
 
 Button.ArrowLeft = function ButtonArrowLeft() {
-  return <ArrowLeftIcon className="h-4 mr-2" />
+  return <ArrowLeftIcon className="h-4" />
 }
 
 export default Button
