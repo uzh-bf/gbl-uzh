@@ -54,7 +54,10 @@ function Game({ source, frontMatter }: Props) {
     <>
       <div className="absolute w-screen">
         <PageWithHeader title={frontMatter.title}>
-          <TitleImage imgSrc={frontMatter.thumbnail}>
+          {/* The thumbnail image corresponds to the first image from the gallery */}
+          <TitleImage
+            imgSrc={frontMatter.gallery ? frontMatter.gallery[0].imgSrc : ''}
+          >
             <Title title={frontMatter.title} />
           </TitleImage>
 
