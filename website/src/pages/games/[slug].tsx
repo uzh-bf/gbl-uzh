@@ -80,22 +80,29 @@ function Game({ source, frontMatter }: Props) {
                   frontMatter.gallery !== undefined ? (
                     <div className="flex-1 mt-8 justify-center">
                       <Header.H3>Gallery</Header.H3>
-                      <div className="container grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 mx-auto">
+                      <div className="container grid grid-cols-3 sm:grid-cols-4  gap-2 mx-auto">
                         {frontMatter.gallery.map((image: any) => (
                           <div
                             className="rounded m-auto hover:opacity-70"
                             key={frontMatter.gallery.indexOf(image)}
+                            onClick={() => {
+                              setZoomedImage(image.imgSrc)
+                              setZoom(true)
+                            }}
                           >
-                            <img
+                            <div
+                              className="inline-block bg-center bg-cover rounded shadow-md w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:h-36 lg:h-36"
+                              style={{
+                                cursor: 'zoom-in',
+                                backgroundImage: 'url("' + image.imgSrc + '")',
+                              }}
+                            ></div>
+                            {/*<img
                               className="rounded shadow-md"
                               style={{ cursor: 'zoom-in' }}
                               src={image.imgSrc}
                               alt={image.alt}
-                              onClick={() => {
-                                setZoomedImage(image.imgSrc)
-                                setZoom(true)
-                              }}
-                            />
+                            />*/}
                           </div>
                         ))}
                       </div>
