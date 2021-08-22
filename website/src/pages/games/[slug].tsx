@@ -6,7 +6,7 @@ import {
 } from '@heroicons/react/solid'
 import clsx from 'clsx'
 import { MDXRemote } from 'next-mdx-remote'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import RadarChart from '../../components/charts/RadarChart'
 import Header from '../../components/common/Header'
@@ -57,6 +57,18 @@ function Game({ source, frontMatter }: Props) {
     const event = e || window.event
     event.stopPropagation()
   }
+
+  const collapseImage = (e: any) => {
+    if (e.key == 'Escape') {
+      setZoom(false)
+    }
+  }
+  useEffect(() => {
+    document.body.addEventListener('keydown', collapseImage)
+    return () => {
+      removeEventListener('keypress', collapseImage)
+    }
+  })
 
   return (
     <>
