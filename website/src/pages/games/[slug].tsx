@@ -32,6 +32,7 @@ function Game({ source, frontMatter }: Props) {
     }))
     return temp
   })
+
   const radarChartTexts = frontMatter.radarCharts.map(
     (singleChart: any) => singleChart.text
   )
@@ -42,9 +43,16 @@ function Game({ source, frontMatter }: Props) {
     alt: 'demo image',
   })
 
-  function handlePropagationStop(e: any) {
+  function previousImage(e: any) {
     setZoomedImage(
       frontMatter.gallery[frontMatter.gallery.indexOf(zoomedImage) - 1]
+    )
+    const event = e || window.event
+    event.stopPropagation()
+  }
+  function nextImage(e: any) {
+    setZoomedImage(
+      frontMatter.gallery[frontMatter.gallery.indexOf(zoomedImage) + 1]
     )
     const event = e || window.event
     event.stopPropagation()
@@ -228,7 +236,7 @@ function Game({ source, frontMatter }: Props) {
                   'relative hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
                 )}
                 style={{ flex: '0 0 50px', height: '60vh' }}
-                onClick={handlePropagationStop}
+                onClick={previousImage}
               >
                 <ChevronLeftIcon className="absolute top-1/2 -translate-y-2/4 w-16 -left-1 md:-left-2" />
               </div>
@@ -249,14 +257,8 @@ function Game({ source, frontMatter }: Props) {
                     : '',
                   'relative hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
                 )}
-                style={{ flex: '0 0 50px' }}
-                onClick={() => {
-                  setZoomedImage(
-                    frontMatter.gallery[
-                      frontMatter.gallery.indexOf(zoomedImage) + 1
-                    ]
-                  )
-                }}
+                style={{ flex: '0 0 50px', height: '60vh' }}
+                onClick={nextImage}
               >
                 <ChevronRightIcon className="absolute top-1/2 -translate-y-2/4 w-16 -right-1 md:-right-2" />
               </div>
