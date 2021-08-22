@@ -1,4 +1,10 @@
-import { PresentationChartBarIcon, XIcon } from '@heroicons/react/solid'
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  PresentationChartBarIcon,
+  XIcon,
+} from '@heroicons/react/solid'
+import clsx from 'clsx'
 import { MDXRemote } from 'next-mdx-remote'
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
@@ -31,7 +37,10 @@ function Game({ source, frontMatter }: Props) {
   )
 
   const [zoom, setZoom] = useState(false)
-  const [zoomedImage, setZoomedImage] = useState('/images/hero.jpg')
+  const [zoomedImage, setZoomedImage] = useState({
+    imgSrc: 'images/hero.jpg',
+    alt: 'demo image',
+  })
 
   return (
     <>
@@ -93,7 +102,7 @@ function Game({ source, frontMatter }: Props) {
                                 backgroundImage: 'url("' + image.imgSrc + '")',
                               }}
                               onClick={() => {
-                                setZoomedImage(image.imgSrc)
+                                setZoomedImage(image)
                                 setZoom(true)
                               }}
                             ></div>
@@ -190,20 +199,59 @@ function Game({ source, frontMatter }: Props) {
         </PageWithHeader>
       </div>
       {zoom ? (
-        <div
-          className="bg-gray-900 bg-opacity-60 z-10 w-full h-full fixed"
-          onClick={() => setZoom(false)}
-          style={{ cursor: 'zoom-out' }}
-        >
+        <div className="bg-gray-900 bg-opacity-60 z-10 w-full h-full fixed">
           <XIcon
             className="mt-2 mr-2 w-8 h-8 md:w-12 md:h-12 float-right hover:cursor-pointer"
             onClick={() => setZoom(false)}
           />
-          <img
-            src={zoomedImage}
-            alt="Magnified Image"
-            className="absolute w-4/5 max-w-max mx-auto top-1/2 left-1/2 -translate-x-2/4 -translate-y-2/4"
-          />
+          <div className="absolute w-full top-1/2 left-1/2 -translate-x-2/4 -translate-y-2/4">
+            <div className="flex justify-around items-stretch max-width-full">
+              <div
+                className={clsx(
+                  frontMatter.gallery.indexOf(zoomedImage) == 0
+                    ? 'invisible'
+                    : '',
+                  'relative hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
+                )}
+                style={{ flex: '0 0 50px' }}
+                onClick={() => {
+                  setZoomedImage(
+                    frontMatter.gallery[
+                      frontMatter.gallery.indexOf(zoomedImage) - 1
+                    ]
+                  )
+                }}
+              >
+                <ChevronLeftIcon className="absolute top-1/2 -translate-y-2/4 w-16 -left-1 md:-left-2" />
+              </div>
+              <img
+                src={zoomedImage.imgSrc}
+                alt="Magnified Image"
+                className="w-4/5vw max-w-max mx-auto"
+                style={{ cursor: 'zoom-out' }}
+                onClick={() => setZoom(false)}
+              />
+              <div
+                className={clsx(
+                  frontMatter.gallery.indexOf(zoomedImage) ==
+                    frontMatter.gallery.length - 1
+                    ? 'invisible'
+                    : '',
+                  'relative hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
+                )}
+                style={{ flex: '0 0 50px' }}
+                onClick={() => {
+                  setZoomedImage(
+                    frontMatter.gallery[
+                      frontMatter.gallery.indexOf(zoomedImage) + 1
+                    ]
+                  )
+                }}
+              >
+                <ChevronRightIcon className="absolute top-1/2 -translate-y-2/4 w-16 -right-1 md:-right-2" />
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         <></>

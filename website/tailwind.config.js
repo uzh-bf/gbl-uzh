@@ -9,6 +9,7 @@ module.exports = {
       },
       width: {
         '1/4vw': '28vw',
+        '4/5vw': '80vw',
       },
       height: {
         '1/4vw': '28vw',
