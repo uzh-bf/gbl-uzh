@@ -127,9 +127,8 @@ function Game({ source, frontMatter }: Props) {
                             key={frontMatter.gallery.indexOf(image)}
                           >
                             <div
-                              className="inline-block bg-center bg-cover rounded shadow-md w-1/4vw h-1/4vw sm:w-28 sm:h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:h-36 lg:h-36"
+                              className="inline-block bg-center bg-cover rounded shadow-md cursor-zoom-in w-1/4vw h-1/4vw sm:w-28 sm:h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:h-36 lg:h-36"
                               style={{
-                                cursor: 'zoom-in',
                                 backgroundImage: 'url("' + image.imgSrc + '")',
                               }}
                               onClick={() => {
@@ -245,19 +244,17 @@ function Game({ source, frontMatter }: Props) {
                   frontMatter.gallery.indexOf(zoomedImage) == 0
                     ? 'invisible'
                     : '',
-                  'relative hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
+                  'relative h-4/5vh flex-0_0_50px hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
                 )}
-                style={{ flex: '0 0 50px', height: '60vh' }}
                 onClick={previousImage}
               >
                 <ChevronLeftIcon className="absolute top-1/2 -translate-y-2/4 w-16 -left-1 md:-left-2" />
               </div>
-              <div className="w-4/5vw max-w-max mx-auto">
+              <div className="w-4/5vw max-w-max  mx-auto">
                 <img
                   src={zoomedImage.imgSrc}
                   alt="Magnified Image"
-                  style={{ cursor: 'zoom-out' }}
-                  className="relative top-1/2 -translate-y-2/4"
+                  className="relative top-1/2 -translate-y-2/4 max-h-4/5vh cursor-zoom-out"
                   onClick={() => setZoom(false)}
                 />
               </div>
@@ -267,9 +264,8 @@ function Game({ source, frontMatter }: Props) {
                     frontMatter.gallery.length - 1
                     ? 'invisible'
                     : '',
-                  'relative hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
+                  'relative h-4/5vh flex-0_0_50px hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
                 )}
-                style={{ flex: '0 0 50px', height: '60vh' }}
                 onClick={nextImage}
               >
                 <ChevronRightIcon className="absolute top-1/2 -translate-y-2/4 w-16 -right-1 md:-right-2" />
