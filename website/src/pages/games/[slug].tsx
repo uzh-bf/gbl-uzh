@@ -213,7 +213,7 @@ function Game({ source, frontMatter }: Props) {
                     : '',
                   'relative hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
                 )}
-                style={{ flex: '0 0 50px' }}
+                style={{ flex: '0 0 50px', height: '60vh' }}
                 onClick={() => {
                   setZoomedImage(
                     frontMatter.gallery[
@@ -224,13 +224,15 @@ function Game({ source, frontMatter }: Props) {
               >
                 <ChevronLeftIcon className="absolute top-1/2 -translate-y-2/4 w-16 -left-1 md:-left-2" />
               </div>
-              <img
-                src={zoomedImage.imgSrc}
-                alt="Magnified Image"
-                className="w-4/5vw max-w-max mx-auto"
-                style={{ cursor: 'zoom-out' }}
-                onClick={() => setZoom(false)}
-              />
+              <div className="w-4/5vw max-w-max mx-auto">
+                <img
+                  src={zoomedImage.imgSrc}
+                  alt="Magnified Image"
+                  style={{ cursor: 'zoom-out' }}
+                  className="relative top-1/2 -translate-y-2/4"
+                  onClick={() => setZoom(false)}
+                />
+              </div>
               <div
                 className={clsx(
                   frontMatter.gallery.indexOf(zoomedImage) ==
