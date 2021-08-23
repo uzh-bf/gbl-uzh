@@ -81,7 +81,7 @@ function About() {
           <div className="flex flex-col md:flex-row">
             <div className="flex-1">
               <Contact
-                name="Dr. Benjaming Wilding"
+                name="Dr. Benjamin Wilding"
                 institution="Department of Banking and Finance, University of Zurich"
                 role="Managing Director and Head of Teaching"
                 link="https://www.bf.uzh.ch/en/persons/wilding-benjamin"

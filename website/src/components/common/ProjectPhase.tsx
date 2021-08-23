@@ -1,3 +1,5 @@
+import Header from './Header'
+
 interface Props {
   title: string
   duration: string
@@ -7,17 +9,17 @@ interface Props {
 function ProjectPhase({ title, duration, children }: Props) {
   return (
     <div className="flex flex-col flex-1 last:mt-2 sm:last:mt-0 sm:last:ml-4">
-      <div className="flex-initial p-2 font-bold text-center text-white bg-uzh-red-80">
-        {title}
+      <div className="prose">
+        <Header.H3 className="flex-initial pb-2 md:pl-4 pt-2 -mb-4 !text-white bg-uzh-red-80">
+          {title}
+        </Header.H3>
       </div>
+
       <div className="flex-1 p-4 prose bg-uzh-gray-20">
+        <Header.H3 className="!text-left">Project Duration</Header.H3>
+        <p>{duration}</p>
+        <Header.H3 className="!text-left">Project Goals</Header.H3>
         <p>
-          <span className="font-bold">Project Duration</span>
-          <br />
-          {duration}
-        </p>
-        <p>
-          <span className="font-bold">Project Goals</span>
           <ul className="!mt-0">{children}</ul>
         </p>
         <p>Supported by Swissuniversities and the University of Zurich</p>

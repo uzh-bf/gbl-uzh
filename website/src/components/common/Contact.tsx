@@ -8,7 +8,9 @@ function Contact({ name, institution, role, link, imgSrc }) {
         <Image layout="responsive" src={imgSrc} alt="Profile Picture" />
       </div>
       <div className="flex-1 px-4 text-center sm:text-left">
-        <Header.H3>{name}</Header.H3>
+        <div className="prose">
+          <Header.H3>{name}</Header.H3>
+        </div>
         <p className="prose-sm text-center sm:text-left sm:prose-lg ">{role}</p>
         <p className="prose-sm text-center sm:text-left sm:prose">
           {institution}
