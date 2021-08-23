@@ -7,7 +7,7 @@ interface Props {
 
 function Tag({ label, className }: Props) {
   let labelTEST = ''
-  if (label !== 'work in progress') {
+  if (label !== 'Work in Progress') {
     return (
       <div
         className={clsx(
