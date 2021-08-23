@@ -99,7 +99,7 @@ function Home() {
                     onClick={() => router.push('/games')}
                   >
                     <Button.Arrow />
-                    Games and Courses
+                    <div className="ml-2">Games and Courses</div>
                   </Button>
                 </div>
               </div>
@@ -113,7 +113,7 @@ function Home() {
           >
             <Button className="mt-4" onClick={() => router.push('/kb')}>
               <Button.Arrow />
-              Knowledge Base
+              <div className="ml-2">Knowledge Base</div>
             </Button>
           </HomeSection.Content>
           <HomeSection.Hero src="/images/kma-SiOJXlWeWc0-unsplash.jpg" />
@@ -126,7 +126,7 @@ function Home() {
           >
             <Button className="mt-4" onClick={() => router.push('/dev')}>
               <Button.Arrow />
-              Development Practices
+              <div className="ml-2">Development Practices</div>
             </Button>
           </HomeSection.Content>
         </HomeSection>
@@ -139,7 +139,7 @@ function Home() {
           >
             <Button className="mt-4" onClick={() => router.push('/roadmap')}>
               <Button.Arrow />
-              Roadmap
+              <div className="ml-2">Roadmap</div>
             </Button>
           </HomeSection.Content>
           <HomeSection.Hero

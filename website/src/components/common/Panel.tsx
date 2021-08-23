@@ -115,15 +115,15 @@ function Panel({
               <>
                 <div className="flex-1"></div>
                 <Button onClick={onNext}>
+                  <div className="hidden mr-2 md:block">Next Module</div>
                   <Button.Arrow />
-                  <div className="hidden ml-2 md:block">Next Module</div>
                 </Button>
               </>
             )}
             {onNext && onPrevious && (
               <Button onClick={onNext}>
+                <div className="hidden mr-2 md:block">Next Module</div>
                 <Button.Arrow />
-                <div className="hidden ml-2 md:block">Next Module</div>
               </Button>
             )}
           </div>
