@@ -19,15 +19,16 @@ function TitleImage({ imgSrc, children }: Props) {
         >
           <TitleBackground
             className={clsx(
-              'p-4 md:p-8 bg-opacity-70',
-              imgSrc && 'p-4 absolute z-10 bottom-5 sm:top-auto sm:bottom-10 '
+              'p-4 md:p-8',
+              imgSrc &&
+                'p-4 absolute z-10 bottom-5 sm:top-auto sm:bottom-10 bg-opacity-70'
             )}
           >
             {children}
           </TitleBackground>
 
           <img
-            className="z-0 opacity-100 saturate-50 w-auto min-w-[80vw] min-h-full"
+            className="z-0 opacity-100 saturate-50 w-auto min-w-[80vw] min-h-full max-w-[2000px]"
             width="100%"
             height="100%"
             src={imgSrc}
