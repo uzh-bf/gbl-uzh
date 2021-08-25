@@ -5,6 +5,7 @@ import Title from '../components/common/Title'
 import TitleBackground from '../components/common/TitleBackground'
 import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
+import customLoader from '../lib/loader'
 import * as Util from '../lib/util'
 
 interface Props {
@@ -33,6 +34,7 @@ function DevelopmentWorkflow({
             } else {
               return (
                 <Image
+                  loader={customLoader}
                   src={module.keyTakeawayImage.src}
                   alt={module.title}
                   width={module.keyTakeawayImage.width}

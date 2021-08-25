@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import Image from 'next/image'
+import customLoader from '../../lib/loader'
 
 interface Props {
   imgSrc: StaticImageData
@@ -18,7 +19,12 @@ function HeroImage({ imgSrc, label, href, className }: Props) {
       )}
     >
       <div className="relative flex-1">
-        <Image src={imgSrc} alt="Hero" layout="intrinsic" />
+        <Image
+          loader={customLoader}
+          src={imgSrc}
+          alt="Hero"
+          layout="intrinsic"
+        />
       </div>
       <p className="flex-1 pl-8 text-2xl font-kollektif-bold md:pl-0">
         {label}

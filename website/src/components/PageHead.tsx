@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import LogoImage from '../../public/images/logo_temp_beta.jpg'
+import customLoader from '../lib/loader'
 
 const NAVIGATION_ITEMS = [
   { href: '/games', label: 'GBL in Use' },
@@ -115,6 +116,7 @@ function Logo() {
       <a className="flex-1 md:pl-8">
         <div className="relative w-full h-16 md:w-40 md:h-full">
           <Image
+            loader={customLoader}
             src={LogoImage}
             alt="Logo"
             layout="fill"

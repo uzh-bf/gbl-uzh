@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import Image from 'next/image'
+import customLoader from '../../lib/loader'
 import Tag from './Tag'
 
 interface Props {
@@ -50,6 +51,7 @@ function Card({
         )}
 
         <Image
+          loader={customLoader}
           className={clsx(
             'z-0 w-full rounded opacity-80 ',
             !colored && 'grayscale filter'
