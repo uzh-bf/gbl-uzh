@@ -13,27 +13,26 @@ function TitleImage({ imgSrc, children }: Props) {
         <div
           className={clsx(
             'relative max-h-[23rem] overflow-hidden',
-            imgSrc && 'min-h-[7rem]',
-            !imgSrc && 'min-h-[3rem] min-w-full'
+            !imgSrc && 'min-h-[3rem] w-full'
           )}
         >
           <TitleBackground
             className={clsx(
               'p-4 md:p-8',
               imgSrc &&
-                'p-4 absolute z-10 bottom-5 sm:top-auto sm:bottom-10 bg-opacity-70'
+                'p-4 absolute z-10 bottom-0 md:bottom-5 sm:top-auto bg-opacity-80'
             )}
           >
             {children}
           </TitleBackground>
 
-          <img
-            className="z-0 opacity-100 saturate-50 w-auto min-w-[80vw] min-h-full max-w-[2000px]"
-            width="100%"
-            height="100%"
-            src={imgSrc}
-            alt=""
-          />
+          {imgSrc && (
+            <img
+              className="z-0 h-auto w-full min-h-[10rem] max-w-[100rem] saturate-50"
+              src={imgSrc}
+              alt=""
+            />
+          )}
         </div>
       </div>
     </div>
