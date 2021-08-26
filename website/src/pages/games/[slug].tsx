@@ -127,7 +127,7 @@ function Game({ source, frontMatter }: Props) {
                             key={frontMatter.gallery.indexOf(image)}
                           >
                             <div
-                              className="inline-block bg-center bg-cover rounded shadow-md cursor-zoom-in w-1/4vw h-1/4vw sm:w-28 sm:h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:h-36 lg:h-36"
+                              className="inline-block bg-center bg-cover rounded shadow-md cursor-[zoom-in] w-[28vw] h-[28vw] sm:w-28 sm:h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:h-36 lg:h-36"
                               style={{
                                 backgroundImage: 'url("' + image.imgSrc + '")',
                               }}
@@ -171,7 +171,7 @@ function Game({ source, frontMatter }: Props) {
                 </div>
               </div>
 
-              <div className="flex-1 p-4 border rounded md:flex-initial md:w-96 bg-uzh-gray-20 md:max-w-1/3 lg:max-w-full">
+              <div className="flex-1 p-4 border rounded md:flex-initial md:w-96 bg-uzh-gray-20 md:max-w-[33%] lg:max-w-full">
                 <Header.H3 className="!text-gray-600">
                   Learning Objectives
                 </Header.H3>
@@ -244,17 +244,17 @@ function Game({ source, frontMatter }: Props) {
                   frontMatter.gallery.indexOf(zoomedImage) == 0
                     ? 'invisible'
                     : '',
-                  'relative h-4/5vh flex-0_0_50px hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
+                  'relative h-[80vh] flex-[0 0 50px] hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
                 )}
                 onClick={previousImage}
               >
                 <ChevronLeftIcon className="absolute top-1/2 -translate-y-2/4 w-16 -left-1 md:-left-2" />
               </div>
-              <div className="w-4/5vw max-w-max  mx-auto">
+              <div className="w-[80vw] max-w-max  mx-auto">
                 <img
                   src={zoomedImage.imgSrc}
                   alt="Magnified Image"
-                  className="relative top-1/2 -translate-y-2/4 max-h-4/5vh cursor-zoom-out"
+                  className="relative top-1/2 -translate-y-2/4 max-h-[80vh] cursor-[zoom-out]"
                   onClick={() => setZoom(false)}
                 />
               </div>
@@ -264,7 +264,7 @@ function Game({ source, frontMatter }: Props) {
                     frontMatter.gallery.length - 1
                     ? 'invisible'
                     : '',
-                  'relative h-4/5vh flex-0_0_50px hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
+                  'relative h-[80vh] flex-[0 0 50px] hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
                 )}
                 onClick={nextImage}
               >
