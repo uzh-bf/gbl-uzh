@@ -121,6 +121,7 @@ function Logo() {
             alt="Logo"
             layout="fill"
             objectFit="contain"
+            unoptimized={true}
             priority
           />
         </div>

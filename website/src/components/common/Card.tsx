@@ -60,6 +60,7 @@ function Card({
           alt={`Screenshot of ${name}`}
           layout="fill"
           objectFit="cover"
+          unoptimized={true}
         />
       </div>
     </button>

@@ -24,6 +24,7 @@ function HeroImage({ imgSrc, label, href, className }: Props) {
           src={imgSrc}
           alt="Hero"
           layout="intrinsic"
+          unoptimized={true}
         />
       </div>
       <p className="flex-1 pl-8 text-2xl font-kollektif-bold md:pl-0">

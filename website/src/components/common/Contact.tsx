@@ -11,6 +11,7 @@ function Contact({ name, institution, role, link, imgSrc }) {
           layout="responsive"
           src={imgSrc}
           alt="Profile Picture"
+          unoptimized={true}
         />
       </div>
       <div className="flex-1 px-4 text-center sm:text-left">

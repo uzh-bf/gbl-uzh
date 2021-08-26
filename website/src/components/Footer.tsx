@@ -14,6 +14,7 @@ function Footer() {
               layout="responsive"
               src={UZHLogo}
               alt="UZH Logo"
+              unoptimized={true}
             />
           </div>
           <div className="flex items-center w-40 h-20 p-4 bg-white border">
@@ -23,6 +24,7 @@ function Footer() {
                 layout="responsive"
                 src={SwissUniLogo}
                 alt="Swissuniversities Logo"
+                unoptimized={true}
               />
             </div>
           </div>
