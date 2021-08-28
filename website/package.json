@@ -6,7 +6,7 @@
     "dev": "NODE_ENV=development next",
     "build": "NODE_ENV=production next build",
     "start": "next start",
-    "export": "node resizeImages.js && npm run build && next export",
+    "export": "node export/resizeImages.js && npm run build && next export && node export/cleanup.js",
     "release": "standard-version",
     "release:dry-run": "standard-version --dry-run",
     "check": "npm-run-all --parallel check:ts format:ci lint",
