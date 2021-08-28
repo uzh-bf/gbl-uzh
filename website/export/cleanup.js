@@ -7,7 +7,4 @@ newWidths.forEach((width) => {
   if (fs.existsSync('./public/images/newWidth' + width + '/')) {
     fs.rmSync('./public/images/newWidth' + width + '/', { recursive: true })
   }
-  if (fs.existsSync('./public/images/originalSize/')) {
-    fs.rmSync('./public/images/originalSize/', { recursive: true })
-  }
 })

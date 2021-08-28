@@ -13,9 +13,6 @@ newWidths.forEach((width) => {
   if (fs.existsSync('./public/images/newWidth' + width + '/')) {
     fs.rmSync('./public/images/newWidth' + width + '/', { recursive: true })
   }
-  if (fs.existsSync('./public/images/originalSize/')) {
-    fs.rmSync('./public/images/originalSize/', { recursive: true })
-  }
 })
 
 newWidths.forEach((width) => {
@@ -105,22 +102,5 @@ newWidths.forEach((width) => {
         }
       )
     })
-
-    // execute this step only once - copy the images in full resolution to a separated folder
-    if (newWidths.indexOf(width) == 0) {
-      fs.mkdir('./public/images/originalSize/', (err) => {
-        if (err) {
-          throw err
-        }
-      })
-      filenames.forEach((file) => {
-        const filename = file.match(filematchRegex)
-        if (filename) {
-          sharp('./public/images/' + file).toFile(
-            './public/images/originalSize/' + filename[0]
-          )
-        }
-      })
-    }
   })
 })
