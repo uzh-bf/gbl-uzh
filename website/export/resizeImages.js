@@ -8,8 +8,32 @@ const filematchRegex = new RegExp('([^/]+).((jpg)|(png)|(jpeg)|(svg))/?$')
 // change these numbers in the cleanup function as well
 const newWidths = ['100', '300', '600', '1000']
 
+const filterImages = (files) => {
+  return files.filter(function (e) {
+    return (
+      path.extname(e).toLowerCase() === '.jpg' ||
+      path.extname(e).toLowerCase() === '.png' ||
+      path.extname(e).toLowerCase() === '.jpeg'
+    )
+  })
+}
+
+const resizeImages = (filenames, width, subfolder) => {
+  subfolderPath = subfolder ? subfolder + '/' : ''
+  filenames.forEach((file) => {
+    const filename = file.match(filematchRegex)
+    if (filename) {
+      sharp('./public/images/' + subfolderPath + file)
+        .resize({ width: parseInt(width) })
+        .toFile(
+          './public/images/newWidth' + width + '/' + subfolderPath + filename[0]
+        )
+    }
+  })
+}
+
+// delete existing folders, if they exist
 newWidths.forEach((width) => {
-  // delete existing folders, if they exist
   if (fs.existsSync('./public/images/newWidth' + width + '/')) {
     fs.rmSync('./public/images/newWidth' + width + '/', { recursive: true })
   }
@@ -21,14 +45,6 @@ newWidths.forEach((width) => {
     if (err) {
       throw err
     }
-
-    const filenames = files.filter(function (e) {
-      return (
-        path.extname(e).toLowerCase() === '.jpg' ||
-        path.extname(e).toLowerCase() === '.png' ||
-        path.extname(e).toLowerCase() === '.jpeg'
-      )
-    })
 
     // get all folder names in order to get also images within subfolders (only one level down)
     const folderNames = files.filter(function (e) {
@@ -48,14 +64,7 @@ newWidths.forEach((width) => {
     })
 
     // create resized images for all files on the top-level of the /public/images folder
-    filenames.forEach((file) => {
-      const filename = file.match(filematchRegex)
-      if (filename) {
-        sharp('./public/images/' + file)
-          .resize({ width: parseInt(width) })
-          .toFile('./public/images/newWidth' + width + '/' + filename[0])
-      }
-    })
+    resizeImages(filterImages(files), width)
 
     // create resized images for all files in a subfolder one level deep
     folderNames.forEach((folderName) => {
@@ -65,14 +74,6 @@ newWidths.forEach((width) => {
           if (err) {
             throw err
           }
-
-          const filenamesSub = filesSubfolder.filter(function (e) {
-            return (
-              path.extname(e).toLowerCase() === '.jpg' ||
-              path.extname(e).toLowerCase() === '.png' ||
-              path.extname(e).toLowerCase() === '.jpeg'
-            )
-          })
 
           fs.mkdir(
             './public/images/newWidth' + width + '/' + folderName + '/',
@@ -84,21 +85,7 @@ newWidths.forEach((width) => {
           )
 
           // create resized images for all files on the top-level of the /public/images folder
-          filenamesSub.forEach((file) => {
-            const filename = file.match(filematchRegex)
-            if (filename) {
-              sharp('./public/images/' + folderName + '/' + file)
-                .resize({ width: parseInt(width) })
-                .toFile(
-                  './public/images/newWidth' +
-                    width +
-                    '/' +
-                    folderName +
-                    '/' +
-                    filename[0]
-                )
-            }
-          })
+          resizeImages(filterImages(filesSubfolder), width, folderName)
         }
       )
     })
