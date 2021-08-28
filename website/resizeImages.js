@@ -12,25 +12,42 @@ newWidths.forEach((width) => {
   if (fs.existsSync('./public/images/newWidth' + width + '/')) {
     fs.rmSync('./public/images/newWidth' + width + '/', { recursive: true })
   }
+  if (fs.existsSync('./public/images/originalSize/')) {
+    fs.rmSync('./public/images/originalSize/', { recursive: true })
+  }
+})
 
-  // create new directories for the images with modified sizes
-  fs.mkdir('./public/images/newWidth' + width + '/', (err) => {
-    if (err) {
-      throw err
-    }
-  })
-
+newWidths.forEach((width) => {
   // find all image files, convert them to all specified widths and save them in the corresponding folder
   fs.readdir('public/images/', function (err, files) {
     if (err) {
       throw err
     }
+
     const filenames = files.filter(function (e) {
       return (
         path.extname(e).toLowerCase() === '.jpg' ||
         path.extname(e).toLowerCase() === '.png' ||
-        path.extname(e).toLowerCase() === '.jpeg.'
+        path.extname(e).toLowerCase() === '.jpeg'
       )
+    })
+
+    // get all folder names in order to get also images within subfolders (only one level down)
+    /*const folderNames = files.filter(function (e) {
+      return (
+        path.extname(e).toLowerCase() !== '.jpg' &&
+        path.extname(e).toLowerCase() !== '.png' &&
+        path.extname(e).toLowerCase() !== '.jpeg' &&
+        path.extname(e).toLowerCase() !== '.svg'
+      )
+    })
+    console.log(folderNames)*/
+
+    // create new directories for the images with modified sizes
+    fs.mkdir('./public/images/newWidth' + width + '/', (err) => {
+      if (err) {
+        throw err
+      }
     })
 
     filenames.forEach((file) => {
@@ -38,16 +55,12 @@ newWidths.forEach((width) => {
       if (filename) {
         sharp('./public/images/' + file)
           .resize({ width: parseInt(width) })
-          .toFile('public/images/newWidth' + width + '/' + filename[0])
+          .toFile('./public/images/newWidth' + width + '/' + filename[0])
       }
     })
 
     // execute this step only once - copy the images in full resolution to a separated folder
     if (newWidths.indexOf(width) == 0) {
-      if (fs.existsSync('./public/images/originalSize/')) {
-        fs.rmSync('./public/images/originalSize/', { recursive: true })
-      }
-
       fs.mkdir('./public/images/originalSize/', (err) => {
         if (err) {
           throw err
@@ -57,7 +70,7 @@ newWidths.forEach((width) => {
         const filename = file.match(filematchRegex)
         if (filename) {
           sharp('./public/images/' + file).toFile(
-            'public/images/originalSize/' + filename[0]
+            './public/images/originalSize/' + filename[0]
           )
         }
       })
