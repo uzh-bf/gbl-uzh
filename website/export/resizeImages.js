@@ -34,7 +34,7 @@ newWidths.forEach((width) => {
     })
 
     // get all folder names in order to get also images within subfolders (only one level down)
-    /*const folderNames = files.filter(function (e) {
+    const folderNames = files.filter(function (e) {
       return (
         path.extname(e).toLowerCase() !== '.jpg' &&
         path.extname(e).toLowerCase() !== '.png' &&
@@ -42,7 +42,6 @@ newWidths.forEach((width) => {
         path.extname(e).toLowerCase() !== '.svg'
       )
     })
-    console.log(folderNames)*/
 
     // create new directories for the images with modified sizes
     fs.mkdir('./public/images/newWidth' + width + '/', (err) => {
@@ -51,6 +50,7 @@ newWidths.forEach((width) => {
       }
     })
 
+    // create resized images for all files on the top-level of the /public/images folder
     filenames.forEach((file) => {
       const filename = file.match(filematchRegex)
       if (filename) {
@@ -58,6 +58,52 @@ newWidths.forEach((width) => {
           .resize({ width: parseInt(width) })
           .toFile('./public/images/newWidth' + width + '/' + filename[0])
       }
+    })
+
+    // create resized images for all files in a subfolder one level deep
+    folderNames.forEach((folderName) => {
+      fs.readdir(
+        'public/images/' + folderName + '/',
+        function (err, filesSubfolder) {
+          if (err) {
+            throw err
+          }
+
+          const filenamesSub = filesSubfolder.filter(function (e) {
+            return (
+              path.extname(e).toLowerCase() === '.jpg' ||
+              path.extname(e).toLowerCase() === '.png' ||
+              path.extname(e).toLowerCase() === '.jpeg'
+            )
+          })
+
+          fs.mkdir(
+            './public/images/newWidth' + width + '/' + folderName + '/',
+            (err) => {
+              if (err) {
+                throw err
+              }
+            }
+          )
+
+          // create resized images for all files on the top-level of the /public/images folder
+          filenamesSub.forEach((file) => {
+            const filename = file.match(filematchRegex)
+            if (filename) {
+              sharp('./public/images/' + folderName + '/' + file)
+                .resize({ width: parseInt(width) })
+                .toFile(
+                  './public/images/newWidth' +
+                    width +
+                    '/' +
+                    folderName +
+                    '/' +
+                    filename[0]
+                )
+            }
+          })
+        }
+      )
     })
 
     // execute this step only once - copy the images in full resolution to a separated folder
