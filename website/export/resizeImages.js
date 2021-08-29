@@ -19,14 +19,14 @@ const filterImages = (files) => {
 }
 
 const resizeImages = (filenames, width, subfolder) => {
-  subfolderPath = subfolder ? subfolder + '/' : ''
+  subfolderPath = subfolder ? `${subfolder}/` : ''
   filenames.forEach((file) => {
     const filename = file.match(filematchRegex)
     if (filename) {
-      sharp('./public/images/' + subfolderPath + file)
+      sharp(`./public/images/${subfolderPath}${file}`)
         .resize({ width: parseInt(width) })
         .toFile(
-          './public/images/newWidth' + width + '/' + subfolderPath + filename[0]
+          `./public/images/newWidth${width}/${subfolderPath}${filename[0]}`
         )
     }
   })
@@ -34,8 +34,8 @@ const resizeImages = (filenames, width, subfolder) => {
 
 // delete existing folders, if they exist
 newWidths.forEach((width) => {
-  if (fs.existsSync('./public/images/newWidth' + width + '/')) {
-    fs.rmSync('./public/images/newWidth' + width + '/', { recursive: true })
+  if (fs.existsSync(`./public/images/newWidth${width}/`)) {
+    fs.rmSync(`./public/images/newWidth${width}/`, { recursive: true })
   }
 })
 
@@ -57,7 +57,7 @@ newWidths.forEach((width) => {
     })
 
     // create new directories for the images with modified sizes
-    fs.mkdir('./public/images/newWidth' + width + '/', (err) => {
+    fs.mkdir(`./public/images/newWidth${width}/`, (err) => {
       if (err) {
         throw err
       }
@@ -69,20 +69,17 @@ newWidths.forEach((width) => {
     // create resized images for all files in a subfolder one level deep
     folderNames.forEach((folderName) => {
       fs.readdir(
-        'public/images/' + folderName + '/',
+        `public/images/${folderName}/`,
         function (err, filesSubfolder) {
           if (err) {
             throw err
           }
 
-          fs.mkdir(
-            './public/images/newWidth' + width + '/' + folderName + '/',
-            (err) => {
-              if (err) {
-                throw err
-              }
+          fs.mkdir(`./public/images/newWidth${width}/${folderName}/`, (err) => {
+            if (err) {
+              throw err
             }
-          )
+          })
 
           // create resized images for all files on the top-level of the /public/images folder
           resizeImages(filterImages(filesSubfolder), width, folderName)
