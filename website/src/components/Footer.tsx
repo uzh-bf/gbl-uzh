@@ -12,7 +12,7 @@ function Footer() {
             <Image
               placeholder="blur"
               loader={customLoader}
-              layout="responsive"
+              layout="intrinsic"
               src={UZHLogo}
               alt="UZH Logo"
             />
@@ -22,7 +22,7 @@ function Footer() {
               <Image
                 placeholder="blur"
                 loader={customLoader}
-                layout="responsive"
+                layout="intrinsic"
                 src={SwissUniLogo}
                 alt="Swissuniversities Logo"
               />

@@ -34,6 +34,7 @@ function DevelopmentWorkflow({
             } else {
               return (
                 <Image
+                  // placeholder="blur"
                   loader={customLoader}
                   src={module.keyTakeawayImage.src}
                   alt={module.title}

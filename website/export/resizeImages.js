@@ -3,88 +3,79 @@ const fs = require('fs')
 const path = require('path')
 
 //const filenames = ['public/images/zgraggen_anja.jpg']
-const filematchRegex = new RegExp('([^/]+).((jpg)|(png)|(jpeg)|(svg))/?$')
+const filematchRegex = new RegExp('([^/]+).((jpg)|(png)|(jpeg))/?$')
 
 // change these numbers in the cleanup function and in the loader as well
-const newWidths = [32, 64, 128, 256, 384, 640, 828, 1200, 1920, 3840]
+const responsiveSizes = [32, 64, 128, 256, 384, 640, 828, 1200, 1920, 3840]
 
-const filterImages = (files) => {
-  return files.filter(function (e) {
-    return (
-      path.extname(e).toLowerCase() === '.jpg' ||
-      path.extname(e).toLowerCase() === '.png' ||
-      path.extname(e).toLowerCase() === '.jpeg'
-    )
-  })
+function isImage(pathName) {
+  return (
+    path.extname(pathName).toLowerCase() === '.jpg' ||
+    path.extname(pathName).toLowerCase() === '.png' ||
+    path.extname(pathName).toLowerCase() === '.jpeg'
+  )
 }
 
-const resizeImages = (filenames, width, subfolder) => {
-  subfolderPath = subfolder ? `${subfolder}/` : ''
-  filenames.forEach((file) => {
-    const filename = file.match(filematchRegex)
-    if (filename) {
-      sharp(`./public/images/${subfolderPath}${file}`)
-        .resize({ width: parseInt(width) })
-        .toFile(
-          `./public/images/newWidth${width}/${subfolderPath}${filename[0]}`
-        )
-    }
-  })
-}
-
-// delete existing folders, if they exist
-newWidths.forEach((width) => {
-  if (fs.existsSync(`./public/images/newWidth${width}/`)) {
-    fs.rmSync(`./public/images/newWidth${width}/`, { recursive: true })
+function isDir(pathName) {
+  try {
+    return fs.lstatSync(pathName).isDirectory()
+  } catch {
+    return false
   }
-})
+}
 
-newWidths.forEach((width) => {
-  // find all image files, convert them to all specified widths and save them in the corresponding folder
-  fs.readdir('public/images/', function (err, files) {
-    if (err) {
-      throw err
-    }
+async function resizeImage(file, newWidth, subfolder) {
+  subfolderPath = subfolder ? `${subfolder}/` : ''
 
-    // get all folder names in order to get also images within subfolders (only one level down)
-    const folderNames = files.filter(function (e) {
-      return (
-        path.extname(e).toLowerCase() !== '.jpg' &&
-        path.extname(e).toLowerCase() !== '.png' &&
-        path.extname(e).toLowerCase() !== '.jpeg' &&
-        path.extname(e).toLowerCase() !== '.svg'
+  const filename = file.match(filematchRegex)
+
+  if (filename) {
+    const source = sharp(`./public/images/${subfolderPath}${file}`)
+
+    return source
+      .resize({ width: newWidth, withoutEnlargement: true })
+      .toFile(
+        `./public/images/responsive_${newWidth}/${subfolderPath}${filename[0]}`
       )
-    })
+  }
+
+  return Promise.resolve()
+}
+
+async function optimize() {
+  responsiveSizes.forEach((width) => {
+    // delete existing folders, if they exist
+    if (fs.existsSync(`./public/images/responsive_${width}/`)) {
+      fs.rmSync(`./public/images/responsive_${width}/`, { recursive: true })
+    }
 
     // create new directories for the images with modified sizes
-    fs.mkdir(`./public/images/newWidth${width}/`, (err) => {
-      if (err) {
-        throw err
+    fs.mkdirSync(`./public/images/responsive_${width}/`)
+  })
+
+  // find all image files, convert them to all specified widths and save them in the corresponding folder
+  await Promise.all(
+    fs.readdirSync('public/images/').flatMap(async (pathName) => {
+      if (
+        isDir(`./public/images/${pathName}/`) &&
+        !pathName.includes('responsive_')
+      ) {
+        responsiveSizes.forEach((width) =>
+          fs.mkdirSync(`./public/images/responsive_${width}/${pathName}/`)
+        )
+
+        return fs
+          .readdirSync(`public/images/${pathName}/`)
+          .map((file) =>
+            responsiveSizes.map((width) => resizeImage(file, width, pathName))
+          )
+      }
+
+      if (isImage(pathName)) {
+        return responsiveSizes.map((width) => resizeImage(pathName, width))
       }
     })
+  )
+}
 
-    // create resized images for all files on the top-level of the /public/images folder
-    resizeImages(filterImages(files), width)
-
-    // create resized images for all files in a subfolder one level deep
-    folderNames.forEach((folderName) => {
-      fs.readdir(
-        `public/images/${folderName}/`,
-        function (err, filesSubfolder) {
-          if (err) {
-            throw err
-          }
-
-          fs.mkdir(`./public/images/newWidth${width}/${folderName}/`, (err) => {
-            if (err) {
-              throw err
-            }
-          })
-
-          // create resized images for all files on the top-level of the /public/images folder
-          resizeImages(filterImages(filesSubfolder), width, folderName)
-        }
-      )
-    })
-  })
-})
+optimize()
