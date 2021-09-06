@@ -1,6 +1,6 @@
 {
   "name": "gbl-web",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "NODE_ENV=development next",
@@ -59,56 +59,5 @@
     "npm-run-all": "4.1.5",
     "standard-version": "9.3.1",
     "typescript": "4.3.5"
-  },
-  "standard-version": {
-    "types": [
-      {
-        "type": "docs",
-        "section": "Documentation"
-      },
-      {
-        "type": "enhance",
-        "section": "Enhancements"
-      },
-      {
-        "type": "feat",
-        "section": "Features"
-      },
-      {
-        "type": "fix",
-        "section": "Bug Fixes"
-      },
-      {
-        "type": "refactor",
-        "section": "Refactors"
-      },
-      {
-        "type": "wip",
-        "section": "Work in Progress"
-      },
-      {
-        "type": "perf",
-        "section": "Performance"
-      },
-      {
-        "type": "deps",
-        "section": "Dependencies"
-      },
-      {
-        "type": "style"
-      },
-      {
-        "type": "chore"
-      },
-      {
-        "type": "test"
-      },
-      {
-        "type": "build"
-      },
-      {
-        "type": "ci"
-      }
-    ]
   }
 }
