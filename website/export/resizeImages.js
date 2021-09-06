@@ -6,7 +6,7 @@ const path = require('path')
 const filematchRegex = new RegExp('([^/]+).((jpg)|(png)|(jpeg)|(svg))/?$')
 
 // change these numbers in the cleanup function and in the loader as well
-const newWidths = ['100', '300', '600', '1000']
+const newWidths = [32, 64, 128, 256, 384, 640, 828, 1200, 1920, 3840]
 
 const filterImages = (files) => {
   return files.filter(function (e) {
