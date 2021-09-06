@@ -7,11 +7,11 @@ function Contact({ name, institution, role, link, imgSrc }) {
     <div className="flex flex-col sm:flex-row">
       <div className="relative flex-initial w-40 m-auto border sm:m-0 sm:h-48">
         <Image
+          placeholder="blur"
           loader={customLoader}
           layout="responsive"
           src={imgSrc}
           alt="Profile Picture"
-          unoptimized={true}
         />
       </div>
       <div className="flex-1 px-4 text-center sm:text-left">

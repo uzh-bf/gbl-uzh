@@ -10,21 +10,21 @@ function Footer() {
         <div className="flex flex-col items-center order-1 mb-4 md:order-2 md:flex-row md:mb-0">
           <div className="relative w-40 h-20 p-4 mb-3 bg-white border md:mb-0 md:mr-8">
             <Image
+              placeholder="blur"
               loader={customLoader}
               layout="responsive"
               src={UZHLogo}
               alt="UZH Logo"
-              unoptimized={true}
             />
           </div>
           <div className="flex items-center w-40 h-20 p-4 bg-white border">
             <div className="relative w-full">
               <Image
+                placeholder="blur"
                 loader={customLoader}
                 layout="responsive"
                 src={SwissUniLogo}
                 alt="Swissuniversities Logo"
-                unoptimized={true}
               />
             </div>
           </div>

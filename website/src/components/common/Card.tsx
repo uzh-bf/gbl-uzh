@@ -51,6 +51,7 @@ function Card({
         )}
 
         <Image
+          placeholder="blur"
           loader={customLoader}
           className={clsx(
             'z-0 w-full rounded opacity-80 ',
@@ -60,7 +61,6 @@ function Card({
           alt={`Screenshot of ${name}`}
           layout="fill"
           objectFit="cover"
-          unoptimized={true}
         />
       </div>
     </button>
