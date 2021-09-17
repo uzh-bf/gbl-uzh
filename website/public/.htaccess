@@ -1,0 +1,12 @@
+RewriteEngine On
+
+## Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+## Redirect to Obsidian
+RewriteRule    "^md/(.*)$"  "https://publish.obsidian.md/serve?url=www.gbl.uzh.ch/md/$1"  [L,P]
+
+## ErrorDocument 404 /404.html
+
+Redirect 302 /beta https://gbl-web.vercel.app
