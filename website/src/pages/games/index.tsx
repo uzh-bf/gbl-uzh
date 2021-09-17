@@ -1,11 +1,11 @@
-import Header from '../components/common/Header'
-import Title from '../components/common/Title'
-import TitleBackground from '../components/common/TitleBackground'
-import Content from '../components/Content'
-import CourseEntry from '../components/courses/CourseEntry'
-import GameCard from '../components/games/GameCard'
-import PageWithHeader from '../components/PageWithHeader'
-import * as Util from '../lib/util'
+import Header from '../../components/common/Header'
+import Title from '../../components/common/Title'
+import TitleBackground from '../../components/common/TitleBackground'
+import Content from '../../components/Content'
+import CourseEntry from '../../components/courses/CourseEntry'
+import GameCard from '../../components/games/GameCard'
+import PageWithHeader from '../../components/PageWithHeader'
+import * as Util from '../../lib/util'
 
 interface Props {
   sourceArr: any
