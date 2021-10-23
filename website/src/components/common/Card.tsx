@@ -51,7 +51,7 @@ function Card({
         )}
 
         <Image
-          placeholder="blur"
+          // placeholder="blur"
           loader={customLoader}
           className={clsx(
             'z-0 w-full rounded opacity-80 ',
