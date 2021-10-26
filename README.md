@@ -15,6 +15,8 @@ The `gbl-uzh` project consists of two key components:
 - The `GBL Website` (located in the `website` directory), a Next.js web application that summarizes all of the outputs of our project on a single platform. The `GBL Website` is hosted publicly on <https://www.gbl.uzh.ch>.
 - The `GBL Knowledge Base` (located in the `kb` directory as a Git submodule), an [Obsidian](https://obsidian.md/) knowledge graph that contains the knowledge on gamification and game-based learning that we gather and curate throughout this and other projects. The knowledge base also serves as a Content Management System (CMS) for the `GBL Website`. The `GBL Knowledge Base` is publicly accessible on <https://www.gbl.uzh.ch/kb>.
 
+Future components include technical frameworks for building learning games, as well as other resources that support the development workflow.
+
 ## Contributing
 
 We welcome any contributions to the project. If you would like to contribute to the code base, please create an [Issue](https://github.com/uzh-bf/gbl-uzh/issues) beforehand to ensure that your goals align with our project vision. If you would like to publish your course or game-based learning resource on our website, please create a new [Discussion](https://github.com/uzh-bf/gbl-uzh/discussions).
