@@ -16,7 +16,7 @@ function PageWithHeader({ title, children, withFooter }: Props) {
   return (
     <div className="flex flex-col h-full">
       <Head>
-        <title>GBL@DBF - {title}</title>
+        <title>GBL@UZH - {title}</title>
       </Head>
       <div className="flex-1 w-full">
         <PageHead />
