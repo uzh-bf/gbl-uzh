@@ -1,7 +1,6 @@
 {
-  "name": "gbl-web",
+  "name": "@gbl-uzh/website",
   "version": "0.2.0",
-  "private": true,
   "scripts": {
     "dev": "NODE_ENV=development next",
     "build": "NODE_ENV=production next build",
@@ -34,13 +33,13 @@
     "gray-matter": "4.0.3",
     "next": "11.1.2",
     "next-mdx-remote": "3.0.4",
-    "path": "^0.12.7",
+    "path": "0.12.7",
     "postcss": "8.3.6",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-markdown": "6.0.3",
     "recharts": "2.1.0",
-    "sharp": "^0.29.0",
+    "sharp": "0.29.0",
     "tailwindcss": "2.2.7"
   },
   "devDependencies": {
