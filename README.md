@@ -21,6 +21,8 @@ Future components include technical frameworks for building learning games, as w
 
 We welcome any contributions to the project. If you would like to contribute to the code base, please create an [Issue](https://github.com/uzh-bf/gbl-uzh/issues) beforehand to ensure that your goals align with our project vision. If you would like to publish your course or game-based learning resource on our website, please create a new [Discussion](https://github.com/uzh-bf/gbl-uzh/discussions).
 
+If you would like to give us feedback or have any requests regarding content of the website or knowledge base, please add a new entry on our [Feedback](https://gbl-uzh.feedbear.com/boards/gbl-web) page.
+
 ## License
 
 The GBL Website and Knowledge Base, as well as other published subcomponents, are licensed under the [AGPLv3](https://www.gnu.org/licenses/agpl-3.0.de.html).
