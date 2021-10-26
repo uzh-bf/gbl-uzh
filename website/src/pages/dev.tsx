@@ -118,5 +118,5 @@ export default DevelopmentWorkflow
 export const getStaticProps = Util.getStaticPropsFolder(
   'development',
   'resources',
-  'Development'
+  'GBL Dev Workflow'
 )

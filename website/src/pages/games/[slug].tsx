@@ -121,7 +121,7 @@ function Game({ source, frontMatter }: Props) {
                     <div className="flex-1 mt-8 justify-center">
                       <Header.H3>Gallery</Header.H3>
                       <div className="container grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 gap-2 mx-auto">
-                        {frontMatter.gallery.map((image: any) => (
+                        {frontMatter.gallery?.map((image: any) => (
                           <div
                             className="rounded m-auto hover:opacity-70"
                             key={frontMatter.gallery.indexOf(image)}
@@ -143,8 +143,7 @@ function Game({ source, frontMatter }: Props) {
                   ) : (
                     <></>
                   )}
-                  {frontMatter.resources !== '' &&
-                  frontMatter.resources !== undefined ? (
+                  {frontMatter.resources ? (
                     <div className="flex-1 mt-8">
                       <Header.H3>Resources</Header.H3>
                       <div className="inline md:flex md:flex-row">
@@ -177,7 +176,7 @@ function Game({ source, frontMatter }: Props) {
                 </Header.H3>
                 <p className="prose-sm prose">
                   <ul>
-                    {frontMatter.objectives.map((item: any) => (
+                    {frontMatter.objectives?.map((item: any) => (
                       <li key={item}>{item}</li>
                     ))}
                   </ul>
@@ -185,14 +184,14 @@ function Game({ source, frontMatter }: Props) {
 
                 <Header.H3 className="mt-6 !text-gray-600">Keywords</Header.H3>
                 <div className="flex flex-row flex-wrap justify-center md:justify-start">
-                  {frontMatter.keywords.map((item: any) => (
+                  {frontMatter.keywords?.map((item: any) => (
                     <Tag key={item} label={item} className="mb-2" />
                   ))}
                 </div>
 
                 <Header.H3 className="mt-6 !text-gray-600">Languages</Header.H3>
                 <div className="flex flex-row flex-wrap justify-center md:justify-start">
-                  {frontMatter.language.map((item: any) => (
+                  {frontMatter.language?.map((item: any) => (
                     <Tag key={item} label={item} className="mb-1" />
                   ))}
                 </div>

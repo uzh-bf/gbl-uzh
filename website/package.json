@@ -9,14 +9,6 @@
     "optimize": "node export/resizeImages.js",
     "optimize:clean": "node export/cleanup.js",
     "export": "npm run optimize && npm run build && next export && npm run optimize:clean",
-    "release": "standard-version --no-verify",
-    "release:dry": "standard-version --dry-run",
-    "release:alpha": "standard-version --prerelease alpha --no-verify",
-    "release:alpha:dry": "standard-version --dry-run --prerelease alpha",
-    "release:beta": "standard-version --prerelease beta --no-verify",
-    "release:beta:dry": "standard-version --dry-run --prerelease beta",
-    "release:rc": "standard-version --prerelease rc --no-verify",
-    "release:rc:dry": "standard-version --dry-run --prerelease rc",
     "check": "npm-run-all --parallel check:ts format:ci lint",
     "check:ts": "tsc",
     "check:fix": "npm-run-all check:ts format lint:fix",
@@ -57,7 +49,6 @@
     "@uzh-bf/code-style-react-ts": "0.0.13",
     "eslint-config-next": "11.1.2",
     "npm-run-all": "4.1.5",
-    "standard-version": "9.3.1",
     "typescript": "4.3.5"
   }
 }

@@ -1,0 +1,44 @@
+{
+  "name": "@uzh-bf/gbl-uzh",
+  "version": "0.2.0",
+  "description": "Game-Based Learning at the University of Zurich",
+  "homepage": "www.gbl.uzh.ch",
+  "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uzh-bf/gbl-uzh.git"
+  },
+  "keywords": [
+    "game-based learning",
+    "gamification",
+    "teaching",
+    "university"
+  ],
+  "maintainers": [
+    "Roland Schlaefli <roland.schlaefli@bf.uzh.ch>",
+    "Benjamin Wilding <benjamin.wilding@bf.uzh.ch>",
+    "Anja Zgraggen <anja.zgraggen@bf.uzh.ch>"
+  ],
+  "contributors": [
+    "Julius Schlapbach <julius.schlapbach@bf.uzh.ch>",
+    "Alex Scheitlin <alex.scheitlin@bf.uzh.ch>",
+    "Moritz Eck <moritz.eck@gmail.com>",
+    "Nik Zaugg <zauggnik@gmail.com>",
+    "David Schmocker <david.schmocker@uzh.ch>",
+    "Johann Gandolfo <johann.gandolfo@bf.uzh.ch>"
+  ],
+  "dependencies": {
+    "standard-version": "9.3.2"
+  },
+  "scripts": {
+    "release": "standard-version --no-verify",
+    "release:dry": "standard-version --dry-run",
+    "release:alpha": "standard-version --prerelease alpha --no-verify",
+    "release:alpha:dry": "standard-version --dry-run --prerelease alpha",
+    "release:beta": "standard-version --prerelease beta --no-verify",
+    "release:beta:dry": "standard-version --dry-run --prerelease beta",
+    "release:rc": "standard-version --prerelease rc --no-verify",
+    "release:rc:dry": "standard-version --dry-run --prerelease rc"
+  },
+
+}

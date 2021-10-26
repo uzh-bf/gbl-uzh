@@ -1,6 +1,18 @@
-# vs code
-.vscode
+.vscode/
+node_modules/
+.next/
+out/
+build/
+.vercel/
 
-# misc
 .DS_Store
 *.pem
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
