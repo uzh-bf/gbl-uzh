@@ -28,10 +28,12 @@ function Game({ source, frontMatter }: Props) {
   const radarChartData = frontMatter.radarCharts.map((singleChart: any) => {
     const temp = singleChart.content.map((item: any) => ({
       subject: item.name,
-      value: item.value,
+      value: +item.value,
     }))
     return temp
   })
+
+  console.log(radarChartData)
 
   const radarChartTexts = frontMatter.radarCharts.map(
     (singleChart: any) => singleChart.text
@@ -98,7 +100,7 @@ function Game({ source, frontMatter }: Props) {
                       <p className="flex-1 prose-sm prose">
                         {radarChartTexts[0]}
                       </p>
-                      <div className="mt-3 mb-6 flex-1 lg:mt-0">
+                      <div className="flex-1 mt-3 mb-6 lg:mt-0">
                         <RadarChart data={radarChartData[0]} />
                       </div>
                     </div>
@@ -110,7 +112,7 @@ function Game({ source, frontMatter }: Props) {
                       <p className="flex-1 prose-sm prose">
                         {radarChartTexts[1]}
                       </p>
-                      <div className="mt-3 mb-6 flex-1 lg:mt-0">
+                      <div className="flex-1 mt-3 mb-6 lg:mt-0">
                         <RadarChart data={radarChartData[1]} />
                       </div>
                     </div>
@@ -118,12 +120,12 @@ function Game({ source, frontMatter }: Props) {
 
                   {frontMatter.gallery !== '' &&
                   frontMatter.gallery !== undefined ? (
-                    <div className="flex-1 mt-8 justify-center">
+                    <div className="justify-center flex-1 mt-8">
                       <Header.H3>Gallery</Header.H3>
-                      <div className="container grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 gap-2 mx-auto">
+                      <div className="container grid grid-cols-3 gap-2 mx-auto sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4">
                         {frontMatter.gallery?.map((image: any) => (
                           <div
-                            className="rounded m-auto hover:opacity-70"
+                            className="m-auto rounded hover:opacity-70"
                             key={frontMatter.gallery.indexOf(image)}
                           >
                             <div
@@ -229,15 +231,15 @@ function Game({ source, frontMatter }: Props) {
       </div>
       {zoom ? (
         <div
-          className="bg-gray-900 bg-opacity-60 z-10 w-full h-full fixed"
+          className="fixed z-10 w-full h-full bg-gray-900 bg-opacity-60"
           onClick={() => setZoom(false)}
         >
           <XIcon
-            className="mt-2 mr-2 w-8 h-8 md:w-12 md:h-12 float-right hover:cursor-pointer"
+            className="float-right w-8 h-8 mt-2 mr-2 md:w-12 md:h-12 hover:cursor-pointer"
             onClick={() => setZoom(false)}
           />
           <div className="absolute w-full top-1/2 left-1/2 -translate-x-2/4 -translate-y-2/4">
-            <div className="flex justify-around items-stretch max-width-full">
+            <div className="flex items-stretch justify-around max-width-full">
               <div
                 className={clsx(
                   frontMatter.gallery.indexOf(zoomedImage) == 0
@@ -247,7 +249,7 @@ function Game({ source, frontMatter }: Props) {
                 )}
                 onClick={previousImage}
               >
-                <ChevronLeftIcon className="absolute top-1/2 -translate-y-2/4 w-16 -left-1 md:-left-2" />
+                <ChevronLeftIcon className="absolute w-16 top-1/2 -translate-y-2/4 -left-1 md:-left-2" />
               </div>
               <div className="w-[80vw] max-w-max  mx-auto">
                 <img
@@ -267,7 +269,7 @@ function Game({ source, frontMatter }: Props) {
                 )}
                 onClick={nextImage}
               >
-                <ChevronRightIcon className="absolute top-1/2 -translate-y-2/4 w-16 -right-1 md:-right-2" />
+                <ChevronRightIcon className="absolute w-16 top-1/2 -translate-y-2/4 -right-1 md:-right-2" />
               </div>
             </div>
           </div>
