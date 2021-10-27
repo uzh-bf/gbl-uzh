@@ -62,6 +62,8 @@ function GBLinUse({
                 ects={course.ects}
                 level={course.level}
                 href={course.href}
+                semester={course.semester}
+                institution={course.institution}
               />
             ))}
           </div>
