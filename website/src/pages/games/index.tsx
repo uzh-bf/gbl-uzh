@@ -55,7 +55,7 @@ function GBLinUse({
             University of Zurich.
           </p>
           <div className="flex flex-col mt-4">
-            {frontMatterArr[1].map((course: any) => (
+            {frontMatterArr[1].map((course: any, ix) => (
               <CourseEntry
                 key={course.name}
                 name={course.name}
@@ -64,6 +64,7 @@ function GBLinUse({
                 href={course.href}
                 semester={course.semester}
                 institution={course.institution}
+                description={sourceArr[1][ix]}
               />
             ))}
           </div>

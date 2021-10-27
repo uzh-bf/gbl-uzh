@@ -1,3 +1,4 @@
+import { MDXRemote } from 'next-mdx-remote'
 import Tag from '../common/Tag'
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
   semester: string
   href: string
   institution: string
+  description?: any
 }
 
 function CourseEntry({
@@ -16,6 +18,7 @@ function CourseEntry({
   semester,
   institution,
   href,
+  description,
 }: Props) {
   return (
     <a
@@ -30,7 +33,10 @@ function CourseEntry({
             {name}
           </h3>
         </div>
-        <div className="flex flex-col mt-1 md:flex-row">
+        <p className="max-w-4xl prose-sm prose">
+          {<MDXRemote {...description} />}
+        </p>
+        <div className="flex flex-col mt-2 md:flex-row">
           {institution && <Tag label={institution} />}
           {semester && <Tag label={`${semester} Semester`} />}
           {level && <Tag label={level} />}{' '}
