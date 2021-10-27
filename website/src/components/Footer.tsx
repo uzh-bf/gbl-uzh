@@ -1,3 +1,4 @@
+import { CodeIcon, LibraryIcon, MailIcon } from '@heroicons/react/solid'
 import Image from 'next/image'
 import Link from 'next/link'
 import SwissUniLogo from '../../public/images/logo_swissuniversities.png'
@@ -30,15 +31,41 @@ function Footer() {
           </div>
         </div>
 
-        <p className="order-2 text-center text-gray-600 md:order-1 md:text-left">
-          <span className="font-bold">GBL @ DBF</span>
-          <br />
-          &copy; {new Date().getFullYear()} Department of Banking and Finance,
-          University of Zurich
-          <br />
-          <Link href="/about" passHref>
-            <div className="no-underline text-uzh-red-100">Contact Us</div>
-          </Link>
+        <p className="order-2 prose-sm prose text-center text-gray-600 md:order-1 md:text-left">
+          <div className="flex flex-row items-center">
+            <LibraryIcon className="w-6 text-gray-500" />
+            <div className="ml-4">
+              <div className="font-bold">GBL @ UZH</div>
+              <div>Department of Banking and Finance, University of Zurich</div>
+            </div>
+          </div>
+
+          <div className="flex flex-row items-center mt-4">
+            <CodeIcon className="w-6 text-gray-500" />
+            <div className="ml-4">
+              The GBL Website and Knowledge Base are being developed in public.
+              <br />
+              Have a look at our source code on{' '}
+              <Link href="https://github.com/uzh-bf/gbl-uzh" passHref>
+                <a target="_blank">Github</a>
+              </Link>
+              .
+            </div>
+          </div>
+
+          <div className="flex flex-row items-center mt-4">
+            <MailIcon className="w-6 text-gray-500" />
+            <div className="ml-4">
+              <Link href="/about" passHref>
+                Contact Us
+              </Link>{' '}
+              or provide feedback on our{' '}
+              <Link href="https://gbl-uzh.feedbear.com/roadmap" passHref>
+                <a target="_blank">Public Roadmap</a>
+              </Link>
+              .
+            </div>
+          </div>
         </p>
       </div>
     </footer>

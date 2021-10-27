@@ -13,7 +13,7 @@ const NAVIGATION_ITEMS = [
   { href: '/dev', label: 'Development' },
   { href: '/roadmap', label: 'Roadmap' },
   // { href: '/resources', label: 'Resources' },
-  { href: '/about', label: 'About Us' },
+  { href: '/about', label: 'About' },
 ]
 
 interface NavigationItemProps {
