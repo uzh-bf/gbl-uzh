@@ -9,4 +9,4 @@ RewriteRule    "^md/(.*)$"  "https://publish.obsidian.md/serve?url=www.gbl.uzh.c
 
 ## ErrorDocument 404 /404.html
 
-Redirect 302 /beta https://gbl-web.vercel.app
+Redirect 302 /beta https://gbl-uzh.vercel.app
