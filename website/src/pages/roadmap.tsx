@@ -57,9 +57,10 @@ function Roadmap() {
         <div>
           <FocusArea
             imgSrc={UZHIcon}
-            title="GBL @ UZH"
+            title="GBL in Use"
             description="Establish an overview of how game-based learning is being used at the
                 University of Zurich."
+            roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-in-use"
           />
 
           <FocusArea
@@ -67,13 +68,15 @@ function Roadmap() {
             imgSrc={NetworkIcon}
             title="GBL Knowledge Base"
             description="Develop a knowledge base and learning resources with know-how and best practices on game-based learning and game development."
+            roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-knowledge-base"
           />
 
           <FocusArea
             className="mt-4"
             imgSrc={ToolboxIcon}
-            title="Game Development Toolbox"
+            title="GBL Toolbox"
             description="Develop technical and content-related resources that can be used when designing and developing learning games."
+            roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-toolbox"
           />
 
           <FocusArea
@@ -81,6 +84,7 @@ function Roadmap() {
             imgSrc={ProcessIcon}
             title="Simulation Platform"
             description="Create a foundational framework that can be applied when implementing simulations."
+            roadmapHref="https://gbl-uzh.feedbear.com/boards/simulation-platform"
           />
 
           <FocusArea
@@ -88,6 +92,7 @@ function Roadmap() {
             imgSrc={TreeIcon}
             title="GBL Community"
             description="Establish and foster a game-based learning community at the University of Zurich and connect with interested external parties."
+            roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-community"
           />
         </div>
 

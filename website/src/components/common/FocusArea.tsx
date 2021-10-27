@@ -1,4 +1,6 @@
 import clsx from 'clsx'
+import Link from 'next/link'
+import Button from './Button'
 import Card from './Card'
 import Header from './Header'
 
@@ -7,9 +9,16 @@ interface Props {
   imgSrc: StaticImageData
   title: string
   description: string
+  roadmapHref?: string
 }
 
-function FocusArea({ className, imgSrc, title, description }: Props) {
+function FocusArea({
+  className,
+  imgSrc,
+  title,
+  description,
+  roadmapHref,
+}: Props) {
   return (
     <div
       className={clsx(
@@ -25,9 +34,22 @@ function FocusArea({ className, imgSrc, title, description }: Props) {
           minHeight="min-h-[100px]"
         />
       </div>
-      <div>
-        <Header.H3 className="mt-4 mb-0 md:mt-0 md:pl-4">{title}</Header.H3>
-        <p className="flex-1 prose md:pl-4 max-w-none">{description}</p>
+
+      <div className="mt-4 mb-0 md:mt-0 md:pl-4">
+        <Header.H3>{title}</Header.H3>
+        <p className="flex-1 prose max-w-none">{description}</p>
+        {roadmapHref && (
+          <div className="mt-2">
+            <Link href={roadmapHref} passHref>
+              <a target="_blank">
+                <Button className="text-xs">
+                  <Button.Arrow />
+                  <div className="ml-2">Detailed Roadmap</div>
+                </Button>
+              </a>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -35,6 +57,7 @@ function FocusArea({ className, imgSrc, title, description }: Props) {
 
 FocusArea.defaultProps = {
   className: undefined,
+  roadmapHref: undefined,
 }
 
 export default FocusArea
