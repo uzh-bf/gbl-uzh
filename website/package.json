@@ -17,37 +17,37 @@
     "lint:fix": "eslint --fix --ext .js,.ts,.tsx src/"
   },
   "dependencies": {
-    "@headlessui/react": "1.4.0",
-    "@heroicons/react": "1.0.3",
-    "@tailwindcss/aspect-ratio": "0.2.1",
-    "@tailwindcss/forms": "0.3.3",
-    "@tailwindcss/line-clamp": "0.2.1",
+    "@headlessui/react": "1.4.1",
+    "@heroicons/react": "1.0.5",
+    "@tailwindcss/aspect-ratio": "0.3.0",
+    "@tailwindcss/forms": "0.3.4",
+    "@tailwindcss/line-clamp": "0.2.2",
     "@tailwindcss/typography": "0.4.1",
     "@visx/group": "1.17.1",
     "@visx/mock-data": "1.7.0",
     "@visx/point": "1.7.0",
     "@visx/scale": "1.14.0",
     "@visx/shape": "1.17.1",
-    "autoprefixer": "10.3.1",
+    "autoprefixer": "10.3.7",
     "clsx": "1.1.1",
     "gray-matter": "4.0.3",
-    "next": "11.1.2",
+    "next": "12.0.1",
     "next-mdx-remote": "3.0.4",
     "path": "0.12.7",
-    "postcss": "8.3.6",
+    "postcss": "8.3.11",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-markdown": "6.0.3",
-    "recharts": "2.1.0",
-    "sharp": "0.29.0",
-    "tailwindcss": "2.2.7"
+    "recharts": "2.1.6",
+    "sharp": "0.29.2",
+    "tailwindcss": "2.2.17"
   },
   "devDependencies": {
-    "@types/node": "16.6.0",
-    "@types/react": "17.0.17",
+    "@types/node": "16.11.6",
+    "@types/react": "17.0.33",
     "@uzh-bf/code-style-react-ts": "0.0.13",
-    "eslint-config-next": "11.1.2",
+    "eslint-config-next": "12.0.1",
     "npm-run-all": "4.1.5",
-    "typescript": "4.3.5"
+    "typescript": "4.4.4"
   }
 }

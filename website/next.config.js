@@ -1,7 +1,5 @@
 module.exports = {
-  experimental: {
-    scriptLoader: true,
-  },
+  swcMinify: true,
   images: {
     loader: 'custom',
   },
