@@ -7,7 +7,7 @@
     "start": "next start",
     "optimize": "node export/resizeImages.js",
     "optimize:clean": "node export/cleanup.js",
-    "export": "npm run optimize && npm run build && next export && npm run optimize:clean",
+    "export": "npm run build && next export",
     "check": "npm-run-all --parallel check:ts format:ci lint",
     "check:ts": "tsc",
     "check:fix": "npm-run-all check:ts format lint:fix",
