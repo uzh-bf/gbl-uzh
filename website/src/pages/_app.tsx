@@ -57,7 +57,7 @@ function App({ Component, pageProps }: AppProps) {
               r.issue=function(k,p){r.push([6,k,p])};
               r.isActive=function(){return false};
               r.getSessionToken=function(){};
-            })(0, ${process.env.NEXT_PUBLIC_OPENREPLAY_PROJECT_KEY}, "//static.openreplay.com/latest/openreplay.js",1,93);
+            })(0, "${process.env.NEXT_PUBLIC_OPENREPLAY_PROJECT_KEY}", "//static.openreplay.com/latest/openreplay.js",1,93);
           `,
         }}
       />
