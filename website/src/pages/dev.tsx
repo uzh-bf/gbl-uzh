@@ -116,7 +116,7 @@ function DevelopmentWorkflow({
 
 export default DevelopmentWorkflow
 export const getStaticProps = Util.getStaticPropsFolder(
-  'development',
+  'workflow',
   'resources',
-  'GBL Dev Workflow'
+  'GBL Toolbox'
 )
