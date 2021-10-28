@@ -9,27 +9,30 @@ function App({ Component, pageProps }: AppProps) {
   const router = useRouter()
 
   useEffect(() => {
-    const handleRouteChange = (url) => {
-      gtag.pageview(url)
-    }
-    router.events.on('routeChangeComplete', handleRouteChange)
-    return () => {
-      router.events.off('routeChangeComplete', handleRouteChange)
+    if (gtag.GA_TRACKING_ID) {
+      const handleRouteChange = (url) => {
+        gtag.pageview(url)
+      }
+      router.events.on('routeChangeComplete', handleRouteChange)
+      return () => {
+        router.events.off('routeChangeComplete', handleRouteChange)
+      }
     }
   }, [router.events])
 
   return (
     <>
-      {/* Global Site Tag (gtag.js) - Google Analytics */}
-      <Script
-        strategy="afterInteractive"
-        src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`}
-      />
-      <Script
-        id="gtag-init"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
+      {gtag.GA_TRACKING_ID && (
+        <>
+          <Script
+            strategy="afterInteractive"
+            src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`}
+          />
+          <Script
+            id="gtag-init"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
@@ -37,13 +40,16 @@ function App({ Component, pageProps }: AppProps) {
               page_path: window.location.pathname,
             });
           `,
-        }}
-      />
-      <Script
-        id="openreplay-init"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
+            }}
+          />
+        </>
+      )}
+      {process.env.NEXT_PUBLIC_OPENREPLAY_PROJECT_KEY && (
+        <Script
+          id="openreplay-init"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
             (function(A,s,a,y,e,r){
               r=window.OpenReplay=[s,r,e,[y-1]];
               s=document.createElement('script');s.src=a;s.async=!A;
@@ -59,8 +65,9 @@ function App({ Component, pageProps }: AppProps) {
               r.getSessionToken=function(){};
             })(0, "${process.env.NEXT_PUBLIC_OPENREPLAY_PROJECT_KEY}", "//static.openreplay.com/latest/openreplay.js",1,93);
           `,
-        }}
-      />
+          }}
+        />
+      )}
       <Component {...pageProps} />
     </>
   )
