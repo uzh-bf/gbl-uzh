@@ -1,9 +1,11 @@
 .vscode/
 node_modules/
-.next/
-out/
-build/
-.vercel/
+
+website/.next/
+website/out/
+website/build/
+website/.vercel/
+website/public/images/responsive*
 
 .DS_Store
 *.pem
