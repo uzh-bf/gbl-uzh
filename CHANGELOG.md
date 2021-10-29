@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.0...v0.2.1) (2021-10-29)
+
+
+### Bug Fixes
+
+* **website:** add quotes around openreplay ([d905e9a](https://github.com/uzh-bf/gbl-uzh/commit/d905e9a9eeb6e5be149db0d4c8fe36046160189d))
+* **website:** add trailing slash ([0cc0763](https://github.com/uzh-bf/gbl-uzh/commit/0cc076344cf64b583a43b0aee58016d86943baa0))
+* **website:** disable swc minify as it breaks the game detail pages ([4f6277a](https://github.com/uzh-bf/gbl-uzh/commit/4f6277a21821d97a65ec430c65a2ecd1eef4dc7e))
+* **website:** update beta link to gbl-uzh ([0a71809](https://github.com/uzh-bf/gbl-uzh/commit/0a718094fb27afbcb3e81176a71eea6dffbf7ce5))
+
+
+### Refactors
+
+* **website:** adjust gtag according to official example ([7be8761](https://github.com/uzh-bf/gbl-uzh/commit/7be8761195134b33a600a904644121169a12e80c))
+
+
+### Enhancements
+
+* add semester and institution to courses on gbl in use ([995b3a1](https://github.com/uzh-bf/gbl-uzh/commit/995b3a152d7aa9ef9608b04115c01402f9b2c13d))
+* **kb:** add new resources to KB ([5160206](https://github.com/uzh-bf/gbl-uzh/commit/5160206ab7738942af1bff12674043f23b958d56))
+* **website:** add description option for course entries ([3523da7](https://github.com/uzh-bf/gbl-uzh/commit/3523da7ad985288ec595a58dbbd76c8a58a1d526))
+* **website:** add links to detailed roadmaps ([8325294](https://github.com/uzh-bf/gbl-uzh/commit/8325294acbd7e4bb8555bd167fb1abb844574224))
+* **website:** add openreplay integration ([eb23dd0](https://github.com/uzh-bf/gbl-uzh/commit/eb23dd06fdfd9d096dd5f6b915027141f22d10e9))
+* **website:** ensure that scripts are loaded only if env variables are present ([bf51130](https://github.com/uzh-bf/gbl-uzh/commit/bf51130c9b9b0532da3fc01948da4782685013e4))
+* **website:** extend footer contents with links to repo and feedbear ([a61f7da](https://github.com/uzh-bf/gbl-uzh/commit/a61f7da0a2d8ebbaa22f6559f58e9c1db0d92983))
+* **website:** replace logo with new working draft ([bab2e88](https://github.com/uzh-bf/gbl-uzh/commit/bab2e882b1c9465f0bb914ebfd52022b3a791c03))
+* **website:** update title prefix to GBL@UZH ([f1fa0e0](https://github.com/uzh-bf/gbl-uzh/commit/f1fa0e0d04e7aabf96d4860d5c973ecbb8049100))
+
+
+### Other
+
+* add cypress file to public folder ([8211d75](https://github.com/uzh-bf/gbl-uzh/commit/8211d75d1260f8203e8f366bd45300364362485d))
+* **deps:** add volta pinning for node ([c937cd2](https://github.com/uzh-bf/gbl-uzh/commit/c937cd28626af9cec60daa1b90b874e244ab7c68))
+* **deps:** lockfile maintenance ([36c30f8](https://github.com/uzh-bf/gbl-uzh/commit/36c30f8bc27136699375238e5462f34f99f412c0))
+* **deps:** upgrade to nextjs 12 and upgrade other dependencies ([c703de8](https://github.com/uzh-bf/gbl-uzh/commit/c703de8d7b641a55562b2f2146e7c35c700cf191))
+* **deps:** upgrade visx and react-markdown ([ae4165f](https://github.com/uzh-bf/gbl-uzh/commit/ae4165ff5a2410273ab27b84f3117844dc0df61d))
+* **kb:** update submodule ([17e4736](https://github.com/uzh-bf/gbl-uzh/commit/17e473673a6101fed7adcbb8568a3b9865b7cfa6))
+* remove cruft .nvmrc ([7a233e4](https://github.com/uzh-bf/gbl-uzh/commit/7a233e4a1cbe17c909ed81c7da6eb7395009e72e))
+* remove npm from global setup ([8bf5bad](https://github.com/uzh-bf/gbl-uzh/commit/8bf5badc9d0e6e4f7d7aa4504dce35732d0ff60a))
+* update kb ([0420a2f](https://github.com/uzh-bf/gbl-uzh/commit/0420a2f26cd4fb89ee171dc28059e6cd8e5b233f))
+* **website:** lockfile maintenance ([6af68af](https://github.com/uzh-bf/gbl-uzh/commit/6af68afdbd3c09a069d5ad9e375aa8f155c3c695))
+* **website:** remove visx ([aac1987](https://github.com/uzh-bf/gbl-uzh/commit/aac1987dc1447147bf18a955a6cc3ef28e86cd3d))
+* **website:** update export script to not optimize images ([69f7194](https://github.com/uzh-bf/gbl-uzh/commit/69f7194da5d38afd44d2bd2017be7b26c51add73))
+
 ## [0.2.0](https://github.com/uzh-bf/gbl-uzh/compare/v0.1.0...v0.2.0) (2021-10-26)
 
 
