@@ -51,6 +51,11 @@ function Home() {
             </Link>
           </HeroImage.Group>
         </div>
+
+        <div className="w-full">
+          <iframe width="100%" height={700} src="/Gamification_Advisor.html" />
+        </div>
+
         <div className="py-8 md:py-16">
           <div className="max-w-6xl m-auto">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
