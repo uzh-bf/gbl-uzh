@@ -1,11 +1,14 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import DevIcon from '../../public/images/einzelarbeit_icon.svg'
 import StudentIcon from '../../public/images/gruppenarbeit_icon.svg'
+import CowboyImageSrc from '../../public/images/nicubunu_Game_baddie_Cowboy.png'
 import PFMImage from '../../public/images/pfm_game.png'
 import uFinImage from '../../public/images/ufin.jpg'
 import UnderConstructionImage from '../../public/images/under_construction.jpg'
 import TeacherIcon from '../../public/images/vorlesung_icon.svg'
+import Advisor from '../components/Advisor'
 import Button from '../components/common/Button'
 import HeroImage from '../components/common/HeroImage'
 import Title from '../components/common/Title'
@@ -14,6 +17,7 @@ import Content from '../components/Content'
 import GameCard from '../components/games/GameCard'
 import PageWithHeader from '../components/PageWithHeader'
 import HomeSection from '../components/sections/HomeSection'
+import loader from '../lib/loader'
 
 function Home() {
   const router = useRouter()
@@ -52,11 +56,30 @@ function Home() {
           </HeroImage.Group>
         </div>
 
-        <div className="w-full">
-          <iframe width="100%" height={700} src="/Gamification_Advisor.html" />
+        <div className="py-4 md:py-8">
+          <div className="max-w-6xl m-auto">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
+              GBL Advisor
+            </h1>
+            <div>
+              <div className="flex flex-col gap-8 pt-4 md:flex-row">
+                <div className="w-[150px]">
+                  <Image src={CowboyImageSrc} loader={loader} />
+                </div>
+                <div className="flex-1">
+                  <div className="mt-2 prose md:prose-lg max-w-none">
+                    Get personalized recommendations with our Gamification and
+                    Game-Based Learning advisor.
+                  </div>
+
+                  <Advisor />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="py-8 md:py-16">
+        <div className="py-4 md:py-8">
           <div className="max-w-6xl m-auto">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
               GBL in Use
