@@ -1,49 +1,19 @@
+import { init } from '@socialgouv/matomo-next'
 import { AppProps } from 'next/dist/shared/lib/router/router'
-import { useRouter } from 'next/router'
 import Script from 'next/script'
 import { useEffect } from 'react'
-import * as gtag from '../lib/gtag'
 import '../styles/globals.css'
 
-function App({ Component, pageProps }: AppProps) {
-  const router = useRouter()
+const MATOMO_URL = process.env.NEXT_PUBLIC_MATOMO_URL
+const MATOMO_SITE_ID = process.env.NEXT_PUBLIC_MATOMO_SITE_ID
 
+function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
-    if (gtag.GA_TRACKING_ID) {
-      const handleRouteChange = (url) => {
-        gtag.pageview(url)
-      }
-      router.events.on('routeChangeComplete', handleRouteChange)
-      return () => {
-        router.events.off('routeChangeComplete', handleRouteChange)
-      }
-    }
-  }, [router.events])
+    init({ url: MATOMO_URL, siteId: MATOMO_SITE_ID })
+  }, [])
 
   return (
     <>
-      {gtag.GA_TRACKING_ID && (
-        <>
-          <Script
-            strategy="afterInteractive"
-            src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`}
-          />
-          <Script
-            id="gtag-init"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${gtag.GA_TRACKING_ID}', {
-              page_path: window.location.pathname,
-            });
-          `,
-            }}
-          />
-        </>
-      )}
       {process.env.NEXT_PUBLIC_OPENREPLAY_PROJECT_KEY && (
         <Script
           id="openreplay-init"
