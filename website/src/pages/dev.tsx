@@ -1,5 +1,6 @@
+import { push } from '@socialgouv/matomo-next'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Panel from '../components/common/Panel'
 import Title from '../components/common/Title'
 import TitleBackground from '../components/common/TitleBackground'
@@ -21,6 +22,11 @@ function DevelopmentWorkflow({
   fileMissingArr,
 }: Props) {
   const [activePanel, setActivePanel] = useState(0)
+
+  useEffect(() => {
+    push(['trackEvent', 'GBL Workflow', 'Panel Activated', activePanel])
+  }, [activePanel])
+
   return (
     <PageWithHeader title="Game Development">
       <TitleBackground>

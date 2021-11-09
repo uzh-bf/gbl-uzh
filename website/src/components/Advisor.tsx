@@ -1,4 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react'
+import { push } from '@socialgouv/matomo-next'
 import { useState } from 'react'
 import Button from './common/Button'
 
@@ -7,7 +8,13 @@ function Advisor() {
 
   return (
     <div>
-      <Button className="mt-4" onClick={() => setIsAdvisorActive(true)}>
+      <Button
+        className="mt-4"
+        onClick={() => {
+          setIsAdvisorActive(true)
+          push(['trackEvent', 'GBL Web', 'Advisor', 'Opened'])
+        }}
+      >
         <Button.Arrow />
         <div className="ml-2">Open</div>
       </Button>
@@ -22,7 +29,10 @@ function Advisor() {
         leaveTo="transform scale-95 opacity-0"
       >
         <Dialog
-          onClose={() => setIsAdvisorActive(false)}
+          onClose={() => {
+            setIsAdvisorActive(false)
+            push(['trackEvent', 'GBL Web', 'Advisor', 'Closed'])
+          }}
           className="fixed inset-0 z-10 overflow-y-auto"
         >
           <div className="flex items-center justify-center min-h-screen">
@@ -37,7 +47,14 @@ function Advisor() {
                 />
               </div>
 
-              <Button onClick={() => setIsAdvisorActive(false)}>Close</Button>
+              <Button
+                onClick={() => {
+                  setIsAdvisorActive(false)
+                  push(['trackEvent', 'GBL Web', 'Advisor', 'Closed'])
+                }}
+              >
+                Close
+              </Button>
             </div>
           </div>
         </Dialog>
