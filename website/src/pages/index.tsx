@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import DevIcon from '../../public/images/einzelarbeit_icon.svg'
 import StudentIcon from '../../public/images/gruppenarbeit_icon.svg'
-import CowboyImageSrc from '../../public/images/nicubunu_Game_baddie_Cowboy.png'
 import PFMImage from '../../public/images/pfm_game.png'
+import AdvisorImage from '../../public/images/tablet_icon.svg'
 import uFinImage from '../../public/images/ufin.jpg'
 import UnderConstructionImage from '../../public/images/under_construction.jpg'
 import TeacherIcon from '../../public/images/vorlesung_icon.svg'
@@ -58,15 +58,19 @@ function Home() {
 
         <div className="py-4 md:py-8">
           <div className="max-w-6xl m-auto">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
-              GBL Advisor
-            </h1>
             <div>
-              <div className="flex flex-col gap-8 pt-4 md:flex-row">
-                <div className="w-[150px]">
-                  <Image src={CowboyImageSrc} loader={loader} />
+              <div className="flex flex-col items-center gap-8 md:flex-row">
+                <div className="relative hidden md:block md:flex-initial">
+                  <Image
+                    src={AdvisorImage}
+                    loader={loader}
+                    layout="intrinsic"
+                  />
                 </div>
                 <div className="flex-1">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
+                    GBL Advisor
+                  </h1>
                   <div className="mt-2 prose md:prose-lg max-w-none">
                     Get personalized recommendations with our Gamification and
                     Game-Based Learning advisor.

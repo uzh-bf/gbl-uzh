@@ -50,9 +50,8 @@ function GBLinUse({
         <div className="mt-4 md:mt-8">
           <Header.H2>Courses</Header.H2>
           <p className="text-gray-600">
-            A selection of lectures and seminars that contain Game-Based
-            Learning elements at the Department of Banking and Finance of the
-            University of Zurich.
+            A selection of lectures and seminars at the University of Zurich
+            that contain Game-Based Learning elements.
           </p>
           <div className="flex flex-col mt-4">
             {frontMatterArr[1].map((course: any, ix) => (

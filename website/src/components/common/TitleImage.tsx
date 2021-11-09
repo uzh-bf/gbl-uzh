@@ -12,7 +12,7 @@ function TitleImage({ imgSrc, children }: Props) {
       <div className="flex justify-center">
         <div
           className={clsx(
-            'relative max-h-[23rem] overflow-hidden',
+            'relative max-h-[25rem] overflow-hidden',
             !imgSrc && 'min-h-[3rem] w-full'
           )}
         >
