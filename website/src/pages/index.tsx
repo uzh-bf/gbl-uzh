@@ -56,7 +56,7 @@ function Home() {
           </HeroImage.Group>
         </div>
 
-        {process.env.WITH_GBL_ADVISOR && (
+        {process.env.NEXT_PUBLIC_WITH_GBL_ADVISOR && (
           <div className="py-4 md:py-8">
             <div className="max-w-6xl m-auto">
               <div>
