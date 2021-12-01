@@ -46,9 +46,9 @@ function Home() {
                     Advisory Wizard
                   </h1>
                   <div className="mt-2 prose md:prose-lg max-w-none">
-                    Don't know where to start? Get personalized recommendations
-                    with our Gamification and Game-Based Learning advisory
-                    wizard.
+                    Don&apos;t know where to start? Get personalized
+                    recommendations with our Gamification and Game-Based
+                    Learning advisory wizard.
                   </div>
 
                   <Advisor />
