@@ -12,7 +12,7 @@ function Advisor() {
         className="mt-4"
         onClick={() => {
           setIsAdvisorActive(true)
-          push(['trackEvent', 'GBL Web', 'Advisor', 'Opened'])
+          push(['trackEvent', 'GBL Advisor', 'Opened'])
         }}
       >
         <Button.Arrow />
@@ -31,7 +31,7 @@ function Advisor() {
         <Dialog
           onClose={() => {
             setIsAdvisorActive(false)
-            push(['trackEvent', 'GBL Web', 'Advisor', 'Closed'])
+            push(['trackEvent', 'GBL Advisor', 'Closed'])
           }}
           className="fixed inset-0 z-10 overflow-y-auto"
         >
@@ -43,14 +43,14 @@ function Advisor() {
                 <iframe
                   width="100%"
                   height="100%"
-                  src="/Gamification Advisor.html"
+                  src="https://www.gbl.uzh.ch/advisor/Gamification Advisor.html"
                 />
               </div>
 
               <Button
                 onClick={() => {
                   setIsAdvisorActive(false)
-                  push(['trackEvent', 'GBL Web', 'Advisor', 'Closed'])
+                  push(['trackEvent', 'GBL Advisor', 'Closed'])
                 }}
               >
                 Close
