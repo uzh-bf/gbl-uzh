@@ -8,7 +8,7 @@ interface Props {
 function HomeSection({ className, children }: Props) {
   return (
     <div className={clsx('py-4 md:py-4', className)}>
-      <div className="flex flex-row max-w-6xl m-auto md:min-h-[350px] shadow-md">
+      <div className="flex flex-row max-w-6xl m-auto md:min-h-[350px] shadow-xl">
         {children}
       </div>
     </div>

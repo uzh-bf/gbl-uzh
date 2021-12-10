@@ -30,7 +30,38 @@ function Home() {
       </TitleImage>
 
       <Content>
-        <div className="py-8 md:py-16">
+        <div className="py-4">
+          <div className="max-w-6xl p-4 m-auto bg-gray-100 sm:py-0 rounded-xl">
+            <div>
+              <div className="flex flex-col items-center gap-8 md:flex-row">
+                <div className="relative hidden md:block md:flex-initial">
+                  <Image
+                    src={AdvisorImage}
+                    loader={loader}
+                    layout="intrinsic"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
+                    Advisory Wizard
+                  </h1>
+                  <div className="mt-2 prose md:prose-lg max-w-none">
+                    Don&apos;t know where to start? Get personalized
+                    recommendations with our Gamification and Game-Based
+                    Learning advisory wizard.
+                  </div>
+
+                  <Advisor />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="py-4 md:py-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
+            Audience
+          </h1>
           <HeroImage.Group>
             <Link href="/kb" passHref>
               <HeroImage
@@ -55,35 +86,6 @@ function Home() {
             </Link>
           </HeroImage.Group>
         </div>
-
-        {process.env.WITH_GBL_ADVISOR && (
-          <div className="py-4 md:py-8">
-            <div className="max-w-6xl m-auto">
-              <div>
-                <div className="flex flex-col items-center gap-8 md:flex-row">
-                  <div className="relative hidden md:block md:flex-initial">
-                    <Image
-                      src={AdvisorImage}
-                      loader={loader}
-                      layout="intrinsic"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
-                      GBL Advisor
-                    </h1>
-                    <div className="mt-2 prose md:prose-lg max-w-none">
-                      Get personalized recommendations with our Gamification and
-                      Game-Based Learning advisor.
-                    </div>
-
-                    <Advisor />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         <div className="py-4 md:py-8">
           <div className="max-w-6xl m-auto">
