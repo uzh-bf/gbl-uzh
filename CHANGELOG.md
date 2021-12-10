@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.2](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.1...v0.2.2) (2021-12-10)
+
+
+### Features
+
+* add initial version of the advisor to the index page ([1fe0202](https://github.com/uzh-bf/gbl-uzh/commit/1fe0202a83489b07fd6998d0e9bf19b64f2fe616))
+* **advisor:** add advisor in separate directory ([833c37c](https://github.com/uzh-bf/gbl-uzh/commit/833c37c2dd4142fe38054569cffe3765b4819b65))
+* embed simple advisory example ([90ff0d5](https://github.com/uzh-bf/gbl-uzh/commit/90ff0d549aedf269373b042b26ae84edfcc73193))
+
+
+### Bug Fixes
+
+* **website:** enable matomo only if the env variables are available ([be59bc0](https://github.com/uzh-bf/gbl-uzh/commit/be59bc0648694ef04dbcbfe6ee314fe4d16befc2))
+* **website:** replace apos with html entity ([5f01b4c](https://github.com/uzh-bf/gbl-uzh/commit/5f01b4ce94c575e0f92c7df61228ff2af184706f))
+* **website:** use NEXT_PUBLIC_WITH_GBL_ADVISOR ([4952142](https://github.com/uzh-bf/gbl-uzh/commit/4952142110b34c461d695a46f98fb9e883ece226))
+
+
+### Enhancements
+
+* **website:** add an icon for the advisor ([12485f4](https://github.com/uzh-bf/gbl-uzh/commit/12485f4b064c54717f32c05d62ae1abf61f5d7d4))
+* **website:** add tailwind and matomo to advisor ([924859b](https://github.com/uzh-bf/gbl-uzh/commit/924859bd6a27ce15555041b1c0107171caa89c59))
+
+
+### Other
+
+* update configs for matomo ([431f8be](https://github.com/uzh-bf/gbl-uzh/commit/431f8be7bcab96a5b1021718f478d54b0e717d8b))
+* update kb ([b60d605](https://github.com/uzh-bf/gbl-uzh/commit/b60d6057271a3ce989b695e8d4a9bb347dcce7d0))
+* **website:** add push events for advisor and dev workflow ([00562d5](https://github.com/uzh-bf/gbl-uzh/commit/00562d58a43d61b8dd9cd7e7580bc8d6405df566))
+* **website:** deploy the advisor ([7aa1277](https://github.com/uzh-bf/gbl-uzh/commit/7aa1277d2e9f3b4b92bcfce6def605188ff212d2))
+* **website:** switch to matomo for webstats.uzh.ch ([82c08b2](https://github.com/uzh-bf/gbl-uzh/commit/82c08b2f8f046c2e34666f41b7ca0e48a18d863c))
+* **website:** update advisor ([6149da6](https://github.com/uzh-bf/gbl-uzh/commit/6149da6df6ecac853cf5c50bb3f1653a89fd2f37))
+
+
+### Dependencies
+
+* **website:** tailwind migrations ([f8d5f7a](https://github.com/uzh-bf/gbl-uzh/commit/f8d5f7a067915d581f71f025c6d4dd4d793407be))
+* **website:** upgrade dependencies ([9960613](https://github.com/uzh-bf/gbl-uzh/commit/9960613669fc49ed9d42a640d4046dd4932a21ac))
+* **website:** upgrade next ([e30603d](https://github.com/uzh-bf/gbl-uzh/commit/e30603d6a6d75c1e6b4fad592e42d11f4836c7e9))
+* **website:** upgrade next ([66b44ce](https://github.com/uzh-bf/gbl-uzh/commit/66b44ce6d261db8dbe864d54e57942abafaed9ed))
+
 ### [0.2.1](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.0...v0.2.1) (2021-10-29)
 
 

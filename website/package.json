@@ -1,6 +1,6 @@
 {
   "name": "@gbl-uzh/website",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "scripts": {
     "dev": "NODE_ENV=development next",
     "build": "NODE_ENV=production next build",
