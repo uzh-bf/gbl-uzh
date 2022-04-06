@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.3](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.2...v0.2.3) (2022-04-06)
+
+
+### Other
+
+* **advisor:** adapt name for wizard ([8fb4a4e](https://github.com/uzh-bf/gbl-uzh/commit/8fb4a4eca47e2ea5a47227a1de8e271362d447bc))
+* **kb:** update kb contents ([fc7c2ee](https://github.com/uzh-bf/gbl-uzh/commit/fc7c2eecdf08e08f48294dd4fddfa7498ad5175d))
+* **website:** copy advisory outputs in export command ([fc7bff3](https://github.com/uzh-bf/gbl-uzh/commit/fc7bff330c313aa08164bc4053b8cb5ece1897b0))
+
+
+### Enhancements
+
+* **advisor:** add back link to footer ([e1724b5](https://github.com/uzh-bf/gbl-uzh/commit/e1724b5243ffed45655f1bdf3d3f7f91e44f1203))
+* **website:** add link to BF UZH in footer ([7740d48](https://github.com/uzh-bf/gbl-uzh/commit/7740d48575ca589467e14c53451d3e9d1050f3a0))
+* **website:** add links to uzh and swissuni in footer ([c95def6](https://github.com/uzh-bf/gbl-uzh/commit/c95def64b2d6302a4e4c2d9151504ba3a35bd766))
+* **website:** dependency upgrades and small contentual changes ([6fb53bb](https://github.com/uzh-bf/gbl-uzh/commit/6fb53bb16b7d6f00372a1a66b8402c6fe0b45dc2))
+* **website:** redirect /community to MS teams ([f014c24](https://github.com/uzh-bf/gbl-uzh/commit/f014c24d91f83da740b059056e63b8a92a06e009))
+
 ### [0.2.2](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.1...v0.2.2) (2021-12-10)
 
 
