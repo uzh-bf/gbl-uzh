@@ -31,8 +31,7 @@ function GBLinUse({
           <Header.H2>Games</Header.H2>
           <p className="text-gray-600">
             Simulations and Serious Games that have been developed or are being
-            developed at the Department of Banking and Finance of the University
-            of Zurich.
+            developed at institutions of the University of Zurich.
           </p>
           <div className="mt-4 sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
             {frontMatterArr[0].map((game: any) => (

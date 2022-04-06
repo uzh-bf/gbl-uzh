@@ -37,7 +37,7 @@ function Card({
         className={clsx('w-full h-full relative', minHeight || 'min-h-[200px]')}
       >
         {tags?.length > 0 && (
-          <div className="absolute top-0 z-10 flex flex-row flex-wrap p-2">
+          <div className="absolute top-0 z-10 flex flex-row flex-wrap gap-1 p-2">
             {tags.map((tag) => (
               <Tag key={tag} label={tag} />
             ))}
