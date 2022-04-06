@@ -44,7 +44,16 @@ function Footer() {
             <LibraryIcon className="w-6 text-gray-500" />
             <div className="ml-4">
               <div className="font-bold">GBL @ UZH</div>
-              <div>Department of Banking and Finance, University of Zurich</div>
+              <div>
+                <a
+                  href="https://www.bf.uzh.ch"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Department of Banking and Finance
+                </a>
+                , University of Zurich
+              </div>
             </div>
           </div>
 
