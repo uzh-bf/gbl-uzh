@@ -192,11 +192,14 @@ function Home() {
           />
           <HomeSection.Content title="“">
             <p className="prose prose-lg">
-              “I absolutely loved the Portfolio Management Game, it was great
-              fun and required us to apply our knowledge and to work
-              meticulously to come up with good decisions for our portfolio, our
-              customers, and our bank in general. It&apos;s a very educational,
-              fun tool.”
+              “I absolutely loved the{' '}
+              <Link href="/games/portfolio-management-simulation">
+                Portfolio Management Game
+              </Link>
+              , it was great fun and required us to apply our knowledge and to
+              work meticulously to come up with good decisions for our
+              portfolio, our customers, and our bank in general. It&apos;s a
+              very educational, fun tool.”
             </p>
             <p className="mt-4 italic prose">
               Student from our International Summer School in 2020

@@ -60,7 +60,7 @@ function Roadmap() {
             title="GBL in Use"
             description="Establish an overview of how game-based learning is being used at the
                 University of Zurich."
-            roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-in-use"
+            // roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-in-use"
           />
 
           <FocusArea
@@ -68,7 +68,7 @@ function Roadmap() {
             imgSrc={NetworkIcon}
             title="GBL Knowledge Base"
             description="Develop a knowledge base and learning resources with know-how and best practices on game-based learning and game development."
-            roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-knowledge-base"
+            // roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-knowledge-base"
           />
 
           <FocusArea
@@ -76,7 +76,7 @@ function Roadmap() {
             imgSrc={ToolboxIcon}
             title="GBL Toolbox"
             description="Develop technical and content-related resources that can be used when designing and developing learning games."
-            roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-toolbox"
+            // roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-toolbox"
           />
 
           <FocusArea
@@ -84,7 +84,7 @@ function Roadmap() {
             imgSrc={ProcessIcon}
             title="Simulation Platform"
             description="Create a foundational framework that can be applied when implementing simulations."
-            roadmapHref="https://gbl-uzh.feedbear.com/boards/simulation-platform"
+            // roadmapHref="https://gbl-uzh.feedbear.com/boards/simulation-platform"
           />
 
           <FocusArea
@@ -92,7 +92,7 @@ function Roadmap() {
             imgSrc={TreeIcon}
             title="GBL Community"
             description="Establish and foster a game-based learning community at the University of Zurich and connect with interested external parties."
-            roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-community"
+            // roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-community"
           />
         </div>
 
@@ -101,7 +101,7 @@ function Roadmap() {
           We strive to develop our roadmap and goals based on the needs of the
           community. If you are interested in game-based learning and would like
           to be involved in the project, please fill out the following form to
-          join our user group.
+          join our community.
         </p>
         <div className="max-w-lg mt-4 border">
           <div id="c7">

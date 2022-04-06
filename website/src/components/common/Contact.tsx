@@ -22,7 +22,12 @@ function Contact({ name, institution, role, link, imgSrc }) {
         <p className="prose-sm text-center sm:text-left sm:prose">
           {institution}
         </p>
-        <a target="_blank" href={link} rel="noreferrer">
+        <a
+          className="text-uzh-red-100 hover:underline"
+          target="_blank"
+          href={link}
+          rel="noreferrer"
+        >
           Profile
         </a>
       </div>

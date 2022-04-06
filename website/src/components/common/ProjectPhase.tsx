@@ -10,7 +10,7 @@ function ProjectPhase({ title, duration, children }: Props) {
   return (
     <div className="flex flex-col flex-1 last:mt-2 sm:last:mt-0 sm:last:ml-4">
       <div className="prose">
-        <Header.H3 className="flex-initial pb-2 md:pl-4 pt-2 -mb-4 !text-white bg-uzh-red-80">
+        <Header.H3 className="flex-initial pb-2 md:pl-4 pt-2 !text-white bg-uzh-red-80">
           {title}
         </Header.H3>
       </div>
