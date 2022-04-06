@@ -1,3 +1,4 @@
+import { StaticImageData } from 'next/image'
 import { useRouter } from 'next/router'
 import Card from '../common/Card'
 

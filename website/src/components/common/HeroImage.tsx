@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import Image from 'next/image'
+import Image, { StaticImageData } from 'next/image'
 import Link from 'next/link'
 import customLoader from '../../lib/loader'
 
