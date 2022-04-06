@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.6](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.5...v0.2.6) (2022-04-06)
+
+
+### Bug Fixes
+
+* **website:** update typing issues ([96422ab](https://github.com/uzh-bf/gbl-uzh/commit/96422ab4d612ae16f9bb8bf3e6b16182848c6658))
+
 ### [0.2.5](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.4...v0.2.5) (2022-04-06)
 
 ### [0.2.4](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.3...v0.2.4) (2022-04-06)
