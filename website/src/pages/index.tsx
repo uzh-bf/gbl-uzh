@@ -1,3 +1,4 @@
+import { UsersIcon } from '@heroicons/react/solid'
 import Image, { StaticImageData } from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -25,8 +26,23 @@ function Home() {
   return (
     <PageWithHeader title="Home">
       <TitleImage imgSrc="/images/DSC01864_cut4.jpg">
-        <Title title="Game-Based Learning" className="mb-4" size="large" />
-        <Title title="Learning-by-doing. Literally." size="medium" />
+        <div className="flex flex-col gap-4 md:items-end md:justify-between md:flex-row">
+          <div className="">
+            <Title title="Game-Based Learning" className="mb-4" size="large" />
+            <Title title="Learning-by-doing. Literally." size="medium" />
+          </div>
+          <div className="flex text-lg font-bold md:text-2xl text-uzh-red-80 hover:text-uzh-red-100">
+            <a
+              className="flex flex-row items-center gap-3"
+              href="https://community.klicker.uzh.ch"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <UsersIcon className="w-5 md:w-8" />
+              Join the community
+            </a>
+          </div>
+        </div>
       </TitleImage>
 
       <Content>

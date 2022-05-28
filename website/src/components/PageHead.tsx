@@ -1,4 +1,4 @@
-import { MenuIcon, UsersIcon } from '@heroicons/react/solid'
+import { MenuIcon } from '@heroicons/react/solid'
 import clsx from 'clsx'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -100,24 +100,6 @@ Navigation.defaultProps = {
   isOpen: false,
 }
 
-function Breadcrumbs() {
-  const router = useRouter()
-
-  return (
-    <div className="flex-initial order-2 mt-4 mb-4 ml-8 font-bold text-center text-md text-uzh-red-80 hover:text-uzh-red-100 md:mb-0 md:mt-0 md:order-1">
-      <a
-        className="flex flex-row items-end gap-2"
-        href="https://community.klicker.uzh.ch"
-        target="_blank"
-        rel="noreferrer"
-      >
-        <UsersIcon className="w-5" />
-        Join the community
-      </a>
-    </div>
-  )
-}
-
 function Logo() {
   return (
     <Link href="/" passHref>
@@ -150,7 +132,6 @@ function PageHead() {
         />
       </div>
       <div className="flex flex-col justify-between flex-initial md:items-end md:border-none md:pr-8">
-        <Breadcrumbs />
         <Navigation isOpen={isOpen} />
       </div>
     </header>
