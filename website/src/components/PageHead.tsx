@@ -1,4 +1,4 @@
-import { MenuIcon } from '@heroicons/react/solid'
+import { MenuIcon, UsersIcon } from '@heroicons/react/solid'
 import clsx from 'clsx'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -104,8 +104,16 @@ function Breadcrumbs() {
   const router = useRouter()
 
   return (
-    <div className="flex-initial order-2 mt-4 mb-4 ml-8 text-sm text-gray-500 md:mb-0 md:mt-0 md:order-1">
-      Location: {router.pathname}
+    <div className="flex-initial order-2 mt-4 mb-4 ml-8 font-bold text-center text-md text-uzh-red-80 hover:text-uzh-red-100 md:mb-0 md:mt-0 md:order-1">
+      <a
+        className="flex flex-row items-end gap-2"
+        href="https://community.klicker.uzh.ch"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <UsersIcon className="w-5" />
+        Join the community
+      </a>
     </div>
   )
 }

@@ -98,20 +98,18 @@ function Roadmap() {
 
         <Header.H2 className="mt-8">Get Involved</Header.H2>
         <p className="prose max-w-none">
-          We strive to develop our roadmap and goals based on the needs of the
-          community. If you are interested in game-based learning and would like
-          to be involved in the project, please fill out the following form to
-          join our community.
+          If you are interested in game-based learning and would like to get in
+          touch with other lecturers to exchange ideas, we invite you to join
+          our community on{' '}
+          <a
+            href="https://community.klicker.uzh.ch"
+            target="_blank"
+            rel="noreferrer"
+          >
+            https://community.klicker.uzh.ch
+          </a>
+          .
         </p>
-        <div className="max-w-lg mt-4 border">
-          <div id="c7">
-            Fill in the{' '}
-            <a href="https://www.bf-tools.uzh.ch/applications/easyforms/index.php?r=app%2Fform&id=12">
-              online form
-            </a>
-            .
-          </div>
-        </div>
       </Content>
     </PageWithHeader>
   )
