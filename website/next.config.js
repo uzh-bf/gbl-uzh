@@ -1,7 +1,15 @@
 module.exports = {
-  // swcMinify: true,
-  trailingSlash: true,
-  images: {
-    loader: 'custom',
+  experimental: {
+    images: {
+      domains: ['www.uzh.ch'],
+      // remotePatterns: [
+      //   {
+      //     protocol: 'https',
+      //     hostname: '**.uzh.ch',
+      //   },
+      // ],
+      unoptimized: true,
+    },
   },
+  reactStrictMode: true,
 }

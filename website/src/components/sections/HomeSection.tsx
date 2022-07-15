@@ -31,9 +31,9 @@ HomeSection.Content = function HomeSectionContent({
   children,
 }: HomeSectionContentProps) {
   return (
-    <div className="flex-1 w-1/2 bg-uzh-gray-20">
+    <div className="flex-1 w-1/2 bg-uzh-grey-20">
       <div className="p-8 md:p-16">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif font-bold text-uzh-red-100">
           {title}
         </h1>
         {content && <p className="mt-4 prose md:prose-lg">{content}</p>}

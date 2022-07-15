@@ -1,6 +1,7 @@
+const { TailwindBasePlugins } = require('@uzh-bf/design-system')
+
 module.exports = {
   plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
+    ...TailwindBasePlugins,
   },
 }

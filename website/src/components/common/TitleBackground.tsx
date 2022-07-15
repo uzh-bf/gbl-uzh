@@ -7,7 +7,7 @@ interface Props {
 
 function TitleBackground({ children, className }: Props) {
   return (
-    <div className={clsx('w-full shadow bg-uzh-gray-20', className || 'p-8')}>
+    <div className={clsx('w-full shadow bg-uzh-grey-20', className || 'p-8')}>
       {children}
     </div>
   )

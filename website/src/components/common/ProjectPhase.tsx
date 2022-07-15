@@ -15,7 +15,7 @@ function ProjectPhase({ title, duration, children }: Props) {
         </Header.H3>
       </div>
 
-      <div className="flex-1 p-4 prose bg-uzh-gray-20">
+      <div className="flex-1 p-4 prose bg-uzh-grey-20">
         <Header.H4 className="!text-left !text-lg">Project Duration</Header.H4>
         <p>{duration}</p>
         <Header.H4 className="!text-left !text-lg">Project Goals</Header.H4>

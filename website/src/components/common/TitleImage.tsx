@@ -8,7 +8,7 @@ interface Props {
 
 function TitleImage({ imgSrc, children }: Props) {
   return (
-    <div className={clsx(imgSrc && 'border-uzh-red-100 bg-uzh-gray-20')}>
+    <div className={clsx(imgSrc && 'border-uzh-red-100 bg-uzh-grey-20')}>
       <div className="flex justify-center">
         <div
           className={clsx(

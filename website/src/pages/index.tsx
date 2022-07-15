@@ -58,7 +58,7 @@ function Home() {
                   />
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
+                  <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl font-kollektif text-uzh-red-100">
                     Advisory Wizard
                   </h1>
                   <div className="mt-2 prose md:prose-lg max-w-none">
@@ -75,7 +75,7 @@ function Home() {
         </div>
 
         <div className="py-4 md:py-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
+          <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl font-kollektif text-uzh-red-100">
             Audience
           </h1>
           <HeroImage.Group>
@@ -105,7 +105,7 @@ function Home() {
 
         <div className="py-4 md:py-8">
           <div className="max-w-6xl m-auto">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif-bold text-uzh-red-100">
+            <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl font-kollektif text-uzh-red-100">
               GBL in Use
             </h1>
             <div>

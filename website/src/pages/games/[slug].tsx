@@ -172,7 +172,7 @@ function Game({ source, frontMatter }: Props) {
                 </div>
               </div>
 
-              <div className="flex-1 p-4 border rounded md:flex-initial md:w-96 bg-uzh-gray-20 md:max-w-[33%] lg:max-w-full">
+              <div className="flex-1 p-4 border rounded md:flex-initial md:w-96 bg-uzh-grey-20 md:max-w-[33%] lg:max-w-full">
                 <Header.H3 className="!text-gray-600">
                   Learning Objectives
                 </Header.H3>

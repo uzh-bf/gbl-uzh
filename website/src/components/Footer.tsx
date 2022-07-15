@@ -6,7 +6,7 @@ import UZHLogo from '../../public/images/logo_uzh.jpeg'
 import customLoader from '../lib/loader'
 function Footer() {
   return (
-    <footer className="z-10 mt-8 text-sm text-gray-600 border-t-2 bg-uzh-gray-20 border-uzh-red-100 border-top md:text-base">
+    <footer className="z-10 mt-8 text-sm text-gray-600 border-t-2 bg-uzh-grey-20 border-uzh-red-100 border-top md:text-base">
       <div className="flex flex-col justify-between flex-initial max-w-6xl px-4 py-16 m-auto md:px-8 md:flex-row">
         <div className="flex flex-col items-center order-1 mb-4 md:order-2 md:flex-row md:mb-0">
           <a href="https://www.uzh.ch" target="_blank" rel="noreferrer">

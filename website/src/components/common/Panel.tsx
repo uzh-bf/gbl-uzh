@@ -47,7 +47,7 @@ function Panel({
   return (
     <div className="mt-4">
       <button
-        className="w-full p-4 border rounded bg-uzh-gray-20"
+        className="w-full p-4 border rounded bg-uzh-grey-20"
         onClick={onActivate}
       >
         <div className="flex flex-row items-center justify-between">

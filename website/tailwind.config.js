@@ -1,3 +1,5 @@
+const { TailwindColorsUZH, TailwindFonts } = require('@uzh-bf/design-system')
+
 module.exports = {
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
   theme: {
@@ -5,24 +7,11 @@ module.exports = {
       screens: {
         lg: '72rem',
       },
+      colors: {
+        ...TailwindColorsUZH,
+      },
       fontFamily: {
-        'kollektif-bold': [
-          'kollektif-bold',
-          'ui-sans-serif',
-          'system-ui',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          'Segoe UI',
-          'Roboto',
-          'Helvetica Neue',
-          'Arial',
-          'Noto Sans',
-          'sans-serif',
-          'Apple Color Emoji',
-          'Segoe UI Emoji',
-          'Segoe UI Symbol',
-          'Noto Color Emoji',
-        ],
+        ...TailwindFonts,
       },
     },
   },
