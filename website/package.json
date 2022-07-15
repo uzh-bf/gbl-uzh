@@ -19,30 +19,34 @@
   "dependencies": {
     "@headlessui/react": "1.5.0",
     "@heroicons/react": "1.0.6",
-    "@socialgouv/matomo-next": "1.3.0",
+    "@socialgouv/matomo-next": "1.4.0",
     "@tailwindcss/aspect-ratio": "0.4.0",
-    "@tailwindcss/forms": "0.5.0",
-    "@tailwindcss/line-clamp": "0.3.1",
-    "@tailwindcss/typography": "0.5.2",
-    "autoprefixer": "10.4.4",
+    "@tailwindcss/forms": "0.5.2",
+    "@tailwindcss/line-clamp": "0.4.0",
+    "@tailwindcss/typography": "0.5.4",
+    "@uzh-bf/design-system": "0.0.6",
+    "autoprefixer": "10.4.7",
     "clsx": "1.1.1",
     "gray-matter": "4.0.3",
-    "next": "12.1.4",
-    "next-mdx-remote": "3.0.8",
-    "postcss": "8.4.12",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "react-markdown": "7.1.0",
-    "recharts": "2.1.9",
+    "next": "12.2.2",
+    "next-mdx-remote": "4.0.3",
+    "postcss": "8.4.14",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-markdown": "8.0.3",
+    "recharts": "2.1.12",
     "sharp": "0.30.3",
-    "tailwindcss": "3.0.23"
+    "tailwind-merge": "1.4.0",
+    "tailwindcss": "3.1.6"
   },
   "devDependencies": {
-    "@types/node": "16.11.6",
-    "@types/react": "17.0.43",
-    "@uzh-bf/code-style-react-ts": "0.0.13",
-    "eslint-config-next": "12.1.4",
+    "@types/node": "18.0.4",
+    "@types/react": "18.0.15",
+    "eslint-config-next": "12.2.2",
     "npm-run-all": "4.1.5",
-    "typescript": "4.6.3"
+    "typescript": "4.7.4"
+  },
+  "volta": {
+    "node": "18.6.0"
   }
 }

@@ -41,7 +41,7 @@
     "release:rc:dry": "standard-version --dry-run --prerelease rc"
   },
   "volta": {
-    "node": "16.13.0",
+    "node": "18.6.0",
     "npm": "8.1.0"
   }
 }
