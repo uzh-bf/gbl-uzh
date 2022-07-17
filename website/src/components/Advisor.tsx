@@ -1,7 +1,9 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { push } from '@socialgouv/matomo-next'
 import { useState } from 'react'
-import Button from './common/Button'
+import { Button } from '@uzh-bf/design-system'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
 
 function Advisor() {
   const [isAdvisorActive, setIsAdvisorActive] = useState(false)
@@ -15,8 +17,8 @@ function Advisor() {
           push(['trackEvent', 'GBL Advisor', 'Opened'])
         }}
       >
-        <Button.Arrow />
-        <div className="ml-2">Open</div>
+        <FontAwesomeIcon icon={faArrowRight} />
+        <div>Open</div>
       </Button>
 
       <Transition
