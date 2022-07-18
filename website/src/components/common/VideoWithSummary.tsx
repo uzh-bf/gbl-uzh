@@ -1,4 +1,4 @@
-import clsx from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 interface Props {
   title: string
@@ -34,7 +34,7 @@ function VideoWithSummary({ title, videoSrc, children, keyTakeaways }: Props) {
               {Array.isArray(keyTakeaways) ? (
                 <ul className="!mt-0">
                   {keyTakeaways.map((item, ix) => (
-                    <li className={clsx(ix === 0 && '!mt-0')} key={item}>
+                    <li className={twMerge(ix === 0 && '!mt-0')} key={item}>
                       {item}
                     </li>
                   ))}

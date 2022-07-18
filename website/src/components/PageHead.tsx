@@ -1,11 +1,12 @@
-import { MenuIcon } from '@heroicons/react/solid'
-import clsx from 'clsx'
+import { twMerge } from 'tailwind-merge'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import LogoImage from '../../public/images/GBLUZH.png'
 import customLoader from '../lib/loader'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faHamburger } from '@fortawesome/free-solid-svg-icons'
 
 const NAVIGATION_ITEMS = [
   { href: '/games', label: 'GBL in Use' },
@@ -26,7 +27,7 @@ function NavigationItem({ isActive, children, href }: NavigationItemProps) {
   return (
     <Link href={href}>
       <a
-        className={clsx(
+        className={twMerge(
           'flex-1 p-1 mb-1 ml-3 mr-3 text-left text-sm text-gray-500 hover:text-uzh-blue-80 hover:cursor-pointer md:flex-initial md:ml-0 md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
           isActive && 'border-uzh-red-100 text-gray-800 font-bold'
         )}
@@ -106,7 +107,6 @@ function Logo() {
       <a className="flex-1 md:pl-8">
         <div className="relative w-full h-20 md:w-56 md:h-full">
           <Image
-            loader={customLoader}
             src={LogoImage}
             alt="Logo"
             layout="fill"
@@ -126,7 +126,8 @@ function PageHead() {
     <header className="flex flex-col justify-between max-w-6xl pt-4 m-auto md:flex-row">
       <div className="relative flex items-center md:items-stretch">
         <Logo />
-        <MenuIcon
+        <FontAwesomeIcon
+          icon={faHamburger}
           className="absolute right-0 w-10 mr-4 hover:cursor-pointer md:hidden"
           onClick={() => setOpen(!isOpen)}
         />

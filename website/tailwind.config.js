@@ -1,4 +1,7 @@
-const { TailwindColorsUZH, TailwindFonts } = require('@uzh-bf/design-system')
+const {
+  TailwindColorsUZH,
+  TailwindFonts,
+} = require('@uzh-bf/design-system/dist/constants')
 
 module.exports = {
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
@@ -21,4 +24,7 @@ module.exports = {
     require('@tailwindcss/forms'),
     require('@tailwindcss/line-clamp'),
   ],
+  corePlugins: {
+    preflight: false,
+  },
 }

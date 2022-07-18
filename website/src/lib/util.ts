@@ -4,7 +4,7 @@ import { serialize } from 'next-mdx-remote/serialize'
 import path from 'path'
 
 export function getStaticProps(dir_name: string) {
-  return async ({ params }) => {
+  return async ({ params }: any) => {
     // slugs come in like "portfolio-management-game"
     // but we want to read from files like "Portfolio Management Game.md"
     const filenameTitleCase = params.slug
@@ -12,7 +12,9 @@ export function getStaticProps(dir_name: string) {
       .replace(/-/g, ' ')
       .toLowerCase()
       // all independent words should begin with a capital character
-      .replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()))
+      .replace(/\w\S*/g, (w: any) =>
+        w.replace(/^\w/, (c: any) => c.toUpperCase())
+      )
 
     const mdxPath = path.join(
       process.cwd(),

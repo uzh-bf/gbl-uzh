@@ -1,6 +1,12 @@
-import { CheckIcon, PresentationChartBarIcon } from '@heroicons/react/solid'
-import clsx from 'clsx'
-import Button from './Button'
+import {
+  faArrowLeft,
+  faArrowRight,
+  faBarChart,
+  faCheck,
+} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button } from '@uzh-bf/design-system'
+import { twMerge } from 'tailwind-merge'
 import Header from './Header'
 import VideoWithSummary from './VideoWithSummary'
 
@@ -47,7 +53,7 @@ function Panel({
   return (
     <div className="mt-4">
       <button
-        className="w-full p-4 border rounded bg-uzh-grey-20"
+        className="w-full p-4 border rounded bg-uzh-grey-20 hover:shadow"
         onClick={onActivate}
       >
         <div className="flex flex-row items-center justify-between">
@@ -55,7 +61,9 @@ function Panel({
             <Header.H2 className="flex-1 !mb-0 !text-left">{title}</Header.H2>
             <div className="text-left text-gray-700">{duration}</div>
           </div>
-          <div className="flex-initial w-6">{isCompleted && <CheckIcon />}</div>
+          <div className="flex-initial w-6">
+            {isCompleted && <FontAwesomeIcon icon={faCheck} />}
+          </div>
         </div>
       </button>
       {isOpen && (
@@ -74,7 +82,7 @@ function Panel({
           )}
 
           {Array.isArray(resources) && (
-            <div className={clsx('mt-4', videoSrc && 'pt-4 border-t')}>
+            <div className={twMerge('mt-4', videoSrc && 'pt-4 border-t')}>
               <div className="flex flex-col md:flex-row">
                 <div className="flex-1">
                   <div className="font-bold">Resources</div>
@@ -82,12 +90,15 @@ function Panel({
                     {resources.map((item) => (
                       <li key={item.name}>
                         <a
-                          className="flex flex-row items-center hover:text-uzh-blue-100"
+                          className="flex flex-row items-center gap-1 hover:text-uzh-red-100"
                           target="_blank"
                           href={item.href}
                           rel="noreferrer"
                         >
-                          <PresentationChartBarIcon className="h-4 mr-1" />
+                          <FontAwesomeIcon
+                            icon={faBarChart}
+                            className="h-4 mr-1"
+                          />
                           {item.name}
                         </a>
                       </li>
@@ -107,28 +118,34 @@ function Panel({
           <div className="flex justify-between pt-4 mt-4 border-t">
             {onPrevious && (
               <Button onClick={onPrevious}>
-                <Button.ArrowLeft />
-                <div className="hidden ml-2 md:block">Previous Module</div>
+                <Button.Icon>
+                  <FontAwesomeIcon icon={faArrowLeft} />
+                </Button.Icon>
+                <Button.Label>Previous Module</Button.Label>
               </Button>
             )}
             {onNext && !onPrevious && (
               <>
                 <div className="flex-1"></div>
                 <Button onClick={onNext}>
-                  <div className="hidden mr-2 md:block">Next Module</div>
-                  <Button.Arrow />
+                  <Button.Label>Next Module</Button.Label>
+                  <Button.Icon>
+                    <FontAwesomeIcon icon={faArrowRight} />
+                  </Button.Icon>
                 </Button>
               </>
             )}
-            {onNext && onPrevious && (
+            {onNext && !!onPrevious && (
               <Button onClick={onNext}>
-                <div className="hidden mr-2 md:block">Next Module</div>
-                <Button.Arrow />
+                <Button.Label>Next Module</Button.Label>
+                <Button.Icon>
+                  <FontAwesomeIcon icon={faArrowRight} />
+                </Button.Icon>
               </Button>
             )}
           </div>
           {/* Stacking Layout for buttons on mobile devices
-          <div className="hidden justify-between pt-4 mt-4 border-t md:flex">
+          <div className="justify-between hidden pt-4 mt-4 border-t md:flex">
             {onPrevious && (
               <Button onClick={onPrevious}>
                 <Button.ArrowLeft />
@@ -155,7 +172,7 @@ function Panel({
             {onPrevious && (
               <Button
                 onClick={onPrevious}
-                className="w-full justify-center md:w-auto"
+                className="justify-center w-full md:w-auto"
               >
                 <Button.ArrowLeft />
                 <div className="ml-2">Previous Module</div>
@@ -168,7 +185,7 @@ function Panel({
                 <div className="flex-1"></div>
                 <Button
                   onClick={onNext}
-                  className="w-full justify-center md:w-auto"
+                  className="justify-center w-full md:w-auto"
                 >
                   <Button.Arrow />
                   <div className="ml-2">Next Module</div>
@@ -180,7 +197,7 @@ function Panel({
             {onNext && onPrevious && (
               <Button
                 onClick={onNext}
-                className="w-full justify-center md:w-auto"
+                className="justify-center w-full md:w-auto"
               >
                 <Button.Arrow />
                 <div className="ml-2">Next Module</div>

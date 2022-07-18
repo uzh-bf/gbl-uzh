@@ -6,6 +6,7 @@ import CourseEntry from '../../components/courses/CourseEntry'
 import GameCard from '../../components/games/GameCard'
 import PageWithHeader from '../../components/PageWithHeader'
 import * as Util from '../../lib/util'
+import { sortBy } from 'ramda'
 
 interface Props {
   sourceArr: any
@@ -20,6 +21,7 @@ function GBLinUse({
   filenames,
   fileMissingArr,
 }: Props) {
+  console.log(frontMatterArr)
   return (
     <PageWithHeader title="GBL in Use">
       <TitleBackground>
@@ -34,15 +36,17 @@ function GBLinUse({
             developed at institutions of the University of Zurich.
           </p>
           <div className="mt-4 sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
-            {frontMatterArr[0].map((game: any) => (
-              <GameCard
-                key={game.title}
-                name={game.title}
-                tags={game.tags}
-                linkHref={game.href}
-                imgSrc={game.imgSrc}
-              />
-            ))}
+            {sortBy((game) => game.title, frontMatterArr[0]).map(
+              (game: any) => (
+                <GameCard
+                  key={game.title}
+                  name={game.title}
+                  tags={game.tags}
+                  linkHref={game.href}
+                  imgSrc={game.imgSrc}
+                />
+              )
+            )}
           </div>
         </div>
 
@@ -53,7 +57,7 @@ function GBLinUse({
             that contain Game-Based Learning elements.
           </p>
           <div className="flex flex-col mt-4">
-            {frontMatterArr[1].map((course: any, ix) => (
+            {frontMatterArr[1].map((course: any, ix: number) => (
               <CourseEntry
                 key={course.name}
                 name={course.name}

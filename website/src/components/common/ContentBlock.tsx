@@ -1,6 +1,6 @@
 import Header from './Header'
 
-function ContentBlock({ title, children }) {
+function ContentBlock({ title, children }: any) {
   return (
     <>
       <Header.H2 className="mt-8 border-b md:mt-16">{title}</Header.H2>

@@ -1,4 +1,4 @@
-import clsx from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 interface Props {
   children: React.ReactNode
@@ -7,7 +7,9 @@ interface Props {
 
 function TitleBackground({ children, className }: Props) {
   return (
-    <div className={clsx('w-full shadow bg-uzh-grey-20', className || 'p-8')}>
+    <div
+      className={twMerge('w-full shadow bg-uzh-grey-20', className || 'p-8')}
+    >
       {children}
     </div>
   )

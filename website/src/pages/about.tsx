@@ -1,3 +1,4 @@
+import { Prose } from '@uzh-bf/design-system'
 import { useEffect } from 'react'
 import RolandImage from '../../public/images/schlaefli_roland.jpg'
 import DavidImage from '../../public/images/schmocker_david.jpg'
@@ -32,7 +33,7 @@ function About() {
       } catch (e) {}
     }
     const scr = document.getElementsByTagName('script')[0]
-    const par = scr.parentNode
+    const par: any = scr.parentNode
     par.insertBefore(s, scr)
   })
 
@@ -122,19 +123,21 @@ function About() {
         </div>
 
         <Header.H2 className="mt-16">Get In Touch</Header.H2>
-        <p className="mb-4 prose max-w-none">
-          If you would like to contact our project team, please fill out the
-          following form and we will gladly get in touch.
-        </p>
-        <div className="max-w-lg border">
-          <div id="c7">
-            Fill in the{' '}
-            <a href="https://www.bf-tools.uzh.ch/applications/easyforms/index.php?r=app%2Fform&id=13">
-              online form
-            </a>
-            .
+        <Prose>
+          <p className="mb-4 prose max-w-none">
+            If you would like to contact our project team, please fill out the
+            following form and we will gladly get in touch.
+          </p>
+          <div className="max-w-lg border">
+            <div id="c7">
+              Fill in the{' '}
+              <a href="https://www.bf-tools.uzh.ch/applications/easyforms/index.php?r=app%2Fform&id=13">
+                online form
+              </a>
+              .
+            </div>
           </div>
-        </div>
+        </Prose>
       </Content>
     </PageWithHeader>
   )

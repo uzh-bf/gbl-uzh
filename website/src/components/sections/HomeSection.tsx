@@ -1,4 +1,5 @@
-import clsx from 'clsx'
+import { Prose } from '@uzh-bf/design-system'
+import { twMerge } from 'tailwind-merge'
 
 interface Props {
   className?: string
@@ -7,7 +8,7 @@ interface Props {
 
 function HomeSection({ className, children }: Props) {
   return (
-    <div className={clsx('py-4 md:py-4', className)}>
+    <div className={twMerge('py-4 md:py-4', className)}>
       <div className="flex flex-row max-w-6xl m-auto md:min-h-[350px] shadow-xl">
         {children}
       </div>
@@ -33,10 +34,10 @@ HomeSection.Content = function HomeSectionContent({
   return (
     <div className="flex-1 w-1/2 bg-uzh-grey-20">
       <div className="p-8 md:p-16">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-kollektif font-bold text-uzh-red-100">
+        <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl font-kollektif text-uzh-red-100">
           {title}
         </h1>
-        {content && <p className="mt-4 prose md:prose-lg">{content}</p>}
+        {content && <Prose className="mt-4 md:prose-lg">{content}</Prose>}
         {children}
       </div>
     </div>
@@ -60,7 +61,7 @@ HomeSection.Hero = function HomeSectionHero({
     <div className="items-center flex-1 hidden w-1/2 md:flex justify-items-center">
       <img
         alt="Hero"
-        className={clsx(
+        className={twMerge(
           'w-full h-full opacity-90',
           padded && 'p-4',
           contain ? 'object-contain' : 'object-cover',

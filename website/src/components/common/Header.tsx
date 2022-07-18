@@ -1,4 +1,4 @@
-import clsx from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 interface Props {
   children: React.ReactNode
@@ -14,7 +14,7 @@ const defaultProps = {
 function H1({ children, className }: Props) {
   return (
     <h1
-      className={clsx(
+      className={twMerge(
         'mb-2 text-2xl sm:text-3xl lg:text-4xl font-kollektif font-bold md:mb-4 text-center md:text-left',
         className
       )}
@@ -37,13 +37,13 @@ function H2({ children, className, align }: Props) {
       'mb-2 text-xl sm:text-2xl lg:text-3xl md:mb-4 font-kollektif font-bold text-center md:text-left'
   }
 
-  return <h2 className={clsx(styles, className)}>{children}</h2>
+  return <h2 className={twMerge(styles, className)}>{children}</h2>
 }
 
 function H3({ children, className }: Props) {
   return (
     <h3
-      className={clsx(
+      className={twMerge(
         'mb-2 text-base sm:text-lg lg:text-xl text-gray-700 font-kollektif font-bold text-center md:text-left',
         className
       )}
@@ -56,7 +56,7 @@ function H3({ children, className }: Props) {
 function H4({ children, className }: Props) {
   return (
     <h4
-      className={clsx(
+      className={twMerge(
         'mb-2 text-sm sm:text-base lg:text-lg text-gray-600 font-kollektif text-center md:text-left',
         className
       )}

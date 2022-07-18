@@ -1,4 +1,6 @@
-import { UsersIcon } from '@heroicons/react/solid'
+import { faArrowRight, faUsers } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button, Prose } from '@uzh-bf/design-system'
 import Image, { StaticImageData } from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -7,10 +9,10 @@ import StudentIcon from '../../public/images/gruppenarbeit_icon.svg'
 import PFMImage from '../../public/images/pfm_game.png'
 import AdvisorImage from '../../public/images/tablet_icon.svg'
 import uFinImage from '../../public/images/ufin.jpg'
+import DerivativesImage from '../../public/images/derivatives_1.png'
 import UnderConstructionImage from '../../public/images/under_construction.jpg'
 import TeacherIcon from '../../public/images/vorlesung_icon.svg'
 import Advisor from '../components/Advisor'
-import Button from '../components/common/Button'
 import HeroImage from '../components/common/HeroImage'
 import Title from '../components/common/Title'
 import TitleImage from '../components/common/TitleImage'
@@ -38,7 +40,7 @@ function Home() {
               target="_blank"
               rel="noreferrer"
             >
-              <UsersIcon className="w-5 md:w-8" />
+              <FontAwesomeIcon icon={faUsers} className="w-5 md:w-8" />
               Join the community
             </a>
           </div>
@@ -119,39 +121,39 @@ function Home() {
                   <div className="mt-4">
                     <div className="sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
                       {[
-                        ['uFin: The Challenge', '/games/u-fin', uFinImage],
-                        [
-                          'Portfolio Management Simulation',
-                          '/games/portfolio-management-simulation',
-                          PFMImage,
-                        ],
-                        [
-                          'Derivatives Game',
-                          '/games/derivatives-game',
-                          UnderConstructionImage,
-                        ],
-                      ].map(
-                        ([name, href, imgSrc]: [
-                          string,
-                          string,
-                          StaticImageData
-                        ]) => (
-                          <GameCard
-                            key="name"
-                            name={name}
-                            imgSrc={imgSrc}
-                            linkHref={href}
-                          />
-                        )
-                      )}
+                        {
+                          name: 'Derivatives Game',
+                          href: '/games/derivatives-game',
+                          imgSrc: DerivativesImage,
+                        },
+                        {
+                          name: 'uFin: The Challenge',
+                          href: '/games/u-fin',
+                          imgSrc: uFinImage,
+                        },
+                        {
+                          name: 'Portfolio Management Simulation',
+                          href: '/games/portfolio-management-simulation',
+                          imgSrc: PFMImage,
+                        },
+                      ].map(({ name, href, imgSrc }: any) => (
+                        <GameCard
+                          key="name"
+                          name={name}
+                          imgSrc={imgSrc}
+                          linkHref={href}
+                        />
+                      ))}
                     </div>
                   </div>
                   <Button
                     className="mt-4"
                     onClick={() => router.push('/games')}
                   >
-                    <Button.Arrow />
-                    <div className="ml-2">Games and Courses</div>
+                    <Button.Icon>
+                      <FontAwesomeIcon icon={faArrowRight} />
+                    </Button.Icon>
+                    <Button.Label>Games and Courses</Button.Label>
                   </Button>
                 </div>
               </div>
@@ -164,8 +166,10 @@ function Home() {
             content="Get to know the terms and definitions in the fields of gamification and Game-Based Learning. Our knowledge base includes basic terms as well as our best practices."
           >
             <Button className="mt-4" onClick={() => router.push('/kb')}>
-              <Button.Arrow />
-              <div className="ml-2">Knowledge Base</div>
+              <Button.Icon>
+                <FontAwesomeIcon icon={faArrowRight} />
+              </Button.Icon>
+              <Button.Label>Knowledge Base</Button.Label>
             </Button>
           </HomeSection.Content>
           <HomeSection.Hero src="/images/kma-SiOJXlWeWc0-unsplash.jpg" />
@@ -177,8 +181,10 @@ function Home() {
             content="Learn how you can proceed if you want to develop your own simulation or serious game. Use our resources as a support and for guidance in your own development."
           >
             <Button className="mt-4" onClick={() => router.push('/dev')}>
-              <Button.Arrow />
-              <div className="ml-2">Development Practices</div>
+              <Button.Icon>
+                <FontAwesomeIcon icon={faArrowRight} />
+              </Button.Icon>
+              <Button.Label>Development Practices</Button.Label>
             </Button>
           </HomeSection.Content>
         </HomeSection>
@@ -190,8 +196,10 @@ function Home() {
           content, exchange game ideas, and join our community!"
           >
             <Button className="mt-4" onClick={() => router.push('/roadmap')}>
-              <Button.Arrow />
-              <div className="ml-2">Roadmap</div>
+              <Button.Icon>
+                <FontAwesomeIcon icon={faArrowRight} />
+              </Button.Icon>
+              <Button.Label>Roadmap</Button.Label>
             </Button>
           </HomeSection.Content>
           <HomeSection.Hero
@@ -207,29 +215,33 @@ function Home() {
             className="saturate-50"
           />
           <HomeSection.Content title="“">
-            <p className="prose prose-lg">
-              “I absolutely loved the{' '}
-              <Link href="/games/portfolio-management-simulation">
-                Portfolio Management Game
-              </Link>
-              , it was great fun and required us to apply our knowledge and to
-              work meticulously to come up with good decisions for our
-              portfolio, our customers, and our bank in general. It&apos;s a
-              very educational, fun tool.”
-            </p>
-            <p className="mt-4 italic prose">
-              Student from our International Summer School in 2020
-            </p>
+            <Prose>
+              <p className="prose-lg">
+                “I absolutely loved the{' '}
+                <Link href="/games/portfolio-management-simulation">
+                  Portfolio Management Game
+                </Link>
+                , it was great fun and required us to apply our knowledge and to
+                work meticulously to come up with good decisions for our
+                portfolio, our customers, and our bank in general. It&apos;s a
+                very educational, fun tool.”
+              </p>
+              <p className="mt-4 italic">
+                Student from our International Summer School in 2020
+              </p>
+            </Prose>
           </HomeSection.Content>
         </HomeSection>
         <HomeSection>
           <HomeSection.Content title="“">
-            <p className="prose prose-lg">
-              “Traditional learning has provided superficial learning through
-              text books. Games are best at teaching a deeper level of
-              learning.”
-            </p>
-            <p className="mt-4 italic prose">Eric Klopfer, MIT</p>
+            <Prose>
+              <p className="prose-lg">
+                “Traditional learning has provided superficial learning through
+                text books. Games are best at teaching a deeper level of
+                learning.”
+              </p>
+              <p className="mt-4 italic">Eric Klopfer, MIT</p>
+            </Prose>
           </HomeSection.Content>
           <HomeSection.Hero
             src="/images/DSC01645_cut1.jpg"

@@ -1,9 +1,11 @@
-import clsx from 'clsx'
+import { twMerge } from 'tailwind-merge'
 import { StaticImageData } from 'next/image'
 import Link from 'next/link'
-import Button from './Button'
+import { Button } from '@uzh-bf/design-system'
 import Card from './Card'
 import Header from './Header'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
 
 interface Props {
   className?: string
@@ -22,7 +24,7 @@ function FocusArea({
 }: Props) {
   return (
     <div
-      className={clsx(
+      className={twMerge(
         'flex flex-col md:flex-row items-center md:items-center',
         className
       )}
@@ -44,7 +46,9 @@ function FocusArea({
             <Link href={roadmapHref} passHref>
               <a target="_blank">
                 <Button className="text-xs">
-                  <Button.Arrow />
+                  <Button.Icon>
+                    <FontAwesomeIcon icon={faArrowRight} />
+                  </Button.Icon>
                   <div className="ml-2">Detailed Roadmap</div>
                 </Button>
               </a>

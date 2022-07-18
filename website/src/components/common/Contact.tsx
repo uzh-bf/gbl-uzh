@@ -2,7 +2,7 @@ import Image from 'next/image'
 import customLoader from '../../lib/loader'
 import Header from './Header'
 
-function Contact({ name, institution, role, link, imgSrc }) {
+function Contact({ name, institution, role, link, imgSrc }: any) {
   return (
     <div className="flex flex-col sm:flex-row">
       <div className="relative flex-initial w-40 m-auto border sm:m-0 sm:h-48">

@@ -1,4 +1,5 @@
-import { CodeIcon, LibraryIcon, MailIcon } from '@heroicons/react/solid'
+import { faBook, faCode, faMailBulk } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Image from 'next/image'
 import Link from 'next/link'
 import SwissUniLogo from '../../public/images/logo_swissuniversities.png'
@@ -39,9 +40,9 @@ function Footer() {
           </a>
         </div>
 
-        <p className="order-2 prose-sm prose text-center text-gray-600 md:order-1 md:text-left">
+        <div className="order-2 prose-sm prose text-center text-gray-600 md:order-1 md:text-left">
           <div className="flex flex-row items-center">
-            <LibraryIcon className="w-6 text-gray-500" />
+            <FontAwesomeIcon icon={faBook} className="w-6 text-gray-500" />
             <div className="ml-4">
               <div className="font-bold">GBL @ UZH</div>
               <div>
@@ -58,7 +59,7 @@ function Footer() {
           </div>
 
           <div className="flex flex-row items-center mt-4">
-            <CodeIcon className="w-6 text-gray-500" />
+            <FontAwesomeIcon icon={faCode} className="w-6 text-gray-500" />
             <div className="ml-4">
               The GBL Website and Knowledge Base are being developed in public.
               <br />
@@ -71,7 +72,7 @@ function Footer() {
           </div>
 
           <div className="flex flex-row items-center mt-4">
-            <MailIcon className="w-6 text-gray-500" />
+            <FontAwesomeIcon icon={faMailBulk} className="w-6 text-gray-500" />
             <div className="ml-4">
               <Link href="/about" passHref>
                 Contact Us
@@ -83,7 +84,7 @@ function Footer() {
               .
             </div>
           </div>
-        </p>
+        </div>
       </div>
     </footer>
   )

@@ -1,10 +1,4 @@
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  PresentationChartBarIcon,
-  XIcon,
-} from '@heroicons/react/solid'
-import clsx from 'clsx'
+import { twMerge } from 'tailwind-merge'
 import { MDXRemote } from 'next-mdx-remote'
 import { useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
@@ -16,6 +10,13 @@ import TitleImage from '../../components/common/TitleImage'
 import Content from '../../components/Content'
 import PageWithHeader from '../../components/PageWithHeader'
 import * as Util from '../../lib/util'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faBarChart,
+  faChevronLeft,
+  faChevronRight,
+  faX,
+} from '@fortawesome/free-solid-svg-icons'
 
 interface Props {
   source: any
@@ -25,7 +26,7 @@ interface Props {
 const components = {}
 
 function Game({ source, frontMatter }: Props) {
-  const radarChartData = frontMatter.radarCharts.map((singleChart: any) => {
+  const radarChartData = frontMatter.radarCharts?.map((singleChart: any) => {
     const temp = singleChart.content.map((item: any) => ({
       subject: item.name,
       value: +item.value,
@@ -33,9 +34,7 @@ function Game({ source, frontMatter }: Props) {
     return temp
   })
 
-  console.log(radarChartData)
-
-  const radarChartTexts = frontMatter.radarCharts.map(
+  const radarChartTexts = frontMatter.radarCharts?.map(
     (singleChart: any) => singleChart.text
   )
 
@@ -76,12 +75,11 @@ function Game({ source, frontMatter }: Props) {
     <>
       <div className="absolute w-screen">
         <PageWithHeader title={frontMatter.title}>
-          {/* The thumbnail image corresponds to the first image from the gallery */}
-          <TitleImage
-            imgSrc={frontMatter.gallery ? frontMatter.gallery[0].imgSrc : ''}
-          >
-            <Title title={frontMatter.title} />
-          </TitleImage>
+          {frontMatter.thumbnail && (
+            <TitleImage imgSrc={frontMatter.thumbnail}>
+              <Title title={frontMatter.title} />
+            </TitleImage>
+          )}
 
           <Content>
             <Header.H2 className="mb-2 md:mb-4" align="left">
@@ -94,29 +92,33 @@ function Game({ source, frontMatter }: Props) {
                 </p>
 
                 <div>
-                  <div className="flex-1 mt-8">
-                    <Header.H3>Characteristics</Header.H3>
-                    <div className="inline lg:flex lg:flex-row">
-                      <p className="flex-1 prose-sm prose">
-                        {radarChartTexts[0]}
-                      </p>
-                      <div className="flex-1 mt-3 mb-6 lg:mt-0">
-                        <RadarChart data={radarChartData[0]} />
+                  {radarChartTexts?.[0] && (
+                    <div className="flex-1 mt-8">
+                      <Header.H3>Characteristics</Header.H3>
+                      <div className="inline lg:flex lg:flex-row">
+                        <p className="flex-1 prose-sm prose">
+                          {radarChartTexts[0]}
+                        </p>
+                        <div className="flex-1 mt-3 mb-6 lg:mt-0">
+                          <RadarChart data={radarChartData[0]} />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="flex-1 mt-4">
-                    <Header.H3>Gamification Elements</Header.H3>
-                    <div className="inline lg:flex lg:flex-row">
-                      <p className="flex-1 prose-sm prose">
-                        {radarChartTexts[1]}
-                      </p>
-                      <div className="flex-1 mt-3 mb-6 lg:mt-0">
-                        <RadarChart data={radarChartData[1]} />
+                  {radarChartTexts?.[1] && (
+                    <div className="flex-1 mt-4">
+                      <Header.H3>Gamification Elements</Header.H3>
+                      <div className="inline lg:flex lg:flex-row">
+                        <p className="flex-1 prose-sm prose">
+                          {radarChartTexts[1]}
+                        </p>
+                        <div className="flex-1 mt-3 mb-6 lg:mt-0">
+                          <RadarChart data={radarChartData[1]} />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   {frontMatter.gallery !== '' &&
                   frontMatter.gallery !== undefined ? (
@@ -153,12 +155,15 @@ function Game({ source, frontMatter }: Props) {
                           {frontMatter.resources.map((item: any) => (
                             <li key={item.name}>
                               <a
-                                className="flex flex-row items-center hover:text-uzh-blue-100"
+                                className="flex flex-row items-center hover:text-uzh-red-100"
                                 target="_blank"
                                 href={item.href}
                                 rel="noreferrer"
                               >
-                                <PresentationChartBarIcon className="h-4 mr-1" />
+                                <FontAwesomeIcon
+                                  icon={faBarChart}
+                                  className="h-4 mr-1"
+                                />
                                 {item.name}
                               </a>
                             </li>
@@ -185,16 +190,16 @@ function Game({ source, frontMatter }: Props) {
                 </p>
 
                 <Header.H3 className="mt-6 !text-gray-600">Keywords</Header.H3>
-                <div className="flex flex-row flex-wrap justify-center md:justify-start">
+                <div className="flex flex-row flex-wrap justify-center gap-1 md:justify-start">
                   {frontMatter.keywords?.map((item: any) => (
-                    <Tag key={item} label={item} className="mb-2" />
+                    <Tag key={item} label={item} />
                   ))}
                 </div>
 
                 <Header.H3 className="mt-6 !text-gray-600">Languages</Header.H3>
-                <div className="flex flex-row flex-wrap justify-center md:justify-start">
+                <div className="flex flex-row flex-wrap justify-center gap-1 md:justify-start">
                   {frontMatter.language?.map((item: any) => (
-                    <Tag key={item} label={item} className="mb-1" />
+                    <Tag key={item} label={item} />
                   ))}
                 </div>
 
@@ -234,14 +239,15 @@ function Game({ source, frontMatter }: Props) {
           className="fixed z-10 w-full h-full bg-gray-900 bg-opacity-60"
           onClick={() => setZoom(false)}
         >
-          <XIcon
+          <FontAwesomeIcon
+            icon={faX}
             className="float-right w-8 h-8 mt-2 mr-2 md:w-12 md:h-12 hover:cursor-pointer"
             onClick={() => setZoom(false)}
           />
           <div className="absolute w-full top-1/2 left-1/2 -translate-x-2/4 -translate-y-2/4">
             <div className="flex items-stretch justify-around max-width-full">
               <div
-                className={clsx(
+                className={twMerge(
                   frontMatter.gallery.indexOf(zoomedImage) == 0
                     ? 'invisible'
                     : '',
@@ -249,7 +255,10 @@ function Game({ source, frontMatter }: Props) {
                 )}
                 onClick={previousImage}
               >
-                <ChevronLeftIcon className="absolute w-16 top-1/2 -translate-y-2/4 -left-1 md:-left-2" />
+                <FontAwesomeIcon
+                  icon={faChevronLeft}
+                  className="absolute w-16 top-1/2 -translate-y-2/4 -left-1 md:-left-2"
+                />
               </div>
               <div className="w-[80vw] max-w-max  mx-auto">
                 <img
@@ -260,7 +269,7 @@ function Game({ source, frontMatter }: Props) {
                 />
               </div>
               <div
-                className={clsx(
+                className={twMerge(
                   frontMatter.gallery.indexOf(zoomedImage) ==
                     frontMatter.gallery.length - 1
                     ? 'invisible'
@@ -269,7 +278,10 @@ function Game({ source, frontMatter }: Props) {
                 )}
                 onClick={nextImage}
               >
-                <ChevronRightIcon className="absolute w-16 top-1/2 -translate-y-2/4 -right-1 md:-right-2" />
+                <FontAwesomeIcon
+                  icon={faChevronRight}
+                  className="absolute w-16 top-1/2 -translate-y-2/4 -right-1 md:-right-2"
+                />
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import clsx from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 interface Props {
   label: string
@@ -8,7 +8,7 @@ interface Props {
 function Tag({ label, className }: Props) {
   return (
     <div
-      className={clsx(
+      className={twMerge(
         'px-2 text-sm prose text-gray-600 border rounded shadow bg-opacity-95',
         label !== 'Work in Progress' ? 'bg-white' : 'bg-yellow-200',
         className

@@ -1,3 +1,4 @@
+import { Prose } from '@uzh-bf/design-system'
 import { useEffect } from 'react'
 import TreeIcon from '../../public/images/baum_icon.svg'
 import ToolboxIcon from '../../public/images/innovation_icon.svg'
@@ -32,7 +33,7 @@ function Roadmap() {
       } catch (e) {}
     }
     const scr = document.getElementsByTagName('script')[0]
-    const par = scr.parentNode
+    const par: any = scr.parentNode
     par.insertBefore(s, scr)
   })
 
@@ -97,19 +98,21 @@ function Roadmap() {
         </div>
 
         <Header.H2 className="mt-8">Get Involved</Header.H2>
-        <p className="prose max-w-none">
-          If you are interested in game-based learning and would like to get in
-          touch with other lecturers to exchange ideas, we invite you to join
-          our community on{' '}
-          <a
-            href="https://community.klicker.uzh.ch"
-            target="_blank"
-            rel="noreferrer"
-          >
-            https://community.klicker.uzh.ch
-          </a>
-          .
-        </p>
+        <Prose className="max-w-none">
+          <p>
+            If you are interested in game-based learning and would like to get
+            in touch with other lecturers to exchange ideas, we invite you to
+            join our community on{' '}
+            <a
+              href="https://community.klicker.uzh.ch"
+              target="_blank"
+              rel="noreferrer"
+            >
+              https://community.klicker.uzh.ch
+            </a>
+            .
+          </p>
+        </Prose>
       </Content>
     </PageWithHeader>
   )

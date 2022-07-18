@@ -1,7 +1,8 @@
-import clsx from 'clsx'
+import { twMerge } from 'tailwind-merge'
 import Image, { StaticImageData } from 'next/image'
 import customLoader from '../../lib/loader'
 import Tag from './Tag'
+import { Button } from '@uzh-bf/design-system'
 
 interface Props {
   name?: string
@@ -23,20 +24,26 @@ function Card({
   colored,
 }: Props) {
   return (
-    <button
+    <Button
+      fluid
       disabled={!onClick}
-      type="button"
       onClick={onClick}
-      className={clsx(
-        'border rounded shadow w-full',
+      className={twMerge(
+        'p-0 border-none outline outline-1 outline-uzh-grey-60 filter',
+        !colored && 'grayscale',
         className,
-        onClick ? 'cursor-pointer hover:shadow-lg' : 'cursor-default'
+        onClick
+          ? 'hover:shadow-lg hover:outline-uzh-red-100 hover:filter-none'
+          : 'cursor-default'
       )}
     >
       <div
-        className={clsx('w-full h-full relative', minHeight || 'min-h-[200px]')}
+        className={twMerge(
+          'w-full h-full relative',
+          minHeight || 'min-h-[200px]'
+        )}
       >
-        {tags?.length > 0 && (
+        {tags && tags.length > 0 && (
           <div className="absolute top-0 z-10 flex flex-row flex-wrap gap-1 p-2">
             {tags.map((tag) => (
               <Tag key={tag} label={tag} />
@@ -45,25 +52,20 @@ function Card({
         )}
 
         {name && (
-          <div className="absolute left-0 right-0 z-10 py-1 text-lg font-bold prose text-center bg-white bg-opacity-70 bottom-3">
+          <div className="absolute left-0 right-0 z-10 py-1 text-lg font-bold prose text-center bg-white bg-opacity-80 bottom-3">
             {name}
           </div>
         )}
 
         <Image
-          // placeholder="blur"
-          loader={customLoader}
-          className={clsx(
-            'z-0 w-full rounded opacity-80 ',
-            !colored && 'grayscale filter'
-          )}
+          className={twMerge('z-0 w-full rounded opacity-90')}
           src={imgSrc}
-          alt={`Screenshot of ${name}`}
+          alt={`Image of ${name}`}
           layout="fill"
           objectFit="cover"
         />
       </div>
-    </button>
+    </Button>
   )
 }
 
