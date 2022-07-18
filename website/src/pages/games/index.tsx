@@ -36,7 +36,7 @@ function GBLinUse({
             developed at institutions of the University of Zurich.
           </p>
           <div className="mt-4 sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
-            {sortBy((game) => game.title, frontMatterArr[0]).map(
+            {sortBy((game: any) => game.title, frontMatterArr[0]).map(
               (game: any) => (
                 <GameCard
                   key={game.title}
