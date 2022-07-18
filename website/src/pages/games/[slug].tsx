@@ -107,8 +107,7 @@ function Game({ source, frontMatter }: Props) {
                     </div>
                   )}
 
-                  {frontMatter.gallery !== '' &&
-                  frontMatter.gallery !== undefined ? (
+                  {frontMatter.gallery && (
                     <div className="justify-center flex-1 mt-8">
                       <Header.H3>Gallery</Header.H3>
                       <div className="container grid grid-cols-3 gap-2 mx-auto sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4">
@@ -131,10 +130,8 @@ function Game({ source, frontMatter }: Props) {
                         ))}
                       </div>
                     </div>
-                  ) : (
-                    <></>
                   )}
-                  {frontMatter.resources ? (
+                  {frontMatter.resources && (
                     <div className="flex-1 mt-8">
                       <Header.H3>Resources</Header.H3>
                       <div className="inline md:flex md:flex-row">
@@ -158,8 +155,6 @@ function Game({ source, frontMatter }: Props) {
                         </ul>
                       </div>
                     </div>
-                  ) : (
-                    <></>
                   )}
                 </div>
               </div>
@@ -222,32 +217,34 @@ function Game({ source, frontMatter }: Props) {
         </PageWithHeader>
       </div>
 
-      <Modal
-        open={zoom}
-        onClose={() => setZoom(false)}
-        onNext={
-          frontMatter.gallery.indexOf(zoomedImage) <
-          frontMatter.gallery.length - 1
-            ? nextImage
-            : undefined
-        }
-        onPrev={
-          frontMatter.gallery.indexOf(zoomedImage) > 0
-            ? previousImage
-            : undefined
-        }
-      >
-        <div className="flex flex-col items-center justify-center w-full h-full">
-          <div className="relative w-full h-full max-h-[15rem]">
-            <Image
-              src={zoomedImage.imgSrc}
-              alt="Magnified Image"
-              layout="fill"
-              objectFit="contain"
-            />
+      {frontMatter.gallery && (
+        <Modal
+          open={zoom}
+          onClose={() => setZoom(false)}
+          onNext={
+            frontMatter.gallery.indexOf(zoomedImage) <
+            frontMatter.gallery.length - 1
+              ? nextImage
+              : undefined
+          }
+          onPrev={
+            frontMatter.gallery.indexOf(zoomedImage) > 0
+              ? previousImage
+              : undefined
+          }
+        >
+          <div className="flex flex-col items-center justify-center w-full h-full">
+            <div className="relative w-full h-full max-h-[15rem]">
+              <Image
+                src={zoomedImage.imgSrc}
+                alt="Magnified Image"
+                layout="fill"
+                objectFit="contain"
+              />
+            </div>
           </div>
-        </div>
-      </Modal>
+        </Modal>
+      )}
     </>
   )
 }
