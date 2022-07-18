@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.8](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.7...v0.2.8) (2022-07-18)
+
+
+### Bug Fixes
+
+* ensure build works with node 16 downgrade ([8b6f07e](https://github.com/uzh-bf/gbl-uzh/commit/8b6f07ee11cb258d7715a1a179c1776f41a627c0))
+
 ### [0.2.7](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.6...v0.2.7) (2022-07-18)
 
 
