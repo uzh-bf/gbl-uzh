@@ -17,6 +17,8 @@ import {
   faChevronRight,
   faX,
 } from '@fortawesome/free-solid-svg-icons'
+import { Button, Modal } from '@uzh-bf/design-system'
+import Image from 'next/image'
 
 interface Props {
   source: any
@@ -44,32 +46,17 @@ function Game({ source, frontMatter }: Props) {
     alt: 'demo image',
   })
 
-  function previousImage(e: any) {
+  function previousImage() {
     setZoomedImage(
       frontMatter.gallery[frontMatter.gallery.indexOf(zoomedImage) - 1]
     )
-    const event = e || window.event
-    event.stopPropagation()
   }
-  function nextImage(e: any) {
+
+  function nextImage() {
     setZoomedImage(
       frontMatter.gallery[frontMatter.gallery.indexOf(zoomedImage) + 1]
     )
-    const event = e || window.event
-    event.stopPropagation()
   }
-
-  const collapseImage = (e: any) => {
-    if (e.key == 'Escape') {
-      setZoom(false)
-    }
-  }
-  useEffect(() => {
-    document.body.addEventListener('keydown', collapseImage)
-    return () => {
-      removeEventListener('keypress', collapseImage)
-    }
-  })
 
   return (
     <>
@@ -234,61 +221,33 @@ function Game({ source, frontMatter }: Props) {
           </Content>
         </PageWithHeader>
       </div>
-      {zoom ? (
-        <div
-          className="fixed z-10 w-full h-full bg-gray-900 bg-opacity-60"
-          onClick={() => setZoom(false)}
-        >
-          <FontAwesomeIcon
-            icon={faX}
-            className="float-right w-8 h-8 mt-2 mr-2 md:w-12 md:h-12 hover:cursor-pointer"
-            onClick={() => setZoom(false)}
-          />
-          <div className="absolute w-full top-1/2 left-1/2 -translate-x-2/4 -translate-y-2/4">
-            <div className="flex items-stretch justify-around max-width-full">
-              <div
-                className={twMerge(
-                  frontMatter.gallery.indexOf(zoomedImage) == 0
-                    ? 'invisible'
-                    : '',
-                  'relative h-[80vh] flex-[0 0 50px] hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
-                )}
-                onClick={previousImage}
-              >
-                <FontAwesomeIcon
-                  icon={faChevronLeft}
-                  className="absolute w-16 top-1/2 -translate-y-2/4 -left-1 md:-left-2"
-                />
-              </div>
-              <div className="w-[80vw] max-w-max  mx-auto">
-                <img
-                  src={zoomedImage.imgSrc}
-                  alt="Magnified Image"
-                  className="relative top-1/2 -translate-y-2/4 max-h-[80vh] cursor-[zoom-out]"
-                  onClick={() => setZoom(false)}
-                />
-              </div>
-              <div
-                className={twMerge(
-                  frontMatter.gallery.indexOf(zoomedImage) ==
-                    frontMatter.gallery.length - 1
-                    ? 'invisible'
-                    : '',
-                  'relative h-[80vh] flex-[0 0 50px] hover:bg-white hover:bg-opacity-50 hover:cursor-pointer'
-                )}
-                onClick={nextImage}
-              >
-                <FontAwesomeIcon
-                  icon={faChevronRight}
-                  className="absolute w-16 top-1/2 -translate-y-2/4 -right-1 md:-right-2"
-                />
-              </div>
-            </div>
+
+      <Modal
+        open={zoom}
+        onClose={() => setZoom(false)}
+        onNext={
+          frontMatter.gallery.indexOf(zoomedImage) <
+          frontMatter.gallery.length - 1
+            ? nextImage
+            : undefined
+        }
+        onPrev={
+          frontMatter.gallery.indexOf(zoomedImage) > 0
+            ? previousImage
+            : undefined
+        }
+      >
+        <div className="flex flex-col items-center justify-center w-full h-full">
+          <div className="relative w-full h-full max-h-[15rem]">
+            <Image
+              src={zoomedImage.imgSrc}
+              alt="Magnified Image"
+              layout="fill"
+              objectFit="contain"
+            />
           </div>
         </div>
-      ) : (
-        <></>
-      )}
+      </Modal>
     </>
   )
 }
