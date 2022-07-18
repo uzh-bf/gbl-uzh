@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.7](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.6...v0.2.7) (2022-07-18)
+
+
+### Features
+
+* **website:** integrate with design system, rework layout, add new games ([f305735](https://github.com/uzh-bf/gbl-uzh/commit/f305735d4ab84d1f55ba6fb81283d2702bcb1b0b))
+
+
+### Dependencies
+
+* **website:** upgrade packages ([ba0459d](https://github.com/uzh-bf/gbl-uzh/commit/ba0459db5be00628f7422586d1ff7c1fcc863a35))
+
+
+### Enhancements
+
+* add community link ([855c122](https://github.com/uzh-bf/gbl-uzh/commit/855c122c1294ad4e73fb9f616556e09d071d2c07))
+* **website:** integrate with @uzh-bf/design-system ([89dd237](https://github.com/uzh-bf/gbl-uzh/commit/89dd237ce9907f70dc9af70ba4bb0bca15b82b7e))
+
+
+### Other
+
+* add join community to banner ([19d2796](https://github.com/uzh-bf/gbl-uzh/commit/19d279605344b4cb7780c51d965ad41fdce31f35))
+* install fontawesome ([3d46943](https://github.com/uzh-bf/gbl-uzh/commit/3d46943f2c7c5e885605eae741094090989c1ac4))
+* kb submodule update ([3126bec](https://github.com/uzh-bf/gbl-uzh/commit/3126bec9d63dfa925731fdd5703f45afaec54b0f))
+* submodule maintenance ([7878686](https://github.com/uzh-bf/gbl-uzh/commit/7878686c7d68c96f1ea84fcd82e83ea8bef018a0))
+* submodule maintenance ([55c2822](https://github.com/uzh-bf/gbl-uzh/commit/55c28226beb254963bb9d8b49a6f56b4c93f81d3))
+* submodule maintenance ([4456209](https://github.com/uzh-bf/gbl-uzh/commit/44562097cba0ea100a0d64833f7974130d4c2b82))
+
 ### [0.2.6](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.5...v0.2.6) (2022-04-06)
 
 
