@@ -17,7 +17,8 @@
   "maintainers": [
     "Roland Schlaefli <roland.schlaefli@bf.uzh.ch>",
     "Benjamin Wilding <benjamin.wilding@bf.uzh.ch>",
-    "Anja Zgraggen <anja.zgraggen@bf.uzh.ch>"
+    "Anja Zgraggen <anja.zgraggen@bf.uzh.ch>",
+    "Andrin Rehmann <andrin.rehmann@bf.uzh.ch>"
   ],
   "contributors": [
     "Julius Schlapbach <julius.schlapbach@bf.uzh.ch>",
@@ -28,7 +29,7 @@
     "Johann Gandolfo <johann.gandolfo@bf.uzh.ch>"
   ],
   "dependencies": {
-    "standard-version": "9.3.2"
+    "standard-version": "9.5.0"
   },
   "scripts": {
     "release": "standard-version --no-verify",
@@ -41,7 +42,6 @@
     "release:rc:dry": "standard-version --dry-run --prerelease rc"
   },
   "volta": {
-    "node": "18.6.0",
-    "npm": "8.1.0"
+    "node": "18.10.0"
   }
 }
