@@ -51,6 +51,26 @@ function GBLinUse({
         </div>
 
         <div className="mt-4 md:mt-8">
+          <Header.H2>Use Cases</Header.H2>
+          <p className="text-gray-600">
+            Examples of how GBL games are used in teaching and learning.
+          </p>
+          <div className="mt-4 sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
+            {sortBy((game: any) => game.title, frontMatterArr[2]).map(
+              (game: any) => (
+                <GameCard
+                  key={game.title}
+                  name={game.title}
+                  tags={game.tags}
+                  linkHref={game.href}
+                  imgSrc={game.imgSrc}
+                />
+              )
+            )}
+          </div>
+        </div>
+
+        <div className="mt-4 md:mt-8">
           <Header.H2>Courses</Header.H2>
           <p className="text-gray-600">
             A selection of lectures and seminars at the University of Zurich
@@ -77,4 +97,4 @@ function GBLinUse({
 }
 
 export default GBLinUse
-export const getStaticProps = Util.getStaticPropsFolders(['games', 'courses'])
+export const getStaticProps = Util.getStaticPropsFolders(['games', 'courses', 'use-cases'])
