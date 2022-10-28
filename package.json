@@ -42,6 +42,6 @@
     "release:rc:dry": "standard-version --dry-run --prerelease rc"
   },
   "volta": {
-    "node": "18.10.0"
+    "node": "18.12.0"
   }
 }
