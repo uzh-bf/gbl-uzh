@@ -2,7 +2,7 @@
   "name": "@gbl-uzh/monorepo",
   "version": "0.2.10",
   "description": "Game-Based Learning at the University of Zurich",
-  "homepage": "www.gbl.uzh.ch",
+  "homepage": "https://www.gbl.uzh.ch",
   "license": "AGPL-3.0",
   "repository": {
     "type": "git",
@@ -43,5 +43,9 @@
   },
   "volta": {
     "node": "18.12.0"
-  }
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
 }
