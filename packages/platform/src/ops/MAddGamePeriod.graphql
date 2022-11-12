@@ -1,0 +1,7 @@
+#import "./FPeriodData.graphql"
+
+mutation AddGamePeriod($gameId: Int!, $facts: PeriodFactsInput!) {
+  addGamePeriod(gameId: $gameId, facts: $facts) {
+    ...PeriodData
+  }
+}

@@ -1,0 +1,36 @@
+fragment PlayerData on Player {
+  id
+
+  isReady
+
+  role
+
+  name
+  avatar
+  location
+  color
+
+  facts
+
+  experience
+  experienceToNext
+
+  achievementKeys
+  achievements {
+    id
+    count
+
+    achievement {
+      id
+      name
+      description
+      image
+      reward
+    }
+  }
+
+  level {
+    id
+    index
+  }
+}

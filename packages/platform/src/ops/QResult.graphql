@@ -1,0 +1,53 @@
+#import "./FResultData.graphql"
+#import "./FPeriodData.graphql"
+#import "./FPlayerData.graphql"
+#import "./FPlayerActionData.graphql"
+
+query Result {
+  result {
+    playerResult {
+      ...ResultData
+      player {
+        id
+        completedLearningElementIds
+        visitedStoryElementIds
+      }
+    }
+    previousResults {
+      ...ResultData
+    }
+    currentGame {
+      id
+      status
+      periods {
+        ...PeriodData
+      }
+      activePeriod {
+        ...PeriodData
+        activeSegment {
+          id
+          index
+          facts
+          learningElements {
+            id
+            title
+          }
+          storyElements {
+            id
+            type
+            title
+            content
+            contentRole
+          }
+        }
+      }
+    }
+    transactions {
+      ...PlayerActionData
+    }
+  }
+
+  self {
+    ...PlayerData
+  }
+}

@@ -1,0 +1,14 @@
+#import "./FPeriodData.graphql"
+#import "./FPlayerData.graphql"
+
+mutation ActivateNextSegment($gameId: Int!) {
+  activateNextSegment(gameId: $gameId) {
+    ...GameData
+    periods {
+      ...PeriodData
+    }
+    players {
+      ...PlayerData
+    }
+  }
+}

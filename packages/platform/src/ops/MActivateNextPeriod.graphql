@@ -1,0 +1,11 @@
+#import "./FGameData.graphql"
+#import "./FPeriodData.graphql"
+
+mutation ActivateNextPeriod($gameId: Int!) {
+  activateNextPeriod(gameId: $gameId) {
+    ...GameData
+    periods {
+      ...PeriodData
+    }
+  }
+}

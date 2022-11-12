@@ -1,0 +1,6 @@
+mutation UpdateReadyState($isReady: Boolean!) {
+  updateReadyState(isReady: $isReady) {
+    id
+    isReady
+  }
+}

@@ -1,0 +1,14 @@
+#import "./FSegmentData.graphql"
+
+fragment PeriodData on Period {
+  id
+
+  index
+  activeSegmentIx
+
+  facts
+
+  segments {
+    ...SegmentData
+  }
+}

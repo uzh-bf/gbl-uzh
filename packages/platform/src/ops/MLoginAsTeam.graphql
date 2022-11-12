@@ -1,0 +1,7 @@
+#import "./FPlayerData.graphql"
+
+mutation LoginAsTeam($token: String!) {
+  loginAsTeam(token: $token) {
+    ...PlayerData
+  }
+}
