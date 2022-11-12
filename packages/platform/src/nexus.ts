@@ -17,10 +17,10 @@ export const Event = objectType({
   },
 })
 
+export * from '../../../apps/demo-game/src/graphql/types/Period'
 export * from './types/Game'
 export * from './types/LearningElement'
 export * from './types/Mutation'
-export * from './types/Period'
 export * from './types/Player'
 export * from './types/Query'
 export * from './types/Subscription'

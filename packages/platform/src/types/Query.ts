@@ -9,7 +9,7 @@ export function generateBaseQueries() {
   return objectType({
     name: 'Query',
     definition(t) {
-      t.nonNull.list.field('games', {
+      t.list.nonNull.field('games', {
         type: Game,
         async resolve(_, args, ctx) {
           return GameService.getGames(args, ctx)
@@ -43,7 +43,7 @@ export function generateBaseQueries() {
         },
       })
 
-      t.nonNull.list.field('learningElements', {
+      t.list.nonNull.field('learningElements', {
         type: LearningElement,
         async resolve(_, args, ctx) {
           return GameService.getLearningElements(args, ctx)
@@ -60,14 +60,14 @@ export function generateBaseQueries() {
         },
       })
 
-      t.list.field('results', {
+      t.list.nonNull.field('results', {
         type: PlayerResult,
         async resolve(_, args, ctx) {
           return PlayService.getPlayerResults(args, ctx)
         },
       })
 
-      t.list.field('pastResults', {
+      t.list.nonNull.field('pastResults', {
         type: PlayerResult,
         async resolve(_, args, ctx) {
           return PlayService.getPastResults(args, ctx)

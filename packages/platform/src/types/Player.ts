@@ -36,10 +36,10 @@ export const PlayerState = objectType({
     t.field('currentGame', {
       type: Game,
     })
-    t.list.field('previousResults', {
+    t.list.nonNull.field('previousResults', {
       type: PlayerResult,
     })
-    t.list.field('transactions', {
+    t.list.nonNull.field('transactions', {
       type: PlayerAction,
     })
   },
@@ -58,7 +58,7 @@ export const Player = objectType({
     t.nonNull.string('color')
     t.nonNull.string('token')
     t.nonNull.boolean('tutorialCompleted')
-    t.nonNull.string('role')
+    t.string('role')
     t.nonNull.int('experience')
     t.nonNull.int('experienceToNext')
 

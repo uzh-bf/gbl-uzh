@@ -30,9 +30,6 @@ export const Game = objectType({
     t.nonNull.list.nonNull.field('periods', {
       type: Period,
     })
-    t.nonNull.list.nonNull.field('segments', {
-      type: PeriodSegment,
-    })
   },
 })
 

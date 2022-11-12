@@ -5,7 +5,7 @@ import { Event } from '../nexus'
 export function generateBaseSubscriptions() {
   return subscriptionType({
     definition(t) {
-      t.list.field('eventsGlobal', {
+      t.list.nonNull.field('eventsGlobal', {
         type: Event,
         async subscribe(_, args, ctx) {
           return pubSub.subscribe('global:events')
@@ -14,7 +14,7 @@ export function generateBaseSubscriptions() {
           return payload as any
         },
       })
-      t.list.field('eventsUser', {
+      t.list.nonNull.field('eventsUser', {
         type: Event,
         async subscribe(_, args, ctx) {
           return pubSub.subscribe('user:events', String(ctx.user.sub))

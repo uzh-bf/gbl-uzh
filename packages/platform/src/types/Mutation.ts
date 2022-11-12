@@ -12,9 +12,6 @@ import { PlayerDecisionType } from '../generated/ops'
 import * as AccountService from '../services/AccountService'
 import * as GameService from '../services/GameService'
 
-import * as PlayService from '../services/PlayService'
-import { Game, Period, PeriodSegment } from './Game'
-import { LearningElementAttempt } from './LearningElement'
 import {
   PeriodFacts,
   PeriodFactsInput,
@@ -22,7 +19,10 @@ import {
   PeriodSegmentFacts,
   PeriodSegmentFactsInput,
   PeriodSegmentFactsSchema,
-} from './Period'
+} from '../../../../apps/demo-game/src/graphql/types/Period'
+import * as PlayService from '../services/PlayService'
+import { Game, Period, PeriodSegment } from './Game'
+import { LearningElementAttempt } from './LearningElement'
 import { Player, PlayerDecision, PlayerResult } from './Player'
 
 const defaultReducers = {}
@@ -49,7 +49,7 @@ export function generateBaseMutations({
         },
       })
 
-      t.nonNull.field('loginAsTeam', {
+      t.field('loginAsTeam', {
         type: Player,
         args: {
           token: nonNull(stringArg()),
@@ -59,7 +59,7 @@ export function generateBaseMutations({
         },
       })
 
-      t.nonNull.field('createGame', {
+      t.field('createGame', {
         type: Game,
         args: {
           name: nonNull(stringArg()),
@@ -72,7 +72,7 @@ export function generateBaseMutations({
         },
       })
 
-      t.nonNull.field('addGamePeriod', {
+      t.field('addGamePeriod', {
         type: Period,
         args: {
           gameId: nonNull(intArg()),
@@ -88,7 +88,7 @@ export function generateBaseMutations({
         },
       })
 
-      t.nonNull.field('addPeriodSegment', {
+      t.field('addPeriodSegment', {
         type: PeriodSegment,
         args: {
           gameId: nonNull(intArg()),

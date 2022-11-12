@@ -193,7 +193,7 @@ model Player {
 
   facts Json
 
-  role String @default("unset")
+  role String?
 
   token String @unique
 

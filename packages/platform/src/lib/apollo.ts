@@ -1,7 +1,7 @@
 import { ApolloClient, ApolloLink, InMemoryCache, split } from '@apollo/client'
 import { HttpLink } from '@apollo/client/link/http'
 import { getMainDefinition } from '@apollo/client/utilities'
-import getConfig from 'next/config'
+import assert from 'node:assert'
 import { useMemo } from 'react'
 
 import SSELink from './SSELink'
@@ -9,19 +9,19 @@ import SSELink from './SSELink'
 let apolloClient
 
 function createIsomorphLink() {
-  const { publicRuntimeConfig, serverRuntimeConfig } = getConfig()
+  assert(typeof process.env.NEXT_PUBLIC_API_URL === 'string')
 
   const isBrowser = typeof window !== 'undefined'
 
   let httpLink: ApolloLink = new HttpLink({
-    uri: publicRuntimeConfig.apiURL,
+    uri: process.env.NEXT_PUBLIC_API_URL,
     credentials: 'same-origin',
   })
 
   // on the client, differentiate between links for query/mutation and subscriptions
   if (isBrowser) {
     const sseLink = new SSELink({
-      url: publicRuntimeConfig.apiURL,
+      url: process.env.NEXT_PUBLIC_API_URL,
     })
 
     // swap out the http link with a split based on operation type
