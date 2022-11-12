@@ -5,7 +5,13 @@ module.exports = {
       type: 'json',
     },
   ],
-  bumpFiles: ['', 'website/', 'advisor/'].reduce((acc, path) => {
+  bumpFiles: [
+    '',
+    'apps/website/',
+    'apps/advisor/',
+    'apps/demo-game/',
+    'packages/platform/',
+  ].reduce((acc, path) => {
     return acc.concat(
       {
         filename: `${path}package.json`,
