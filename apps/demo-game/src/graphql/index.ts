@@ -6,6 +6,7 @@ import {
 import * as reducers from '../reducers'
 
 export * from '@gbl-uzh/platform/dist/nexus'
+export * from './types'
 
 export const Query = generateBaseQueries()
 export const Mutation = generateBaseMutations({
