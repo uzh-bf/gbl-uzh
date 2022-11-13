@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.11](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.10...v0.2.11) (2022-11-13)
+
+
+### Bug Fixes
+
+* ts-node-dev ([6350145](https://github.com/uzh-bf/gbl-uzh/commit/6350145edd5fb98da88c36267cd53203a2a57cb6))
+* **website:** add fonts css to globals.css ([e3275b5](https://github.com/uzh-bf/gbl-uzh/commit/e3275b510cfb9a747010b35c9bf2820bfca07f54))
+
+
+### Dependencies
+
+* upgrade minor stuff ([19107b2](https://github.com/uzh-bf/gbl-uzh/commit/19107b2df891531fdf6947e5f85efc6ed42bbc8d))
+* upgrade standard-version and package.json metadata ([b47f613](https://github.com/uzh-bf/gbl-uzh/commit/b47f61343793aae7000cc74fd1982ebbd1a996cb))
+
+
+### Other
+
+* **kb:** submodule update ([3b242a1](https://github.com/uzh-bf/gbl-uzh/commit/3b242a13b89e68bc3120d9352ae78b88b49a19b2))
+* submodule maintenance ([59a7392](https://github.com/uzh-bf/gbl-uzh/commit/59a7392066cf86c1d1329b9e910c19d9503b2160))
+* update node version in volta ([03931e8](https://github.com/uzh-bf/gbl-uzh/commit/03931e89853a6dc70094c16f61d3187500f368f6))
+* **website:** upgrade dependencies ([47e52f3](https://github.com/uzh-bf/gbl-uzh/commit/47e52f3462f6088d8726d6716f1638734328ddab))
+
 ### [0.2.10](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.9...v0.2.10) (2022-07-18)
 
 
