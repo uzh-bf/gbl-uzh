@@ -12,29 +12,27 @@ import { PlayerDecisionType } from '../generated/ops'
 import * as AccountService from '../services/AccountService'
 import * as GameService from '../services/GameService'
 
-import {
-  PeriodFacts,
-  PeriodFactsInput,
-  PeriodFactsSchema,
-  PeriodSegmentFacts,
-  PeriodSegmentFactsInput,
-  PeriodSegmentFactsSchema,
-} from '../../../../apps/demo-game/src/graphql/types/Period'
 import * as PlayService from '../services/PlayService'
 import { Game, Period, PeriodSegment } from './Game'
 import { LearningElementAttempt } from './LearningElement'
 import { Player, PlayerDecision, PlayerResult } from './Player'
 
 const defaultReducers = {}
+const defaultSchemas = {}
+const defaultInputTypes = {}
 
 interface GenerateBaseMutationsArgs {
   reducers?: any
+  schemas?: any
+  inputTypes?: any
   roleAssigner?: (ix: number) => void
 }
 
-export function generateBaseMutations({
+export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
   reducers = defaultReducers,
   roleAssigner = () => 'UNSET',
+  schemas = defaultSchemas,
+  inputTypes = defaultInputTypes
 }: GenerateBaseMutationsArgs = {}) {
   return objectType({
     name: 'Mutation',
@@ -77,12 +75,12 @@ export function generateBaseMutations({
         args: {
           gameId: nonNull(intArg()),
           facts: arg({
-            type: nonNull(PeriodFactsInput),
+            type: nonNull(inputTypes.PeriodFactsInput),
           }),
         },
         async resolve(_, args, ctx) {
           return GameService.addGamePeriod<PeriodFacts>(args, ctx, {
-            schema: PeriodFactsSchema,
+            schema: schemas.PeriodFactsSchema,
             reducers,
           })
         },
@@ -94,14 +92,14 @@ export function generateBaseMutations({
           gameId: nonNull(intArg()),
           periodIx: nonNull(intArg()),
           facts: arg({
-            type: nonNull(PeriodSegmentFactsInput),
+            type: nonNull(inputTypes.PeriodSegmentFactsInput),
           }),
           storyElements: list(stringArg()),
           learningElements: list(stringArg()),
         },
         async resolve(_, args, ctx) {
           return GameService.addPeriodSegment<PeriodSegmentFacts>(args, ctx, {
-            schema: PeriodSegmentFactsSchema,
+            schema: schemas.PeriodSegmentFactsSchema,
             reducers,
           })
         },

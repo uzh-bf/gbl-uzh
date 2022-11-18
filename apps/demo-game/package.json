@@ -6,7 +6,7 @@
   "scripts": {
     "prebuild": "npm run prisma:aurora prisma:generate",
     "build": "run-s build:nexus build:graphql build:next",
-    "build:nexus": "ts-node --esm --transpile-only -P tsconfig.nexus.json src/pages/api/graphql.ts",
+    "build:nexus": "ts-node --esm --transpile-only -P tsconfig.json src/pages/api/graphql.ts",
     "build:graphql": "graphql-codegen --config codegen.ts",
     "build:next": "cross-env NODE_ENV=production next build",
     "predev": "npm run prisma:aurora prisma:generate build:nexus",
@@ -40,7 +40,7 @@
     "@fortawesome/free-regular-svg-icons": "6.2.0",
     "@fortawesome/free-solid-svg-icons": "6.2.0",
     "@fortawesome/react-fontawesome": "0.2.0",
-    "@gbl-uzh/platform": "0.2.10",
+    "@gbl-uzh/platform": "*",
     "@next-auth/prisma-adapter": "1.0.5",
     "@next/font": "13.0.3",
     "@prisma/client": "4.6.1",
