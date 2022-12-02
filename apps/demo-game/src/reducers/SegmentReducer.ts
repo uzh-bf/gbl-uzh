@@ -1,5 +1,5 @@
 import { Action } from '@gbl-uzh/platform'
-import { PeriodSegmentFacts } from '@graphql/index'
+import { PeriodSegmentFacts, ValueTypes } from '@graphql/index'
 import { PrismaClient } from '@prisma/client'
 import { match } from 'ts-pattern'
 
@@ -32,25 +32,18 @@ export function apply(state: any, action: Actions) {
         periodIx,
       } = action.payload
 
-      const t = 1 - segmentIx / segmentCount
+      const nextPeriodPortfolio : ValueTypes<number> = {
+        bank: 0,
+        bonds: 0,
+        stock: 0
+      };
 
-      let spotPrice = periodFacts.initialSpotPrice
-      let dice1
-      let dice2
-      if (previousSegmentFacts?.spotPrice) {
-        const seededSpotPrice = SEEDED_SPOT_PRICE({
-          previousSpotPrice: previousSegmentFacts.spotPrice,
-          randomSeed: periodFacts.randomSeed,
-          distribution: trend.distribution,
-          segmentIx,
-          periodIx,
-        })
-
-        dice1 = seededSpotPrice.dice1
-        dice2 = seededSpotPrice.dice2
-        spotPrice = seededSpotPrice.spotPrice
-      }
       
+
+
+
+
+
       return {
         type: ActionTypes.SEGMENT_INITIALIZE,
         result: state,

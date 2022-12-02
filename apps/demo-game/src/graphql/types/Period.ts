@@ -22,19 +22,25 @@ export const PeriodSegmentFactsSchema = yup.object({
   stockForecast: yup.number(),
 })
 
-interface valueTypes<T> {
+export interface ValueTypes<T> {
   bank: T,
   bonds: T,
   stock: T
 }
 
+export interface Dies {
+  bondsAndStock: number,
+  bonds: number,
+  stock : number,
+}
+
 export interface PeriodSegmentFacts
   extends yup.InferType<typeof PeriodSegmentFactsSchema> {
-    composition: valueTypes<number>,
-    investmentDecision: valueTypes<boolean>,
-    dieMonth1 : valueTypes<number>,
-    dieMonth2 : valueTypes<number>,
-    dieMonth3 : valueTypes<number>,
+    composition: ValueTypes<number>,
+    investmentDecision: ValueTypes<boolean>,
+    dieMonth1 : Dies,
+    dieMonth2 : Dies,
+    dieMonth3 : Dies
   }
 
 export const PeriodSegmentFactsInput = inputObjectType({
