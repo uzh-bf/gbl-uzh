@@ -1,6 +1,6 @@
 import { faBook, faCode, faMailBulk } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image'
 import Link from 'next/link'
 import SwissUniLogo from '../../public/images/logo_swissuniversities.png'
 import UZHLogo from '../../public/images/logo_uzh.jpeg'
@@ -64,7 +64,11 @@ function Footer() {
               The GBL Website and Knowledge Base are being developed in public.
               <br />
               Have a look at our source code on{' '}
-              <Link href="https://github.com/uzh-bf/gbl-uzh" passHref target="_blank">
+              <Link
+                href="https://github.com/uzh-bf/gbl-uzh"
+                passHref
+                target="_blank"
+              >
                 Github
               </Link>
               .
@@ -78,7 +82,11 @@ function Footer() {
                 Contact Us
               </Link>{' '}
               or provide feedback on our{' '}
-              <Link href="https://gbl-uzh.feedbear.com/roadmap" passHref target="_blank">
+              <Link
+                href="https://gbl-uzh.feedbear.com/roadmap"
+                passHref
+                target="_blank"
+              >
                 Public Roadmap
               </Link>
               .
@@ -87,7 +95,7 @@ function Footer() {
         </div>
       </div>
     </footer>
-  );
+  )
 }
 
 export default Footer

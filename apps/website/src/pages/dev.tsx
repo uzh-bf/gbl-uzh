@@ -1,5 +1,5 @@
 import { push } from '@socialgouv/matomo-next'
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image'
 import { useEffect, useState } from 'react'
 import Panel from '../components/common/Panel'
 import Title from '../components/common/Title'

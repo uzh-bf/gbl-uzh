@@ -1,6 +1,9 @@
-import { twMerge } from 'tailwind-merge'
+import { faBarChart } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Modal } from '@uzh-bf/design-system'
 import { MDXRemote } from 'next-mdx-remote'
-import { useEffect, useState } from 'react'
+import Image from 'next/legacy/image'
+import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import RadarChart from '../../components/charts/RadarChart'
 import Header from '../../components/common/Header'
@@ -10,15 +13,6 @@ import TitleImage from '../../components/common/TitleImage'
 import Content from '../../components/Content'
 import PageWithHeader from '../../components/PageWithHeader'
 import * as Util from '../../lib/util'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faBarChart,
-  faChevronLeft,
-  faChevronRight,
-  faX,
-} from '@fortawesome/free-solid-svg-icons'
-import { Button, Modal } from '@uzh-bf/design-system'
-import Image from "next/legacy/image";
 
 interface Props {
   source: any

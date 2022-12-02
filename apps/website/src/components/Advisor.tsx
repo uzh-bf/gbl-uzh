@@ -1,8 +1,8 @@
-import { Modal, Button } from '@uzh-bf/design-system'
-import { push } from '@socialgouv/matomo-next'
-import { useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { push } from '@socialgouv/matomo-next'
+import { Button, Modal } from '@uzh-bf/design-system'
+import { useState } from 'react'
 
 function Advisor() {
   const [isAdvisorActive, setIsAdvisorActive] = useState(false)

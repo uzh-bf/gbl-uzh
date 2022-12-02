@@ -18,7 +18,7 @@ export function getStaticProps(dir_name: string) {
 
     const mdxPath = path.join(
       process.cwd(),
-      `../kb/${dir_name}/${filenameTitleCase}.md`
+      `../../kb/${dir_name}/${filenameTitleCase}.md`
     )
     const source = fs.readFileSync(mdxPath)
     const { content, data } = matter(source)
@@ -29,13 +29,13 @@ export function getStaticProps(dir_name: string) {
         frontMatter: data,
       },
     }
-  };
+  }
 }
 
 export function getStaticPaths(dir_name: string) {
   return async () => {
     const paths = fs
-      .readdirSync(path.join(process.cwd(), `../kb/${dir_name}/`))
+      .readdirSync(path.join(process.cwd(), `../../kb/${dir_name}/`))
       .filter((p) => /\.md?$/.test(p))
       .map((p) =>
         p
@@ -46,12 +46,12 @@ export function getStaticPaths(dir_name: string) {
       .map((slug) => ({ params: { slug } }))
 
     return { paths, fallback: false }
-  };
+  }
 }
 
 export function getStaticPropsSinglePage(dir_name: string, slug: string) {
   return async () => {
-    const mdxPath = path.join(process.cwd(), `../kb/${dir_name}/${slug}.md`)
+    const mdxPath = path.join(process.cwd(), `../../kb/${dir_name}/${slug}.md`)
     const source = fs.readFileSync(mdxPath)
     const { content, data } = matter(source)
     const mdxSource = await serialize(content)
@@ -81,7 +81,7 @@ export function getStaticPropsFolder(
     if (parentfile_dir && parentfile) {
       const mdxPathParent = path.join(
         process.cwd(),
-        `../kb/${parentfile_dir}/${parentfile}.md`
+        `../../kb/${parentfile_dir}/${parentfile}.md`
       )
       const sourceParent = fs.readFileSync(mdxPathParent)
       slugArr = matter(sourceParent).data.childrenFiles.map(
@@ -89,14 +89,14 @@ export function getStaticPropsFolder(
       )
     } else {
       slugArr = fs
-        .readdirSync('../kb/' + folder)
+        .readdirSync('../../kb/' + folder)
         .map((item) => item.split('.')[0])
     }
 
     for (let i = 0; i < slugArr.length; i++) {
       const mdxPath = path.join(
         process.cwd(),
-        `../kb/${folder}/${slugArr[i]}.md`
+        `../../kb/${folder}/${slugArr[i]}.md`
       )
 
       let source: Buffer
@@ -143,7 +143,7 @@ export function getStaticPropsFolders(folders: Array<string>) {
     let fileMissingArr = new Array()
 
     const slugArrs = folders.map((folder: string) =>
-      fs.readdirSync('../kb/' + folder).map((item) => item.split('.')[0])
+      fs.readdirSync('../../kb/' + folder).map((item) => item.split('.')[0])
     )
 
     // attention: for loop is required in order to enable async functions such as 'serialize'
@@ -155,7 +155,7 @@ export function getStaticPropsFolders(folders: Array<string>) {
       for (let i = 0; i < slugArrs[k].length; i++) {
         const mdxPath = path.join(
           process.cwd(),
-          `../kb/${folders[k]}/${slugArrs[k][i]}.md`
+          `../../kb/${folders[k]}/${slugArrs[k][i]}.md`
         )
 
         let source: Buffer
