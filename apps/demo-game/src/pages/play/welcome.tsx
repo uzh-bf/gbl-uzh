@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client'
-import { Button } from '@uzh-bf/design-system'
+import { Button, FormikTextField} from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import { UpdatePlayerDataDocument } from '@gbl-uzh/platform/dist/generated/ops'
 import { useRouter } from 'next/router'
@@ -23,23 +23,28 @@ function Welcome() {
     <div className="w-full max-w-2xl gap-8 p-8 m-auto border rounded">
       <Formik 
         initialValues={{
-          name: '',
-
+          name: 'Your Name',
         }}
         onSubmit={async (values) => {
           console.log(values)
-        }}>
-
-        <Form className="">
-          <div className="flex flex-row gap-8">
-            <div className="flex flex-col flex-initial gap-4">
-              company name
-                
-            </div>
-          </div>
-        </Form>
-
+          await updatePlayerData({
+            variables: {
+              name: values.name,
+            },
+          })
+          router.replace('/play/cockpit')
+        }}
+      >
+        {({ values, errors, touched }) => (
+          <Form className="">
+              <FormikTextField label="Trader Name" name="name" />
+              <Button className="mt-8" type="submit">
+                  Start Game
+              </Button>
+          </Form>
+        )}
       </Formik>
+
     </div>
   )
 }
