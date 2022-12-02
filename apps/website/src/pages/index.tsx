@@ -1,16 +1,15 @@
 import { faArrowRight, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, Prose } from '@uzh-bf/design-system'
-import Image, { StaticImageData } from "next/legacy/image";
+import Image from 'next/legacy/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import DerivativesImage from '../../public/images/derivatives_1.png'
 import DevIcon from '../../public/images/einzelarbeit_icon.svg'
 import StudentIcon from '../../public/images/gruppenarbeit_icon.svg'
 import PFMImage from '../../public/images/pfm_game.png'
 import AdvisorImage from '../../public/images/tablet_icon.svg'
 import uFinImage from '../../public/images/ufin.jpg'
-import DerivativesImage from '../../public/images/derivatives_1.png'
-import UnderConstructionImage from '../../public/images/under_construction.jpg'
 import TeacherIcon from '../../public/images/vorlesung_icon.svg'
 import Advisor from '../components/Advisor'
 import HeroImage from '../components/common/HeroImage'
@@ -250,7 +249,7 @@ function Home() {
         </HomeSection>
       </Content>
     </PageWithHeader>
-  );
+  )
 }
 
 export default Home

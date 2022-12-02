@@ -1,12 +1,11 @@
-import { twMerge } from 'tailwind-merge'
-import Image from "next/legacy/image";
+import { faHamburger } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Image from 'next/legacy/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
+import { twMerge } from 'tailwind-merge'
 import LogoImage from '../../public/images/GBLUZH.png'
-import customLoader from '../lib/loader'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHamburger } from '@fortawesome/free-solid-svg-icons'
 
 const NAVIGATION_ITEMS = [
   { href: '/games', label: 'GBL in Use' },
@@ -25,17 +24,16 @@ interface NavigationItemProps {
 
 function NavigationItem({ isActive, children, href }: NavigationItemProps) {
   return (
-    (<Link
+    <Link
       href={href}
       className={twMerge(
         'flex-1 p-1 mb-1 ml-3 mr-3 text-left text-sm text-gray-500 hover:text-uzh-blue-80 hover:cursor-pointer md:flex-initial md:ml-0 md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
         isActive && 'border-uzh-red-100 text-gray-800 font-bold'
-      )}>
-
+      )}
+    >
       {children}
-
-    </Link>)
-  );
+    </Link>
+  )
 }
 
 NavigationItem.defaultProps = {
@@ -103,8 +101,7 @@ Navigation.defaultProps = {
 
 function Logo() {
   return (
-    (<Link href="/" passHref className="flex-1 md:pl-8">
-
+    <Link href="/" passHref className="flex-1 md:pl-8">
       <div className="relative w-full h-20 md:w-56 md:h-full">
         <Image
           src={LogoImage}
@@ -114,9 +111,8 @@ function Logo() {
           priority
         />
       </div>
-
-    </Link>)
-  );
+    </Link>
+  )
 }
 
 function PageHead() {

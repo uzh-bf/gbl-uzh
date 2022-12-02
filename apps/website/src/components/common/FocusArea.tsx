@@ -1,11 +1,11 @@
-import { twMerge } from 'tailwind-merge'
-import { StaticImageData } from "next/legacy/image";
-import Link from 'next/link'
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@uzh-bf/design-system'
+import { StaticImageData } from 'next/legacy/image'
+import Link from 'next/link'
+import { twMerge } from 'tailwind-merge'
 import Card from './Card'
 import Header from './Header'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
 
 interface Props {
   className?: string
@@ -44,20 +44,18 @@ function FocusArea({
         {roadmapHref && (
           <div className="mt-2">
             <Link href={roadmapHref} passHref target="_blank">
-
               <Button className="text-xs">
                 <Button.Icon>
                   <FontAwesomeIcon icon={faArrowRight} />
                 </Button.Icon>
                 <div className="ml-2">Detailed Roadmap</div>
               </Button>
-
             </Link>
           </div>
         )}
       </div>
     </div>
-  );
+  )
 }
 
 FocusArea.defaultProps = {

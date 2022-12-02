@@ -1,13 +1,20 @@
-import { init } from '@socialgouv/matomo-next'
-import { AppProps } from 'next/dist/shared/lib/router/router'
-import { useEffect } from 'react'
 import { config } from '@fortawesome/fontawesome-svg-core'
+import { Source_Sans_Pro } from '@next/font/google'
+import { init } from '@socialgouv/matomo-next'
 import { ThemeProvider } from '@uzh-bf/design-system'
+import { AppProps } from 'next/app'
+import { useEffect } from 'react'
 
 import '@fortawesome/fontawesome-svg-core/styles.css'
 config.autoAddCss = false
 
 import '../globals.css'
+
+const sourceSansPro = Source_Sans_Pro({
+  subsets: ['latin'],
+  variable: '--source-sans-pro',
+  weight: ['400', '700'],
+})
 
 const MATOMO_URL = process.env.NEXT_PUBLIC_MATOMO_URL
 const MATOMO_SITE_ID = process.env.NEXT_PUBLIC_MATOMO_SITE_ID
@@ -20,9 +27,11 @@ function App({ Component, pageProps }: AppProps) {
   }, [])
 
   return (
-    <ThemeProvider theme={{}}>
-      <Component {...pageProps} />
-    </ThemeProvider>
+    <div className={`${sourceSansPro.variable} font-sans`}>
+      <ThemeProvider>
+        <Component {...pageProps} />
+      </ThemeProvider>
+    </div>
   )
 }
 
