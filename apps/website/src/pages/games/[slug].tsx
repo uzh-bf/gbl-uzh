@@ -18,7 +18,7 @@ import {
   faX,
 } from '@fortawesome/free-solid-svg-icons'
 import { Button, Modal } from '@uzh-bf/design-system'
-import Image from 'next/image'
+import Image from "next/legacy/image";
 
 interface Props {
   source: any

@@ -1,4 +1,4 @@
-import type { ImageLoaderProps } from 'next/image'
+import { ImageLoaderProps } from "next/legacy/image";
 
 function loader({ src, width }: ImageLoaderProps): string {
   return src

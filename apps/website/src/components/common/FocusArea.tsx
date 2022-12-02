@@ -1,5 +1,5 @@
 import { twMerge } from 'tailwind-merge'
-import { StaticImageData } from 'next/image'
+import { StaticImageData } from "next/legacy/image";
 import Link from 'next/link'
 import { Button } from '@uzh-bf/design-system'
 import Card from './Card'
@@ -43,21 +43,21 @@ function FocusArea({
         <p className="flex-1 prose max-w-none">{description}</p>
         {roadmapHref && (
           <div className="mt-2">
-            <Link href={roadmapHref} passHref>
-              <a target="_blank">
-                <Button className="text-xs">
-                  <Button.Icon>
-                    <FontAwesomeIcon icon={faArrowRight} />
-                  </Button.Icon>
-                  <div className="ml-2">Detailed Roadmap</div>
-                </Button>
-              </a>
+            <Link href={roadmapHref} passHref target="_blank">
+
+              <Button className="text-xs">
+                <Button.Icon>
+                  <FontAwesomeIcon icon={faArrowRight} />
+                </Button.Icon>
+                <div className="ml-2">Detailed Roadmap</div>
+              </Button>
+
             </Link>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
 
 FocusArea.defaultProps = {

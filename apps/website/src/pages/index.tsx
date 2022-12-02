@@ -1,7 +1,7 @@
 import { faArrowRight, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, Prose } from '@uzh-bf/design-system'
-import Image, { StaticImageData } from 'next/image'
+import Image, { StaticImageData } from "next/legacy/image";
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import DevIcon from '../../public/images/einzelarbeit_icon.svg'
@@ -81,21 +81,21 @@ function Home() {
             Audience
           </h1>
           <HeroImage.Group>
-            <Link href="/kb" passHref>
+            <Link href="/kb" passHref legacyBehavior>
               <HeroImage
                 href="/kb"
                 imgSrc={TeacherIcon}
                 label="GBL for teachers"
               />
             </Link>
-            <Link href="/games" passHref>
+            <Link href="/games" passHref legacyBehavior>
               <HeroImage
                 href="/games"
                 imgSrc={StudentIcon}
                 label="GBL for students"
               />
             </Link>
-            <Link href="/dev" passHref>
+            <Link href="/dev" passHref legacyBehavior>
               <HeroImage
                 href="/dev"
                 imgSrc={DevIcon}
@@ -250,7 +250,7 @@ function Home() {
         </HomeSection>
       </Content>
     </PageWithHeader>
-  )
+  );
 }
 
 export default Home
