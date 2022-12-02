@@ -1,5 +1,5 @@
 import { twMerge } from 'tailwind-merge'
-import Image from 'next/image'
+import Image from "next/legacy/image";
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
@@ -25,17 +25,17 @@ interface NavigationItemProps {
 
 function NavigationItem({ isActive, children, href }: NavigationItemProps) {
   return (
-    <Link href={href}>
-      <a
-        className={twMerge(
-          'flex-1 p-1 mb-1 ml-3 mr-3 text-left text-sm text-gray-500 hover:text-uzh-blue-80 hover:cursor-pointer md:flex-initial md:ml-0 md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
-          isActive && 'border-uzh-red-100 text-gray-800 font-bold'
-        )}
-      >
-        {children}
-      </a>
-    </Link>
-  )
+    (<Link
+      href={href}
+      className={twMerge(
+        'flex-1 p-1 mb-1 ml-3 mr-3 text-left text-sm text-gray-500 hover:text-uzh-blue-80 hover:cursor-pointer md:flex-initial md:ml-0 md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
+        isActive && 'border-uzh-red-100 text-gray-800 font-bold'
+      )}>
+
+      {children}
+
+    </Link>)
+  );
 }
 
 NavigationItem.defaultProps = {
@@ -103,20 +103,20 @@ Navigation.defaultProps = {
 
 function Logo() {
   return (
-    <Link href="/" passHref>
-      <a className="flex-1 md:pl-8">
-        <div className="relative w-full h-20 md:w-56 md:h-full">
-          <Image
-            src={LogoImage}
-            alt="Logo"
-            layout="fill"
-            objectFit="contain"
-            priority
-          />
-        </div>
-      </a>
-    </Link>
-  )
+    (<Link href="/" passHref className="flex-1 md:pl-8">
+
+      <div className="relative w-full h-20 md:w-56 md:h-full">
+        <Image
+          src={LogoImage}
+          alt="Logo"
+          layout="fill"
+          objectFit="contain"
+          priority
+        />
+      </div>
+
+    </Link>)
+  );
 }
 
 function PageHead() {

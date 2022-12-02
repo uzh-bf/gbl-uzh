@@ -29,7 +29,7 @@ export function getStaticProps(dir_name: string) {
         frontMatter: data,
       },
     }
-  }
+  };
 }
 
 export function getStaticPaths(dir_name: string) {
@@ -46,7 +46,7 @@ export function getStaticPaths(dir_name: string) {
       .map((slug) => ({ params: { slug } }))
 
     return { paths, fallback: false }
-  }
+  };
 }
 
 export function getStaticPropsSinglePage(dir_name: string, slug: string) {

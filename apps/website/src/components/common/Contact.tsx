@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import Image from "next/legacy/image";
 import customLoader from '../../lib/loader'
 import Header from './Header'
 

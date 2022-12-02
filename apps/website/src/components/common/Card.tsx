@@ -1,5 +1,5 @@
 import { twMerge } from 'tailwind-merge'
-import Image, { StaticImageData } from 'next/image'
+import Image, { StaticImageData } from "next/legacy/image";
 import customLoader from '../../lib/loader'
 import Tag from './Tag'
 import { Button } from '@uzh-bf/design-system'
