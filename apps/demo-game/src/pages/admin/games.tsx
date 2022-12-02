@@ -80,7 +80,6 @@ function Games() {
               min={1}
               label="Player Count"
             />
-
             <Button type="submit">Create Game</Button>
           </Form>
         )}
@@ -88,9 +87,9 @@ function Games() {
 
       <div className="grid grid-cols-10 gap-1 mt-4">
         {data.games.map((game) => (
-          <div className="p-2 border" key={game.id}>
-            <Link href={`/admin/games/${game.id}`}>
-              {game.name} {game.activePeriodIx}
+          <div className="p-2 border" key={game?.id}>
+            <Link href={`/admin/games/${game?.id}`}>
+              {game?.name} {game?.activePeriodIx}
             </Link>
           </div>
         ))}
