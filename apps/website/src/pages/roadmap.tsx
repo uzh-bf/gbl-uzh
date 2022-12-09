@@ -38,12 +38,14 @@ function Roadmap() {
   return (
     <PageWithHeader title="Roadmap">
       <TitleBackground>
-        <H1>Project Roadmap</H1>
+        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-8' }}>
+          Project Roadmap
+        </H1>
       </TitleBackground>
 
       <Content>
         <H2>Vision</H2>
-        <Prose>
+        <Prose className={{ root: 'max-w-none' }}>
           Game-based learning has many benefits for lecturers and students.
           However, it can be difficult to get started with developing learning
           games and integrating games with other curricular activities. We want
@@ -52,7 +54,7 @@ function Roadmap() {
           development based on what we have learned on our own journey.
         </Prose>
 
-        <H2>Focus Areas</H2>
+        <H2 className={{ root: 'mt-8' }}>Focus Areas</H2>
         <div>
           <FocusArea
             imgSrc={UZHIcon}

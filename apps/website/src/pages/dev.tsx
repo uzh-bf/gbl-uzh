@@ -1,8 +1,8 @@
 import { push } from '@socialgouv/matomo-next'
-import Image from 'next/legacy/image'
+import { H1 } from '@uzh-bf/design-system'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import Panel from '../components/common/Panel'
-import Title from '../components/common/Title'
 import TitleBackground from '../components/common/TitleBackground'
 import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
@@ -30,7 +30,9 @@ function DevelopmentWorkflow({
   return (
     <PageWithHeader title="Game Development">
       <TitleBackground>
-        <Title title="Game Development" />
+        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-8' }}>
+          Game Development
+        </H1>
       </TitleBackground>
       <Content>
         {frontMatterArr.map((module: any) => {
