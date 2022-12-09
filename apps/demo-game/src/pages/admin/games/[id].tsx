@@ -119,12 +119,14 @@ function ManageGame() {
     return <div>{error.message}</div>
   }
 
+  console.log(data.game as Game);
   return (
     <div className="p-4">
       <div>
         <div className="flex flex-col gap-2 overflow-x-auto md:flex-row">
-          {data.game.periods.map((period, ix) => {
-            const periodStatus = computePeriodStatus(data.game, ix)
+          {
+            data.game.periods.map((period, ix) => {
+            const periodStatus = computePeriodStatus(data.game as Game, ix);
 
             const labels = [
               period.facts.spotTradingEnabled && 'S',
@@ -143,7 +145,7 @@ function ManageGame() {
               <div
                 className="flex flex-row gap-2"
                 key={period.id}
-                id={isPeriodActive && 'active-period'}
+                id={isPeriodActive ? 'active-period' : undefined}
               >
                 <div
                   className={twMerge(
@@ -182,8 +184,8 @@ function ManageGame() {
                   <div className="flex flex-row gap-1 mt-1">
                     {period.segments.map((segment, ix) => {
                       const segmentStatus = computeSegmentStatus(
-                        data.game,
-                        period,
+                        data.game as Game,
+                        period as Period,
                         ix
                       )
 
@@ -229,7 +231,7 @@ function ManageGame() {
                         </div>
                       )
                     })}
-                    {!isPeriodCompleted && data.game.periods.length - 1 === ix && (
+                    {!isPeriodCompleted && (data.game as Game).periods.length - 1 === ix && (
                       <Formik
                         initialValues={{
                           periodIx: -1,
@@ -366,7 +368,7 @@ function ManageGame() {
                     onClick={async () => {
                       await newPeriodForm.setFieldValue(
                         'newPeriodIx',
-                        data.game.periods.length
+                        (data.game as Game).periods.length
                       )
                       newPeriodForm.handleSubmit()
                       setIsPeriodModalOpen(false)
