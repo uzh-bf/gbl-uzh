@@ -1,4 +1,4 @@
-import { Prose } from '@uzh-bf/design-system'
+import { H1, H2, Prose } from '@uzh-bf/design-system'
 import { useEffect } from 'react'
 import TreeIcon from '../../public/images/baum_icon.svg'
 import ToolboxIcon from '../../public/images/innovation_icon.svg'
@@ -6,8 +6,6 @@ import NetworkIcon from '../../public/images/netzwerk_icon.svg'
 import ProcessIcon from '../../public/images/prozess_icon.svg'
 import UZHIcon from '../../public/images/uzh_icon.svg'
 import FocusArea from '../components/common/FocusArea'
-import Header from '../components/common/Header'
-import Title from '../components/common/Title'
 import TitleBackground from '../components/common/TitleBackground'
 import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
@@ -40,21 +38,21 @@ function Roadmap() {
   return (
     <PageWithHeader title="Roadmap">
       <TitleBackground>
-        <Title title="Project Roadmap" />
+        <H1>Project Roadmap</H1>
       </TitleBackground>
 
       <Content>
-        <Header.H2>Vision</Header.H2>
-        <p className="mb-8 prose max-w-none">
+        <H2>Vision</H2>
+        <Prose>
           Game-based learning has many benefits for lecturers and students.
           However, it can be difficult to get started with developing learning
           games and integrating games with other curricular activities. We want
           to foster the application of game-based learning in the university
           context by providing foundational resources for game usage and
           development based on what we have learned on our own journey.
-        </p>
+        </Prose>
 
-        <Header.H2>Focus Areas</Header.H2>
+        <H2>Focus Areas</H2>
         <div>
           <FocusArea
             imgSrc={UZHIcon}
@@ -97,8 +95,8 @@ function Roadmap() {
           />
         </div>
 
-        <Header.H2 className="mt-8">Get Involved</Header.H2>
-        <Prose className="max-w-none">
+        <H2 className={{ root: 'mt-8' }}>Get Involved</H2>
+        <Prose className={{ root: 'max-w-none' }}>
           <p>
             If you are interested in game-based learning and would like to get
             in touch with other lecturers to exchange ideas, we invite you to
