@@ -109,7 +109,7 @@ function Game({ source, frontMatter }: Props) {
                             key={frontMatter.gallery.indexOf(image)}
                           >
                             <div
-                              className="inline-block bg-center bg-cover rounded shadow-md cursor-[zoom-in] w-[28vw] h-[28vw] sm:w-28 sm:h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:h-36 lg:h-36"
+                              className="inline-block bg-center bg-cover rounded shadow-md cursor-[zoom-in] w-[28vw] h-[28vw] sm:w-28 sm:h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:h-36"
                               style={{
                                 backgroundImage: 'url("' + image.imgSrc + '")',
                               }}
