@@ -427,7 +427,7 @@ function ManageGame() {
         <div className="font-bold">Players</div>
         <div className="flex flex-col gap-2 mt-2">
           {data.game.players.map((player) => (
-            <PlayerCompact key={player.id} player={player} />
+            <PlayerCompact key={player.id} player={player as Player} />
           ))}
         </div>
       </div>

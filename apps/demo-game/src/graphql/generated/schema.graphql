@@ -114,9 +114,7 @@ type Period {
 }
 
 input PeriodFactsInput {
-  stockGap: Float!
-  stockTrend: Float!
-  stockVariance: Float!
+  name: String
 }
 
 type PeriodSegment {
@@ -131,7 +129,9 @@ type PeriodSegment {
 }
 
 input PeriodSegmentFactsInput {
-  stockForecast: Float
+  bankPercentage: Float
+  bondsPercentage: Float
+  stockPercentage: Float
 }
 
 type Player {

@@ -37,12 +37,12 @@ declare global {
 
 export interface NexusGenInputs {
   PeriodFactsInput: { // input type
-    stockGap: number; // Float!
-    stockTrend: number; // Float!
-    stockVariance: number; // Float!
+    name?: string | null; // String
   }
   PeriodSegmentFactsInput: { // input type
-    stockForecast?: number | null; // Float
+    bankPercentage?: number | null; // Float
+    bondsPercentage?: number | null; // Float
+    stockPercentage?: number | null; // Float
   }
 }
 

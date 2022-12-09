@@ -1,5 +1,5 @@
 import { Action } from '@gbl-uzh/platform'
-import { PeriodSegmentFacts, ValueTypes } from '@graphql/index'
+import { PeriodSegmentFacts } from '@graphql/index'
 import { PrismaClient } from '@prisma/client'
 import { result } from 'nexus/dist/utils'
 import { match } from 'ts-pattern'
@@ -43,9 +43,9 @@ export function apply(state: any, action: Actions) {
       periodFacts.dieMonth3.stock = Math.ceil(Math.random() * 6);
       periodFacts.dieMonth3.bondsAndStock = Math.ceil(Math.random() * 6);
 
-      periodFacts.portfolio.bank = previousSegmentFacts.portfolio.bank;
-      periodFacts.portfolio.bonds = previousSegmentFacts.portfolio.bonds;
-      periodFacts.portfolio.stock = previousSegmentFacts.portfolio.stock;
+      periodFacts.portfolio.bank = 0.0;//previousSegmentFacts.portfolio.bank;
+      periodFacts.portfolio.bonds = 0.0;//previousSegmentFacts.portfolio.bonds;
+      periodFacts.portfolio.stock = 0.0;//previousSegmentFacts.portfolio.stock;
 
       periodFacts.investmentDecision.bank = Math.random();
       periodFacts.investmentDecision.bonds = Math.random();
