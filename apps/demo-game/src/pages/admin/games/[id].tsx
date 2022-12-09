@@ -322,10 +322,7 @@ function ManageGame() {
 
           <Formik
             initialValues={{
-              newPeriodIx: 0,
-              stockTrend: 0.084,
-              stockVariance: 0.0403,
-              stockGap: 0.025,
+              periodName : 'Game Period',
             }}
             onSubmit={async (variables, { resetForm }) => {
               await addGamePeriod({

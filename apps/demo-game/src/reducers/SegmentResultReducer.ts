@@ -1,4 +1,5 @@
 import { match } from 'ts-pattern'
+import {PeriodSegmentFacts} from 'src/graphql/types/Period'
 
 export enum ActionTypes {
   SEGMENT_RESULTS_INITIALIZE = 'SEGMENT_RESULTS_INITIALIZE',
@@ -12,7 +13,7 @@ export function apply(state: any, action: any) {
 
   return match(action)
     .with({ type: ActionTypes.SEGMENT_RESULTS_END }, () => {
-      const { segmentFacts } = action.payload;
+      const segmentFacts : PeriodSegmentFacts = action.payload.segmentFacts;
       
       const result = {
         ...state,
@@ -22,10 +23,22 @@ export function apply(state: any, action: any) {
         type: ActionTypes.SEGMENT_RESULTS_END,
         result: result,
       }
+    })
+    .with({ type: ActionTypes.SEGMENT_RESULTS_INITIALIZE }, () => {
+      const segmentFacts : PeriodSegmentFacts = action.payload.segmentFacts;
 
+      const result = {
+        ...state,
+        segmentFacts: segmentFacts,
+      };
+      return {
+        type: ActionTypes.SEGMENT_RESULTS_INITIALIZE,
+        result: result,
+      }
     })
     .with({ type: ActionTypes.SEGMENT_RESULTS_START}, () => {
-      const { segmentFacts } = action.payload;
+      const segmentFacts : PeriodSegmentFacts = action.payload.segmentFacts;
+
       const result = {
         ...state,
         segmentFacts: segmentFacts,

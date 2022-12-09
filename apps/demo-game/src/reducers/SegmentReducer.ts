@@ -28,21 +28,33 @@ export function apply(state: any, action: Actions) {
       const {
         segmentIx,
         segmentCount,
-        periodFacts,
-        previousSegmentFacts,
+        periodFacts = {} as PeriodSegmentFacts,
+        previousSegmentFacts = {} as PeriodSegmentFacts,
         periodIx,
       } = action.payload
 
-      const nextPeriodPortfolio : ValueTypes<number> = {
-        bank: 0,
-        bonds: 0,
-        stock: 0
-      };
+      periodFacts.dieMonth1.bonds = Math.ceil(Math.random() * 6);
+      periodFacts.dieMonth1.stock = Math.ceil(Math.random() * 6);
+      periodFacts.dieMonth1.bondsAndStock = Math.ceil(Math.random() * 6);
+      periodFacts.dieMonth2.bonds = Math.ceil(Math.random() * 6);
+      periodFacts.dieMonth2.stock = Math.ceil(Math.random() * 6);
+      periodFacts.dieMonth2.bondsAndStock = Math.ceil(Math.random() * 6);
+      periodFacts.dieMonth3.bonds = Math.ceil(Math.random() * 6);
+      periodFacts.dieMonth3.stock = Math.ceil(Math.random() * 6);
+      periodFacts.dieMonth3.bondsAndStock = Math.ceil(Math.random() * 6);
 
+      periodFacts.portfolio.bank = previousSegmentFacts.portfolio.bank;
+      periodFacts.portfolio.bonds = previousSegmentFacts.portfolio.bonds;
+      periodFacts.portfolio.stock = previousSegmentFacts.portfolio.stock;
+
+      periodFacts.investmentDecision.bank = Math.random();
+      periodFacts.investmentDecision.bonds = Math.random();
+      periodFacts.investmentDecision.stock = Math.random();
+      
       const result = {
-        ...state,
-
-      };
+          ...state,
+          periodFacts
+      }
 
       return {
         type: ActionTypes.SEGMENT_INITIALIZE,
