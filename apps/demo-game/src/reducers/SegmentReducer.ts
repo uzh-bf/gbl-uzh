@@ -1,6 +1,7 @@
 import { Action } from '@gbl-uzh/platform'
 import { PeriodSegmentFacts, ValueTypes } from '@graphql/index'
 import { PrismaClient } from '@prisma/client'
+import { result } from 'nexus/dist/utils'
 import { match } from 'ts-pattern'
 
 export enum ActionTypes {
@@ -38,15 +39,14 @@ export function apply(state: any, action: Actions) {
         stock: 0
       };
 
-      
+      const result = {
+        ...state,
 
-
-
-
+      };
 
       return {
         type: ActionTypes.SEGMENT_INITIALIZE,
-        result: state,
+        result: result,
       }
     })
     .exhaustive()
