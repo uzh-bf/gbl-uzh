@@ -1,6 +1,6 @@
 import { faArrowRight, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Button, Prose } from '@uzh-bf/design-system'
+import { Button, H1, Prose } from '@uzh-bf/design-system'
 import Image from 'next/legacy/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -13,7 +13,6 @@ import uFinImage from '../../public/images/ufin.jpg'
 import TeacherIcon from '../../public/images/vorlesung_icon.svg'
 import Advisor from '../components/Advisor'
 import HeroImage from '../components/common/HeroImage'
-import Title from '../components/common/Title'
 import TitleImage from '../components/common/TitleImage'
 import Content from '../components/Content'
 import GameCard from '../components/games/GameCard'
@@ -29,10 +28,14 @@ function Home() {
       <TitleImage imgSrc="/images/DSC01864_cut4.jpg">
         <div className="flex flex-col gap-4 md:items-end md:justify-between md:flex-row">
           <div className="">
-            <Title title="Game-Based Learning" className="mb-4" size="large" />
-            <Title title="Learning-by-doing. Literally." size="medium" />
+            <H1 className={{ root: 'text-3xl sm:text-4xl' }}>
+              Game-Based Learning
+            </H1>
+            <div className="text-2xl font-light">
+              Learning-by-doing. Literally.
+            </div>
           </div>
-          <div className="flex text-lg font-bold md:text-2xl text-uzh-red-80 hover:text-uzh-red-100">
+          <div className="flex text-lg font-bold md:text-2xl bg-uzh-red-100">
             <a
               className="flex flex-row items-center gap-3"
               href="https://community.klicker.uzh.ch"
