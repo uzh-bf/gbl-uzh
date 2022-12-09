@@ -1,5 +1,5 @@
+import { H3, Prose, Tag } from '@uzh-bf/design-system'
 import { MDXRemote } from 'next-mdx-remote'
-import Tag from '../common/Tag'
 
 interface Props {
   name: string
@@ -28,14 +28,8 @@ function CourseEntry({
       rel="noreferrer"
     >
       <div className="px-2 py-2 bg-white border rounded cursor-pointer hover:shadow">
-        <div className="flex">
-          <h3 className="text-base font-bold text-left text-gray-700 sm:text-lg lg:text-xl font-kollektif md:text-left">
-            {name}
-          </h3>
-        </div>
-        <p className="max-w-4xl prose-sm prose">
-          {<MDXRemote {...description} />}
-        </p>
+        <H3>{name}</H3>
+        <Prose>{<MDXRemote {...description} />}</Prose>
         <div className="flex flex-col gap-1 md:flex-row">
           {institution && <Tag label={institution} />}
           {semester && <Tag label={`${semester} Semester`} />}

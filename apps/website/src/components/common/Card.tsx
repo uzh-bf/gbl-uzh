@@ -1,7 +1,6 @@
-import { Button } from '@uzh-bf/design-system'
+import { Button, Tag } from '@uzh-bf/design-system'
 import Image, { StaticImageData } from 'next/image'
 import { twMerge } from 'tailwind-merge'
-import Tag from './Tag'
 
 interface Props {
   name?: string

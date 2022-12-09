@@ -1,6 +1,5 @@
+import { H1, H2, Prose } from '@uzh-bf/design-system'
 import { sortBy } from 'ramda'
-import Header from '../../components/common/Header'
-import Title from '../../components/common/Title'
 import TitleBackground from '../../components/common/TitleBackground'
 import Content from '../../components/Content'
 import CourseEntry from '../../components/courses/CourseEntry'
@@ -25,16 +24,16 @@ function GBLinUse({
   return (
     <PageWithHeader title="GBL in Use">
       <TitleBackground>
-        <Title title="GBL in Use" />
+        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-8' }}>GBL in Use</H1>
       </TitleBackground>
 
       <Content>
         <div>
-          <Header.H2>Games</Header.H2>
-          <p className="text-gray-600">
+          <H2>Games</H2>
+          <Prose className={{ root: 'max-w-none' }}>
             Simulations and Serious Games that have been developed or are being
             developed at institutions of the University of Zurich.
-          </p>
+          </Prose>
           <div className="mt-4 sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
             {sortBy((game: any) => game.title, frontMatterArr[0]).map(
               (game: any) => (
@@ -51,11 +50,11 @@ function GBLinUse({
         </div>
 
         <div className="mt-4 md:mt-8">
-          <Header.H2>Courses</Header.H2>
-          <p className="text-gray-600">
+          <H2>Courses</H2>
+          <Prose className={{ root: 'max-w-none' }}>
             A selection of lectures and seminars at the University of Zurich
             that contain Game-Based Learning elements.
-          </p>
+          </Prose>
           <div className="flex flex-col mt-4">
             {frontMatterArr[1].map((course: any, ix: number) => (
               <CourseEntry
