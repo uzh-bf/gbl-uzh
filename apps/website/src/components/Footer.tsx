@@ -1,6 +1,6 @@
 import { faBook, faCode, faMailBulk } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import Link from 'next/link'
 import SwissUniLogo from '../../public/images/logo_swissuniversities.png'
 import UZHLogo from '../../public/images/logo_uzh.jpeg'
@@ -15,9 +15,9 @@ function Footer() {
               <Image
                 placeholder="blur"
                 loader={customLoader}
-                layout="intrinsic"
                 src={UZHLogo}
                 alt="UZH Logo"
+                fill
               />
             </div>
           </a>
@@ -31,9 +31,9 @@ function Footer() {
                 <Image
                   placeholder="blur"
                   loader={customLoader}
-                  layout="intrinsic"
                   src={SwissUniLogo}
                   alt="Swissuniversities Logo"
+                  fill
                 />
               </div>
             </div>

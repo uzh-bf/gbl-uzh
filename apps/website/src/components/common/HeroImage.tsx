@@ -1,4 +1,4 @@
-import Image, { StaticImageData } from 'next/legacy/image'
+import Image, { StaticImageData } from 'next/image'
 import Link from 'next/link'
 import { twMerge } from 'tailwind-merge'
 
@@ -20,11 +20,9 @@ function HeroImage({ imgSrc, label, href, className }: Props) {
       )}
     >
       <div className="relative flex-1">
-        <Image src={imgSrc} alt="Hero" layout="intrinsic" />
+        <Image src={imgSrc} alt="Hero" fill />
       </div>
-      <p className="flex-1 pl-8 text-2xl font-bold font-kollektif md:pl-0">
-        {label}
-      </p>
+      <p className="flex-1 pl-8 text-2xl font-bold md:pl-0">{label}</p>
     </Link>
   )
 }

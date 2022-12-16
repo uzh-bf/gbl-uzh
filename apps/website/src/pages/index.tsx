@@ -1,7 +1,7 @@
 import { faArrowRight, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, H1, Prose } from '@uzh-bf/design-system'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import DerivativesImage from '../../public/images/derivatives_1.png'
@@ -35,17 +35,23 @@ function Home() {
               Learning-by-doing. Literally.
             </div>
           </div>
-          <div className="flex text-lg font-bold md:text-2xl bg-uzh-red-100">
-            <a
-              className="flex flex-row items-center gap-3"
-              href="https://community.klicker.uzh.ch"
-              target="_blank"
-              rel="noreferrer"
+          <a
+            className="flex flex-row items-center gap-4"
+            href="https://community.klicker.uzh.ch"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Button
+              className={{
+                root: 'text-white bg-uzh-red-100 px-4 py-3 border-0 text-xl gap-8',
+              }}
             >
-              <FontAwesomeIcon icon={faUsers} className="w-5 md:w-8" />
-              Join the community
-            </a>
-          </div>
+              <Button.Icon>
+                <FontAwesomeIcon icon={faUsers} />
+              </Button.Icon>
+              <Button.Label>Join the community</Button.Label>
+            </Button>
+          </a>
         </div>
       </TitleImage>
 
@@ -56,13 +62,14 @@ function Home() {
               <div className="flex flex-col items-center gap-8 md:flex-row">
                 <div className="relative hidden md:block md:flex-initial">
                   <Image
+                    alt="Advisor"
                     src={AdvisorImage}
                     loader={loader}
-                    layout="intrinsic"
+                    fill
                   />
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl font-kollektif text-uzh-red-100">
+                  <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl">
                     Advisory Wizard
                   </h1>
                   <div className="mt-2 prose md:prose-lg max-w-none">
@@ -79,9 +86,6 @@ function Home() {
         </div>
 
         <div className="py-4 md:py-8">
-          <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl font-kollektif text-uzh-red-100">
-            Audience
-          </h1>
           <HeroImage.Group>
             <Link href="/kb" passHref legacyBehavior>
               <HeroImage
@@ -109,8 +113,8 @@ function Home() {
 
         <div className="py-4 md:py-8">
           <div className="max-w-6xl m-auto">
-            <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl font-kollektif text-uzh-red-100">
-              GBL in Use
+            <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl">
+              Games & Courses
             </h1>
             <div>
               <div className="flex flex-col md:flex-row">
@@ -162,6 +166,7 @@ function Home() {
             </div>
           </div>
         </div>
+
         <HomeSection>
           <HomeSection.Content
             title="Knowledge Base"

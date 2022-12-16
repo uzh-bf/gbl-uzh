@@ -1,6 +1,6 @@
 import { faHamburger } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
@@ -8,11 +8,12 @@ import { twMerge } from 'tailwind-merge'
 import LogoImage from '../../public/images/GBLUZH.png'
 
 const NAVIGATION_ITEMS = [
-  { href: '/games', label: 'GBL in Use' },
-  { href: '/kb', label: 'Knowledge Base' },
+  { href: '/games', label: 'Games & Courses' },
+  { href: '/use_cases', label: 'Use Cases' },
   { href: '/dev', label: 'Development' },
-  { href: '/roadmap', label: 'Roadmap' },
+  { href: '/kb', label: 'Knowledge Base' },
   // { href: '/resources', label: 'Resources' },
+  { href: '/roadmap', label: 'Roadmap' },
   { href: '/about', label: 'About' },
 ]
 
@@ -103,13 +104,7 @@ function Logo() {
   return (
     <Link href="/" passHref className="flex-1 md:pl-8">
       <div className="relative w-full h-20 md:w-56 md:h-full">
-        <Image
-          src={LogoImage}
-          alt="Logo"
-          layout="fill"
-          objectFit="contain"
-          priority
-        />
+        <Image src={LogoImage} alt="Logo" fill priority />
       </div>
     </Link>
   )
