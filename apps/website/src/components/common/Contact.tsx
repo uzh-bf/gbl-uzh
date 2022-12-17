@@ -1,6 +1,5 @@
 import { H3, Prose } from '@uzh-bf/design-system'
 import Image from 'next/image'
-import customLoader from '../../lib/loader'
 
 function Contact({ name, institution, role, link, imgSrc }: any) {
   return (
@@ -9,7 +8,6 @@ function Contact({ name, institution, role, link, imgSrc }: any) {
         <Image
           className="object-cover border rounded shadow"
           placeholder="blur"
-          loader={customLoader}
           fill
           src={imgSrc}
           alt="Profile Picture"

@@ -1,6 +1,6 @@
 import { faArrowRight, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Button, H1, Prose } from '@uzh-bf/design-system'
+import { Button, H1, H2, Prose } from '@uzh-bf/design-system'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -18,7 +18,6 @@ import Content from '../components/Content'
 import GameCard from '../components/games/GameCard'
 import PageWithHeader from '../components/PageWithHeader'
 import HomeSection from '../components/sections/HomeSection'
-import loader from '../lib/loader'
 
 function Home() {
   const router = useRouter()
@@ -36,14 +35,14 @@ function Home() {
             </div>
           </div>
           <a
-            className="flex flex-row items-center gap-4"
+            className="flex-row items-center hidden gap-4 md:flex"
             href="https://community.klicker.uzh.ch"
             target="_blank"
             rel="noreferrer"
           >
             <Button
               className={{
-                root: 'text-white bg-uzh-red-100 px-4 py-3 border-0 text-xl gap-8',
+                root: 'text-white bg-uzh-red-100 md:px-4 md:py-3 border-0 md:text-xl gap-4 md:gap-8',
               }}
             >
               <Button.Icon>
@@ -56,36 +55,31 @@ function Home() {
       </TitleImage>
 
       <Content>
-        <div className="py-4">
-          <div className="max-w-6xl p-4 m-auto bg-gray-100 sm:py-0 rounded-xl">
+        <div className="md:py-4">
+          <div className="max-w-6xl p-6 m-auto rounded shadow bg-slate-100">
             <div>
-              <div className="flex flex-col items-center gap-8 md:flex-row">
-                <div className="relative hidden md:block md:flex-initial">
-                  <Image
-                    alt="Advisor"
-                    src={AdvisorImage}
-                    loader={loader}
-                    fill
-                  />
+              <div className="flex flex-col items-center gap-16 md:flex-row">
+                <div className="relative hidden w-44 h-44 md:block md:flex-initial">
+                  <Image alt="Advisor" src={AdvisorImage} fill />
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl">
-                    Advisory Wizard
-                  </h1>
-                  <div className="mt-2 prose md:prose-lg max-w-none">
+                  <H2>Advisory Wizard</H2>
+                  <Prose className={{ root: 'max-w-none md:prose-lg' }}>
                     Don&apos;t know where to start? Get personalized
                     recommendations with our Gamification and Game-Based
                     Learning advisory wizard.
-                  </div>
+                  </Prose>
 
-                  <Advisor />
+                  <div className="mt-4">
+                    <Advisor />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="py-4 md:py-8">
+        <div className="py-4">
           <HeroImage.Group>
             <Link href="/kb" passHref legacyBehavior>
               <HeroImage
@@ -113,9 +107,7 @@ function Home() {
 
         <div className="py-4 md:py-8">
           <div className="max-w-6xl m-auto">
-            <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl">
-              Games & Courses
-            </h1>
+            <H2>Games & Courses</H2>
             <div>
               <div className="flex flex-col md:flex-row">
                 <div className="flex-1">
@@ -153,7 +145,7 @@ function Home() {
                     </div>
                   </div>
                   <Button
-                    className="mt-4"
+                    className={{ root: 'mt-4' }}
                     onClick={() => router.push('/games')}
                   >
                     <Button.Icon>
@@ -172,7 +164,10 @@ function Home() {
             title="Knowledge Base"
             content="Get to know the terms and definitions in the fields of gamification and Game-Based Learning. Our knowledge base includes basic terms as well as our best practices."
           >
-            <Button className="mt-4" onClick={() => router.push('/kb')}>
+            <Button
+              className={{ root: 'mt-4' }}
+              onClick={() => router.push('/kb')}
+            >
               <Button.Icon>
                 <FontAwesomeIcon icon={faArrowRight} />
               </Button.Icon>
@@ -187,7 +182,10 @@ function Home() {
             title="Development Practices"
             content="Learn how you can proceed if you want to develop your own simulation or serious game. Use our resources as a support and for guidance in your own development."
           >
-            <Button className="mt-4" onClick={() => router.push('/dev')}>
+            <Button
+              className={{ root: 'mt-4' }}
+              onClick={() => router.push('/dev')}
+            >
               <Button.Icon>
                 <FontAwesomeIcon icon={faArrowRight} />
               </Button.Icon>
@@ -202,7 +200,10 @@ function Home() {
           questions, let us know what would be useful for you in terms of
           content, exchange game ideas, and join our community!"
           >
-            <Button className="mt-4" onClick={() => router.push('/roadmap')}>
+            <Button
+              className={{ root: 'mt-4' }}
+              onClick={() => router.push('/roadmap')}
+            >
               <Button.Icon>
                 <FontAwesomeIcon icon={faArrowRight} />
               </Button.Icon>

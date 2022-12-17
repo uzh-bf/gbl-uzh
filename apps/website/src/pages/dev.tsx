@@ -6,7 +6,6 @@ import Panel from '../components/common/Panel'
 import TitleBackground from '../components/common/TitleBackground'
 import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
-import customLoader from '../lib/loader'
 import * as Util from '../lib/util'
 
 interface Props {
@@ -43,7 +42,6 @@ function DevelopmentWorkflow({
               return (
                 <Image
                   // placeholder="blur"
-                  loader={customLoader}
                   src={module.keyTakeawayImage.src}
                   alt={module.title}
                   width={module.keyTakeawayImage.width}
