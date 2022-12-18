@@ -117,7 +117,7 @@ function Home() {
                     Learning.
                   </div>
                   <div className="mt-4">
-                    <div className="sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
+                    <div className="gap-1 sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
                       {[
                         {
                           name: 'Derivatives Game',
