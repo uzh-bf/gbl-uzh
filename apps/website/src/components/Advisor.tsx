@@ -10,11 +10,10 @@ function Advisor() {
   return (
     <Modal
       fullScreen
-      title="GBL Advisory Wizard"
       open={isAdvisorActive}
       trigger={
         <Button
-          className="mt-4"
+          className={{ root: 'mt-4' }}
           onClick={() => {
             setIsAdvisorActive(true)
             push(['trackEvent', 'GBL Advisor', 'Opened'])
