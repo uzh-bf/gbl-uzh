@@ -1,13 +1,12 @@
-import { Prose } from '@uzh-bf/design-system'
+import { H1, H2, Prose } from '@uzh-bf/design-system'
 import { useEffect } from 'react'
+import AndrinImage from '../../public/images/rehmann_andrin.png'
 import RolandImage from '../../public/images/schlaefli_roland.jpg'
 import DavidImage from '../../public/images/schmocker_david.jpg'
 import BenjaminImage from '../../public/images/wilding_benjamin.jpg'
 import AnjaImage from '../../public/images/zgraggen_anja.jpg'
 import Contact from '../components/common/Contact'
-import Header from '../components/common/Header'
 import ProjectPhase from '../components/common/ProjectPhase'
-import Title from '../components/common/Title'
 import TitleBackground from '../components/common/TitleBackground'
 import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
@@ -40,11 +39,11 @@ function About() {
   return (
     <PageWithHeader title="About Us">
       <TitleBackground>
-        <Title title="About Us" />
+        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-8' }}>About Us</H1>
       </TitleBackground>
 
       <Content>
-        <Header.H2>Project Overview</Header.H2>
+        <H2>Project Overview</H2>
         <div className="flex flex-col sm:flex-row">
           <ProjectPhase duration="2019-2021" title="Project 1">
             <li>
@@ -77,52 +76,50 @@ function About() {
           </ProjectPhase>
         </div>
 
-        <Header.H2 className="mt-16">Project Team</Header.H2>
-        <div>
-          <div className="flex flex-col md:flex-row">
-            <div className="flex-1">
-              <Contact
-                name="Dr. Benjamin Wilding"
-                institution="Department of Banking and Finance, University of Zurich"
-                role="Managing Director and Head of Teaching"
-                link="https://www.bf.uzh.ch/en/persons/wilding-benjamin"
-                imgSrc={BenjaminImage}
-              />
-            </div>
+        <H2 className={{ root: 'mt-8' }}>Project Team</H2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Contact
+            name="Dr. Benjamin Wilding"
+            institution="Department of Banking and Finance, University of Zurich"
+            role="Managing Director and Head of Teaching"
+            link="https://www.bf.uzh.ch/en/persons/wilding-benjamin"
+            imgSrc={BenjaminImage}
+          />
 
-            <div className="flex-1 mt-8 sm:mt-0">
-              <Contact
-                name="Dr. David Schmocker"
-                institution="Center for University Teaching and Learning, Digitalization and Innovation, University of Zurich"
-                role=""
-                link="https://www.hochschuldidaktik.uzh.ch/de/aboutus/team/schmocker-david.html"
-                imgSrc={DavidImage}
-              />
-            </div>
-          </div>
-          <div className="flex flex-col mt-4 md:flex-row">
-            <div className="flex-1 mt-8 sm:mt-0">
-              <Contact
-                name="Anja Zgraggen"
-                institution="Department of Banking and Finance, University of Zurich"
-                role="Program and Project Manager"
-                link="https://www.bf.uzh.ch/en/persons/zgraggen-anja"
-                imgSrc={AnjaImage}
-              />
-            </div>
-            <div className="flex-1 mt-8 sm:mt-0">
-              <Contact
-                name="Roland Schläfli"
-                institution="Department of Banking and Finance, University of Zurich"
-                role="IT Project Manager and Developer"
-                link="https://www.bf.uzh.ch/en/persons/schlaefli-roland"
-                imgSrc={RolandImage}
-              />
-            </div>
-          </div>
+          <Contact
+            name="Dr. David Schmocker"
+            institution="Center for University Teaching and Learning, Digitalization and Innovation, University of Zurich"
+            role=""
+            link="https://www.hochschuldidaktik.uzh.ch/de/aboutus/team/schmocker-david.html"
+            imgSrc={DavidImage}
+          />
+
+          <Contact
+            name="Anja Zgraggen"
+            institution="Department of Banking and Finance, University of Zurich"
+            role="Program and Project Manager"
+            link="https://www.bf.uzh.ch/en/persons/zgraggen-anja"
+            imgSrc={AnjaImage}
+          />
+
+          <Contact
+            name="Roland Schläfli"
+            institution="Department of Banking and Finance, University of Zurich"
+            role="IT Project Manager and Developer"
+            link="https://www.bf.uzh.ch/en/persons/schlaefli-roland"
+            imgSrc={RolandImage}
+          />
+
+          <Contact
+            name="Andrin Rehmann"
+            institution="Department of Banking and Finance, University of Zurich"
+            role="Game Developer"
+            link="https://www.bf.uzh.ch/en/persons/rehmann-andrin"
+            imgSrc={AndrinImage}
+          />
         </div>
 
-        <Header.H2 className="mt-16">Get In Touch</Header.H2>
+        <H2 className={{ root: 'mt-8' }}>Get In Touch</H2>
         <Prose>
           <p className="mb-4 prose max-w-none">
             If you would like to contact our project team, please fill out the

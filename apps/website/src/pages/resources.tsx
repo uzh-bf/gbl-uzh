@@ -1,5 +1,4 @@
-import Header from '../components/common/Header'
-import Title from '../components/common/Title'
+import { H1, H2, H3 } from '@uzh-bf/design-system'
 import TitleBackground from '../components/common/TitleBackground'
 import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
@@ -8,13 +7,13 @@ function Resources() {
   return (
     <PageWithHeader title="Resources">
       <TitleBackground>
-        <Title title="Resources" />
+        <H1 className={{ root: 'max-w-6xl mx-auto' }}>Resources</H1>{' '}
       </TitleBackground>
 
       <Content>
-        <Header.H2>Videos</Header.H2>
+        <H2>Videos</H2>
 
-        <Header.H2>Workshop Materials</Header.H2>
+        <H2>Workshop Materials</H2>
         <div className="flex flex-row py-2">
           <svg
             className="w-6 h-6"
@@ -33,13 +32,13 @@ function Resources() {
           <div className="ml-2">document</div>
         </div>
 
-        <Header.H2>Development Toolbox</Header.H2>
+        <H2>Development Toolbox</H2>
 
-        <Header.H3>Simulation Platform</Header.H3>
+        <H3>Simulation Platform</H3>
 
-        <Header.H3>Development Tooling</Header.H3>
+        <H3>Development Tooling</H3>
 
-        <Header.H2>Literature</Header.H2>
+        <H2>Literature</H2>
       </Content>
     </PageWithHeader>
   )

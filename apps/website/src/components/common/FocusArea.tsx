@@ -1,11 +1,10 @@
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Button } from '@uzh-bf/design-system'
+import { Button, H3, Prose } from '@uzh-bf/design-system'
 import { StaticImageData } from 'next/legacy/image'
 import Link from 'next/link'
 import { twMerge } from 'tailwind-merge'
 import Card from './Card'
-import Header from './Header'
 
 interface Props {
   className?: string
@@ -39,16 +38,16 @@ function FocusArea({
       </div>
 
       <div className="mt-4 mb-0 md:mt-0 md:pl-4">
-        <Header.H3>{title}</Header.H3>
-        <p className="flex-1 prose max-w-none">{description}</p>
+        <H3>{title}</H3>
+        <Prose>{description}</Prose>
         {roadmapHref && (
           <div className="mt-2">
             <Link href={roadmapHref} passHref target="_blank">
-              <Button className="text-xs">
+              <Button className={{ root: 'text-xs' }}>
                 <Button.Icon>
                   <FontAwesomeIcon icon={faArrowRight} />
                 </Button.Icon>
-                <div className="ml-2">Detailed Roadmap</div>
+                <Button.Label>Detailed Roadmap</Button.Label>
               </Button>
             </Link>
           </div>

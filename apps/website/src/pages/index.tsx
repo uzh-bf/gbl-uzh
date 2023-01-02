@@ -1,7 +1,7 @@
 import { faArrowRight, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Button, Prose } from '@uzh-bf/design-system'
-import Image from 'next/legacy/image'
+import { Button, H1, H2, Prose } from '@uzh-bf/design-system'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import DerivativesImage from '../../public/images/derivatives_1.png'
@@ -13,13 +13,11 @@ import uFinImage from '../../public/images/ufin.jpg'
 import TeacherIcon from '../../public/images/vorlesung_icon.svg'
 import Advisor from '../components/Advisor'
 import HeroImage from '../components/common/HeroImage'
-import Title from '../components/common/Title'
 import TitleImage from '../components/common/TitleImage'
 import Content from '../components/Content'
 import GameCard from '../components/games/GameCard'
 import PageWithHeader from '../components/PageWithHeader'
 import HomeSection from '../components/sections/HomeSection'
-import loader from '../lib/loader'
 
 function Home() {
   const router = useRouter()
@@ -29,56 +27,59 @@ function Home() {
       <TitleImage imgSrc="/images/DSC01864_cut4.jpg">
         <div className="flex flex-col gap-4 md:items-end md:justify-between md:flex-row">
           <div className="">
-            <Title title="Game-Based Learning" className="mb-4" size="large" />
-            <Title title="Learning-by-doing. Literally." size="medium" />
+            <H1 className={{ root: 'text-3xl sm:text-4xl' }}>
+              Game-Based Learning
+            </H1>
+            <div className="text-2xl font-light">
+              Learning-by-doing. Literally.
+            </div>
           </div>
-          <div className="flex text-lg font-bold md:text-2xl text-uzh-red-80 hover:text-uzh-red-100">
-            <a
-              className="flex flex-row items-center gap-3"
-              href="https://community.klicker.uzh.ch"
-              target="_blank"
-              rel="noreferrer"
+          <a
+            className="flex-row items-center hidden gap-4 md:flex"
+            href="https://community.klicker.uzh.ch"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Button
+              className={{
+                root: 'text-white bg-uzh-red-100 md:px-4 md:py-3 border-0 md:text-xl gap-4 md:gap-8',
+              }}
             >
-              <FontAwesomeIcon icon={faUsers} className="w-5 md:w-8" />
-              Join the community
-            </a>
-          </div>
+              <Button.Icon>
+                <FontAwesomeIcon icon={faUsers} />
+              </Button.Icon>
+              <Button.Label>Join the community</Button.Label>
+            </Button>
+          </a>
         </div>
       </TitleImage>
 
       <Content>
-        <div className="py-4">
-          <div className="max-w-6xl p-4 m-auto bg-gray-100 sm:py-0 rounded-xl">
+        <div className="md:py-4">
+          <div className="max-w-6xl p-6 m-auto rounded shadow bg-slate-100">
             <div>
-              <div className="flex flex-col items-center gap-8 md:flex-row">
-                <div className="relative hidden md:block md:flex-initial">
-                  <Image
-                    src={AdvisorImage}
-                    loader={loader}
-                    layout="intrinsic"
-                  />
+              <div className="flex flex-col items-center gap-16 md:flex-row">
+                <div className="relative hidden w-44 h-44 md:block md:flex-initial">
+                  <Image alt="Advisor" src={AdvisorImage} fill />
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl font-kollektif text-uzh-red-100">
-                    Advisory Wizard
-                  </h1>
-                  <div className="mt-2 prose md:prose-lg max-w-none">
+                  <H2>Advisory Wizard</H2>
+                  <Prose className={{ root: 'max-w-none md:prose-lg' }}>
                     Don&apos;t know where to start? Get personalized
                     recommendations with our Gamification and Game-Based
                     Learning advisory wizard.
-                  </div>
+                  </Prose>
 
-                  <Advisor />
+                  <div className="mt-4">
+                    <Advisor />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="py-4 md:py-8">
-          <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl font-kollektif text-uzh-red-100">
-            Audience
-          </h1>
+        <div className="py-4">
           <HeroImage.Group>
             <Link href="/kb" passHref legacyBehavior>
               <HeroImage
@@ -106,9 +107,7 @@ function Home() {
 
         <div className="py-4 md:py-8">
           <div className="max-w-6xl m-auto">
-            <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl font-kollektif text-uzh-red-100">
-              GBL in Use
-            </h1>
+            <H2>Games & Courses</H2>
             <div>
               <div className="flex flex-col md:flex-row">
                 <div className="flex-1">
@@ -118,7 +117,7 @@ function Home() {
                     Learning.
                   </div>
                   <div className="mt-4">
-                    <div className="sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
+                    <div className="gap-1 sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
                       {[
                         {
                           name: 'Derivatives Game',
@@ -146,7 +145,7 @@ function Home() {
                     </div>
                   </div>
                   <Button
-                    className="mt-4"
+                    className={{ root: 'mt-4' }}
                     onClick={() => router.push('/games')}
                   >
                     <Button.Icon>
@@ -159,12 +158,16 @@ function Home() {
             </div>
           </div>
         </div>
+
         <HomeSection>
           <HomeSection.Content
             title="Knowledge Base"
             content="Get to know the terms and definitions in the fields of gamification and Game-Based Learning. Our knowledge base includes basic terms as well as our best practices."
           >
-            <Button className="mt-4" onClick={() => router.push('/kb')}>
+            <Button
+              className={{ root: 'mt-4' }}
+              onClick={() => router.push('/kb')}
+            >
               <Button.Icon>
                 <FontAwesomeIcon icon={faArrowRight} />
               </Button.Icon>
@@ -179,7 +182,10 @@ function Home() {
             title="Development Practices"
             content="Learn how you can proceed if you want to develop your own simulation or serious game. Use our resources as a support and for guidance in your own development."
           >
-            <Button className="mt-4" onClick={() => router.push('/dev')}>
+            <Button
+              className={{ root: 'mt-4' }}
+              onClick={() => router.push('/dev')}
+            >
               <Button.Icon>
                 <FontAwesomeIcon icon={faArrowRight} />
               </Button.Icon>
@@ -194,7 +200,10 @@ function Home() {
           questions, let us know what would be useful for you in terms of
           content, exchange game ideas, and join our community!"
           >
-            <Button className="mt-4" onClick={() => router.push('/roadmap')}>
+            <Button
+              className={{ root: 'mt-4' }}
+              onClick={() => router.push('/roadmap')}
+            >
               <Button.Icon>
                 <FontAwesomeIcon icon={faArrowRight} />
               </Button.Icon>

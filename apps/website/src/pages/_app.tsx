@@ -13,7 +13,7 @@ import '../globals.css'
 const sourceSansPro = Source_Sans_Pro({
   subsets: ['latin'],
   variable: '--source-sans-pro',
-  weight: ['400', '700'],
+  weight: ['300', '400', '700'],
 })
 
 const MATOMO_URL = process.env.NEXT_PUBLIC_MATOMO_URL
@@ -27,7 +27,7 @@ function App({ Component, pageProps }: AppProps) {
   }, [])
 
   return (
-    <div className={`${sourceSansPro.variable} font-sans`}>
+    <div className={`${sourceSansPro.variable} font-sans h-full`}>
       <ThemeProvider>
         <Component {...pageProps} />
       </ThemeProvider>

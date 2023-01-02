@@ -1,7 +1,6 @@
-import { Button } from '@uzh-bf/design-system'
-import Image, { StaticImageData } from 'next/legacy/image'
+import { Button, Tag } from '@uzh-bf/design-system'
+import Image, { StaticImageData } from 'next/image'
 import { twMerge } from 'tailwind-merge'
-import Tag from './Tag'
 
 interface Props {
   name?: string
@@ -27,14 +26,16 @@ function Card({
       fluid
       disabled={!onClick}
       onClick={onClick}
-      className={twMerge(
-        'p-0 border-none outline outline-1 outline-uzh-grey-60 filter',
-        !colored && 'grayscale',
-        className,
-        onClick
-          ? 'hover:shadow-lg hover:outline-uzh-red-100 hover:filter-none'
-          : 'cursor-default'
-      )}
+      className={{
+        root: twMerge(
+          'p-0 border-none outline outline-1 outline-uzh-grey-60 filter',
+          !colored && 'grayscale',
+          className,
+          onClick
+            ? 'hover:shadow-lg hover:outline-uzh-red-100 hover:filter-none'
+            : 'cursor-default'
+        ),
+      }}
     >
       <div
         className={twMerge(
@@ -57,11 +58,10 @@ function Card({
         )}
 
         <Image
-          className={twMerge('z-0 w-full rounded opacity-90')}
+          className={twMerge('z-0 w-full rounded opacity-90 object-cover')}
           src={imgSrc}
           alt={`Image of ${name}`}
-          layout="fill"
-          objectFit="cover"
+          fill
         />
       </div>
     </Button>

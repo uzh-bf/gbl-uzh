@@ -5,9 +5,8 @@ import {
   faCheck,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Button } from '@uzh-bf/design-system'
+import { Button, H2 } from '@uzh-bf/design-system'
 import { twMerge } from 'tailwind-merge'
-import Header from './Header'
 import VideoWithSummary from './VideoWithSummary'
 
 interface Props {
@@ -52,20 +51,20 @@ function Panel({
 }: Props) {
   return (
     <div className="mt-4">
-      <button
-        className="w-full p-4 border rounded bg-uzh-grey-20 hover:shadow"
+      <Button
+        className={{
+          root: 'w-full p-4 flex flex-row justify-between',
+        }}
         onClick={onActivate}
       >
-        <div className="flex flex-row items-center justify-between">
-          <div>
-            <Header.H2 className="flex-1 !mb-0 !text-left">{title}</Header.H2>
-            <div className="text-left text-gray-700">{duration}</div>
-          </div>
-          <div className="flex-initial w-6">
-            {isCompleted && <FontAwesomeIcon icon={faCheck} />}
-          </div>
+        <div>
+          <H2>{title}</H2>
+          <div className="text-left text-gray-700">{duration}</div>
         </div>
-      </button>
+        <div className="flex-initial w-6">
+          {isCompleted && <FontAwesomeIcon icon={faCheck} />}
+        </div>
+      </Button>
       {isOpen && (
         <div className="p-4 border border-t-0">
           {videoSrc && (

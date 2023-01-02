@@ -1,14 +1,12 @@
 import { faBarChart } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Modal } from '@uzh-bf/design-system'
+import { H1, H2, H3, Modal, Prose, Tag } from '@uzh-bf/design-system'
 import { MDXRemote } from 'next-mdx-remote'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import RadarChart from '../../components/charts/RadarChart'
-import Header from '../../components/common/Header'
-import Tag from '../../components/common/Tag'
-import Title from '../../components/common/Title'
+
 import TitleImage from '../../components/common/TitleImage'
 import Content from '../../components/Content'
 import PageWithHeader from '../../components/PageWithHeader'
@@ -58,28 +56,28 @@ function Game({ source, frontMatter }: Props) {
         <PageWithHeader title={frontMatter.title}>
           {frontMatter.thumbnail && (
             <TitleImage imgSrc={frontMatter.thumbnail}>
-              <Title title={frontMatter.title} />
+              <H1 className={{ root: 'max-w-6xl mx-auto' }}>
+                {frontMatter.title}
+              </H1>
             </TitleImage>
           )}
 
           <Content>
-            <Header.H2 className="mb-2 md:mb-4" align="left">
-              {frontMatter.subtitle}
-            </Header.H2>
-            <div className="flex flex-col items-start md:flex-row">
+            <H2>{frontMatter.subtitle}</H2>
+            <div className="flex flex-col items-start gap-4 md:gap-8 md:flex-row">
               <div className="flex-1 pb-4 md:pb-0 md:pr-8">
-                <p className="prose max-w-none">
+                <Prose className={{ root: 'max-w-none' }}>
                   <MDXRemote {...source} components={components} />
-                </p>
+                </Prose>
 
                 <div>
                   {radarChartTexts?.[0] && (
                     <div className="flex-1 mt-8">
-                      <Header.H3>Characteristics</Header.H3>
+                      <H3>Characteristics</H3>
                       <div className="inline lg:flex lg:flex-row">
-                        <p className="flex-1 prose-sm prose">
+                        <Prose className={{ root: 'flex-1' }}>
                           {radarChartTexts[0]}
-                        </p>
+                        </Prose>
                         <div className="flex-1 mt-3 mb-6 lg:mt-0">
                           <RadarChart data={radarChartData[0]} />
                         </div>
@@ -89,7 +87,7 @@ function Game({ source, frontMatter }: Props) {
 
                   {radarChartTexts?.[1] && (
                     <div className="flex-1 mt-4">
-                      <Header.H3>Gamification Elements</Header.H3>
+                      <H3>Gamification Elements</H3>
                       <div className="inline lg:flex lg:flex-row">
                         <p className="flex-1 prose-sm prose">
                           {radarChartTexts[1]}
@@ -102,16 +100,16 @@ function Game({ source, frontMatter }: Props) {
                   )}
 
                   {frontMatter.gallery && (
-                    <div className="justify-center flex-1 mt-8">
-                      <Header.H3>Gallery</Header.H3>
-                      <div className="container grid grid-cols-3 gap-2 mx-auto sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4">
+                    <div className="flex-1 mt-8">
+                      <H3>Gallery</H3>
+                      <div className="flex flex-row flex-wrap gap-2 md:gap-4">
                         {frontMatter.gallery?.map((image: any) => (
                           <div
-                            className="m-auto rounded hover:opacity-70"
+                            className="rounded hover:opacity-70"
                             key={frontMatter.gallery.indexOf(image)}
                           >
                             <div
-                              className="inline-block bg-center bg-cover rounded shadow-md cursor-[zoom-in] w-[28vw] h-[28vw] sm:w-28 sm:h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:h-36 lg:h-36"
+                              className="inline-block bg-center bg-cover rounded shadow-md cursor-[zoom-in] w-[28vw] h-[28vw] sm:w-32 sm:h-32 md:w-36 md:h-36 lg:h-36"
                               style={{
                                 backgroundImage: 'url("' + image.imgSrc + '")',
                               }}
@@ -127,7 +125,7 @@ function Game({ source, frontMatter }: Props) {
                   )}
                   {frontMatter.resources && (
                     <div className="flex-1 mt-8">
-                      <Header.H3>Resources</Header.H3>
+                      <H3>Resources</H3>
                       <div className="inline md:flex md:flex-row">
                         <ul>
                           {frontMatter.resources.map((item: any) => (
@@ -153,47 +151,53 @@ function Game({ source, frontMatter }: Props) {
                 </div>
               </div>
 
-              <div className="flex-1 p-4 border rounded md:flex-initial md:w-96 bg-uzh-grey-20 md:max-w-[33%] lg:max-w-full">
-                <Header.H3 className="!text-gray-600">
-                  Learning Objectives
-                </Header.H3>
-                <p className="prose-sm prose">
-                  <ul>
-                    {frontMatter.objectives?.map((item: any) => (
-                      <li key={item}>{item}</li>
+              <div className="flex flex-col flex-1 gap-2 md:p-4 md:border rounded md:flex-none md:w-[300px]">
+                <div>
+                  <H3>Learning Objectives</H3>
+                  <Prose>
+                    <ul>
+                      {frontMatter.objectives?.map((item: any) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </Prose>
+                </div>
+
+                <div>
+                  <H3>Keywords</H3>
+                  <div className="flex flex-row flex-wrap justify-start gap-1">
+                    {frontMatter.keywords?.map((item: any) => (
+                      <Tag key={item} label={item} />
                     ))}
-                  </ul>
-                </p>
-
-                <Header.H3 className="mt-6 !text-gray-600">Keywords</Header.H3>
-                <div className="flex flex-row flex-wrap justify-center gap-1 md:justify-start">
-                  {frontMatter.keywords?.map((item: any) => (
-                    <Tag key={item} label={item} />
-                  ))}
+                  </div>
                 </div>
 
-                <Header.H3 className="mt-6 !text-gray-600">Languages</Header.H3>
-                <div className="flex flex-row flex-wrap justify-center gap-1 md:justify-start">
-                  {frontMatter.language?.map((item: any) => (
-                    <Tag key={item} label={item} />
-                  ))}
+                <div>
+                  <H3>Languages</H3>
+                  <div className="flex flex-row flex-wrap justify-start gap-1">
+                    {frontMatter.language?.map((item: any) => (
+                      <Tag key={item} label={item} />
+                    ))}
+                  </div>
                 </div>
 
-                <Header.H3 className="mt-6 !text-gray-600">Imprint</Header.H3>
-                <ReactMarkdown className="prose-sm prose text-center md:text-left">
-                  {frontMatter.imprint}
-                </ReactMarkdown>
+                <div>
+                  <H3>Imprint</H3>
+                  <ReactMarkdown className="prose-sm prose text-left">
+                    {frontMatter.imprint}
+                  </ReactMarkdown>
+                </div>
 
-                <Header.H3 className="mt-6 !text-gray-600">Contact</Header.H3>
-                <ReactMarkdown className="prose-sm prose text-center md:text-left">
-                  {frontMatter.contact}
-                </ReactMarkdown>
+                <div>
+                  <H3>Contact</H3>
+                  <ReactMarkdown className="prose-sm prose text-left">
+                    {frontMatter.contact}
+                  </ReactMarkdown>
+                </div>
 
                 {frontMatter['usedIn'] && (
-                  <>
-                    <Header.H3 className="mt-6 !text-gray-600">
-                      Used In
-                    </Header.H3>
+                  <div>
+                    <H3>Used In</H3>
                     <ul>
                       {frontMatter['usedIn'].map((course: any) => (
                         <li key={course.name}>
@@ -203,7 +207,7 @@ function Game({ source, frontMatter }: Props) {
                         </li>
                       ))}
                     </ul>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
@@ -227,15 +231,13 @@ function Game({ source, frontMatter }: Props) {
               : undefined
           }
         >
-          <div className="flex flex-col items-center justify-center w-full h-full">
-            <div className="relative w-full h-full max-h-[15rem]">
-              <Image
-                src={zoomedImage.imgSrc}
-                alt="Magnified Image"
-                layout="fill"
-                objectFit="contain"
-              />
-            </div>
+          <div className="relative w-full h-full">
+            <Image
+              src={zoomedImage.imgSrc}
+              alt="Magnified Image"
+              fill
+              className="object-contain"
+            />
           </div>
         </Modal>
       )}

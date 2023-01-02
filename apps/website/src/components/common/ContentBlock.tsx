@@ -1,9 +1,9 @@
-import Header from './Header'
+import { H2 } from '@uzh-bf/design-system'
 
 function ContentBlock({ title, children }: any) {
   return (
     <>
-      <Header.H2 className="mt-8 border-b md:mt-16">{title}</Header.H2>
+      <H2 className={{ root: 'mt-8 border-b md:mt-16' }}>{title}</H2>
       <div className="flex flex-col py-1 md:flex-row">
         <p className="flex-1 prose max-w-none">{children}</p>
         <div className="flex-initial pl-16 w-72">

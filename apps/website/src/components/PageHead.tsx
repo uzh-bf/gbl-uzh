@@ -1,6 +1,7 @@
-import { faHamburger } from '@fortawesome/free-solid-svg-icons'
+import { faBars } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Image from 'next/legacy/image'
+import { Button } from '@uzh-bf/design-system'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
@@ -8,11 +9,12 @@ import { twMerge } from 'tailwind-merge'
 import LogoImage from '../../public/images/GBLUZH.png'
 
 const NAVIGATION_ITEMS = [
-  { href: '/games', label: 'GBL in Use' },
-  { href: '/kb', label: 'Knowledge Base' },
+  { href: '/games', label: 'Games & Courses' },
+  { href: '/use_cases', label: 'Use Cases' },
   { href: '/dev', label: 'Development' },
-  { href: '/roadmap', label: 'Roadmap' },
+  { href: '/kb', label: 'Knowledge Base' },
   // { href: '/resources', label: 'Resources' },
+  { href: '/roadmap', label: 'Roadmap' },
   { href: '/about', label: 'About' },
 ]
 
@@ -27,8 +29,8 @@ function NavigationItem({ isActive, children, href }: NavigationItemProps) {
     <Link
       href={href}
       className={twMerge(
-        'flex-1 p-1 mb-1 ml-3 mr-3 text-left text-sm text-gray-500 hover:text-uzh-blue-80 hover:cursor-pointer md:flex-initial md:ml-0 md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
-        isActive && 'border-uzh-red-100 text-gray-800 font-bold'
+        'flex-1 p-1 mb-1 ml-3 mr-3 text-left text-sm text-gray-500 hover:text-uzh-blue-80 hover:border-uzh-blue-40 hover:cursor-pointer md:flex-initial md:ml-0 md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
+        isActive && 'border-uzh-red-100 text-gray-800'
       )}
     >
       {children}
@@ -47,7 +49,7 @@ function Navigation({ isOpen }: NavigationProps) {
   const router = useRouter()
 
   const mobileMenu = (
-    <nav className="flex flex-col order-1 mt-8 md:hidden">
+    <nav className="flex flex-col order-1 pb-4 md:hidden">
       <NavigationItem isActive={router.pathname === '/'} href="/">
         Home
       </NavigationItem>
@@ -101,14 +103,14 @@ Navigation.defaultProps = {
 
 function Logo() {
   return (
-    <Link href="/" passHref className="flex-1 md:pl-8">
-      <div className="relative w-full h-20 md:w-56 md:h-full">
+    <Link href="/">
+      <div className="relative w-56 h-20 ">
         <Image
           src={LogoImage}
           alt="Logo"
-          layout="fill"
-          objectFit="contain"
+          fill
           priority
+          className="object-contain p-2"
         />
       </div>
     </Link>
@@ -119,16 +121,27 @@ function PageHead() {
   const [isOpen, setOpen] = useState(false)
 
   return (
-    <header className="flex flex-col justify-between max-w-6xl pt-4 m-auto md:flex-row">
-      <div className="relative flex items-center md:items-stretch">
-        <Logo />
-        <FontAwesomeIcon
-          icon={faHamburger}
-          className="absolute right-0 w-10 mr-4 hover:cursor-pointer md:hidden"
-          onClick={() => setOpen(!isOpen)}
-        />
+    <header className="flex flex-col justify-between max-w-6xl pt-1 m-auto md:flex-row md:items-end">
+      <div className="flex flex-row items-end justify-between md:items-stretch">
+        <div className="flex-initial md:pl-8">
+          <Logo />
+        </div>
+
+        <div className="pb-4 pr-6">
+          <Button
+            basic
+            className={{
+              root: twMerge('md:hidden text-xl', isOpen && 'text-uzh-red-100'),
+            }}
+            onClick={() => setOpen(!isOpen)}
+          >
+            <Button.Icon>
+              <FontAwesomeIcon icon={faBars} />
+            </Button.Icon>
+          </Button>
+        </div>
       </div>
-      <div className="flex flex-col justify-between flex-initial md:items-end md:border-none md:pr-8">
+      <div className="">
         <Navigation isOpen={isOpen} />
       </div>
     </header>
