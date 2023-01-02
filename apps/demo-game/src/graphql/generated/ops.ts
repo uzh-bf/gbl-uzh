@@ -201,9 +201,7 @@ export type Period = {
 };
 
 export type PeriodFactsInput = {
-  stockGap: Scalars['Float'];
-  stockTrend: Scalars['Float'];
-  stockVariance: Scalars['Float'];
+  name?: InputMaybe<Scalars['String']>;
 };
 
 export type PeriodSegment = {
@@ -219,7 +217,9 @@ export type PeriodSegment = {
 };
 
 export type PeriodSegmentFactsInput = {
-  stockForecast?: InputMaybe<Scalars['Float']>;
+  bankPercentage?: InputMaybe<Scalars['Float']>;
+  bondsPercentage?: InputMaybe<Scalars['Float']>;
+  stockPercentage?: InputMaybe<Scalars['Float']>;
 };
 
 export type Player = {

@@ -13,14 +13,19 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
 
+import PlayerCompact from '@components/PlayerCompact'
+
 import { useMutation, useQuery } from '@apollo/client'
 import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
   AddGamePeriodDocument,
   AddPeriodSegmentDocument,
+  Game,
+  Player,
   GameDocument,
   GameStatus,
+  Period,
 } from '@gbl-uzh/platform/dist/generated/ops'
 import { pick } from 'ramda'
 import { useState } from 'react'
@@ -33,9 +38,9 @@ enum STATUS {
   RESULTS = 'RESULTS',
 }
 
-function computePeriodStatus(game, periodIndex: number): string {
+function computePeriodStatus(game : Game, periodIndex: number): string {
   if (
-    game.status === GameStatus.Results
+    game.activePeriodIx && game.status === GameStatus.Results 
       ? game.activePeriodIx - 1 === periodIndex
       : game.activePeriodIx === periodIndex
   ) {
@@ -44,12 +49,12 @@ function computePeriodStatus(game, periodIndex: number): string {
     return STATUS.ACTIVE
   }
 
-  if (game.activePeriodIx <= periodIndex) return STATUS.SCHEDULED
+  if (game.activePeriodIx && game.activePeriodIx <= periodIndex) return STATUS.SCHEDULED
 
   return STATUS.COMPLETED
 }
 
-function computeSegmentStatus(game, period, segmentIndex: number): string {
+function computeSegmentStatus(game : Game, period : Period, segmentIndex: number): string {
   if (
     ![
       GameStatus.Paused,
@@ -61,33 +66,9 @@ function computeSegmentStatus(game, period, segmentIndex: number): string {
   )
     return STATUS.ACTIVE
 
-  if (period.activeSegmentIx < segmentIndex) return STATUS.SCHEDULED
+  if (period.activeSegmentIx && period.activeSegmentIx < segmentIndex) return STATUS.SCHEDULED
 
   return STATUS.COMPLETED
-}
-
-function Player({ player }) {
-  return (
-    <div className="flex flex-row items-end gap-4 py-1 border-b last:border-0">
-      <img width="20px" src={`/avatars/${player.avatar}.png`} />
-      <div>
-        {player.isReady ? (
-          <FontAwesomeIcon icon={faCheck} />
-        ) : (
-          <FontAwesomeIcon icon={faSnowboarding} />
-        )}
-      </div>
-      <div>{player.role}</div>
-      <div>{player.name}</div>
-      <Link
-        href={`/join/${player.token}`}
-        target="_blank"
-        className="text-red-400"
-      >
-        Login
-      </Link>
-    </div>
-  )
 }
 
 function ManageGame() {
@@ -108,7 +89,8 @@ function ManageGame() {
       onCompleted() {
         try {
           const anchor = document.querySelector('#active-period')
-          anchor.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          if (anchor)
+            anchor.scrollIntoView({ behavior: 'smooth', block: 'center' })
         } catch (e) {}
       },
     }
@@ -137,12 +119,14 @@ function ManageGame() {
     return <div>{error.message}</div>
   }
 
+  console.log(data.game as Game);
   return (
     <div className="p-4">
       <div>
         <div className="flex flex-col gap-2 overflow-x-auto md:flex-row">
-          {data.game.periods.map((period, ix) => {
-            const periodStatus = computePeriodStatus(data.game, ix)
+          {
+            data.game.periods.map((period, ix) => {
+            const periodStatus = computePeriodStatus(data.game as Game, ix);
 
             const labels = [
               period.facts.spotTradingEnabled && 'S',
@@ -161,7 +145,7 @@ function ManageGame() {
               <div
                 className="flex flex-row gap-2"
                 key={period.id}
-                id={isPeriodActive && 'active-period'}
+                id={isPeriodActive ? 'active-period' : undefined}
               >
                 <div
                   className={twMerge(
@@ -200,8 +184,8 @@ function ManageGame() {
                   <div className="flex flex-row gap-1 mt-1">
                     {period.segments.map((segment, ix) => {
                       const segmentStatus = computeSegmentStatus(
-                        data.game,
-                        period,
+                        data.game as Game,
+                        period as Period,
                         ix
                       )
 
@@ -247,7 +231,7 @@ function ManageGame() {
                         </div>
                       )
                     })}
-                    {!isPeriodCompleted && data.game.periods.length - 1 === ix && (
+                    {!isPeriodCompleted && (data.game as Game).periods.length - 1 === ix && (
                       <Formik
                         initialValues={{
                           periodIx: -1,
@@ -338,10 +322,7 @@ function ManageGame() {
 
           <Formik
             initialValues={{
-              newPeriodIx: 0,
-              stockTrend: 0.084,
-              stockVariance: 0.0403,
-              stockGap: 0.025,
+              periodName : 'Game Period',
             }}
             onSubmit={async (variables, { resetForm }) => {
               await addGamePeriod({
@@ -384,7 +365,7 @@ function ManageGame() {
                     onClick={async () => {
                       await newPeriodForm.setFieldValue(
                         'newPeriodIx',
-                        data.game.periods.length
+                        (data.game as Game).periods.length
                       )
                       newPeriodForm.handleSubmit()
                       setIsPeriodModalOpen(false)
@@ -395,19 +376,9 @@ function ManageGame() {
                 }
               >
                 <FormikTextField
-                  type="number"
-                  name="stockTrend"
-                  label="Trend (Stocks)"
-                />
-                <FormikTextField
-                  type="number"
-                  name="stockVariance"
-                  label="Variance (Stocks)"
-                />
-                <FormikTextField
-                  type="number"
-                  name="stockGap"
-                  label="Gap (Stocks)"
+                  type="string"
+                  name="periodName"
+                  label="Period Name"
                 />
               </Modal>
             )}
@@ -456,7 +427,7 @@ function ManageGame() {
         <div className="font-bold">Players</div>
         <div className="flex flex-col gap-2 mt-2">
           {data.game.players.map((player) => (
-            <Player key={player.id} player={player} />
+            <PlayerCompact key={player.id} player={player as Player} />
           ))}
         </div>
       </div>
