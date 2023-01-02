@@ -2,7 +2,7 @@
   "name": "@gbl-uzh/website",
   "version": "0.2.11",
   "scripts": {
-    "dev": "NODE_ENV=development next",
+    "dev": "NODE_ENV=development next -p 3001",
     "build": "NODE_ENV=production next build",
     "start": "next start",
     "optimize": "node export/resizeImages.js",

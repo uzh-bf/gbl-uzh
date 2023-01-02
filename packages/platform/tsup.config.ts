@@ -8,6 +8,6 @@ export default defineConfig({
     'src/lib/util.ts',
     'src/lib/apollo.ts',
   ],
-  clean: true,
+  clean: false,
   dts: true,
 })
