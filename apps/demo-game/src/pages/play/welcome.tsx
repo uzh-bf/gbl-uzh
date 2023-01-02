@@ -1,10 +1,8 @@
 import { useMutation } from '@apollo/client'
-import { Button, FormikTextField} from '@uzh-bf/design-system'
-import { Form, Formik } from 'formik'
 import { UpdatePlayerDataDocument } from '@gbl-uzh/platform/dist/generated/ops'
+import { Button, FormikTextField } from '@uzh-bf/design-system'
+import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
-import { useContext } from 'react'
-import Markdown from 'react-markdown'
 import * as Yup from 'yup'
 
 const Schema = Yup.object().shape({
@@ -21,7 +19,7 @@ function Welcome() {
 
   return (
     <div className="w-full max-w-2xl gap-8 p-8 m-auto border rounded">
-      <Formik 
+      <Formik
         initialValues={{
           name: 'Your Name',
         }}
@@ -37,14 +35,13 @@ function Welcome() {
       >
         {({ values, errors, touched }) => (
           <Form className="">
-              <FormikTextField label="Trader Name" name="name" />
-              <Button className="mt-8" type="submit">
-                  Start Game
-              </Button>
+            <FormikTextField label="Trader Name" name="name" />
+            <Button className="mt-8" type="submit">
+              Start Game
+            </Button>
           </Form>
         )}
       </Formik>
-
     </div>
   )
 }

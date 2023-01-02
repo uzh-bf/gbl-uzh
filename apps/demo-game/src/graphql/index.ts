@@ -4,8 +4,13 @@ import {
   generateBaseSubscriptions,
 } from '@gbl-uzh/platform/dist/nexus'
 import * as reducers from '../reducers'
-import { PeriodFactsSchema, PeriodSegmentFactsSchema, PeriodFactsInput, PeriodSegmentFactsInput } from './types'
-import type {PeriodFacts, PeriodSegmentFacts} from './types'
+import type { PeriodFacts, PeriodSegmentFacts } from './types'
+import {
+  PeriodFactsInput,
+  PeriodFactsSchema,
+  PeriodSegmentFactsInput,
+  PeriodSegmentFactsSchema,
+} from './types'
 
 export * from '@gbl-uzh/platform/dist/nexus'
 export * from './types'
@@ -16,11 +21,11 @@ export const Mutation = generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
   reducers,
   schemas: {
     PeriodFactsSchema,
-    PeriodSegmentFactsSchema
+    PeriodSegmentFactsSchema,
   },
   inputTypes: {
     PeriodFactsInput,
-    PeriodSegmentFactsInput 
-  }
+    PeriodSegmentFactsInput,
+  },
 })
 export const Subscription = generateBaseSubscriptions()

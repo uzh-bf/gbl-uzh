@@ -3,13 +3,11 @@ import {
   faCheck,
   faPause,
   faPlus,
-  faSnowboarding,
   faSync,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, FormikTextField, Modal } from '@uzh-bf/design-system'
 import { Formik } from 'formik'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
 
@@ -22,10 +20,10 @@ import {
   AddGamePeriodDocument,
   AddPeriodSegmentDocument,
   Game,
-  Player,
   GameDocument,
   GameStatus,
   Period,
+  Player,
 } from '@gbl-uzh/platform/dist/generated/ops'
 import { pick } from 'ramda'
 import { useState } from 'react'
@@ -38,9 +36,9 @@ enum STATUS {
   RESULTS = 'RESULTS',
 }
 
-function computePeriodStatus(game : Game, periodIndex: number): string {
+function computePeriodStatus(game: Game, periodIndex: number): string {
   if (
-    game.activePeriodIx && game.status === GameStatus.Results 
+    game.activePeriodIx && game.status === GameStatus.Results
       ? game.activePeriodIx - 1 === periodIndex
       : game.activePeriodIx === periodIndex
   ) {
@@ -49,12 +47,17 @@ function computePeriodStatus(game : Game, periodIndex: number): string {
     return STATUS.ACTIVE
   }
 
-  if (game.activePeriodIx && game.activePeriodIx <= periodIndex) return STATUS.SCHEDULED
+  if (game.activePeriodIx && game.activePeriodIx <= periodIndex)
+    return STATUS.SCHEDULED
 
   return STATUS.COMPLETED
 }
 
-function computeSegmentStatus(game : Game, period : Period, segmentIndex: number): string {
+function computeSegmentStatus(
+  game: Game,
+  period: Period,
+  segmentIndex: number
+): string {
   if (
     ![
       GameStatus.Paused,
@@ -66,7 +69,8 @@ function computeSegmentStatus(game : Game, period : Period, segmentIndex: number
   )
     return STATUS.ACTIVE
 
-  if (period.activeSegmentIx && period.activeSegmentIx < segmentIndex) return STATUS.SCHEDULED
+  if (period.activeSegmentIx && period.activeSegmentIx < segmentIndex)
+    return STATUS.SCHEDULED
 
   return STATUS.COMPLETED
 }
@@ -119,14 +123,13 @@ function ManageGame() {
     return <div>{error.message}</div>
   }
 
-  console.log(data.game as Game);
+  console.log(data.game as Game)
   return (
     <div className="p-4">
       <div>
         <div className="flex flex-col gap-2 overflow-x-auto md:flex-row">
-          {
-            data.game.periods.map((period, ix) => {
-            const periodStatus = computePeriodStatus(data.game as Game, ix);
+          {data.game.periods.map((period, ix) => {
+            const periodStatus = computePeriodStatus(data.game as Game, ix)
 
             const labels = [
               period.facts.spotTradingEnabled && 'S',
@@ -231,80 +234,81 @@ function ManageGame() {
                         </div>
                       )
                     })}
-                    {!isPeriodCompleted && (data.game as Game).periods.length - 1 === ix && (
-                      <Formik
-                        initialValues={{
-                          periodIx: -1,
-                          storyElements: '',
-                          learningElements: '',
-                        }}
-                        onSubmit={async (variables, { resetForm }) => {
-                          await addPeriodSegment({
-                            variables: {
-                              gameId: Number(router.query.id),
-                              periodIx: variables.periodIx,
-                              facts: {},
-                              storyElements: variables.storyElements
-                                ? variables.storyElements.split(',')
-                                : [],
-                              learningElements: variables.learningElements
-                                ? variables.learningElements.split(',')
-                                : [],
-                            },
-                          })
-                          resetForm()
-                        }}
-                      >
-                        {(newSegmentForm) => (
-                          <Modal
-                            open={isSegmentModalOpen}
-                            onClose={() => setIsSegmentModalOpen(false)}
-                            trigger={
-                              <Button
-                                className="w-12 h-full font-bold text-gray-500"
-                                onClick={() => setIsSegmentModalOpen(true)}
-                              >
-                                <FontAwesomeIcon icon={faPlus} />
-                              </Button>
-                            }
-                            title="Add Segment"
-                            onSecondaryAction={
-                              <Button
-                                onClick={() => {
-                                  newSegmentForm.resetForm()
-                                  setIsSegmentModalOpen(false)
-                                }}
-                              >
-                                Discard
-                              </Button>
-                            }
-                            onPrimaryAction={
-                              <Button
-                                onClick={async () => {
-                                  await newSegmentForm.setFieldValue(
-                                    'periodIx',
-                                    period.index
-                                  )
-                                  newSegmentForm.handleSubmit()
-                                  setIsSegmentModalOpen(false)
-                                }}
-                              >
-                                Submit
-                              </Button>
-                            }
-                          >
-                            <FormikTextField
-                              name="storyElements"
-                              label="Story Elements"
-                            />
-                            <FormikTextField
-                              name="learningElements"
-                              label="Learning Elements"
-                            />
-                          </Modal>
-                        )}
-                      </Formik>
-                    )}
+                    {!isPeriodCompleted &&
+                      (data.game as Game).periods.length - 1 === ix && (
+                        <Formik
+                          initialValues={{
+                            periodIx: -1,
+                            storyElements: '',
+                            learningElements: '',
+                          }}
+                          onSubmit={async (variables, { resetForm }) => {
+                            await addPeriodSegment({
+                              variables: {
+                                gameId: Number(router.query.id),
+                                periodIx: variables.periodIx,
+                                facts: {},
+                                storyElements: variables.storyElements
+                                  ? variables.storyElements.split(',')
+                                  : [],
+                                learningElements: variables.learningElements
+                                  ? variables.learningElements.split(',')
+                                  : [],
+                              },
+                            })
+                            resetForm()
+                          }}
+                        >
+                          {(newSegmentForm) => (
+                            <Modal
+                              open={isSegmentModalOpen}
+                              onClose={() => setIsSegmentModalOpen(false)}
+                              trigger={
+                                <Button
+                                  className="w-12 h-full font-bold text-gray-500"
+                                  onClick={() => setIsSegmentModalOpen(true)}
+                                >
+                                  <FontAwesomeIcon icon={faPlus} />
+                                </Button>
+                              }
+                              title="Add Segment"
+                              onSecondaryAction={
+                                <Button
+                                  onClick={() => {
+                                    newSegmentForm.resetForm()
+                                    setIsSegmentModalOpen(false)
+                                  }}
+                                >
+                                  Discard
+                                </Button>
+                              }
+                              onPrimaryAction={
+                                <Button
+                                  onClick={async () => {
+                                    await newSegmentForm.setFieldValue(
+                                      'periodIx',
+                                      period.index
+                                    )
+                                    newSegmentForm.handleSubmit()
+                                    setIsSegmentModalOpen(false)
+                                  }}
+                                >
+                                  Submit
+                                </Button>
+                              }
+                            >
+                              <FormikTextField
+                                name="storyElements"
+                                label="Story Elements"
+                              />
+                              <FormikTextField
+                                name="learningElements"
+                                label="Learning Elements"
+                              />
+                            </Modal>
+                          )}
+                        </Formik>
+                      )}
                   </div>
                 </div>
                 <div
@@ -322,7 +326,7 @@ function ManageGame() {
 
           <Formik
             initialValues={{
-              periodName : 'Game Period',
+              periodName: 'Game Period',
             }}
             onSubmit={async (variables, { resetForm }) => {
               await addGamePeriod({
