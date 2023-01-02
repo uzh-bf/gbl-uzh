@@ -27,7 +27,7 @@ function App({ Component, pageProps }: AppProps) {
   }, [])
 
   return (
-    <div className={`${sourceSansPro.variable} font-sans`}>
+    <div className={`${sourceSansPro.variable} font-sans h-full`}>
       <ThemeProvider>
         <Component {...pageProps} />
       </ThemeProvider>

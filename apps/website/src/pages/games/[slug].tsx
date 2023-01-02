@@ -64,7 +64,7 @@ function Game({ source, frontMatter }: Props) {
 
           <Content>
             <H2>{frontMatter.subtitle}</H2>
-            <div className="flex flex-col items-start md:flex-row">
+            <div className="flex flex-col items-start gap-4 md:gap-8 md:flex-row">
               <div className="flex-1 pb-4 md:pb-0 md:pr-8">
                 <Prose className={{ root: 'max-w-none' }}>
                   <MDXRemote {...source} components={components} />
@@ -100,16 +100,16 @@ function Game({ source, frontMatter }: Props) {
                   )}
 
                   {frontMatter.gallery && (
-                    <div className="justify-center flex-1 mt-8">
+                    <div className="flex-1 mt-8">
                       <H3>Gallery</H3>
-                      <div className="container grid grid-cols-3 gap-2 mx-auto sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4">
+                      <div className="flex flex-row flex-wrap gap-2 md:gap-4">
                         {frontMatter.gallery?.map((image: any) => (
                           <div
-                            className="m-auto rounded hover:opacity-70"
+                            className="rounded hover:opacity-70"
                             key={frontMatter.gallery.indexOf(image)}
                           >
                             <div
-                              className="inline-block bg-center bg-cover rounded shadow-md cursor-[zoom-in] w-[28vw] h-[28vw] sm:w-28 sm:h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:h-36"
+                              className="inline-block bg-center bg-cover rounded shadow-md cursor-[zoom-in] w-[28vw] h-[28vw] sm:w-32 sm:h-32 md:w-36 md:h-36 lg:h-36"
                               style={{
                                 backgroundImage: 'url("' + image.imgSrc + '")',
                               }}
@@ -151,7 +151,7 @@ function Game({ source, frontMatter }: Props) {
                 </div>
               </div>
 
-              <div className="flex-1 p-4 border rounded md:flex-initial md:w-96 md:max-w-[33%] lg:max-w-full">
+              <div className="flex flex-col flex-1 gap-2 md:p-4 md:border rounded md:flex-none md:w-[300px]">
                 <div>
                   <H3>Learning Objectives</H3>
                   <Prose>
@@ -165,7 +165,7 @@ function Game({ source, frontMatter }: Props) {
 
                 <div>
                   <H3>Keywords</H3>
-                  <div className="flex flex-row flex-wrap justify-center gap-1 md:justify-start">
+                  <div className="flex flex-row flex-wrap justify-start gap-1">
                     {frontMatter.keywords?.map((item: any) => (
                       <Tag key={item} label={item} />
                     ))}
@@ -174,7 +174,7 @@ function Game({ source, frontMatter }: Props) {
 
                 <div>
                   <H3>Languages</H3>
-                  <div className="flex flex-row flex-wrap justify-center gap-1 md:justify-start">
+                  <div className="flex flex-row flex-wrap justify-start gap-1">
                     {frontMatter.language?.map((item: any) => (
                       <Tag key={item} label={item} />
                     ))}
@@ -183,14 +183,14 @@ function Game({ source, frontMatter }: Props) {
 
                 <div>
                   <H3>Imprint</H3>
-                  <ReactMarkdown className="prose-sm prose text-center md:text-left">
+                  <ReactMarkdown className="prose-sm prose text-left">
                     {frontMatter.imprint}
                   </ReactMarkdown>
                 </div>
 
                 <div>
                   <H3>Contact</H3>
-                  <ReactMarkdown className="prose-sm prose text-center md:text-left">
+                  <ReactMarkdown className="prose-sm prose text-left">
                     {frontMatter.contact}
                   </ReactMarkdown>
                 </div>
@@ -231,15 +231,13 @@ function Game({ source, frontMatter }: Props) {
               : undefined
           }
         >
-          <div className="flex flex-col items-center justify-center w-full h-full">
-            <div className="relative w-full h-full max-h-[15rem]">
-              <Image
-                src={zoomedImage.imgSrc}
-                alt="Magnified Image"
-                fill
-                className="object-contain"
-              />
-            </div>
+          <div className="relative w-full h-full">
+            <Image
+              src={zoomedImage.imgSrc}
+              alt="Magnified Image"
+              fill
+              className="object-contain"
+            />
           </div>
         </Modal>
       )}

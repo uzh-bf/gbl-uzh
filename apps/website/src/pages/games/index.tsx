@@ -20,7 +20,6 @@ function GBLinUse({
   filenames,
   fileMissingArr,
 }: Props) {
-  console.log(frontMatterArr)
   return (
     <PageWithHeader title="GBL in Use">
       <TitleBackground>
@@ -34,7 +33,7 @@ function GBLinUse({
             Simulations and Serious Games that have been developed or are being
             developed at institutions of the University of Zurich.
           </Prose>
-          <div className="mt-4 sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
+          <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2 md:grid-cols-3">
             {sortBy((game: any) => game.title, frontMatterArr[0]).map(
               (game: any) => (
                 <GameCard
@@ -55,7 +54,7 @@ function GBLinUse({
             A selection of lectures and seminars at the University of Zurich
             that contain Game-Based Learning elements.
           </Prose>
-          <div className="flex flex-col mt-4">
+          <div className="flex flex-col gap-2 mt-2 md:grid md:grid-cols-2">
             {frontMatterArr[1].map((course: any, ix: number) => (
               <CourseEntry
                 key={course.name}
