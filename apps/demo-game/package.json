@@ -1,6 +1,6 @@
 {
   "name": "@gbl-uzh/demo-game",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "private": true,
   "license": "AGPL-3.0",
   "scripts": {
