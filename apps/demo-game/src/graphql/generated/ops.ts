@@ -202,6 +202,7 @@ export type Period = {
 
 export type PeriodFactsInput = {
   name?: InputMaybe<Scalars['String']>;
+  name2?: InputMaybe<Scalars['String']>;
 };
 
 export type PeriodSegment = {

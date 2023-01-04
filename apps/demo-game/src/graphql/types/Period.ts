@@ -11,6 +11,7 @@ export const PeriodFactsInput = inputObjectType({
   name: 'PeriodFactsInput',
   definition(t) {
     t.string('name')
+    t.string('name2')
   },
 })
 
@@ -56,8 +57,8 @@ export interface PeriodSegmentFacts
 export const PeriodSegmentFactsInput = inputObjectType({
   name: 'PeriodSegmentFactsInput',
   definition(t) {
-    t.float('bankPercentage'),
-      t.float('bondsPercentage'),
-      t.float('stockPercentage')
+    t.float('bankPercentage')
+    t.float('bondsPercentage')
+    t.float('stockPercentage')
   },
 })

@@ -38,6 +38,7 @@ declare global {
 export interface NexusGenInputs {
   PeriodFactsInput: { // input type
     name?: string | null; // String
+    name2?: string | null; // String
   }
   PeriodSegmentFactsInput: { // input type
     bankPercentage?: number | null; // Float
