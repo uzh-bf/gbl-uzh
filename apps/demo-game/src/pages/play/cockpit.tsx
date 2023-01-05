@@ -1,10 +1,10 @@
 import { useMutation, useQuery } from '@apollo/client'
+import { Switch } from '@uzh-bf/design-system'
+import { useState } from 'react'
 import {
   PerformActionDocument,
   ResultDocument,
-} from '@gbl-uzh/platform/dist/generated/ops'
-import { Switch } from '@uzh-bf/design-system'
-import { useState } from 'react'
+} from 'src/graphql/generated/ops'
 import { ActionTypes } from 'src/reducers/ActionsReducer'
 
 function Cockpit() {

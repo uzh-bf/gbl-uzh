@@ -24,7 +24,7 @@ import {
   GameStatus,
   Period,
   Player,
-} from '@gbl-uzh/platform/dist/generated/ops'
+} from 'src/graphql/generated/ops'
 import { pick } from 'ramda'
 import { useState } from 'react'
 

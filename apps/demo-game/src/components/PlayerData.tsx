@@ -1,5 +1,5 @@
-import { Achievement, Player } from '@gbl-uzh/platform/dist/generated/ops'
 import { useRouter } from 'next/router'
+import { Achievement, Player } from 'src/graphql/generated/ops'
 
 function Achievement({
   name,

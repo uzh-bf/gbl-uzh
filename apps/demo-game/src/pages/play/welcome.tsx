@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client'
-import { UpdatePlayerDataDocument } from '@gbl-uzh/platform/dist/generated/ops'
+import { UpdatePlayerDataDocument } from 'src/graphql/generated/ops'
 import { Button, FormikTextField } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'

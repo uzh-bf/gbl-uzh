@@ -1,7 +1,7 @@
 import { useMutation } from '@apollo/client'
-import { LoginAsTeamDocument } from '@gbl-uzh/platform/dist/generated/ops'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
+import { LoginAsTeamDocument } from 'src/graphql/generated/ops'
 
 function Join() {
   const router = useRouter()

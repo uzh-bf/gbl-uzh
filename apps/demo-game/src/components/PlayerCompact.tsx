@@ -1,4 +1,4 @@
-import { Player } from '@gbl-uzh/platform/dist/generated/ops'
+import { Player } from 'src/graphql/generated/ops'
 
 import { faCheck, faSnowboarding } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
