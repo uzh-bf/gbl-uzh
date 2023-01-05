@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.13](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.12...v0.2.13) (2023-01-05)
+
+
+### Bug Fixes
+
+* **packages/platform:** embed graphql documents in platform dist ([89c5692](https://github.com/uzh-bf/gbl-uzh/commit/89c5692f1a4b08d76090ec538a41360e884eb3b0))
+
+
+### Other
+
+* **apps/demo-game:** name2 ([53a2e3d](https://github.com/uzh-bf/gbl-uzh/commit/53a2e3dc083bc7985d7a5e78f845fbb0008ea33b))
+* lockfile maintenance ([806405c](https://github.com/uzh-bf/gbl-uzh/commit/806405c89181113b57eca0da6adeef7941b7b5d5))
+
 ### [0.2.12](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.11...v0.2.12) (2023-01-04)
 
 
