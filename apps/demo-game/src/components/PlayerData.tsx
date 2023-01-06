@@ -1,9 +1,17 @@
-import { Progress } from '@uzh-bf/design-system'
 import { useRouter } from 'next/router'
-import { Achievement, Player} from '@gbl-uzh/platform/dist/generated/ops'
+import { Achievement, Player } from 'src/graphql/generated/ops'
 
-function Achievement({ name, xpReward, image, count } :
-    { name: string, xpReward: number, image: string, count: number }) {
+function Achievement({
+  name,
+  xpReward,
+  image,
+  count,
+}: {
+  name: string
+  xpReward: number
+  image: string
+  count: number
+}) {
   return (
     <div
       className="relative w-10 h-10 p-2 bg-white border rounded shadow md:w-12 md:h-12"
@@ -29,7 +37,7 @@ function PlayerData({
   level,
   avatar,
   location,
-} : Player) {
+}: Player) {
   const router = useRouter()
 
   return (

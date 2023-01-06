@@ -1,7 +1,0 @@
-{
-  "files": [
-    "../../node_modules/@gbl-uzh/platform/dist/schema.prisma",
-    "./prisma/app.prisma"
-  ],
-  "output": "./prisma/schema.prisma"
-}

@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.13](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.12...v0.2.13) (2023-01-05)
+
+
+### Bug Fixes
+
+* **packages/platform:** embed graphql documents in platform dist ([89c5692](https://github.com/uzh-bf/gbl-uzh/commit/89c5692f1a4b08d76090ec538a41360e884eb3b0))
+
+
+### Other
+
+* **apps/demo-game:** name2 ([53a2e3d](https://github.com/uzh-bf/gbl-uzh/commit/53a2e3dc083bc7985d7a5e78f845fbb0008ea33b))
+* lockfile maintenance ([806405c](https://github.com/uzh-bf/gbl-uzh/commit/806405c89181113b57eca0da6adeef7941b7b5d5))
+
+### [0.2.12](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.11...v0.2.12) (2023-01-04)
+
+
+### Other
+
+* **apps/website:** upgrade packages and design system ([#20](https://github.com/uzh-bf/gbl-uzh/issues/20)) ([b904e60](https://github.com/uzh-bf/gbl-uzh/commit/b904e602a6cfa664ee749eddb68d45d309bff4a3))
+* kb submodule ([82a2411](https://github.com/uzh-bf/gbl-uzh/commit/82a24119c00fab0052bc0318e7ff6c8bc95205d7))
+* lockfile maintenance ([98743d1](https://github.com/uzh-bf/gbl-uzh/commit/98743d11b529622f27fc8d13fa3684691f546425))
+* lockfile maintenance ([b154d67](https://github.com/uzh-bf/gbl-uzh/commit/b154d67ec54764c6215e79cf422f1a51c3068a98))
+* submodule update ([bd2661c](https://github.com/uzh-bf/gbl-uzh/commit/bd2661cd625d2a63c79c265f5816ccc28277c038))
+
 ### [0.2.11](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.10...v0.2.11) (2022-11-13)
 
 

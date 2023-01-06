@@ -115,6 +115,7 @@ type Period {
 
 input PeriodFactsInput {
   name: String
+  name2: String
 }
 
 type PeriodSegment {

@@ -1,19 +1,31 @@
 {
   "extends": "@tsconfig/node18/tsconfig.json",
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
   "compilerOptions": {
     "allowJs": true,
     "noEmit": true,
     "incremental": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "@components/*": ["src/components/*"],
-      "@graphql/*": ["src/graphql/*"],
-      "@lib/*": ["src/lib/*"]
-    }
+      "@components/*": [
+        "src/components/*"
+      ],
+      "@graphql/*": [
+        "src/graphql/*"
+      ],
+      "@lib/*": [
+        "src/lib/*"
+      ]
+    },
+    "isolatedModules": true
   }
 }
