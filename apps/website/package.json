@@ -1,6 +1,6 @@
 {
   "name": "@gbl-uzh/website",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "scripts": {
     "dev": "cross-env NODE_ENV=development next -p 3001",
     "build": "cross-env NODE_ENV=production next build",

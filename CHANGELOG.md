@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.14](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.13...v0.2.14) (2023-01-06)
+
+
+### Bug Fixes
+
+* advisor ([d53d3c6](https://github.com/uzh-bf/gbl-uzh/commit/d53d3c64dbd62644c34e3df02dcd00c72119480a))
+* build graphql codegen ops in game instead of import platform ([a30fd88](https://github.com/uzh-bf/gbl-uzh/commit/a30fd8867e40ce9af509093403bca2acc8e8b0ae))
+* **packages/platform:** allow null return in Game for players and periods ([dedb286](https://github.com/uzh-bf/gbl-uzh/commit/dedb28616edd7f999d11759827ad44250ab5024b))
+
 ### [0.2.13](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.12...v0.2.13) (2023-01-05)
 
 
