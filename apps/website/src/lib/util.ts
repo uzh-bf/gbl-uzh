@@ -22,9 +22,7 @@ export function getStaticProps(dir_name: string) {
     )
     const source = fs.readFileSync(mdxPath)
     const { content, data } = matter(source)
-    const mdxSource = await serialize(content, {
-      mdxOptions: { development: false },
-    })
+    const mdxSource = await serialize(content)
     return {
       props: {
         source: mdxSource,
@@ -56,9 +54,7 @@ export function getStaticPropsSinglePage(dir_name: string, slug: string) {
     const mdxPath = path.join(process.cwd(), `../../kb/${dir_name}/${slug}.md`)
     const source = fs.readFileSync(mdxPath)
     const { content, data } = matter(source)
-    const mdxSource = await serialize(content, {
-      mdxOptions: { development: false },
-    })
+    const mdxSource = await serialize(content)
     return {
       props: {
         source: mdxSource,
@@ -114,9 +110,7 @@ export function getStaticPropsFolder(
 
       const { content, data } = matter(source)
       dataHandles.push(data)
-      let temp2 = await serialize(content, {
-        mdxOptions: { development: false },
-      })
+      let temp2 = await serialize(content)
       mdxSources.push(temp2)
     }
 
@@ -175,9 +169,7 @@ export function getStaticPropsFolders(folders: Array<string>) {
 
         const { content, data } = matter(source)
         dataHandlesArr[k].push(data)
-        let temp2 = await serialize(content, {
-          mdxOptions: { development: false },
-        })
+        let temp2 = await serialize(content)
         mdxSources[k].push(temp2)
       }
     }

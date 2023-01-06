@@ -24,7 +24,7 @@ function CourseEntry({
     <a href={href} target="_blank" rel="noreferrer">
       <div className="h-full px-2 py-2 bg-white border rounded cursor-pointer hover:shadow">
         <H3 className={{ root: 'text-base' }}>{name}</H3>
-        <Prose>{<MDXRemote {...description} />}</Prose>
+        <Prose><MDXRemote {...description} /></Prose>
         <div className="flex flex-row gap-1 mt-2">
           {institution && <Tag label={institution} />}
           {semester && <Tag label={`${semester} Semester`} />}

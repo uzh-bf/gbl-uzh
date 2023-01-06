@@ -7,9 +7,7 @@ interface Props {
 
 function TitleBackground({ children, className }: Props) {
   return (
-    <div
-      className={twMerge('w-full shadow bg-uzh-grey-20', className || 'p-8')}
-    >
+    <div className={twMerge('w-full shadow bg-slate-100', className || 'p-4')}>
       {children}
     </div>
   )

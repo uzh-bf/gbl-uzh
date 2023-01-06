@@ -8,7 +8,7 @@ interface Props {
 
 function TitleImage({ imgSrc, children }: Props) {
   return (
-    <div className={twMerge(imgSrc && 'border-uzh-red-100 bg-uzh-grey-20')}>
+    <div className={twMerge(imgSrc && 'border-uzh-red-100 bg-slate-50')}>
       <div className="flex justify-center">
         <div
           className={twMerge(
@@ -26,9 +26,9 @@ function TitleImage({ imgSrc, children }: Props) {
 
           <TitleBackground
             className={twMerge(
-              'p-4 md:p-8',
+              'p-4 md:p-6',
               imgSrc &&
-                'p-4 absolute bottom-0 md:bottom-5 sm:top-auto bg-opacity-80 border-b-2 border-slate-400'
+                'p-4 absolute bottom-0 md:bottom-3 sm:top-auto bg-opacity-90 border-b border-slate-300'
             )}
           >
             {children}
