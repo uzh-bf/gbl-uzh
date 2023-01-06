@@ -24,10 +24,10 @@ export const Game = objectType({
       type: Period,
     })
 
-    t.list.nonNull.field('players', {
+    t.nonNull.list.nonNull.field('players', {
       type: Player,
     })
-    t.list.nonNull.field('periods', {
+    t.nonNull.list.nonNull.field('periods', {
       type: Period,
     })
   },
