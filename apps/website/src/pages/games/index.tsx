@@ -23,7 +23,7 @@ function GBLinUse({
   return (
     <PageWithHeader title="GBL in Use">
       <TitleBackground>
-        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-8' }}>GBL in Use</H1>
+        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-4' }}>GBL in Use</H1>
       </TitleBackground>
 
       <Content>
@@ -40,7 +40,7 @@ function GBLinUse({
                   key={game.title}
                   name={game.title}
                   tags={game.tags}
-                  linkHref={game.href}
+                  linkHref={`/games/${game.slug}`}
                   imgSrc={game.imgSrc}
                 />
               )

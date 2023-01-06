@@ -53,7 +53,7 @@ function Game({ source, frontMatter }: Props) {
 
   return (
     <>
-      <div className="absolute w-screen">
+      <div>
         <PageWithHeader title={frontMatter.title}>
           {frontMatter.thumbnail && (
             <TitleImage imgSrc={frontMatter.thumbnail}>

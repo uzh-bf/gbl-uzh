@@ -39,7 +39,7 @@ function About() {
   return (
     <PageWithHeader title="About Us">
       <TitleBackground>
-        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-8' }}>About Us</H1>
+        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-4' }}>About Us</H1>
       </TitleBackground>
 
       <Content>

@@ -29,7 +29,7 @@ function DevelopmentWorkflow({
   return (
     <PageWithHeader title="Game Development">
       <TitleBackground>
-        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-8' }}>
+        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-4' }}>
           Game Development
         </H1>
       </TitleBackground>

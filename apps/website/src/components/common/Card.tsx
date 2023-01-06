@@ -52,7 +52,7 @@ function Card({
         )}
 
         {name && (
-          <div className="absolute left-0 right-0 z-10 py-1 text-lg font-bold prose text-center bg-white bg-opacity-80 bottom-3">
+          <div className="absolute left-0 right-0 z-10 py-1 text-lg font-bold prose text-center bg-white bg-opacity-95 bottom-3">
             {name}
           </div>
         )}

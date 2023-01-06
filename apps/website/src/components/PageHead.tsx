@@ -10,7 +10,7 @@ import LogoImage from '../../public/images/GBLUZH.png'
 
 const NAVIGATION_ITEMS = [
   { href: '/games', label: 'Games & Courses' },
-  { href: '/use_cases', label: 'Use Cases' },
+  { href: '/use-cases', label: 'Use Cases' },
   { href: '/dev', label: 'Development' },
   { href: '/kb', label: 'Knowledge Base' },
   // { href: '/resources', label: 'Resources' },
@@ -123,7 +123,7 @@ function PageHead() {
   return (
     <header className="flex flex-col justify-between max-w-6xl pt-1 m-auto md:flex-row md:items-end">
       <div className="flex flex-row items-end justify-between md:items-stretch">
-        <div className="flex-initial md:pl-8">
+        <div className="flex-initial">
           <Logo />
         </div>
 
