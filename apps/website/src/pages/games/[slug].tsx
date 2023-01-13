@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { H1, H2, H3, Modal, Prose, Tag } from '@uzh-bf/design-system'
 import { MDXRemote } from 'next-mdx-remote'
 import Image from 'next/image'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import RadarChart from '../../components/charts/RadarChart'
@@ -15,12 +16,17 @@ import * as Util from '../../lib/util'
 
 interface Props {
   source: any
-  frontMatter: any
 }
 
 const components = {}
 
-function Game({ source, frontMatter }: Props) {
+function Game({ source }: Props) {
+  const router = useRouter()
+
+  console.log(source)
+
+  const { frontMatter } = source
+
   const radarChartData = frontMatter.radarCharts?.map((singleChart: any) => {
     const temp = singleChart.content.map((item: any) => ({
       subject: item.name,
@@ -194,6 +200,25 @@ function Game({ source, frontMatter }: Props) {
                 </div>
               )}
 
+              {frontMatter.useCases && (
+                <div className="mt-8">
+                  <H3>Use Cases</H3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    {frontMatter.useCases.map((item: any) => (
+                      <Card
+                        key={item}
+                        name={item.title}
+                        imgSrc={item.imgSrc}
+                        disabled={!item.href}
+                        onClick={() => {
+                          if (item.href) router.push(item.href)
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {frontMatter.gallery && (
                 <div className="flex-1 mt-8">
                   <H3>Gallery</H3>
@@ -209,17 +234,6 @@ function Game({ source, frontMatter }: Props) {
                           setZoom(true)
                         }}
                       />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {frontMatter.useCases && (
-                <div className="mt-8">
-                  <H3>Use Cases</H3>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    {frontMatter.useCases.map((item: any) => (
-                      <Card key={item} name={item} imgSrc={''} />
                     ))}
                   </div>
                 </div>

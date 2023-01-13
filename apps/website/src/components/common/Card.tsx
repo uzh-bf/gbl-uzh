@@ -10,6 +10,7 @@ interface Props {
   onClick?: () => void
   minHeight?: string
   colored?: boolean
+  disabled?: boolean
 }
 
 function Card({
@@ -20,11 +21,12 @@ function Card({
   onClick,
   minHeight,
   colored,
+  disabled,
 }: Props) {
   return (
     <Button
       fluid
-      disabled={!onClick}
+      disabled={disabled || !onClick}
       onClick={onClick}
       className={{
         root: twMerge(
