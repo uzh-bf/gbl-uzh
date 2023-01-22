@@ -10,16 +10,8 @@ import * as Util from '../lib/util'
 
 interface Props {
   sourceArr: any
-  frontMatterArr: any
-  filenames: any
-  fileMissingArr: any
 }
-function DevelopmentWorkflow({
-  sourceArr,
-  frontMatterArr,
-  filenames,
-  fileMissingArr,
-}: Props) {
+function DevelopmentWorkflow({ sourceArr }: Props) {
   const [activePanel, setActivePanel] = useState(0)
 
   useEffect(() => {
@@ -29,88 +21,87 @@ function DevelopmentWorkflow({
   return (
     <PageWithHeader title="Game Development">
       <TitleBackground>
-        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-8' }}>
+        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-4' }}>
           Game Development
         </H1>
       </TitleBackground>
       <Content>
-        {frontMatterArr.map((module: any) => {
+        {sourceArr.map(({ frontmatter }: any, ix: number) => {
           const keyTakeaways = () => {
-            if (module.keyTakeawayList) {
-              return module.keyTakeawayList
+            if (frontmatter.keyTakeawayList) {
+              return frontmatter.keyTakeawayList
             } else {
               return (
                 <Image
                   // placeholder="blur"
-                  src={module.keyTakeawayImage.src}
-                  alt={module.title}
-                  width={module.keyTakeawayImage.width}
-                  height={module.keyTakeawayImage.height}
+                  src={frontmatter.keyTakeawayImage.src}
+                  alt={frontmatter.title}
+                  width={frontmatter.keyTakeawayImage.width}
+                  height={frontmatter.keyTakeawayImage.height}
                 />
               )
             }
           }
-          const index = frontMatterArr.indexOf(module)
 
-          if (index < 1) {
+          if (ix < 1) {
             return (
               <Panel
-                key={index}
-                duration={module.duration}
-                isOpen={activePanel === index}
-                isCompleted={activePanel > index}
-                title={module.title}
-                videoSrc={module.videoSrc}
+                key={ix}
+                duration={frontmatter.duration}
+                isOpen={activePanel === ix}
+                isCompleted={activePanel > ix}
+                title={frontmatter.title}
+                videoSrc={frontmatter.videoSrc}
                 keyTakeaways={keyTakeaways()}
-                resources={module.resources.map((resource: any) => ({
+                resources={frontmatter.resources.map((resource: any) => ({
                   name: resource.name,
                   href: resource.href,
                 }))}
-                onNext={() => setActivePanel(index + 1)}
-                onActivate={() => setActivePanel(index)}
+                onNext={() => setActivePanel(ix + 1)}
+                onActivate={() => setActivePanel(ix)}
               >
-                {module.description}
+                {frontmatter.description}
               </Panel>
             )
-          } else if (index == frontMatterArr.length - 1) {
+          } else if (ix == sourceArr.length - 1) {
             return (
               <Panel
-                key={index}
-                duration={module.duration}
-                isOpen={activePanel === index}
-                isCompleted={activePanel > index}
-                title={module.title}
-                videoSrc={module.videoSrc}
+                key={ix}
+                duration={frontmatter.duration}
+                isOpen={activePanel === ix}
+                isCompleted={activePanel > ix}
+                title={frontmatter.title}
+                videoSrc={frontmatter.videoSrc}
                 keyTakeaways={keyTakeaways()}
-                resources={module.resources.map((resource: any) => ({
+                resources={frontmatter.resources.map((resource: any) => ({
                   name: resource.name,
                   href: resource.href,
                 }))}
-                onPrevious={() => setActivePanel(index - 1)}
-                onActivate={() => setActivePanel(index)}
+                onPrevious={() => setActivePanel(ix - 1)}
+                onActivate={() => setActivePanel(ix)}
               >
-                {module.description}
+                {frontmatter.description}
               </Panel>
             )
           } else {
             return (
               <Panel
-                key={index}
-                duration={module.duration}
-                isOpen={activePanel === index}
-                isCompleted={activePanel > index}
-                title={module.title}
-                videoSrc={module.videoSrc}
+                key={ix}
+                duration={frontmatter.duration}
+                isOpen={activePanel === ix}
+                isCompleted={activePanel > ix}
+                title={frontmatter.title}
+                videoSrc={frontmatter.videoSrc}
                 keyTakeaways={keyTakeaways()}
-                resources={module.resources.map((resource: any) => ({
+                resources={frontmatter.resources.map((resource: any) => ({
                   name: resource.name,
                   href: resource.href,
                 }))}
-                onNext={() => setActivePanel(index + 1)}
-                onPrevious={() => setActivePanel(index - 1)}
-                onActivate={() => setActivePanel(index)}
+                onNext={() => setActivePanel(ix + 1)}
+                onPrevious={() => setActivePanel(ix - 1)}
+                onActivate={() => setActivePanel(ix)}
               >
-                {module.description}
+                {frontmatter.description}
               </Panel>
             )
           }
