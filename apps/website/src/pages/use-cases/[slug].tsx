@@ -12,25 +12,27 @@ import * as Util from '../../lib/util'
 interface Props {
   useCaseData: {
     source: any
-    frontMatter: any
+  }
+  overviewData: {
+    sourceArr: any[]
   }
 }
 
 const components = {}
 
 function UseCase({
-  useCaseData: { source, frontMatter },
-  overviewData: { frontMatterArr },
+  useCaseData: { source },
+  overviewData: { sourceArr },
 }: Props) {
   const router = useRouter()
 
   return (
     <>
       <div>
-        <PageWithHeader title={frontMatter.title}>
+        <PageWithHeader title={source.frontmatter.title}>
           <TitleBackground>
             <H1 className={{ root: 'max-w-6xl mx-auto md:pl-4' }}>
-              {frontMatter.title}
+              {source.frontmatter.title}
             </H1>
           </TitleBackground>
 
@@ -39,19 +41,19 @@ function UseCase({
               <div className="flex-initial hidden p-4 border rounded w-80 md:block bg-slate-50">
                 <H2>Use Cases</H2>
                 <ul className="text-sm">
-                  {frontMatterArr[0].map((useCase: any) => (
+                  {sourceArr[0].map(({ frontmatter }: any) => (
                     <Link
                       className="block py-1 border-b last:border-b-0"
-                      key={useCase.slug}
-                      href={`/use-cases/${useCase.slug}`}
+                      key={frontmatter.slug}
+                      href={`/use-cases/${frontmatter.slug}`}
                     >
                       <li
                         className={twMerge(
                           'hover:text-orange-600 hover:cursor-pointer',
-                          router.query.slug === useCase.slug && 'font-bold'
+                          router.query.slug === frontmatter.slug && 'font-bold'
                         )}
                       >
-                        {useCase.title}
+                        {frontmatter.title}
                       </li>
                     </Link>
                   ))}
@@ -72,7 +74,7 @@ function UseCase({
   )
 }
 
-export const getStaticProps = async (pageProps) => {
+export const getStaticProps = async (pageProps: any) => {
   const overviewData = await Util.getStaticPropsFolders(['use-cases'])()
   const useCaseData = await Util.getStaticProps('use-cases')(pageProps)
   return {

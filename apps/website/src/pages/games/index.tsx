@@ -8,18 +8,11 @@ import PageWithHeader from '../../components/PageWithHeader'
 import * as Util from '../../lib/util'
 
 interface Props {
-  sourceArr: any
-  frontMatterArr: any
-  filenames: any
-  fileMissingArr: any
+  sourceArr: any[]
 }
 
-function GBLinUse({
-  sourceArr,
-  frontMatterArr,
-  filenames,
-  fileMissingArr,
-}: Props) {
+function GBLinUse({ sourceArr }: Props) {
+  console.warn(sourceArr)
   return (
     <PageWithHeader title="GBL in Use">
       <TitleBackground>
@@ -34,17 +27,18 @@ function GBLinUse({
             developed at institutions of the University of Zurich.
           </Prose>
           <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2 md:grid-cols-3">
-            {sortBy((game: any) => game.title, frontMatterArr[0]).map(
-              (game: any) => (
-                <GameCard
-                  key={game.title}
-                  name={game.title}
-                  tags={game.tags}
-                  linkHref={`/games/${game.slug}`}
-                  imgSrc={game.imgSrc}
-                />
-              )
-            )}
+            {sortBy(
+              ({ frontmatter }: any) => frontmatter.title,
+              sourceArr[0]
+            ).map(({ frontmatter }) => (
+              <GameCard
+                key={frontmatter.title}
+                name={frontmatter.title}
+                tags={frontmatter.tags}
+                linkHref={`/games/${frontmatter.slug}`}
+                imgSrc={frontmatter.imgSrc}
+              />
+            ))}
           </div>
         </div>
 
@@ -55,16 +49,16 @@ function GBLinUse({
             that contain Game-Based Learning elements.
           </Prose>
           <div className="flex flex-col gap-2 mt-2 md:grid md:grid-cols-2">
-            {frontMatterArr[1].map((course: any, ix: number) => (
+            {sourceArr[1].map(({ frontmatter, ...source }: any, ix: number) => (
               <CourseEntry
-                key={course.name}
-                name={course.name}
-                ects={course.ects}
-                level={course.level}
-                href={course.href}
-                semester={course.semester}
-                institution={course.institution}
-                description={sourceArr[1][ix]}
+                key={frontmatter.name}
+                name={frontmatter.name}
+                ects={frontmatter.ects}
+                level={frontmatter.level}
+                href={frontmatter.href}
+                semester={frontmatter.semester}
+                institution={frontmatter.institution}
+                description={source}
               />
             ))}
           </div>

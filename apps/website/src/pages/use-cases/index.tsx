@@ -9,17 +9,9 @@ import * as Util from '../../lib/util'
 
 interface Props {
   sourceArr: any
-  frontMatterArr: any
-  filenames: any
-  fileMissingArr: any
 }
 
-function GBLUseCases({
-  sourceArr,
-  frontMatterArr,
-  filenames,
-  fileMissingArr,
-}: Props) {
+function GBLUseCases({ sourceArr }: Props) {
   const router = useRouter()
 
   return (
@@ -30,17 +22,18 @@ function GBLUseCases({
 
       <Content>
         <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2 md:grid-cols-3">
-          {sortBy((useCase: any) => useCase.title, frontMatterArr[0]).map(
-            (useCase: any) => (
-              <Card
-                key={useCase.title}
-                name={useCase.title}
-                tags={useCase.tags}
-                imgSrc={useCase.imgSrc}
-                onClick={() => router.push(`/use-cases/${useCase.slug}`)}
-              />
-            )
-          )}
+          {sortBy(
+            ({ frontmatter }: any) => frontmatter.title,
+            sourceArr[0]
+          ).map(({ frontmatter }: any) => (
+            <Card
+              key={frontmatter.title}
+              name={frontmatter.title}
+              tags={frontmatter.tags}
+              imgSrc={frontmatter.imgSrc}
+              onClick={() => router.push(`/use-cases/${frontmatter.slug}`)}
+            />
+          ))}
         </div>
       </Content>
     </PageWithHeader>

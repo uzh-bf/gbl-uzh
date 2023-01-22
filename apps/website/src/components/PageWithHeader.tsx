@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import { twMerge } from 'tailwind-merge'
 import Footer from './Footer'
 import PageHead from './PageHead'
 
@@ -6,15 +7,16 @@ interface Props {
   title: string
   withFooter?: boolean
   children: React.ReactNode
+  className?: string
 }
 
 const defaultProps = {
   withFooter: true,
 }
 
-function PageWithHeader({ title, children, withFooter }: Props) {
+function PageWithHeader({ className, title, children, withFooter }: Props) {
   return (
-    <div className="flex flex-col h-full">
+    <div className={twMerge('flex flex-col h-full', className)}>
       <Head>
         <title>GBL@UZH - {title}</title>
       </Head>

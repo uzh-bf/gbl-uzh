@@ -23,11 +23,9 @@ const components = {}
 function Game({ source }: Props) {
   const router = useRouter()
 
-  console.log(source)
+  const { frontmatter } = source
 
-  const { frontMatter } = source
-
-  const radarChartData = frontMatter.radarCharts?.map((singleChart: any) => {
+  const radarChartData = frontmatter.radarCharts?.map((singleChart: any) => {
     const temp = singleChart.content.map((item: any) => ({
       subject: item.name,
       value: +item.value,
@@ -35,7 +33,7 @@ function Game({ source }: Props) {
     return temp
   })
 
-  const radarChartTexts = frontMatter.radarCharts?.map(
+  const radarChartTexts = frontmatter.radarCharts?.map(
     (singleChart: any) => singleChart.text
   )
 
@@ -47,24 +45,24 @@ function Game({ source }: Props) {
 
   function previousImage() {
     setZoomedImage(
-      frontMatter.gallery[frontMatter.gallery.indexOf(zoomedImage) - 1]
+      frontmatter.gallery[frontmatter.gallery.indexOf(zoomedImage) - 1]
     )
   }
 
   function nextImage() {
     setZoomedImage(
-      frontMatter.gallery[frontMatter.gallery.indexOf(zoomedImage) + 1]
+      frontmatter.gallery[frontmatter.gallery.indexOf(zoomedImage) + 1]
     )
   }
 
   return (
     <>
       <div>
-        <PageWithHeader title={frontMatter.title}>
-          {frontMatter.thumbnail && (
-            <TitleImage imgSrc={frontMatter.thumbnail}>
+        <PageWithHeader title={frontmatter.title}>
+          {frontmatter.thumbnail && (
+            <TitleImage imgSrc={frontmatter.thumbnail}>
               <H1 className={{ root: 'max-w-7xl mx-auto md:pl-4' }}>
-                {frontMatter.title}
+                {frontmatter.title}
               </H1>
             </TitleImage>
           )}
@@ -72,23 +70,25 @@ function Game({ source }: Props) {
           <Content className="max-w-7xl">
             <div className="flex flex-col items-start gap-4 md:gap-8 md:flex-row">
               <div className="flex-1 pb-4 md:pb-0 md:pr-8">
-                <H2>{frontMatter.subtitle}</H2>
-                {frontMatter.keywords && (
+                <H2>{frontmatter.subtitle}</H2>
+                {frontmatter.keywords && (
                   <div className="flex flex-row gap-4 mt-2">
                     <div className="flex flex-row flex-wrap justify-start gap-1">
-                      {frontMatter.language?.map((item: any) => (
+                      {frontmatter.language?.map((item: any) => (
                         <Tag
                           key={item}
                           label={
-                            <div className="flex flex-row items-center gap-2 text-base">
-                              <FontAwesomeIcon icon={faLanguage} />
-                              {item}
-                            </div>
+                            (
+                              <div className="flex flex-row items-center gap-2 text-base">
+                                <FontAwesomeIcon icon={faLanguage} />
+                                {item}
+                              </div>
+                            ) as any
                           }
                         />
                       ))}
 
-                      {frontMatter.keywords.map((item: any) => (
+                      {frontmatter.keywords.map((item: any) => (
                         <Tag
                           key={item}
                           label={item}
@@ -108,7 +108,7 @@ function Game({ source }: Props) {
                   <H3>Learning Objectives</H3>
                   <Prose>
                     <ul>
-                      {frontMatter.objectives?.map((item: any) => (
+                      {frontmatter.objectives?.map((item: any) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
@@ -118,23 +118,23 @@ function Game({ source }: Props) {
                 <div>
                   <H3>Imprint</H3>
                   <ReactMarkdown className="prose-sm prose text-left">
-                    {frontMatter.imprint}
+                    {frontmatter.imprint}
                   </ReactMarkdown>
                 </div>
 
                 <div>
                   <H3>Contact</H3>
                   <ReactMarkdown className="prose-sm prose text-left">
-                    {frontMatter.contact}
+                    {frontmatter.contact}
                   </ReactMarkdown>
                 </div>
 
-                {frontMatter.resources && (
+                {frontmatter.resources && (
                   <div>
                     <H3>Resources</H3>
                     <div className="inline md:flex md:flex-row">
                       <ul>
-                        {frontMatter.resources.map((item: any) => (
+                        {frontmatter.resources.map((item: any) => (
                           <li key={item.name}>
                             <a
                               className="flex flex-row items-center hover:text-uzh-red-100"
@@ -155,11 +155,11 @@ function Game({ source }: Props) {
                   </div>
                 )}
 
-                {frontMatter['usedIn'] && (
+                {frontmatter['usedIn'] && (
                   <div>
                     <H3>Used In</H3>
                     <ul>
-                      {frontMatter['usedIn'].map((course: any) => (
+                      {frontmatter['usedIn'].map((course: any) => (
                         <li key={course.name}>
                           <p className="prose-sm prose text-center md:text-left">
                             {course.name}
@@ -200,11 +200,11 @@ function Game({ source }: Props) {
                 </div>
               )}
 
-              {frontMatter.useCases && (
+              {frontmatter.useCases && (
                 <div className="mt-8">
                   <H3>Use Cases</H3>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    {frontMatter.useCases.map((item: any) => (
+                    {frontmatter.useCases.map((item: any) => (
                       <Card
                         key={item}
                         name={item.title}
@@ -219,11 +219,11 @@ function Game({ source }: Props) {
                 </div>
               )}
 
-              {frontMatter.gallery && (
+              {frontmatter.gallery && (
                 <div className="flex-1 mt-8">
                   <H3>Gallery</H3>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    {frontMatter.gallery?.map((image: any) => (
+                    {frontmatter.gallery?.map((image: any) => (
                       <Card
                         colored
                         name={image.name}
@@ -243,18 +243,18 @@ function Game({ source }: Props) {
         </PageWithHeader>
       </div>
 
-      {frontMatter.gallery && (
+      {frontmatter.gallery && (
         <Modal
           open={zoom}
           onClose={() => setZoom(false)}
           onNext={
-            frontMatter.gallery.indexOf(zoomedImage) <
-            frontMatter.gallery.length - 1
+            frontmatter.gallery.indexOf(zoomedImage) <
+            frontmatter.gallery.length - 1
               ? nextImage
               : undefined
           }
           onPrev={
-            frontMatter.gallery.indexOf(zoomedImage) > 0
+            frontmatter.gallery.indexOf(zoomedImage) > 0
               ? previousImage
               : undefined
           }
