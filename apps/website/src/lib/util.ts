@@ -2,6 +2,18 @@ import fs from 'fs'
 import matter from 'gray-matter'
 import { serialize } from 'next-mdx-remote/serialize'
 import path from 'path'
+import wikiLinkPlugin from 'remark-wiki-link'
+
+const wikiPlugin: any = [
+  wikiLinkPlugin,
+  {
+    aliasDivider: '|',
+    permalinks: [],
+    hrefTemplate: (permalink: string) =>
+      `/kb?initialPath=${encodeURIComponent(permalink)}`,
+    pageResolver: (name: string) => [name.replace(' ', '+')],
+  },
+]
 
 export function getStaticProps(dir_name: string) {
   return async ({ params }: any) => {
@@ -21,7 +33,10 @@ export function getStaticProps(dir_name: string) {
       `../../kb/${dir_name}/${filenameTitleCase}.md`
     )
     const source = fs.readFileSync(mdxPath)
-    const mdxSource = await serialize(source, { parseFrontmatter: true })
+    const mdxSource = await serialize(source, {
+      parseFrontmatter: true,
+      mdxOptions: { remarkPlugins: [wikiPlugin] },
+    })
     return {
       props: {
         source: mdxSource,
@@ -51,7 +66,10 @@ export function getStaticPropsSinglePage(dir_name: string, slug: string) {
   return async () => {
     const mdxPath = path.join(process.cwd(), `../../kb/${dir_name}/${slug}.md`)
     const source = fs.readFileSync(mdxPath)
-    const mdxSource = await serialize(source, { parseFrontmatter: true })
+    const mdxSource = await serialize(source, {
+      parseFrontmatter: true,
+      mdxOptions: { remarkPlugins: [wikiPlugin] },
+    })
     return {
       props: {
         source: mdxSource,
@@ -103,7 +121,10 @@ export function getStaticPropsFolder(
         fileMissingArr.push(true)
       }
 
-      let temp2 = await serialize(source, { parseFrontmatter: true })
+      let temp2 = await serialize(source, {
+        parseFrontmatter: true,
+        mdxOptions: { remarkPlugins: [wikiPlugin] },
+      })
       mdxSources.push(temp2)
     }
 
@@ -147,7 +168,10 @@ export function getStaticPropsFolders(folders: Array<string>) {
           fileMissingArr[k].push(true)
         }
 
-        let temp2 = await serialize(source, { parseFrontmatter: true })
+        let temp2 = await serialize(source, {
+          parseFrontmatter: true,
+          mdxOptions: { remarkPlugins: [wikiPlugin] },
+        })
         mdxSources[k].push(temp2)
       }
     }
