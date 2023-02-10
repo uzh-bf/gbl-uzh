@@ -15,40 +15,40 @@ export const PeriodFactsInput = inputObjectType({
   },
 })
 
-function generateDiceObject() {
-  return yup.number().positive().integer().max(6).required().default(3)
-}
+// function generateDiceObject() {
+//   return yup.number().positive().integer().max(6).required()
+// }
 
-function generateDieObject() {
-  return yup.object({
-    bondsAndStock: generateDiceObject(),
-    bonds: generateDiceObject(),
-    stock: generateDiceObject(),
-  })
-}
+// function generateDieObject() {
+//   return yup.object({
+//     bondsAndStock: generateDiceObject(),
+//     bonds: generateDiceObject(),
+//     stock: generateDiceObject(),
+//   })
+// }
 
-function generateValuePercentagesObject() {
-  return yup.object({
-    bank: yup.number().positive().max(1).required().default(0.1),
-    bonds: yup.number().positive().max(1).required().default(0.1),
-    stock: yup.number().positive().max(1).required().default(0.1),
-  })
-}
+// function generateValuePercentagesObject() {
+//   return yup.object({
+//     bank: yup.number().positive().max(1).required(),
+//     bonds: yup.number().positive().max(1).required(),
+//     stock: yup.number().positive().max(1).required(),
+//   })
+// }
 
-function generateValueObject() {
-  return yup.object({
-    bank: yup.number().positive().required().default(1000),
-    bonds: yup.number().positive().required().default(1000),
-    stock: yup.number().positive().required().default(1000),
-  })
-}
+// function generateValueObject() {
+//   return yup.object({
+//     bank: yup.number().positive().required(),
+//     bonds: yup.number().positive().required(),
+//     stock: yup.number().positive().required(),
+//   })
+// }
 
 export const PeriodSegmentFactsSchema = yup.object({
-  portfolio: generateValueObject(),
-  investmentDecision: generateValuePercentagesObject(),
-  dieMonth1: generateDieObject(),
-  dieMonth2: generateDieObject(),
-  dieMonth3: generateDieObject(),
+  // portfolio: generateValueObject(),
+  // investmentDecision: generateValuePercentagesObject(),
+  // dieMonth1: generateDieObject(),
+  // dieMonth2: generateDieObject(),
+  // dieMonth3: generateDieObject(),
 })
 
 export interface PeriodSegmentFacts

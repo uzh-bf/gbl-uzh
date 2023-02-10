@@ -12,24 +12,16 @@ export function apply(state: any, action: any) {
   console.log('segmentResult', state, action)
 
   return match(action)
-    .with({ type: ActionTypes.SEGMENT_RESULTS_END }, () => {
-      const segmentFacts: PeriodSegmentFacts = action.payload.segmentFacts
-
-      const result = {
-        ...state,
-        segmentFacts: segmentFacts,
-      }
-      return {
-        type: ActionTypes.SEGMENT_RESULTS_END,
-        result: result,
-      }
-    })
     .with({ type: ActionTypes.SEGMENT_RESULTS_INITIALIZE }, () => {
       const segmentFacts: PeriodSegmentFacts = action.payload.segmentFacts
 
       const result = {
         ...state,
-        segmentFacts: segmentFacts,
+        investmentDecision: {
+          bank: true,
+          bonds: true,
+          stock: true,
+        },
       }
       return {
         type: ActionTypes.SEGMENT_RESULTS_INITIALIZE,
@@ -41,13 +33,28 @@ export function apply(state: any, action: any) {
 
       const result = {
         ...state,
-        segmentFacts: segmentFacts,
+        investmentDecision: {
+          bank: segmentFacts.investmentDecision.bank ?? true,
+          bonds: segmentFacts.investmentDecision.bonds ?? true,
+          stock: segmentFacts.investmentDecision.stock ?? true,
+        },
       }
       return {
         type: ActionTypes.SEGMENT_RESULTS_START,
         result: result,
       }
     })
+    .with({ type: ActionTypes.SEGMENT_RESULTS_END }, () => {
+      const segmentFacts: PeriodSegmentFacts = action.payload.segmentFacts
+
+      const result = {
+        ...state,
+      }
+
+      return {
+        type: ActionTypes.SEGMENT_RESULTS_END,
+        result: result,
+      }
+    })
     .exhaustive()
-  return state
 }

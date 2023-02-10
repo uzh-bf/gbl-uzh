@@ -25,34 +25,36 @@ export function apply(state: any, action: Actions) {
   return match(action)
     .with({ type: ActionTypes.SEGMENT_INITIALIZE }, () => {
       const {
-        segmentIx,
-        segmentCount,
-        periodFacts = {} as PeriodSegmentFacts,
+        // segmentIx,
+        // segmentCount,
+        // periodFacts = {} as PeriodSegmentFacts,
         previousSegmentFacts = {} as PeriodSegmentFacts,
-        periodIx,
+        // periodIx,
       } = action.payload
-
-      periodFacts.dieMonth1.bonds = Math.ceil(Math.random() * 6)
-      periodFacts.dieMonth1.stock = Math.ceil(Math.random() * 6)
-      periodFacts.dieMonth1.bondsAndStock = Math.ceil(Math.random() * 6)
-      periodFacts.dieMonth2.bonds = Math.ceil(Math.random() * 6)
-      periodFacts.dieMonth2.stock = Math.ceil(Math.random() * 6)
-      periodFacts.dieMonth2.bondsAndStock = Math.ceil(Math.random() * 6)
-      periodFacts.dieMonth3.bonds = Math.ceil(Math.random() * 6)
-      periodFacts.dieMonth3.stock = Math.ceil(Math.random() * 6)
-      periodFacts.dieMonth3.bondsAndStock = Math.ceil(Math.random() * 6)
-
-      periodFacts.portfolio.bank = 0.0 //previousSegmentFacts.portfolio.bank;
-      periodFacts.portfolio.bonds = 0.0 //previousSegmentFacts.portfolio.bonds;
-      periodFacts.portfolio.stock = 0.0 //previousSegmentFacts.portfolio.stock;
-
-      periodFacts.investmentDecision.bank = Math.random()
-      periodFacts.investmentDecision.bonds = Math.random()
-      periodFacts.investmentDecision.stock = Math.random()
 
       const result = {
         ...state,
-        periodFacts,
+        dieMonth1: {
+          bonds: Math.ceil(Math.random() * 6),
+          stock: Math.ceil(Math.random() * 6),
+          bondsAndStock: Math.ceil(Math.random() * 6),
+        },
+        dieMonth2: {
+          bonds: Math.ceil(Math.random() * 6),
+          stock: Math.ceil(Math.random() * 6),
+          bondsAndStock: Math.ceil(Math.random() * 6),
+        },
+        dieMonth3: {
+          bonds: Math.ceil(Math.random() * 6),
+          stock: Math.ceil(Math.random() * 6),
+          bondsAndStock: Math.ceil(Math.random() * 6),
+        },
+        portfolio: {
+          bank: 3333.33,
+          bonds: 3333.33,
+          stock: 3333.33,
+        },
+        previousInvestmentDecisions: previousSegmentFacts?.investmentDecision,
       }
 
       return {
