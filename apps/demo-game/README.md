@@ -1,6 +1,8 @@
 # GAME
 
-## Setup
+This is a step by step explanation on how to implement a game using the uzh-gbl-platform packag along with the demo-game as a starer template.
+
+## Getting started
 
 ### Github authentification:
 
@@ -26,8 +28,9 @@
 
 - Install docker desktop
 - Install node.js
+- execute ``npm install`` in a terminal from the root directory of the code. ``package.json`` should be located inside the root.
 
-## Startup
+### Starting the application locally
 
 
 #### Linux based systems
@@ -48,7 +51,7 @@ In a new terminal:
 
 - ``npm run dev``
 
-## Troubleshooting
+### Troubleshooting
 
 - **Reseting the database**
 
@@ -60,11 +63,11 @@ In a new terminal:
 
 - **npm packages**: Sometimes the npm packages are not installed correctly. To fix this, run ``npm install`` in the root directory of the code.
 
-
+---
 
 ## Implementation
 
-The game is composed of a backend running in a Docker container and a web app that generates the frontend. For the backend you only need to condigure the types as found in the folder ``src/graphql/types`` and the reducers as found in ``src/reducers``. Prisma then auto generates the database from the defined types, whereas the reducers act as server side function which are executed for different actions performed. Theese actions can either be triggered by a user or admin action.  The fronted is a react app and its pages and components are found in 
+The game is composed of a backend running in a Docker container and a web app that generates the frontend. For the backend you only need to configure the types as found in the folder ``src/graphql/types`` and the reducers as found in ``src/reducers``. Prisma then auto generates the database from the defined types, whereas the reducers act as server side function which are executed for different actions performed. Theese actions can either be triggered by a user or admin action. The actions can then be accessed by the fronte end. The fronted is a react app and its pages and components are found in 
 ``src/components`` and ``src/pages``. 
 
 ### Terminology
@@ -75,8 +78,13 @@ The game is composed of a backend running in a Docker container and a web app th
 - **Results**: The results of a period are the results of all segments in that period. The results of a segment are the results of all actions in that segment.
 - **Facts**: 
 
+![alt text](timeline.svg)
+
 ## How to implement the database
 
+### Schema
+
+The database schema is defined in ``src/graphql/types``. The most important file is ``src/graphql/types/Period.ts``, here all we define PeriodFactsInput, PeriodSegmentFactsScema, PeriodSegmentFacts and PeriodSegmentFactsInput. 
 
 ### Reducers
 
