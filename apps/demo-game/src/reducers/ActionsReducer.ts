@@ -47,7 +47,7 @@ type Actions =
     >
 
 export function apply(state: any, action: Actions) {
-  console.log('segment', state, action)
+  console.log('action', state, action)
 
   return match(action)
     .with({ type: ActionTypes.DECIDE_BANK }, () => {
@@ -64,15 +64,26 @@ export function apply(state: any, action: Actions) {
       }
     })
     .with({ type: ActionTypes.DECIDE_BONDS }, () => {
+      const { decision } = action.payload.playerArgs
+      const result = {
+        ...state,
+        bonds: decision,
+      }
+
       return {
         type: action.type,
         result: state,
       }
     })
     .with({ type: ActionTypes.DECIDE_STOCK }, () => {
+      const { decision } = action.payload.playerArgs
+      const result = {
+        ...state,
+        stock: decision,
+      }
       return {
         type: action.type,
-        result: state,
+        result : result,
       }
     })
     .exhaustive()

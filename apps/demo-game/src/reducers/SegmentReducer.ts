@@ -1,6 +1,7 @@
 import { Action } from '@gbl-uzh/platform'
 import { PeriodSegmentFacts } from '@graphql/index'
 import { PrismaClient } from '@prisma/client'
+import console from 'console'
 import { match } from 'ts-pattern'
 
 export enum ActionTypes {
@@ -54,7 +55,6 @@ export function apply(state: any, action: Actions) {
           bonds: 3333.33,
           stock: 3333.33,
         },
-        previousInvestmentDecisions: previousSegmentFacts?.investmentDecision,
       }
 
       return {

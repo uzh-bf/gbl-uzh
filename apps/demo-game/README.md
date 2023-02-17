@@ -67,8 +67,10 @@ In a new terminal:
 
 ## Implementation
 
-The game is composed of a backend running in a Docker container and a web app that generates the frontend. For the backend you only need to configure the types as found in the folder ``src/graphql/types`` and the reducers as found in ``src/reducers``. Prisma then auto generates the database from the defined types, whereas the reducers act as server side function which are executed for different actions performed. Theese actions can either be triggered by a user or admin action. The actions can then be accessed by the fronte end. The fronted is a react app and its pages and components are found in 
-``src/components`` and ``src/pages``. 
+The game is composed of a backend running in a Docker container and a web app that generates the frontend. The database automatically adapts to the reducers  ``src/reducers``, which are a set of functions each of which are defined on a specific action. An action can be triggered by a user (or player) of the game or the admin who manages the game. For each object in the database a specific initiialize reducer initializes the object on the database. The developer therefore does not need to specify any database schemas manually. 
+
+The frontend is generated using React and Next.js. The frontend is located in the 
+``src/components`` and ``src/pages`` folders, whereas actions are triggered with javascript calls. The actions in turn trigger the reducers on the backend. 
 
 ### Terminology
 - **Admin**: The person responsible for managing games, including creating new games and controlling the flow of running games.

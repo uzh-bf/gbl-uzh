@@ -7,54 +7,45 @@ export enum ActionTypes {
   SEGMENT_RESULTS_END = 'SEGMENT_RESULTS_END',
 }
 
-// state equal type to actionReducer
 export function apply(state: any, action: any) {
   console.log('segmentResult', state, action)
 
   return match(action)
     .with({ type: ActionTypes.SEGMENT_RESULTS_INITIALIZE }, () => {
-      const segmentFacts: PeriodSegmentFacts = action.payload.segmentFacts
-
       const result = {
         ...state,
-        investmentDecision: {
-          bank: true,
-          bonds: true,
-          stock: true,
-        },
+        bankDecision: false,
+        bondDecision: false,
+        stockDecision: false,
       }
+
       return {
         type: ActionTypes.SEGMENT_RESULTS_INITIALIZE,
         result: result,
-      }
-    })
+    }})
     .with({ type: ActionTypes.SEGMENT_RESULTS_START }, () => {
-      const segmentFacts: PeriodSegmentFacts = action.payload.segmentFacts
-
       const result = {
         ...state,
-        investmentDecision: {
-          bank: segmentFacts.investmentDecision.bank ?? true,
-          bonds: segmentFacts.investmentDecision.bonds ?? true,
-          stock: segmentFacts.investmentDecision.stock ?? true,
-        },
+        bankDecision: false,
+        bondDecision: false,
+        stockDecision: false,
       }
+      
       return {
         type: ActionTypes.SEGMENT_RESULTS_START,
         result: result,
-      }
-    })
+    }})
     .with({ type: ActionTypes.SEGMENT_RESULTS_END }, () => {
-      const segmentFacts: PeriodSegmentFacts = action.payload.segmentFacts
-
       const result = {
         ...state,
+        bankDecision: false,
+        bondDecision: false,
+        stockDecision: false,
       }
-
+      
       return {
-        type: ActionTypes.SEGMENT_RESULTS_END,
+        type: ActionTypes.SEGMENT_RESULTS_START,
         result: result,
-      }
-    })
+    }})
     .exhaustive()
 }

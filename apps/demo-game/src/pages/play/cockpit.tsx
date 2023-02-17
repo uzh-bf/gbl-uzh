@@ -21,6 +21,10 @@ function Cockpit() {
   )
 
   console.log(playerState?.data?.result?.currentGame)
+  if (playerState?.data?.result?.currentGame?.status === 'PAUSED') {
+    return <div>Game is paused</div>
+  }
+
   return (
     <div>
       <Switch

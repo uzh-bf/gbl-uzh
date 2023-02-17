@@ -33,15 +33,23 @@ export function apply(state: any, action: Actions) {
 
   return match(action)
     .with({ type: ActionTypes.PERIOD_INITIALIZE }, () => {
+      const result = {
+        ...state,
+        someValue : 42,
+      }
       return {
-        type: ActionTypes.PERIOD_INITIALIZE,
-        result: state,
+        type: action.type,
+        result: result,
       }
     })
     .with({ type: ActionTypes.PERIOD_CONSOLIDATE }, () => {
+      const result = {
+        ...state,
+        someValue : 42,
+      }
       return {
-        type: ActionTypes.PERIOD_INITIALIZE,
-        result: state,
+        type: action.type,
+        result: result,
       }
     })
     .exhaustive()

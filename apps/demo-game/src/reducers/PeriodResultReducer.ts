@@ -13,6 +13,7 @@ export function apply(state: any, action: any) {
 
       const result = {
         ...state,
+        
       }
       return {
         type: action.type,
