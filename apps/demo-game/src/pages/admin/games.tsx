@@ -4,6 +4,8 @@ import {
   GameDataFragmentDoc,
   GamesDocument,
 } from 'src/graphql/generated/ops'
+
+//import { CreateGameDocument, GameDataFragmentDoc, GamesDocument } from '@gbl-uzh/platform/dist/generated/ops'
 import { Button, FormikTextField } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import { signOut, useSession } from 'next-auth/react'
