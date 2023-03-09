@@ -20,6 +20,12 @@ function Cockpit() {
     }
   )
 
+  const columns = [
+    { label: 'Count', accessor: 'count', sortable: true },
+    { label: 'Answer', accessor: 'answer', sortable: true },
+    { label: 'Username', accessor: 'username', sortable: false },
+  ]
+
   console.log(playerState?.data?.result?.currentGame)
   switch (playerState?.data?.result?.currentGame?.status) {
     case 'PREPARATION':
@@ -46,11 +52,10 @@ function Cockpit() {
     case 'RUNNING':
       return (
         <div>
-          <div class="wrapper">
-            <div class="entry">
-            ...
-            </div>
-          </div>
+
+          <Table columns={columns} data={data} caption="Table with example data" />
+          
+        
           <Switch
             label="Bank Decision"
             checked={bankDecisionState}
