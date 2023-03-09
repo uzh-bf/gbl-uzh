@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { Switch, Table } from '@uzh-bf/design-system'
-import { useState } from 'react'
+import { Switch } from '@uzh-bf/design-system'
+import { useEffect, useState } from 'react'
 import {
   PerformActionDocument,
   ResultDocument,
@@ -9,9 +9,21 @@ import { ActionTypes } from 'src/reducers/ActionsReducer'
 
 function Cockpit() {
   const playerState = useQuery(ResultDocument, { fetchPolicy: 'cache-first' })
-  const [bankDecisionState, setBankDecisionState] = useState(false)
-  const [bondsDecisionState, setBondsDecisionState] = useState(false)
-  const [stockDecisionState, setStockDecisionState] = useState(false)
+  const [bankDecisionState, setBankDecisionState] = useState(null)
+  const [bondsDecisionState, setBondsDecisionState] = useState(null)
+  const [stockDecisionState, setStockDecisionState] = useState(null)
+
+  useEffect(() => {
+    setBankDecisionState(
+      playerState?.data?.result?.playerResult?.facts.bankDecision
+    )
+    setBondsDecisionState(
+      playerState?.data?.result?.playerResult?.facts.bondDecision
+    )
+    setStockDecisionState(
+      playerState?.data?.result?.playerResult?.facts.stockDecision
+    )
+  }, [playerState])
 
   const [performAction, updatedPlayerResult] = useMutation(
     PerformActionDocument,
@@ -47,9 +59,7 @@ function Cockpit() {
       return (
         <div>
           <div class="wrapper">
-            <div class="entry">
-            ...
-            </div>
+            <div class="entry">...</div>
           </div>
           <Switch
             label="Bank Decision"
@@ -99,7 +109,8 @@ function Cockpit() {
               })
             }}
           />
-        </div>)
+        </div>
+      )
   }
 }
 

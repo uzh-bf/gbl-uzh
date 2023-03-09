@@ -57,7 +57,7 @@ export function apply(state: any, action: Actions) {
         type: action.type,
         result: {
           ...state,
-          bank: decision,
+          bankDecision: decision,
         },
         isDirty: true,
       }
@@ -69,7 +69,7 @@ export function apply(state: any, action: Actions) {
         type: action.type,
         result: {
           ...state,
-          bonds: decision,
+          bondDecision: decision,
         },
         isDirty: true,
       }
@@ -81,7 +81,7 @@ export function apply(state: any, action: Actions) {
         type: action.type,
         result: {
           ...state,
-          stock: decision,
+          stockDecision: decision,
         },
         isDirty: true,
       }
