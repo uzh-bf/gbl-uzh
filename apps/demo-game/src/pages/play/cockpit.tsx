@@ -28,21 +28,21 @@ function Cockpit() {
   const decisions = [
     {
       name: 'Bank',
-      label : 'Invest 50% into bank.',
+      label : (percentage : string) => `Invest ${percentage}% into bank.`,
       effect : setBankDecisionState,
       state : bankDecisionState,
       action : ActionTypes.DECIDE_BANK
     },
     {
       name: 'Bonds',
-      label : 'Invest 50% into bonds.',
+      label : (percentage : string) => `Invest ${percentage}% into bonds.`,
       effect : setBondsDecisionState,
       state : bondsDecisionState,
       action : ActionTypes.DECIDE_BONDS
     },
     {
       name: 'Stocks',
-      label : 'Invest 50% into stocks.',
+      label : (percentage : string) => `Invest ${percentage}% into stocks.`,
       effect : setStockDecisionState,
       state : stockDecisionState,
       action : ActionTypes.DECIDE_STOCK
@@ -139,7 +139,9 @@ function Cockpit() {
               return (
                 <div className="p-1">
                   <Switch
-                  label={object.label}
+                  label={object.label(
+                    object.state ? (Math.round(1 / (+ bankDecisionState + + bondsDecisionState + + stockDecisionState) * 100)).toString() : '0'
+                  )}
                   checked={object.state}
                   id="switch"
                   onCheckedChange={async (cheked) => {
