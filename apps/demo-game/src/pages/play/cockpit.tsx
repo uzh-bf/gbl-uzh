@@ -25,6 +25,30 @@ function Cockpit() {
     )
   }, [playerState])
 
+  const decisions = [
+    {
+      name: 'Bank',
+      label : 'Invest 50% into bank.',
+      effect : setBankDecisionState,
+      state : bankDecisionState,
+      action : ActionTypes.DECIDE_BANK
+    },
+    {
+      name: 'Bonds',
+      label : 'Invest 50% into bonds.',
+      effect : setBondsDecisionState,
+      state : bondsDecisionState,
+      action : ActionTypes.DECIDE_BONDS
+    },
+    {
+      name: 'Stocks',
+      label : 'Invest 50% into stocks.',
+      effect : setStockDecisionState,
+      state : stockDecisionState,
+      action : ActionTypes.DECIDE_STOCK
+    },
+  ];
+
   const [performAction, updatedPlayerResult] = useMutation(
     PerformActionDocument,
     {
@@ -34,7 +58,14 @@ function Cockpit() {
 
   // <Table columns={columns} data={data} caption="Table with example data" />
         
-  const columns = [
+  const columns_results = [
+    { label: 'Category', accessor: 'cat', sortable: false },
+    { label: 'Month 1', accessor: 'mon1', sortable: false },
+    { label: 'Month 2', accessor: 'mon2', sortable: false },
+    { label: 'Month 3', accessor: 'mon2', sortable: false },
+  ]
+
+  const columns_current_stock = [
     { label: 'Category', accessor: 'cat', sortable: false },
     { label: 'Month 1', accessor: 'mon1', sortable: false },
     { label: 'Month 2', accessor: 'mon2', sortable: false },
@@ -69,62 +100,35 @@ function Cockpit() {
 
     case 'PAUSED':
       return <div> 
-          <Table columns={columns} data={data} caption="Segment Results" />
+          <Table columns={columns_results} data={data} caption="Segment Results" />
         </div>
 
     case 'RUNNING':
       return (
        
         <div>
-        
-          <Switch
-            label="Bank Decision"
-            checked={bankDecisionState}
-            id="switch"
-            onCheckedChange={async (cheked) => {
-              setBankDecisionState(cheked)
-              await performAction({
-                variables: {
-                  type: ActionTypes.DECIDE_BANK,
-                  payload: JSON.stringify({
-                    decision: cheked,
-                  }),
-                },
-              })
-            }}
-          />
-          <Switch
-            label="Bonds Decision"
-            checked={bondsDecisionState}
-            id="switch"
-            onCheckedChange={async (cheked) => {
-              setBondsDecisionState(cheked)
-              await performAction({
-                variables: {
-                  type: ActionTypes.DECIDE_BONDS,
-                  payload: JSON.stringify({
-                    decision: cheked,
-                  }),
-                },
-              })
-            }}
-          />
-          <Switch
-            label="Stock Decision"
-            checked={stockDecisionState}
-            id="switch"
-            onCheckedChange={async (cheked) => {
-              setStockDecisionState(cheked)
-              await performAction({
-                variables: {
-                  type: ActionTypes.DECIDE_STOCK,
-                  payload: JSON.stringify({
-                    decision: cheked,
-                  }),
-                },
-              })
-            }}
-          />
+          <Table columns={columns_current_stock} data={data} caption="Stock" />
+          <div className="p-4 border rounded">
+          {decisions.map(function(object, i){
+              return (
+                <Switch
+                label={object.label}
+                checked={object.state}
+                id="switch"
+                onCheckedChange={async (cheked) => {
+                  object.effect(cheked)
+                  await performAction({
+                    variables: {
+                      type: object.action,
+                      payload: JSON.stringify({
+                        decision: cheked,
+                      }),
+                    },
+                  })
+                }}
+              />)
+          })}
+          </div>
         </div>
       )
   }
