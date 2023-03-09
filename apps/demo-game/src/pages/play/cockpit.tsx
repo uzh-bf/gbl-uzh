@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { Switch } from '@uzh-bf/design-system'
+import { Switch, Table } from '@uzh-bf/design-system'
 import { useEffect, useState } from 'react'
 import {
   PerformActionDocument,
@@ -9,9 +9,9 @@ import { ActionTypes } from 'src/reducers/ActionsReducer'
 
 function Cockpit() {
   const playerState = useQuery(ResultDocument, { fetchPolicy: 'cache-first' })
-  const [bankDecisionState, setBankDecisionState] = useState(null)
-  const [bondsDecisionState, setBondsDecisionState] = useState(null)
-  const [stockDecisionState, setStockDecisionState] = useState(null)
+  const [bankDecisionState, setBankDecisionState] = useState(false)
+  const [bondsDecisionState, setBondsDecisionState] = useState(false)
+  const [stockDecisionState, setStockDecisionState] = useState(false)
 
   useEffect(() => {
     setBankDecisionState(
@@ -25,6 +25,30 @@ function Cockpit() {
     )
   }, [playerState])
 
+  const decisions = [
+    {
+      name: 'Bank',
+      label : (percentage : string) => `Invest ${percentage}% into bank.`,
+      effect : setBankDecisionState,
+      state : bankDecisionState,
+      action : ActionTypes.DECIDE_BANK
+    },
+    {
+      name: 'Bonds',
+      label : (percentage : string) => `Invest ${percentage}% into bonds.`,
+      effect : setBondsDecisionState,
+      state : bondsDecisionState,
+      action : ActionTypes.DECIDE_BONDS
+    },
+    {
+      name: 'Stocks',
+      label : (percentage : string) => `Invest ${percentage}% into stocks.`,
+      effect : setStockDecisionState,
+      state : stockDecisionState,
+      action : ActionTypes.DECIDE_STOCK
+    },
+  ];
+
   const [performAction, updatedPlayerResult] = useMutation(
     PerformActionDocument,
     {
@@ -32,10 +56,49 @@ function Cockpit() {
     }
   )
 
-  console.log(playerState?.data?.result?.currentGame)
+  // <Table columns={columns} data={data} caption="Table with example data" />
+        
+  const columns_segment_results = [
+    { label: 'Category', accessor: 'cat', sortable: false },
+    { label: 'Month 1', accessor: 'mon1', sortable: false },
+    { label: 'Month 2', accessor: 'mon2', sortable: false },
+    { label: 'Month 3', accessor: 'mon2', sortable: false },
+  ]
+
+  const columns_portfolio = [
+    { label: 'Category', accessor: 'cat', sortable: false },
+    { label: 'Value', accessor: 'val', sortable: false }
+  ]
+
+  const data_segment_results = [
+    { cat: 'Portfolio: Saving', mon1: 100, mon2: 200, mon3: 300 },
+    { cat: 'Portfolio: Stocks', mon1: 100, mon2: 200, mon3: 300 },
+    { cat: 'Portfolio: Bonds', mon1: 100, mon2: 200, mon3: 300 },
+  ]
+
+  const data_portfolio = [
+    { cat: 'Portfolio: Saving', val: 100 },
+    { cat: 'Portfolio: Stocks', val: 100 },
+    { cat: 'Portfolio: Bonds', val: 100 },
+  ]
+
+  console.log(playerState?.data)
+
+  const header = (
+    <div className='p-4 border rounded'>
+      <div className='font-bold'>
+        Playing as {playerState?.data?.result?.playerResult?.player?.name} in game {playerState?.data?.result?.currentGame?.id}
+      </div>
+
+      <div className=''>
+        Current status: {playerState?.data?.result?.currentGame?.status}
+      </div>
+    </div>
+  )
+
   switch (playerState?.data?.result?.currentGame?.status) {
     case 'PREPARATION':
-      return <div>Game is begin prepared.</div>
+      return <div>{header} Game is begin prepared.</div>
 
     case 'COMPLETED':
       return <div> Game is completed. </div>
@@ -53,65 +116,52 @@ function Cockpit() {
       return <div> Game is scheduled. </div>
 
     case 'PAUSED':
-      return <div> Game is paused. </div>
+      return (
+        <div> 
+          {header}
+          <div className='max-w-2xl' >
+          <Table columns={columns_segment_results} data={data_segment_results} caption="" />
+          </div>
+         
+        </div>)
 
     case 'RUNNING':
       return (
+       
         <div>
-          <div class="wrapper">
-            <div class="entry">...</div>
+          {header} 
+          <div className='max-w-md' >
+             <Table columns={columns_portfolio} data={data_portfolio} caption="" />
           </div>
-          <Switch
-            label="Bank Decision"
-            checked={bankDecisionState}
-            id="switch"
-            onCheckedChange={async (cheked) => {
-              setBankDecisionState(cheked)
-              await performAction({
-                variables: {
-                  type: ActionTypes.DECIDE_BANK,
-                  payload: JSON.stringify({
-                    decision: cheked,
-                  }),
-                },
-              })
-            }}
-          />
-          <Switch
-            label="Bonds Decision"
-            checked={bondsDecisionState}
-            id="switch"
-            onCheckedChange={async (cheked) => {
-              setBondsDecisionState(cheked)
-              await performAction({
-                variables: {
-                  type: ActionTypes.DECIDE_BONDS,
-                  payload: JSON.stringify({
-                    decision: cheked,
-                  }),
-                },
-              })
-            }}
-          />
-          <Switch
-            label="Stock Decision"
-            checked={stockDecisionState}
-            id="switch"
-            onCheckedChange={async (cheked) => {
-              setStockDecisionState(cheked)
-              await performAction({
-                variables: {
-                  type: ActionTypes.DECIDE_STOCK,
-                  payload: JSON.stringify({
-                    decision: cheked,
-                  }),
-                },
-              })
-            }}
-          />
+         
+          <div className="p-4 border rounded">
+          {decisions.map(function(decision, i){
+              return (
+                <div className="p-1">
+                  <Switch
+                  label={decision.label(
+                    decision.state ? (Math.round(1 / (+ bankDecisionState + + bondsDecisionState + + stockDecisionState) * 100)).toString() : '0'
+                  )}
+                  checked={decision.state}
+                  id="switch"
+                  onCheckedChange={async (cheked) => {
+                    decision.effect(cheked)
+                    await performAction({
+                      variables: {
+                        type: decision.action,
+                        payload: JSON.stringify({
+                          decision: cheked,
+                        }),
+                      },
+                    })
+                  }}
+                />
+              </div>)
+          })}
+          </div>
         </div>
       )
   }
-}
+} 
 
 export default Cockpit
