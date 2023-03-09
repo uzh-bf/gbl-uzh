@@ -53,37 +53,37 @@ export function apply(state: any, action: Actions) {
     .with({ type: ActionTypes.DECIDE_BANK }, () => {
       const { decision } = action.payload.playerArgs
 
-      const result = {
-        ...state,
-        bank: decision,
-      }
-
       return {
         type: action.type,
-        result: result,
+        result: {
+          ...state,
+          bankDecision: decision,
+        },
+        isDirty: true,
       }
     })
     .with({ type: ActionTypes.DECIDE_BONDS }, () => {
       const { decision } = action.payload.playerArgs
-      const result = {
-        ...state,
-        bonds: decision,
-      }
 
       return {
         type: action.type,
-        result: result,
+        result: {
+          ...state,
+          bondDecision: decision,
+        },
+        isDirty: true,
       }
     })
     .with({ type: ActionTypes.DECIDE_STOCK }, () => {
       const { decision } = action.payload.playerArgs
-      const result = {
-        ...state,
-        stock: decision,
-      }
+
       return {
         type: action.type,
-        result: result,
+        result: {
+          ...state,
+          stockDecision: decision,
+        },
+        isDirty: true,
       }
     })
     .exhaustive()

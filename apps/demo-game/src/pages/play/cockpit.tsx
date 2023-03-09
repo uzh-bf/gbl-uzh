@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { Switch, Table } from '@uzh-bf/design-system'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   PerformActionDocument,
   ResultDocument,
@@ -13,6 +13,18 @@ function Cockpit() {
   const [bondsDecisionState, setBondsDecisionState] = useState(false)
   const [stockDecisionState, setStockDecisionState] = useState(false)
 
+  useEffect(() => {
+    setBankDecisionState(
+      playerState?.data?.result?.playerResult?.facts.bankDecision
+    )
+    setBondsDecisionState(
+      playerState?.data?.result?.playerResult?.facts.bondDecision
+    )
+    setStockDecisionState(
+      playerState?.data?.result?.playerResult?.facts.stockDecision
+    )
+  }, [playerState])
+
   const [performAction, updatedPlayerResult] = useMutation(
     PerformActionDocument,
     {
@@ -20,10 +32,19 @@ function Cockpit() {
     }
   )
 
+  // <Table columns={columns} data={data} caption="Table with example data" />
+        
   const columns = [
-    { label: 'Count', accessor: 'count', sortable: true },
-    { label: 'Answer', accessor: 'answer', sortable: true },
-    { label: 'Username', accessor: 'username', sortable: false },
+    { label: 'Category', accessor: 'cat', sortable: false },
+    { label: 'Month 1', accessor: 'mon1', sortable: false },
+    { label: 'Month 2', accessor: 'mon2', sortable: false },
+    { label: 'Month 3', accessor: 'mon2', sortable: false },
+  ]
+
+  const data = [
+    { cat: 'Portfolio: Saving', mon1: 100, mon2: 200, mon3: 300 },
+    { cat: 'Portfolio: Stocks', mon1: 100, mon2: 200, mon3: 300 },
+    { cat: 'Portfolio: Bonds', mon1: 100, mon2: 200, mon3: 300 },
   ]
 
   console.log(playerState?.data?.result?.currentGame)
@@ -47,14 +68,14 @@ function Cockpit() {
       return <div> Game is scheduled. </div>
 
     case 'PAUSED':
-      return <div> Game is paused. </div>
+      return <div> 
+          <Table columns={columns} data={data} caption="Segment Results" />
+        </div>
 
     case 'RUNNING':
       return (
+       
         <div>
-
-          <Table columns={columns} data={data} caption="Table with example data" />
-          
         
           <Switch
             label="Bank Decision"
@@ -104,7 +125,8 @@ function Cockpit() {
               })
             }}
           />
-        </div>)
+        </div>
+      )
   }
 }
 
