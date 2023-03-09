@@ -1,7 +1,7 @@
 import { Action } from '@gbl-uzh/platform'
+import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PeriodSegmentFacts } from '@graphql/index'
 import { PrismaClient } from '@prisma/client'
-import console from 'console'
 import { match } from 'ts-pattern'
 
 export enum ActionTypes {
@@ -21,45 +21,16 @@ type Actions = Action<
 >
 
 export function apply(state: any, action: Actions) {
-  console.log('segment', state, action)
+  debugLog('SegmentReducer', state, action)
 
   return match(action)
     .with({ type: ActionTypes.SEGMENT_INITIALIZE }, () => {
-      const {
-        // segmentIx,
-        // segmentCount,
-        // periodFacts = {} as PeriodSegmentFacts,
-        previousSegmentFacts = {} as PeriodSegmentFacts,
-        // periodIx,
-      } = action.payload
-
-      const result = {
-        ...state,
-        dieMonth1: {
-          bonds: Math.ceil(Math.random() * 6),
-          stock: Math.ceil(Math.random() * 6),
-          bondsAndStock: Math.ceil(Math.random() * 6),
-        },
-        dieMonth2: {
-          bonds: Math.ceil(Math.random() * 6),
-          stock: Math.ceil(Math.random() * 6),
-          bondsAndStock: Math.ceil(Math.random() * 6),
-        },
-        dieMonth3: {
-          bonds: Math.ceil(Math.random() * 6),
-          stock: Math.ceil(Math.random() * 6),
-          bondsAndStock: Math.ceil(Math.random() * 6),
-        },
-        portfolio: {
-          bank: 3333.33,
-          bonds: 3333.33,
-          stock: 3333.33,
-        },
-      }
-
       return {
-        type: ActionTypes.SEGMENT_INITIALIZE,
-        result: result,
+        type: action.type,
+        result: state,
+        events: [],
+        notification: [],
+        isDirty: false,
       }
     })
     .exhaustive()

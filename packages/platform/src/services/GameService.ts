@@ -347,6 +347,13 @@ export async function activateNextPeriod(
           where: {
             id: gameId,
           },
+          include: {
+            periods: {
+              include: {
+                segments: true,
+              },
+            },
+          },
           data: {
             status: GameStatus.Preparation,
             activePeriodIx: nextPeriodIx,
@@ -407,6 +414,13 @@ export async function activateNextPeriod(
         ctx.prisma.game.update({
           data: {
             status: GameStatus.Consolidation,
+          },
+          include: {
+            periods: {
+              include: {
+                segments: true,
+              },
+            },
           },
           where: {
             id: gameId,
@@ -480,6 +494,13 @@ export async function activateNextPeriod(
           where: {
             id: gameId,
           },
+          include: {
+            periods: {
+              include: {
+                segments: true,
+              },
+            },
+          },
           data: {
             status: GameStatus.Results,
             activePeriodIx: nextPeriodIx,
@@ -544,6 +565,13 @@ export async function activateNextPeriod(
         ctx.prisma.game.update({
           where: {
             id: gameId,
+          },
+          include: {
+            periods: {
+              include: {
+                segments: true,
+              },
+            },
           },
           data: {
             status: GameStatus.Preparation,
@@ -640,6 +668,14 @@ export async function activateNextSegment(
           where: {
             id: gameId,
           },
+          include: {
+            periods: {
+              include: {
+                segments: true,
+              },
+            },
+            players: true,
+          },
           data: {
             status: GameStatus.Running,
           },
@@ -719,6 +755,14 @@ export async function activateNextSegment(
       const result = await ctx.prisma.$transaction([
         ctx.prisma.game.update({
           where: { id: gameId },
+          include: {
+            periods: {
+              include: {
+                segments: true,
+              },
+            },
+            players: true,
+          },
           data: {
             status: GameStatus.Paused,
           },
@@ -935,7 +979,7 @@ export function computePeriodStartResults(
           type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_START,
           payload: {
             playerRole: result.player.role ?? result.player.connect.role,
-            initialCash: periodFacts.initialCash,
+            periodFacts,
           },
         })
 
@@ -981,7 +1025,7 @@ export function computePeriodStartResults(
         type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_INITIALIZE,
         payload: {
           playerRole: player.role,
-          initialCash: periodFacts.initialCash,
+          periodFacts,
         },
       }
     )
@@ -1049,19 +1093,14 @@ export async function computePeriodEndResults(
       } = reducers.PeriodResult.apply(result.facts, {
         type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_END,
         payload: {
-          interestRate: periodFacts.interestRate,
-          spotPrice: segmentFacts.spotPrice,
-          futuresPrice: segmentFacts.futuresPrice,
-          randomSeed: periodFacts.randomSeed,
-          initialSpotPrice: periodFacts.initialSpotPrice,
+          periodFacts,
+          segmentFacts,
+
           playerRole: result.player.role,
           playerLevel: result.player.levelIx + 1,
           playerExperience: result.player.experience,
-          storageCostPerItem: periodFacts.storageCostPerItem,
-          trendE: periodFacts.trendE,
-          trendGap: periodFacts.trendGap,
+
           consolidationDecisions,
-          cashInflowTotal: segmentFacts.cashInflowTotal,
           periodIx: activePeriodIx,
         },
       })
@@ -1137,16 +1176,11 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
             type: reducers.SegmentResult.ActionTypes.SEGMENT_RESULTS_START,
             payload: {
               playerRole: result.player.role,
-              interestRate: game.activePeriod.facts.interestRate,
-              futuresPriceNext:
-                game.activePeriod.activeSegment.nextSegment.facts.futuresPrice,
-              futuresPriceCurrent:
-                game.activePeriod.activeSegment.facts.futuresPrice,
-              spotPriceNext:
-                game.activePeriod.activeSegment.nextSegment.facts.spotPrice,
+              periodFacts: game.activePeriod.facts,
+              segmentFacts: game.activePeriod.activeSegment.facts,
+              nextSegmentFacts:
+                game.activePeriod.activeSegment.nextSegment?.facts,
               segmentIx: nextSegmentIx,
-              cashInflow:
-                game.activePeriod.activeSegment.nextSegment.facts.cashInflow,
             },
           }
         )
@@ -1208,10 +1242,11 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
       const { result: facts } = reducers.SegmentResult.apply(result.facts, {
         type: reducers.SegmentResult.ActionTypes.SEGMENT_RESULTS_INITIALIZE,
         payload: {
-          cashBalance: result.facts.cashBalance,
-          storageAmount: result.facts.storageAmount,
-          spotPrice: game.activePeriod.facts.initialSpotPrice,
           playerRole: result.player.role,
+          periodFacts: game.activePeriod.facts,
+          segmentFacts: game.activePeriod.activeSegment?.facts,
+          nextSegmentFacts: game.activePeriod.activeSegment?.nextSegment?.facts,
+          segmentIx: nextSegmentIx,
         },
       })
 
@@ -1266,7 +1301,7 @@ export function computeSegmentEndResults(game, ctx, { reducers }) {
         {
           type: reducers.SegmentResult.ActionTypes.SEGMENT_RESULTS_END,
           payload: {
-            storageCostPerItem: game.activePeriod.facts.storageCostPerItem,
+            periodFacts: game.activePeriod.facts,
             segmentIx: game.activePeriod.activeSegmentIx,
           },
         }

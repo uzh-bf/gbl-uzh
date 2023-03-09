@@ -1,6 +1,8 @@
 import { Action } from '@gbl-uzh/platform'
+import { debugLog, diceRoll } from '@gbl-uzh/platform/dist/lib/util'
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { PrismaClient } from '@prisma/client'
+import * as R from 'ramda'
 import { match } from 'ts-pattern'
 
 export enum ActionTypes {
@@ -29,27 +31,42 @@ type Actions =
     >
 
 export function apply(state: any, action: Actions) {
-  console.log('period', state, action)
+  debugLog('PeriodReducer', state, action)
 
   return match(action)
     .with({ type: ActionTypes.PERIOD_INITIALIZE }, () => {
-      const result = {
-        ...state,
-        someValue : 42,
-      }
+      const diceRolls = R.range(0, 3).map(() => {
+        const bondsAndStocks = diceRoll()
+        return {
+          bonds: diceRoll() + bondsAndStocks,
+          stocks: diceRoll() + bondsAndStocks,
+        }
+      })
+
       return {
         type: action.type,
-        result: result,
+        result: {
+          ...state,
+          diceRolls,
+          scenario: {
+            // TODO: replace with input values from period creation
+            trendStocks: 0.0067,
+            trendBonds: 0.0033,
+            gapStocks: 0.0025,
+            gapBonds: 0.005,
+            bankReturn: 0.002,
+          },
+        },
+        isDirty: true,
       }
     })
     .with({ type: ActionTypes.PERIOD_CONSOLIDATE }, () => {
-      const result = {
-        ...state,
-        someValue : 42,
-      }
       return {
         type: action.type,
-        result: result,
+        result: state,
+        events: [],
+        notification: [],
+        isDirty: false,
       }
     })
     .exhaustive()

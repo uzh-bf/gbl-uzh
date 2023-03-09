@@ -1,3 +1,6 @@
+import { Action } from '@gbl-uzh/platform'
+import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
+import { PrismaClient } from '@prisma/client'
 import { match } from 'ts-pattern'
 
 export enum ActionTypes {
@@ -6,26 +9,41 @@ export enum ActionTypes {
   PERIOD_RESULTS_END = 'PERIOD_RESULTS_END',
 }
 
-export function apply(state: any, action: any) {
-  console.log('periodResult', state, action)
+type Actions =
+  | Action<ActionTypes.PERIOD_RESULTS_INITIALIZE, any, PrismaClient>
+  | Action<ActionTypes.PERIOD_RESULTS_START, any, PrismaClient>
+  | Action<ActionTypes.PERIOD_RESULTS_END, any, PrismaClient>
+
+export function apply(state: any, action: Actions) {
+  debugLog('PeriodResultReducer', state, action)
+
   return match(action)
     .with({ type: ActionTypes.PERIOD_RESULTS_INITIALIZE }, () => {
-      const result = {
-        ...state,
-      }
       return {
         type: action.type,
-        result,
-        events : [],
-        notification : [],
-        isDirty : true,
+        result: state,
+        events: [],
+        notification: [],
+        isDirty: false,
       }
     })
     .with({ type: ActionTypes.PERIOD_RESULTS_START }, () => {
-      return state
+      return {
+        type: action.type,
+        result: state,
+        events: [],
+        notification: [],
+        isDirty: false,
+      }
     })
     .with({ type: ActionTypes.PERIOD_RESULTS_END }, () => {
-      return state
+      return {
+        type: action.type,
+        result: state,
+        events: [],
+        notification: [],
+        isDirty: false,
+      }
     })
     .exhaustive()
 }
