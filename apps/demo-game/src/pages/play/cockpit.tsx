@@ -135,20 +135,20 @@ function Cockpit() {
           </div>
          
           <div className="p-4 border rounded">
-          {decisions.map(function(object, i){
+          {decisions.map(function(decision, i){
               return (
                 <div className="p-1">
                   <Switch
-                  label={object.label(
-                    object.state ? (Math.round(1 / (+ bankDecisionState + + bondsDecisionState + + stockDecisionState) * 100)).toString() : '0'
+                  label={decision.label(
+                    decision.state ? (Math.round(1 / (+ bankDecisionState + + bondsDecisionState + + stockDecisionState) * 100)).toString() : '0'
                   )}
-                  checked={object.state}
+                  checked={decision.state}
                   id="switch"
                   onCheckedChange={async (cheked) => {
-                    object.effect(cheked)
+                    decision.effect(cheked)
                     await performAction({
                       variables: {
-                        type: object.action,
+                        type: decision.action,
                         payload: JSON.stringify({
                           decision: cheked,
                         }),
