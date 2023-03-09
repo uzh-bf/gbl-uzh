@@ -72,7 +72,7 @@ export function apply(state: any, action: Actions) {
 
       return {
         type: action.type,
-        result: state,
+        result: result,
       }
     })
     .with({ type: ActionTypes.DECIDE_STOCK }, () => {
@@ -83,7 +83,7 @@ export function apply(state: any, action: Actions) {
       }
       return {
         type: action.type,
-        result : result,
+        result: result,
       }
     })
     .exhaustive()
