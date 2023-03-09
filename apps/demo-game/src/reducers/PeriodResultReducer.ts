@@ -10,10 +10,8 @@ export function apply(state: any, action: any) {
   console.log('periodResult', state, action)
   return match(action)
     .with({ type: ActionTypes.PERIOD_RESULTS_INITIALIZE }, () => {
-
       const result = {
         ...state,
-        
       }
       return {
         type: action.type,
