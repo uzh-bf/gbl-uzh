@@ -58,24 +58,28 @@ function Cockpit() {
 
   // <Table columns={columns} data={data} caption="Table with example data" />
         
-  const columns_results = [
+  const columns_segment_results = [
     { label: 'Category', accessor: 'cat', sortable: false },
     { label: 'Month 1', accessor: 'mon1', sortable: false },
     { label: 'Month 2', accessor: 'mon2', sortable: false },
     { label: 'Month 3', accessor: 'mon2', sortable: false },
   ]
 
-  const columns_current_stock = [
+  const columns_portfolio = [
     { label: 'Category', accessor: 'cat', sortable: false },
-    { label: 'Month 1', accessor: 'mon1', sortable: false },
-    { label: 'Month 2', accessor: 'mon2', sortable: false },
-    { label: 'Month 3', accessor: 'mon2', sortable: false },
+    { label: 'Value', accessor: 'val', sortable: false }
   ]
 
-  const data = [
+  const data_segment_results = [
     { cat: 'Portfolio: Saving', mon1: 100, mon2: 200, mon3: 300 },
     { cat: 'Portfolio: Stocks', mon1: 100, mon2: 200, mon3: 300 },
     { cat: 'Portfolio: Bonds', mon1: 100, mon2: 200, mon3: 300 },
+  ]
+
+  const data_portfolio = [
+    { cat: 'Portfolio: Saving', val: 100 },
+    { cat: 'Portfolio: Stocks', val: 100 },
+    { cat: 'Portfolio: Bonds', val: 100 },
   ]
 
   console.log(playerState?.data)
@@ -112,16 +116,24 @@ function Cockpit() {
       return <div> Game is scheduled. </div>
 
     case 'PAUSED':
-      return <div> 
-          <Table columns={columns_results} data={data} caption="Segment Results" />
-        </div>
+      return (
+        <div> 
+          {header}
+          <div className='max-w-2xl' >
+          <Table columns={columns_segment_results} data={data_segment_results} caption="" />
+          </div>
+         
+        </div>)
 
     case 'RUNNING':
       return (
        
         <div>
           {header} 
-          <Table columns={columns_current_stock} data={data} caption="Stock" />
+          <div className='max-w-md' >
+             <Table columns={columns_portfolio} data={data_portfolio} caption="" />
+          </div>
+         
           <div className="p-4 border rounded">
           {decisions.map(function(object, i){
               return (
