@@ -78,10 +78,23 @@ function Cockpit() {
     { cat: 'Portfolio: Bonds', mon1: 100, mon2: 200, mon3: 300 },
   ]
 
-  console.log(playerState?.data?.result?.currentGame)
+  console.log(playerState?.data)
+
+  const header = (
+    <div className='p-4 border rounded'>
+      <div className='font-bold'>
+        Playing as {playerState?.data?.result?.playerResult?.player?.name} in game {playerState?.data?.result?.currentGame?.id}
+      </div>
+
+      <div className=''>
+        Current status: {playerState?.data?.result?.currentGame?.status}
+      </div>
+    </div>
+  )
+
   switch (playerState?.data?.result?.currentGame?.status) {
     case 'PREPARATION':
-      return <div>Game is begin prepared.</div>
+      return <div>{header} Game is begin prepared.</div>
 
     case 'COMPLETED':
       return <div> Game is completed. </div>
@@ -107,31 +120,34 @@ function Cockpit() {
       return (
        
         <div>
+          {header} 
           <Table columns={columns_current_stock} data={data} caption="Stock" />
           <div className="p-4 border rounded">
           {decisions.map(function(object, i){
               return (
-                <Switch
-                label={object.label}
-                checked={object.state}
-                id="switch"
-                onCheckedChange={async (cheked) => {
-                  object.effect(cheked)
-                  await performAction({
-                    variables: {
-                      type: object.action,
-                      payload: JSON.stringify({
-                        decision: cheked,
-                      }),
-                    },
-                  })
-                }}
-              />)
+                <div className="p-1">
+                  <Switch
+                  label={object.label}
+                  checked={object.state}
+                  id="switch"
+                  onCheckedChange={async (cheked) => {
+                    object.effect(cheked)
+                    await performAction({
+                      variables: {
+                        type: object.action,
+                        payload: JSON.stringify({
+                          decision: cheked,
+                        }),
+                      },
+                    })
+                  }}
+                />
+              </div>)
           })}
           </div>
         </div>
       )
   }
-}
+} 
 
 export default Cockpit
