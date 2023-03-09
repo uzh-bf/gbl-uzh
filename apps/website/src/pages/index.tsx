@@ -126,7 +126,7 @@ function Home() {
                         },
                         {
                           name: 'uFin: The Challenge',
-                          href: '/games/u-fin',
+                          href: '/games/ufin',
                           imgSrc: uFinImage,
                         },
                         {

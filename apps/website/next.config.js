@@ -1,4 +1,5 @@
 module.exports = {
+  trailingSlash: true,
   swcMinify: true,
   images: {
     domains: ['www.uzh.ch'],
