@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { Switch } from '@uzh-bf/design-system'
+import { Switch, Table } from '@uzh-bf/design-system'
 import { useState } from 'react'
 import {
   PerformActionDocument,
@@ -21,62 +21,86 @@ function Cockpit() {
   )
 
   console.log(playerState?.data?.result?.currentGame)
-  if (playerState?.data?.result?.currentGame?.status === 'PAUSED') {
-    return <div>Game is paused</div>
-  }
+  switch (playerState?.data?.result?.currentGame?.status) {
+    case 'PREPARATION':
+      return <div>Game is begin prepared.</div>
 
-  return (
-    <div>
-      <Switch
-        label="Bank Decision"
-        checked={bankDecisionState}
-        id="switch"
-        onCheckedChange={async (cheked) => {
-          setBankDecisionState(cheked)
-          await performAction({
-            variables: {
-              type: ActionTypes.DECIDE_BANK,
-              payload: JSON.stringify({
-                decision: cheked,
-              }),
-            },
-          })
-        }}
-      />
-      <Switch
-        label="Bonds Decision"
-        checked={bondsDecisionState}
-        id="switch"
-        onCheckedChange={async (cheked) => {
-          setBondsDecisionState(cheked)
-          await performAction({
-            variables: {
-              type: ActionTypes.DECIDE_BONDS,
-              payload: JSON.stringify({
-                decision: cheked,
-              }),
-            },
-          })
-        }}
-      />
-      <Switch
-        label="Stock Decision"
-        checked={stockDecisionState}
-        id="switch"
-        onCheckedChange={async (cheked) => {
-          setStockDecisionState(cheked)
-          await performAction({
-            variables: {
-              type: ActionTypes.DECIDE_STOCK,
-              payload: JSON.stringify({
-                decision: cheked,
-              }),
-            },
-          })
-        }}
-      />
-    </div>
-  )
+    case 'COMPLETED':
+      return <div> Game is completed. </div>
+
+    case 'CONSOLIDATION':
+      return <div> Game is being consolidated. </div>
+
+    case 'PREPARATION':
+      return <div> Game is being prepared. </div>
+
+    case 'RESULTS':
+      return <div> RESULTS </div>
+
+    case 'SCHEDULED':
+      return <div> Game is scheduled. </div>
+
+    case 'PAUSED':
+      return <div> Game is paused. </div>
+
+    case 'RUNNING':
+      return (
+        <div>
+          <div class="wrapper">
+            <div class="entry">
+            ...
+            </div>
+          </div>
+          <Switch
+            label="Bank Decision"
+            checked={bankDecisionState}
+            id="switch"
+            onCheckedChange={async (cheked) => {
+              setBankDecisionState(cheked)
+              await performAction({
+                variables: {
+                  type: ActionTypes.DECIDE_BANK,
+                  payload: JSON.stringify({
+                    decision: cheked,
+                  }),
+                },
+              })
+            }}
+          />
+          <Switch
+            label="Bonds Decision"
+            checked={bondsDecisionState}
+            id="switch"
+            onCheckedChange={async (cheked) => {
+              setBondsDecisionState(cheked)
+              await performAction({
+                variables: {
+                  type: ActionTypes.DECIDE_BONDS,
+                  payload: JSON.stringify({
+                    decision: cheked,
+                  }),
+                },
+              })
+            }}
+          />
+          <Switch
+            label="Stock Decision"
+            checked={stockDecisionState}
+            id="switch"
+            onCheckedChange={async (cheked) => {
+              setStockDecisionState(cheked)
+              await performAction({
+                variables: {
+                  type: ActionTypes.DECIDE_STOCK,
+                  payload: JSON.stringify({
+                    decision: cheked,
+                  }),
+                },
+              })
+            }}
+          />
+        </div>)
+  }
 }
 
 export default Cockpit
