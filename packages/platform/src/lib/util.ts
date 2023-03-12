@@ -1,3 +1,4 @@
+import { integer, MersenneTwister19937 } from 'random-js'
 import util from 'util'
 
 export function setDifference(a, b, filterNoId = false) {
@@ -19,6 +20,11 @@ export function debugLog(...args) {
   }
 }
 
-export function diceRoll() {
-  return Math.ceil(Math.random() * 6)
+export function diceRoll(seeds: number[] = []) {
+  const rng = MersenneTwister19937.seedWithArray(seeds)
+  return integer(1, 6)(rng)
+}
+
+export function computeScenarioOutcome(trend, gap, diceRoll) {
+  return trend + (diceRoll - 7) * gap
 }

@@ -3,6 +3,8 @@ import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PrismaClient } from '@prisma/client'
 import { match } from 'ts-pattern'
 
+const INITIAL_CAPITAL = 10000
+
 export enum ActionTypes {
   PERIOD_RESULTS_INITIALIZE = 'PERIOD_RESULTS_INITIALIZE',
   PERIOD_RESULTS_START = 'PERIOD_RESULTS_START',
@@ -15,13 +17,22 @@ type Actions =
   | Action<ActionTypes.PERIOD_RESULTS_END, any, PrismaClient>
 
 export function apply(state: any, action: Actions) {
-  debugLog('PeriodResultReducer', state, action)
-
-  return match(action)
+  const newState = match(action)
     .with({ type: ActionTypes.PERIOD_RESULTS_INITIALIZE }, () => {
       return {
         type: action.type,
-        result: state,
+        result: {
+          decisions: {
+            bank: true,
+            bonds: false,
+            stocks: false,
+          },
+          assets: {
+            bank: INITIAL_CAPITAL,
+            bonds: 0,
+            stocks: 0,
+          },
+        },
         events: [],
         notification: [],
         isDirty: false,
@@ -46,4 +57,8 @@ export function apply(state: any, action: Actions) {
       }
     })
     .exhaustive()
+
+  debugLog('PeriodResultReducer', state, action, newState)
+
+  return newState
 }

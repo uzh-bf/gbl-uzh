@@ -752,6 +752,8 @@ export async function activateNextSegment(
         reducers,
       })
 
+      return
+
       const result = await ctx.prisma.$transaction([
         ctx.prisma.game.update({
           where: { id: gameId },
@@ -1301,7 +1303,9 @@ export function computeSegmentEndResults(game, ctx, { reducers }) {
         {
           type: reducers.SegmentResult.ActionTypes.SEGMENT_RESULTS_END,
           payload: {
+            playerRole: result.player.role,
             periodFacts: game.activePeriod.facts,
+            segmentFacts: game.activePeriod.activeSegment.facts,
             segmentIx: game.activePeriod.activeSegmentIx,
           },
         }

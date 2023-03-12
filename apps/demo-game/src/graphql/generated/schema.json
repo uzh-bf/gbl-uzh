@@ -1447,26 +1447,109 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "name",
+            "name": "rollsPerSegment",
             "description": null,
             "type": {
               "kind": "SCALAR",
-              "name": "String",
+              "name": "Int",
               "ofType": null
             },
-            "defaultValue": null,
+            "defaultValue": "3",
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "name2",
+            "name": "scenario",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "PeriodFactsScenarioInput",
+              "ofType": null
+            },
+            "defaultValue": "{bankReturn: 0.002, gapBonds: 0.005, gapStocks: 0.0025, seed: 0, trendBonds: 0.0033, trendStocks: 0.0067}",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "PeriodFactsScenarioInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "bankReturn",
             "description": null,
             "type": {
               "kind": "SCALAR",
-              "name": "String",
+              "name": "Float",
               "ofType": null
             },
-            "defaultValue": null,
+            "defaultValue": "0.002",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gapBonds",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": "0.005",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gapStocks",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": "0.0025",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "seed",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": "0",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "trendBonds",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": "0.0033",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "trendStocks",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": "0.0067",
             "isDeprecated": false,
             "deprecationReason": null
           }

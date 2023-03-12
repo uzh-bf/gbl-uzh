@@ -114,8 +114,17 @@ type Period {
 }
 
 input PeriodFactsInput {
-  name: String
-  name2: String
+  rollsPerSegment: Int = 3
+  scenario: PeriodFactsScenarioInput = {bankReturn: 0.002, gapBonds: 0.005, gapStocks: 0.0025, seed: 0, trendBonds: 0.0033, trendStocks: 0.0067}
+}
+
+input PeriodFactsScenarioInput {
+  bankReturn: Float = 0.002
+  gapBonds: Float = 0.005
+  gapStocks: Float = 0.0025
+  seed: Int = 0
+  trendBonds: Float = 0.0033
+  trendStocks: Float = 0.0067
 }
 
 type PeriodSegment {

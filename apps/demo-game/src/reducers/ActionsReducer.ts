@@ -1,4 +1,5 @@
 import { Action } from '@gbl-uzh/platform'
+import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PrismaClient } from '@prisma/client'
 import { match } from 'ts-pattern'
 
@@ -15,9 +16,8 @@ type Actions =
         playerArgs: {
           decision: boolean
         }
-        segmentFacts: {
-          spotPrice: number
-        }
+        segmentFacts: {}
+        periodFacts: {}
       },
       PrismaClient
     >
@@ -27,10 +27,8 @@ type Actions =
         playerArgs: {
           decision: boolean
         }
-        segmentFacts: {
-          futuresPrice: number
-        }
-        periodFacts: any
+        segmentFacts: {}
+        periodFacts: {}
       },
       PrismaClient
     >
@@ -40,16 +38,14 @@ type Actions =
         playerArgs: {
           decision: boolean
         }
-        segmentFacts: any
-        periodFacts: any
+        segmentFacts: {}
+        periodFacts: {}
       },
       PrismaClient
     >
 
 export function apply(state: any, action: Actions) {
-  console.log('action', state, action)
-
-  return match(action)
+  const newState = match(action)
     .with({ type: ActionTypes.DECIDE_BANK }, () => {
       const { decision } = action.payload.playerArgs
 
@@ -57,7 +53,10 @@ export function apply(state: any, action: Actions) {
         type: action.type,
         result: {
           ...state,
-          bankDecision: decision,
+          decisions: {
+            ...state.decisions,
+            bank: decision,
+          },
         },
         isDirty: true,
       }
@@ -69,7 +68,10 @@ export function apply(state: any, action: Actions) {
         type: action.type,
         result: {
           ...state,
-          bondDecision: decision,
+          decisions: {
+            ...state.decisions,
+            bonds: decision,
+          },
         },
         isDirty: true,
       }
@@ -81,10 +83,17 @@ export function apply(state: any, action: Actions) {
         type: action.type,
         result: {
           ...state,
-          stockDecision: decision,
+          decisions: {
+            ...state.decisions,
+            stocks: decision,
+          },
         },
         isDirty: true,
       }
     })
     .exhaustive()
+
+  debugLog('ActionsReducer', state, action, newState)
+
+  return newState
 }

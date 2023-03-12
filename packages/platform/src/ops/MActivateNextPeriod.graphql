@@ -5,7 +5,20 @@ mutation ActivateNextPeriod($gameId: Int!) {
   activateNextPeriod(gameId: $gameId) {
     ...GameData
     periods {
-      ...PeriodData
+      id
+
+      index
+      activeSegmentIx
+
+      facts
+
+      segments {
+        id
+
+        index
+
+        facts
+      }
     }
   }
 }

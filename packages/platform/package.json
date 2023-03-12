@@ -60,5 +60,8 @@
   },
   "volta": {
     "extends": "../../package.json"
+  },
+  "dependencies": {
+    "random-js": "2.1.0"
   }
 }

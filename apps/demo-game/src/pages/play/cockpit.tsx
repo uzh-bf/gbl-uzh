@@ -15,39 +15,39 @@ function Cockpit() {
 
   useEffect(() => {
     setBankDecisionState(
-      playerState?.data?.result?.playerResult?.facts.bankDecision
+      playerState?.data?.result?.playerResult?.facts.decisions.bank
     )
     setBondsDecisionState(
-      playerState?.data?.result?.playerResult?.facts.bondDecision
+      playerState?.data?.result?.playerResult?.facts.decisions.bonds
     )
     setStockDecisionState(
-      playerState?.data?.result?.playerResult?.facts.stockDecision
+      playerState?.data?.result?.playerResult?.facts.decisions.stocks
     )
   }, [playerState])
 
   const decisions = [
     {
       name: 'Bank',
-      label : (percentage : string) => `Invest ${percentage}% into bank.`,
-      effect : setBankDecisionState,
-      state : bankDecisionState,
-      action : ActionTypes.DECIDE_BANK
+      label: (percentage: string) => `Invest ${percentage}% into bank.`,
+      effect: setBankDecisionState,
+      state: bankDecisionState,
+      action: ActionTypes.DECIDE_BANK,
     },
     {
       name: 'Bonds',
-      label : (percentage : string) => `Invest ${percentage}% into bonds.`,
-      effect : setBondsDecisionState,
-      state : bondsDecisionState,
-      action : ActionTypes.DECIDE_BONDS
+      label: (percentage: string) => `Invest ${percentage}% into bonds.`,
+      effect: setBondsDecisionState,
+      state: bondsDecisionState,
+      action: ActionTypes.DECIDE_BONDS,
     },
     {
       name: 'Stocks',
-      label : (percentage : string) => `Invest ${percentage}% into stocks.`,
-      effect : setStockDecisionState,
-      state : stockDecisionState,
-      action : ActionTypes.DECIDE_STOCK
+      label: (percentage: string) => `Invest ${percentage}% into stocks.`,
+      effect: setStockDecisionState,
+      state: stockDecisionState,
+      action: ActionTypes.DECIDE_STOCK,
     },
-  ];
+  ]
 
   const [performAction, updatedPlayerResult] = useMutation(
     PerformActionDocument,
@@ -57,7 +57,7 @@ function Cockpit() {
   )
 
   // <Table columns={columns} data={data} caption="Table with example data" />
-        
+
   const columns_segment_results = [
     { label: 'Category', accessor: 'cat', sortable: false },
     { label: 'Month 1', accessor: 'mon1', sortable: false },
@@ -67,7 +67,7 @@ function Cockpit() {
 
   const columns_portfolio = [
     { label: 'Category', accessor: 'cat', sortable: false },
-    { label: 'Value', accessor: 'val', sortable: false }
+    { label: 'Value', accessor: 'val', sortable: false },
   ]
 
   const data_segment_results = [
@@ -85,12 +85,13 @@ function Cockpit() {
   console.log(playerState?.data)
 
   const header = (
-    <div className='p-4 border rounded'>
-      <div className='font-bold'>
-        Playing as {playerState?.data?.result?.playerResult?.player?.name} in game {playerState?.data?.result?.currentGame?.id}
+    <div className="p-4 border rounded">
+      <div className="font-bold">
+        Playing as {playerState?.data?.self?.name} in game{' '}
+        {playerState?.data?.result?.currentGame?.id}
       </div>
 
-      <div className=''>
+      <div className="">
         Current status: {playerState?.data?.result?.currentGame?.status}
       </div>
     </div>
@@ -117,51 +118,67 @@ function Cockpit() {
 
     case 'PAUSED':
       return (
-        <div> 
+        <div>
           {header}
-          <div className='max-w-2xl' >
-          <Table columns={columns_segment_results} data={data_segment_results} caption="" />
+          <div className="max-w-2xl">
+            <Table
+              columns={columns_segment_results}
+              data={data_segment_results}
+              caption=""
+            />
           </div>
-         
-        </div>)
+        </div>
+      )
 
     case 'RUNNING':
       return (
-       
         <div>
-          {header} 
-          <div className='max-w-md' >
-             <Table columns={columns_portfolio} data={data_portfolio} caption="" />
+          {header}
+          <div className="max-w-md">
+            <Table
+              columns={columns_portfolio}
+              data={data_portfolio}
+              caption=""
+            />
           </div>
-         
+
           <div className="p-4 border rounded">
-          {decisions.map(function(decision, i){
+            {decisions.map(function (decision, i) {
               return (
                 <div className="p-1">
                   <Switch
-                  label={decision.label(
-                    decision.state ? (Math.round(1 / (+ bankDecisionState + + bondsDecisionState + + stockDecisionState) * 100)).toString() : '0'
-                  )}
-                  checked={decision.state}
-                  id="switch"
-                  onCheckedChange={async (cheked) => {
-                    decision.effect(cheked)
-                    await performAction({
-                      variables: {
-                        type: decision.action,
-                        payload: JSON.stringify({
-                          decision: cheked,
-                        }),
-                      },
-                    })
-                  }}
-                />
-              </div>)
-          })}
+                    label={decision.label(
+                      decision.state
+                        ? Math.round(
+                            (1 /
+                              (+bankDecisionState +
+                                +bondsDecisionState +
+                                +stockDecisionState)) *
+                              100
+                          ).toString()
+                        : '0'
+                    )}
+                    checked={decision.state}
+                    id="switch"
+                    onCheckedChange={async (cheked) => {
+                      decision.effect(cheked)
+                      await performAction({
+                        variables: {
+                          type: decision.action,
+                          payload: JSON.stringify({
+                            decision: cheked,
+                          }),
+                        },
+                      })
+                    }}
+                  />
+                </div>
+              )
+            })}
           </div>
         </div>
       )
   }
-} 
+}
 
 export default Cockpit

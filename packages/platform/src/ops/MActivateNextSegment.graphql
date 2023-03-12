@@ -5,10 +5,37 @@ mutation ActivateNextSegment($gameId: Int!) {
   activateNextSegment(gameId: $gameId) {
     ...GameData
     periods {
-      ...PeriodData
+      id
+
+      index
+      activeSegmentIx
+
+      facts
+
+      segments {
+        id
+
+        index
+
+        facts
+      }
     }
     players {
-      ...PlayerData
+      id
+
+      isReady
+
+      role
+
+      name
+      avatar
+      location
+      color
+
+      facts
+
+      experience
+      experienceToNext
     }
   }
 }
