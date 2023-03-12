@@ -1,5 +1,9 @@
 import { Action } from '@gbl-uzh/platform'
-import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
+import {
+  computePercentChange,
+  debugLog,
+  withPercentChange,
+} from '@gbl-uzh/platform/dist/lib/util'
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { PrismaClient } from '@prisma/client'
 import * as R from 'ramda'
@@ -16,6 +20,7 @@ type State = {
     bank: number
     bonds: number
     stocks: number
+    totalAssets: number
   }
   decisions: {
     bank: boolean
@@ -78,28 +83,42 @@ export function apply(state: State, action: Actions) {
     .with(
       { type: ActionTypes.SEGMENT_RESULTS_END, payload: P.select() },
       ({ segmentFacts }) => {
-        const assets = state.assets
-        const decisions = state.decisions
-
-        const numInvestedBuckets = R.sum(Object.values(decisions).map(Number))
-        const totalAssets = R.sum(Object.values(assets))
+        const numInvestedBuckets = R.sum(
+          Object.values(state.decisions).map(Number)
+        )
+        const totalAssets =
+          state.assets.bank + state.assets.bonds + state.assets.stocks
 
         const targetAssets = {
-          bank: decisions.bank ? (1 / numInvestedBuckets) * totalAssets : 0,
-          bonds: decisions.bonds ? (1 / numInvestedBuckets) * totalAssets : 0,
-          stocks: decisions.stocks ? (1 / numInvestedBuckets) * totalAssets : 0,
+          bank: state.decisions.bank
+            ? (1 / numInvestedBuckets) * totalAssets
+            : 0,
+          bonds: state.decisions.bonds
+            ? (1 / numInvestedBuckets) * totalAssets
+            : 0,
+          stocks: state.decisions.stocks
+            ? (1 / numInvestedBuckets) * totalAssets
+            : 0,
         }
 
         const assetsWithReturns = segmentFacts.returns.reduce(
           (acc, returns, ix) => {
             const last = acc[acc.length - 1]
-            const bankWithReturn = last.bank * (1 + returns.bank)
-            const bondsWithReturn = last.bonds * (1 + returns.bonds)
-            const stocksWithReturn = last.stocks * (1 + returns.stocks)
+
+            const bankWithReturn = withPercentChange(last.bank, returns.bank)
+            const bondsWithReturn = withPercentChange(last.bonds, returns.bonds)
+            const stocksWithReturn = withPercentChange(
+              last.stocks,
+              returns.stocks
+            )
+
             const totalAssetsWithReturn =
               bankWithReturn + bondsWithReturn + stocksWithReturn
-            const totalAssetsReturn =
-              (totalAssetsWithReturn - totalAssets) / totalAssets
+            const totalAssetsReturn = computePercentChange(
+              totalAssetsWithReturn,
+              last.totalAssets
+            )
+
             return [
               ...acc,
               {
@@ -137,7 +156,27 @@ export function apply(state: State, action: Actions) {
           result: {
             ...state,
             assetsWithReturns,
-            assets: finalAssets,
+            assets: {
+              ...R.pick(
+                ['bank', 'bonds', 'stocks', 'totalAssets'],
+                finalAssets
+              ),
+            },
+            returns: {
+              bank: computePercentChange(finalAssets.bank, targetAssets.bank),
+              bonds: computePercentChange(
+                finalAssets.bonds,
+                targetAssets.bonds
+              ),
+              stocks: computePercentChange(
+                finalAssets.stocks,
+                targetAssets.stocks
+              ),
+              totalAssets: computePercentChange(
+                finalAssets.totalAssets,
+                state.assets.bank
+              ),
+            },
           },
         }
       }

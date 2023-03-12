@@ -46,7 +46,7 @@
   "peerDependencies": {
     "@apollo/client": "^3.7.0",
     "@prisma/client": "^4.8.0",
-    "@uzh-bf/design-system": "^0.0.79",
+    "@uzh-bf/design-system": "^1.0.0",
     "graphql": "^16.6.0",
     "graphql-scalars": "^1.19.0",
     "graphql-yoga": "^3.0.0",

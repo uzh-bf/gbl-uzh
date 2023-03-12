@@ -752,8 +752,6 @@ export async function activateNextSegment(
         reducers,
       })
 
-      return
-
       const result = await ctx.prisma.$transaction([
         ctx.prisma.game.update({
           where: { id: gameId },

@@ -28,3 +28,11 @@ export function diceRoll(seeds: number[] = []) {
 export function computeScenarioOutcome(trend, gap, diceRoll) {
   return trend + (diceRoll - 7) * gap
 }
+
+export function computePercentChange(newValue, oldValue) {
+  return (newValue - oldValue) / oldValue
+}
+
+export function withPercentChange(value, percentChange) {
+  return value * (1 + percentChange)
+}

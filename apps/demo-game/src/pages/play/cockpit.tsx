@@ -25,30 +25,6 @@ function Cockpit() {
     )
   }, [playerState])
 
-  const decisions = [
-    {
-      name: 'Bank',
-      label: (percentage: string) => `Invest ${percentage}% into bank.`,
-      effect: setBankDecisionState,
-      state: bankDecisionState,
-      action: ActionTypes.DECIDE_BANK,
-    },
-    {
-      name: 'Bonds',
-      label: (percentage: string) => `Invest ${percentage}% into bonds.`,
-      effect: setBondsDecisionState,
-      state: bondsDecisionState,
-      action: ActionTypes.DECIDE_BONDS,
-    },
-    {
-      name: 'Stocks',
-      label: (percentage: string) => `Invest ${percentage}% into stocks.`,
-      effect: setStockDecisionState,
-      state: stockDecisionState,
-      action: ActionTypes.DECIDE_STOCK,
-    },
-  ]
-
   const [performAction, updatedPlayerResult] = useMutation(
     PerformActionDocument,
     {
@@ -56,13 +32,75 @@ function Cockpit() {
     }
   )
 
-  // <Table columns={columns} data={data} caption="Table with example data" />
+  const resultFacts = playerState.data?.result?.playerResult?.facts
+  const currentGame = playerState?.data?.result?.currentGame
+  const self = playerState?.data?.self
+
+  if (!currentGame) return null
+
+  const decisions = [
+    {
+      name: 'Bank',
+      label: (percentage: number, totalAssets: number) =>
+        `Invest ${(percentage * 100).toFixed()}% (CHF ${(
+          totalAssets * percentage
+        ).toFixed(2)}) into bank.`,
+      effect: setBankDecisionState,
+      state: bankDecisionState,
+      action: ActionTypes.DECIDE_BANK,
+    },
+    {
+      name: 'Bonds',
+      label: (percentage: number, totalAssets: number) =>
+        `Invest ${(percentage * 100).toFixed()}% (CHF ${(
+          totalAssets * percentage
+        ).toFixed(2)}) into bonds.`,
+      effect: setBondsDecisionState,
+      state: bondsDecisionState,
+      action: ActionTypes.DECIDE_BONDS,
+    },
+    {
+      name: 'Stocks',
+      label: (percentage: number, totalAssets: number) =>
+        `Invest ${(percentage * 100).toFixed()}% (CHF ${(
+          totalAssets * percentage
+        ).toFixed(2)}) into stocks.`,
+      effect: setStockDecisionState,
+      state: stockDecisionState,
+      action: ActionTypes.DECIDE_STOCK,
+    },
+  ]
 
   const columns_segment_results = [
-    { label: 'Category', accessor: 'cat', sortable: false },
-    { label: 'Month 1', accessor: 'mon1', sortable: false },
-    { label: 'Month 2', accessor: 'mon2', sortable: false },
-    { label: 'Month 3', accessor: 'mon2', sortable: false },
+    { label: '', accessor: 'cat', sortable: false },
+    {
+      label: 'Initial',
+      accessor: 0,
+      sortable: false,
+      transformer: (val, row) =>
+        typeof val === 'number' && `CHF ${val.toFixed(2)}`,
+    },
+    {
+      label: 'Month 1',
+      accessor: 1,
+      sortable: false,
+      transformer: (val, row) =>
+        typeof val === 'number' && `CHF ${val.toFixed(2)}`,
+    },
+    {
+      label: 'Month 2',
+      accessor: 2,
+      sortable: false,
+      transformer: (val, row) =>
+        typeof val === 'number' && `CHF ${val.toFixed(2)}`,
+    },
+    {
+      label: 'Month 3',
+      accessor: 3,
+      sortable: false,
+      transformer: (val, row) =>
+        typeof val === 'number' && `CHF ${val.toFixed(2)}`,
+    },
   ]
 
   const columns_portfolio = [
@@ -70,34 +108,89 @@ function Cockpit() {
     { label: 'Value', accessor: 'val', sortable: false },
   ]
 
+  const bankResults = Object.values(resultFacts.assetsWithReturns ?? {}).reduce(
+    (acc, value) => {
+      return {
+        ...acc,
+        [value.ix]: value.bank,
+      }
+    },
+    { cat: 'Savings' }
+  )
+
+  const bondsResults = Object.values(
+    resultFacts.assetsWithReturns ?? {}
+  ).reduce(
+    (acc, value) => {
+      return {
+        ...acc,
+        [value.ix]: value.bonds,
+      }
+    },
+    { cat: 'Bonds' }
+  )
+
+  const stocksResults = Object.values(
+    resultFacts.assetsWithReturns ?? {}
+  ).reduce(
+    (acc, value) => {
+      return {
+        ...acc,
+        [value.ix]: value.stocks,
+      }
+    },
+    { cat: 'Stocks' }
+  )
+
+  const totalResults = Object.values(
+    resultFacts.assetsWithReturns ?? {}
+  ).reduce(
+    (acc, value) => {
+      return {
+        ...acc,
+        [value.ix]: value.totalAssets,
+      }
+    },
+    { cat: 'Total' }
+  )
+
   const data_segment_results = [
-    { cat: 'Portfolio: Saving', mon1: 100, mon2: 200, mon3: 300 },
-    { cat: 'Portfolio: Stocks', mon1: 100, mon2: 200, mon3: 300 },
-    { cat: 'Portfolio: Bonds', mon1: 100, mon2: 200, mon3: 300 },
+    bankResults,
+    bondsResults,
+    stocksResults,
+    totalResults,
   ]
 
   const data_portfolio = [
-    { cat: 'Portfolio: Saving', val: 100 },
-    { cat: 'Portfolio: Stocks', val: 100 },
-    { cat: 'Portfolio: Bonds', val: 100 },
+    {
+      cat: 'Savings',
+      val: `CHF ${resultFacts.assets.bank.toFixed(2)}`,
+    },
+    {
+      cat: 'Bonds',
+      val: `CHF ${resultFacts.assets.bonds.toFixed(2)}`,
+    },
+    {
+      cat: 'Stocks',
+      val: `CHF ${resultFacts.assets.stocks.toFixed(2)}`,
+    },
+    {
+      cat: 'Total',
+      val: `CHF ${resultFacts.assets.totalAssets.toFixed(2)}`,
+    },
   ]
-
-  console.log(playerState?.data)
 
   const header = (
     <div className="p-4 border rounded">
       <div className="font-bold">
-        Playing as {playerState?.data?.self?.name} in game{' '}
-        {playerState?.data?.result?.currentGame?.id}
+        Playing as {self?.name} in game {currentGame.id}
       </div>
 
-      <div className="">
-        Current status: {playerState?.data?.result?.currentGame?.status}
-      </div>
+      <div className="">Current status: {currentGame.status}</div>
     </div>
   )
 
-  switch (playerState?.data?.result?.currentGame?.status) {
+  switch (currentGame?.status) {
     case 'PREPARATION':
       return <div>{header} Game is begin prepared.</div>
 
@@ -145,28 +238,26 @@ function Cockpit() {
           <div className="p-4 border rounded">
             {decisions.map(function (decision, i) {
               return (
-                <div className="p-1">
+                <div className="p-1" key={decision.name}>
                   <Switch
                     label={decision.label(
                       decision.state
-                        ? Math.round(
-                            (1 /
-                              (+bankDecisionState +
-                                +bondsDecisionState +
-                                +stockDecisionState)) *
-                              100
-                          ).toString()
-                        : '0'
+                        ? 1 /
+                            (+bankDecisionState +
+                              +bondsDecisionState +
+                              +stockDecisionState)
+                        : 0,
+                      resultFacts.assets.totalAssets
                     )}
                     checked={decision.state}
                     id="switch"
-                    onCheckedChange={async (cheked) => {
-                      decision.effect(cheked)
+                    onCheckedChange={async (checked) => {
+                      decision.effect(checked)
                       await performAction({
                         variables: {
                           type: decision.action,
                           payload: JSON.stringify({
-                            decision: cheked,
+                            decision: checked,
                           }),
                         },
                       })

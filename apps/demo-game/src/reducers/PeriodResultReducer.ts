@@ -31,6 +31,7 @@ export function apply(state: any, action: Actions) {
             bank: INITIAL_CAPITAL,
             bonds: 0,
             stocks: 0,
+            totalAssets: INITIAL_CAPITAL,
           },
         },
         events: [],

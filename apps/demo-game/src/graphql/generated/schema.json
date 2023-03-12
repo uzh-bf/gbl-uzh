@@ -1466,7 +1466,7 @@
               "name": "PeriodFactsScenarioInput",
               "ofType": null
             },
-            "defaultValue": "{bankReturn: 0.002, gapBonds: 0.005, gapStocks: 0.0025, seed: 0, trendBonds: 0.0033, trendStocks: 0.0067}",
+            "defaultValue": "{bankReturn: 0.002, gapBonds: 0.005, gapStocks: 0.025, seed: 0, trendBonds: 0.0031, trendStocks: 0.0065}",
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -1513,7 +1513,7 @@
               "name": "Float",
               "ofType": null
             },
-            "defaultValue": "0.0025",
+            "defaultValue": "0.025",
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1537,7 +1537,7 @@
               "name": "Float",
               "ofType": null
             },
-            "defaultValue": "0.0033",
+            "defaultValue": "0.0031",
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1549,7 +1549,7 @@
               "name": "Float",
               "ofType": null
             },
-            "defaultValue": "0.0067",
+            "defaultValue": "0.0065",
             "isDeprecated": false,
             "deprecationReason": null
           }
