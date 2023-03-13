@@ -211,8 +211,7 @@ function Home() {
             </Button>
           </HomeSection.Content>
           <HomeSection.Hero
-            // src="/images/DSC01773_cut1.jpg"
-            src="/images/DSC01773_cut1.jpg"
+            src="/images/DSC01645_cut1.jpg"
             className="saturate-50"
           />
         </HomeSection>
@@ -251,10 +250,7 @@ function Home() {
               <p className="mt-4 italic">Eric Klopfer, MIT</p>
             </Prose>
           </HomeSection.Content>
-          <HomeSection.Hero
-            src="/images/DSC01645_cut1.jpg"
-            className="saturate-50"
-          />
+          <HomeSection.Hero src="/images/hero_1.jpg" className="saturate-50" />
         </HomeSection>
       </Content>
     </PageWithHeader>
