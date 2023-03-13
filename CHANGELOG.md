@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.1](https://github.com/uzh-bf/gbl-uzh/compare/v0.3.0...v0.3.1) (2023-03-13)
+
+
+### Deployment
+
+* **apps/demo-game:** add basic dockerfile and fix prisma copy script to work in non-monorepo setting ([38f91e8](https://github.com/uzh-bf/gbl-uzh/commit/38f91e89bf45726b34f0a4f995c322a3a6b87f5f))
+* **apps/demo-game:** fix docker build ([a70c13a](https://github.com/uzh-bf/gbl-uzh/commit/a70c13aff14cb6667f4808300c12236b626982c1))
+
+
+### Other
+
+* **apps/demo-game:** add production db commands ([7964295](https://github.com/uzh-bf/gbl-uzh/commit/796429524bff4a16cd43a908f812b2ca2b751751))
+* new prisma setup and create initial migration ([21e06ae](https://github.com/uzh-bf/gbl-uzh/commit/21e06ae1dad6ad19cd70ebb5f1221a1af47fc17a))
+
+
+### Dependencies
+
+* upgrade all dependencies ([aeb2a41](https://github.com/uzh-bf/gbl-uzh/commit/aeb2a41c266a00725382c8ed8d4bbaba25e0c816))
+
 ## [0.3.0](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.10...v0.3.0) (2023-03-13)
 
 
