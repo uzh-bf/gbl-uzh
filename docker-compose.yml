@@ -1,10 +1,10 @@
 services:
   postgres:
-    image: postgres:14.3
+    image: docker.io/library/postgres:15
     environment:
-      POSTGRES_USER: demo
-      POSTGRES_PASSWORD: demo
-      POSTGRES_DB: demo
+      POSTGRES_USER: prisma
+      POSTGRES_PASSWORD: prisma
+      POSTGRES_DB: prisma
     ports:
       - 5432:5432
     networks:
