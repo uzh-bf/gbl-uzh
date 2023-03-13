@@ -3,7 +3,6 @@
   "version": "0.2.14",
   "description": "Game-Based Learning at the University of Zurich",
   "homepage": "https://www.gbl.uzh.ch",
-  "license": "AGPL-3.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/uzh-bf/gbl-uzh.git"
