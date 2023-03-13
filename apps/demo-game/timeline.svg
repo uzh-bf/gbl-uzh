@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 802 470" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Artboard1" transform="matrix(1.03155,0,0,1.03643,-13.8403,-12.3444)">
+        <rect x="13.417" y="11.91" width="776.878" height="453.447" style="fill:none;"/>
+        <clipPath id="_clip1">
+            <rect x="13.417" y="11.91" width="776.878" height="453.447"/>
+        </clipPath>
+        <g clip-path="url(#_clip1)">
+            <g transform="matrix(0.969414,0,0,0.964849,13.417,11.9105)">
+                <rect x="0" y="0" width="801.39" height="469.967" style="fill:rgb(45,45,45);"/>
+                <path d="M798.39,6L801.39,-0L804.39,6L798.39,6Z"/>
+                <path d="M801.39,-0L-0,-0L-0,469.967L801.39,469.967L801.39,4.8" style="fill:none;stroke:black;stroke-width:1px;"/>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,10.1622,96.7061)">
+                <g transform="matrix(0.996435,0,0,1.85556,-21.9422,-100.521)">
+                    <rect x="59.685" y="184.14" width="203.753" height="32.688" style="fill:rgb(193,228,255);"/>
+                </g>
+                <g transform="matrix(0.388592,0,0,1.85556,29.9545,-82.5424)">
+                    <rect x="59.685" y="184.14" width="203.753" height="32.688" style="fill:rgb(242,143,171);"/>
+                </g>
+                <g transform="matrix(0.388592,0,0,1.85556,118.938,-82.5424)">
+                    <rect x="59.685" y="184.14" width="203.753" height="32.688" style="fill:rgb(242,143,171);"/>
+                </g>
+            </g>
+            <g transform="matrix(4.45139e-17,-0.723545,2.0424,1.24472e-16,-334.714,307.105)">
+                <rect x="59.685" y="184.14" width="203.753" height="32.688" style="fill:rgb(193,228,255);"/>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,10.1622,96.7061)">
+                <g transform="matrix(1,-0,-0,1,3.35749,-87.8848)">
+                    <use xlink:href="#_Image2" x="558.791" y="329.067" width="183.468px" height="78.983px" transform="matrix(0.997108,0,0,0.999787,0,0)"/>
+                </g>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,10.1622,96.7061)">
+                <g transform="matrix(1.41355,0,0,1.85556,172.17,-100.521)">
+                    <rect x="59.685" y="184.14" width="203.753" height="32.688" style="fill:rgb(193,228,255);"/>
+                </g>
+                <g transform="matrix(0.388592,0,0,1.85556,248.962,-82.5424)">
+                    <rect x="59.685" y="184.14" width="203.753" height="32.688" style="fill:rgb(242,143,171);"/>
+                </g>
+                <g transform="matrix(0.388592,0,0,1.85556,337.945,-82.5424)">
+                    <rect x="59.685" y="184.14" width="203.753" height="32.688" style="fill:rgb(242,143,171);"/>
+                </g>
+                <g transform="matrix(0.388592,0,0,1.85556,427.654,-82.5424)">
+                    <rect x="59.685" y="184.14" width="203.753" height="32.688" style="fill:rgb(242,143,171);"/>
+                </g>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,20.7036,-38.1316)">
+                <text x="17.191px" y="95.157px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:24px;fill:white;">GBL<tspan x="64.324px 70.992px " y="95.157px 95.157px "> P</tspan>latform</text>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,81.6504,-151.086)">
+                <text x="45.831px" y="304.589px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:12px;fill:white;">PERIOD_RESUL<tspan x="137.636px 144.966px " y="304.589px 304.589px ">TS</tspan>_INITIALIZE</text>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,81.6504,-168.952)">
+                <text x="45.831px" y="304.589px" style="font-family:'Arial-BoldMT', 'Arial', sans-serif;font-weight:700;font-size:12px;fill:white;">PERIOD_INITIALIZE</text>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,81.6504,-32.2635)">
+                <text x="45.831px" y="304.589px" style="font-family:'Arial-BoldMT', 'Arial', sans-serif;font-weight:700;font-size:12px;fill:white;">PERIOD_CONSOLIDA<tspan x="169.622px 176.952px " y="304.589px 304.589px ">TE</tspan></text>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,81.6504,-49.1071)">
+                <text x="45.831px" y="304.589px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:12px;fill:white;">PERIOD_RESUL<tspan x="137.636px 144.966px " y="304.589px 304.589px ">TS</tspan>_END</text>
+            </g>
+            <g transform="matrix(4.45139e-17,-0.723545,2.0424,1.24472e-16,-22.9441,307.111)">
+                <rect x="59.685" y="184.14" width="203.753" height="32.688" style="fill:rgb(242,143,171);"/>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,399.852,-137.979)">
+                <text x="45.831px" y="304.589px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:12px;fill:white;">SEGMENT_RESUL<tspan x="150.966px 158.296px " y="304.589px 304.589px ">TS</tspan>_ST<tspan x="187.417px 195.421px 203.87px " y="304.589px 304.589px 304.589px ">ART</tspan></text>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,399.852,-153.83)">
+                <text x="45.831px" y="304.589px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:12px;fill:white;">SEGMENT_RESUL<tspan x="150.966px 158.296px " y="304.589px 304.589px ">TS</tspan>_INITIALIZE</text>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,399.852,-168.952)">
+                <text x="45.831px" y="304.589px" style="font-family:'Arial-BoldMT', 'Arial', sans-serif;font-weight:700;font-size:12px;fill:white;">SEGMENT_INITIALIZE</text>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,399.852,-32.2635)">
+                <text x="45.831px" y="304.589px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:12px;fill:white;">SEGEMENTS_RESUL<tspan x="166.974px 174.304px " y="304.589px 304.589px ">TS</tspan>_END</text>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,26.5756,32.2326)">
+                <path d="M416.089,87.339L416.089,240.128" style="fill:none;"/>
+                <g transform="matrix(1,-0,-0,1,-13.5738,-21.0625)">
+                    <path d="M432.663,255.191L429.663,261.191L426.663,255.191L432.663,255.191Z" style="fill:white;"/>
+                    <path d="M429.663,108.401L429.663,256.391" style="fill:none;stroke:white;stroke-width:1px;"/>
+                </g>
+            </g>
+            <g transform="matrix(2.65311e-16,-0.964849,4.33286,5.908e-17,-337.052,822.53)">
+                <g transform="matrix(1.36998e-17,0.223735,-1,6.12323e-17,840.152,80.8863)">
+                    <path d="M705.743,421.062L711.743,424.062L705.743,427.062L705.743,421.062Z" style="fill:white;"/>
+                    <path d="M28.84,424.062L706.943,424.062" style="fill:none;stroke:white;stroke-width:1px;"/>
+                </g>
+            </g>
+            <g transform="matrix(0.969414,0,0,0.964849,-286.419,32.2326)">
+                <path d="M416.089,87.339L416.089,240.128" style="fill:none;"/>
+                <g transform="matrix(1,-0,-0,1,309.296,-21.0625)">
+                    <path d="M109.793,255.191L106.793,261.191L103.793,255.191L109.793,255.191Z" style="fill:white;"/>
+                    <path d="M106.793,108.401L106.793,256.391" style="fill:none;stroke:white;stroke-width:1px;"/>
+                </g>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <image id="_Image2" width="184px" height="79px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALgAAABPCAYAAABYpA9mAAAACXBIWXMAAA7EAAAOxAGVKw4bAAADlUlEQVR4nO2dMW5USRCG/xqNBN6MxAkB2pQLkLJHsLSn4A5cg7sQOES7BMRIEFp2RAiLHLiLoLuf22/eeMwYs/jn+6zR9FR3Vfe8+Sw7mNKL1x8/pzIVSilSUpFSSqUisj5nkdRjpcXqnJQKFWVoGteVKUm1binKrDlqjyy1pjIVpUzxax9DTq+psW7fp63JTJWW08fZ4jnMz2OZeaMcSRvzS7FdOfP5781Z2vumOeM12idn6dptO/u2z2Ieu0nO0ue1lLN+8PAPKS6FjbiUJKMolMositAk+yi/pliVOaM00etcdoElZSlXJe+CzgTPYbxV/lL3VJuP+dx3ynaTX4R9pb/LPef7rVaraRwRGzl9flvOkui9zvgelmr380TEFfl7/R6TdOUcnTGvj/s+ETHFRsYzL7G6dhbgnoPgYA2CgzUIDtYgOFiD4GANgoM1CA7WIDhYg+BgDYKDNQgO1iA4WIPgYA2CgzUIDtasb5P86OSrHr/9V0WSImqvgaQM1XaHlDJSRSFlqvQvyUfUnp+UMkJl6A1qbRLKDGVIJbPV63OtpyFSStWa0151voyHrJ0Yw4t2QPX4lQXbErcvg1+aWwleDWvaRZVYitb6FjWeodoG154jWk5fklOpaV5tXNTWS4pWIzSsl5Rd5xhi2lwXw4teZ2oGKbOEWIiP6zcvw17y8/fzzuESgzUIDtYgOFiD4GANgoM1CA7WIDhYg+BgDYKDNQgO1iA4WIPgYA2CgzUIDtYgOFiD4GANgoM1CA7WIDhYg+BgDYKDNQgO1iA4WIPgYA2CgzUIDtYgOFiD4GANgoM1CA7WIDhYg+BgDYKDNQgO1iA4WIPgYA2CgzUIDtYgOFiD4GDN+v27N9LlPYTrPU37zVnrfYvbjV01xVIpZerJl7Ue/+QDO3F2dqZSSr378/CQNI1Xq5UODw//55PeX9avXr7Y+wbVf/35NJ89//tHnue34vj4WOfn59de/4ODgzw6OvpZR7KDf1HAGgQHaxAcrEFwsAbBwRoEB2sQHKxBcLAGwcEaBAdrEBysQXCwBsHBGgQHaxAcrEFwsGZ9m+RP/33WPycflO0r+5lSxmVvUO1NiaFfSOq9QbmxvsdTmbERl6b+oim/x/rrMpvbuu+O2NKeObyjcVzaruPcUmz+I0mlFO3i4uJCp6en13b9zGP9udcf9+lre2xXrV3xsf5SbBwv7bmUu89Zlt6nJH0Do0OM5VXqZeIAAAAASUVORK5CYII="/>
+    </defs>
+</svg>

@@ -1,0 +1,7 @@
+#import "./FGameData.graphql"
+
+query Games {
+  games {
+    ...GameData
+  }
+}

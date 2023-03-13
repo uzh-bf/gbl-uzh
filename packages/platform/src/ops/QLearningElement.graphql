@@ -1,0 +1,19 @@
+#import "./FLearningElementData.graphql"
+
+query LearningElement($id: ID!) {
+  learningElement(id: $id) {
+    id
+
+    element {
+      ...LearningElementData
+
+      options {
+        content
+      }
+    }
+
+    state
+
+    solution
+  }
+}

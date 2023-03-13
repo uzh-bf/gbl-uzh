@@ -1,0 +1,17 @@
+fragment ResultData on PlayerResult {
+  id
+
+  type
+
+  facts
+
+  period {
+    id
+    index
+  }
+
+  segment {
+    id
+    index
+  }
+}

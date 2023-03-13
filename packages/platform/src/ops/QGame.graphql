@@ -1,0 +1,37 @@
+#import "./FGameData.graphql"
+#import "./FPeriodData.graphql"
+#import "./FPlayerData.graphql"
+
+query Game($id: Int) {
+  game(id: $id) {
+    ...GameData
+    activePeriod {
+      id
+      activeSegmentIx
+      segments {
+        id
+      }
+    }
+    periods {
+      ...PeriodData
+    }
+    players {
+       id
+
+      isReady
+
+      role
+
+      name
+      avatar
+      location
+      color
+
+      facts
+
+      experience
+      experienceToNext
+      token
+    }
+  }
+}

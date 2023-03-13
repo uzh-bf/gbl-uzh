@@ -2,6 +2,61 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.14](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.13...v0.2.14) (2023-01-06)
+
+
+### Bug Fixes
+
+* advisor ([d53d3c6](https://github.com/uzh-bf/gbl-uzh/commit/d53d3c64dbd62644c34e3df02dcd00c72119480a))
+* build graphql codegen ops in game instead of import platform ([a30fd88](https://github.com/uzh-bf/gbl-uzh/commit/a30fd8867e40ce9af509093403bca2acc8e8b0ae))
+* **packages/platform:** allow null return in Game for players and periods ([dedb286](https://github.com/uzh-bf/gbl-uzh/commit/dedb28616edd7f999d11759827ad44250ab5024b))
+
+### [0.2.13](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.12...v0.2.13) (2023-01-05)
+
+
+### Bug Fixes
+
+* **packages/platform:** embed graphql documents in platform dist ([89c5692](https://github.com/uzh-bf/gbl-uzh/commit/89c5692f1a4b08d76090ec538a41360e884eb3b0))
+
+
+### Other
+
+* **apps/demo-game:** name2 ([53a2e3d](https://github.com/uzh-bf/gbl-uzh/commit/53a2e3dc083bc7985d7a5e78f845fbb0008ea33b))
+* lockfile maintenance ([806405c](https://github.com/uzh-bf/gbl-uzh/commit/806405c89181113b57eca0da6adeef7941b7b5d5))
+
+### [0.2.12](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.11...v0.2.12) (2023-01-04)
+
+
+### Other
+
+* **apps/website:** upgrade packages and design system ([#20](https://github.com/uzh-bf/gbl-uzh/issues/20)) ([b904e60](https://github.com/uzh-bf/gbl-uzh/commit/b904e602a6cfa664ee749eddb68d45d309bff4a3))
+* kb submodule ([82a2411](https://github.com/uzh-bf/gbl-uzh/commit/82a24119c00fab0052bc0318e7ff6c8bc95205d7))
+* lockfile maintenance ([98743d1](https://github.com/uzh-bf/gbl-uzh/commit/98743d11b529622f27fc8d13fa3684691f546425))
+* lockfile maintenance ([b154d67](https://github.com/uzh-bf/gbl-uzh/commit/b154d67ec54764c6215e79cf422f1a51c3068a98))
+* submodule update ([bd2661c](https://github.com/uzh-bf/gbl-uzh/commit/bd2661cd625d2a63c79c265f5816ccc28277c038))
+
+### [0.2.11](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.10...v0.2.11) (2022-11-13)
+
+
+### Bug Fixes
+
+* ts-node-dev ([6350145](https://github.com/uzh-bf/gbl-uzh/commit/6350145edd5fb98da88c36267cd53203a2a57cb6))
+* **website:** add fonts css to globals.css ([e3275b5](https://github.com/uzh-bf/gbl-uzh/commit/e3275b510cfb9a747010b35c9bf2820bfca07f54))
+
+
+### Dependencies
+
+* upgrade minor stuff ([19107b2](https://github.com/uzh-bf/gbl-uzh/commit/19107b2df891531fdf6947e5f85efc6ed42bbc8d))
+* upgrade standard-version and package.json metadata ([b47f613](https://github.com/uzh-bf/gbl-uzh/commit/b47f61343793aae7000cc74fd1982ebbd1a996cb))
+
+
+### Other
+
+* **kb:** submodule update ([3b242a1](https://github.com/uzh-bf/gbl-uzh/commit/3b242a13b89e68bc3120d9352ae78b88b49a19b2))
+* submodule maintenance ([59a7392](https://github.com/uzh-bf/gbl-uzh/commit/59a7392066cf86c1d1329b9e910c19d9503b2160))
+* update node version in volta ([03931e8](https://github.com/uzh-bf/gbl-uzh/commit/03931e89853a6dc70094c16f61d3187500f368f6))
+* **website:** upgrade dependencies ([47e52f3](https://github.com/uzh-bf/gbl-uzh/commit/47e52f3462f6088d8726d6716f1638734328ddab))
+
 ### [0.2.10](https://github.com/uzh-bf/gbl-uzh/compare/v0.2.9...v0.2.10) (2022-07-18)
 
 

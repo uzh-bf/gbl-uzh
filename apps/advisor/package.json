@@ -1,0 +1,14 @@
+{
+  "name": "@gbl-uzh/advisor",
+  "version": "0.2.14",
+  "license": "AGPL-3.0",
+  "description": "",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "compile": "NODE_ENV=production npx tailwindcss -i ./advisor.css -o ./advisor_out.css --minify",
+    "serve": "npx serve"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  }
+}

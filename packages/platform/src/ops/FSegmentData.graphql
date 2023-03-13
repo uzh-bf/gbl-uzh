@@ -1,0 +1,15 @@
+fragment SegmentData on PeriodSegment {
+  id
+
+  index
+
+  facts
+
+  learningElements {
+    id
+  }
+
+  storyElements {
+    id
+  }
+}

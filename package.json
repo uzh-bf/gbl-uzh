@@ -1,9 +1,8 @@
 {
   "name": "@gbl-uzh/monorepo",
-  "version": "0.2.10",
+  "version": "0.2.14",
   "description": "Game-Based Learning at the University of Zurich",
-  "homepage": "www.gbl.uzh.ch",
-  "license": "AGPL-3.0",
+  "homepage": "https://www.gbl.uzh.ch",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/uzh-bf/gbl-uzh.git"
@@ -28,10 +27,16 @@
     "David Schmocker <david.schmocker@uzh.ch>",
     "Johann Gandolfo <johann.gandolfo@bf.uzh.ch>"
   ],
-  "dependencies": {
-    "standard-version": "9.5.0"
+  "devDependencies": {
+    "standard-version": "9.5.0",
+    "turbo": "1.6.3"
   },
   "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "publish": "turbo run publish",
+    "format": "turbo run format",
+    "start": "turbo run start",
     "release": "standard-version --no-verify",
     "release:dry": "standard-version --dry-run",
     "release:alpha": "standard-version --prerelease alpha --no-verify",
@@ -42,6 +47,14 @@
     "release:rc:dry": "standard-version --dry-run --prerelease rc"
   },
   "volta": {
-    "node": "18.12.0"
-  }
+    "node": "18.14.0"
+  },
+  "packageManager": "npm@8.19.2",
+  "engines": {
+    "node": "=18"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
 }

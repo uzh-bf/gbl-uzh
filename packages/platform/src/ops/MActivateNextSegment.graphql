@@ -1,0 +1,41 @@
+#import "./FPeriodData.graphql"
+#import "./FPlayerData.graphql"
+
+mutation ActivateNextSegment($gameId: Int!) {
+  activateNextSegment(gameId: $gameId) {
+    ...GameData
+    periods {
+      id
+
+      index
+      activeSegmentIx
+
+      facts
+
+      segments {
+        id
+
+        index
+
+        facts
+      }
+    }
+    players {
+      id
+
+      isReady
+
+      role
+
+      name
+      avatar
+      location
+      color
+
+      facts
+
+      experience
+      experienceToNext
+    }
+  }
+}

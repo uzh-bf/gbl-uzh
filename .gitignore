@@ -1,12 +1,6 @@
 .vscode/
 node_modules/
 
-website/.next/
-website/out/
-website/build/
-website/.vercel/
-website/public/images/responsive*
-
 .DS_Store
 *.pem
 
@@ -18,3 +12,5 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+
+.turbo/

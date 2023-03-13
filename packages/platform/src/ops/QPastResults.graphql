@@ -1,0 +1,40 @@
+#import "./FResultData.graphql"
+
+query PastResults {
+  result {
+    currentGame {
+      id
+      status
+    }
+  }
+  pastResults {
+    ...ResultData
+    player {
+      id
+
+      role
+
+      name
+      avatar
+      color
+
+      facts
+
+      experience
+      experienceToNext
+
+      level {
+        id
+        index
+      }
+
+      completedLearningElementIds
+      visitedStoryElementIds
+    }
+    period {
+      id
+      index
+      facts
+    }
+  }
+}

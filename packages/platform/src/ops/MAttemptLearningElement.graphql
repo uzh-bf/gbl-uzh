@@ -1,0 +1,18 @@
+mutation AttemptLearningElement($elementId: ID!, $selection: String!) {
+  attemptLearningElement(elementId: $elementId, selection: $selection) {
+    id
+
+    pointsAchieved
+    pointsMax
+
+    element {
+      id
+      feedback
+    }
+
+    player {
+      id
+      completedLearningElementIds
+    }
+  }
+}

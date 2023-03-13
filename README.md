@@ -12,10 +12,10 @@ For more details on our future plans, have a look at our [Roadmap](https://www.g
 
 The `gbl-uzh` project consists of two key components:
 
-- The `GBL Website` (located in the `website` directory), a Next.js web application that summarizes all of the outputs of our project on a single platform. The `GBL Website` is hosted publicly on <https://www.gbl.uzh.ch>.
+- The `GBL Website` (located in the `apps/website` directory), a Next.js web application that summarizes all of the outputs of our project on a single site. The `GBL Website` is hosted publicly on <https://www.gbl.uzh.ch>.
 - The `GBL Knowledge Base` (located in the `kb` directory as a Git submodule), an [Obsidian](https://obsidian.md/) knowledge graph that contains the knowledge on gamification and game-based learning that we gather and curate throughout this and other projects. The knowledge base also serves as a Content Management System (CMS) for the `GBL Website`. The `GBL Knowledge Base` is publicly accessible on <https://www.gbl.uzh.ch/kb>.
-
-Future components include technical frameworks for building learning games, as well as other resources that support the development workflow.
+- The `GBL Advisor` (located in the `apps/advisor` directory), an advisory wizard for getting started in the space of Game-Based Learning as a teacher. The advisor is built on the Twinery text-based serious game engine.
+- The `GBL Platform` (located in the `packages/platform` directory), a code framework for building round-based simulations with Next.js and React.
 
 ## Contributing
 
