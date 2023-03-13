@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  compress: false,
+  output: 'standalone',
   reactStrictMode: true,
   swcMinify: true,
   typescript: {
