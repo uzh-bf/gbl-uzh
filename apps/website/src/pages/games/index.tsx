@@ -1,4 +1,6 @@
-import { H1, H2, Prose } from '@uzh-bf/design-system'
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button, H1, H2, Prose } from '@uzh-bf/design-system'
 import { sortBy } from 'ramda'
 import TitleBackground from '../../components/common/TitleBackground'
 import Content from '../../components/Content'
@@ -21,15 +23,15 @@ function GBLinUse({ sourceArr }: Props) {
 
       <Content>
         <div>
-          <H2>Games</H2>
+          <H2>Serious games and simulations developed at UZH</H2>
           <Prose className={{ root: 'max-w-none' }}>
-            Simulations and Serious Games that have been developed or are being
+            Serious games and simulations that have been developed or are being
             developed at institutions of the University of Zurich.
           </Prose>
           <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2 md:grid-cols-3">
             {sortBy(
               ({ frontmatter }: any) => frontmatter.title,
-              sourceArr[0]
+              sourceArr[0].filter((item) => !item.frontmatter.external)
             ).map(({ frontmatter }) => (
               <GameCard
                 key={frontmatter.title}
@@ -39,6 +41,43 @@ function GBLinUse({ sourceArr }: Props) {
                 imgSrc={frontmatter.imgSrc}
               />
             ))}
+            <a href="https://forms.office.com/e/UL1CWut5ya" target="_blank">
+              <Button fluid className={{ root: 'h-full flex-col text-lg' }}>
+                <Button.Icon>
+                  <FontAwesomeIcon icon={faPlus} />
+                </Button.Icon>
+                <Button.Label>Submit your own game</Button.Label>
+              </Button>
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-4 md:mt-8">
+          <H2>Serious games and simulations developed at other institutions</H2>
+          <Prose className={{ root: 'max-w-none' }}>
+            Serious games and simulations of other educational institutions.
+          </Prose>
+          <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2 md:grid-cols-3">
+            {sortBy(
+              ({ frontmatter }: any) => frontmatter.title,
+              sourceArr[0].filter((item) => item.frontmatter.external)
+            ).map(({ frontmatter }) => (
+              <GameCard
+                key={frontmatter.title}
+                name={frontmatter.title}
+                tags={frontmatter.tags}
+                linkHref={`/games/${frontmatter.slug}`}
+                imgSrc={frontmatter.imgSrc}
+              />
+            ))}
+            <a href="https://forms.office.com/e/UL1CWut5ya" target="_blank">
+              <Button fluid className={{ root: 'h-full flex-col text-lg' }}>
+                <Button.Icon>
+                  <FontAwesomeIcon icon={faPlus} />
+                </Button.Icon>
+                <Button.Label>Submit your own game</Button.Label>
+              </Button>
+            </a>
           </div>
         </div>
 
@@ -61,6 +100,15 @@ function GBLinUse({ sourceArr }: Props) {
                 description={source}
               />
             ))}
+
+            <a href="https://forms.office.com/e/nieHr9d1EX" target="_blank">
+              <Button fluid className={{ root: 'h-full text-lg gap-4' }}>
+                <Button.Icon>
+                  <FontAwesomeIcon icon={faPlus} />
+                </Button.Icon>
+                <Button.Label>Submit your own course</Button.Label>
+              </Button>
+            </a>
           </div>
         </div>
       </Content>
