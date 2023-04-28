@@ -25,12 +25,14 @@ interface HomeSectionContentProps {
   title: string
   content?: string
   children?: React.ReactNode
+  className?: string
 }
 
 HomeSection.Content = function HomeSectionContent({
   title,
   content,
   children,
+  className,
 }: HomeSectionContentProps) {
   return (
     <div className="flex-1 w-1/2 bg-slate-100">

@@ -1,10 +1,13 @@
-import { H1 } from '@uzh-bf/design-system'
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button, H1, H2 } from '@uzh-bf/design-system'
 import { useRouter } from 'next/router'
 import { sortBy } from 'ramda'
-import Card from '../../components/common/Card'
+import { twMerge } from 'tailwind-merge'
 import TitleBackground from '../../components/common/TitleBackground'
 import Content from '../../components/Content'
 import PageWithHeader from '../../components/PageWithHeader'
+import HomeSection from '../../components/sections/HomeSection'
 import * as Util from '../../lib/util'
 
 interface Props {
@@ -14,6 +17,19 @@ interface Props {
 function GBLUseCases({ sourceArr }: Props) {
   const router = useRouter()
 
+  const useCasesDevelopment = sortBy(
+    ({ frontmatter }: any) => frontmatter.title,
+    sourceArr[0]
+  ).filter(({ frontmatter }) => frontmatter.type === 'development')
+  const useCasesSeriousGames = sortBy(
+    ({ frontmatter }: any) => frontmatter.title,
+    sourceArr[0]
+  ).filter(({ frontmatter }) => frontmatter.type === 'serious-games')
+  const useCasesSimulations = sortBy(
+    ({ frontmatter }: any) => frontmatter.title,
+    sourceArr[0]
+  ).filter(({ frontmatter }) => frontmatter.type === 'simulations')
+
   return (
     <PageWithHeader title="Use Cases">
       <TitleBackground>
@@ -21,20 +37,62 @@ function GBLUseCases({ sourceArr }: Props) {
       </TitleBackground>
 
       <Content>
-        <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2 md:grid-cols-3">
-          {sortBy(
-            ({ frontmatter }: any) => frontmatter.title,
-            sourceArr[0]
-          ).map(({ frontmatter }: any) => (
-            <Card
-              key={frontmatter.title}
-              name={frontmatter.title}
-              tags={frontmatter.tags}
-              imgSrc={frontmatter.imgSrc}
-              onClick={() => router.push(`/use-cases/${frontmatter.slug}`)}
-            />
+        <H2>Game Development</H2>
+        <div className="">
+          {useCasesDevelopment.map(({ frontmatter }: any, ix) => (
+            <HomeSection key={frontmatter.slug}>
+              <HomeSection.Content
+                className={twMerge(ix % 2 === 0 ? 'order-1' : 'order-2')}
+                title={frontmatter.title}
+                content={frontmatter.abstract}
+              >
+                <Button
+                  className={{ root: 'mt-4' }}
+                  onClick={() => router.push(`/use-cases/${frontmatter.slug}`)}
+                >
+                  <Button.Icon>
+                    <FontAwesomeIcon icon={faArrowRight} />
+                  </Button.Icon>
+                  <Button.Label>Read more</Button.Label>
+                </Button>
+              </HomeSection.Content>
+              <HomeSection.Hero
+                className={twMerge('', ix % 2 === 0 ? 'order-2' : 'order-1')}
+                src={frontmatter.imgSrc}
+              />
+            </HomeSection>
           ))}
         </div>
+
+        <H2 className={{ root: 'mt-6' }}>Simulations</H2>
+        <div className="">
+          {useCasesSimulations.map(({ frontmatter }: any, ix: number) => (
+            <HomeSection key={frontmatter.slug}>
+              <HomeSection.Content
+                className={twMerge(ix % 2 === 0 ? 'order-1' : 'order-2')}
+                title={frontmatter.title}
+                content={frontmatter.abstract}
+              >
+                <Button
+                  className={{ root: 'mt-4' }}
+                  onClick={() => router.push(`/use-cases/${frontmatter.slug}`)}
+                >
+                  <Button.Icon>
+                    <FontAwesomeIcon icon={faArrowRight} />
+                  </Button.Icon>
+                  <Button.Label>Read more</Button.Label>
+                </Button>
+              </HomeSection.Content>
+              <HomeSection.Hero
+                className={twMerge(ix % 2 === 0 ? 'order-2' : 'order-1')}
+                src={frontmatter.imgSrc}
+              />
+            </HomeSection>
+          ))}
+        </div>
+
+        {/* <H2 className={{ root: 'mt-6' }}>Serious Games</H2>
+        <div className="">Coming Soon</div> */}
       </Content>
     </PageWithHeader>
   )
