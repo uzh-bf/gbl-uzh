@@ -1,8 +1,8 @@
 import { config } from '@fortawesome/fontawesome-svg-core'
-import { Source_Sans_Pro } from '@next/font/google'
 import { init } from '@socialgouv/matomo-next'
 import { ThemeProvider } from '@uzh-bf/design-system'
 import { AppProps } from 'next/app'
+import { Source_Sans_Pro } from 'next/font/google'
 import { useEffect } from 'react'
 
 import '@fortawesome/fontawesome-svg-core/styles.css'
