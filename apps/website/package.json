@@ -8,7 +8,7 @@
     "start": "next start",
     "optimize": "node export/resizeImages.js",
     "optimize:clean": "node export/cleanup.js",
-    "export": "npm run build && next export && mkdir out/advisor && cp '../advisor/Gamification Advisor.html' out/advisor/ && cp '../advisor/advisor_out.css' out/advisor/",
+    "export": "npm run build && mkdir out/advisor && cp '../advisor/Gamification Advisor.html' out/advisor/ && cp '../advisor/advisor_out.css' out/advisor/",
     "check": "npm-run-all --parallel check:ts format:ci lint",
     "check:ts": "tsc",
     "check:fix": "npm-run-all check:ts format lint:fix",

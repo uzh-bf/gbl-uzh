@@ -31,7 +31,7 @@ function GBLinUse({ sourceArr }: Props) {
           <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2 md:grid-cols-3">
             {sortBy(
               ({ frontmatter }: any) => frontmatter.title,
-              sourceArr[0].filter((item) => !item.frontmatter.external)
+              sourceArr[0].filter((item: any) => !item.frontmatter.external)
             ).map(({ frontmatter }) => (
               <GameCard
                 key={frontmatter.title}
@@ -60,7 +60,7 @@ function GBLinUse({ sourceArr }: Props) {
           <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2 md:grid-cols-3">
             {sortBy(
               ({ frontmatter }: any) => frontmatter.title,
-              sourceArr[0].filter((item) => item.frontmatter.external)
+              sourceArr[0].filter((item: any) => item.frontmatter.external)
             ).map(({ frontmatter }) => (
               <GameCard
                 key={frontmatter.title}
