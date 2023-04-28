@@ -1,5 +1,6 @@
 import { H1, H2, Prose } from '@uzh-bf/design-system'
 import { useEffect } from 'react'
+import MelinaImage from '../../public/images/camin_melina.jpg'
 import AndrinImage from '../../public/images/rehmann_andrin.png'
 import RolandImage from '../../public/images/schlaefli_roland.jpg'
 import DavidImage from '../../public/images/schmocker_david.jpg'
@@ -90,7 +91,7 @@ function About() {
             name="Dr. David Schmocker"
             institution="Center for University Teaching and Learning, Digitalization and Innovation, University of Zurich"
             role=""
-            link="https://www.hochschuldidaktik.uzh.ch/de/aboutus/team/schmocker-david.html"
+            link="https://www.le.uzh.ch/en/about-us/Community/davidschmocker"
             imgSrc={DavidImage}
           />
 
@@ -116,6 +117,14 @@ function About() {
             role="Game Developer"
             link="https://www.bf.uzh.ch/en/persons/rehmann-andrin"
             imgSrc={AndrinImage}
+          />
+
+          <Contact
+            name="Melina Camin"
+            institution="Department of Banking and Finance, University of Zurich"
+            role="Game Developer"
+            link="https://www.bf.uzh.ch/en/persons/melina-camin"
+            imgSrc={MelinaImage}
           />
         </div>
 
