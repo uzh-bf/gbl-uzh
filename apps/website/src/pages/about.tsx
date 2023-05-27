@@ -1,7 +1,5 @@
 import { H1, H2, Prose } from '@uzh-bf/design-system'
 import { useEffect } from 'react'
-import MelinaImage from '../../public/images/camin_melina.jpg'
-import AndrinImage from '../../public/images/rehmann_andrin.png'
 import RolandImage from '../../public/images/schlaefli_roland.jpg'
 import DavidImage from '../../public/images/schmocker_david.jpg'
 import BenjaminImage from '../../public/images/wilding_benjamin.jpg'
@@ -109,22 +107,6 @@ function About() {
             role="IT Project Manager and Developer"
             link="https://www.bf.uzh.ch/en/persons/schlaefli-roland"
             imgSrc={RolandImage}
-          />
-
-          <Contact
-            name="Andrin Rehmann"
-            institution="Department of Banking and Finance, University of Zurich"
-            role="Game Developer"
-            link="https://www.bf.uzh.ch/en/persons/rehmann-andrin"
-            imgSrc={AndrinImage}
-          />
-
-          <Contact
-            name="Melina Camin"
-            institution="Department of Banking and Finance, University of Zurich"
-            role="Game Developer"
-            link="https://www.bf.uzh.ch/en/persons/melina-camin"
-            imgSrc={MelinaImage}
           />
         </div>
 
