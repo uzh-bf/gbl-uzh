@@ -1,5 +1,8 @@
 .vscode/
 node_modules/
+.turbo/
+dist/
+.parcel-cache/
 
 .DS_Store
 *.pem
@@ -12,5 +15,3 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
-
-.turbo/
