@@ -544,7 +544,11 @@ export async function getPastResults(args, ctx: Context) {
     },
     include: {
       period: true,
-      player: true,
+      player: {
+        include: {
+          level: true,
+        },
+      },
     },
   })
 
