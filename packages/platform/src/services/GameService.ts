@@ -318,7 +318,7 @@ export async function activateNextPeriod(
   })
 
   if (!game) return null
-  log.info('game found')
+  log.info(`game found, status ${game.status}`)
 
   const currentPeriodIx = game.activePeriodIx
   const currentSegmentIx = game.activePeriod?.activeSegmentIx
@@ -549,7 +549,8 @@ export async function activateNextPeriod(
     // initialize the next period and move to PREPARATION
     case GameStatus.Results: {
       // if there is no next period, return
-      if (!game.activePeriod?.nextPeriod) {
+      if (!game.activePeriod) {
+        log.warn('no next period available')
         return null
       }
 
