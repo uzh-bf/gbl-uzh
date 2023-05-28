@@ -56,5 +56,8 @@
   "workspaces": [
     "packages/*",
     "apps/*"
-  ]
+  ],
+  "dependencies": {
+    "winston": "3.9.0"
+  }
 }
