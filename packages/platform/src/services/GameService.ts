@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid'
 import { none, repeat } from 'ramda'
 import * as yup from 'yup'
 import { GameStatus, PlayerResultType } from '../generated/ops'
+import log from '../lib/logger'
 import { CtxWithFacts, CtxWithFactsAndSchema, CtxWithPrisma } from '../types'
 import * as EventService from './EventService'
 
@@ -269,6 +270,8 @@ export async function activateNextPeriod(
   ctx: Context,
   { reducers }: CtxWithFacts<any, PrismaClient>
 ) {
+  log.info('activating next period')
+
   // get the current game and as well as the results of the initially active period
   // these will be used by the model to compute the starting situation of the next period
   const game = await ctx.prisma.game.findUnique({
@@ -315,6 +318,7 @@ export async function activateNextPeriod(
   })
 
   if (!game) return null
+  log.info('game found')
 
   const currentPeriodIx = game.activePeriodIx
   const currentSegmentIx = game.activePeriod?.activeSegmentIx
@@ -480,6 +484,7 @@ export async function activateNextPeriod(
           periodFacts: game.activePeriod.facts,
           periodDecisions: game.activePeriod.decisions,
           activePeriodIx: currentPeriodIx,
+          activeSegmentIx: currentSegmentIx,
           gameId: game.id,
         },
         ctx,
@@ -722,21 +727,6 @@ export async function activateNextSegment(
         ...extras,
       ])
 
-      try {
-        await ctx.prisma.player.updateMany({
-          where: {
-            game: {
-              id: gameId,
-            },
-          },
-          data: {
-            isReady: false,
-          },
-        })
-      } catch (e) {
-        console.error(e)
-      }
-
       return result
     }
 
@@ -783,6 +773,18 @@ export async function activateNextSegment(
           },
           include: {
             results: true,
+          },
+        }),
+
+        // reset player readiness
+        ctx.prisma.player.updateMany({
+          where: {
+            game: {
+              id: gameId,
+            },
+          },
+          data: {
+            isReady: false,
           },
         }),
 
@@ -1071,6 +1073,7 @@ export async function computePeriodEndResults(
     periodDecisions,
     segmentFacts,
     activePeriodIx,
+    activeSegmentIx,
     gameId,
   },
   ctx: Context,
@@ -1102,8 +1105,11 @@ export async function computePeriodEndResults(
 
           consolidationDecisions,
           periodIx: activePeriodIx,
+          segmentIx: activeSegmentIx,
         },
       })
+
+      log.debug(actions)
 
       const mapper = mapAction({
         ctx,

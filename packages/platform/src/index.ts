@@ -1,3 +1,4 @@
+export { default as log } from './lib/logger'
 export * as AccountService from './services/AccountService'
 export * as EventService from './services/EventService'
 export * as GameService from './services/GameService'
