@@ -48,7 +48,8 @@ export enum STATUS {
 
 export function computePeriodStatus(game: Game, periodIndex: number): string {
   if (
-    game.activePeriodIx && game.status === GameStatus.Results
+    typeof game.activePeriodIx === 'number' &&
+    game.status === GameStatus.Results
       ? game.activePeriodIx - 1 === periodIndex
       : game.activePeriodIx === periodIndex
   ) {
@@ -57,7 +58,10 @@ export function computePeriodStatus(game: Game, periodIndex: number): string {
     return STATUS.ACTIVE
   }
 
-  if (game.activePeriodIx && game.activePeriodIx <= periodIndex)
+  if (
+    typeof game.activePeriodIx === 'number' &&
+    game.activePeriodIx <= periodIndex
+  )
     return STATUS.SCHEDULED
 
   return STATUS.COMPLETED
