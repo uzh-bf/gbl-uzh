@@ -61,6 +61,8 @@ export async function addGamePeriod<TFacts>(
 ) {
   const validatedFacts = schema.validateSync(facts)
 
+  console.log(gameId)
+
   const game = await ctx.prisma.game.findUnique({
     where: {
       id: gameId,
@@ -84,6 +86,8 @@ export async function addGamePeriod<TFacts>(
   })
 
   if (!game) return null
+
+  console.log(game)
 
   const index = game.periods[0]?.index + 1 || 0
 

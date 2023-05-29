@@ -5,27 +5,29 @@ export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: string;
-  String: string;
-  Boolean: boolean;
-  Int: number;
-  Float: number;
+  ID: { input: string | number; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-  DateTime: any;
+  DateTime: { input: any; output: any; }
   /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-  JSONObject: any;
+  JSONObject: { input: any; output: any; }
 };
 
 export type Achievement = {
   __typename?: 'Achievement';
-  description: Scalars['String'];
-  id: Scalars['ID'];
-  image?: Maybe<Scalars['String']>;
-  name: Scalars['String'];
-  reward?: Maybe<Scalars['JSONObject']>;
+  description: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  image?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  reward?: Maybe<Scalars['JSONObject']['output']>;
   when: AchievementFrequency;
 };
 
@@ -37,21 +39,21 @@ export enum AchievementFrequency {
 export type AchievementInstance = {
   __typename?: 'AchievementInstance';
   achievement: Achievement;
-  count: Scalars['Int'];
-  id: Scalars['Int'];
+  count: Scalars['Int']['output'];
+  id: Scalars['Int']['output'];
 };
 
 export type Event = {
   __typename?: 'Event';
-  type?: Maybe<Scalars['String']>;
+  type?: Maybe<Scalars['String']['output']>;
 };
 
 export type Game = {
   __typename?: 'Game';
   activePeriod?: Maybe<Period>;
-  activePeriodIx?: Maybe<Scalars['Int']>;
-  id: Scalars['ID'];
-  name: Scalars['String'];
+  activePeriodIx?: Maybe<Scalars['Int']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
   periods: Array<Period>;
   players: Array<Player>;
   status: GameStatus;
@@ -69,37 +71,37 @@ export enum GameStatus {
 
 export type LearningAnswerOption = {
   __typename?: 'LearningAnswerOption';
-  content: Scalars['String'];
-  correct: Scalars['Boolean'];
-  id: Scalars['ID'];
+  content: Scalars['String']['output'];
+  correct: Scalars['Boolean']['output'];
+  id: Scalars['ID']['output'];
 };
 
 export type LearningElement = {
   __typename?: 'LearningElement';
-  feedback?: Maybe<Scalars['String']>;
-  id: Scalars['ID'];
-  motivation?: Maybe<Scalars['String']>;
+  feedback?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  motivation?: Maybe<Scalars['String']['output']>;
   options: Array<LearningAnswerOption>;
-  question: Scalars['String'];
-  reward?: Maybe<Scalars['JSONObject']>;
-  title: Scalars['String'];
+  question: Scalars['String']['output'];
+  reward?: Maybe<Scalars['JSONObject']['output']>;
+  title: Scalars['String']['output'];
 };
 
 export type LearningElementAttempt = {
   __typename?: 'LearningElementAttempt';
   element?: Maybe<LearningElement>;
-  id?: Maybe<Scalars['ID']>;
+  id?: Maybe<Scalars['ID']['output']>;
   player?: Maybe<Player>;
-  pointsAchieved?: Maybe<Scalars['Int']>;
-  pointsMax?: Maybe<Scalars['Int']>;
+  pointsAchieved?: Maybe<Scalars['Int']['output']>;
+  pointsMax?: Maybe<Scalars['Int']['output']>;
 };
 
 export type LearningElementState = {
   __typename?: 'LearningElementState';
   element?: Maybe<LearningElement>;
-  id?: Maybe<Scalars['ID']>;
-  solution?: Maybe<Scalars['String']>;
-  state?: Maybe<Scalars['String']>;
+  id?: Maybe<Scalars['ID']['output']>;
+  solution?: Maybe<Scalars['String']['output']>;
+  state?: Maybe<Scalars['String']['output']>;
 };
 
 export type Mutation = {
@@ -120,162 +122,162 @@ export type Mutation = {
 
 
 export type MutationActivateNextPeriodArgs = {
-  gameId: Scalars['Int'];
+  gameId: Scalars['Int']['input'];
 };
 
 
 export type MutationActivateNextSegmentArgs = {
-  gameId: Scalars['Int'];
+  gameId: Scalars['Int']['input'];
 };
 
 
 export type MutationAddGamePeriodArgs = {
   facts: PeriodFactsInput;
-  gameId: Scalars['Int'];
+  gameId: Scalars['Int']['input'];
 };
 
 
 export type MutationAddPeriodSegmentArgs = {
   facts: PeriodSegmentFactsInput;
-  gameId: Scalars['Int'];
-  learningElements?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
-  periodIx: Scalars['Int'];
-  storyElements?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  gameId: Scalars['Int']['input'];
+  learningElements?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  periodIx: Scalars['Int']['input'];
+  storyElements?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 
 export type MutationAttemptLearningElementArgs = {
-  elementId: Scalars['ID'];
-  selection: Scalars['String'];
+  elementId: Scalars['ID']['input'];
+  selection: Scalars['String']['input'];
 };
 
 
 export type MutationCreateGameArgs = {
-  name: Scalars['String'];
-  playerCount: Scalars['Int'];
+  name: Scalars['String']['input'];
+  playerCount: Scalars['Int']['input'];
 };
 
 
 export type MutationLoginAsTeamArgs = {
-  token: Scalars['String'];
+  token: Scalars['String']['input'];
 };
 
 
 export type MutationMarkStoryElementArgs = {
-  elementId: Scalars['ID'];
+  elementId: Scalars['ID']['input'];
 };
 
 
 export type MutationPerformActionArgs = {
-  payload: Scalars['String'];
-  type: Scalars['String'];
+  payload: Scalars['String']['input'];
+  type: Scalars['String']['input'];
 };
 
 
 export type MutationSaveConsolidationDecisionArgs = {
-  payload: Scalars['String'];
+  payload: Scalars['String']['input'];
 };
 
 
 export type MutationUpdatePlayerDataArgs = {
-  avatar?: InputMaybe<Scalars['String']>;
-  color?: InputMaybe<Scalars['String']>;
-  facts?: InputMaybe<Scalars['String']>;
-  name?: InputMaybe<Scalars['String']>;
+  avatar?: InputMaybe<Scalars['String']['input']>;
+  color?: InputMaybe<Scalars['String']['input']>;
+  facts?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type MutationUpdateReadyStateArgs = {
-  isReady: Scalars['Boolean'];
+  isReady: Scalars['Boolean']['input'];
 };
 
 export type Period = {
   __typename?: 'Period';
   actions: Array<PlayerAction>;
   activeSegment?: Maybe<PeriodSegment>;
-  activeSegmentIx?: Maybe<Scalars['Int']>;
-  facts: Scalars['JSONObject'];
-  id: Scalars['ID'];
-  index: Scalars['Int'];
+  activeSegmentIx?: Maybe<Scalars['Int']['output']>;
+  facts: Scalars['JSONObject']['output'];
+  id: Scalars['ID']['output'];
+  index: Scalars['Int']['output'];
   results: Array<PlayerResult>;
   segments: Array<PeriodSegment>;
 };
 
 export type PeriodFactsInput = {
-  rollsPerSegment?: InputMaybe<Scalars['Int']>;
+  rollsPerSegment?: InputMaybe<Scalars['Int']['input']>;
   scenario?: InputMaybe<PeriodFactsScenarioInput>;
 };
 
 export type PeriodFactsScenarioInput = {
-  bankReturn?: InputMaybe<Scalars['Float']>;
-  gapBonds?: InputMaybe<Scalars['Float']>;
-  gapStocks?: InputMaybe<Scalars['Float']>;
-  seed?: InputMaybe<Scalars['Int']>;
-  trendBonds?: InputMaybe<Scalars['Float']>;
-  trendStocks?: InputMaybe<Scalars['Float']>;
+  bankReturn?: InputMaybe<Scalars['Float']['input']>;
+  gapBonds?: InputMaybe<Scalars['Float']['input']>;
+  gapStocks?: InputMaybe<Scalars['Float']['input']>;
+  seed?: InputMaybe<Scalars['Int']['input']>;
+  trendBonds?: InputMaybe<Scalars['Float']['input']>;
+  trendStocks?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type PeriodSegment = {
   __typename?: 'PeriodSegment';
   actions: Array<PlayerAction>;
-  facts: Scalars['JSONObject'];
-  id: Scalars['ID'];
-  index: Scalars['Int'];
+  facts: Scalars['JSONObject']['output'];
+  id: Scalars['ID']['output'];
+  index: Scalars['Int']['output'];
   learningElements: Array<LearningElement>;
-  periodIx: Scalars['Int'];
+  periodIx: Scalars['Int']['output'];
   results: Array<PlayerResult>;
   storyElements: Array<StoryElement>;
 };
 
 export type PeriodSegmentFactsInput = {
-  bankPercentage?: InputMaybe<Scalars['Float']>;
-  bondsPercentage?: InputMaybe<Scalars['Float']>;
-  stockPercentage?: InputMaybe<Scalars['Float']>;
+  bankPercentage?: InputMaybe<Scalars['Float']['input']>;
+  bondsPercentage?: InputMaybe<Scalars['Float']['input']>;
+  stockPercentage?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type Player = {
   __typename?: 'Player';
-  achievementIds: Array<Scalars['String']>;
-  achievementKeys: Array<Scalars['String']>;
+  achievementIds: Array<Scalars['String']['output']>;
+  achievementKeys: Array<Scalars['String']['output']>;
   achievements: Array<AchievementInstance>;
-  avatar: Scalars['String'];
-  color: Scalars['String'];
-  completedLearningElementIds: Array<Scalars['Int']>;
+  avatar: Scalars['String']['output'];
+  color: Scalars['String']['output'];
+  completedLearningElementIds: Array<Scalars['Int']['output']>;
   completedLearningElements: Array<LearningElement>;
-  experience: Scalars['Int'];
-  experienceToNext: Scalars['Int'];
-  facts: Scalars['JSONObject'];
-  id: Scalars['ID'];
-  isReady: Scalars['Boolean'];
+  experience: Scalars['Int']['output'];
+  experienceToNext: Scalars['Int']['output'];
+  facts: Scalars['JSONObject']['output'];
+  id: Scalars['ID']['output'];
+  isReady: Scalars['Boolean']['output'];
   level: PlayerLevel;
-  levelIx: Scalars['Int'];
-  location: Scalars['String'];
-  name: Scalars['String'];
-  role?: Maybe<Scalars['String']>;
-  token: Scalars['String'];
-  tutorialCompleted: Scalars['Boolean'];
-  visitedStoryElementIds: Array<Scalars['Int']>;
+  levelIx: Scalars['Int']['output'];
+  location: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  role?: Maybe<Scalars['String']['output']>;
+  token: Scalars['String']['output'];
+  tutorialCompleted: Scalars['Boolean']['output'];
+  visitedStoryElementIds: Array<Scalars['Int']['output']>;
   visitedStoryElements: Array<StoryElement>;
 };
 
 export type PlayerAction = {
   __typename?: 'PlayerAction';
-  facts?: Maybe<Scalars['JSONObject']>;
-  id: Scalars['ID'];
+  facts?: Maybe<Scalars['JSONObject']['output']>;
+  id: Scalars['ID']['output'];
   period: Period;
-  periodIx: Scalars['Int'];
+  periodIx: Scalars['Int']['output'];
   player: Player;
   segment?: Maybe<PeriodSegment>;
-  segmentIx?: Maybe<Scalars['Int']>;
-  type: Scalars['String'];
+  segmentIx?: Maybe<Scalars['Int']['output']>;
+  type: Scalars['String']['output'];
 };
 
 export type PlayerDecision = {
   __typename?: 'PlayerDecision';
-  facts: Scalars['JSONObject'];
-  id: Scalars['ID'];
+  facts: Scalars['JSONObject']['output'];
+  id: Scalars['ID']['output'];
   period: Period;
-  periodIx: Scalars['Int'];
+  periodIx: Scalars['Int']['output'];
   player: Player;
   type: PlayerDecisionType;
 };
@@ -287,16 +289,16 @@ export enum PlayerDecisionType {
 
 export type PlayerLevel = {
   __typename?: 'PlayerLevel';
-  description: Scalars['String'];
-  id: Scalars['ID'];
-  index: Scalars['Int'];
-  requiredXP: Scalars['Int'];
+  description: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  index: Scalars['Int']['output'];
+  requiredXP: Scalars['Int']['output'];
 };
 
 export type PlayerResult = {
   __typename?: 'PlayerResult';
-  facts?: Maybe<Scalars['JSONObject']>;
-  id: Scalars['ID'];
+  facts?: Maybe<Scalars['JSONObject']['output']>;
+  id: Scalars['ID']['output'];
   period: Period;
   player: Player;
   segment?: Maybe<PeriodSegment>;
@@ -332,21 +334,21 @@ export type Query = {
 
 
 export type QueryGameArgs = {
-  id?: InputMaybe<Scalars['Int']>;
+  id?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
 export type QueryLearningElementArgs = {
-  id: Scalars['ID'];
+  id: Scalars['ID']['input'];
 };
 
 export type StoryElement = {
   __typename?: 'StoryElement';
-  content?: Maybe<Scalars['String']>;
-  contentRole?: Maybe<Scalars['String']>;
-  id: Scalars['ID'];
-  reward?: Maybe<Scalars['JSONObject']>;
-  title: Scalars['String'];
+  content?: Maybe<Scalars['String']['output']>;
+  contentRole?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  reward?: Maybe<Scalars['JSONObject']['output']>;
+  title: Scalars['String']['output'];
   type: StoryElementType;
 };
 
@@ -381,21 +383,21 @@ export type ResultDataFragment = { __typename?: 'PlayerResult', id: string, type
 export type SegmentDataFragment = { __typename?: 'PeriodSegment', id: string, index: number, facts: any, learningElements: Array<{ __typename?: 'LearningElement', id: string }>, storyElements: Array<{ __typename?: 'StoryElement', id: string }> };
 
 export type ActivateNextPeriodMutationVariables = Exact<{
-  gameId: Scalars['Int'];
+  gameId: Scalars['Int']['input'];
 }>;
 
 
 export type ActivateNextPeriodMutation = { __typename?: 'Mutation', activateNextPeriod?: { __typename?: 'Game', id: string, status: GameStatus, name: string, activePeriodIx?: number | null, periods: Array<{ __typename?: 'Period', id: string, index: number, activeSegmentIx?: number | null, facts: any, segments: Array<{ __typename?: 'PeriodSegment', id: string, index: number, facts: any }> }> } | null };
 
 export type ActivateNextSegmentMutationVariables = Exact<{
-  gameId: Scalars['Int'];
+  gameId: Scalars['Int']['input'];
 }>;
 
 
 export type ActivateNextSegmentMutation = { __typename?: 'Mutation', activateNextSegment?: { __typename?: 'Game', id: string, status: GameStatus, name: string, activePeriodIx?: number | null, periods: Array<{ __typename?: 'Period', id: string, index: number, activeSegmentIx?: number | null, facts: any, segments: Array<{ __typename?: 'PeriodSegment', id: string, index: number, facts: any }> }>, players: Array<{ __typename?: 'Player', id: string, isReady: boolean, role?: string | null, name: string, avatar: string, location: string, color: string, facts: any, experience: number, experienceToNext: number }> } | null };
 
 export type AddGamePeriodMutationVariables = Exact<{
-  gameId: Scalars['Int'];
+  gameId: Scalars['Int']['input'];
   facts: PeriodFactsInput;
 }>;
 
@@ -403,80 +405,80 @@ export type AddGamePeriodMutationVariables = Exact<{
 export type AddGamePeriodMutation = { __typename?: 'Mutation', addGamePeriod?: { __typename?: 'Period', id: string, index: number, activeSegmentIx?: number | null, facts: any, segments: Array<{ __typename?: 'PeriodSegment', id: string, index: number, facts: any, learningElements: Array<{ __typename?: 'LearningElement', id: string }>, storyElements: Array<{ __typename?: 'StoryElement', id: string }> }> } | null };
 
 export type AddPeriodSegmentMutationVariables = Exact<{
-  gameId: Scalars['Int'];
-  periodIx: Scalars['Int'];
+  gameId: Scalars['Int']['input'];
+  periodIx: Scalars['Int']['input'];
   facts: PeriodSegmentFactsInput;
-  storyElements?: InputMaybe<Array<InputMaybe<Scalars['String']>> | InputMaybe<Scalars['String']>>;
-  learningElements?: InputMaybe<Array<InputMaybe<Scalars['String']>> | InputMaybe<Scalars['String']>>;
+  storyElements?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  learningElements?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
 }>;
 
 
 export type AddPeriodSegmentMutation = { __typename?: 'Mutation', addPeriodSegment?: { __typename?: 'PeriodSegment', id: string, index: number, facts: any, learningElements: Array<{ __typename?: 'LearningElement', id: string }>, storyElements: Array<{ __typename?: 'StoryElement', id: string }> } | null };
 
 export type AttemptLearningElementMutationVariables = Exact<{
-  elementId: Scalars['ID'];
-  selection: Scalars['String'];
+  elementId: Scalars['ID']['input'];
+  selection: Scalars['String']['input'];
 }>;
 
 
 export type AttemptLearningElementMutation = { __typename?: 'Mutation', attemptLearningElement?: { __typename?: 'LearningElementAttempt', id?: string | null, pointsAchieved?: number | null, pointsMax?: number | null, element?: { __typename?: 'LearningElement', id: string, feedback?: string | null } | null, player?: { __typename?: 'Player', id: string, completedLearningElementIds: Array<number> } | null } | null };
 
 export type CreateGameMutationVariables = Exact<{
-  name: Scalars['String'];
-  playerCount: Scalars['Int'];
+  name: Scalars['String']['input'];
+  playerCount: Scalars['Int']['input'];
 }>;
 
 
 export type CreateGameMutation = { __typename?: 'Mutation', createGame?: { __typename?: 'Game', id: string, status: GameStatus, name: string, activePeriodIx?: number | null } | null };
 
 export type LoginAsTeamMutationVariables = Exact<{
-  token: Scalars['String'];
+  token: Scalars['String']['input'];
 }>;
 
 
 export type LoginAsTeamMutation = { __typename?: 'Mutation', loginAsTeam?: { __typename?: 'Player', id: string, isReady: boolean, role?: string | null, name: string, avatar: string, location: string, color: string, facts: any, experience: number, experienceToNext: number, achievementKeys: Array<string>, achievements: Array<{ __typename?: 'AchievementInstance', id: number, count: number, achievement: { __typename?: 'Achievement', id: string, name: string, description: string, image?: string | null, reward?: any | null } }>, level: { __typename?: 'PlayerLevel', id: string, index: number } } | null };
 
 export type MarkStoryElementMutationVariables = Exact<{
-  elementId: Scalars['ID'];
+  elementId: Scalars['ID']['input'];
 }>;
 
 
 export type MarkStoryElementMutation = { __typename?: 'Mutation', markStoryElement?: { __typename?: 'Player', id: string, visitedStoryElementIds: Array<number> } | null };
 
 export type PerformActionMutationVariables = Exact<{
-  type: Scalars['String'];
-  payload: Scalars['String'];
+  type: Scalars['String']['input'];
+  payload: Scalars['String']['input'];
 }>;
 
 
 export type PerformActionMutation = { __typename?: 'Mutation', performAction?: { __typename?: 'PlayerResult', id: string, type?: PlayerResultType | null, facts?: any | null, period: { __typename?: 'Period', id: string, index: number }, segment?: { __typename?: 'PeriodSegment', id: string, index: number } | null } | null };
 
 export type SaveConsolidationDecisionMutationVariables = Exact<{
-  payload: Scalars['String'];
+  payload: Scalars['String']['input'];
 }>;
 
 
 export type SaveConsolidationDecisionMutation = { __typename?: 'Mutation', saveConsolidationDecision?: { __typename?: 'PlayerDecision', id: string, type: PlayerDecisionType, facts: any } | null };
 
 export type UpdatePlayerDataMutationVariables = Exact<{
-  name?: InputMaybe<Scalars['String']>;
-  avatar?: InputMaybe<Scalars['String']>;
-  color?: InputMaybe<Scalars['String']>;
-  facts?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  avatar?: InputMaybe<Scalars['String']['input']>;
+  color?: InputMaybe<Scalars['String']['input']>;
+  facts?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
 export type UpdatePlayerDataMutation = { __typename?: 'Mutation', updatePlayerData?: { __typename?: 'Player', id: string, isReady: boolean, role?: string | null, name: string, avatar: string, location: string, color: string, facts: any, experience: number, experienceToNext: number, achievementKeys: Array<string>, achievements: Array<{ __typename?: 'AchievementInstance', id: number, count: number, achievement: { __typename?: 'Achievement', id: string, name: string, description: string, image?: string | null, reward?: any | null } }>, level: { __typename?: 'PlayerLevel', id: string, index: number } } | null };
 
 export type UpdateReadyStateMutationVariables = Exact<{
-  isReady: Scalars['Boolean'];
+  isReady: Scalars['Boolean']['input'];
 }>;
 
 
 export type UpdateReadyStateMutation = { __typename?: 'Mutation', updateReadyState?: { __typename?: 'Player', id: string, isReady: boolean } | null };
 
 export type GameQueryVariables = Exact<{
-  id?: InputMaybe<Scalars['Int']>;
+  id?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -488,7 +490,7 @@ export type GamesQueryVariables = Exact<{ [key: string]: never; }>;
 export type GamesQuery = { __typename?: 'Query', games?: Array<{ __typename?: 'Game', id: string, status: GameStatus, name: string, activePeriodIx?: number | null }> | null };
 
 export type LearningElementQueryVariables = Exact<{
-  id: Scalars['ID'];
+  id: Scalars['ID']['input'];
 }>;
 
 
@@ -597,20 +599,21 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 ) => TResult | Promise<TResult>;
 
 
+
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Achievement: ResolverTypeWrapper<Achievement>;
   AchievementFrequency: AchievementFrequency;
   AchievementInstance: ResolverTypeWrapper<AchievementInstance>;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
-  DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   Event: ResolverTypeWrapper<Event>;
-  Float: ResolverTypeWrapper<Scalars['Float']>;
+  Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   Game: ResolverTypeWrapper<Game>;
   GameStatus: GameStatus;
-  ID: ResolverTypeWrapper<Scalars['ID']>;
-  Int: ResolverTypeWrapper<Scalars['Int']>;
-  JSONObject: ResolverTypeWrapper<Scalars['JSONObject']>;
+  ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  JSONObject: ResolverTypeWrapper<Scalars['JSONObject']['output']>;
   LearningAnswerOption: ResolverTypeWrapper<LearningAnswerOption>;
   LearningElement: ResolverTypeWrapper<LearningElement>;
   LearningElementAttempt: ResolverTypeWrapper<LearningElementAttempt>;
@@ -632,7 +635,7 @@ export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>;
   StoryElement: ResolverTypeWrapper<StoryElement>;
   StoryElementType: StoryElementType;
-  String: ResolverTypeWrapper<Scalars['String']>;
+  String: ResolverTypeWrapper<Scalars['String']['output']>;
   Subscription: ResolverTypeWrapper<{}>;
   UserRole: UserRole;
 };
@@ -641,14 +644,14 @@ export type ResolversTypes = {
 export type ResolversParentTypes = {
   Achievement: Achievement;
   AchievementInstance: AchievementInstance;
-  Boolean: Scalars['Boolean'];
-  DateTime: Scalars['DateTime'];
+  Boolean: Scalars['Boolean']['output'];
+  DateTime: Scalars['DateTime']['output'];
   Event: Event;
-  Float: Scalars['Float'];
+  Float: Scalars['Float']['output'];
   Game: Game;
-  ID: Scalars['ID'];
-  Int: Scalars['Int'];
-  JSONObject: Scalars['JSONObject'];
+  ID: Scalars['ID']['output'];
+  Int: Scalars['Int']['output'];
+  JSONObject: Scalars['JSONObject']['output'];
   LearningAnswerOption: LearningAnswerOption;
   LearningElement: LearningElement;
   LearningElementAttempt: LearningElementAttempt;
@@ -667,7 +670,7 @@ export type ResolversParentTypes = {
   PlayerState: PlayerState;
   Query: {};
   StoryElement: StoryElement;
-  String: Scalars['String'];
+  String: Scalars['String']['output'];
   Subscription: {};
 };
 

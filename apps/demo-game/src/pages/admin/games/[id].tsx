@@ -15,6 +15,13 @@ import PlayerCompact from '@components/PlayerCompact'
 
 import { useMutation, useQuery } from '@apollo/client'
 import {
+  STATUS,
+  computePeriodStatus,
+  computeSegmentStatus,
+} from '@gbl-uzh/platform/dist/lib/util'
+import { pick } from 'ramda'
+import { useState } from 'react'
+import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
   AddGamePeriodDocument,
@@ -25,55 +32,6 @@ import {
   Period,
   Player,
 } from 'src/graphql/generated/ops'
-import { pick } from 'ramda'
-import { useState } from 'react'
-
-enum STATUS {
-  ACTIVE = 'ACTIVE',
-  PAUSED = 'PAUSED',
-  SCHEDULED = 'SCHEDULED',
-  COMPLETED = 'COMPLETED',
-  RESULTS = 'RESULTS',
-}
-
-function computePeriodStatus(game: Game, periodIndex: number): string {
-  if (
-    game.activePeriodIx && game.status === GameStatus.Results
-      ? game.activePeriodIx - 1 === periodIndex
-      : game.activePeriodIx === periodIndex
-  ) {
-    if (game.status === GameStatus.Paused) return STATUS.PAUSED
-    if (game.status === GameStatus.Results) return STATUS.RESULTS
-    return STATUS.ACTIVE
-  }
-
-  if (game.activePeriodIx && game.activePeriodIx <= periodIndex)
-    return STATUS.SCHEDULED
-
-  return STATUS.COMPLETED
-}
-
-function computeSegmentStatus(
-  game: Game,
-  period: Period,
-  segmentIndex: number
-): string {
-  if (
-    ![
-      GameStatus.Paused,
-      GameStatus.Preparation,
-      GameStatus.Consolidation,
-      GameStatus.Results,
-    ].includes(game.status) &&
-    period.activeSegmentIx === segmentIndex
-  )
-    return STATUS.ACTIVE
-
-  if (period.activeSegmentIx && period.activeSegmentIx < segmentIndex)
-    return STATUS.SCHEDULED
-
-  return STATUS.COMPLETED
-}
 
 function ManageGame() {
   const router = useRouter()
@@ -123,7 +81,6 @@ function ManageGame() {
     return <div>{error.message}</div>
   }
 
-  console.log(data.game as Game)
   return (
     <div className="p-4">
       <div>

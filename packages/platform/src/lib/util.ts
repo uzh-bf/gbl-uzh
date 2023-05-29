@@ -1,5 +1,6 @@
-import { integer, MersenneTwister19937 } from 'random-js'
+import { MersenneTwister19937, integer } from 'random-js'
 import util from 'util'
+import { Game, GameStatus, Period } from '../generated/ops'
 
 export function setDifference(a, b, filterNoId = false) {
   if (!b) return a
@@ -35,4 +36,51 @@ export function computePercentChange(newValue, oldValue) {
 
 export function withPercentChange(value, percentChange) {
   return value * (1 + percentChange)
+}
+
+export enum STATUS {
+  ACTIVE = 'ACTIVE',
+  PAUSED = 'PAUSED',
+  SCHEDULED = 'SCHEDULED',
+  COMPLETED = 'COMPLETED',
+  RESULTS = 'RESULTS',
+}
+
+export function computePeriodStatus(game: Game, periodIndex: number): string {
+  if (
+    game.activePeriodIx && game.status === GameStatus.Results
+      ? game.activePeriodIx - 1 === periodIndex
+      : game.activePeriodIx === periodIndex
+  ) {
+    if (game.status === GameStatus.Paused) return STATUS.PAUSED
+    if (game.status === GameStatus.Results) return STATUS.RESULTS
+    return STATUS.ACTIVE
+  }
+
+  if (game.activePeriodIx && game.activePeriodIx <= periodIndex)
+    return STATUS.SCHEDULED
+
+  return STATUS.COMPLETED
+}
+
+export function computeSegmentStatus(
+  game: Game,
+  period: Period,
+  segmentIndex: number
+): string {
+  if (
+    ![
+      GameStatus.Paused,
+      GameStatus.Preparation,
+      GameStatus.Consolidation,
+      GameStatus.Results,
+    ].includes(game.status) &&
+    period.activeSegmentIx === segmentIndex
+  )
+    return STATUS.ACTIVE
+
+  if (period.activeSegmentIx && period.activeSegmentIx < segmentIndex)
+    return STATUS.SCHEDULED
+
+  return STATUS.COMPLETED
 }
