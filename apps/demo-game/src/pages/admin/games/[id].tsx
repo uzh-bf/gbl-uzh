@@ -222,8 +222,11 @@ function ManageGame() {
                               onClose={() => setIsSegmentModalOpen(false)}
                               trigger={
                                 <Button
-                                  className="w-12 h-full font-bold text-gray-500"
+                                  className={{
+                                    root: 'w-12 h-full font-bold text-gray-500',
+                                  }}
                                   onClick={() => setIsSegmentModalOpen(true)}
+                                  data={{ cy: 'add-segment' }}
                                 >
                                   <FontAwesomeIcon icon={faPlus} />
                                 </Button>
@@ -257,10 +260,12 @@ function ManageGame() {
                               <FormikTextField
                                 name="storyElements"
                                 label="Story Elements"
+                                data={{ cy: 'story-elements' }}
                               />
                               <FormikTextField
                                 name="learningElements"
                                 label="Learning Elements"
+                                data={{ cy: 'learning-elements' }}
                               />
                             </Modal>
                           )}
@@ -304,8 +309,9 @@ function ManageGame() {
                 onClose={() => setIsPeriodModalOpen(false)}
                 trigger={
                   <Button
-                    className="font-bold text-gray-500 md:w-48"
+                    className={{ root: 'font-bold text-gray-500 md:w-48' }}
                     onClick={() => setIsPeriodModalOpen(true)}
+                    data={{ cy: 'add-period' }}
                   >
                     <FontAwesomeIcon icon={faPlus} />
                   </Button>
@@ -340,6 +346,7 @@ function ManageGame() {
                   type="string"
                   name="periodName"
                   label="Period Name"
+                  data={{ cy: 'period-name' }}
                 />
               </Modal>
             )}
@@ -387,8 +394,10 @@ function ManageGame() {
       <div className="max-w-sm mt-4">
         <div className="font-bold">Players</div>
         <div className="flex flex-col gap-2 mt-2">
-          {data.game.players.map((player) => (
-            <PlayerCompact key={player.id} player={player as Player} />
+          {data.game.players.map((player, ix) => (
+            <div key={player.id} data-cy={`player-${ix}`}>
+              <PlayerCompact key={player.id} player={player as Player} />
+            </div>
           ))}
         </div>
       </div>
