@@ -28,6 +28,8 @@
     "Johann Gandolfo <johann.gandolfo@bf.uzh.ch>"
   ],
   "devDependencies": {
+    "@testing-library/cypress": "9.0.0",
+    "cypress": "12.13.0",
     "standard-version": "9.5.0",
     "turbo": "1.9.9"
   },
