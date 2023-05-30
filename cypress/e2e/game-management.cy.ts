@@ -18,6 +18,8 @@ function joinAsTeam(cy, joinLink) {
   cy.session(joinLink, () => {
     cy.visit(joinLink)
   })
+
+  cy.visit('http://localhost:3000/play/welcome')
 }
 
 function createGame(cy, name = undefined) {
@@ -54,10 +56,23 @@ describe('template spec', () => {
     addSegment(cy)
     addSegment(cy)
 
-    cy.get('div[data-cy="player-0"] a').then((el) => {
-      joinAsTeam(cy, `http://localhost:3000${el.attr('href')}`)
-    })
+    cy.get('div[data-cy="player-0"] a')
+      .then((el) => {
+        return `http://localhost:3000${el.attr('href')}`
+      })
+      .then((href) => {
+        joinAsTeam(cy, href)
+      })
 
-    cy.visit('http://localhost:3000/play/welcome')
+    login(cy)
+    cy.get('a').contains(gameName).click()
+
+    cy.get('div[data-cy="player-1"] a')
+      .then((el) => {
+        return `http://localhost:3000${el.attr('href')}`
+      })
+      .then((href) => {
+        joinAsTeam(cy, href)
+      })
   })
 })
