@@ -1,17 +1,12 @@
-import { PrismaClient } from '@prisma/client'
+import * as DB from '@prisma/client'
 import {
-  GameStatus,
-  PlayerDecisionType,
-  PlayerResultType,
-} from '../generated/ops'
-import {
-  BaseUserNotificationType as UserNotificationType,
   CtxWithPrisma,
   LearningElementState,
+  BaseUserNotificationType as UserNotificationType,
 } from '../types'
 import * as EventService from './EventService'
 
-type Context = CtxWithPrisma<PrismaClient>
+type Context = CtxWithPrisma<DB.PrismaClient>
 
 interface PerformActionArgs<ActionTypes> {
   gameId: number
@@ -31,7 +26,7 @@ export async function performAction<ActionTypes>(
     periodIx: args.periodIx,
     segmentIx: args.segmentIx,
     playerId: args.playerId,
-    type: PlayerResultType.SegmentEnd,
+    type: DB.PlayerResultType.SEGMENT_END,
   }
 
   const previousResult = await ctx.prisma.playerResult.findUnique({
@@ -48,7 +43,7 @@ export async function performAction<ActionTypes>(
 
   if (!previousResult) return null
 
-  if (previousResult.game.status !== GameStatus.Running) {
+  if (previousResult.game.status !== DB.GameStatus.RUNNING) {
     throw new Error('ACTIONS_NOT_ALLOWED')
   }
 
@@ -136,7 +131,7 @@ export async function performAction<ActionTypes>(
 }
 
 interface SaveDecisionsArgs {
-  decisionType: PlayerDecisionType
+  decisionType: DB.PlayerDecisionType
   facts: any
 }
 
@@ -261,7 +256,7 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
         periodIx: currentGame.activePeriodIx,
         segmentIx: currentGame.activePeriod.activeSegmentIx,
         playerId: args.playerId,
-        type: PlayerResultType.SegmentEnd,
+        type: DB.PlayerResultType.SEGMENT_END,
       },
     },
     include: {

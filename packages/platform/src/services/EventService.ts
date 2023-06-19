@@ -1,4 +1,4 @@
-import { AchievementFrequency } from '../generated/ops'
+import * as DB from '@prisma/client'
 import { pubSub } from '../lib/pubsub'
 import { BaseUserNotificationType as UserNotificationType } from '../types'
 
@@ -54,7 +54,7 @@ export async function receiveEvent(
     const awardedAchievements = await matchingEvent.achievements.reduce(
       async (acc, achievement) => {
         if (
-          achievement.when === AchievementFrequency.First &&
+          achievement.when === DB.AchievementFrequency.FIRST &&
           event.ctx.achievements.includes(achievement.id)
         ) {
           return acc
