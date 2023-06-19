@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.4.0](https://github.com/uzh-bf/gbl-uzh/compare/v0.3.1...v0.4.0) (2023-06-19)
+
+
+### Features
+
+* add cypress testing stack for demo game ([#25](https://github.com/uzh-bf/gbl-uzh/issues/25)) ([c46e46e](https://github.com/uzh-bf/gbl-uzh/commit/c46e46ef8cf621319ecebb20fdd200e32e4dbc97))
+
+
+### Bug Fixes
+
+* **apps/website:** update build ([5a0c4be](https://github.com/uzh-bf/gbl-uzh/commit/5a0c4be47c82e514eb18c81d39e71c38a4dc0041))
+* **platform:** ensure periods with dynamic segment count can be closed ([9197c90](https://github.com/uzh-bf/gbl-uzh/commit/9197c90028cbb107772ecf3a37fb1ad9f99f8c90))
+* **platform:** join player level when getting results ([a6d01da](https://github.com/uzh-bf/gbl-uzh/commit/a6d01da2d9723a3a16dd9471d809710d74951b5e))
+
+
+### Enhancements
+
+* **apps/website:** rework use case index page layout ([636fca8](https://github.com/uzh-bf/gbl-uzh/commit/636fca82f613d6c25385a44530f30f62245be313))
+
+
+### Dependencies
+
+* add winston for logging in platform ([3663753](https://github.com/uzh-bf/gbl-uzh/commit/36637536042075c032eb4e9ad95cc73359ebed15))
+* **website:** upgrade next ([876a535](https://github.com/uzh-bf/gbl-uzh/commit/876a535275d40d49e9924a5055123d51742749a0))
+
+
+### Other
+
+* add .env to gitignore ([f0d8b6c](https://github.com/uzh-bf/gbl-uzh/commit/f0d8b6c109ed4bc5f4b227b436cae5c328d30436))
+* **apps/demo-game:** add instructions to .env.local.template ([f1b04ac](https://github.com/uzh-bf/gbl-uzh/commit/f1b04ac8d0d2fef7c37904d07582efacf9ae9b49))
+* **apps/website:** add forms and area for requesting the addition of games (also external) ([59b768d](https://github.com/uzh-bf/gbl-uzh/commit/59b768df626937253f98562a59046fc244570d79))
+* **apps/website:** add melina to team page, update david image ([37e5754](https://github.com/uzh-bf/gbl-uzh/commit/37e5754447037be365280f4cbcf6882d9c0af80c))
+* **apps/website:** move to native next/font ([51b8bd6](https://github.com/uzh-bf/gbl-uzh/commit/51b8bd6752789060ac23b1f7233b3992fec04954))
+* **kb:** update to latest state ([544fc43](https://github.com/uzh-bf/gbl-uzh/commit/544fc435df72369deaf6c7955bbd6f5a9035fef0))
+* restructuring without nexus build and using public dir ([d44b928](https://github.com/uzh-bf/gbl-uzh/commit/d44b9284b333987a4845ccbd1996bd06adef2377))
+* upgrade platform packages ([5343c0b](https://github.com/uzh-bf/gbl-uzh/commit/5343c0bdb092b254ab62041b7a3dd45a0df98f30))
+* **website:** update team ([0ba7cd5](https://github.com/uzh-bf/gbl-uzh/commit/0ba7cd594455b13e222ba09e0e610a53c3fd7eec))
+
 ### [0.3.1](https://github.com/uzh-bf/gbl-uzh/compare/v0.3.0...v0.3.1) (2023-03-13)
 
 
