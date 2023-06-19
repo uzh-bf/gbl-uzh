@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.1](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.0...v0.4.1) (2023-06-19)
+
+
+### Bug Fixes
+
+* font import ([78246ef](https://github.com/uzh-bf/gbl-uzh/commit/78246ef236835c341a2ab68c9d1e2a7cdfefdb9e))
+
+
+### Dependencies
+
+* update graphql-yoga peer dep ([f1d7867](https://github.com/uzh-bf/gbl-uzh/commit/f1d7867192e613ed2eaa310694b5795544eabea1))
+* upgrade outdated prisma ([c565a24](https://github.com/uzh-bf/gbl-uzh/commit/c565a24af022682469076172018611d338d5aa96))
+
+
+### Other
+
+* update contributors ([9efcdab](https://github.com/uzh-bf/gbl-uzh/commit/9efcdab0ba7f6894c0b2a77e4323b98bb234dd43))
+
 ## [0.4.0](https://github.com/uzh-bf/gbl-uzh/compare/v0.3.1...v0.4.0) (2023-06-19)
 
 
