@@ -2,7 +2,7 @@ import { UserRole } from '@gbl-uzh/platform/dist/index'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import type { DefaultSession, NextAuthOptions } from 'next-auth'
 import type { DefaultJWT } from 'next-auth/jwt'
-import GithubProvider from 'next-auth/providers/github'
+import Auth0Provider from 'next-auth/providers/auth0'
 
 // we use our own decode and encode to allow manual cookie creation in the team login scenario
 import { decode, encode } from './jwt'
@@ -20,9 +20,10 @@ interface ExtendedSession extends DefaultSession {
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    GithubProvider({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
+    Auth0Provider({
+      clientId: process.env.AUTH0_CLIENT_ID as string,
+      clientSecret: process.env.AUTH0_CLIENT_SECRET as string,
+      issuer: process.env.AUTH0_ISSUER,
     }),
   ],
   session: {

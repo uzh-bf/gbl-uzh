@@ -28,8 +28,10 @@
     "Johann Gandolfo <johann.gandolfo@bf.uzh.ch>"
   ],
   "devDependencies": {
+    "@testing-library/cypress": "9.0.0",
+    "cypress": "12.13.0",
     "standard-version": "9.5.0",
-    "turbo": "1.8.3"
+    "turbo": "1.9.9"
   },
   "scripts": {
     "dev": "turbo run dev",
@@ -47,17 +49,14 @@
     "release:rc:dry": "standard-version --dry-run --prerelease rc"
   },
   "volta": {
-    "node": "18.14.0"
+    "node": "18.16.0"
   },
-  "packageManager": "npm@8.19.2",
+  "packageManager": "npm@9.5.1",
   "engines": {
     "node": "=18"
   },
   "workspaces": [
     "packages/*",
     "apps/*"
-  ],
-  "dependencies": {
-    "winston": "3.9.0"
-  }
+  ]
 }

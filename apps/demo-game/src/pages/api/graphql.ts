@@ -1,6 +1,6 @@
 import { createYoga } from 'graphql-yoga'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { unstable_getServerSession } from 'next-auth/next'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../../lib/authOptions'
 
 import { schema } from '../../graphql/nexus'
@@ -19,7 +19,7 @@ export default createYoga<{
   graphqlEndpoint: '/api/graphql',
   schema,
   async context({ req, res, ...ctx }) {
-    const session = await unstable_getServerSession(req, res, authOptions)
+    const session = await getServerSession(req, res, authOptions)
 
     return {
       ...ctx,
