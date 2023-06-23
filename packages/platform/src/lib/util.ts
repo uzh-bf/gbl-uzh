@@ -1,6 +1,6 @@
+import * as DB from '@prisma/client'
 import { MersenneTwister19937, integer } from 'random-js'
 import util from 'util'
-import { Game, GameStatus, Period } from '../generated/ops'
 
 export function setDifference(a, b, filterNoId = false) {
   if (!b) return a
@@ -46,15 +46,18 @@ export enum STATUS {
   RESULTS = 'RESULTS',
 }
 
-export function computePeriodStatus(game: Game, periodIndex: number): string {
+export function computePeriodStatus(
+  game: DB.Game,
+  periodIndex: number
+): string {
   if (
     typeof game.activePeriodIx === 'number' &&
-    game.status === GameStatus.Results
+    game.status === DB.GameStatus.RESULTS
       ? game.activePeriodIx - 1 === periodIndex
       : game.activePeriodIx === periodIndex
   ) {
-    if (game.status === GameStatus.Paused) return STATUS.PAUSED
-    if (game.status === GameStatus.Results) return STATUS.RESULTS
+    if (game.status === DB.GameStatus.PAUSED) return STATUS.PAUSED
+    if (game.status === DB.GameStatus.RESULTS) return STATUS.RESULTS
     return STATUS.ACTIVE
   }
 
@@ -68,17 +71,17 @@ export function computePeriodStatus(game: Game, periodIndex: number): string {
 }
 
 export function computeSegmentStatus(
-  game: Game,
-  period: Period,
+  game: DB.Game,
+  period: DB.Period,
   segmentIndex: number
 ): string {
   if (
     ![
-      GameStatus.Paused,
-      GameStatus.Preparation,
-      GameStatus.Consolidation,
-      GameStatus.Results,
-    ].includes(game.status) &&
+      DB.GameStatus.PAUSED,
+      DB.GameStatus.PREPARATION,
+      DB.GameStatus.CONSOLIDATION,
+      DB.GameStatus.RESULTS,
+    ].includes(game.status as any) &&
     period.activeSegmentIx === segmentIndex
   )
     return STATUS.ACTIVE
