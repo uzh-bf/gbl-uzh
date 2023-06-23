@@ -247,6 +247,7 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
     },
     include: {
       period: true,
+      segment: true,
     },
   })
 
