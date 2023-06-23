@@ -75,14 +75,21 @@ function Games() {
       >
         {() => (
           <Form className="p-4 border rounded">
-            <FormikTextField name="name" label="Name" />
+            <FormikTextField
+              name="name"
+              label="Name"
+              data={{ cy: 'game-name' }}
+            />
             <FormikTextField
               name="playerCount"
               type="number"
               min={1}
               label="Player Count"
+              data={{ cy: 'game-player-count' }}
             />
-            <Button type="submit">Create Game</Button>
+            <Button type="submit" data={{ cy: 'create-game' }}>
+              Create Game
+            </Button>
           </Form>
         )}
       </Formik>

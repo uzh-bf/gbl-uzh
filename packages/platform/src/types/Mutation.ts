@@ -1,3 +1,4 @@
+import * as DB from '@prisma/client'
 import {
   arg,
   booleanArg,
@@ -8,7 +9,6 @@ import {
   objectType,
   stringArg,
 } from 'nexus'
-import { PlayerDecisionType } from '../generated/ops'
 import * as AccountService from '../services/AccountService'
 import * as GameService from '../services/GameService'
 
@@ -32,7 +32,7 @@ export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
   reducers = defaultReducers,
   roleAssigner = () => 'UNSET',
   schemas = defaultSchemas,
-  inputTypes = defaultInputTypes
+  inputTypes = defaultInputTypes,
 }: GenerateBaseMutationsArgs = {}) {
   return objectType({
     name: 'Mutation',
@@ -208,7 +208,7 @@ export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
 
           return PlayService.saveDecisions(
             {
-              decisionType: PlayerDecisionType.Consolidation,
+              decisionType: DB.PlayerDecisionType.CONSOLIDATION,
               facts,
             },
             ctx

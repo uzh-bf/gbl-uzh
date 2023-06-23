@@ -22,6 +22,7 @@ function Dice({ dice1, dice2 }) {
         dieSize={250}
         margin={100}
         disableIndividual
+        rollDone={() => null}
       />
     </div>
   )

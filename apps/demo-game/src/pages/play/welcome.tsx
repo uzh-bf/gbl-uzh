@@ -1,8 +1,8 @@
 import { useMutation } from '@apollo/client'
-import { UpdatePlayerDataDocument } from 'src/graphql/generated/ops'
 import { Button, FormikTextField } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
+import { UpdatePlayerDataDocument } from 'src/graphql/generated/ops'
 import * as Yup from 'yup'
 
 const Schema = Yup.object().shape({
@@ -36,7 +36,7 @@ function Welcome() {
         {({ values, errors, touched }) => (
           <Form className="">
             <FormikTextField label="Trader Name" name="name" />
-            <Button className="mt-8" type="submit">
+            <Button className={{ root: 'mt-8' }} type="submit">
               Start Game
             </Button>
           </Form>

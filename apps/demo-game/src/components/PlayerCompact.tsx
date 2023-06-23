@@ -6,7 +6,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
 
 function PlayerCompact({ player }: { player: Player }) {
-  console.log(player)
   return (
     <div className="flex flex-row items-end gap-4 py-1 border-b last:border-0">
       <img width="20px" src={`/avatars/${player.avatar}.png`} />

@@ -1,8 +1,8 @@
+import * as DB from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
 import { nanoid } from 'nanoid'
 import { none, repeat } from 'ramda'
 import * as yup from 'yup'
-import { GameStatus, PlayerResultType } from '../generated/ops'
 import log from '../lib/logger'
 import { CtxWithFacts, CtxWithFactsAndSchema, CtxWithPrisma } from '../types'
 import * as EventService from './EventService'
@@ -335,7 +335,7 @@ export async function activateNextPeriod(
   switch (game.status) {
     // SCHEDULED -> PREPARATION
     // if the game is scheduled, initialize period results and move to PREPARATION
-    case GameStatus.Scheduled: {
+    case DB.GameStatus.SCHEDULED: {
       const { results, extras } = computePeriodStartResults(
         {
           results: undefined,
@@ -363,7 +363,7 @@ export async function activateNextPeriod(
             },
           },
           data: {
-            status: GameStatus.Preparation,
+            status: DB.GameStatus.PREPARATION,
             activePeriodIx: nextPeriodIx,
             activePeriod: {
               connect: {
@@ -399,7 +399,7 @@ export async function activateNextPeriod(
     // RUNNING -> CONSOLIDATION
     // if the final segment is running, go on with consolidation of the period
     // compute the results of the last segment and update the game status
-    case GameStatus.Running: {
+    case DB.GameStatus.RUNNING: {
       if (!game.activePeriod?.activeSegment || !currentSegmentIx) return null
 
       const { results, extras } = computeSegmentEndResults(game, ctx, {
@@ -421,7 +421,7 @@ export async function activateNextPeriod(
       const result = await ctx.prisma.$transaction([
         ctx.prisma.game.update({
           data: {
-            status: GameStatus.Consolidation,
+            status: DB.GameStatus.CONSOLIDATION,
           },
           include: {
             periods: {
@@ -478,7 +478,7 @@ export async function activateNextPeriod(
 
     // CONSOLIDATION -> RESULTS
     // compute period end results and move to the results phase
-    case GameStatus.Consolidation: {
+    case DB.GameStatus.CONSOLIDATION: {
       if (!game.activePeriod?.activeSegment) return null
 
       const { results, extras, promises } = await computePeriodEndResults(
@@ -511,7 +511,7 @@ export async function activateNextPeriod(
             },
           },
           data: {
-            status: GameStatus.Results,
+            status: DB.GameStatus.RESULTS,
             activePeriodIx: nextPeriodIx,
             activePeriod: {
               connect: {
@@ -551,7 +551,7 @@ export async function activateNextPeriod(
     // RESULTS -> PREPARATION
     // if the game is in the results phase (between periods)
     // initialize the next period and move to PREPARATION
-    case GameStatus.Results: {
+    case DB.GameStatus.RESULTS: {
       // if there is no next period, return
       if (!game.activePeriod) {
         log.warn('no next period available')
@@ -584,7 +584,7 @@ export async function activateNextPeriod(
             },
           },
           data: {
-            status: GameStatus.Preparation,
+            status: DB.GameStatus.PREPARATION,
           },
         }),
 
@@ -667,8 +667,8 @@ export async function activateNextSegment(
   switch (game.status) {
     // PREPARATION -> RUNNING
     // PAUSED -> RUNNING
-    case GameStatus.Preparation:
-    case GameStatus.Paused: {
+    case DB.GameStatus.PREPARATION:
+    case DB.GameStatus.PAUSED: {
       const { results, extras } = computeSegmentStartResults(game, ctx, {
         reducers,
       })
@@ -687,7 +687,7 @@ export async function activateNextSegment(
             players: true,
           },
           data: {
-            status: GameStatus.Running,
+            status: DB.GameStatus.RUNNING,
           },
         }),
 
@@ -737,7 +737,7 @@ export async function activateNextSegment(
 
     // RUNNING -> PAUSED
     // compute the segment results of the current segment and set to paused
-    case GameStatus.Running: {
+    case DB.GameStatus.RUNNING: {
       // return if there is no next segment available
       if (!game.activePeriod?.activeSegment?.nextSegment) {
         return null
@@ -759,7 +759,7 @@ export async function activateNextSegment(
             players: true,
           },
           data: {
-            status: GameStatus.Paused,
+            status: DB.GameStatus.PAUSED,
           },
         }),
 
@@ -980,7 +980,7 @@ export function computePeriodStartResults(
   if (currentPeriodIx >= 0) {
     const result = results
       // ensure that we only work on PERIOD_END results of the preceding period
-      .filter((result) => result.type === PlayerResultType.PeriodEnd)
+      .filter((result) => result.type === DB.PlayerResultType.PERIOD_END)
       .map((result, ix, allResults) => {
         const { result: facts, actions } = reducers.PeriodResult.apply(result, {
           type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_START,
@@ -1002,7 +1002,7 @@ export function computePeriodStartResults(
         }
 
         return {
-          type: PlayerResultType.PeriodStart,
+          type: DB.PlayerResultType.PERIOD_START,
           periodIx: currentPeriodIx,
           facts,
           player: {
@@ -1049,7 +1049,7 @@ export function computePeriodStartResults(
     }
 
     return {
-      type: PlayerResultType.PeriodStart,
+      type: DB.PlayerResultType.PERIOD_START,
       periodIx: nextPeriodIx,
       facts,
       player: {
@@ -1088,7 +1088,7 @@ export async function computePeriodEndResults(
   let promises: Promise<any>[] = []
 
   const results = segmentResults
-    .filter((result) => result.type === PlayerResultType.SegmentEnd)
+    .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
     .map((result, ix, allResults) => {
       const consolidationDecisions = periodDecisions.find(
         (decision) => decision.playerId === result.playerId
@@ -1147,7 +1147,7 @@ export async function computePeriodEndResults(
       ]
 
       return {
-        type: PlayerResultType.PeriodEnd,
+        type: DB.PlayerResultType.PERIOD_END,
         periodIx: activePeriodIx,
         facts,
         player: {
@@ -1179,7 +1179,7 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
   // if there was a previous segment, compute the change in results
   if (currentSegmentIx >= 0) {
     const results = game.activePeriod.activeSegment.results
-      .filter((result) => result.type === PlayerResultType.SegmentEnd)
+      .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
       .reduce((acc, result, ix, allResults) => {
         const { result: facts, actions } = reducers.SegmentResult.apply(
           result.facts,
@@ -1231,11 +1231,11 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
           ...acc,
           {
             ...common,
-            type: PlayerResultType.SegmentStart,
+            type: DB.PlayerResultType.SEGMENT_START,
           },
           {
             ...common,
-            type: PlayerResultType.SegmentEnd,
+            type: DB.PlayerResultType.SEGMENT_END,
           },
         ]
       }, [])
@@ -1248,7 +1248,7 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
 
   // if it is the first segment, transform PERIOD_START to SEGMENT_START
   const results = game.activePeriod.results
-    .filter((result) => result.type === PlayerResultType.PeriodStart)
+    .filter((result) => result.type === DB.PlayerResultType.PERIOD_START)
     .reduce((acc, result, ix, allResults) => {
       const { result: facts } = reducers.SegmentResult.apply(result.facts, {
         type: reducers.SegmentResult.ActionTypes.SEGMENT_RESULTS_INITIALIZE,
@@ -1286,11 +1286,11 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
         ...acc,
         {
           ...common,
-          type: PlayerResultType.SegmentStart,
+          type: DB.PlayerResultType.SEGMENT_START,
         },
         {
           ...common,
-          type: PlayerResultType.SegmentEnd,
+          type: DB.PlayerResultType.SEGMENT_END,
         },
       ]
     }, [])
@@ -1305,7 +1305,7 @@ export function computeSegmentEndResults(game, ctx, { reducers }) {
   let extras: any[] = []
 
   const results = game.activePeriod.activeSegment.results
-    .filter((result) => result.type === PlayerResultType.SegmentEnd)
+    .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
     .map((result, ix, allResults) => {
       const { result: facts, actions } = reducers.SegmentResult.apply(
         result.facts,
@@ -1337,7 +1337,7 @@ export function computeSegmentEndResults(game, ctx, { reducers }) {
             periodIx: game.activePeriodIx,
             segmentIx: game.activePeriod.activeSegmentIx,
             playerId: result.playerId,
-            type: PlayerResultType.SegmentEnd,
+            type: DB.PlayerResultType.SEGMENT_END,
           },
         },
         data: {
