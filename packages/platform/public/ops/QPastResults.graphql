@@ -16,6 +16,7 @@ query PastResults {
 
       name
       avatar
+      location
       color
 
       facts
