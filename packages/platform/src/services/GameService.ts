@@ -61,8 +61,6 @@ export async function addGamePeriod<TFacts>(
 ) {
   const validatedFacts = schema.validateSync(facts)
 
-  console.log(gameId)
-
   const game = await ctx.prisma.game.findUnique({
     where: {
       id: gameId,
@@ -87,8 +85,6 @@ export async function addGamePeriod<TFacts>(
 
   if (!game) return null
 
-  console.log(game)
-
   const index = game.periods[0]?.index + 1 || 0
 
   const { result: initializedFacts } = reducers.Period.apply(validatedFacts, {
@@ -100,6 +96,12 @@ export async function addGamePeriod<TFacts>(
       periodIx: index,
     },
   })
+
+  console.log(
+    game.periods[0]?.facts,
+    game.periods[0]?.segments[0]?.facts,
+    initializedFacts
+  )
 
   // create or update the facts and settings of a game period
   return ctx.prisma.period.upsert({

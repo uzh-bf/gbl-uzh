@@ -22,6 +22,7 @@ function createIsomorphLink() {
   if (isBrowser) {
     const sseLink = new SSELink({
       url: process.env.NEXT_PUBLIC_API_URL,
+      credentials: 'same-origin',
     })
 
     // swap out the http link with a split based on operation type

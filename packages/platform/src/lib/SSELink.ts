@@ -1,4 +1,4 @@
-// ref: https://www.graphql-yoga.com/docs/features/subscriptions
+// ref: https://the-guild.dev/graphql/sse/recipes#with-apollo
 
 import {
   ApolloLink,
@@ -7,34 +7,26 @@ import {
   Operation,
 } from '@apollo/client/core'
 import { print } from 'graphql'
-
-interface SSELinkOptions {
-  url: string
-}
+import { Client, ClientOptions, createClient } from 'graphql-sse'
 
 class SSELink extends ApolloLink {
-  constructor(private options: EventSourceInit & SSELinkOptions) {
+  private client: Client
+
+  constructor(options: ClientOptions) {
     super()
+    this.client = createClient(options)
   }
 
   public request(operation: Operation): Observable<FetchResult> {
-    const url = new URL(this.options.url)
-    url.searchParams.append('query', print(operation.query))
-    url.searchParams.append('variables', JSON.stringify(operation.variables))
-
     return new Observable((sink) => {
-      const eventsource = new EventSource(url.toString(), this.options)
-      eventsource.onmessage = function (event) {
-        const data = JSON.parse(event.data)
-        sink.next(data)
-        if (eventsource.readyState === 2) {
-          sink.complete()
+      return this.client.subscribe<FetchResult>(
+        { ...operation, query: print(operation.query) },
+        {
+          next: sink.next.bind(sink),
+          complete: sink.complete.bind(sink),
+          error: sink.error.bind(sink),
         }
-      }
-      eventsource.onerror = function (error) {
-        sink.error(error)
-      }
-      return () => eventsource.close()
+      )
     })
   }
 }
