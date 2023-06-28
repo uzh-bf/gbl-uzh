@@ -51,6 +51,7 @@
     "yup": "^1.0.0"
   },
   "dependencies": {
+    "nanoid": "4.0.2",
     "random-js": "2.1.0",
     "winston": "3.9.0"
   },
