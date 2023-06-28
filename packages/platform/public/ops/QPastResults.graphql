@@ -37,5 +37,10 @@ query PastResults {
       index
       facts
     }
+    segment {
+      id
+      index
+      facts
+    }
   }
 }
