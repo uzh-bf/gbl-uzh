@@ -387,7 +387,7 @@ export interface NexusGenFieldTypes {
     pastResults: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
     result: NexusGenRootTypes['PlayerState'] | null; // PlayerState
     results: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
-    self: NexusGenRootTypes['Player']; // Player!
+    self: NexusGenRootTypes['Player'] | null; // Player
   }
   StoryElement: { // field return type
     content: string | null; // String

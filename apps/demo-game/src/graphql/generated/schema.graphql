@@ -231,7 +231,7 @@ type Query {
   pastResults: [PlayerResult!]
   result: PlayerState
   results: [PlayerResult!]
-  self: Player!
+  self: Player
 }
 
 type StoryElement {
