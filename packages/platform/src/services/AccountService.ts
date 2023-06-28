@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
 import JWT from 'jsonwebtoken'
 import { strict as assert } from 'node:assert'
-import { destroyCookie, setCookie } from 'nookies'
+import { setCookie } from 'nookies'
 import { CtxWithPrisma, UserRole } from '../types'
 
 interface CreateLoginTokenArgs {
@@ -60,7 +60,6 @@ export async function loginAsTeam(
         ? '__Secure-next-auth.session-token'
         : 'next-auth.session-token'
 
-    destroyCookie(ctx, cookieName)
     setCookie(ctx, cookieName, jwt, {
       path: '/',
       maxAge: 60 * 60 * 24 * 7,

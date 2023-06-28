@@ -36,9 +36,10 @@ export function generateBaseQueries() {
         },
       })
 
-      t.nonNull.field('self', {
+      t.field('self', {
         type: Player,
         async resolve(_, args, ctx) {
+          if (!ctx.user) return null
           return PlayService.getPlayerData({ playerId: ctx.user.sub }, ctx)
         },
       })

@@ -17,7 +17,11 @@ export function generateBaseSubscriptions() {
       t.list.nonNull.field('eventsUser', {
         type: Event,
         async subscribe(_, args, ctx) {
-          return pubSub.subscribe('user:events', String(ctx.user.sub))
+          if (ctx.user) {
+            return pubSub.subscribe('user:events', String(ctx.user.sub))
+          }
+
+          return pubSub.subscribe('user:events', 'anonymous')
         },
         async resolve(payload) {
           return payload as any
