@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.4](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.3...v0.4.4) (2023-06-28)
+
+
+### Dependencies
+
+* back to older nanoid package in platform ([d755d29](https://github.com/uzh-bf/gbl-uzh/commit/d755d29e46c9711076646424c334fc77ae67c9ac))
+
 ### [0.4.3](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.2...v0.4.3) (2023-06-28)
 
 
