@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.3](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.2...v0.4.3) (2023-06-28)
+
+
+### Other
+
+* lockfile maintenance ([f4682fc](https://github.com/uzh-bf/gbl-uzh/commit/f4682fc8a010701f31fdfde131da4783810cbd7e))
+* rebuild demo-game ([fecfe2c](https://github.com/uzh-bf/gbl-uzh/commit/fecfe2c7f3354d6d4a280ef37ef700223a27cd00))
+
+
+### Dependencies
+
+* install nanoid ([643c0d8](https://github.com/uzh-bf/gbl-uzh/commit/643c0d8e97642102ffe8e1d92451c129911bef65))
+
 ### [0.4.2](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.1...v0.4.2) (2023-06-28)
 
 
