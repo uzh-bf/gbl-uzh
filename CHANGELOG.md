@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.2](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.1...v0.4.2) (2023-06-28)
+
+
+### Bug Fixes
+
+* add location to the past results query ([a7438d1](https://github.com/uzh-bf/gbl-uzh/commit/a7438d16ed61d2ded46475c3369664c62c33b818))
+* destroy cookie and set a new one when logging in as a team ([757f7d6](https://github.com/uzh-bf/gbl-uzh/commit/757f7d6a579ac08641e18a192b84ecfea3ecc18a))
+* **packages/platform:** ensure ctx.user is not used if undefined ([bdbab69](https://github.com/uzh-bf/gbl-uzh/commit/bdbab696cb6e3cad4437b6615cd93a237945830c))
+* **packages/platform:** include segment when fetching previous results ([16e6c30](https://github.com/uzh-bf/gbl-uzh/commit/16e6c30956f9b2d85310ac38a623bc4565da66e2))
+* **platform:** use typeof game.activePeriodIx in util ([cf330ef](https://github.com/uzh-bf/gbl-uzh/commit/cf330ef3c6d8ada33451a861e40f7876f6e1b9f4))
+
+
+### Refactors
+
+* move period and segment status computations to platform utils ([248c525](https://github.com/uzh-bf/gbl-uzh/commit/248c52575af959fbeab3bdd51123f69bcc2929a1))
+
+
+### Dependencies
+
+* upgrade outdated packages and add graphql-sse ([cdc4ea0](https://github.com/uzh-bf/gbl-uzh/commit/cdc4ea07c85c338c1e9f28c031067a537658f725))
+* upgrade packages ([dfc2925](https://github.com/uzh-bf/gbl-uzh/commit/dfc2925486292a1e60a84e82fa2ac42f99dec0fc))
+* upgrade packages in demo game ([9c459ad](https://github.com/uzh-bf/gbl-uzh/commit/9c459ad2858cc793f891b8fef5612988c79cb89d))
+
+
+### Enhancements
+
+* setup cypress with basic admin login flow ([1e8d9d3](https://github.com/uzh-bf/gbl-uzh/commit/1e8d9d3f4b5ba707e2b34ad0f512603024b8ad31))
+* use graphql-sse in the apollo link ([96c7f2b](https://github.com/uzh-bf/gbl-uzh/commit/96c7f2b1e5ef1b9bae3556e2c92a7f44d8671798))
+
+
+### Other
+
+* fetch segment in past results query ([e40c148](https://github.com/uzh-bf/gbl-uzh/commit/e40c148f0cd200af842e39a0ecff56a6b6e1c0e8))
+* lockfile maintenance ([2179989](https://github.com/uzh-bf/gbl-uzh/commit/2179989dfbd872ffe14822da59c18a802120ed22))
+* remove prisma extension that is now included by default ([5bbdf2f](https://github.com/uzh-bf/gbl-uzh/commit/5bbdf2f1a99fd573eaaee9113190f5d7befa604d))
+
 ### [0.4.1](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.0...v0.4.1) (2023-06-19)
 
 
