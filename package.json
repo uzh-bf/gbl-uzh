@@ -29,9 +29,9 @@
   ],
   "devDependencies": {
     "@testing-library/cypress": "9.0.0",
-    "cypress": "12.15.0",
+    "cypress": "12.16.0",
     "standard-version": "9.5.0",
-    "turbo": "1.10.6"
+    "turbo": "1.10.7"
   },
   "scripts": {
     "dev": "turbo run dev",
