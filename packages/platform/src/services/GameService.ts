@@ -33,6 +33,7 @@ export async function createGame(
             facts: {},
             token: nanoid(),
             role: roleAssigner(ix),
+            name: `Team ${playerCount - ix}`,
             level: {
               connect: {
                 index: 0,
