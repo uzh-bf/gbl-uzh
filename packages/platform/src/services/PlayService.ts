@@ -487,6 +487,9 @@ export async function markStoryElement(
           id: args.elementId,
         },
       },
+      visitedStoryElementIds: {
+        push: args.elementId,
+      },
     },
   })
 }

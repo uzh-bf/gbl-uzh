@@ -85,7 +85,7 @@ export const Player = objectType({
     t.nonNull.list.nonNull.field('visitedStoryElements', {
       type: StoryElement,
     })
-    t.nonNull.list.nonNull.int('visitedStoryElementIds')
+    t.nonNull.list.nonNull.string('visitedStoryElementIds')
   },
 })
 
