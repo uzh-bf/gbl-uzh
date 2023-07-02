@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.6](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.5...v0.4.6) (2023-07-02)
+
+
+### Bug Fixes
+
+* learning elements completion ([896a006](https://github.com/uzh-bf/gbl-uzh/commit/896a0061027bcdb6853c2dcebbc0345394a2d2d2))
+* push story element ids ([d418f04](https://github.com/uzh-bf/gbl-uzh/commit/d418f04596756513b94389c83cb1a3ff085e3eb1))
+
 ### [0.4.5](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.4...v0.4.5) (2023-07-02)
 
 
