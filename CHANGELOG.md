@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.5](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.4...v0.4.5) (2023-07-02)
+
+
+### Bug Fixes
+
+* make the team name generic and assign team numbers per default ([efb3410](https://github.com/uzh-bf/gbl-uzh/commit/efb3410ab17c1140beb8230cf0cda4d94cbd2c8b))
+
+
+### Dependencies
+
+* lockfile maintenance ([aa35400](https://github.com/uzh-bf/gbl-uzh/commit/aa35400afd7617e0fcadc41e0ca85c8257a43d82))
+* minor upgrades ([243cae6](https://github.com/uzh-bf/gbl-uzh/commit/243cae6b8aee4d7b6ffcc21de309e0c3ab25d892))
+
 ### [0.4.4](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.3...v0.4.4) (2023-06-28)
 
 
