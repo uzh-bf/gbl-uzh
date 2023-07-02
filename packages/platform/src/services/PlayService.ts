@@ -404,6 +404,9 @@ export async function attemptLearningElement(
               id: args.elementId,
             },
           },
+          completedLearningElementIds: {
+            push: args.elementId,
+          },
         },
         include: {
           game: {
