@@ -509,6 +509,9 @@ export async function getPlayerTransactions(
         id: ctx.user.sub,
       },
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   })
 
   return playerActions
