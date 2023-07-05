@@ -18,7 +18,9 @@ export const StoryElement = objectType({
     t.nonNull.string('title')
 
     t.string('content')
-    t.string('contentRole')
+    t.field('contentRole', {
+      type: 'JSONObject',
+    })
 
     t.field('reward', {
       type: 'JSONObject',
