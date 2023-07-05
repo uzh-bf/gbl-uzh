@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.8](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.7...v0.4.8) (2023-07-05)
+
+
+### Other
+
+* regenerate files ([4bf68a1](https://github.com/uzh-bf/gbl-uzh/commit/4bf68a10a5d83a51a8e44cb4df4b49a44d0c8bc7))
+
 ### [0.4.7](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.6...v0.4.7) (2023-07-05)
 
 

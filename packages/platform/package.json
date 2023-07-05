@@ -1,6 +1,6 @@
 {
   "name": "@gbl-uzh/platform",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "license": "LGPL-3.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
