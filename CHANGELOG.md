@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.7](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.6...v0.4.7) (2023-07-05)
+
+
+### Bug Fixes
+
+* **platform:** add logout mutation ([6024d31](https://github.com/uzh-bf/gbl-uzh/commit/6024d319a8f37ed4896274cf785db5f434a4dc92))
+* **platform:** add mutation to logout as team ([111e15e](https://github.com/uzh-bf/gbl-uzh/commit/111e15e28e52896a302dffcca3c41eabedcb3a59))
+* **platform:** ensure logout does not break if not logged in ([a78e7c7](https://github.com/uzh-bf/gbl-uzh/commit/a78e7c77985cd88a37242fa999cd734823c489a9))
+* **platform:** logoutAsTeam ([8a8bfef](https://github.com/uzh-bf/gbl-uzh/commit/8a8bfef60abe8b182231dd81915cb8fe0c810acf))
+* **platform:** make contentRole a JSON object to return unstructured ([48183c4](https://github.com/uzh-bf/gbl-uzh/commit/48183c467b52a0cb5e619cb5b9b19990c5175b79))
+
+
+### Other
+
+* lockfile maintenance ([c1cc313](https://github.com/uzh-bf/gbl-uzh/commit/c1cc3137c1024103172448e5537b4245375d29b8))
+
 ### [0.4.6](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.5...v0.4.6) (2023-07-02)
 
 
