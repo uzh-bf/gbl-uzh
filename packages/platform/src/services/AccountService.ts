@@ -75,7 +75,7 @@ export async function loginAsTeam(
 }
 
 export async function logoutAsTeam(ctx: CtxWithPrisma<PrismaClient>) {
-  if (!ctx.user.sub) return false
+  if (!ctx.user?.sub) return false
 
   const matchingPlayer = await ctx.prisma.player.findUnique({
     where: {
