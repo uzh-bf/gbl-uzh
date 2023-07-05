@@ -277,6 +277,9 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
         id: args.playerId,
       },
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   })
 
   return {
