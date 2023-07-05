@@ -1,6 +1,6 @@
 {
   "name": "@gbl-uzh/platform",
-  "version": "0.4.4",
+  "version": "0.4.6",
   "license": "LGPL-3.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -30,7 +30,7 @@
     "ts-jest": "29.1.0",
     "ts-node": "10.9.1",
     "tsup": "7.1.0",
-    "typescript": "5.1.3"
+    "typescript": "5.1.6"
   },
   "peerDependencies": {
     "@apollo/client": "^3.7.0",

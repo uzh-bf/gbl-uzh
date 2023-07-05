@@ -80,12 +80,12 @@ export const Player = objectType({
     t.nonNull.list.nonNull.field('completedLearningElements', {
       type: LearningElement,
     })
-    t.nonNull.list.nonNull.int('completedLearningElementIds')
+    t.nonNull.list.nonNull.string('completedLearningElementIds')
 
     t.nonNull.list.nonNull.field('visitedStoryElements', {
       type: StoryElement,
     })
-    t.nonNull.list.nonNull.int('visitedStoryElementIds')
+    t.nonNull.list.nonNull.string('visitedStoryElementIds')
   },
 })
 

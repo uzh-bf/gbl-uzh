@@ -404,6 +404,9 @@ export async function attemptLearningElement(
               id: args.elementId,
             },
           },
+          completedLearningElementIds: {
+            push: args.elementId,
+          },
         },
         include: {
           game: {
@@ -486,6 +489,9 @@ export async function markStoryElement(
         connect: {
           id: args.elementId,
         },
+      },
+      visitedStoryElementIds: {
+        push: args.elementId,
       },
     },
   })
