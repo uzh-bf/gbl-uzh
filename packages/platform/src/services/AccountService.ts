@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
 import JWT from 'jsonwebtoken'
 import { strict as assert } from 'node:assert'
-import { setCookie } from 'nookies'
+import { destroyCookie, setCookie } from 'nookies'
 import { CtxWithPrisma, UserRole } from '../types'
 
 interface CreateLoginTokenArgs {
@@ -72,4 +72,27 @@ export async function loginAsTeam(
   }
 
   return matchingPlayer
+}
+
+export async function logoutAsTeam(ctx: CtxWithPrisma<PrismaClient>) {
+  if (!ctx.user.sub) return false
+
+  const matchingPlayer = await ctx.prisma.player.findUnique({
+    where: {
+      id: ctx.user.sub,
+    },
+  })
+
+  if (matchingPlayer) {
+    const cookieName =
+      process.env.NODE_ENV === 'production'
+        ? '__Secure-next-auth.session-token'
+        : 'next-auth.session-token'
+
+    destroyCookie(ctx, cookieName)
+
+    return true
+  }
+
+  return false
 }

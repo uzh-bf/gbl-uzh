@@ -57,6 +57,12 @@ export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
         },
       })
 
+      t.boolean('logoutAsTeam', {
+        async resolve(_, __, ctx) {
+          return AccountService.logoutAsTeam(ctx)
+        },
+      })
+
       t.field('createGame', {
         type: Game,
         args: {
