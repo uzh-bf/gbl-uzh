@@ -278,7 +278,7 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
       },
     },
     orderBy: {
-      createdAt: 'desc',
+      createdAt: 'asc',
     },
   })
 
@@ -513,7 +513,7 @@ export async function getPlayerTransactions(
       },
     },
     orderBy: {
-      createdAt: 'desc',
+      createdAt: 'asc',
     },
   })
 
