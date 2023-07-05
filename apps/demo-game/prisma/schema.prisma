@@ -179,7 +179,7 @@ model PeriodSegment {
 model Player {
   id String @id @default(uuid()) @db.Uuid
 
-  name     String  @default("Cocoa AG")
+  name     String  @default("Anonymous")
   avatar   String  @default("")
   location String  @default("")
   color    String  @default("White")

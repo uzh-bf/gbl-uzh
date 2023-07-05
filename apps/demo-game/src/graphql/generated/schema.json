@@ -1087,6 +1087,18 @@
             "deprecationReason": null
           },
           {
+            "name": "logoutAsTeam",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "markStoryElement",
             "description": null,
             "args": [
@@ -1900,7 +1912,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "SCALAR",
-                    "name": "Int",
+                    "name": "String",
                     "ofType": null
                   }
                 }
@@ -2136,7 +2148,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "SCALAR",
-                    "name": "Int",
+                    "name": "String",
                     "ofType": null
                   }
                 }
@@ -2904,7 +2916,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "String",
+              "name": "JSONObject",
               "ofType": null
             },
             "isDeprecated": false,

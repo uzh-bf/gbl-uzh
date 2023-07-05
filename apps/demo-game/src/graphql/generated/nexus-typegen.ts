@@ -154,7 +154,7 @@ export interface NexusGenObjects {
     achievements: NexusGenRootTypes['AchievementInstance'][]; // [AchievementInstance!]!
     avatar: string; // String!
     color: string; // String!
-    completedLearningElementIds: number[]; // [Int!]!
+    completedLearningElementIds: string[]; // [String!]!
     completedLearningElements: NexusGenRootTypes['LearningElement'][]; // [LearningElement!]!
     experience: number; // Int!
     experienceToNext: number; // Int!
@@ -168,7 +168,7 @@ export interface NexusGenObjects {
     role?: string | null; // String
     token: string; // String!
     tutorialCompleted: boolean; // Boolean!
-    visitedStoryElementIds: number[]; // [Int!]!
+    visitedStoryElementIds: string[]; // [String!]!
     visitedStoryElements: NexusGenRootTypes['StoryElement'][]; // [StoryElement!]!
   }
   PlayerAction: { // root type
@@ -212,7 +212,7 @@ export interface NexusGenObjects {
   Query: {};
   StoryElement: { // root type
     content?: string | null; // String
-    contentRole?: string | null; // String
+    contentRole?: NexusGenScalars['JSONObject'] | null; // JSONObject
     id: string; // ID!
     reward?: NexusGenScalars['JSONObject'] | null; // JSONObject
     title: string; // String!
@@ -292,6 +292,7 @@ export interface NexusGenFieldTypes {
     attemptLearningElement: NexusGenRootTypes['LearningElementAttempt'] | null; // LearningElementAttempt
     createGame: NexusGenRootTypes['Game'] | null; // Game
     loginAsTeam: NexusGenRootTypes['Player'] | null; // Player
+    logoutAsTeam: boolean | null; // Boolean
     markStoryElement: NexusGenRootTypes['Player'] | null; // Player
     performAction: NexusGenRootTypes['PlayerResult'] | null; // PlayerResult
     saveConsolidationDecision: NexusGenRootTypes['PlayerDecision'] | null; // PlayerDecision
@@ -324,7 +325,7 @@ export interface NexusGenFieldTypes {
     achievements: NexusGenRootTypes['AchievementInstance'][]; // [AchievementInstance!]!
     avatar: string; // String!
     color: string; // String!
-    completedLearningElementIds: number[]; // [Int!]!
+    completedLearningElementIds: string[]; // [String!]!
     completedLearningElements: NexusGenRootTypes['LearningElement'][]; // [LearningElement!]!
     experience: number; // Int!
     experienceToNext: number; // Int!
@@ -338,7 +339,7 @@ export interface NexusGenFieldTypes {
     role: string | null; // String
     token: string; // String!
     tutorialCompleted: boolean; // Boolean!
-    visitedStoryElementIds: number[]; // [Int!]!
+    visitedStoryElementIds: string[]; // [String!]!
     visitedStoryElements: NexusGenRootTypes['StoryElement'][]; // [StoryElement!]!
   }
   PlayerAction: { // field return type
@@ -391,7 +392,7 @@ export interface NexusGenFieldTypes {
   }
   StoryElement: { // field return type
     content: string | null; // String
-    contentRole: string | null; // String
+    contentRole: NexusGenScalars['JSONObject'] | null; // JSONObject
     id: string; // ID!
     reward: NexusGenScalars['JSONObject'] | null; // JSONObject
     title: string; // String!
@@ -464,6 +465,7 @@ export interface NexusGenFieldTypeNames {
     attemptLearningElement: 'LearningElementAttempt'
     createGame: 'Game'
     loginAsTeam: 'Player'
+    logoutAsTeam: 'Boolean'
     markStoryElement: 'Player'
     performAction: 'PlayerResult'
     saveConsolidationDecision: 'PlayerDecision'
@@ -496,7 +498,7 @@ export interface NexusGenFieldTypeNames {
     achievements: 'AchievementInstance'
     avatar: 'String'
     color: 'String'
-    completedLearningElementIds: 'Int'
+    completedLearningElementIds: 'String'
     completedLearningElements: 'LearningElement'
     experience: 'Int'
     experienceToNext: 'Int'
@@ -510,7 +512,7 @@ export interface NexusGenFieldTypeNames {
     role: 'String'
     token: 'String'
     tutorialCompleted: 'Boolean'
-    visitedStoryElementIds: 'Int'
+    visitedStoryElementIds: 'String'
     visitedStoryElements: 'StoryElement'
   }
   PlayerAction: { // field return type name
@@ -563,7 +565,7 @@ export interface NexusGenFieldTypeNames {
   }
   StoryElement: { // field return type name
     content: 'String'
-    contentRole: 'String'
+    contentRole: 'JSONObject'
     id: 'ID'
     reward: 'JSONObject'
     title: 'String'

@@ -95,6 +95,7 @@ type Mutation {
   attemptLearningElement(elementId: ID!, selection: String!): LearningElementAttempt
   createGame(name: String!, playerCount: Int!): Game
   loginAsTeam(token: String!): Player
+  logoutAsTeam: Boolean
   markStoryElement(elementId: ID!): Player
   performAction(payload: String!, type: String!): PlayerResult
   saveConsolidationDecision(payload: String!): PlayerDecision
@@ -150,7 +151,7 @@ type Player {
   achievements: [AchievementInstance!]!
   avatar: String!
   color: String!
-  completedLearningElementIds: [Int!]!
+  completedLearningElementIds: [String!]!
   completedLearningElements: [LearningElement!]!
   experience: Int!
   experienceToNext: Int!
@@ -164,7 +165,7 @@ type Player {
   role: String
   token: String!
   tutorialCompleted: Boolean!
-  visitedStoryElementIds: [Int!]!
+  visitedStoryElementIds: [String!]!
   visitedStoryElements: [StoryElement!]!
 }
 
@@ -236,7 +237,7 @@ type Query {
 
 type StoryElement {
   content: String
-  contentRole: String
+  contentRole: JSONObject
   id: ID!
   reward: JSONObject
   title: String!
