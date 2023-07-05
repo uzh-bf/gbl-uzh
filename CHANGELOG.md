@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.10](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.9...v0.4.10) (2023-07-05)
+
+
+### Bug Fixes
+
+* **platform:** get player transactions in ascending order ([489cf10](https://github.com/uzh-bf/gbl-uzh/commit/489cf106ca32d849b4f16c9c2766b4d3aacb81d0))
+
 ### [0.4.9](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.8...v0.4.9) (2023-07-05)
 
 
