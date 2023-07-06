@@ -52,6 +52,7 @@ export const Player = objectType({
 
     t.nonNull.boolean('isReady')
 
+    t.nonNull.int('number')
     t.nonNull.string('name')
     t.nonNull.string('avatar')
     t.nonNull.string('location')
