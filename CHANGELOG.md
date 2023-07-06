@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.11](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.10...v0.4.11) (2023-07-06)
+
+
+### Bug Fixes
+
+* add number to player and order by it ([809848b](https://github.com/uzh-bf/gbl-uzh/commit/809848b2c7131f0299a1d0bd76c1bfda64bd62f3))
+* **platform:** add number to Player in graphql type ([18a9917](https://github.com/uzh-bf/gbl-uzh/commit/18a99173ac4cb65389ed0c40712561ed310f3e61))
+* **platform:** assign the player number on creating a game ([bc4517f](https://github.com/uzh-bf/gbl-uzh/commit/bc4517f0d6278057899f2c57f6f492354528ac6b))
+
 ### [0.4.10](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.9...v0.4.10) (2023-07-05)
 
 
