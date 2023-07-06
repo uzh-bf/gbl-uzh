@@ -16,12 +16,13 @@ query Game($id: Int) {
       ...PeriodData
     }
     players {
-       id
+      id
 
       isReady
 
       role
 
+      number
       name
       avatar
       location

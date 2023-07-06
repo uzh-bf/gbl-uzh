@@ -884,6 +884,9 @@ export async function getGame(args, ctx: Context) {
           level: true,
           achievements: true,
         },
+        orderBy: {
+          number: 'asc',
+        },
       },
       periods: {
         orderBy: {
