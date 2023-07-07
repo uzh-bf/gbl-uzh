@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.12](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.11...v0.4.12) (2023-07-07)
+
+
+### Features
+
+* addCountdown ([b594397](https://github.com/uzh-bf/gbl-uzh/commit/b5943977699c912ce6f2511f1eb82a013dd9dc0d))
+
+
+### Other
+
+* lockfile maintenance ([0668423](https://github.com/uzh-bf/gbl-uzh/commit/0668423a73955a5af915e44df684261478966d97))
+
 ### [0.4.11](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.10...v0.4.11) (2023-07-06)
 
 

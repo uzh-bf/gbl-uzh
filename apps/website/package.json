@@ -1,7 +1,7 @@
 {
   "name": "@gbl-uzh/website",
   "license": "AGPL-3.0",
-  "version": "0.4.11",
+  "version": "0.4.12",
   "scripts": {
     "dev": "cross-env NODE_ENV=development next -p 3001",
     "build": "cross-env NODE_ENV=production next build",
