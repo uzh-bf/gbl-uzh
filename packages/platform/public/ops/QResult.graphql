@@ -28,6 +28,7 @@ query Result {
           id
           index
           facts
+          countdownExpiresAt
           learningElements {
             id
             title

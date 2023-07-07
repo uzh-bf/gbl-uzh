@@ -8,6 +8,10 @@ query Game($id: Int) {
     activePeriod {
       id
       activeSegmentIx
+      activeSegment {
+        id
+        countdownExpiresAt
+      }
       segments {
         id
       }

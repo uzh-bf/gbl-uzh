@@ -68,6 +68,10 @@ export const PeriodSegment = objectType({
     t.nonNull.int('index')
     t.nonNull.int('periodIx')
 
+    t.field('countdownExpiresAt', {
+      type: 'DateTime',
+    })
+
     t.nonNull.list.nonNull.field('actions', {
       type: PlayerAction,
     })

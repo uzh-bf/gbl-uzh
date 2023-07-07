@@ -221,6 +221,16 @@ export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
           )
         },
       })
+
+      t.boolean('addCountdown', {
+        args: {
+          gameId: nonNull(intArg()),
+          seconds: nonNull(intArg()),
+        },
+        async resolve(_, args, ctx) {
+          return PlayService.addCountdown(args, ctx)
+        },
+      })
     },
   })
 }

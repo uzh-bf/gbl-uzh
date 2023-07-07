@@ -573,3 +573,29 @@ export async function updateReadyState(args, ctx: Context) {
     },
   })
 }
+
+export async function addCountdown(args, ctx: Context) {
+  const currentGame = await ctx.prisma.game.findUnique({
+    where: { id: args.gameId },
+    include: {
+      activePeriod: {
+        include: {
+          activeSegment: true,
+        },
+      },
+    },
+  })
+
+  if (!currentGame?.activePeriod?.activeSegment) return null
+
+  await ctx.prisma.periodSegment.update({
+    where: {
+      id: currentGame.activePeriod.activeSegment.id,
+    },
+    data: {
+      countdownExpiresAt: new Date(Date.now() + args.seconds * 1000),
+    },
+  })
+
+  return true
+}

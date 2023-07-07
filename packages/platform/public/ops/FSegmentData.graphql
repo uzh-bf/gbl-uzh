@@ -3,6 +3,8 @@ fragment SegmentData on PeriodSegment {
 
   index
 
+  countdownExpiresAt
+
   facts
 
   learningElements {
