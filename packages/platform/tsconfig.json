@@ -4,6 +4,8 @@
   "compilerOptions": {
     "lib": ["es2022", "dom"],
     "noImplicitAny": false,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "moduleResolution": "node",
+    "module": "CommonJS"
   }
 }

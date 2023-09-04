@@ -2,7 +2,7 @@ import { config } from '@fortawesome/fontawesome-svg-core'
 import { init } from '@socialgouv/matomo-next'
 import { ThemeProvider } from '@uzh-bf/design-system'
 import { AppProps } from 'next/app'
-import { Source_Sans_Pro } from 'next/font/google'
+import { Source_Sans_3 } from 'next/font/google'
 import { useEffect } from 'react'
 
 import '@fortawesome/fontawesome-svg-core/styles.css'
@@ -10,7 +10,7 @@ config.autoAddCss = false
 
 import '../globals.css'
 
-const sourceSansPro = Source_Sans_Pro({
+const sourceSansPro = Source_Sans_3({
   subsets: ['latin'],
   variable: '--source-sans-pro',
   weight: ['300', '400', '700'],

@@ -151,6 +151,8 @@ model PeriodSegment {
 
   facts Json
 
+  countdownExpiresAt DateTime?
+
   actions PlayerAction[]
   results PlayerResult[]
 
@@ -179,6 +181,7 @@ model PeriodSegment {
 model Player {
   id String @id @default(uuid()) @db.Uuid
 
+  number   Int     @default(-1)
   name     String  @default("Anonymous")
   avatar   String  @default("")
   location String  @default("")

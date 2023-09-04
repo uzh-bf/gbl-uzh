@@ -140,6 +140,7 @@ export interface NexusGenObjects {
   }
   PeriodSegment: { // root type
     actions: NexusGenRootTypes['PlayerAction'][]; // [PlayerAction!]!
+    countdownExpiresAt?: NexusGenScalars['DateTime'] | null; // DateTime
     facts: NexusGenScalars['JSONObject']; // JSONObject!
     id: string; // ID!
     index: number; // Int!
@@ -165,6 +166,7 @@ export interface NexusGenObjects {
     levelIx: number; // Int!
     location: string; // String!
     name: string; // String!
+    number: number; // Int!
     role?: string | null; // String
     token: string; // String!
     tutorialCompleted: boolean; // Boolean!
@@ -287,6 +289,7 @@ export interface NexusGenFieldTypes {
   Mutation: { // field return type
     activateNextPeriod: NexusGenRootTypes['Game'] | null; // Game
     activateNextSegment: NexusGenRootTypes['Game'] | null; // Game
+    addCountdown: boolean | null; // Boolean
     addGamePeriod: NexusGenRootTypes['Period'] | null; // Period
     addPeriodSegment: NexusGenRootTypes['PeriodSegment'] | null; // PeriodSegment
     attemptLearningElement: NexusGenRootTypes['LearningElementAttempt'] | null; // LearningElementAttempt
@@ -311,6 +314,7 @@ export interface NexusGenFieldTypes {
   }
   PeriodSegment: { // field return type
     actions: NexusGenRootTypes['PlayerAction'][]; // [PlayerAction!]!
+    countdownExpiresAt: NexusGenScalars['DateTime'] | null; // DateTime
     facts: NexusGenScalars['JSONObject']; // JSONObject!
     id: string; // ID!
     index: number; // Int!
@@ -336,6 +340,7 @@ export interface NexusGenFieldTypes {
     levelIx: number; // Int!
     location: string; // String!
     name: string; // String!
+    number: number; // Int!
     role: string | null; // String
     token: string; // String!
     tutorialCompleted: boolean; // Boolean!
@@ -460,6 +465,7 @@ export interface NexusGenFieldTypeNames {
   Mutation: { // field return type name
     activateNextPeriod: 'Game'
     activateNextSegment: 'Game'
+    addCountdown: 'Boolean'
     addGamePeriod: 'Period'
     addPeriodSegment: 'PeriodSegment'
     attemptLearningElement: 'LearningElementAttempt'
@@ -484,6 +490,7 @@ export interface NexusGenFieldTypeNames {
   }
   PeriodSegment: { // field return type name
     actions: 'PlayerAction'
+    countdownExpiresAt: 'DateTime'
     facts: 'JSONObject'
     id: 'ID'
     index: 'Int'
@@ -509,6 +516,7 @@ export interface NexusGenFieldTypeNames {
     levelIx: 'Int'
     location: 'String'
     name: 'String'
+    number: 'Int'
     role: 'String'
     token: 'String'
     tutorialCompleted: 'Boolean'
@@ -584,6 +592,10 @@ export interface NexusGenArgTypes {
     }
     activateNextSegment: { // args
       gameId: number; // Int!
+    }
+    addCountdown: { // args
+      gameId: number; // Int!
+      seconds: number; // Int!
     }
     addGamePeriod: { // args
       facts: NexusGenInputs['PeriodFactsInput']; // PeriodFactsInput!
