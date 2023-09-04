@@ -5,9 +5,9 @@ import TitleBackground from '../components/common/TitleBackground'
 
 function EscapeUZH() {
   return (
-    <PageWithHeader title="About Us">
+    <PageWithHeader title="EscapeUZH">
       <TitleBackground>
-        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-4' }}>Escape @ UZH</H1>
+        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-4' }}>EscapeUZH</H1>
       </TitleBackground>
 
       <Content>escape.uzh.ch</Content>
