@@ -18,7 +18,7 @@ function PageWithHeader({ className, title, children, withFooter }: Props) {
   return (
     <div className={twMerge('flex flex-col h-full', className)}>
       <Head>
-        <title>GBL@UZH - {title}</title>
+        <title>{`GBL@UZH - ${title}`}</title>
       </Head>
       <div className="flex-1 w-full">
         <PageHead />

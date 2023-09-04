@@ -48,7 +48,11 @@ function Card({
         {tags && tags.length > 0 && (
           <div className="absolute top-0 z-10 flex flex-row flex-wrap gap-1 p-2">
             {tags.map((tag) => (
-              <Tag key={tag} label={tag} />
+              <Tag
+                key={tag}
+                label={tag}
+                className={{ root: 'bg-slate-200 border-slate-400 border' }}
+              />
             ))}
           </div>
         )}
