@@ -1,22 +1,7 @@
 {
   "name": "@gbl-uzh/website",
-  "license": "AGPL-3.0",
   "version": "0.4.12",
-  "scripts": {
-    "dev": "cross-env NODE_ENV=development next -p 3001",
-    "build": "cross-env NODE_ENV=production next build",
-    "start": "next start",
-    "optimize": "node export/resizeImages.js",
-    "optimize:clean": "node export/cleanup.js",
-    "export": "npm run build && mkdir out/advisor && cp '../advisor/Gamification Advisor.html' out/advisor/ && cp '../advisor/advisor_out.css' out/advisor/",
-    "check": "npm-run-all --parallel check:ts format:ci lint",
-    "check:ts": "tsc",
-    "check:fix": "npm-run-all check:ts format lint:fix",
-    "format": "prettier --write \"src/**/*.(js|ts|tsx|graphql|json)\" \"*.(js|ts)\"",
-    "format:ci": "prettier --list-different \"src/**/*.(js|ts|tsx|graphql|json)\" \"*.(js|ts)\"",
-    "lint": "eslint --ext .js,.ts,.tsx src/",
-    "lint:fix": "eslint --fix --ext .js,.ts,.tsx src/"
-  },
+  "license": "AGPL-3.0",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "6.3.0",
     "@fortawesome/free-regular-svg-icons": "6.3.0",
@@ -53,6 +38,21 @@
     "remark-wiki-link": "1.0.4",
     "sharp": "0.31.3",
     "typescript": "5.0.4"
+  },
+  "scripts": {
+    "build": "cross-env NODE_ENV=production next build",
+    "check": "npm-run-all --parallel check:ts format:ci lint",
+    "check:fix": "npm-run-all check:ts format lint:fix",
+    "check:ts": "tsc",
+    "dev": "cross-env NODE_ENV=development next -p 3001",
+    "export": "npm run build && mkdir out/advisor && cp '../advisor/Gamification Advisor.html' out/advisor/ && cp '../advisor/advisor_out.css' out/advisor/",
+    "format": "prettier --write \"src/**/*.(js|ts|tsx|graphql|json)\" \"*.(js|ts)\"",
+    "format:ci": "prettier --list-different \"src/**/*.(js|ts|tsx|graphql|json)\" \"*.(js|ts)\"",
+    "lint": "eslint --ext .js,.ts,.tsx src/",
+    "lint:fix": "eslint --fix --ext .js,.ts,.tsx src/",
+    "optimize": "node export/resizeImages.js",
+    "optimize:clean": "node export/cleanup.js",
+    "start": "next start"
   },
   "volta": {
     "extends": "../../package.json"

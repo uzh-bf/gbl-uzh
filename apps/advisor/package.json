@@ -1,8 +1,8 @@
 {
   "name": "@gbl-uzh/advisor",
+  "description": "",
   "version": "0.4.12",
   "license": "AGPL-3.0",
-  "description": "",
   "main": "tailwind.config.js",
   "scripts": {
     "compile": "NODE_ENV=production npx tailwindcss -i ./advisor.css -o ./advisor_out.css --minify",
