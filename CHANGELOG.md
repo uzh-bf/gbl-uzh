@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.13](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.12...v0.4.13) (2023-09-06)
+
+
+### Bug Fixes
+
+* builds with tsconfig settings ([c0a0314](https://github.com/uzh-bf/gbl-uzh/commit/c0a0314e4baedae00b83bd3ae1b31c7c1fd16e6f))
+* issues with title tag, clarity of tags on game overview ([23309df](https://github.com/uzh-bf/gbl-uzh/commit/23309df68d2af0c4d10700e9f4cdd8474e57fee3))
+
+
+### Other
+
+* install syncpack and format package.json consistently ([830b1f7](https://github.com/uzh-bf/gbl-uzh/commit/830b1f784639a0815c2e692451593c47248c3356))
+* lockfile maintenance ([3747648](https://github.com/uzh-bf/gbl-uzh/commit/37476485c504d597b821cc31c3f67f3f69a2ad3c))
+
+
+### Dependencies
+
+* fix mismatches ([783e213](https://github.com/uzh-bf/gbl-uzh/commit/783e213519b44385d5f4b950e765b1874ad7a1a6))
+* syncpack fix ([ec2d6bc](https://github.com/uzh-bf/gbl-uzh/commit/ec2d6bcc7da53a73a28cbbd4b722a3bad72cc13b))
+
 ### [0.4.12](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.11...v0.4.12) (2023-07-07)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@gbl-uzh/website",
-  "version": "0.4.12",
+  "version": "0.4.13",
   "license": "AGPL-3.0",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "6.4.2",
