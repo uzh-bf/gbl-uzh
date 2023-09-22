@@ -10,8 +10,8 @@ import LogoImage from '../../public/images/GBLUZH.png'
 
 const NAVIGATION_ITEMS = [
   { href: '/games', label: 'Games & Courses' },
-  { href: '/escape', label: 'EscapeUZH' },
   { href: '/use-cases', label: 'Use Cases' },
+  { href: '/escape', label: 'EscapeUZH' },
   { href: '/dev', label: 'Development' },
   { href: '/kb', label: 'Knowledge Base' },
   // { href: '/resources', label: 'Resources' },
