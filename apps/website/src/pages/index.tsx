@@ -4,7 +4,6 @@ import { Button, H1, H2, Prose } from '@uzh-bf/design-system'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import DerivativesImage from '../../public/images/derivatives_1.png'
 import DevIcon from '../../public/images/einzelarbeit_icon.svg'
 import StudentIcon from '../../public/images/gruppenarbeit_icon.svg'
 import PFMImage from '../../public/images/pfm_game.png'
@@ -18,6 +17,7 @@ import HeroImage from '../components/common/HeroImage'
 import TitleImage from '../components/common/TitleImage'
 import GameCard from '../components/games/GameCard'
 import HomeSection from '../components/sections/HomeSection'
+import EscapeUZHImage from '/public/images/escape_hero.png'
 
 function Home() {
   const router = useRouter()
@@ -120,19 +120,19 @@ function Home() {
                     <div className="gap-1 sm:grid sm:grid-cols-3 sm:gap-2 md:gap-4">
                       {[
                         {
-                          name: 'Derivatives Game',
-                          href: '/games/derivatives-game',
-                          imgSrc: DerivativesImage,
-                        },
-                        {
-                          name: 'uFin: The Challenge',
-                          href: '/games/ufin',
-                          imgSrc: uFinImage,
+                          name: 'EscapeUZH Scavenger Hunt',
+                          href: '/games/escape-uzh',
+                          imgSrc: EscapeUZHImage,
                         },
                         {
                           name: 'Portfolio Management Simulation',
                           href: '/games/portfolio-management-simulation',
                           imgSrc: PFMImage,
+                        },
+                        {
+                          name: 'uFin: The Challenge',
+                          href: '/games/u-fin',
+                          imgSrc: uFinImage,
                         },
                       ].map(({ name, href, imgSrc }: any) => (
                         <GameCard
@@ -159,6 +159,23 @@ function Home() {
           </div>
         </div>
 
+        <HomeSection>
+          <HomeSection.Hero src="/images/escape_phones.png" />
+          <HomeSection.Content
+            title="EscapeUZH Platform"
+            content="Play our UZH scavenger hunt or design your own digital escape rooms on our EscapeUZH platform."
+          >
+            <Button
+              className={{ root: 'mt-4' }}
+              onClick={() => router.push('/escape')}
+            >
+              <Button.Icon>
+                <FontAwesomeIcon icon={faArrowRight} />
+              </Button.Icon>
+              <Button.Label>EscapeUZH</Button.Label>
+            </Button>
+          </HomeSection.Content>
+        </HomeSection>
         <HomeSection>
           <HomeSection.Content
             title="Knowledge Base"
@@ -202,7 +219,7 @@ function Home() {
           >
             <Button
               className={{ root: 'mt-4' }}
-              onClick={() => router.push('/roadmap')}
+              onClick={() => router.push('/about')}
             >
               <Button.Icon>
                 <FontAwesomeIcon icon={faArrowRight} />
