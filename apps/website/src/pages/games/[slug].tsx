@@ -61,18 +61,18 @@ function Game({ source }: Props) {
         <PageWithHeader title={frontmatter.title}>
           {frontmatter.thumbnail && (
             <TitleImage imgSrc={frontmatter.thumbnail}>
-              <H1 className={{ root: 'max-w-7xl mx-auto md:pl-4' }}>
+              <H1 className={{ root: 'mx-auto max-w-7xl md:pl-4' }}>
                 {frontmatter.title}
               </H1>
             </TitleImage>
           )}
 
           <Content className="max-w-7xl">
-            <div className="flex flex-col items-start gap-4 md:gap-8 md:flex-row">
+            <div className="flex flex-col items-start gap-4 md:flex-row md:gap-8">
               <div className="flex-1 pb-4 md:pb-0 md:pr-8">
                 <H2>{frontmatter.subtitle}</H2>
                 {frontmatter.keywords && (
-                  <div className="flex flex-row gap-4 mt-2">
+                  <div className="mt-2 flex flex-row gap-4">
                     <div className="flex flex-row flex-wrap justify-start gap-1">
                       {frontmatter.language?.map((item: any) => (
                         <Tag
@@ -98,12 +98,12 @@ function Game({ source }: Props) {
                     </div>
                   </div>
                 )}
-                <Prose className={{ root: 'max-w-none mt-4' }}>
+                <Prose className={{ root: 'mt-4 max-w-none' }}>
                   <MDXRemote {...source} components={components} />
                 </Prose>
               </div>
 
-              <div className="flex flex-col flex-1 gap-4 md:p-4 md:pt-2 md:border rounded md:flex-none md:w-[400px]">
+              <div className="flex flex-1 flex-col gap-4 rounded md:w-[400px] md:flex-none md:border md:p-4 md:pt-2">
                 <div>
                   <H3>Learning Objectives</H3>
                   <Prose>
@@ -117,14 +117,16 @@ function Game({ source }: Props) {
 
                 <div>
                   <H3>Imprint</H3>
-                  <ReactMarkdown className="prose-sm prose text-left">
+                  {/* @ts-ignore */}
+                  <ReactMarkdown className="prose prose-sm text-left">
                     {frontmatter.imprint}
                   </ReactMarkdown>
                 </div>
 
                 <div>
                   <H3>Contact</H3>
-                  <ReactMarkdown className="prose-sm prose text-left">
+                  {/* @ts-ignore */}
+                  <ReactMarkdown className="prose prose-sm text-left">
                     {frontmatter.contact}
                   </ReactMarkdown>
                 </div>
@@ -144,7 +146,7 @@ function Game({ source }: Props) {
                             >
                               <FontAwesomeIcon
                                 icon={faBarChart}
-                                className="h-4 mr-1"
+                                className="mr-1 h-4"
                               />
                               {item.name}
                             </a>
@@ -161,7 +163,7 @@ function Game({ source }: Props) {
                     <ul>
                       {frontmatter['usedIn'].map((course: any) => (
                         <li key={course.name}>
-                          <p className="prose-sm prose text-center md:text-left">
+                          <p className="prose prose-sm text-center md:text-left">
                             {course.name}
                           </p>
                         </li>
@@ -173,13 +175,13 @@ function Game({ source }: Props) {
             </div>
             <div>
               {radarChartTexts?.[0] && (
-                <div className="flex-1 p-4 pt-2 mt-8 border rounded">
+                <div className="mt-8 flex-1 rounded border p-4 pt-2">
                   <H3>Characteristics</H3>
                   <div className="lg:flex lg:flex-row">
-                    <Prose className={{ root: 'flex-1 max-w-none' }}>
+                    <Prose className={{ root: 'max-w-none flex-1' }}>
                       {radarChartTexts[0]}
                     </Prose>
-                    <div className="flex-initial w-96">
+                    <div className="w-96 flex-initial">
                       <RadarChart data={radarChartData[0]} />
                     </div>
                   </div>
@@ -187,13 +189,13 @@ function Game({ source }: Props) {
               )}
 
               {radarChartTexts?.[1] && (
-                <div className="flex-1 p-4 pt-2 mt-4 border rounded">
+                <div className="mt-4 flex-1 rounded border p-4 pt-2">
                   <H3>Gamification Elements</H3>
                   <div className="lg:flex lg:flex-row">
-                    <Prose className={{ root: 'flex-1 max-w-none' }}>
+                    <Prose className={{ root: 'max-w-none flex-1' }}>
                       {radarChartTexts[1]}
                     </Prose>
-                    <div className="flex-initial w-96">
+                    <div className="w-96 flex-initial">
                       <RadarChart data={radarChartData[1]} />
                     </div>
                   </div>
@@ -220,12 +222,13 @@ function Game({ source }: Props) {
               )}
 
               {frontmatter.gallery && (
-                <div className="flex-1 mt-8">
+                <div className="mt-8 flex-1">
                   <H3>Gallery</H3>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                     {frontmatter.gallery?.map((image: any) => (
                       <Card
                         colored
+                        objectFit="contain"
                         name={image.name}
                         key={image.imgSrc}
                         imgSrc={image.imgSrc}
@@ -259,7 +262,7 @@ function Game({ source }: Props) {
               : undefined
           }
         >
-          <div className="relative w-full h-full">
+          <div className="relative h-full w-full">
             <Image
               src={zoomedImage.imgSrc}
               alt="Magnified Image"
