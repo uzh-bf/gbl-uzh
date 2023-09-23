@@ -1,5 +1,4 @@
-const { TailwindColorsUZH } = require('@uzh-bf/design-system/dist/constants')
-const { fontFamily } = require('tailwindcss/defaultTheme')
+const { TailwindColorsUZH, TailwindFontsUZH } = require('@uzh-bf/design-system/dist/constants')
 
 /** @type {import('tailwindcss').Config} \*/
 module.exports = {
@@ -13,7 +12,7 @@ module.exports = {
         ...TailwindColorsUZH,
       },
       fontFamily: {
-        sans: ['var(--source-sans-pro)', ...fontFamily.sans],
+        ...TailwindFontsUZH,
       },
     },
   },
@@ -21,7 +20,6 @@ module.exports = {
     require('@tailwindcss/typography'),
     require('@tailwindcss/aspect-ratio'),
     require('@tailwindcss/forms'),
-    require('@tailwindcss/line-clamp'),
   ],
   corePlugins: {
     preflight: false,

@@ -15,7 +15,6 @@ const NAVIGATION_ITEMS = [
   { href: '/dev', label: 'Development' },
   { href: '/kb', label: 'Knowledge Base' },
   // { href: '/resources', label: 'Resources' },
-  { href: '/roadmap', label: 'Roadmap' },
   { href: '/about', label: 'About' },
 ]
 
