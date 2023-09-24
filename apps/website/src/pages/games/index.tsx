@@ -2,11 +2,11 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, H1, H2, Prose } from '@uzh-bf/design-system'
 import { sortBy } from 'ramda'
-import TitleBackground from '../../components/common/TitleBackground'
 import Content from '../../components/Content'
+import PageWithHeader from '../../components/PageWithHeader'
+import TitleBackground from '../../components/common/TitleBackground'
 import CourseEntry from '../../components/courses/CourseEntry'
 import GameCard from '../../components/games/GameCard'
-import PageWithHeader from '../../components/PageWithHeader'
 import * as Util from '../../lib/util'
 
 interface Props {
@@ -18,7 +18,7 @@ function GBLinUse({ sourceArr }: Props) {
   return (
     <PageWithHeader title="GBL in Use">
       <TitleBackground>
-        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-4' }}>GBL in Use</H1>
+        <H1 className={{ root: 'mx-auto max-w-6xl lg:pl-4' }}>GBL in Use</H1>
       </TitleBackground>
 
       <Content>
@@ -28,7 +28,7 @@ function GBLinUse({ sourceArr }: Props) {
             Serious games and simulations that have been developed or are being
             developed at institutions of the University of Zurich.
           </Prose>
-          <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2 md:grid-cols-3">
+          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
             {sortBy(
               ({ frontmatter }: any) => frontmatter.title,
               sourceArr[0].filter((item: any) => !item.frontmatter.external)
@@ -42,7 +42,12 @@ function GBLinUse({ sourceArr }: Props) {
               />
             ))}
             <a href="https://forms.office.com/e/UL1CWut5ya" target="_blank">
-              <Button fluid className={{ root: 'h-full flex-col text-lg' }}>
+              <Button
+                fluid
+                className={{
+                  root: 'h-full flex-col border-uzh-red-40 bg-uzh-red-20 text-lg',
+                }}
+              >
                 <Button.Icon>
                   <FontAwesomeIcon icon={faPlus} />
                 </Button.Icon>
@@ -57,7 +62,7 @@ function GBLinUse({ sourceArr }: Props) {
           <Prose className={{ root: 'max-w-none' }}>
             Serious games and simulations of other educational institutions.
           </Prose>
-          <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2 md:grid-cols-3">
+          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
             {sortBy(
               ({ frontmatter }: any) => frontmatter.title,
               sourceArr[0].filter((item: any) => item.frontmatter.external)
@@ -71,7 +76,12 @@ function GBLinUse({ sourceArr }: Props) {
               />
             ))}
             <a href="https://forms.office.com/e/UL1CWut5ya" target="_blank">
-              <Button fluid className={{ root: 'h-full flex-col text-lg' }}>
+              <Button
+                fluid
+                className={{
+                  root: 'h-full flex-col border-uzh-red-40 bg-uzh-red-20 text-lg',
+                }}
+              >
                 <Button.Icon>
                   <FontAwesomeIcon icon={faPlus} />
                 </Button.Icon>
@@ -87,7 +97,7 @@ function GBLinUse({ sourceArr }: Props) {
             A selection of lectures and seminars at the University of Zurich
             that contain Game-Based Learning elements.
           </Prose>
-          <div className="flex flex-col gap-2 mt-2 md:grid md:grid-cols-2">
+          <div className="mt-2 flex flex-col gap-2 md:grid md:grid-cols-2">
             {sourceArr[1].map(({ frontmatter, ...source }: any, ix: number) => (
               <CourseEntry
                 key={frontmatter.name}
@@ -102,7 +112,7 @@ function GBLinUse({ sourceArr }: Props) {
             ))}
 
             <a href="https://forms.office.com/e/nieHr9d1EX" target="_blank">
-              <Button fluid className={{ root: 'h-full text-lg gap-4' }}>
+              <Button fluid className={{ root: 'h-full gap-4 text-lg' }}>
                 <Button.Icon>
                   <FontAwesomeIcon icon={faPlus} />
                 </Button.Icon>
