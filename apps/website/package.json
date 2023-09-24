@@ -45,7 +45,7 @@
     "check:fix": "npm-run-all check:ts format lint:fix",
     "check:ts": "tsc",
     "dev": "cross-env NODE_ENV=development next -p 3001",
-    "export": "npm run build && mkdir out/advisor && cp '../advisor/Gamification Advisor.html' out/advisor/ && cp '../advisor/advisor_out.css' out/advisor/",
+    "export": "npm run build && mkdir out/advisor && cp '../../advisor/Gamification Advisor.html' out/advisor/ && cp '../../advisor/advisor_out.css' out/advisor/",
     "format": "prettier --write \"src/**/*.(js|ts|tsx|graphql|json)\" \"*.(js|ts)\"",
     "format:ci": "prettier --list-different \"src/**/*.(js|ts|tsx|graphql|json)\" \"*.(js|ts)\"",
     "lint": "eslint --ext .js,.ts,.tsx src/",
