@@ -14,15 +14,15 @@ function Achievement({
 }) {
   return (
     <div
-      className="relative w-10 h-10 p-2 bg-white border rounded shadow md:w-12 md:h-12"
+      className="relative h-10 w-10 rounded border bg-white p-2 shadow md:h-12 md:w-12"
       title={name}
     >
-      <img className="w-6 h-6 md:w-8 md:h-8" src={`/${image}`} />
-      <div className="absolute bottom-0 right-0 p-[2px] text-xs text-red-700 bg-white bg-opacity-90 rounded">
+      <img className="h-6 w-6 md:h-8 md:w-8" src={`/${image}`} />
+      <div className="absolute bottom-0 right-0 rounded bg-white bg-opacity-90 p-[2px] text-xs text-red-700">
         {xpReward}
       </div>
       {count > 1 && (
-        <div className="absolute top-0 right-0 p-[2px] text-xs text-red-700 bg-white bg-opacity-90 rounded">
+        <div className="absolute right-0 top-0 rounded bg-white bg-opacity-90 p-[2px] text-xs text-red-700">
           {count}x
         </div>
       )}
@@ -58,7 +58,7 @@ function PlayerData({
           />?*/}
         </div>
 
-        <div className="flex flex-row flex-wrap flex-initial gap-2">
+        <div className="flex flex-initial flex-row flex-wrap gap-2">
           {achievements.map((achievement) => (
             <Achievement
               key={achievement.id}

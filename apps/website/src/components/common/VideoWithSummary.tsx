@@ -10,12 +10,12 @@ interface Props {
 function VideoWithSummary({ title, videoSrc, children, keyTakeaways }: Props) {
   return (
     <div>
-      <p className="hidden prose text-justify max-w-none md:block">
+      <p className="prose hidden max-w-none text-justify md:block">
         {children}
       </p>
       {videoSrc && (
-        <div className="flex flex-col justify-between mt-4 md:flex-row">
-          <div className="flex-initial w-full border rounded shadow h-80 md:flex-1">
+        <div className="mt-4 flex flex-col justify-between md:flex-row">
+          <div className="h-80 w-full flex-initial rounded border shadow md:flex-1">
             <iframe
               title={title}
               width="100%"
@@ -26,8 +26,8 @@ function VideoWithSummary({ title, videoSrc, children, keyTakeaways }: Props) {
               allowFullScreen
             />
           </div>
-          <div className="flex-1 mt-4 md:mt-0 md:pl-6">
-            <p className="prose text-justify max-w-none md:hidden mb-5">
+          <div className="mt-4 flex-1 md:mt-0 md:pl-6">
+            <p className="prose mb-5 max-w-none text-justify md:hidden">
               {children}
             </p>
             <p className="prose">

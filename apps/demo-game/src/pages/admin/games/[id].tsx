@@ -109,9 +109,9 @@ function ManageGame() {
               >
                 <div
                   className={twMerge(
-                    'p-2 border rounded flex-1 flex flex-col gap-1',
-                    isPeriodPaused && 'bg-orange-100 border-orange-300',
-                    isPeriodActive && 'bg-green-50 border-green-300',
+                    'flex flex-1 flex-col gap-1 rounded border p-2',
+                    isPeriodPaused && 'border-orange-300 bg-orange-100',
+                    isPeriodActive && 'border-green-300 bg-green-50',
                     isPeriodCompleted && 'bg-gray-100 text-gray-400'
                   )}
                 >
@@ -132,7 +132,7 @@ function ManageGame() {
                     <div className="flex flex-row gap-1">
                       {labels.map((label) => (
                         <div
-                          className="px-1 font-bold border rounded text-slate-600"
+                          className="rounded border px-1 font-bold text-slate-600"
                           key={label}
                         >
                           {label}
@@ -141,7 +141,7 @@ function ManageGame() {
                     </div>
                   </div>
 
-                  <div className="flex flex-row gap-1 mt-1">
+                  <div className="mt-1 flex flex-row gap-1">
                     {period.segments.map((segment, ix) => {
                       const segmentStatus = computeSegmentStatus(
                         data.game as Game,
@@ -159,8 +159,8 @@ function ManageGame() {
                       return (
                         <div
                           className={twMerge(
-                            'p-2 border rounded flex-initial text-center',
-                            isSegmentActive && 'bg-green-100 border-green-600',
+                            'flex-initial rounded border p-2 text-center',
+                            isSegmentActive && 'border-green-600 bg-green-100',
                             isSegmentCompleted && ' text-gray-400'
                           )}
                           key={segment.id}
@@ -177,7 +177,7 @@ function ManageGame() {
                                 <FontAwesomeIcon icon={faCheck} />
                               )}
                             </div>
-                            <div className="text-right whitespace-nowrap">
+                            <div className="whitespace-nowrap text-right">
                               <div className="flex flex-row gap-2">
                                 <div className="text-sm">
                                   Story: {segment.storyElements.length}
@@ -223,7 +223,7 @@ function ManageGame() {
                               trigger={
                                 <Button
                                   className={{
-                                    root: 'w-12 h-full font-bold text-gray-500',
+                                    root: 'h-full w-12 font-bold text-gray-500',
                                   }}
                                   onClick={() => setIsSegmentModalOpen(true)}
                                   data={{ cy: 'add-segment' }}
@@ -275,9 +275,9 @@ function ManageGame() {
                 </div>
                 <div
                   className={twMerge(
-                    'flex flex-row items-center text-xl text-gray-300 bg-gray-50 rounded p-2 border',
+                    'flex flex-row items-center rounded border bg-gray-50 p-2 text-xl text-gray-300',
                     periodStatus === STATUS.RESULTS &&
-                      'text-red-400 border-red-200'
+                      'border-red-200 text-red-400'
                   )}
                 >
                   <FontAwesomeIcon icon={faPauseCircle} />
@@ -354,7 +354,7 @@ function ManageGame() {
         </div>
       </div>
 
-      <div className="flex flex-row gap-2 mt-2">
+      <div className="mt-2 flex flex-row gap-2">
         <Button
           // disabled={
           //   data.game.status === GameStatus.Preparation ||
@@ -391,9 +391,9 @@ function ManageGame() {
         </Button>
       </div>
 
-      <div className="max-w-sm mt-4">
+      <div className="mt-4 max-w-sm">
         <div className="font-bold">Players</div>
-        <div className="flex flex-col gap-2 mt-2">
+        <div className="mt-2 flex flex-col gap-2">
           {data.game.players.map((player, ix) => (
             <div key={player.id} data-cy={`player-${ix}`}>
               <PlayerCompact key={player.id} player={player as Player} />

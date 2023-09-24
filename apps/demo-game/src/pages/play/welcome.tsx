@@ -18,7 +18,7 @@ function Welcome() {
   const [updatePlayerData, { loading }] = useMutation(UpdatePlayerDataDocument)
 
   return (
-    <div className="w-full max-w-2xl gap-8 p-8 m-auto border rounded">
+    <div className="m-auto w-full max-w-2xl gap-8 rounded border p-8">
       <Formik
         initialValues={{
           name: 'Your Name',

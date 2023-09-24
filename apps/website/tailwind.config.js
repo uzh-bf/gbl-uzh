@@ -1,4 +1,7 @@
-const { TailwindColorsUZH, TailwindFontsUZH } = require('@uzh-bf/design-system/dist/constants')
+const {
+  TailwindColorsUZH,
+  TailwindFontsUZH,
+} = require('@uzh-bf/design-system/dist/constants')
 
 /** @type {import('tailwindcss').Config} \*/
 module.exports = {

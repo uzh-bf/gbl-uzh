@@ -7,7 +7,7 @@ import {
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { PrismaClient } from '@prisma/client'
 import * as R from 'ramda'
-import { match, P } from 'ts-pattern'
+import { P, match } from 'ts-pattern'
 
 export enum ActionTypes {
   SEGMENT_RESULTS_INITIALIZE = 'SEGMENT_RESULTS_INITIALIZE',

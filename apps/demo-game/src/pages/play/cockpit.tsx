@@ -181,7 +181,7 @@ function Cockpit() {
   ]
 
   const header = (
-    <div className="p-4 border rounded">
+    <div className="rounded border p-4">
       <div className="font-bold">
         Playing as {self?.name} in game {currentGame.id}
       </div>
@@ -235,7 +235,7 @@ function Cockpit() {
             />
           </div>
 
-          <div className="p-4 border rounded">
+          <div className="rounded border p-4">
             {decisions.map(function (decision, i) {
               return (
                 <div className="p-1" key={decision.name}>

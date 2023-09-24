@@ -53,7 +53,7 @@ function Panel({
     <div className="mt-4">
       <Button
         className={{
-          root: 'w-full p-4 flex flex-row justify-between',
+          root: 'flex w-full flex-row justify-between p-4',
         }}
         onClick={onActivate}
       >
@@ -61,12 +61,12 @@ function Panel({
           <H2>{title}</H2>
           <div className="text-left text-gray-700">{duration}</div>
         </div>
-        <div className="flex-initial w-6">
+        <div className="w-6 flex-initial">
           {isCompleted && <FontAwesomeIcon icon={faCheck} />}
         </div>
       </Button>
       {isOpen && (
-        <div className="p-4 border border-t-0">
+        <div className="border border-t-0 p-4">
           {videoSrc && (
             <VideoWithSummary
               title={title}
@@ -77,11 +77,11 @@ function Panel({
             </VideoWithSummary>
           )}
           {!videoSrc && (
-            <p className="block prose text-justify max-w-none">{children}</p>
+            <p className="prose block max-w-none text-justify">{children}</p>
           )}
 
           {Array.isArray(resources) && (
-            <div className={twMerge('mt-4', videoSrc && 'pt-4 border-t')}>
+            <div className={twMerge('mt-4', videoSrc && 'border-t pt-4')}>
               <div className="flex flex-col md:flex-row">
                 <div className="flex-1">
                   <div className="font-bold">Resources</div>
@@ -96,7 +96,7 @@ function Panel({
                         >
                           <FontAwesomeIcon
                             icon={faBarChart}
-                            className="h-4 mr-1"
+                            className="mr-1 h-4"
                           />
                           {item.name}
                         </a>
@@ -114,7 +114,7 @@ function Panel({
             </div>
           )}
           {/* Simpler Layout on Mobile devices (only arrows without text are visible) */}
-          <div className="flex justify-between pt-4 mt-4 border-t">
+          <div className="mt-4 flex justify-between border-t pt-4">
             {onPrevious && (
               <Button onClick={onPrevious}>
                 <Button.Icon>

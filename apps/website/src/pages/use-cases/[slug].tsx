@@ -31,25 +31,25 @@ function UseCase({
       <div>
         <PageWithHeader title={source.frontmatter.title}>
           <TitleBackground>
-            <H1 className={{ root: 'max-w-6xl mx-auto md:pl-4' }}>
+            <H1 className={{ root: 'mx-auto max-w-6xl md:pl-4' }}>
               {source.frontmatter.title}
             </H1>
           </TitleBackground>
 
           <Content>
             <div className="flex flex-row gap-8">
-              <div className="flex-initial hidden p-4 border rounded w-80 md:block bg-slate-50">
+              <div className="hidden w-80 flex-initial rounded border bg-slate-50 p-4 md:block">
                 <H2>Use Cases</H2>
                 <ul className="text-sm">
                   {sourceArr[0].map(({ frontmatter }: any) => (
                     <Link
-                      className="block py-1 border-b last:border-b-0"
+                      className="block border-b py-1 last:border-b-0"
                       key={frontmatter.slug}
                       href={`/use-cases/${frontmatter.slug}`}
                     >
                       <li
                         className={twMerge(
-                          'hover:text-orange-600 hover:cursor-pointer',
+                          'hover:cursor-pointer hover:text-orange-600',
                           router.query.slug === frontmatter.slug && 'font-bold'
                         )}
                       >
@@ -61,7 +61,7 @@ function UseCase({
               </div>
               <Prose
                 className={{
-                  root: 'flex-1 max-w-none prose-headings:font-sans prose-h2:text-xl prose-headings:mb-[0.5em]',
+                  root: 'max-w-none flex-1 prose-headings:mb-[0.5em] prose-headings:font-sans prose-h2:text-xl',
                 }}
               >
                 <MDXRemote {...source} components={components} />

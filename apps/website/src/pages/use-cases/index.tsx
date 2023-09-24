@@ -4,9 +4,9 @@ import { Button, H1, H2 } from '@uzh-bf/design-system'
 import { useRouter } from 'next/router'
 import { sortBy } from 'ramda'
 import { twMerge } from 'tailwind-merge'
-import TitleBackground from '../../components/common/TitleBackground'
 import Content from '../../components/Content'
 import PageWithHeader from '../../components/PageWithHeader'
+import TitleBackground from '../../components/common/TitleBackground'
 import HomeSection from '../../components/sections/HomeSection'
 import * as Util from '../../lib/util'
 
@@ -33,7 +33,7 @@ function GBLUseCases({ sourceArr }: Props) {
   return (
     <PageWithHeader title="Use Cases">
       <TitleBackground>
-        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-4' }}>Use Cases</H1>
+        <H1 className={{ root: 'mx-auto max-w-6xl lg:pl-4' }}>Use Cases</H1>
       </TitleBackground>
 
       <Content>

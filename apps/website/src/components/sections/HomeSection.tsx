@@ -10,7 +10,7 @@ interface Props {
 function HomeSection({ className, children }: Props) {
   return (
     <div className={twMerge('py-4 md:py-4', className)}>
-      <div className="flex flex-row max-w-6xl m-auto md:min-h-[350px] shadow-lg">
+      <div className="m-auto flex max-w-6xl flex-row shadow-lg md:min-h-[350px]">
         {children}
       </div>
     </div>
@@ -35,7 +35,7 @@ HomeSection.Content = function HomeSectionContent({
   className,
 }: HomeSectionContentProps) {
   return (
-    <div className="flex-1 w-1/2 bg-slate-100">
+    <div className="w-1/2 flex-1 bg-slate-100">
       <div className="p-8 md:p-16">
         <H2>{title}</H2>
         {content && (
@@ -61,11 +61,11 @@ HomeSection.Hero = function HomeSectionHero({
   className,
 }: HomeSectionHeroProps) {
   return (
-    <div className="relative items-center flex-1 hidden w-1/2 md:flex justify-items-center">
+    <div className="relative hidden w-1/2 flex-1 items-center justify-items-center md:flex">
       <Image
         alt="Hero"
         className={twMerge(
-          'w-full h-full opacity-90',
+          'h-full w-full opacity-90',
           padded && 'p-4',
           contain ? 'object-contain' : 'object-cover',
           className

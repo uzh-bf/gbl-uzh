@@ -6,11 +6,11 @@ import SwissUniLogo from '../../public/images/logo_swissuniversities.png'
 import UZHLogo from '../../public/images/logo_uzh.jpeg'
 function Footer() {
   return (
-    <footer className="mt-8 text-sm text-gray-600 border-t-2 bg-slate-100 border-uzh-red-100 border-top md:text-base">
-      <div className="flex flex-col justify-between flex-initial max-w-6xl px-4 py-8 m-auto md:py-16 md:px-8 md:flex-row">
-        <div className="flex flex-row items-center self-center order-1 gap-2 mb-4 md:gap-4 md:order-2 md:mb-0">
+    <footer className="border-top mt-8 border-t-2 border-uzh-red-100 bg-slate-100 text-sm text-gray-600 md:text-base">
+      <div className="m-auto flex max-w-6xl flex-initial flex-col justify-between px-4 py-8 md:flex-row md:px-8 md:py-16">
+        <div className="order-1 mb-4 flex flex-row items-center gap-2 self-center md:order-2 md:mb-0 md:gap-4">
           <a href="https://www.uzh.ch" target="_blank" rel="noreferrer">
-            <div className="relative w-40 h-20 bg-white rounded hover:outline">
+            <div className="relative h-20 w-40 rounded bg-white hover:outline">
               <Image
                 src={UZHLogo}
                 alt="UZH Logo"
@@ -24,7 +24,7 @@ function Footer() {
             target="_blank"
             rel="noreferrer"
           >
-            <div className="relative w-40 h-20 bg-white rounded hover:outline">
+            <div className="relative h-20 w-40 rounded bg-white hover:outline">
               <Image
                 src={SwissUniLogo}
                 alt="Swissuniversities Logo"
@@ -35,7 +35,7 @@ function Footer() {
           </a>
         </div>
 
-        <div className="order-2 space-y-2 prose-sm prose text-center text-gray-600 md:space-y-4 md:order-1 md:text-left">
+        <div className="prose prose-sm order-2 space-y-2 text-center text-gray-600 md:order-1 md:space-y-4 md:text-left">
           <div className="flex flex-row items-center gap-4">
             <FontAwesomeIcon
               icon={faBook}

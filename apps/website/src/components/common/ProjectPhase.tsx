@@ -8,16 +8,16 @@ interface Props {
 
 function ProjectPhase({ title, duration, children }: Props) {
   return (
-    <div className="flex flex-col flex-1 last:mt-2 sm:last:mt-0 sm:last:ml-4">
+    <div className="flex flex-1 flex-col last:mt-2 sm:last:ml-4 sm:last:mt-0">
       <H3
         className={{
-          root: 'flex-initial pb-2 md:pl-4 pt-2 text-white bg-uzh-red-80',
+          root: 'flex-initial bg-uzh-red-80 pb-2 pt-2 text-white md:pl-4',
         }}
       >
         {title}
       </H3>
 
-      <div className="flex-1 p-4 bg-uzh-grey-20">
+      <div className="flex-1 bg-uzh-grey-20 p-4">
         <H4>Project Duration</H4>
         <Prose>{duration}</Prose>
         <H4>Project Goals</H4>

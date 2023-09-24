@@ -24,20 +24,20 @@ function FocusArea({
   return (
     <div
       className={twMerge(
-        'flex flex-col md:flex-row items-center md:items-center',
+        'flex flex-col items-center md:flex-row md:items-center',
         className
       )}
     >
-      <div className="flex-1 md:flex-initial md:w-36">
+      <div className="flex-1 md:w-36 md:flex-initial">
         <Card
           colored
-          className="p-4 w-36"
+          className="w-36 p-4"
           imgSrc={imgSrc}
           minHeight="min-h-[100px]"
         />
       </div>
 
-      <div className="mt-4 mb-0 md:mt-0 md:pl-4">
+      <div className="mb-0 mt-4 md:mt-0 md:pl-4">
         <H3>{title}</H3>
         <Prose>{description}</Prose>
         {roadmapHref && (

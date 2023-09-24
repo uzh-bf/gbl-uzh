@@ -29,7 +29,7 @@ GameCard.defaultProps = {
 
 GameCard.ProcessSignifier = function ProcessSignifier() {
   return (
-    <div className="flex flex-col items-center p-2 mb-2 border rounded md:mb-0 md:mr-2 md:last:mr-0">
+    <div className="mb-2 flex flex-col items-center rounded border p-2 md:mb-0 md:mr-2 md:last:mr-0">
       <div className="flex flex-row">
         <svg height="35" width="35">
           <circle

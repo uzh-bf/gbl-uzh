@@ -4,9 +4,9 @@ import Image from 'next/image'
 function Contact({ name, institution, role, link, imgSrc }: any) {
   return (
     <div className="flex flex-row">
-      <div className="relative flex-initial w-40 h-48 m-auto sm:m-0">
+      <div className="relative m-auto h-48 w-40 flex-initial sm:m-0">
         <Image
-          className="object-cover border rounded shadow"
+          className="rounded border object-cover shadow"
           placeholder="blur"
           fill
           src={imgSrc}

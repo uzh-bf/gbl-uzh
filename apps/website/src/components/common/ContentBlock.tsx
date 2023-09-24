@@ -5,11 +5,11 @@ function ContentBlock({ title, children }: any) {
     <>
       <H2 className={{ root: 'mt-8 border-b md:mt-16' }}>{title}</H2>
       <div className="flex flex-col py-1 md:flex-row">
-        <p className="flex-1 prose max-w-none">{children}</p>
-        <div className="flex-initial pl-16 w-72">
+        <p className="prose max-w-none flex-1">{children}</p>
+        <div className="w-72 flex-initial pl-16">
           <div className="flex flex-row py-2">
             <svg
-              className="w-6 h-6"
+              className="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -26,7 +26,7 @@ function ContentBlock({ title, children }: any) {
           </div>
           <div className="flex flex-row py-2">
             <svg
-              className="w-6 h-6"
+              className="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -43,7 +43,7 @@ function ContentBlock({ title, children }: any) {
           </div>
           <div className="flex flex-row py-2">
             <svg
-              className="w-6 h-6"
+              className="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

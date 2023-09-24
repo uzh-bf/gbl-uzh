@@ -7,7 +7,7 @@ interface Props {
 
 function Content({ className, children }: Props) {
   return (
-    <div className={twMerge('max-w-6xl p-4 m-auto md:pt-8', className)}>
+    <div className={twMerge('m-auto max-w-6xl p-4 md:pt-8', className)}>
       {children}
     </div>
   )

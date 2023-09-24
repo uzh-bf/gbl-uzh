@@ -16,13 +16,13 @@ const defaultProps = {
 
 function PageWithHeader({ className, title, children, withFooter }: Props) {
   return (
-    <div className={twMerge('flex flex-col h-full', className)}>
+    <div className={twMerge('flex h-full flex-col', className)}>
       <Head>
         <title>{`GBL@UZH - ${title}`}</title>
       </Head>
-      <div className="flex-1 w-full">
+      <div className="w-full flex-1">
         <PageHead />
-        <div className="h-full md:border-t-2 border-uzh-red-100">
+        <div className="h-full border-uzh-red-100 md:border-t-2">
           {children}
         </div>
         {/* <div className="h-full">{children}</div> */}

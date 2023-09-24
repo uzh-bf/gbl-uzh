@@ -1,13 +1,13 @@
 import { H1, H2, H3 } from '@uzh-bf/design-system'
-import TitleBackground from '../components/common/TitleBackground'
 import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
+import TitleBackground from '../components/common/TitleBackground'
 
 function Resources() {
   return (
     <PageWithHeader title="Resources">
       <TitleBackground>
-        <H1 className={{ root: 'max-w-6xl mx-auto' }}>Resources</H1>{' '}
+        <H1 className={{ root: 'mx-auto max-w-6xl' }}>Resources</H1>{' '}
       </TitleBackground>
 
       <Content>
@@ -16,7 +16,7 @@ function Resources() {
         <H2>Workshop Materials</H2>
         <div className="flex flex-row py-2">
           <svg
-            className="w-6 h-6"
+            className="h-6 w-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

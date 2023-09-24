@@ -2,10 +2,10 @@ import { push } from '@socialgouv/matomo-next'
 import { H1 } from '@uzh-bf/design-system'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import Panel from '../components/common/Panel'
-import TitleBackground from '../components/common/TitleBackground'
 import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
+import Panel from '../components/common/Panel'
+import TitleBackground from '../components/common/TitleBackground'
 import * as Util from '../lib/util'
 
 interface Props {
@@ -21,7 +21,7 @@ function DevelopmentWorkflow({ sourceArr }: Props) {
   return (
     <PageWithHeader title="Game Development">
       <TitleBackground>
-        <H1 className={{ root: 'max-w-6xl mx-auto lg:pl-4' }}>
+        <H1 className={{ root: 'mx-auto max-w-6xl lg:pl-4' }}>
           Game Development
         </H1>
       </TitleBackground>

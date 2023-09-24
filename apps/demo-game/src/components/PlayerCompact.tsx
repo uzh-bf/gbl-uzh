@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 function PlayerCompact({ player }: { player: Player }) {
   return (
-    <div className="flex flex-row items-end gap-4 py-1 border-b last:border-0">
+    <div className="flex flex-row items-end gap-4 border-b py-1 last:border-0">
       <img width="20px" src={`/avatars/${player.avatar}.png`} />
       <div>
         {player.isReady ? (

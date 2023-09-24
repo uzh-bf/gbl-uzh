@@ -74,7 +74,7 @@ function Games() {
         }}
       >
         {() => (
-          <Form className="p-4 border rounded">
+          <Form className="rounded border p-4">
             <FormikTextField
               name="name"
               label="Name"
@@ -94,9 +94,9 @@ function Games() {
         )}
       </Formik>
 
-      <div className="grid grid-cols-10 gap-1 mt-4">
+      <div className="mt-4 grid grid-cols-10 gap-1">
         {data.games.map((game) => (
-          <div className="p-2 border" key={game?.id}>
+          <div className="border p-2" key={game?.id}>
             <Link href={`/admin/games/${game?.id}`}>
               {game?.name} {game?.activePeriodIx}
             </Link>
