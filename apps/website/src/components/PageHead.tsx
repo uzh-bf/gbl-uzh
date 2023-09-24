@@ -11,10 +11,10 @@ import LogoImage from '../../public/images/GBLUZH.png'
 const NAVIGATION_ITEMS = [
   { href: '/games', label: 'Games & Courses' },
   { href: '/use-cases', label: 'Use Cases' },
+  { href: '/escape', label: 'EscapeUZH' },
   { href: '/dev', label: 'Development' },
   { href: '/kb', label: 'Knowledge Base' },
   // { href: '/resources', label: 'Resources' },
-  { href: '/roadmap', label: 'Roadmap' },
   { href: '/about', label: 'About' },
 ]
 
@@ -29,11 +29,11 @@ function NavigationItem({ isActive, children, href }: NavigationItemProps) {
     <Link
       href={href}
       className={twMerge(
-        'flex-1 p-1 mb-1 ml-3 mr-3 text-left text-sm text-gray-500 hover:text-uzh-blue-80 hover:border-uzh-blue-40 hover:cursor-pointer md:flex-initial md:ml-0 md:mb-0 md:mr-2 md:p-2 md:last:mr-0 last:mb-0 border-b-2 md:border-b-0 md:border-t-4',
+        'mb-1 ml-3 mr-3 flex-1 border-b-2 p-1 text-left text-sm text-gray-500 last:mb-0 hover:cursor-pointer hover:border-uzh-blue-40 hover:text-uzh-blue-80 md:mb-0 md:ml-0 md:mr-2 md:flex-initial md:border-b-0 md:border-t-4 md:p-2 md:last:mr-0',
         isActive && 'border-uzh-red-100 text-gray-800'
       )}
     >
-      {children}
+      {children as any}
     </Link>
   )
 }
@@ -49,7 +49,7 @@ function Navigation({ isOpen }: NavigationProps) {
   const router = useRouter()
 
   const mobileMenu = (
-    <nav className="flex flex-col order-1 pb-4 md:hidden">
+    <nav className="order-1 flex flex-col pb-4 md:hidden">
       <NavigationItem isActive={router.pathname === '/'} href="/">
         Home
       </NavigationItem>
@@ -76,7 +76,7 @@ function Navigation({ isOpen }: NavigationProps) {
   return (
     <>
       {/* Menu for medium / large screens */}
-      <nav className="flex-col order-1 hidden mt-8 md:order-2 md:flex-row md:flex">
+      <nav className="order-1 mt-8 hidden flex-col md:order-2 md:flex md:flex-row">
         <NavigationItem isActive={router.pathname === '/'} href="/">
           Home
         </NavigationItem>
@@ -104,7 +104,7 @@ Navigation.defaultProps = {
 function Logo() {
   return (
     <Link href="/">
-      <div className="relative w-56 h-20 ">
+      <div className="relative h-20 w-56 ">
         <Image
           src={LogoImage}
           alt="Logo"
@@ -121,7 +121,7 @@ function PageHead() {
   const [isOpen, setOpen] = useState(false)
 
   return (
-    <header className="flex flex-col justify-between max-w-6xl pt-1 m-auto md:flex-row md:items-end">
+    <header className="m-auto flex max-w-6xl flex-col justify-between pt-1 md:flex-row md:items-end">
       <div className="flex flex-row items-end justify-between md:items-stretch">
         <div className="flex-initial">
           <Logo />
@@ -131,7 +131,7 @@ function PageHead() {
           <Button
             basic
             className={{
-              root: twMerge('md:hidden text-xl', isOpen && 'text-uzh-red-100'),
+              root: twMerge('text-xl md:hidden', isOpen && 'text-uzh-red-100'),
             }}
             onClick={() => setOpen(!isOpen)}
           >

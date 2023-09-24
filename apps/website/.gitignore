@@ -3,3 +3,4 @@ out/
 build/
 .vercel/
 public/images/responsive*
+.vercel

@@ -1,6 +1,5 @@
 import { config } from '@fortawesome/fontawesome-svg-core'
 import { init } from '@socialgouv/matomo-next'
-import { ThemeProvider } from '@uzh-bf/design-system'
 import { AppProps } from 'next/app'
 import { Source_Sans_3 } from 'next/font/google'
 import { useEffect } from 'react'
@@ -12,7 +11,7 @@ import '../globals.css'
 
 const sourceSansPro = Source_Sans_3({
   subsets: ['latin'],
-  variable: '--source-sans-pro',
+  variable: '--theme-font-primary',
   weight: ['300', '400', '700'],
 })
 
@@ -28,9 +27,7 @@ function App({ Component, pageProps }: AppProps) {
 
   return (
     <div className={`${sourceSansPro.variable} font-sans h-full`}>
-      <ThemeProvider>
         <Component {...pageProps} />
-      </ThemeProvider>
     </div>
   )
 }

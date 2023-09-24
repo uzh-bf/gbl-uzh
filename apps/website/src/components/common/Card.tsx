@@ -11,6 +11,7 @@ interface Props {
   minHeight?: string
   colored?: boolean
   disabled?: boolean
+  objectFit?: string
 }
 
 function Card({
@@ -22,6 +23,7 @@ function Card({
   minHeight,
   colored,
   disabled,
+  objectFit = undefined,
 }: Props) {
   return (
     <Button
@@ -30,7 +32,7 @@ function Card({
       onClick={onClick}
       className={{
         root: twMerge(
-          'p-0 border-none outline outline-1 outline-uzh-grey-60 filter',
+          'border-none p-0 outline outline-1 outline-uzh-grey-60 filter',
           !colored && 'grayscale',
           className,
           onClick
@@ -41,7 +43,7 @@ function Card({
     >
       <div
         className={twMerge(
-          'w-full h-full relative',
+          'relative h-full w-full',
           minHeight || 'min-h-[200px]'
         )}
       >
@@ -51,22 +53,23 @@ function Card({
               <Tag
                 key={tag}
                 label={tag}
-                className={{ root: 'bg-slate-200 border-slate-400 border' }}
+                className={{ root: 'border border-slate-400 bg-slate-200' }}
               />
             ))}
           </div>
         )}
 
         {name && (
-          <div className="absolute left-0 right-0 z-10 py-1 text-lg font-bold prose text-center bg-white bg-opacity-95 bottom-3">
+          <div className="prose absolute bottom-3 left-0 right-0 z-10 bg-white bg-opacity-95 py-1 text-center text-lg font-bold">
             {name}
           </div>
         )}
 
         <Image
-          className={twMerge('z-0 w-full rounded opacity-90 object-cover')}
+          className={twMerge('z-0 w-full rounded object-cover opacity-90')}
           src={imgSrc}
           alt={`Image of ${name}`}
+          objectFit={objectFit}
           fill
         />
       </div>
