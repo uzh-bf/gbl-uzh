@@ -100,7 +100,7 @@ function About() {
         </div>
 
         <H2 className={{ root: 'mt-8' }}>Project Overview</H2>
-        <div className="flex flex-col sm:flex-row">
+        <div className="mt-2 flex flex-col sm:flex-row">
           <ProjectPhase duration="2019-2021" title="Project 1">
             <li>
               Conduct workshops for lecturers and students supported by experts.
@@ -133,7 +133,7 @@ function About() {
         </div>
 
         <H2 className={{ root: 'mt-8' }}>Project Team</H2>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="mt-2 grid gap-4 md:grid-cols-2">
           <Contact
             name="Dr. Benjamin Wilding"
             institution="Department of Banking and Finance, University of Zurich"
