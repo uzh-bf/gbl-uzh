@@ -17,6 +17,11 @@ The `gbl-uzh` project consists of two key components:
 - The `GBL Advisor` (located in the `apps/advisor` directory), an advisory wizard for getting started in the space of Game-Based Learning as a teacher. The advisor is built on the Twinery text-based serious game engine.
 - The `GBL Platform` (located in the `packages/platform` directory), a code framework for building round-based simulations with Next.js and React.
 
+## Requirements
+
+- Docker / Podman
+- Node.js 18+ / PNPM
+
 ## Contributing
 
 We welcome any contributions to the project. If you would like to contribute to the code base, please create an [Issue](https://github.com/uzh-bf/gbl-uzh/issues) beforehand to ensure that your goals align with our project vision. If you would like to give us feedback or have any requests regarding content of the website or knowledge base, please add a new entry in [Discussions](https://github.com/uzh-bf/gbl-uzh/discussions).

@@ -40,7 +40,7 @@
     "typescript": "5.2.2"
   },
   "scripts": {
-    "build": "cross-env NODE_ENV=production next build",
+    "//build": "cross-env NODE_ENV=production next build",
     "check": "npm-run-all --parallel check:ts format:ci lint",
     "check:fix": "npm-run-all check:ts format lint:fix",
     "check:ts": "tsc",
