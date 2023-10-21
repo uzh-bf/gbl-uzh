@@ -6,6 +6,15 @@ import {
   ResultDocument,
 } from 'src/graphql/generated/ops'
 import { ActionTypes } from 'src/reducers/ActionsReducer'
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+
+function getTotalAssetsOfPreviousResults(previousResults) {
+  const filtered = previousResults.filter((o) => o.type == "SEGMENT_END")
+  filtered.sort((a, b) => (
+      a.period.index > b.period.index && a.segment.index > b.segment.index ? -1 : 1
+  ))
+  return filtered.map((e) => e.facts.assetsWithReturns).flat().map((e) => e.totalAssets)
+}
 
 function Cockpit() {
   const playerState = useQuery(ResultDocument, { fetchPolicy: 'cache-first' })
@@ -33,6 +42,7 @@ function Cockpit() {
   )
 
   const resultFacts = playerState.data?.result?.playerResult?.facts
+  const previousResults = playerState.data?.result?.previousResults
   const currentGame = playerState?.data?.result?.currentGame
   const self = playerState?.data?.self
 
@@ -72,34 +82,34 @@ function Cockpit() {
   ]
 
   const columns_segment_results = [
-    { label: '', accessor: 'cat', sortable: false },
+    { label: '', accessor: 'cat', sortable: false},
     {
       label: 'Initial',
       accessor: 0,
       sortable: false,
-      transformer: (val, row) =>
-        typeof val === 'number' && `CHF ${val.toFixed(2)}`,
+      transformer: ({row}) =>
+        typeof row[0] === 'number' && `CHF ${row[0].toFixed(2)}`,
     },
     {
       label: 'Month 1',
       accessor: 1,
       sortable: false,
-      transformer: (val, row) =>
-        typeof val === 'number' && `CHF ${val.toFixed(2)}`,
+      transformer: ({row}) =>
+        typeof row[1] === 'number' && `CHF ${row[1].toFixed(2)}`,
     },
     {
       label: 'Month 2',
       accessor: 2,
       sortable: false,
-      transformer: (val, row) =>
-        typeof val === 'number' && `CHF ${val.toFixed(2)}`,
+      transformer: ({row}) =>
+        typeof row[2] === 'number' && `CHF ${row[2].toFixed(2)}`,
     },
     {
       label: 'Month 3',
       accessor: 3,
       sortable: false,
-      transformer: (val, row) =>
-        typeof val === 'number' && `CHF ${val.toFixed(2)}`,
+      transformer: ({row}) =>
+        typeof row[3] === 'number' && `CHF ${row[3].toFixed(2)}`,
     },
   ]
 
@@ -190,6 +200,9 @@ function Cockpit() {
     </div>
   )
 
+  const totalAssetsPerMonth = getTotalAssetsOfPreviousResults(previousResults)
+      .map((s, i) => ({total: s, month: "month_" + String(i)}))
+  
   switch (currentGame?.status) {
     case 'PREPARATION':
       return <div>{header} Game is begin prepared.</div>
@@ -219,6 +232,18 @@ function Cockpit() {
               data={data_segment_results}
               caption=""
             />
+          </div>
+          <div className="max-w-2xl">
+            <div className="flex justify-center">
+              Total over time chart
+            </div>
+            <LineChart width={600} height={400} data={totalAssetsPerMonth}>
+              <Line type="monotone" dataKey="total" stroke="#8884d8" />
+              <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+              <XAxis dataKey="month"/>
+              <YAxis />
+              <Tooltip />
+            </LineChart>
           </div>
         </div>
       )
