@@ -6,7 +6,7 @@
 
 Game-based learning has many benefits for lecturers and students. However, it can be difficult to get started with developing learning games and integrating games with other curricular activities. We want to foster the application of game-based learning in the university context by providing foundational resources for game usage and development based on what we have learned on our own journey.
 
-For more details on our future plans, have a look at our [Roadmap](https://www.gbl.uzh.ch/roadmap).
+For more details on our future plans, have a look at our [Roadmap](https://www.gbl.uzh.ch/about/).
 
 ## Project Components
 
@@ -19,9 +19,7 @@ The `gbl-uzh` project consists of two key components:
 
 ## Contributing
 
-We welcome any contributions to the project. If you would like to contribute to the code base, please create an [Issue](https://github.com/uzh-bf/gbl-uzh/issues) beforehand to ensure that your goals align with our project vision. If you would like to publish your course or game-based learning resource on our website, please create a new [Discussion](https://github.com/uzh-bf/gbl-uzh/discussions).
-
-If you would like to give us feedback or have any requests regarding content of the website or knowledge base, please add a new entry on our [Feedback](https://gbl-uzh.feedbear.com/boards/gbl-web) page.
+We welcome any contributions to the project. If you would like to contribute to the code base, please create an [Issue](https://github.com/uzh-bf/gbl-uzh/issues) beforehand to ensure that your goals align with our project vision. If you would like to give us feedback or have any requests regarding content of the website or knowledge base, please add a new entry in [Discussions](https://github.com/uzh-bf/gbl-uzh/discussions).
 
 ## License
 
