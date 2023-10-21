@@ -89,6 +89,7 @@
     "prisma:reset": "prisma migrate reset",
     "prisma:seed": "ts-node --esm prisma/seed.ts",
     "prisma:seed:prod": "doppler run --config prd -- ts-node --esm prisma/seed.ts",
+    "prisma:setup": "run-s prisma:reset prisma:push prisma:seed",
     "prisma:studio": "prisma studio",
     "prisma:studio:prod": "doppler run --config prd -- prisma studio",
     "start": "next start",

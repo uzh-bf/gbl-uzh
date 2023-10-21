@@ -35,6 +35,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "format": "turbo run format",
+    "prisma:setup": "pnpm run --filter @gbl-uzh/demo-game prisma:setup",
     "publish": "turbo run publish",
     "release": "standard-version --no-verify",
     "release:alpha": "standard-version --prerelease alpha --no-verify",
