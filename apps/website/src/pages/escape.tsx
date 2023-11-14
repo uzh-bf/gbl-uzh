@@ -1,5 +1,7 @@
 import { H1, H2, Prose } from '@uzh-bf/design-system'
+import Image from 'next/image'
 import Link from 'next/link'
+import EscapePhoneSrc from '../../public/images/escape_phone.png'
 import Content from '../components/Content'
 import PageWithHeader from '../components/PageWithHeader'
 import TitleImage from '../components/common/TitleImage'
@@ -28,7 +30,7 @@ function EscapeUZH() {
                 github.com/uzh-bf/escapp
               </a>
               ) developed initially at Universidad Politécnica de Madrid and
-              adapter and hosted by the Department of Banking and Finance for
+              adapted and hosted by the Department of Banking and Finance for
               the University of Zurich.
             </p>
             <p>
@@ -69,19 +71,18 @@ function EscapeUZH() {
           <Prose className={{ root: 'max-w-none' }}>
             If you are interested in using the platform or our escape room for
             educational purposes, please submit your use case using the form
-            available on the right (or directly on{' '}
+            available on{' '}
             <a href="https://forms.office.com/e/dxZrnYmy5P" target="_blank">
               Microsoft Forms
             </a>
-            ).
+            .
           </Prose>
         </div>
-        <div className="min-w-[400px] flex-1">
-          <iframe
-            className="flex-1"
-            width="100%"
-            height="1000px"
-            src="https://forms.office.com/Pages/ResponsePage.aspx?id=2zjkx2LkIkypCsNYsWmAs3FqIECvYGdIv-SlumKwtF1URUIwNVI2SzIzVjlGWkEzNUZGN1BKWTNLSy4u&embed=true"
+        <div className="max-w-sm flex-1">
+          <Image
+            alt="Escape Room on Mobile"
+            src={EscapePhoneSrc}
+            className="rounded object-contain shadow"
           />
         </div>
       </Content>
