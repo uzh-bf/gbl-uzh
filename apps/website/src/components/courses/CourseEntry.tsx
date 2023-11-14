@@ -1,5 +1,6 @@
 import { H3, Prose, Tag } from '@uzh-bf/design-system'
 import { MDXRemote } from 'next-mdx-remote'
+import { twMerge } from 'tailwind-merge'
 
 interface Props {
   name: string
@@ -8,6 +9,7 @@ interface Props {
   semester: string
   href: string
   institution: string
+  highlight?: boolean
   description?: any
 }
 
@@ -19,10 +21,16 @@ function CourseEntry({
   institution,
   href,
   description,
-}: Props) {
+  highlight,
+}: Readonly<Props>) {
   return (
     <a href={href} target="_blank" rel="noreferrer">
-      <div className="h-full cursor-pointer rounded border bg-white px-2 py-2 hover:shadow">
+      <div
+        className={twMerge(
+          'h-full cursor-pointer rounded border bg-white px-2 py-2 hover:shadow',
+          highlight && 'border-orange-600 bg-orange-50'
+        )}
+      >
         <H3 className={{ root: 'text-sm' }}>{name}</H3>
         <Prose>
           <MDXRemote {...description} />
@@ -31,7 +39,10 @@ function CourseEntry({
           {institution && <Tag label={institution} />}
           {semester && <Tag label={`${semester} Semester`} />}
           {level && <Tag label={level} />}{' '}
-          {ects && <Tag label={`${ects} ECTS`} />}
+          {typeof ects !== 'undefined' && <Tag label={`${ects} ECTS`} />}
+          {highlight && (
+            <Tag label="New" className={{ root: 'bg-orange-200' }} />
+          )}
         </div>
       </div>
     </a>

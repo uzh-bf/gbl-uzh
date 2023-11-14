@@ -107,6 +107,7 @@ function GBLinUse({ sourceArr }: Props) {
                 href={frontmatter.href}
                 semester={frontmatter.semester}
                 institution={frontmatter.institution}
+                highlight={frontmatter.highlight}
                 description={source}
               />
             ))}
