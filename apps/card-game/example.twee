@@ -1,0 +1,148 @@
+:: StoryTitle
+Card Game Example
+
+
+:: StoryData
+{
+  "ifid": "61485CD7-104E-4035-BB96-6CBB1050405D",
+  "format": "SugarCube",
+  "format-version": "2.36.1",
+  "start": "Start"
+}
+
+
+:: UserScript [script]
+importScripts("https://cdn.tailwindcss.com");
+
+
+:: UserStylesheet [stylesheet]
+body {
+  background-color: white;
+  color: black;
+}
+
+
+:: StoryInit
+<<set $allCards = {}>>
+
+<<set $allCards["Sugar1"] = {
+  precondition: 'false',
+  description: "Do you want to feed more sugar to your people?",
+  accept: "<<set $happiness = $happiness + 2>><<set $health = $health - 3>><<goto 'CoreLoop'>>",
+  acceptExplanation: "Sugar is bad for you.",
+  reject: "<<goto 'CoreLoop'>>",
+  rejectExplanation: "Sugar is bad for you.",
+}>>
+<<set $allCards["Sugar2"] = {
+  precondition: 'false',
+  description: "Do you want to feed more sugar to your people?",
+  accept: "<<set $happiness = $happiness + 2>><<set $health = $health - 3>><<goto 'CoreLoop'>>",
+  acceptExplanation: "Sugar is bad for you.",
+  reject: "<<goto 'CoreLoop'>>",
+  rejectExplanation: "Sugar is bad for you.",
+}>>
+<<set $allCards["Sugar3"] = {
+  precondition: 'false',
+  description: "Do you want to feed more sugar to your people?",
+  accept: "<<set $happiness = $happiness + 2>><<set $health = $health - 3>><<goto 'CoreLoop'>>",
+  acceptExplanation: "Sugar is bad for you.",
+  reject: "<<goto 'CoreLoop'>>",
+  rejectExplanation: "Sugar is bad for you.",
+}>>
+
+<<set $allEvents = Object.keys($allCards)>>
+
+<<set $cardArray = ['Sugar1']>>
+
+<<set $intelligence = 5>>
+<<set $health = 5>>
+<<set $happiness = 5>>
+
+<<set $explanation = 'undefined'>>
+<<set $cardName = 'undefined'>>
+
+
+:: Start
+
+Hello, Mr. Governor! You are the boss. Do stuff.
+
+Your population starts with 5 points in each category.
+
+<<link "Start Game" "CoreLoop">><</link>>
+
+
+:: CoreLoop
+<<nobr>>
+  /* TODO: what to do if the available cards are empty? check a condition and win/lose? */
+
+  <<if $health <= 0 || $happiness <= 0 || $intelligence <= 0>>
+    <<goto 'GameOver'>>
+  <</if>>
+
+  <<if $allEvents.length === 0>>
+    <<goto 'Won'>>
+  <</if>>
+
+  <<if $explanation == 'undefined'>>
+    <<if $cardName != 'undefined'>>
+      <<set $allEvents.delete($cardName)>>
+    <</if>>
+
+    <<set $cardName = $cardArray.pluck()>>  /* Pull a random card name from the deck. */
+
+    <<for eval($allCards[$cardName].precondition)>>  /* Test the card. */
+      <<set $cardArray.push($cardName)>>  /* Put the card back in the deck. */
+      <<set $cardName = $cardArray.pluck()>>  /* Keep looking for a valid card. */
+    <</for>>
+  <</if>>
+
+  <<if $explanation != 'undefined'>>
+    <<set $cardArray.push($allEvents.random())>>  /* Add a random event to the deck. */
+  <</if>>
+
+  <div>
+    <div class="flex flex-row justify-between bg-slate-100 px-4 py-2">
+      <div>INT: $intelligence/10</div>
+      <div>HEL: $health/10</div>
+      <div>HAP: $happiness/10</div>
+    </div>
+
+    <div class="p-8 rounded-xl border border-solid border-slate-500 shadow-xl bg-slate-200 mt-4 w-[300px] h-[400px] mx-auto flex flex-col justify-between">
+      <<if $explanation == 'undefined'>>
+        <div>
+          <<print $allCards[$cardName].description>>
+        </div>
+        <div class="flex flex-row justify-between">
+          <div class="text-green-600">
+            <<link "Accept">><<set $explanation = 'acceptExplanation'>><<run $.wiki($allCards[$cardName].accept)>><</link>>
+          </div>
+          <div class="text-red-600">
+            <<link "Reject">><<set $explanation = 'rejectExplanation'>><<run $.wiki($allCards[$cardName].reject)>><</link>>
+          </div>
+        </div>
+      <</if>>
+
+      <<if $explanation != 'undefined'>>
+        <div>
+          <<print $allCards[$cardName][$explanation]>>
+        </div>
+        <div class="flex flex-row justify-between">
+          <div>
+          </div>
+          <div class="text-green-600">
+            <<link "Next">><<set $explanation = 'undefined'>><<goto 'CoreLoop'>><</link>>
+          </div>
+        </div>
+      <</if>>
+    </div>
+  </div>
+<</nobr>>
+
+:: GameOver
+
+THE END!
+
+
+:: Won
+
+Congratulations, you won!
