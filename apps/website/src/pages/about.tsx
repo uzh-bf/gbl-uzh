@@ -5,6 +5,7 @@ import ToolboxIcon from '../../public/images/innovation_icon.svg'
 import NetworkIcon from '../../public/images/netzwerk_icon.svg'
 import ProcessIcon from '../../public/images/prozess_icon.svg'
 import RolandImage from '../../public/images/schlaefli_roland.jpg'
+import JakobImage from '../../public/images/jakob_jakob.jpg'
 import DavidImage from '../../public/images/schmocker_david.jpg'
 import UZHIcon from '../../public/images/uzh_icon.svg'
 import BenjaminImage from '../../public/images/wilding_benjamin.jpg'
@@ -164,6 +165,14 @@ function About() {
             role="IT Project Manager and Developer"
             link="https://www.bf.uzh.ch/en/persons/schlaefli-roland"
             imgSrc={RolandImage}
+          />
+
+          <Contact
+            name="Jakob Jakob"
+            institution="Department of Finance, University of Zurich"
+            role="Computer Graphics and Game Software Engineer"
+            link=""
+            imgSrc={JakobImage}
           />
         </div>
 
