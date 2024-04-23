@@ -139,7 +139,7 @@ function About() {
             name="Dr. Benjamin Wilding"
             institution="Department of Finance, University of Zurich"
             role="Managing Director and Head of Teaching"
-            link="https://www.bf.uzh.ch/en/persons/wilding-benjamin"
+            link="https://www.df.uzh.ch/en/people/staff/management/benjamin-wilding.html"
             imgSrc={BenjaminImage}
           />
 
@@ -155,7 +155,7 @@ function About() {
             name="Anja Zgraggen"
             institution="Department of Finance, University of Zurich"
             role="Program and Project Manager"
-            link="https://www.bf.uzh.ch/en/persons/zgraggen-anja"
+            link="https://www.df.uzh.ch/en/people/staff/teaching-center/anja-zgraggen.html"
             imgSrc={AnjaImage}
           />
 
@@ -163,7 +163,7 @@ function About() {
             name="Roland Schläfli"
             institution="Department of Finance, University of Zurich"
             role="IT Project Manager and Developer"
-            link="https://www.bf.uzh.ch/en/persons/schlaefli-roland"
+            link="https://www.df.uzh.ch/en/people/staff/teaching-center/roland-schlaefli.html"
             imgSrc={RolandImage}
           />
 
@@ -171,7 +171,7 @@ function About() {
             name="Jakob Jakob"
             institution="Department of Finance, University of Zurich"
             role="Computer Graphics and Game Software Engineer"
-            link=""
+            link="https://www.df.uzh.ch/en/people/staff/teaching-center/jakob-jakob.html"
             imgSrc={JakobImage}
           />
         </div>
