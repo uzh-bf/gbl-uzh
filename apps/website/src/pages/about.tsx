@@ -136,7 +136,7 @@ function About() {
         <div className="mt-2 grid gap-4 md:grid-cols-2">
           <Contact
             name="Dr. Benjamin Wilding"
-            institution="Department of Banking and Finance, University of Zurich"
+            institution="Department of Finance, University of Zurich"
             role="Managing Director and Head of Teaching"
             link="https://www.bf.uzh.ch/en/persons/wilding-benjamin"
             imgSrc={BenjaminImage}
@@ -152,7 +152,7 @@ function About() {
 
           <Contact
             name="Anja Zgraggen"
-            institution="Department of Banking and Finance, University of Zurich"
+            institution="Department of Finance, University of Zurich"
             role="Program and Project Manager"
             link="https://www.bf.uzh.ch/en/persons/zgraggen-anja"
             imgSrc={AnjaImage}
@@ -160,7 +160,7 @@ function About() {
 
           <Contact
             name="Roland Schläfli"
-            institution="Department of Banking and Finance, University of Zurich"
+            institution="Department of Finance, University of Zurich"
             role="IT Project Manager and Developer"
             link="https://www.bf.uzh.ch/en/persons/schlaefli-roland"
             imgSrc={RolandImage}
