@@ -5,6 +5,7 @@ import ToolboxIcon from '../../public/images/innovation_icon.svg'
 import NetworkIcon from '../../public/images/netzwerk_icon.svg'
 import ProcessIcon from '../../public/images/prozess_icon.svg'
 import RolandImage from '../../public/images/schlaefli_roland.jpg'
+import JakobImage from '../../public/images/jakob_jakob.jpg'
 import DavidImage from '../../public/images/schmocker_david.jpg'
 import UZHIcon from '../../public/images/uzh_icon.svg'
 import BenjaminImage from '../../public/images/wilding_benjamin.jpg'
@@ -136,9 +137,9 @@ function About() {
         <div className="mt-2 grid gap-4 md:grid-cols-2">
           <Contact
             name="Dr. Benjamin Wilding"
-            institution="Department of Banking and Finance, University of Zurich"
+            institution="Department of Finance, University of Zurich"
             role="Managing Director and Head of Teaching"
-            link="https://www.bf.uzh.ch/en/persons/wilding-benjamin"
+            link="https://www.df.uzh.ch/en/people/staff/management/benjamin-wilding.html"
             imgSrc={BenjaminImage}
           />
 
@@ -152,18 +153,26 @@ function About() {
 
           <Contact
             name="Anja Zgraggen"
-            institution="Department of Banking and Finance, University of Zurich"
+            institution="Department of Finance, University of Zurich"
             role="Program and Project Manager"
-            link="https://www.bf.uzh.ch/en/persons/zgraggen-anja"
+            link="https://www.df.uzh.ch/en/people/staff/teaching-center/anja-zgraggen.html"
             imgSrc={AnjaImage}
           />
 
           <Contact
             name="Roland Schläfli"
-            institution="Department of Banking and Finance, University of Zurich"
+            institution="Department of Finance, University of Zurich"
             role="IT Project Manager and Developer"
-            link="https://www.bf.uzh.ch/en/persons/schlaefli-roland"
+            link="https://www.df.uzh.ch/en/people/staff/teaching-center/roland-schlaefli.html"
             imgSrc={RolandImage}
+          />
+
+          <Contact
+            name="Jakob Jakob"
+            institution="Department of Finance, University of Zurich"
+            role="Computer Graphics and Game Software Engineer"
+            link="https://www.df.uzh.ch/en/people/staff/teaching-center/jakob-jakob.html"
+            imgSrc={JakobImage}
           />
         </div>
 
