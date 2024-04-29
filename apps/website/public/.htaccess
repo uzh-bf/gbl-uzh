@@ -1,11 +1,13 @@
 RewriteEngine On
 
 ## Force HTTPS
+
 RewriteCond %{HTTPS} off
-RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+RewriteRule (.\*) https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 ## Redirect to Obsidian
-RewriteRule    "^md/(.*)$"  "https://publish.obsidian.md/serve?url=www.gbl.uzh.ch/md/$1"  [L,P]
+
+RewriteRule "^md/(.\*)$" "https://publish.obsidian.md/serve?url=www.gbl.uzh.ch/md/$1" [L,P]
 
 ## ErrorDocument 404 /404.html
 
@@ -17,4 +19,4 @@ Redirect 302 /beta https://gbl-uzh.vercel.app
 
 Redirect 302 /teams "https://teams.microsoft.com/l/team/19%3aE_4kPlMZ6eGdoVapDgVGYalqPqpCjQ-6YLyH1fWNLdQ1%40thread.tacv2/conversations?groupId=9bb8d586-4fc6-414b-8068-09593a7c38e8&tenantId=c7e438db-e462-4c22-a90a-c358b16980b3"
 
-Redirect 302 /escape-uzh https://escape.uzh.ch/escapeRooms/8/join?token=escape-uzh
+Redirect 302 /escape-uzh https://escape.bf-app.ch/escapeRooms/8/join?token=escape-uzh
