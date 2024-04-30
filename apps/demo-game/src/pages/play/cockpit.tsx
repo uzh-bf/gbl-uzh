@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { Switch, Table } from '@uzh-bf/design-system'
+import { createMachine } from 'xstate'
 import { useEffect, useState } from 'react'
 import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts'
 import {
@@ -8,7 +9,6 @@ import {
 } from 'src/graphql/generated/ops'
 import { ActionTypes } from 'src/reducers/ActionsReducer'
 
-// FIXME: includes initial values as well (2 segments played = 8 entries in chart)
 function getTotalAssetsOfPreviousResults(previousResults: any[]) {
   const filtered = previousResults.filter((o) => o.type == 'SEGMENT_END')
 
@@ -17,16 +17,6 @@ function getTotalAssetsOfPreviousResults(previousResults: any[]) {
       ? -1
       : 1
   )
-
-  // FIXME: breaks at the beginning of the game when nothing has been played yet
-  // Unhandled Runtime Error
-  // TypeError: e is undefined
-  // src/pages/play/cockpit.tsx (25:16) @ e
-  //   23 | .map((e) => e.facts.assetsWithReturns)
-  //   24 | .flat()
-  // > 25 | .map((e) => e.totalAssets)
-  //      |            ^
-  //   26 | }
 
   return filtered
     .map((e) => e.facts.assetsWithReturns)
