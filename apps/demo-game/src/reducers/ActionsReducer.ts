@@ -45,51 +45,26 @@ type Actions =
     >
 
 export function apply(state: any, action: Actions) {
+  const output = {
+    type: action.type,
+    result: state,
+    isDirty: true,
+  }
+
+  const { decision } = action.payload.playerArgs
+
   const newState = match(action)
     .with({ type: ActionTypes.DECIDE_BANK }, () => {
-      const { decision } = action.payload.playerArgs
-
-      return {
-        type: action.type,
-        result: {
-          ...state,
-          decisions: {
-            ...state.decisions,
-            bank: decision,
-          },
-        },
-        isDirty: true,
-      }
+      output.result.decisions.bank = decision
+      return output
     })
     .with({ type: ActionTypes.DECIDE_BONDS }, () => {
-      const { decision } = action.payload.playerArgs
-
-      return {
-        type: action.type,
-        result: {
-          ...state,
-          decisions: {
-            ...state.decisions,
-            bonds: decision,
-          },
-        },
-        isDirty: true,
-      }
+      output.result.decisions.bonds = decision
+      return output
     })
     .with({ type: ActionTypes.DECIDE_STOCK }, () => {
-      const { decision } = action.payload.playerArgs
-
-      return {
-        type: action.type,
-        result: {
-          ...state,
-          decisions: {
-            ...state.decisions,
-            stocks: decision,
-          },
-        },
-        isDirty: true,
-      }
+      output.result.decisions.stocks = decision
+      return output
     })
     .exhaustive()
 
