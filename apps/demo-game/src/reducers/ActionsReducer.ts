@@ -1,7 +1,8 @@
 import { Action } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PrismaClient } from '@prisma/client'
-import { match } from 'ts-pattern'
+import decisionMachine from 'src/machines/decisionMachine'
+import { createActor } from 'xstate'
 
 export enum ActionTypes {
   DECIDE_BANK = 'DECIDE_BANK',
@@ -44,29 +45,33 @@ type Actions =
       PrismaClient
     >
 
-export function apply(state: any, action: Actions) {
-  const output = {
-    type: action.type,
-    result: state,
-    isDirty: true,
-  }
-
+export async function apply(state: any, action: Actions) {
   const { decision } = action.payload.playerArgs
 
-  const newState = match(action)
-    .with({ type: ActionTypes.DECIDE_BANK }, () => {
-      output.result.decisions.bank = decision
-      return output
-    })
-    .with({ type: ActionTypes.DECIDE_BONDS }, () => {
-      output.result.decisions.bonds = decision
-      return output
-    })
-    .with({ type: ActionTypes.DECIDE_STOCK }, () => {
-      output.result.decisions.stocks = decision
-      return output
-    })
-    .exhaustive()
+  const actor = createActor(decisionMachine, {
+    input: {
+      result: state,
+    },
+  })
+
+  actor.start()
+
+  // TODO(Jakob): Redundant (only theoretically)
+  actor.send({ type: 'preparationDone' })
+  actor.send({
+    type: 'updateInvestment',
+    values: {
+      actionType: action.type,
+      decision: decision,
+      result: state,
+      isDirty: true,
+    },
+  })
+  // TODO(Jakob): Redundant (only theoretically)
+  // - Maybe this is needed to make sure we have the latest update
+  actor.send({ type: 'submit' })
+
+  const newState = actor.getSnapshot().context
 
   debugLog('ActionsReducer', state, action, newState)
 
