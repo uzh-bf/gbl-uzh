@@ -78,7 +78,7 @@ export const gameStateMachine = setup({
                     },
                   },
                   {
-                    target: '#Game.GAME_ACTIVE.CONSOLIDATION',
+                    target: 'CONSOLIDATION',
                     guard: {
                       type: 'last segment',
                     },
@@ -90,6 +90,13 @@ export const gameStateMachine = setup({
               on: {
                 onNext: {
                   target: 'RUNNING',
+                },
+              },
+            },
+            CONSOLIDATION: {
+              on: {
+                onNext: {
+                  target: '#Game.GAME_ACTIVE.RESULTS',
                 },
               },
             },
@@ -111,13 +118,6 @@ export const gameStateMachine = setup({
                 },
               },
             ],
-          },
-        },
-        CONSOLIDATION: {
-          on: {
-            onNext: {
-              target: 'RESULTS',
-            },
           },
         },
       },
