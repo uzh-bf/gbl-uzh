@@ -36,6 +36,17 @@ describe('GameStateMachine', () => {
   })
 
   it('supports basic workflow', () => {
+    expect(actor.getSnapshot().value).toEqual('GAME_PREPARED')
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(-1)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(-1)
+
+    actor.send({ type: 'onNext' })
+    expect(actor.getSnapshot().value).toMatchObject({
+      GAME_ACTIVE: 'SCHEDULED',
+    })
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(-1)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(-1)
+
     actor.send({ type: 'onNext' })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'PREPARATION' },

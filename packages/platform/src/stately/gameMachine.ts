@@ -7,7 +7,7 @@ interface BaseContext extends MachineContext {
   segmentCount: number
 }
 
-interface RequiredInput {
+interface BaseInput {
   periodCount: number
   segmentCount: number
 }
@@ -15,11 +15,11 @@ interface RequiredInput {
 type PrepareStateMachineArgs<TInput, TContext> = {
   initializeContext: (
     input: TInput
-  ) => Omit<TContext, keyof BaseContext> & RequiredInput
+  ) => Omit<TContext, keyof BaseContext> & BaseInput
 }
 
 export function prepareGameStateMachine<
-  TInput extends RequiredInput,
+  TInput extends BaseInput,
   TContext extends BaseContext | undefined
 >({ initializeContext }: PrepareStateMachineArgs<TInput, TContext>) {
   return setup({
@@ -35,10 +35,10 @@ export function prepareGameStateMachine<
       IS_LAST_SEGMENT: function ({ context, event }) {
         return context.activeSegmentIx === context.segmentCount - 1
       },
-      MORE_PERIODS_REMAINING: function ({ context, event }) {
+      IS_NOT_LAST_PERIOD: function ({ context, event }) {
         return context.activePeriodIx < context.periodCount - 1
       },
-      NO_PERIODS_REMAINING: function ({ context, event }) {
+      IS_LAST_PERIOD: function ({ context, event }) {
         return context.activePeriodIx === context.periodCount - 1
       },
     },
@@ -56,9 +56,16 @@ export function prepareGameStateMachine<
       activeSegmentIx: -1,
       ...initializeContext(input),
     }),
-    id: 'Game',
-    initial: 'GAME_ACTIVE',
+    id: 'GAME_FLOW',
+    initial: 'GAME_PREPARED',
     states: {
+      GAME_PREPARED: {
+        on: {
+          onNext: {
+            target: 'GAME_ACTIVE',
+          },
+        },
+      },
       GAME_ACTIVE: {
         initial: 'SCHEDULED',
         states: {
@@ -119,7 +126,7 @@ export function prepareGameStateMachine<
               CONSOLIDATION: {
                 on: {
                   onNext: {
-                    target: '#Game.GAME_ACTIVE.RESULTS',
+                    target: '#GAME_FLOW.GAME_ACTIVE.RESULTS',
                   },
                 },
               },
@@ -131,16 +138,16 @@ export function prepareGameStateMachine<
                 {
                   target: 'PERIOD_ACTIVE',
                   guard: {
-                    type: 'MORE_PERIODS_REMAINING',
+                    type: 'IS_NOT_LAST_PERIOD',
                   },
                   actions: assign(({ context }) => ({
                     activePeriodIx: context.activePeriodIx + 1,
                   })),
                 },
                 {
-                  target: '#Game.GAME_COMPLETED',
+                  target: '#GAME_FLOW.GAME_COMPLETED',
                   guard: {
-                    type: 'NO_PERIODS_REMAINING',
+                    type: 'IS_LAST_PERIOD',
                   },
                   actions: assign(({ context }) => ({
                     activePeriodIx: -1,
