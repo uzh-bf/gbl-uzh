@@ -617,6 +617,14 @@ export async function activateNextPeriod(
       // PREPARATION, PAUSED, COMPLETED, etc.
       return null
   }
+
+  // const actor = createGameStateMachine({ input: { currentPeriodIx }})
+
+  // actor.send('onNext')
+
+  // const newState = actor.getSnapshot()
+
+  // prisma.game.update({ newState...))
 }
 
 interface ActivateSegmentArgs {

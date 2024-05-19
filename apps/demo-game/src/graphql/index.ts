@@ -15,6 +15,7 @@ import {
 export * from '@gbl-uzh/platform/dist/nexus'
 export * from './types'
 
+// const gameStateMachine = createGameStateMachine(asdasd)
 export const Query = generateBaseQueries()
 export const Mutation = generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
   roleAssigner: (ix) => null,

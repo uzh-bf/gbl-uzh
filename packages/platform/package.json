@@ -10,7 +10,8 @@
   "dependencies": {
     "nanoid": "3.3.6",
     "random-js": "2.1.0",
-    "winston": "3.9.0"
+    "winston": "3.9.0",
+    "xstate": "5.13.0"
   },
   "devDependencies": {
     "@tsconfig/node18": "18.2.4",
@@ -49,7 +50,8 @@
     "build:nexus": "tsx src/nexus.ts",
     "build:ts": "cross-env NODE_ENV=production tsup",
     "dev": "cross-env NODE_ENV=development tsup --watch",
-    "generate": "prisma generate"
+    "generate": "prisma generate",
+    "machine": "tsx src/stately/gameMachine.ts"
   },
   "engines": {
     "node": ">=18"
