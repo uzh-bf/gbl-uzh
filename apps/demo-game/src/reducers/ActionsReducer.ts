@@ -1,7 +1,8 @@
 import { Action } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PrismaClient } from '@prisma/client'
-import { match } from 'ts-pattern'
+import decisionMachine from 'src/machines/decisionMachine'
+import { createActor } from 'xstate'
 
 export enum ActionTypes {
   DECIDE_BANK = 'DECIDE_BANK',
@@ -44,54 +45,33 @@ type Actions =
       PrismaClient
     >
 
-export function apply(state: any, action: Actions) {
-  const newState = match(action)
-    .with({ type: ActionTypes.DECIDE_BANK }, () => {
-      const { decision } = action.payload.playerArgs
+export async function apply(state: any, action: Actions) {
+  const { decision } = action.payload.playerArgs
 
-      return {
-        type: action.type,
-        result: {
-          ...state,
-          decisions: {
-            ...state.decisions,
-            bank: decision,
-          },
-        },
-        isDirty: true,
-      }
-    })
-    .with({ type: ActionTypes.DECIDE_BONDS }, () => {
-      const { decision } = action.payload.playerArgs
+  const actor = createActor(decisionMachine, {
+    input: {
+      result: state,
+    },
+  })
 
-      return {
-        type: action.type,
-        result: {
-          ...state,
-          decisions: {
-            ...state.decisions,
-            bonds: decision,
-          },
-        },
-        isDirty: true,
-      }
-    })
-    .with({ type: ActionTypes.DECIDE_STOCK }, () => {
-      const { decision } = action.payload.playerArgs
+  actor.start()
 
-      return {
-        type: action.type,
-        result: {
-          ...state,
-          decisions: {
-            ...state.decisions,
-            stocks: decision,
-          },
-        },
-        isDirty: true,
-      }
-    })
-    .exhaustive()
+  // TODO(Jakob): Redundant (only theoretically)
+  actor.send({ type: 'preparationDone' })
+  actor.send({
+    type: 'updateInvestment',
+    values: {
+      actionType: action.type,
+      decision: decision,
+      result: state,
+      isDirty: true,
+    },
+  })
+  // TODO(Jakob): Redundant (only theoretically)
+  // - Maybe this is needed to make sure we have the latest update
+  actor.send({ type: 'submit' })
+
+  const newState = actor.getSnapshot().context
 
   debugLog('ActionsReducer', state, action, newState)
 
