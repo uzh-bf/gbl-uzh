@@ -78,7 +78,7 @@ describe('GameStateMachine', () => {
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(0)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
     expect(actor.getSnapshot().context.user).toMatchObject({
-      stockPrice: 100,
+      stockPrice: 110,
     })
 
     actor.send({ type: 'onNext' })
