@@ -1,24 +1,46 @@
 import { createActor } from 'xstate'
 
-import { prepareGameStateMachine } from './gameMachine'
+import {
+  BaseContext,
+  BaseInput,
+  Transitions,
+  prepareGameStateMachine,
+} from './gameMachine'
 
-type MachineInput = {
-  periodCount: number
-  segmentCount: number
+interface MachineInput extends BaseInput {
+  stockPrice: number
 }
 
-type MachineContext = {
-  activePeriodIx: number
-  activeSegmentIx: number
-  periodCount: number
-  segmentCount: number
+interface UserContext {
+  stockPrice: number
+}
+
+interface MachineContext extends BaseContext<UserContext> {}
+
+function transitionFn(
+  transitionName: string,
+  context: MachineContext
+): MachineContext {
+  switch (transitionName) {
+    case Transitions.SCHEDULED_TO_PERIOD_ACTIVE:
+      return {
+        ...context,
+        userDefined: {
+          ...context.userDefined,
+          stockPrice: context.userDefined.stockPrice + 10,
+        },
+      }
+
+    default:
+      return context
+  }
 }
 
 const GameStateMachine = prepareGameStateMachine<MachineInput, MachineContext>({
   initializeContext: (input) => ({
-    periodCount: input.periodCount,
-    segmentCount: input.segmentCount,
+    stockPrice: 100,
   }),
+  transitionFn,
 })
 
 describe('GameStateMachine', () => {
@@ -29,6 +51,7 @@ describe('GameStateMachine', () => {
       input: {
         periodCount: 2,
         segmentCount: 2,
+        stockPrice: 100,
       },
     })
 
@@ -39,6 +62,9 @@ describe('GameStateMachine', () => {
     expect(actor.getSnapshot().value).toEqual('GAME_PREPARED')
     expect(actor.getSnapshot().context.activePeriodIx).toEqual(-1)
     expect(actor.getSnapshot().context.activeSegmentIx).toEqual(-1)
+    expect(actor.getSnapshot().context.userDefined).toMatchObject({
+      stockPrice: 100,
+    })
 
     actor.send({ type: 'onNext' })
     expect(actor.getSnapshot().value).toMatchObject({
@@ -46,6 +72,9 @@ describe('GameStateMachine', () => {
     })
     expect(actor.getSnapshot().context.activePeriodIx).toEqual(-1)
     expect(actor.getSnapshot().context.activeSegmentIx).toEqual(-1)
+    expect(actor.getSnapshot().context.userDefined).toMatchObject({
+      stockPrice: 100,
+    })
 
     actor.send({ type: 'onNext' })
     expect(actor.getSnapshot().value).toMatchObject({
@@ -53,6 +82,9 @@ describe('GameStateMachine', () => {
     })
     expect(actor.getSnapshot().context.activePeriodIx).toEqual(0)
     expect(actor.getSnapshot().context.activeSegmentIx).toEqual(-1)
+    expect(actor.getSnapshot().context.userDefined).toMatchObject({
+      stockPrice: 100,
+    })
 
     actor.send({ type: 'onNext' })
     expect(actor.getSnapshot().value).toMatchObject({

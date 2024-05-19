@@ -1,27 +1,38 @@
-import { MachineContext, and, assign, createActor, setup } from 'xstate'
+import { MachineContext, and, assign, setup } from 'xstate'
 
-interface BaseContext extends MachineContext {
+export enum Transitions {
+  'SCHEDULED_TO_PERIOD_ACTIVE' = 'SCHEDULED_TO_PERIOD_ACTIVE',
+}
+
+export interface BaseContext<UserContext extends Record<string, any>>
+  extends MachineContext {
   activePeriodIx: number
   activeSegmentIx: number
   periodCount: number
   segmentCount: number
+  userDefined: UserContext
 }
 
-interface BaseInput {
+export interface BaseInput {
   periodCount: number
   segmentCount: number
 }
 
-type PrepareStateMachineArgs<TInput, TContext> = {
-  initializeContext: (
-    input: TInput
-  ) => Omit<TContext, keyof BaseContext> & BaseInput
+type PrepareStateMachineArgs<
+  TInput,
+  TContext extends BaseContext<any> | undefined
+> = {
+  initializeContext: (input: TInput) => Omit<TContext, keyof BaseContext<any>>
+  transitionFn?: (transitionName: string, context: TContext) => TContext
 }
 
 export function prepareGameStateMachine<
   TInput extends BaseInput,
-  TContext extends BaseContext | undefined
->({ initializeContext }: PrepareStateMachineArgs<TInput, TContext>) {
+  TContext extends BaseContext<any> | undefined
+>({
+  initializeContext,
+  transitionFn = (transitionName, context) => context,
+}: PrepareStateMachineArgs<TInput, TContext>) {
   return setup({
     types: {
       input: {} as TInput,
@@ -60,7 +71,9 @@ export function prepareGameStateMachine<
     context: ({ input }) => ({
       activePeriodIx: -1,
       activeSegmentIx: -1,
-      ...initializeContext(input),
+      periodCount: input.periodCount,
+      segmentCount: input.segmentCount,
+      userDefined: initializeContext(input) ?? {},
     }),
     id: 'GAME_FLOW',
     initial: 'GAME_PREPARED',
@@ -82,6 +95,11 @@ export function prepareGameStateMachine<
                 target: 'PERIOD_ACTIVE',
                 actions: assign(({ context }) => ({
                   activePeriodIx: context.activePeriodIx + 1,
+                  userDefined:
+                    transitionFn(
+                      Transitions.SCHEDULED_TO_PERIOD_ACTIVE,
+                      context as TContext
+                    )?.userDefined ?? {},
                 })),
               },
             },
