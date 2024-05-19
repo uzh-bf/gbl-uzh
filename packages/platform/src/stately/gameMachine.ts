@@ -1,4 +1,4 @@
-import { MachineContext, assign, createActor, setup } from 'xstate'
+import { MachineContext, and, assign, createActor, setup } from 'xstate'
 
 interface BaseContext extends MachineContext {
   activePeriodIx: number
@@ -41,6 +41,12 @@ export function prepareGameStateMachine<
       IS_LAST_PERIOD: function ({ context, event }) {
         return context.activePeriodIx === context.periodCount - 1
       },
+      HAS_PERIODS: function ({ context, event }) {
+        return context.periodCount > 0
+      },
+      HAS_SEGMENTS: function ({ context, event }) {
+        return context.segmentCount > 0
+      },
     },
     schemas: {
       events: {
@@ -63,6 +69,7 @@ export function prepareGameStateMachine<
         on: {
           onNext: {
             target: 'GAME_ACTIVE',
+            guard: and(['HAS_PERIODS', 'HAS_SEGMENTS']),
           },
         },
       },
