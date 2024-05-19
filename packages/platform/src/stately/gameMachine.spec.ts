@@ -1,46 +1,117 @@
 import { createActor } from 'xstate'
 
-import { gameStateMachine } from './gameMachine'
+import { GameStateMachine } from './gameMachine'
 
 describe('GameStateMachine', () => {
-  it('should work', () => {
-    const actor = createActor(gameStateMachine, {
+  let actor
+
+  beforeEach(() => {
+    actor = createActor(GameStateMachine, {
       input: {
-        activePeriodIx: 0,
-        activeSegmentIx: 0,
-        periodCount: 1,
+        activePeriodIx: -1,
+        activeSegmentIx: -1,
+        periodCount: 2,
         segmentCount: 2,
       },
     })
 
     actor.start()
+  })
 
+  it('supports basic workflow', () => {
     actor.send({ type: 'onNext' }) // preparation
-    console.log(actor.getSnapshot().value)
+    expect(actor.getSnapshot().value).toMatchObject({
+      GAME_ACTIVE: { PERIOD_ACTIVE: 'PREPARATION' },
+    })
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(0)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(-1)
 
     actor.send({ type: 'onNext' }) // running
-    console.log(actor.getSnapshot().value)
+    expect(actor.getSnapshot().value).toMatchObject({
+      GAME_ACTIVE: { PERIOD_ACTIVE: 'RUNNING' },
+    })
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(0)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(0)
 
     actor.send({ type: 'onNext' }) // paused
-    console.log(actor.getSnapshot().value)
+    expect(actor.getSnapshot().value).toMatchObject({
+      GAME_ACTIVE: { PERIOD_ACTIVE: 'PAUSED' },
+    })
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(0)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(0)
 
     actor.send({ type: 'onNext' }) // running
-    console.log(actor.getSnapshot().value)
+    expect(actor.getSnapshot().value).toMatchObject({
+      GAME_ACTIVE: { PERIOD_ACTIVE: 'RUNNING' },
+    })
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(0)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(1)
 
     actor.send({ type: 'onNext' }) // consolidation
-    console.log(actor.getSnapshot().value)
+    expect(actor.getSnapshot().value).toMatchObject({
+      GAME_ACTIVE: { PERIOD_ACTIVE: 'CONSOLIDATION' },
+    })
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(0)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(-1)
 
     actor.send({ type: 'onNext' }) // results
-    console.log(actor.getSnapshot().value)
+    expect(actor.getSnapshot().value).toMatchObject({
+      GAME_ACTIVE: 'RESULTS',
+    })
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(0)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(-1)
 
     actor.send({ type: 'onNext' }) // preparation
-    console.log(actor.getSnapshot().value)
+    expect(actor.getSnapshot().value).toMatchObject({
+      GAME_ACTIVE: { PERIOD_ACTIVE: 'PREPARATION' },
+    })
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(1)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(-1)
 
     actor.send({ type: 'onNext' }) // running
-    console.log(actor.getSnapshot().value)
+    expect(actor.getSnapshot().value).toMatchObject({
+      GAME_ACTIVE: { PERIOD_ACTIVE: 'RUNNING' },
+    })
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(1)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(0)
 
     actor.send({ type: 'onNext' }) // paused
-    console.log(actor.getSnapshot().value)
+    expect(actor.getSnapshot().value).toMatchObject({
+      GAME_ACTIVE: { PERIOD_ACTIVE: 'PAUSED' },
+    })
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(1)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(0)
+
+    actor.send({ type: 'onNext' }) // running
+    expect(actor.getSnapshot().value).toMatchObject({
+      GAME_ACTIVE: { PERIOD_ACTIVE: 'RUNNING' },
+    })
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(1)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(1)
+
+    actor.send({ type: 'onNext' }) // consolidation
+    expect(actor.getSnapshot().value).toMatchObject({
+      GAME_ACTIVE: { PERIOD_ACTIVE: 'CONSOLIDATION' },
+    })
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(1)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(-1)
+
+    actor.send({ type: 'onNext' }) // results
+    expect(actor.getSnapshot().value).toMatchObject({
+      GAME_ACTIVE: 'RESULTS',
+    })
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(1)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(-1)
+
+    actor.send({ type: 'onNext' }) // results
+    expect(actor.getSnapshot().value).toEqual('GAME_COMPLETED')
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(-1)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(-1)
+
+    actor.send({ type: 'onNext' }) // results
+    expect(actor.getSnapshot().value).toEqual('GAME_COMPLETED')
+    expect(actor.getSnapshot().context.activePeriodIx).toEqual(-1)
+    expect(actor.getSnapshot().context.activeSegmentIx).toEqual(-1)
   })
 })
 

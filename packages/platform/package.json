@@ -52,7 +52,9 @@
     "dev": "cross-env NODE_ENV=development tsup --watch",
     "generate": "prisma generate",
     "machine": "tsx src/stately/gameMachine.ts",
-    "test": "jest"
+    "machine:watch": "tsx watch src/stately/gameMachine.ts",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "engines": {
     "node": ">=18"

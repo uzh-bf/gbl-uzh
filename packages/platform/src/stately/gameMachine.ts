@@ -10,23 +10,23 @@ type GameStateContext = {
 // export function prepareGameStateMachine<TContext extends MachineContext>(
 //   onNextA: Function
 // ) {
-export const gameStateMachine = setup({
+export const GameStateMachine = setup({
   types: {
     input: {} as GameStateContext,
     context: {} as GameStateContext,
     events: {} as { type: 'onNext' },
   },
   guards: {
-    'not last segment': function ({ context, event }) {
+    IS_NOT_LAST_SEGMENT: function ({ context, event }) {
       return context.activeSegmentIx < context.segmentCount - 1
     },
-    'last segment': function ({ context, event }) {
+    IS_LAST_SEGMENT: function ({ context, event }) {
       return context.activeSegmentIx === context.segmentCount - 1
     },
-    'more periods remaining': function ({ context, event }) {
+    MORE_PERIODS_REMAINING: function ({ context, event }) {
       return context.activePeriodIx < context.periodCount - 1
     },
-    'last period completed': function ({ context, event }) {
+    NO_PERIODS_REMAINING: function ({ context, event }) {
       return context.activePeriodIx === context.periodCount - 1
     },
   },
@@ -40,7 +40,10 @@ export const gameStateMachine = setup({
   },
 }).createMachine({
   context: ({ input }) => ({
-    ...input,
+    activePeriodIx: input.activePeriodIx,
+    activeSegmentIx: input.activeSegmentIx,
+    periodCount: input.periodCount,
+    segmentCount: input.segmentCount,
   }),
   id: 'Game',
   initial: 'GAME_ACTIVE',
@@ -65,6 +68,9 @@ export const gameStateMachine = setup({
               on: {
                 onNext: {
                   target: 'RUNNING',
+                  actions: assign(({ context }) => ({
+                    activeSegmentIx: context.activeSegmentIx + 1,
+                  })),
                 },
               },
             },
@@ -74,14 +80,17 @@ export const gameStateMachine = setup({
                   {
                     target: 'PAUSED',
                     guard: {
-                      type: 'not last segment',
+                      type: 'IS_NOT_LAST_SEGMENT',
                     },
                   },
                   {
                     target: 'CONSOLIDATION',
                     guard: {
-                      type: 'last segment',
+                      type: 'IS_LAST_SEGMENT',
                     },
+                    actions: assign(({ context }) => ({
+                      activeSegmentIx: -1,
+                    })),
                   },
                 ],
               },
@@ -90,6 +99,9 @@ export const gameStateMachine = setup({
               on: {
                 onNext: {
                   target: 'RUNNING',
+                  actions: assign(({ context }) => ({
+                    activeSegmentIx: context.activeSegmentIx + 1,
+                  })),
                 },
               },
             },
@@ -108,14 +120,20 @@ export const gameStateMachine = setup({
               {
                 target: 'PERIOD_ACTIVE',
                 guard: {
-                  type: 'more periods remaining',
+                  type: 'MORE_PERIODS_REMAINING',
                 },
+                actions: assign(({ context }) => ({
+                  activePeriodIx: context.activePeriodIx + 1,
+                })),
               },
               {
                 target: '#Game.GAME_COMPLETED',
                 guard: {
-                  type: 'last period completed',
+                  type: 'NO_PERIODS_REMAINING',
                 },
+                actions: assign(({ context }) => ({
+                  activePeriodIx: -1,
+                })),
               },
             ],
           },
