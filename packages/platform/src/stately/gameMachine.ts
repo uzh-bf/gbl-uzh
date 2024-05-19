@@ -7,12 +7,19 @@ interface BaseContext extends MachineContext {
   segmentCount: number
 }
 
+interface RequiredInput {
+  periodCount: number
+  segmentCount: number
+}
+
 type PrepareStateMachineArgs<TInput, TContext> = {
-  initializeContext: (input: TInput) => Omit<TContext, keyof BaseContext>
+  initializeContext: (
+    input: TInput
+  ) => Omit<TContext, keyof BaseContext> & RequiredInput
 }
 
 export function prepareGameStateMachine<
-  TInput extends {},
+  TInput extends RequiredInput,
   TContext extends BaseContext | undefined
 >({ initializeContext }: PrepareStateMachineArgs<TInput, TContext>) {
   return setup({
