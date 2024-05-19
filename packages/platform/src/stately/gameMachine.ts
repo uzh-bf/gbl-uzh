@@ -18,16 +18,16 @@ export const gameStateMachine = setup({
   },
   guards: {
     'not last segment': function ({ context, event }) {
-      return context.activeSegmentIx < context.segmentCount
+      return context.activeSegmentIx < context.segmentCount - 1
     },
     'last segment': function ({ context, event }) {
-      return context.activeSegmentIx === context.segmentCount
+      return context.activeSegmentIx === context.segmentCount - 1
     },
     'more periods remaining': function ({ context, event }) {
-      return context.activePeriodIx < context.periodCount
+      return context.activePeriodIx < context.periodCount - 1
     },
     'last period completed': function ({ context, event }) {
-      return context.activePeriodIx === context.periodCount
+      return context.activePeriodIx === context.periodCount - 1
     },
   },
   schemas: {
@@ -126,18 +126,3 @@ export const gameStateMachine = setup({
   },
 })
 // }
-
-const actor = createActor(gameStateMachine, {
-  input: {
-    activePeriodIx: 0,
-    activeSegmentIx: 0,
-    periodCount: 3,
-    segmentCount: 3,
-  },
-})
-
-actor.start()
-
-actor.send({ type: 'onNext' })
-
-console.log(actor)
