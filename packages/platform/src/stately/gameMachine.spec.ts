@@ -2,20 +2,20 @@ import { createActor } from 'xstate'
 
 import { prepareGameStateMachine } from './gameMachine'
 
-type GameStateContext = {
+type MachineInput = {
+  periodCount: number
+  segmentCount: number
+}
+
+type MachineContext = {
   activePeriodIx: number
   activeSegmentIx: number
   periodCount: number
   segmentCount: number
 }
 
-const GameStateMachine = prepareGameStateMachine<
-  GameStateContext,
-  GameStateContext
->({
+const GameStateMachine = prepareGameStateMachine<MachineInput, MachineContext>({
   initializeContext: (input) => ({
-    activePeriodIx: input.activePeriodIx,
-    activeSegmentIx: input.activeSegmentIx,
     periodCount: input.periodCount,
     segmentCount: input.segmentCount,
   }),
@@ -27,8 +27,6 @@ describe('GameStateMachine', () => {
   beforeEach(() => {
     actor = createActor(GameStateMachine, {
       input: {
-        activePeriodIx: -1,
-        activeSegmentIx: -1,
         periodCount: 2,
         segmentCount: 2,
       },

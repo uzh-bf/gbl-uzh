@@ -1,12 +1,19 @@
 import { MachineContext, assign, createActor, setup } from 'xstate'
 
+interface BaseContext extends MachineContext {
+  activePeriodIx: number
+  activeSegmentIx: number
+  periodCount: number
+  segmentCount: number
+}
+
 type PrepareStateMachineArgs<TInput, TContext> = {
-  initializeContext: (input: TInput) => TContext
+  initializeContext: (input: TInput) => Omit<TContext, keyof BaseContext>
 }
 
 export function prepareGameStateMachine<
   TInput extends {},
-  TContext extends MachineContext | undefined
+  TContext extends BaseContext | undefined
 >({ initializeContext }: PrepareStateMachineArgs<TInput, TContext>) {
   return setup({
     types: {
@@ -37,7 +44,11 @@ export function prepareGameStateMachine<
       },
     },
   }).createMachine({
-    context: ({ input }) => initializeContext(input),
+    context: ({ input }) => ({
+      activePeriodIx: -1,
+      activeSegmentIx: -1,
+      ...initializeContext(input),
+    }),
     id: 'Game',
     initial: 'GAME_ACTIVE',
     states: {
