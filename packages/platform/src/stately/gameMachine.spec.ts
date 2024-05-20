@@ -1,11 +1,6 @@
 import { createActor } from 'xstate'
 
-import {
-  BaseContext,
-  BaseInput,
-  Transitions,
-  prepareGameStateMachine,
-} from './gameMachine'
+import { BaseContext, BaseInput, prepareGameStateMachine } from './gameMachine'
 
 interface UserInput extends BaseInput {
   stockPrice: number
@@ -20,12 +15,6 @@ function transitionFn(
   context: BaseContext<UserContext>
 ): UserContext {
   switch (transitionName) {
-    case Transitions.SCHEDULED_TO_PERIOD_ACTIVE:
-      return {
-        ...context.user,
-        stockPrice: context.user.stockPrice + 10,
-      }
-
     default:
       return context.user
   }
@@ -63,7 +52,7 @@ describe('GameStateMachine', () => {
 
     actor.send({ type: 'onNext' })
     expect(actor.getSnapshot().value).toMatchObject({
-      GAME_ACTIVE: 'SCHEDULED',
+      GAME_ACTIVE: 'PERIOD_SCHEDULED',
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(-1)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
@@ -111,7 +100,7 @@ describe('GameStateMachine', () => {
 
     actor.send({ type: 'onNext' })
     expect(actor.getSnapshot().value).toMatchObject({
-      GAME_ACTIVE: 'RESULTS',
+      GAME_ACTIVE: 'PERIOD_RESULTS',
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(0)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
@@ -153,7 +142,7 @@ describe('GameStateMachine', () => {
 
     actor.send({ type: 'onNext' })
     expect(actor.getSnapshot().value).toMatchObject({
-      GAME_ACTIVE: 'RESULTS',
+      GAME_ACTIVE: 'PERIOD_RESULTS',
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(1)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
