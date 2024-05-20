@@ -31,7 +31,7 @@
     "typescript": "5.4.5"
   },
   "peerDependencies": {
-    "@apollo/client": "3.8.2",
+    "@apollo/client": "3.10.4",
     "@prisma/client": "5.14.0",
     "@uzh-bf/design-system": "1.8.0",
     "graphql": "16.8.0",
