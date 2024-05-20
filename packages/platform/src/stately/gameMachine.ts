@@ -1,4 +1,4 @@
-import { MachineContext, and, assign, setup } from 'xstate'
+import { and, assign, setup } from 'xstate'
 
 export type Transitions =
   | 'GAME_PREPARED_TO_GAME_ACTIVE'
@@ -11,7 +11,7 @@ export type Transitions =
   | 'PERIOD_RESULTS_TO_PERIOD_ACTIVE'
   | 'PERIOD_RESULTS_TO_GAME_COMPLETED'
 
-export interface BaseContext<TUserContext extends {}> extends MachineContext {
+export interface BaseContext<TUserContext extends {}> {
   game: {
     activePeriodIx: number
     activeSegmentIx: number
@@ -39,7 +39,7 @@ export function prepareGameStateMachine<
   TUserContext extends {}
 >({
   initializeUserContext,
-  transitionFn = (transitionName, context) => context?.userContext,
+  transitionFn = (_, context) => context.user,
 }: PrepareStateMachineArgs<TInput, TUserContext>) {
   return setup({
     types: {
@@ -47,6 +47,7 @@ export function prepareGameStateMachine<
       context: {} as BaseContext<TUserContext>,
       events: {} as { type: 'onNext' },
     },
+
     guards: {
       IS_NOT_LAST_SEGMENT: function ({ context, event }) {
         return context.game.activeSegmentIx < context.game.segmentCount - 1
@@ -67,6 +68,7 @@ export function prepareGameStateMachine<
         return context.game.segmentCount > 0
       },
     },
+
     schemas: {
       events: {
         onNext: {
@@ -76,6 +78,9 @@ export function prepareGameStateMachine<
       },
     },
   }).createMachine({
+    id: 'GAME_FLOW',
+    initial: 'GAME_PREPARED',
+
     context: ({ input }) => ({
       game: {
         activePeriodIx: -1,
@@ -85,8 +90,7 @@ export function prepareGameStateMachine<
       },
       user: initializeUserContext(input) ?? {},
     }),
-    id: 'GAME_FLOW',
-    initial: 'GAME_PREPARED',
+
     states: {
       GAME_PREPARED: {
         on: {
@@ -100,8 +104,10 @@ export function prepareGameStateMachine<
           },
         },
       },
+
       GAME_ACTIVE: {
         initial: 'PERIOD_SCHEDULED',
+
         states: {
           PERIOD_SCHEDULED: {
             on: {
@@ -120,8 +126,10 @@ export function prepareGameStateMachine<
               },
             },
           },
+
           PERIOD_ACTIVE: {
             initial: 'PREPARATION',
+
             states: {
               PREPARATION: {
                 on: {
@@ -140,6 +148,7 @@ export function prepareGameStateMachine<
                   },
                 },
               },
+
               RUNNING: {
                 on: {
                   onNext: [
@@ -162,10 +171,7 @@ export function prepareGameStateMachine<
                         type: 'IS_LAST_SEGMENT',
                       },
                       actions: assign(({ context }) => ({
-                        game: {
-                          ...context.game,
-                          activeSegmentIx: -1,
-                        },
+                        game: context.game,
                         user: transitionFn(
                           'PERIOD_ACTIVE_RUNNING_TO_CONSOLIDATION',
                           context
@@ -175,6 +181,7 @@ export function prepareGameStateMachine<
                   ],
                 },
               },
+
               PAUSED: {
                 on: {
                   onNext: {
@@ -192,12 +199,16 @@ export function prepareGameStateMachine<
                   },
                 },
               },
+
               CONSOLIDATION: {
                 on: {
                   onNext: {
                     target: '#GAME_FLOW.GAME_ACTIVE.PERIOD_RESULTS',
                     actions: assign(({ context }) => ({
-                      game: context.game,
+                      game: {
+                        ...context.game,
+                        activeSegmentIx: -1,
+                      },
                       user: transitionFn(
                         'PERIOD_ACTIVE_CONSOLIDATION_TO_PERIOD_RESULTS',
                         context
@@ -208,6 +219,7 @@ export function prepareGameStateMachine<
               },
             },
           },
+
           PERIOD_RESULTS: {
             on: {
               onNext: [
@@ -219,7 +231,7 @@ export function prepareGameStateMachine<
                   actions: assign(({ context }) => ({
                     game: {
                       ...context.game,
-                      activePeriodIx: context.activePeriodIx + 1,
+                      activePeriodIx: context.game.activePeriodIx + 1,
                     },
                     user: transitionFn(
                       'PERIOD_RESULTS_TO_PERIOD_ACTIVE',
@@ -248,6 +260,7 @@ export function prepareGameStateMachine<
           },
         },
       },
+
       GAME_COMPLETED: {},
     },
   })

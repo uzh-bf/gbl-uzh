@@ -96,7 +96,7 @@ describe('GameStateMachine', () => {
       GAME_ACTIVE: { PERIOD_ACTIVE: 'CONSOLIDATION' },
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(0)
-    expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
+    expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(1)
 
     actor.send({ type: 'onNext' })
     expect(actor.getSnapshot().value).toMatchObject({
@@ -138,7 +138,7 @@ describe('GameStateMachine', () => {
       GAME_ACTIVE: { PERIOD_ACTIVE: 'CONSOLIDATION' },
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(1)
-    expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
+    expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(1)
 
     actor.send({ type: 'onNext' })
     expect(actor.getSnapshot().value).toMatchObject({
