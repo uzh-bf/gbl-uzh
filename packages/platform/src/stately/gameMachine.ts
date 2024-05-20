@@ -1,5 +1,10 @@
 import { and, assign, setup } from 'xstate'
 
+export type Events =
+  | { type: 'onNext' }
+  | { type: 'addPeriod' }
+  | { type: 'addSegment' }
+
 export type Transitions =
   | 'ADD_PERIOD'
   | 'ADD_SEGMENT'
@@ -44,10 +49,7 @@ export function prepareGameStateMachine<
     types: {
       input: {} as TInput,
       context: {} as BaseContext<TUserContext>,
-      events: {} as
-        | { type: 'onNext' }
-        | { type: 'addPeriod' }
-        | { type: 'addSegment' },
+      events: {} as Events,
     },
 
     guards: {
