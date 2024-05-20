@@ -1,4 +1,4 @@
-import { createActor } from 'xstate'
+import { createActor, waitFor } from 'xstate'
 
 import { BaseContext, BaseInput, prepareGameStateMachine } from './gameMachine'
 
@@ -40,11 +40,15 @@ describe('GameStateMachine', () => {
     actor.start()
   })
 
-  it('supports basic workflow', () => {
-    actor.send({ type: 'addPeriod' })
-    actor.send({ type: 'addSegment' })
-    actor.send({ type: 'addSegment' })
-    actor.send({ type: 'addPeriod' })
+  afterEach(() => {
+    actor.stop()
+  })
+
+  it('supports basic workflow', async () => {
+    actor.send({ type: 'ADD_PERIOD' })
+    actor.send({ type: 'ADD_SEGMENT' })
+    actor.send({ type: 'ADD_SEGMENT' })
+    actor.send({ type: 'ADD_PERIOD' })
 
     expect(actor.getSnapshot().value).toEqual('GAME_PREPARED')
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(-1)
@@ -53,7 +57,12 @@ describe('GameStateMachine', () => {
       stockPrice: 100,
     })
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
+    await waitFor(actor, (state) =>
+      state.matches({
+        GAME_ACTIVE: 'PERIOD_SCHEDULED',
+      })
+    )
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: 'PERIOD_SCHEDULED',
     })
@@ -63,7 +72,7 @@ describe('GameStateMachine', () => {
       stockPrice: 100,
     })
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'PREPARATION' },
     })
@@ -73,89 +82,89 @@ describe('GameStateMachine', () => {
       stockPrice: 100,
     })
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'RUNNING' },
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(0)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(0)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'PAUSED' },
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(0)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(0)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'RUNNING' },
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(0)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(1)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'CONSOLIDATION' },
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(0)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(1)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: 'PERIOD_RESULTS',
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(0)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'PREPARATION' },
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(1)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'RUNNING' },
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(1)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(0)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'PAUSED' },
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(1)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(0)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'RUNNING' },
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(1)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(1)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'CONSOLIDATION' },
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(1)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(1)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: 'PERIOD_RESULTS',
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(1)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toEqual('GAME_COMPLETED')
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(-1)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'ON_NEXT' })
     expect(actor.getSnapshot().value).toEqual('GAME_COMPLETED')
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(-1)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)

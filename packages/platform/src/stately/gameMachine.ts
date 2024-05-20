@@ -1,7 +1,21 @@
-import { and, assign, setup } from 'xstate'
+import { and, assign, fromPromise, setup } from 'xstate'
+
+const updateDatabase = (data) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (data) {
+        console.log(data)
+        resolve({ success: true, data })
+      } else {
+        console.log(data)
+        reject(new Error('Failed to update database'))
+      }
+    }, 1000)
+  })
+}
 
 export type Events =
-  | { type: 'onNext' }
+  | { type: 'ON_NEXT' }
   | { type: 'ADD_PERIOD' }
   | { type: 'ADD_SEGMENT' }
   | { type: 'GAME_ACTIVE_INVOKE' }
@@ -47,6 +61,11 @@ export function prepareGameStateMachine<
   transitionFn = (_, context) => context.user,
 }: PrepareStateMachineArgs<TInput, TUserContext>) {
   return setup({
+    actors: {
+      FETCH_DATA: fromPromise(async ({ input }) => {
+        return updateDatabase(input)
+      }),
+    },
     actions: {
       ADD_PERIOD: assign(({ context }) => ({
         game: {
@@ -63,8 +82,6 @@ export function prepareGameStateMachine<
         },
         user: transitionFn('ADD_SEGMENT', context),
       })),
-
-      GAME_ACTIVE_INVOKE: async ({ context, event }) => {},
     },
 
     types: {
@@ -104,11 +121,7 @@ export function prepareGameStateMachine<
           type: 'object',
           properties: {},
         },
-        GAME_ACTIVE_INVOKE: {
-          type: 'object',
-          properties: {},
-        },
-        onNext: {
+        ON_NEXT: {
           type: 'object',
           properties: {},
         },
@@ -141,13 +154,14 @@ export function prepareGameStateMachine<
     },
 
     states: {
+      // how to push data from here to invoke?
       GAME_PREPARED: {
         on: {
-          onNext: {
-            target: 'GAME_ACTIVE',
+          ON_NEXT: {
+            target: 'GAME_ACTIVE_INVOKE',
             guard: and(['HAS_PERIODS', 'HAS_SEGMENTS']),
             actions: [
-              assign(({ context }) => ({
+              assign(({ context, event }) => ({
                 game: context.game,
                 user: transitionFn('GAME_PREPARED_TO_GAME_ACTIVE', context),
               })),
@@ -156,17 +170,22 @@ export function prepareGameStateMachine<
         },
       },
 
-      // GAME_ACTIVE_INVOKE: {
-      //   invoke: {
-      //     input: ({ context, event }) => ({}),
-      //     onDone: {
-      //       target: 'GAME_ACTIVE',
-      //     },
-      //     onError: {
-      //       target: 'GAME_ACTIVE',
-      //     },
-      //   },
-      // },
+      GAME_ACTIVE_INVOKE: {
+        invoke: {
+          id: 'updateDatabase',
+          src: 'FETCH_DATA',
+          input: ({ context, event }) => ({
+            context,
+            event,
+          }),
+          onDone: {
+            target: 'GAME_ACTIVE',
+          },
+          onError: {
+            target: 'GAME_PREPARED',
+          },
+        },
+      },
 
       GAME_ACTIVE: {
         initial: 'PERIOD_SCHEDULED',
@@ -174,7 +193,7 @@ export function prepareGameStateMachine<
         states: {
           PERIOD_SCHEDULED: {
             on: {
-              onNext: {
+              ON_NEXT: {
                 target: 'PERIOD_ACTIVE',
                 actions: [
                   assign(({ context }) => ({
@@ -198,7 +217,7 @@ export function prepareGameStateMachine<
             states: {
               PREPARATION: {
                 on: {
-                  onNext: {
+                  ON_NEXT: {
                     target: 'RUNNING',
                     actions: [
                       assign(({ context }) => ({
@@ -218,7 +237,7 @@ export function prepareGameStateMachine<
 
               RUNNING: {
                 on: {
-                  onNext: [
+                  ON_NEXT: [
                     {
                       target: 'PAUSED',
                       guard: {
@@ -255,7 +274,7 @@ export function prepareGameStateMachine<
 
               PAUSED: {
                 on: {
-                  onNext: {
+                  ON_NEXT: {
                     target: 'RUNNING',
                     actions: [
                       assign(({ context }) => ({
@@ -275,7 +294,7 @@ export function prepareGameStateMachine<
 
               CONSOLIDATION: {
                 on: {
-                  onNext: {
+                  ON_NEXT: {
                     target: '#GAME_FLOW.GAME_ACTIVE.PERIOD_RESULTS',
                     actions: [
                       assign(({ context }) => ({
@@ -297,7 +316,7 @@ export function prepareGameStateMachine<
 
           PERIOD_RESULTS: {
             on: {
-              onNext: [
+              ON_NEXT: [
                 {
                   target: 'PERIOD_ACTIVE',
                   guard: {
