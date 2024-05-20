@@ -1,0 +1,36 @@
+## Defining Gamification
+
+![[Gamification Circle.png]]
+
+A phenomenon which has been steadily gaining popularity in recent years, ‘gamification’ is one of the latest buzzwords, especially in educational contexts ([[Caponetto et al. (2014)]]). Amidst the varying interpretations, the majority of researchers agree that gamification does _not_ refer to the use of real games ([[Robson et al. (2015)]]), as tends to be the case with [[Game-Based Learning]] ([[Al-Azawi et al. (2016)]]). Rather, gamification focuses more on the _elements_ and _effects_ linked to games, illustrated by the following definition.
+
+Gamification refers to the concept of applying game design elements in non-game contexts ([[Deterding et al. (2011)]]). This definition does not limit the use of gamification to specific niches but allows for great flexibility in its application to a plethora of areas such as business, health, marketing, and learning. Furthermore, gamification elements can range from trivial, i.e., a simple reward system based on leaderboards, but can also comprise complex simulations and [[Serious Games]].
+
+## Gamification in Learning
+
+As an exemplary framework to implement gamification, [[Nah et al. (2014)]] propose the design elements listed in Table 1 below after reviewing 15 papers on the literature on gamification. In addition to these eight affordances in Table 1, it is important to keep in mind that [[Khurana and Kumar (2017)]] find a crucial factor for determining the success of the gamified content in improving student performance is the inclusion of ‘fun’. This is not surprising – if ever a non-compulsory game stops being fun, players will stop playing it. The gamified elements added to learning materials should make studying more appealing by addressing motivations not solely focused on academics and tap into their drive to achieve something in the short term (e.g., reaching a new level or earning a badge). This ties into [Marzano and Kendall's (2007)](Marzano%20and%20Kendall%20(2007).md) ‘New Taxonomy of Educational Objectives’, where they propose a certain level of wellbeing must be present for successful, sustainable learning to occur. Gamification, when executed correctly, will boost users’ mental and social wellbeing, thus encouraging their learning success and value creation.
+
+*Table 1: Examples of Game Design Elements (based on Nah et al. (2014))*
+
+| **Design Element** | **Explanation**                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------------------- |
+| Points             | Measure success and progress, potentially leading to rewards                                         |
+| Levels / Stages    | Players can progress throughout the game with levels increasing in difficulty                        |
+| Badges             | Mark special achievements or accomplishments, useful for looking into the future                     |
+| Leaderboards       | Create a competitive setting, often display only a limited number of participants to avoid demotivation |
+| Prizes and Rewards | Serves as motivation, generally better to receive many small rewards than one big one                |
+| Progress Bars      | Track progress towards overall or individual goals                                                   |
+| Storyline          | Narrative for learning context and consistent motivation                                             |
+| Feedback           | The more frequent and concise, the better                                                            |
+
+Gamification in education has been related to increased levels of engagement among students which is seen to directly correlate with higher learning performance; one of the main objectives of this thesis ([[Hamari et al. (2016)]]; [[Putri Septiani and Rosmansyah (2021)]]). It has also positively influenced the learning performance and motivation of students struggling with cognitive and behavioural challenges ([[Halbach and Solheim (2018)]]) as well as students’ academic grades ([[Majuri et al. (2018)]]). Affordances such as leaderboards and badges have been linked to positively affect students’ perceived meaningfulness of a task ([[Sailer et al. (2017)]]).
+## Why Gamification Works
+Reasons for these positive effects stem from scientific origins; as briefly introduced in [[Science of Learning]]; reinforcing rewards of desired behaviours will trigger emotions which motivate further adaptation of the behaviour (Robson et al., 2015). Is this reinforced enough over time, habits will begin to form and the behaviour will require less cognitive exertion (Duhigg, 2014). 
+
+Rewards and reinforcements are at the centre of gamification; point systems or badges for specific achievements and prizes, for example, reward players on the desired behaviour. Systematically programming the environment so that these rewards are consistent and communicated to students may instil the necessary trust and motivation in them to carry on and pursue higher leaderboard positions or achievements. Students will start to expect positive consequences from certain processes, inspiring them to keep participating ([[Sousa (2022)]]). It will also induce a sense of fun – which [[Chou (2019)]] and [[Khurana and Kumar (2017)]] deem crucial.
+
+The desired behaviour is not black and white – different types of rewards can be given for different performances, e.g., the number of completed questions vs. the accuracy of the answers. Such flexibility allows gamification creators to target the areas they would like students to focus on, motivating and addressing their different personalities and goals. Even negative emotions such as loss avoidance are capable of inducing satisfying reactions or behaviours ([[Robson et al. (2015)]]). Gamification, as explained using the [[Octalysis Framework]] in the following chapter, often targets positive as well as negative emotions ([[Chou (2019)]]).
+
+Gamified (micro-)content is more captivating as it stimulates curiosity and exploration as well as captures the structured play of rules and the competitive pursuit of goals ([[Deterding et al. (2011)]]). Moreover, [[Bai et al. (2020)]] see additional benefits in gamification as it provides feedback on performance, fulfils the need for recognition and ultimately, may increase the learning performance compared to non-gamified learning.
+
+When working with Gamification principles, we regularly refer to the [[Octalysis Framework]] as a baseline of the different elements that make up the overall topic. We aim to augment or alter existing learning processes to create a revised version of this process that users experience as game-like ([[Landers et al. (2018)]]). Therefore, the focus lies on the gamification subcategory of [[Game-Based Learning]], where Simulations and [[Serious Games]] play an important role. Furthermore, we apply gamification to [[Microlearning]].

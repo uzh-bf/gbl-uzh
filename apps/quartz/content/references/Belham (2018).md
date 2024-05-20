@@ -1,0 +1,4 @@
+> Belham, F. S. (2018). _Introduction to The Neuroscience Of Learning | Letters by SLTs | Medium_. Accessed on August 24, 2023. https://medium.com/neuroscience-in-real-life/introduction-to-neuroscience-of-learning-3dd2042b181b
+## Summary
+Neuroscience of learning encompasses the understanding of how learning processes are facilitated by neural changes in the brain. Synaptic plasticity, which involves the strengthening of synapses, is central to learning. When a new skill or information is acquired, related neural circuits are modified due to the release and reception of neurotransmitters in response to stimuli. The article also discusses the concept of neuroplasticity, which supports the ability for lifelong learning. These insights into the brain's learning mechanisms can help enhance educational methods to better align with how the brain naturally learns and adapts.
+

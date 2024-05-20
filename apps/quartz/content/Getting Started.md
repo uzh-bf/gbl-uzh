@@ -1,0 +1,1 @@
+The [[GBL Knowledge Base]] is based on [Obsidian](https://obsidian.md/), a tool for networked thought and knowledge curation. For a description of the principles underlying the approach in Obsidian, see [What is Obsidian](https://help.obsidian.md/Obsidian/Obsidian). If you would like to use Obsidian yourself, refer to [Start here](https://help.obsidian.md/Start+here).

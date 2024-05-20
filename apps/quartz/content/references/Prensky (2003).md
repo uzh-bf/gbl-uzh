@@ -1,0 +1,14 @@
+# Digital Game-Based Learning
+## Summary
+The paper discusses the potential of [[digital game-based learning]] as a tool to [[engagement|engage]] and [[motivation|motivate]] students, a demographic that has grown up immersed in digital technology. The research by Green and Bavelier (2003) is highlighted, which suggests that playing action video games can enhance visual selective attention. Prensky argues that the traditional educational content is often not motivating for students, whereas video games excel in engaging players. The paper suggests that the skills and cognitive abilities developed through gaming, such as multitasking, quick decision-making, and understanding complex systems, are valuable and can be harnessed for educational purposes. The paper also notes the shift towards games being used for social and collaborative experiences, and the increasing recognition of games as effective learning tools by various organizations, including the military and academic institutions.
+## Key Topics
+- **[[Digital Game-Based Learning]]:** The integration of educational content with the engaging and motivating elements of video games to enhance learning experiences.
+- **[[Motivation]] in Learning:** The critical role of [[motivation]] in successful learning, and how traditional educational methods often fail to engage students, while video games naturally motivate and captivate them.
+- **Cognitive Benefits of Gaming:** Research indicating that video games can improve cognitive abilities such as visual selective attention, multitasking, and quick decision-making.
+- **Generational Differences:** The distinction between "digital natives" (the younger generation that has grown up with digital technology) and "digital immigrants" (older generations), and how these differences impact [[learning styles]] and preferences.
+- **Social Aspects of Gaming:** The evolution of video games from single-player experiences to massively multiplayer online games that foster [[collaboration]] and [[social interaction]].
+- **Educational Potential of Video Games:** The growing recognition and development of video games as tools for learning complex subjects, with support from academia, industry, and the military.
+## Abstract
+> Research published by University of Rochester neuroscientists C. Shawn Green and Daphne Bavelier has grabbed national attention for suggesting that playing "action" video and computer games has the positive effect of enhancing students' visual selective attention. But that finding is just one small part of a more important message that all parents and educators need to hear: Video games are not the enemy, but the best opportunity we have to engage our kids in real learning.
+## Reference
+> Prensky, M. (2003). Digital game-based learning. _Computers in Entertainment_, _1_(1), 21. https://doi.org/10.1145/950566.950596

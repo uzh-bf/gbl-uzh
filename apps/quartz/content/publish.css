@@ -1,0 +1,9 @@
+.theme-light {
+  --background-primary-alt: #edeff1;
+  --text-accent: #dc6027;
+  --text-accent-hover: #dc6027;
+}
+
+.site-body-left-column-site-name {
+  display: none;
+}
