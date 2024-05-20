@@ -2,8 +2,9 @@ import { and, assign, setup } from 'xstate'
 
 export type Events =
   | { type: 'onNext' }
-  | { type: 'addPeriod' }
-  | { type: 'addSegment' }
+  | { type: 'ADD_PERIOD' }
+  | { type: 'ADD_SEGMENT' }
+  | { type: 'GAME_ACTIVE_INVOKE' }
 
 export type Transitions =
   | 'ADD_PERIOD'
@@ -46,6 +47,26 @@ export function prepareGameStateMachine<
   transitionFn = (_, context) => context.user,
 }: PrepareStateMachineArgs<TInput, TUserContext>) {
   return setup({
+    actions: {
+      ADD_PERIOD: assign(({ context }) => ({
+        game: {
+          ...context.game,
+          periodCount: context.game.periodCount + 1,
+        },
+        user: transitionFn('ADD_PERIOD', context),
+      })),
+
+      ADD_SEGMENT: assign(({ context }) => ({
+        game: {
+          ...context.game,
+          segmentCount: context.game.segmentCount + 1,
+        },
+        user: transitionFn('ADD_SEGMENT', context),
+      })),
+
+      GAME_ACTIVE_INVOKE: async ({ context, event }) => {},
+    },
+
     types: {
       input: {} as TInput,
       context: {} as BaseContext<TUserContext>,
@@ -75,11 +96,15 @@ export function prepareGameStateMachine<
 
     schemas: {
       events: {
-        addPeriod: {
+        ADD_PERIOD: {
           type: 'object',
           properties: {},
         },
-        addSegment: {
+        ADD_SEGMENT: {
+          type: 'object',
+          properties: {},
+        },
+        GAME_ACTIVE_INVOKE: {
           type: 'object',
           properties: {},
         },
@@ -104,26 +129,14 @@ export function prepareGameStateMachine<
     }),
 
     on: {
-      addPeriod: {
+      ADD_PERIOD: {
         target: '#GAME_FLOW',
-        actions: assign(({ context }) => ({
-          game: {
-            ...context.game,
-            periodCount: context.game.periodCount + 1,
-          },
-          user: transitionFn('ADD_PERIOD', context),
-        })),
+        actions: [{ type: 'ADD_PERIOD' }],
       },
 
-      addSegment: {
+      ADD_SEGMENT: {
         target: '#GAME_FLOW',
-        actions: assign(({ context }) => ({
-          game: {
-            ...context.game,
-            segmentCount: context.game.segmentCount + 1,
-          },
-          user: transitionFn('ADD_SEGMENT', context),
-        })),
+        actions: [{ type: 'ADD_SEGMENT' }],
       },
     },
 
@@ -133,13 +146,27 @@ export function prepareGameStateMachine<
           onNext: {
             target: 'GAME_ACTIVE',
             guard: and(['HAS_PERIODS', 'HAS_SEGMENTS']),
-            actions: assign(({ context }) => ({
-              game: context.game,
-              user: transitionFn('GAME_PREPARED_TO_GAME_ACTIVE', context),
-            })),
+            actions: [
+              assign(({ context }) => ({
+                game: context.game,
+                user: transitionFn('GAME_PREPARED_TO_GAME_ACTIVE', context),
+              })),
+            ],
           },
         },
       },
+
+      // GAME_ACTIVE_INVOKE: {
+      //   invoke: {
+      //     input: ({ context, event }) => ({}),
+      //     onDone: {
+      //       target: 'GAME_ACTIVE',
+      //     },
+      //     onError: {
+      //       target: 'GAME_ACTIVE',
+      //     },
+      //   },
+      // },
 
       GAME_ACTIVE: {
         initial: 'PERIOD_SCHEDULED',
@@ -149,16 +176,18 @@ export function prepareGameStateMachine<
             on: {
               onNext: {
                 target: 'PERIOD_ACTIVE',
-                actions: assign(({ context }) => ({
-                  game: {
-                    ...context.game,
-                    activePeriodIx: context.game.activePeriodIx + 1,
-                  },
-                  user: transitionFn(
-                    'PERIOD_SCHEDULED_TO_PERIOD_ACTIVE',
-                    context
-                  ),
-                })),
+                actions: [
+                  assign(({ context }) => ({
+                    game: {
+                      ...context.game,
+                      activePeriodIx: context.game.activePeriodIx + 1,
+                    },
+                    user: transitionFn(
+                      'PERIOD_SCHEDULED_TO_PERIOD_ACTIVE',
+                      context
+                    ),
+                  })),
+                ],
               },
             },
           },
@@ -171,16 +200,18 @@ export function prepareGameStateMachine<
                 on: {
                   onNext: {
                     target: 'RUNNING',
-                    actions: assign(({ context }) => ({
-                      game: {
-                        ...context.game,
-                        activeSegmentIx: context.game.activeSegmentIx + 1,
-                      },
-                      user: transitionFn(
-                        'PERIOD_ACTIVE_PREPARATION_TO_RUNNING',
-                        context
-                      ),
-                    })),
+                    actions: [
+                      assign(({ context }) => ({
+                        game: {
+                          ...context.game,
+                          activeSegmentIx: context.game.activeSegmentIx + 1,
+                        },
+                        user: transitionFn(
+                          'PERIOD_ACTIVE_PREPARATION_TO_RUNNING',
+                          context
+                        ),
+                      })),
+                    ],
                   },
                 },
               },
@@ -193,26 +224,30 @@ export function prepareGameStateMachine<
                       guard: {
                         type: 'IS_NOT_LAST_SEGMENT',
                       },
-                      actions: assign(({ context }) => ({
-                        game: context.game,
-                        user: transitionFn(
-                          'PERIOD_ACTIVE_RUNNING_TO_PAUSED',
-                          context
-                        ),
-                      })),
+                      actions: [
+                        assign(({ context }) => ({
+                          game: context.game,
+                          user: transitionFn(
+                            'PERIOD_ACTIVE_RUNNING_TO_PAUSED',
+                            context
+                          ),
+                        })),
+                      ],
                     },
                     {
                       target: 'CONSOLIDATION',
                       guard: {
                         type: 'IS_LAST_SEGMENT',
                       },
-                      actions: assign(({ context }) => ({
-                        game: context.game,
-                        user: transitionFn(
-                          'PERIOD_ACTIVE_RUNNING_TO_CONSOLIDATION',
-                          context
-                        ),
-                      })),
+                      actions: [
+                        assign(({ context }) => ({
+                          game: context.game,
+                          user: transitionFn(
+                            'PERIOD_ACTIVE_RUNNING_TO_CONSOLIDATION',
+                            context
+                          ),
+                        })),
+                      ],
                     },
                   ],
                 },
@@ -222,16 +257,18 @@ export function prepareGameStateMachine<
                 on: {
                   onNext: {
                     target: 'RUNNING',
-                    actions: assign(({ context }) => ({
-                      game: {
-                        ...context.game,
-                        activeSegmentIx: context.game.activeSegmentIx + 1,
-                      },
-                      user: transitionFn(
-                        'PERIOD_ACTIVE_PAUSED_TO_RUNNING',
-                        context
-                      ),
-                    })),
+                    actions: [
+                      assign(({ context }) => ({
+                        game: {
+                          ...context.game,
+                          activeSegmentIx: context.game.activeSegmentIx + 1,
+                        },
+                        user: transitionFn(
+                          'PERIOD_ACTIVE_PAUSED_TO_RUNNING',
+                          context
+                        ),
+                      })),
+                    ],
                   },
                 },
               },
@@ -240,16 +277,18 @@ export function prepareGameStateMachine<
                 on: {
                   onNext: {
                     target: '#GAME_FLOW.GAME_ACTIVE.PERIOD_RESULTS',
-                    actions: assign(({ context }) => ({
-                      game: {
-                        ...context.game,
-                        activeSegmentIx: -1,
-                      },
-                      user: transitionFn(
-                        'PERIOD_ACTIVE_CONSOLIDATION_TO_PERIOD_RESULTS',
-                        context
-                      ),
-                    })),
+                    actions: [
+                      assign(({ context }) => ({
+                        game: {
+                          ...context.game,
+                          activeSegmentIx: -1,
+                        },
+                        user: transitionFn(
+                          'PERIOD_ACTIVE_CONSOLIDATION_TO_PERIOD_RESULTS',
+                          context
+                        ),
+                      })),
+                    ],
                   },
                 },
               },
@@ -264,32 +303,36 @@ export function prepareGameStateMachine<
                   guard: {
                     type: 'IS_NOT_LAST_PERIOD',
                   },
-                  actions: assign(({ context }) => ({
-                    game: {
-                      ...context.game,
-                      activePeriodIx: context.game.activePeriodIx + 1,
-                    },
-                    user: transitionFn(
-                      'PERIOD_RESULTS_TO_PERIOD_ACTIVE',
-                      context
-                    ),
-                  })),
+                  actions: [
+                    assign(({ context }) => ({
+                      game: {
+                        ...context.game,
+                        activePeriodIx: context.game.activePeriodIx + 1,
+                      },
+                      user: transitionFn(
+                        'PERIOD_RESULTS_TO_PERIOD_ACTIVE',
+                        context
+                      ),
+                    })),
+                  ],
                 },
                 {
                   target: '#GAME_FLOW.GAME_COMPLETED',
                   guard: {
                     type: 'IS_LAST_PERIOD',
                   },
-                  actions: assign(({ context }) => ({
-                    game: {
-                      ...context.game,
-                      activePeriodIx: -1,
-                    },
-                    user: transitionFn(
-                      'PERIOD_RESULTS_TO_GAME_COMPLETED',
-                      context
-                    ),
-                  })),
+                  actions: [
+                    assign(({ context }) => ({
+                      game: {
+                        ...context.game,
+                        activePeriodIx: -1,
+                      },
+                      user: transitionFn(
+                        'PERIOD_RESULTS_TO_GAME_COMPLETED',
+                        context
+                      ),
+                    })),
+                  ],
                 },
               ],
             },
