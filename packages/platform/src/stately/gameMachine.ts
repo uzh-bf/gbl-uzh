@@ -1,6 +1,8 @@
 import { and, assign, setup } from 'xstate'
 
 export type Transitions =
+  | 'ADD_PERIOD'
+  | 'ADD_SEGMENT'
   | 'GAME_PREPARED_TO_GAME_ACTIVE'
   | 'PERIOD_SCHEDULED_TO_PERIOD_ACTIVE'
   | 'PERIOD_ACTIVE_PREPARATION_TO_RUNNING'
@@ -21,10 +23,7 @@ export interface BaseContext<TUserContext extends {}> {
   user: TUserContext
 }
 
-export interface BaseInput {
-  periodCount: number
-  segmentCount: number
-}
+export interface BaseInput {}
 
 type PrepareStateMachineArgs<TInput, TUserContext extends {}> = {
   initializeUserContext: (input: TInput) => TUserContext
@@ -45,7 +44,10 @@ export function prepareGameStateMachine<
     types: {
       input: {} as TInput,
       context: {} as BaseContext<TUserContext>,
-      events: {} as { type: 'onNext' },
+      events: {} as
+        | { type: 'onNext' }
+        | { type: 'addPeriod' }
+        | { type: 'addSegment' },
     },
 
     guards: {
@@ -71,6 +73,14 @@ export function prepareGameStateMachine<
 
     schemas: {
       events: {
+        addPeriod: {
+          type: 'object',
+          properties: {},
+        },
+        addSegment: {
+          type: 'object',
+          properties: {},
+        },
         onNext: {
           type: 'object',
           properties: {},
@@ -83,13 +93,37 @@ export function prepareGameStateMachine<
 
     context: ({ input }) => ({
       game: {
+        periodCount: 0,
+        segmentCount: 0,
         activePeriodIx: -1,
         activeSegmentIx: -1,
-        periodCount: input.periodCount,
-        segmentCount: input.segmentCount,
       },
       user: initializeUserContext(input) ?? {},
     }),
+
+    on: {
+      addPeriod: {
+        target: '#GAME_FLOW',
+        actions: assign(({ context }) => ({
+          game: {
+            ...context.game,
+            periodCount: context.game.periodCount + 1,
+          },
+          user: transitionFn('ADD_PERIOD', context),
+        })),
+      },
+
+      addSegment: {
+        target: '#GAME_FLOW',
+        actions: assign(({ context }) => ({
+          game: {
+            ...context.game,
+            segmentCount: context.game.segmentCount + 1,
+          },
+          user: transitionFn('ADD_SEGMENT', context),
+        })),
+      },
+    },
 
     states: {
       GAME_PREPARED: {

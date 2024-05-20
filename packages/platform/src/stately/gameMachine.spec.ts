@@ -33,8 +33,6 @@ describe('GameStateMachine', () => {
   beforeEach(() => {
     actor = createActor(GameStateMachine, {
       input: {
-        periodCount: 2,
-        segmentCount: 2,
         stockPrice: 100,
       },
     })
@@ -43,6 +41,11 @@ describe('GameStateMachine', () => {
   })
 
   it('supports basic workflow', () => {
+    actor.send({ type: 'addPeriod' })
+    actor.send({ type: 'addSegment' })
+    actor.send({ type: 'addSegment' })
+    actor.send({ type: 'addPeriod' })
+
     expect(actor.getSnapshot().value).toEqual('GAME_PREPARED')
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(-1)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
