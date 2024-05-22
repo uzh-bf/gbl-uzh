@@ -37,6 +37,7 @@ function Cockpit() {
   const self = playerState?.data?.self
 
   if (!currentGame) return null
+  if (!resultFacts) return null
 
   const decisions = [
     {

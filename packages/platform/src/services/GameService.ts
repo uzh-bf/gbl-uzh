@@ -1039,6 +1039,10 @@ export function computePeriodStartResults(
     }
   }
 
+  // TODO(Jakob):
+  // - This should happen before clicking on "Next Period", shouldn't it?
+  // - It would be nicer to separate these two functions
+
   // if the game has not started yet, generate initial PERIOD_START results
   const result = players.map((player, ix, allPlayers) => {
     const { result: facts, actions } = reducers.PeriodResult.apply(
