@@ -1,5 +1,7 @@
 import * as DB from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
+import { nanoid } from 'nanoid'
+import { repeat } from 'ramda'
 import { createActor, waitFor } from 'xstate'
 import { Action } from '../'
 import { debugLog } from '../../dist/lib/util'
@@ -12,15 +14,13 @@ import {
 
 interface UserInput extends BaseInput {
   stockPrice: number
-  facts: any
-  actions: any
+  results: any
 }
 
-// TODO(Jakob): Add facts and actions
 interface UserContext {
   stockPrice: number
-  facts: any
-  actions: any
+  // NOTE(Jakob): results includes facts and actions of all players
+  results: any
 }
 
 const INITIAL_CAPITAL = 10000
@@ -146,7 +146,8 @@ function transitionFn(
   switch (transitionName) {
     case 'PERIOD_SCHEDULED_TO_PERIOD_ACTIVE':
       const { results } = computePeriodStartResults({
-        results: undefined,
+        // TODO(Jakob): Read results from DB?
+        results: context.user.results,
         players: game.players,
         activePeriodIx: context.game.activePeriodIx,
         // TODO(Jakob): Why 0 index?
@@ -156,8 +157,7 @@ function transitionFn(
       return {
         ...context.user,
         stockPrice: context.user.stockPrice + 10,
-        facts: results.facts,
-        actions: results.actions,
+        results: results,
       }
 
     default:
@@ -168,95 +168,12 @@ function transitionFn(
 const GameStateMachine = prepareGameStateMachine<UserInput, UserContext>({
   initializeUserContext: (input) => ({
     stockPrice: 100,
-    facts: {},
-    actions: {},
+    results: {},
   }),
   transitionFn,
 })
 
 describe('GameStateMachine', () => {
-  // TODO(Jakob):
-  // - Users should only implemnt facts and actions,
-  //   platform should do data handling
-  let game = {
-    // gameId: 0,
-    // periodFacts: {},
-
-    id: 11,
-    status: 'RESULTS',
-    name: '11',
-    activePeriodIx: 1,
-    activePeriodId: 20,
-    // ownerId: '716f7632-ed33-4701-a281-0f27bd4f6e82',
-    players: [
-      {
-        id: 'dc426b47-1dfe-4024-8c52-5df4c7aab000',
-        number: 1,
-        name: 'Team 1',
-        avatar: '',
-        location: '',
-        color: 'White',
-        isReady: false,
-        experience: 0,
-        experienceToNext: 100,
-        levelIx: 0,
-        tutorialCompleted: false,
-        facts: {},
-        role: null,
-        token: 'zpN4CRT0yv3QOshY8v_-O',
-        achievementKeys: [],
-        achievementIds: [],
-        completedLearningElementIds: [],
-        visitedStoryElementIds: [],
-        gameId: 11,
-      },
-    ],
-    periods: [
-      {
-        id: 19,
-        index: 0,
-        // facts: [Object],
-        facts: {},
-        activeSegmentIx: 1,
-        activeSegmentId: 35,
-        nextPeriodId: 20,
-        gameId: 11,
-      },
-      {
-        id: 20,
-        index: 1,
-        // facts: [Object],
-        facts: {},
-        activeSegmentIx: -1,
-        activeSegmentId: null,
-        nextPeriodId: 28,
-        gameId: 11,
-      },
-    ],
-    activePeriod: {
-      id: 20,
-      index: 1,
-      facts: { scenario: [Object], rollsPerSegment: 3 },
-      activeSegmentIx: -1,
-      activeSegmentId: null,
-      nextPeriodId: 28,
-      gameId: 11,
-      results: [],
-      nextPeriod: {
-        id: 28,
-        index: 2,
-        // facts: [Object],
-        facts: {},
-        activeSegmentIx: -1,
-        activeSegmentId: null,
-        nextPeriodId: 29,
-        gameId: 11,
-      },
-      previousPeriod: [[Object]],
-      activeSegment: null,
-      decisions: [],
-    },
-  }
   // [
   //   ('ActionsReducer',
   // // state === facts ----------------------------------------------------------
@@ -411,15 +328,105 @@ describe('GameStateMachine', () => {
   // }
 
   let actor
+  let prismaClient
+  let game
+  const createNewGame = false
+  const gameId = 11
+  const playerCount = 1
+  const userSub = '716f7632-ed33-4701-a281-0f27bd4f6e82'
+  const name = 'TestGame'
 
-  beforeEach(() => {
+  beforeEach(async () => {
     actor = createActor(GameStateMachine, {
       input: {
         stockPrice: 100,
-        facts: {},
-        actions: {},
+        results: {},
       },
     })
+
+    prismaClient = new PrismaClient()
+
+    if (createNewGame) {
+      // TODO(Jakob):
+      // - Maybe use the createGame fn from GameService.ts
+      // - Maybe automate:
+      //    1. game creation
+      //    2. add periods and segments
+      //    3. go to a certain period and certain segment
+      game = await prismaClient.game.create({
+        data: {
+          name,
+          owner: {
+            connect: {
+              id: userSub,
+            },
+          },
+          players: {
+            create: repeat(0, playerCount).map((_, ix) => {
+              return {
+                facts: {},
+                token: nanoid(),
+                role: null,
+                number: playerCount - ix,
+                name: `Team ${playerCount - ix}`,
+                level: {
+                  connect: {
+                    index: 0,
+                  },
+                },
+              }
+            }),
+          },
+        },
+        include: {
+          players: true,
+          periods: true,
+        },
+      })
+    } else {
+      game = await prismaClient.game.findUnique({
+        where: {
+          id: gameId,
+        },
+        include: {
+          players: true,
+          periods: true,
+          activePeriod: {
+            include: {
+              results: {
+                include: {
+                  player: true,
+                },
+              },
+              nextPeriod: true,
+              previousPeriod: {
+                include: {
+                  results: {
+                    include: {
+                      player: true,
+                    },
+                  },
+                },
+              },
+              activeSegment: {
+                include: {
+                  results: {
+                    include: {
+                      player: true,
+                    },
+                  },
+                },
+              },
+              decisions: {
+                include: {
+                  player: true,
+                },
+              },
+            },
+          },
+        },
+      })
+    }
 
     actor.start()
   })
@@ -447,25 +454,21 @@ describe('GameStateMachine', () => {
       stockPrice: 100,
     })
 
-    // PERIOD_SCHEDULED_TO_PERIOD_ACTIVE
-    actor.send({
-      type: 'onNext',
-      game: game,
-    })
+    // PERIOD_SCHEDULED_TO_PERIOD_UPDATE_DB_RESULTS
+    actor.send({ type: 'onNext', game: game, prisma: prismaClient })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: 'PERIOD_UPDATE_DB_RESULTS',
     })
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(-1)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
-    expect(actor.getSnapshot().context.user).toMatchObject({
-      stockPrice: 110,
-      facts: {},
-      actions: {},
-    })
+    // expect(actor.getSnapshot().context.user).toMatchObject({
+    //   stockPrice: 110,
+    //   results: null,
+    // })
 
-    actor.send({ type: 'onNext' })
-    await waitFor(actor, (state) =>
-      state.matches({
+    // TODO(Jakob): Do also an example where it fails
+    await waitFor(actor, (snapshot) =>
+      snapshot.matches({
         GAME_ACTIVE: { PERIOD_ACTIVE: 'PREPARATION' },
       })
     )
@@ -476,6 +479,7 @@ describe('GameStateMachine', () => {
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
     expect(actor.getSnapshot().context.user).toMatchObject({
       stockPrice: 110,
+      results: null,
     })
 
     actor.send({ type: 'onNext' })

@@ -19,7 +19,7 @@ export type Transitions =
   | 'PERIOD_RESULTS_TO_PERIOD_ACTIVE'
   | 'PERIOD_RESULTS_TO_GAME_COMPLETED'
 
-export interface BaseContext<TUserContext extends {}> {
+export interface BaseContext<TUserContext> {
   game: {
     activePeriodIx: number
     activeSegmentIx: number
@@ -32,11 +32,13 @@ export interface BaseContext<TUserContext extends {}> {
 export interface BaseInput {}
 
 // TODO(Jakob):
+// 1. Read results from DB in computePeriodStartResults?
+// - Users should only implemnt facts and actions,
+//   platform should do data handling
 // - Add type for game
 // - Move some functions to a util.ts file or something
-// - replace updateDatabase
 
-type PrepareStateMachineArgs<TInput, TUserContext extends {}> = {
+type PrepareStateMachineArgs<TInput, TUserContext> = {
   initializeUserContext: (input: TInput) => TUserContext
   transitionFn?: (
     transitionName: Transitions,
@@ -45,23 +47,9 @@ type PrepareStateMachineArgs<TInput, TUserContext extends {}> = {
   ) => TUserContext
 }
 
-const updateDatabase = (data) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (data) {
-        console.log(data)
-        resolve({ success: true, data })
-      } else {
-        console.log(data)
-        reject(new Error('Failed to update database'))
-      }
-    }, 1000)
-  })
-}
-
-function mapAction({ ctx, gameId, activePeriodIx, playerId }) {
-  return (action) =>
-    ctx.prisma.playerAction.create({
+function mapAction({ prisma, gameId, activePeriodIx, playerId }) {
+  return async (action) =>
+    prisma.playerAction.create({
       data: {
         type: action.type,
         facts: action.facts,
@@ -98,101 +86,115 @@ function mapAction({ ctx, gameId, activePeriodIx, playerId }) {
     })
 }
 
-const initPlayerResults = (players, activePeriodIx, gameId, results, ctx) => {
+const initPlayersResults = async (
+  players,
+  results,
+  activePeriodIx,
+  gameId,
+  prisma
+) => {
   const nextPeriodIx = activePeriodIx + 1
   let extras: any[] = []
-  const outputResults = players.map((player, ix, allPlayers) => {
-    const facts = results[ix].facts
-    const actions = results[ix].actions
-    if (actions && actions.length > 0) {
-      const mapper = mapAction({
-        ctx,
-        gameId,
-        activePeriodIx: nextPeriodIx,
-        playerId: player.id,
-      })
-      extras = [...extras, ...actions.map(mapper)]
-    }
+  // TODO(Jakob): Make sure results and players have same size
+  const resultsOut = await Promise.all(
+    players.map(async (player, ix, allPlayers) => {
+      const facts = results[ix].facts
+      const actions = results[ix].actions
+      if (actions && actions.length > 0) {
+        const mapper = mapAction({
+          prisma,
+          gameId,
+          activePeriodIx: nextPeriodIx,
+          playerId: player.id,
+        })
+        const mapped = await Promise.all(actions.map(mapper))
+        extras = [...extras, ...mapped]
+      }
 
-    return {
-      type: DB.PlayerResultType.PERIOD_START,
-      periodIx: nextPeriodIx,
-      facts,
-      player: {
-        connect: {
-          id: player.id,
+      return {
+        type: DB.PlayerResultType.PERIOD_START,
+        periodIx: nextPeriodIx,
+        facts,
+        player: {
+          connect: {
+            id: player.id,
+          },
         },
-      },
-      game: {
-        connect: {
-          id: gameId,
+        game: {
+          connect: {
+            id: gameId,
+          },
         },
-      },
-    }
-  })
+      }
+    })
+  )
 
   return {
-    results: outputResults,
+    results: resultsOut,
     extras,
   }
 }
 
-const updateDBPeriodResults = async ({ context, event }) => {
-  const activePeriodIx = context.game.activePeriodIx
-  const gameId = event.game.gameId
-  const ctx = event.ctx
-
+const updateDBPeriodResults = async (game, prisma, results, activePeriodIx) => {
+  const gameId = game.id
   let extras: any[] = []
-  let results: any
+  let resultsOut: any
   if (activePeriodIx < 0) {
-    ;({ results, extras } = initPlayerResults(
-      event.game.players,
+    console.log('initPlayerResults')
+    ;({ results: resultsOut, extras } = await initPlayersResults(
+      game.players,
+      results,
       activePeriodIx,
       gameId,
-      event.results,
-      ctx
+      prisma
     ))
   } else {
+    console.log('existingResults')
     // If the game is running, transform previous results to next
-    results = event.results
-      // TODO(Jakob): We already filter when we compute the facts -> remove
-      // ensure that we only work on PERIOD_END results of the preceding period
-      // .filter((result) => result.type === DB.PlayerResultType.PERIOD_END)
-      .map((result, ix, allResults) => {
-        if (result.actions && result.actions.length > 0) {
-          const mapper = mapAction({
-            ctx,
-            gameId,
-            activePeriodIx: activePeriodIx,
-            playerId: result.player.id,
-          })
-          extras = [...extras, ...result.actions.map(mapper)]
-        }
-        const facts = result.facts
-        return {
-          type: DB.PlayerResultType.PERIOD_START,
-          periodIx: activePeriodIx,
-          facts,
-          player: {
-            connect: {
-              id: result.player.id ?? result.player.connect.id,
+    resultsOut = await Promise.all(
+      results
+        // TODO(Jakob): We already filter when we compute the facts -> remove
+        // ensure that we only work on PERIOD_END results of the preceding period
+        // .filter((result) => result.type === DB.PlayerResultType.PERIOD_END)
+        .map(async (result, ix, allResults) => {
+          if (result.actions && result.actions.length > 0) {
+            const mapper = mapAction({
+              prisma,
+              gameId,
+              activePeriodIx: activePeriodIx,
+              playerId: result.player.id,
+            })
+            const mapped = await Promise.all(result.actions.map(mapper))
+            extras = [...extras, ...mapped]
+          }
+          const facts = result.facts
+          return {
+            type: DB.PlayerResultType.PERIOD_START,
+            periodIx: activePeriodIx,
+            facts,
+            player: {
+              connect: {
+                id: result.player.id ?? result.player.connect.id,
+              },
             },
-          },
-          game: {
-            connect: {
-              id: gameId,
+            game: {
+              connect: {
+                id: gameId,
+              },
             },
-          },
-        }
-      })
+          }
+        })
+    )
   }
 
   // update the status and active period of the current game
   // and prepare PERIOD_START results
 
+  // TODO(Jakob): Check what the return value is needed for
+  // in activateNextPeriod in GameService.ts
   const nextPeriodIx = activePeriodIx + 1
-  const result = await ctx.prisma.$transaction([
-    ctx.prisma.game.update({
+  return prisma.$transaction([
+    prisma.game.update({
       where: {
         id: gameId,
       },
@@ -217,7 +219,7 @@ const updateDBPeriodResults = async ({ context, event }) => {
       },
     }),
 
-    ctx.prisma.period.update({
+    prisma.period.update({
       where: {
         gameId_index: {
           gameId,
@@ -226,25 +228,23 @@ const updateDBPeriodResults = async ({ context, event }) => {
       },
       data: {
         results: {
-          create: results,
+          create: resultsOut,
         },
       },
     }),
 
     ...extras,
   ])
-
-  // TODO(Jakob): Check what the return value is needed for
-  // in activateNextPeriod in GameService.ts
-  return result
 }
 
+// TODO(Jakob):
+// I needed to add: TUserContext extends { results: any } -> ask Roli
 export function prepareGameStateMachine<
   TInput extends BaseInput,
-  TUserContext extends {}
+  TUserContext extends { results: any }
 >({
   initializeUserContext,
-  transitionFn = (transitionName, context, game) => context?.user,
+  transitionFn = (transitionName, context, game) => context.user,
 }: PrepareStateMachineArgs<TInput, TUserContext>) {
   return setup({
     types: {
@@ -256,12 +256,37 @@ export function prepareGameStateMachine<
         type: 'onNext'
         // TODO(Jakob): Add type
         game: any
+        prisma: any
       },
     },
     actors: {
-      updateDBPeriodResults: fromPromise(async ({ input }) => {
-        return updateDatabase(input)
-      }),
+      updateDBPeriodResults: fromPromise(
+        // TODO(Jakob): Complete type of game and prisma
+        async ({
+          input,
+        }: {
+          input: {
+            game: any
+            prisma: any
+            results: any
+            activePeriodIx: number
+          }
+        }) => {
+          const results = await updateDBPeriodResults(
+            input.game,
+            input.prisma,
+            input.results,
+            input.activePeriodIx
+          )
+          return {
+            user: {
+              // TODO(Jakob): check for the rest of context.user,
+              // maybe provide context as input
+              results: results,
+            },
+          }
+        }
+      ),
     },
     guards: {
       IS_NOT_LAST_SEGMENT: function ({ context, event }) {
@@ -363,7 +388,6 @@ export function prepareGameStateMachine<
                 actions: assign(({ context, event }) => ({
                   game: {
                     ...context.game,
-                    // activePeriodIx: context.game.activePeriodIx + 1,
                   },
                   user: transitionFn(
                     'PERIOD_SCHEDULED_TO_PERIOD_ACTIVE',
@@ -379,36 +403,41 @@ export function prepareGameStateMachine<
             invoke: {
               id: 'periodUpdateDBResults',
               src: 'updateDBPeriodResults',
-              // TODO(Jakob): Only add relevant input
               input: ({ context, event }) => ({
-                context: context,
-                event: event,
+                game: event.game,
+                prisma: event.prisma,
+                results: context.user.results,
+                activePeriodIx: context.game.activePeriodIx,
               }),
               onDone: {
                 target: 'PERIOD_ACTIVE',
-                actions: assign(({ context }) => ({
-                  game: {
-                    ...context.game,
-                    activePeriodIx: context.game.activePeriodIx + 1,
-                  },
-                  user: {
-                    ...context.user,
-                    facts: {},
-                    actions: {},
-                  },
-                })),
+                actions: assign(({ context }) => {
+                  console.log('success')
+                  return {
+                    game: {
+                      ...context.game,
+                      activePeriodIx: context.game.activePeriodIx + 1,
+                    },
+                    user: {
+                      ...context.user,
+                      results: null,
+                    },
+                  }
+                }),
               },
               onError: {
                 target: 'PERIOD_SCHEDULED',
                 // TODO(Jakob): Add additional error msg
-                actions: assign(({ context }) => ({
-                  game: context.game,
-                  user: {
-                    ...context.user,
-                    facts: {},
-                    actions: {},
-                  },
-                })),
+                actions: assign(({ context }) => {
+                  console.log('fail')
+                  return {
+                    game: context.game,
+                    user: {
+                      ...context.user,
+                      results: null,
+                    },
+                  }
+                }),
               },
             },
           },
