@@ -1,10 +1,16 @@
+// import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import * as DB from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
 import { nanoid } from 'nanoid'
+import * as R from 'ramda'
 import { repeat } from 'ramda'
 import { createActor, waitFor } from 'xstate'
 import { Action } from '../'
-import { debugLog } from '../../dist/lib/util'
+import {
+  computePercentChange,
+  debugLog,
+  withPercentChange,
+} from '../../dist/lib/util'
 import {
   BaseContext,
   BaseInput,
@@ -14,13 +20,13 @@ import {
 
 interface UserInput extends BaseInput {
   stockPrice: number
-  results: any
+  results: { facts: {}; actions: {} }[]
 }
 
 interface UserContext {
   stockPrice: number
-  // NOTE(Jakob): results includes facts and actions of all players
-  results: any
+  // Of all players, per period and segment
+  results: { facts: {}; actions: {} }[]
 }
 
 const INITIAL_CAPITAL = 10000
@@ -31,13 +37,50 @@ enum ActionTypes {
   PERIOD_RESULTS_END = 'PERIOD_RESULTS_END',
 }
 
+enum ActionTypesSegmentResults {
+  SEGMENT_RESULTS_INITIALIZE = 'SEGMENT_RESULTS_INITIALIZE',
+  SEGMENT_RESULTS_START = 'SEGMENT_RESULTS_START',
+  SEGMENT_RESULTS_END = 'SEGMENT_RESULTS_END',
+}
+
 type Actions =
   | Action<ActionTypes.PERIOD_RESULTS_INITIALIZE, any, PrismaClient>
   | Action<ActionTypes.PERIOD_RESULTS_START, any, PrismaClient>
   | Action<ActionTypes.PERIOD_RESULTS_END, any, PrismaClient>
 
-function apply(state: any, action: Actions) {
-  let newState
+type PayloadTypeSegmentResults = {
+  // periodFacts: PeriodFacts
+  // segmentFacts: PeriodSegmentFacts
+  periodFacts: any
+  segmentFacts: any
+  segmentIx: number
+}
+
+type ActionsSegmentResults =
+  | Action<
+      ActionTypesSegmentResults.SEGMENT_RESULTS_INITIALIZE,
+      {},
+      PrismaClient
+    >
+  | Action<
+      ActionTypesSegmentResults.SEGMENT_RESULTS_START,
+      PayloadTypeSegmentResults,
+      PrismaClient
+    >
+  | Action<
+      ActionTypesSegmentResults.SEGMENT_RESULTS_END,
+      PayloadTypeSegmentResults,
+      PrismaClient
+    >
+
+function applyPeriodResultReducer(state: any, action: Actions) {
+  let newState = {
+    type: action.type,
+    result: state,
+    events: [],
+    notification: [],
+    isDirty: false,
+  }
   if (action.type === ActionTypes.PERIOD_RESULTS_INITIALIZE) {
     newState = {
       type: action.type,
@@ -58,25 +101,105 @@ function apply(state: any, action: Actions) {
       notification: [],
       isDirty: false,
     }
-  } else if (action.type === ActionTypes.PERIOD_RESULTS_START) {
-    newState = {
-      type: action.type,
-      result: state,
-      events: [],
-      notification: [],
-      isDirty: false,
-    }
-  } else if (action.type === ActionTypes.PERIOD_RESULTS_END) {
-    newState = {
-      type: action.type,
-      result: state,
-      events: [],
-      notification: [],
-      isDirty: false,
-    }
   }
 
   debugLog('PeriodResultReducer', state, action, newState)
+
+  return newState
+}
+
+function apply(state: any, action: ActionsSegmentResults) {
+  let newState = {
+    type: action.type,
+    events: [],
+    notification: [],
+    isDirty: true,
+    result: {
+      ...state,
+    },
+  }
+  if (action.type === ActionTypesSegmentResults.SEGMENT_RESULTS_END) {
+    const numInvestedBuckets = R.sum(Object.values(state.decisions).map(Number))
+    const totalAssets =
+      state.assets.bank + state.assets.bonds + state.assets.stocks
+
+    const targetAssets = {
+      bank: state.decisions.bank ? (1 / numInvestedBuckets) * totalAssets : 0,
+      bonds: state.decisions.bonds ? (1 / numInvestedBuckets) * totalAssets : 0,
+      stocks: state.decisions.stocks
+        ? (1 / numInvestedBuckets) * totalAssets
+        : 0,
+    }
+
+    const assetsWithReturns = action.payload.segmentFacts.returns.reduce(
+      (acc, returns, ix) => {
+        const last = acc[acc.length - 1]
+
+        const bankWithReturn = withPercentChange(last.bank, returns.bank)
+        const bondsWithReturn = withPercentChange(last.bonds, returns.bonds)
+        const stocksWithReturn = withPercentChange(last.stocks, returns.stocks)
+
+        const totalAssetsWithReturn =
+          bankWithReturn + bondsWithReturn + stocksWithReturn
+        const totalAssetsReturn = computePercentChange(
+          totalAssetsWithReturn,
+          last.totalAssets
+        )
+
+        return [
+          ...acc,
+          {
+            ix: ix + 1,
+            bank: bankWithReturn,
+            bankReturn: returns.bank,
+            bonds: bondsWithReturn,
+            bondsReturn: returns.bonds,
+            stocks: stocksWithReturn,
+            stocksReturn: returns.stocks,
+            totalAssets: totalAssetsWithReturn,
+            totalAssetsReturn,
+          },
+        ]
+      },
+      [
+        {
+          ix: 0,
+          ...targetAssets,
+          totalAssets,
+        },
+      ]
+    )
+
+    const finalAssets = R.omit(
+      ['ix'],
+      assetsWithReturns[assetsWithReturns.length - 1]
+    )
+
+    newState = {
+      type: action.type,
+      events: [],
+      notification: [],
+      isDirty: true,
+      result: {
+        ...state,
+        assetsWithReturns,
+        assets: {
+          ...R.pick(['bank', 'bonds', 'stocks', 'totalAssets'], finalAssets),
+        },
+        returns: {
+          bank: computePercentChange(finalAssets.bank, targetAssets.bank),
+          bonds: computePercentChange(finalAssets.bonds, targetAssets.bonds),
+          stocks: computePercentChange(finalAssets.stocks, targetAssets.stocks),
+          totalAssets: computePercentChange(
+            finalAssets.totalAssets,
+            state.assets.bank
+          ),
+        },
+      },
+    }
+  }
+
+  debugLog('SegmentResultReducer', state, action, newState)
 
   return newState
 }
@@ -87,54 +210,94 @@ function computePeriodStartResults({
   activePeriodIx,
   periodFacts,
 }) {
-  const currentPeriodIx = activePeriodIx
-  const nextPeriodIx = currentPeriodIx + 1
-
-  // if the game is running, transform previous results to next
-  if (currentPeriodIx >= 0) {
-    const result = results
-      // ensure that we only work on PERIOD_END results of the preceding period
-      .filter((result) => result.type === DB.PlayerResultType.PERIOD_END)
-      .map((result, ix, allResults) => {
-        const { result: facts, actions } = apply(result, {
-          type: ActionTypes.PERIOD_RESULTS_START,
+  // if the game has not started yet, generate initial PERIOD_START results
+  if (activePeriodIx < 0) {
+    const result = players.map((player, ix, allPlayers) => {
+      // NOTE(Jakob): Other games may have actions that come from the reducer
+      const actions = null
+      const { result: facts } = applyPeriodResultReducer(
+        {},
+        {
+          type: ActionTypes.PERIOD_RESULTS_INITIALIZE,
           payload: {
-            playerRole: result.player.role ?? result.player.connect.role,
+            playerRole: player.role,
             periodFacts,
           },
-        })
-
-        return {
-          facts: facts,
-          actions: actions,
         }
-      })
+      )
+
+      return {
+        facts: facts,
+        actions: actions,
+      }
+    })
+
     return {
       results: result,
     }
   }
 
-  // if the game has not started yet, generate initial PERIOD_START results
-  const result = players.map((player, ix, allPlayers) => {
-    const { result: facts, actions } = apply(
-      {},
-      {
-        type: ActionTypes.PERIOD_RESULTS_INITIALIZE,
+  // if the game is running, transform previous results to next
+  const result = results
+    // ensure that we only work on PERIOD_END results of the preceding period
+    .filter((result) => result.type === DB.PlayerResultType.PERIOD_END)
+    .map((result, ix, allResults) => {
+      const actions = null
+      const { result: facts } = applyPeriodResultReducer(result, {
+        type: ActionTypes.PERIOD_RESULTS_START,
         payload: {
-          playerRole: player.role,
+          playerRole: result.player.role ?? result.player.connect.role,
           periodFacts,
         },
+      })
+
+      return {
+        facts: facts,
+        actions: actions,
       }
-    )
-
-    return {
-      facts: facts,
-      actions: actions,
-    }
-  })
-
+    })
   return {
     results: result,
+  }
+}
+
+function computeSegmentEndResults(game) {
+  const results = game.activePeriod.activeSegment.results
+    .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
+    .map((result, ix, allResults) => {
+      const actions = null
+      const { result: facts } = apply(result.facts, {
+        type: ActionTypesSegmentResults.SEGMENT_RESULTS_END,
+        payload: {
+          // playerRole: result.player.role,
+          periodFacts: game.activePeriod.facts,
+          segmentFacts: game.activePeriod.activeSegment.facts,
+          segmentIx: game.activePeriod.activeSegmentIx,
+        },
+      })
+
+      return {
+        where: {
+          periodIx_segmentIx_playerId_type: {
+            periodIx: game.activePeriodIx,
+            segmentIx: game.activePeriod.activeSegmentIx,
+            playerId: result.playerId,
+            type: DB.PlayerResultType.SEGMENT_END,
+          },
+        },
+        data: {
+          facts,
+          game: {
+            connect: {
+              id: game.id,
+            },
+          },
+        },
+      }
+    })
+
+  return {
+    results: results,
   }
 }
 
@@ -144,7 +307,7 @@ function transitionFn(
   game: any
 ): UserContext {
   switch (transitionName) {
-    case 'PERIOD_SCHEDULED_TO_PERIOD_ACTIVE':
+    case 'PERIOD_SCHEDULED_TO_PERIOD_ACTIVE': {
       const { results } = computePeriodStartResults({
         // TODO(Jakob): Read results from DB?
         results: context.user.results,
@@ -153,12 +316,21 @@ function transitionFn(
         // TODO(Jakob): Why 0 index?
         periodFacts: game.periods?.[0].facts,
       })
-
       return {
         ...context.user,
         stockPrice: context.user.stockPrice + 10,
         results: results,
       }
+    }
+
+    case 'PERIOD_ACTIVE_PREPARATION_TO_RUNNING': {
+      // if (!game.activePeriod?.activeSegment || !currentSegmentIx) return null
+      const { results } = computeSegmentEndResults(game)
+      return {
+        ...context.user,
+        results: results,
+      }
+    }
 
     default:
       return context.user
@@ -168,7 +340,7 @@ function transitionFn(
 const GameStateMachine = prepareGameStateMachine<UserInput, UserContext>({
   initializeUserContext: (input) => ({
     stockPrice: 100,
-    results: {},
+    results: [],
   }),
   transitionFn,
 })
@@ -328,10 +500,12 @@ describe('GameStateMachine', () => {
   // }
 
   let actor
-  let prismaClient
+  let prisma
   let game
-  const createNewGame = false
+  // To take an existing game
   const gameId = 11
+  // To create a new game
+  const createNewGame = false
   const playerCount = 1
   const userSub = '716f7632-ed33-4701-a281-0f27bd4f6e82'
   const name = 'TestGame'
@@ -340,11 +514,11 @@ describe('GameStateMachine', () => {
     actor = createActor(GameStateMachine, {
       input: {
         stockPrice: 100,
-        results: {},
+        results: [],
       },
     })
 
-    prismaClient = new PrismaClient()
+    prisma = new PrismaClient()
 
     if (createNewGame) {
       // TODO(Jakob):
@@ -353,7 +527,7 @@ describe('GameStateMachine', () => {
       //    1. game creation
       //    2. add periods and segments
       //    3. go to a certain period and certain segment
-      game = await prismaClient.game.create({
+      game = await prisma.game.create({
         data: {
           name,
           owner: {
@@ -384,7 +558,7 @@ describe('GameStateMachine', () => {
         },
       })
     } else {
-      game = await prismaClient.game.findUnique({
+      game = await prisma.game.findUnique({
         where: {
           id: gameId,
         },
@@ -455,7 +629,7 @@ describe('GameStateMachine', () => {
     })
 
     // PERIOD_SCHEDULED_TO_PERIOD_UPDATE_DB_RESULTS
-    actor.send({ type: 'onNext', game: game, prisma: prismaClient })
+    actor.send({ type: 'onNext', game: game, prisma: prisma })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: 'PERIOD_UPDATE_DB_RESULTS',
     })
@@ -482,7 +656,7 @@ describe('GameStateMachine', () => {
       results: null,
     })
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'onNext', game: game })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'RUNNING' },
     })
@@ -496,7 +670,7 @@ describe('GameStateMachine', () => {
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(0)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(0)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'onNext', game: game })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'RUNNING' },
     })
@@ -524,7 +698,7 @@ describe('GameStateMachine', () => {
     expect(actor.getSnapshot().context.game.activePeriodIx).toEqual(1)
     expect(actor.getSnapshot().context.game.activeSegmentIx).toEqual(-1)
 
-    actor.send({ type: 'onNext' })
+    actor.send({ type: 'onNext', game: game })
     expect(actor.getSnapshot().value).toMatchObject({
       GAME_ACTIVE: { PERIOD_ACTIVE: 'RUNNING' },
     })

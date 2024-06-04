@@ -10,6 +10,7 @@ export type Transitions =
   | 'ADD_PERIOD'
   | 'ADD_SEGMENT'
   | 'GAME_PREPARED_TO_GAME_ACTIVE'
+  // TODO(Jakob): Add PERIOD_SCHEDULED_TO_PERIOD_UPDATE_DB_RESULTS
   | 'PERIOD_SCHEDULED_TO_PERIOD_ACTIVE'
   | 'PERIOD_ACTIVE_PREPARATION_TO_RUNNING'
   | 'PERIOD_ACTIVE_RUNNING_TO_PAUSED'
@@ -32,7 +33,13 @@ export interface BaseContext<TUserContext> {
 export interface BaseInput {}
 
 // TODO(Jakob):
+// 0. Currently in GameService we have activateNextPeriod and activateNextSegment
+//    consider both to adopt them to our state machine. Both check the current
+//    game status and depend which fn you call (by clicking a buuton), different things happen
 // 1. Read results from DB in computePeriodStartResults?
+// 2. We currently added computePeriodStartResults, continue with
+//    computePeriodEndResults
+//
 // - Users should only implemnt facts and actions,
 //   platform should do data handling
 // - Add type for game
@@ -48,7 +55,7 @@ type PrepareStateMachineArgs<TInput, TUserContext> = {
 }
 
 function mapAction({ prisma, gameId, activePeriodIx, playerId }) {
-  return async (action) =>
+  return (action) =>
     prisma.playerAction.create({
       data: {
         type: action.type,
@@ -107,6 +114,7 @@ const initPlayersResults = async (
           activePeriodIx: nextPeriodIx,
           playerId: player.id,
         })
+        // TODO(Jakob): replace promise.all with prisma transaction
         const mapped = await Promise.all(actions.map(mapper))
         extras = [...extras, ...mapped]
       }
@@ -450,15 +458,16 @@ export function prepareGameStateMachine<
                 on: {
                   onNext: {
                     target: 'RUNNING',
-                    actions: assign(({ context }) => ({
+                    actions: assign(({ context, event }) => ({
                       game: {
                         ...context.game,
                         activeSegmentIx: context.game.activeSegmentIx + 1,
                       },
-                      // user: transitionFn(
-                      //   'PERIOD_ACTIVE_PREPARATION_TO_RUNNING',
-                      //   context
-                      // ),
+                      user: transitionFn(
+                        'PERIOD_ACTIVE_PREPARATION_TO_RUNNING',
+                        context,
+                        event.game
+                      ),
                     })),
                   },
                 },

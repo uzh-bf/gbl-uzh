@@ -282,6 +282,7 @@ export async function activateNextPeriod(
 
   // get the current game and as well as the results of the initially active period
   // these will be used by the model to compute the starting situation of the next period
+  // TODO(Jakob): Why not using getGame?
   const game = await ctx.prisma.game.findUnique({
     where: {
       id: gameId,
