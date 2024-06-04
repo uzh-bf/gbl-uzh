@@ -7,7 +7,6 @@ import {
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { PrismaClient } from '@prisma/client'
 import * as R from 'ramda'
-import { P, match } from 'ts-pattern'
 
 export enum ActionTypes {
   SEGMENT_INITIALIZE = 'SEGMENT_INITIALIZE',
@@ -26,59 +25,61 @@ type Actions = Action<
 >
 
 export function apply(state: any, action: Actions) {
-  const newState = match(action)
-    .with(
-      { type: ActionTypes.SEGMENT_INITIALIZE, payload: P.select() },
-      ({ periodFacts, segmentIx }) => {
-        // rollsPerSegment can be configured on a period level
-        // this will allow, e.g., to use quarters (3x) in the first period and years (12x) thereafter
-        const diceRolls = R.range(0, periodFacts.rollsPerSegment).map(
-          (rollIx) => {
-            const bondsAndStocks = diceRoll([
-              periodFacts.scenario.seed,
-              segmentIx,
-              rollIx,
-              0,
-            ])
-            return {
-              bonds:
-                diceRoll([periodFacts.scenario.seed, segmentIx, rollIx, 1]) +
-                bondsAndStocks,
-              stocks:
-                diceRoll([periodFacts.scenario.seed, segmentIx, rollIx, 2]) +
-                bondsAndStocks,
-            }
-          }
-        )
+  let newState = {
+    type: action.type,
+    result: {},
+    events: [],
+    notifiaction: [],
+    isDirty: false,
+  }
 
-        const returns = diceRolls.map((rolls) => ({
-          bank: action.payload.periodFacts.scenario.bankReturn,
+  switch (action.type) {
+    case ActionTypes.SEGMENT_INITIALIZE:
+      const payload = action.payload
+      const periodFacts = payload.periodFacts
+      const segmentIx = payload.segmentIx
+
+      const diceRolls = R.range(0, periodFacts.rollsPerSegment).map(
+        (rollIx: number) => {
+          const seed = periodFacts.scenario.seed
+          const bondsAndStocks = diceRoll([seed, segmentIx, rollIx, 0])
+          return {
+            bonds: diceRoll([seed, segmentIx, rollIx, 1]) + bondsAndStocks,
+            stocks: diceRoll([seed, segmentIx, rollIx, 2]) + bondsAndStocks,
+          }
+        }
+      )
+
+      const returns = diceRolls.map((rolls) => {
+        const scenario = action.payload.periodFacts.scenario
+        return {
+          bank: scenario.bankReturn,
           bonds: computeScenarioOutcome(
-            action.payload.periodFacts.scenario.trendBonds,
-            action.payload.periodFacts.scenario.gapBonds,
+            scenario.trendBonds,
+            scenario.gapBonds,
             rolls.bonds
           ),
           stocks: computeScenarioOutcome(
-            action.payload.periodFacts.scenario.trendStocks,
-            action.payload.periodFacts.scenario.gapStocks,
+            scenario.trendStocks,
+            scenario.gapStocks,
             rolls.stocks
           ),
-        }))
-
-        return {
-          type: action.type,
-          result: {
-            ...state,
-            diceRolls,
-            returns,
-          },
-          events: [],
-          notification: [],
-          isDirty: false,
         }
+      })
+
+      newState = {
+        ...newState,
+        result: {
+          ...state,
+          diceRolls,
+          returns,
+        },
       }
-    )
-    .exhaustive()
+      break
+
+    default:
+      break
+  }
 
   debugLog('SegmentReducer', state, action, newState)
 
