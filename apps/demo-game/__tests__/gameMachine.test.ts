@@ -16,6 +16,16 @@ describe('Testing Demo Game', () => {
     },
   }
 
+  // TODO(Jakob):
+  // - flag if it should create new game or find existing one
+  //   (implement helper for that)
+  // - flag for clearing the prisma db and do from scratch
+  // - what is the return of GameService.createGame and what is it used for?
+
+  // - Add state machine in the platform code and add it here
+  // - Use the functions in util and GameService and alter them iteratively
+  //   in order to use the state machine -> also check how to use the actor
+
   it('creates a new Game', () => {
     GameService.createGame({ name: nameGame, playerCount: playerCount }, ctx, {
       roleAssigner,
