@@ -4,15 +4,17 @@ import { nanoid } from 'nanoid'
 import { none, repeat } from 'ramda'
 import * as yup from 'yup'
 import log from '../lib/logger'
-import {
-  CtxWithFacts,
-  CtxWithFactsAndSchema,
-  CtxWithPrisma,
-  UserRole,
-} from '../types'
+import { CtxWithFacts, CtxWithFactsAndSchema, UserRole } from '../types'
 import * as EventService from './EventService'
 
-type Context = CtxWithPrisma<PrismaClient>
+export interface Context {
+  prisma: PrismaClient
+  user: {
+    sub: string
+    role: UserRole
+    gameId?: number
+  }
+}
 
 interface CreateGameArgs {
   name: string
