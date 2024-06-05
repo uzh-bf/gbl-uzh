@@ -29,29 +29,18 @@ type Actions =
     >
 
 export function apply(state: any, action: Actions) {
-  const output = {
+  let newState = {
     type: action.type,
     result: state,
     isDirty: true,
   }
 
-  let newState
   switch (action.type) {
-    // TODO(Jakob):
-    // Is it ok if we add here events and notifications as well?
-    // -> it would be more consistent
-    case ActionTypes.PERIOD_INITIALIZE:
-      newState = output
-      break
     case ActionTypes.PERIOD_CONSOLIDATE:
-      newState = {
-        ...output,
-        isDirty: false,
-        events: [],
-        notification: [],
-      }
+      newState.isDirty = false
       break
 
+    case ActionTypes.PERIOD_INITIALIZE:
     default:
       break
   }
