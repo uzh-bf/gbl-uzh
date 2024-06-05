@@ -884,7 +884,7 @@ export async function getGame(args, ctx: Context) {
 
   return ctx.prisma.game.findUnique({
     where: {
-      id: args.id,
+      id: gameId,
     },
     include: {
       players: {
