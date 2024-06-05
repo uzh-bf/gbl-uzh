@@ -1,5 +1,17 @@
-import { GameService, UserRole } from '@gbl-uzh/platform'
+import { GameService, Reducers, UserRole } from '@gbl-uzh/platform'
 import { PrismaClient } from '@prisma/client'
+import { PeriodFacts, PeriodFactsSchema } from '../src/graphql/types'
+import * as reds from '../src/reducers'
+
+// TODO(Jakob):
+// - Check where we get the facts from to addPeriod
+// - flag for clearing the prisma db and do from scratch -> only over cli?
+
+// - Why do we always provide all reducers for every function in GameServie?
+
+// - Add state machine in the platform code and add it here
+// - Use the functions in util and GameService and alter them iteratively
+//   in order to use the state machine -> also check how to use the actor
 
 describe('Testing Demo Game', () => {
   const nameGame = 'TestDemoGame'
@@ -10,6 +22,28 @@ describe('Testing Demo Game', () => {
   const userSub = '716f7632-ed33-4701-a281-0f27bd4f6e82'
   const roleAssigner = (ix: number): UserRole => UserRole.PLAYER
   const prisma = new PrismaClient()
+  const reducers: Reducers<PrismaClient> = {
+    Actions: {
+      apply: reds.Actions.apply,
+      ActionTypes: reds.Actions.ActionTypes,
+    },
+    Period: {
+      apply: reds.Period.apply,
+      ActionTypes: reds.Period.ActionTypes,
+    },
+    PeriodResult: {
+      apply: reds.PeriodResult.apply,
+      ActionTypes: reds.PeriodResult.ActionTypes,
+    },
+    Segment: {
+      apply: reds.Segment.apply,
+      ActionTypes: reds.Segment.ActionTypes,
+    },
+    SegmentResult: {
+      apply: reds.SegmentResult.apply,
+      ActionTypes: reds.SegmentResult.ActionTypes,
+    },
+  }
 
   let ctx: GameService.Context = {
     prisma: prisma,
@@ -58,14 +92,6 @@ describe('Testing Demo Game', () => {
     })
   }
 
-  // TODO(Jakob):
-  // - flag for clearing the prisma db and do from scratch
-  // - what is the return of GameService.createGame and what is it used for?
-
-  // - Add state machine in the platform code and add it here
-  // - Use the functions in util and GameService and alter them iteratively
-  //   in order to use the state machine -> also check how to use the actor
-
   it('creates a new Game', async () => {
     if (createNewGame) {
       game = await GameService.createGame(
@@ -77,6 +103,22 @@ describe('Testing Demo Game', () => {
     } else {
       game = await findGame(gameId)
     }
+
+    let facts = {
+      rollsPerSegment: 1,
+      scenario: {
+        bankReturn: 1,
+        seed: 1,
+        trendStocks: 1,
+        trendBonds: 1,
+        gapStocks: 1,
+        gapBonds: 1,
+      },
+    }
+    GameService.addGamePeriod<PeriodFacts>({ gameId, facts }, ctx, {
+      schema: PeriodFactsSchema,
+      reducers,
+    })
   })
 })
 

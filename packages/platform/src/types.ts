@@ -56,7 +56,7 @@ interface Reducer<
   ActionTypes: Record<string, string>
 }
 
-interface Reducers<PrismaType> {
+export interface Reducers<PrismaType> {
   Actions: Reducer<any, any, any, any, any, any, PrismaType>
   Period: Reducer<any, any, any, any, any, any, PrismaType>
   PeriodResult: Reducer<any, any, any, any, any, any, PrismaType>
