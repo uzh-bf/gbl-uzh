@@ -14,18 +14,32 @@ export enum ActionTypes {
   SEGMENT_RESULTS_END = 'SEGMENT_RESULTS_END',
 }
 
+type Assets = {
+  bank: number
+  bonds: number
+  stocks: number
+}
+type AssetsTotal = Assets & { totalAssets: number }
+
+type Decisions = {
+  bank: boolean
+  bonds: boolean
+  stocks: boolean
+}
+
+type AssetsReturn = {
+  bankReturn: number
+  bondsReturn: number
+  stocksReturn: number
+}
+type AssetsTotalReturn = AssetsReturn & { totalAssetsReturn: number }
+
 type State = {
-  assets: {
-    bank: number
-    bonds: number
-    stocks: number
-    totalAssets: number
-  }
-  decisions: {
-    bank: boolean
-    bonds: boolean
-    stocks: boolean
-  }
+  assets: AssetsTotal
+  decisions: Decisions
+  // TODO(JJ): It actually should be with AssetsTotalReturn
+  assetsWithReturns?: ({ ix: number } & AssetsTotal)[]
+  returns?: AssetsTotal
 }
 
 type Actions =
@@ -50,20 +64,13 @@ type Actions =
     >
 
 export function apply(state: State, action: Actions) {
-  const output = {
+  let newState = {
     type: action.type,
-    events: [],
-    notification: [],
     isDirty: true,
     result: state,
   }
-  let newState
-  switch (action.type) {
-    case ActionTypes.SEGMENT_RESULTS_INITIALIZE:
-    case ActionTypes.SEGMENT_RESULTS_START:
-      newState = output
-      break
 
+  switch (action.type) {
     case ActionTypes.SEGMENT_RESULTS_END:
       const segmentFacts = action.payload.segmentFacts
       const numInvestedBuckets = R.sum(
@@ -128,7 +135,7 @@ export function apply(state: State, action: Actions) {
       )
 
       newState = {
-        ...output,
+        ...newState,
         result: {
           ...state,
           assetsWithReturns,
@@ -151,6 +158,8 @@ export function apply(state: State, action: Actions) {
       }
       break
 
+    case ActionTypes.SEGMENT_RESULTS_INITIALIZE:
+    case ActionTypes.SEGMENT_RESULTS_START:
     default:
       break
   }
