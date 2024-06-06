@@ -28,8 +28,8 @@ export type Output<OutputType, NotificationType, EventType> = {
   type: OutputType
   extras?: any
   result: any
-  notifications: Notification<NotificationType>[]
-  events: Event<EventType>[]
+  notifications?: Notification<NotificationType>[]
+  events?: Event<EventType>[]
   actions?: any[]
   isDirty: boolean
 }
