@@ -1,4 +1,4 @@
-import { Action } from '@gbl-uzh/platform'
+import { Action, ResultState } from '@gbl-uzh/platform'
 import {
   computeScenarioOutcome,
   debugLog,
@@ -6,10 +6,17 @@ import {
 } from '@gbl-uzh/platform/dist/lib/util'
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { PrismaClient } from '@prisma/client'
+import { produce } from 'immer'
 import * as R from 'ramda'
+import { P, match } from 'ts-pattern'
 
 export enum ActionTypes {
   SEGMENT_INITIALIZE = 'SEGMENT_INITIALIZE',
+}
+
+type State = {
+  diceRolls?: { bonds: number; stocks: number }[]
+  returns?: { bank: number; bonds: number; stocks: number }[]
 }
 
 type Actions = Action<
@@ -24,64 +31,64 @@ type Actions = Action<
   PrismaClient
 >
 
-export function apply(state: any, action: Actions) {
-  let newState = {
+export function apply(
+  state: State,
+  action: Actions
+): ResultState<ActionTypes, State> {
+  const baseState: ResultState<ActionTypes, State> = {
     type: action.type,
-    result: {},
-    events: [],
-    notifiaction: [],
+    result: state,
     isDirty: false,
   }
 
-  switch (action.type) {
-    case ActionTypes.SEGMENT_INITIALIZE:
-      const payload = action.payload
-      const periodFacts = payload.periodFacts
-      const segmentIx = payload.segmentIx
+  const newState = produce(baseState, (draft) => {
+    match(action)
+      .with(
+        { type: ActionTypes.SEGMENT_INITIALIZE, payload: P.select() },
+        (payload) => {
+          const periodFacts = payload.periodFacts
+          const segmentIx = payload.segmentIx
 
-      const diceRolls = R.range(0, periodFacts.rollsPerSegment).map(
-        (rollIx: number) => {
-          const seed = periodFacts.scenario.seed
-          const bondsAndStocks = diceRoll([seed, segmentIx, rollIx, 0])
-          return {
-            bonds: diceRoll([seed, segmentIx, rollIx, 1]) + bondsAndStocks,
-            stocks: diceRoll([seed, segmentIx, rollIx, 2]) + bondsAndStocks,
-          }
+          const diceRolls = R.range(0, periodFacts.rollsPerSegment).map(
+            (rollIx: number) => {
+              const seed = periodFacts.scenario.seed
+              const bondsAndStocks = diceRoll([seed, segmentIx, rollIx, 0])
+              return {
+                bonds: diceRoll([seed, segmentIx, rollIx, 1]) + bondsAndStocks,
+                stocks: diceRoll([seed, segmentIx, rollIx, 2]) + bondsAndStocks,
+              }
+            }
+          )
+
+          const returns = diceRolls.map((rolls) => {
+            const scenario = action.payload.periodFacts.scenario
+            return {
+              bank: scenario.bankReturn,
+              bonds: computeScenarioOutcome(
+                scenario.trendBonds,
+                scenario.gapBonds,
+                rolls.bonds
+              ),
+              stocks: computeScenarioOutcome(
+                scenario.trendStocks,
+                scenario.gapStocks,
+                rolls.stocks
+              ),
+            }
+          })
+
+          draft.result.diceRolls = diceRolls
+          draft.result.returns = returns
         }
       )
+      .exhaustive()
+  })
 
-      const returns = diceRolls.map((rolls) => {
-        const scenario = action.payload.periodFacts.scenario
-        return {
-          bank: scenario.bankReturn,
-          bonds: computeScenarioOutcome(
-            scenario.trendBonds,
-            scenario.gapBonds,
-            rolls.bonds
-          ),
-          stocks: computeScenarioOutcome(
-            scenario.trendStocks,
-            scenario.gapStocks,
-            rolls.stocks
-          ),
-        }
-      })
+  const resultState = produce(newState, (draft) => {
+    draft.isDirty = baseState !== newState
+  })
 
-      newState = {
-        ...newState,
-        result: {
-          ...state,
-          diceRolls,
-          returns,
-        },
-      }
-      break
+  debugLog('SegmentReducer', state, action, newState, resultState)
 
-    default:
-      break
-  }
-
-  debugLog('SegmentReducer', state, action, newState)
-
-  return newState
+  return resultState
 }
