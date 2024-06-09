@@ -1,12 +1,16 @@
-import { Action } from '@gbl-uzh/platform'
+import { Action, ResultState } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { PrismaClient } from '@prisma/client'
+import { produce } from 'immer'
+import { P, match } from 'ts-pattern'
 
 export enum ActionTypes {
   PERIOD_INITIALIZE = 'PERIOD_INITIALIZE',
   PERIOD_CONSOLIDATE = 'PERIOD_CONSOLIDATE',
 }
+
+type State = {}
 
 type Actions =
   | Action<
@@ -28,24 +32,34 @@ type Actions =
       PrismaClient
     >
 
-export function apply(state: any, action: Actions) {
-  let newState = {
+export function apply(
+  state: State,
+  action: Actions
+): ResultState<ActionTypes, State> {
+  const baseState: ResultState<ActionTypes, State> = {
     type: action.type,
     result: state,
-    isDirty: true,
+    isDirty: false,
   }
 
-  switch (action.type) {
-    case ActionTypes.PERIOD_CONSOLIDATE:
-      newState.isDirty = false
-      break
+  const newState = produce(baseState, (draft) => {
+    match(action)
+      .with(
+        { type: ActionTypes.PERIOD_CONSOLIDATE, payload: P.select() },
+        (payload) => {}
+      )
+      .with(
+        { type: ActionTypes.PERIOD_INITIALIZE, payload: P.select() },
+        (payload) => {}
+      )
+      .exhaustive()
+  })
 
-    case ActionTypes.PERIOD_INITIALIZE:
-    default:
-      break
-  }
+  const resultState = produce(newState, (draft) => {
+    draft.isDirty = baseState !== newState
+  })
 
-  debugLog('PeriodReducer', state, action, newState)
+  debugLog('PeriodReducer', state, action, newState, resultState)
 
-  return newState
+  return resultState
 }

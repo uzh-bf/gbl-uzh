@@ -24,6 +24,14 @@ export type Event<EventType> = {
   facts?: any
 }
 
+export type ResultState<ActionTypes, StateType> = {
+  type: ActionTypes
+  result: StateType
+  isDirty: boolean
+  events?: any[]
+  notifications?: any[]
+}
+
 export type Output<OutputType, NotificationType, EventType> = {
   type: OutputType
   extras?: any

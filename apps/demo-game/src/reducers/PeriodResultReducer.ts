@@ -1,7 +1,8 @@
-import { Action } from '@gbl-uzh/platform'
+import { Action, ResultState } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PrismaClient } from '@prisma/client'
-import { match } from 'ts-pattern'
+import { produce } from 'immer'
+import { P, match } from 'ts-pattern'
 
 const INITIAL_CAPITAL = 10000
 
@@ -11,55 +12,69 @@ export enum ActionTypes {
   PERIOD_RESULTS_END = 'PERIOD_RESULTS_END',
 }
 
-type Actions =
-  | Action<ActionTypes.PERIOD_RESULTS_INITIALIZE, any, PrismaClient>
-  | Action<ActionTypes.PERIOD_RESULTS_START, any, PrismaClient>
-  | Action<ActionTypes.PERIOD_RESULTS_END, any, PrismaClient>
+type State = {
+  decisions: {
+    bank: boolean
+    bonds: boolean
+    stocks: boolean
+  }
+  assets: {
+    bank: number
+    bonds: number
+    stocks: number
+    totalAssets: number
+  }
+}
 
-export function apply(state: any, action: Actions) {
-  const newState = match(action)
-    .with({ type: ActionTypes.PERIOD_RESULTS_INITIALIZE }, () => {
-      return {
-        type: action.type,
-        result: {
-          decisions: {
+type Actions =
+  | Action<ActionTypes.PERIOD_RESULTS_INITIALIZE, void, PrismaClient>
+  | Action<ActionTypes.PERIOD_RESULTS_START, void, PrismaClient>
+  | Action<ActionTypes.PERIOD_RESULTS_END, void, PrismaClient>
+
+export function apply(
+  state: State,
+  action: Actions
+): ResultState<ActionTypes, State> {
+  const baseState: ResultState<ActionTypes, State> = {
+    type: action.type,
+    result: state,
+    isDirty: false,
+  }
+
+  const newState = produce(baseState, (draft) => {
+    match(action)
+      .with(
+        { type: ActionTypes.PERIOD_RESULTS_INITIALIZE, payload: P.select() },
+        (payload) => {
+          draft.result.decisions = {
             bank: true,
             bonds: false,
             stocks: false,
-          },
-          assets: {
+          }
+          draft.result.assets = {
             bank: INITIAL_CAPITAL,
             bonds: 0,
             stocks: 0,
             totalAssets: INITIAL_CAPITAL,
-          },
-        },
-        events: [],
-        notification: [],
-        isDirty: false,
-      }
-    })
-    .with({ type: ActionTypes.PERIOD_RESULTS_START }, () => {
-      return {
-        type: action.type,
-        result: state,
-        events: [],
-        notification: [],
-        isDirty: false,
-      }
-    })
-    .with({ type: ActionTypes.PERIOD_RESULTS_END }, () => {
-      return {
-        type: action.type,
-        result: state,
-        events: [],
-        notification: [],
-        isDirty: false,
-      }
-    })
-    .exhaustive()
+          }
+        }
+      )
+      .with(
+        { type: ActionTypes.PERIOD_RESULTS_START, payload: P.select() },
+        (payload) => {}
+      )
+      .with(
+        { type: ActionTypes.PERIOD_RESULTS_END, payload: P.select() },
+        (payload) => {}
+      )
+      .exhaustive()
+  })
 
-  debugLog('PeriodResultReducer', state, action, newState)
+  const resultState = produce(newState, (draft) => {
+    draft.isDirty = baseState !== newState
+  })
 
-  return newState
+  debugLog('PeriodResultReducer', state, action, newState, resultState)
+
+  return resultState
 }

@@ -1,8 +1,9 @@
-import { Action } from '@gbl-uzh/platform'
+import { Action, ResultState } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
+import { PeriodFacts, PeriodSegmentFacts } from '@graphql/types'
 import { PrismaClient } from '@prisma/client'
 import { produce } from 'immer'
-import { match } from 'ts-pattern'
+import { P, match } from 'ts-pattern'
 
 export enum ActionTypes {
   DECIDE_BANK = 'DECIDE_BANK',
@@ -10,7 +11,7 @@ export enum ActionTypes {
   DECIDE_STOCK = 'DECIDE_STOCK',
 }
 
-type State = {
+type InputState = {
   decisions: {
     bank: boolean
     bonds: boolean
@@ -18,11 +19,7 @@ type State = {
   }
 }
 
-type ResultState = {
-  type: ActionTypes
-  result: State
-  isDirty: boolean
-}
+type OutputState = InputState
 
 type Actions =
   | Action<
@@ -31,8 +28,8 @@ type Actions =
         playerArgs: {
           decision: boolean
         }
-        segmentFacts: {}
-        periodFacts: {}
+        segmentFacts: PeriodSegmentFacts
+        periodFacts: PeriodFacts
       },
       PrismaClient
     >
@@ -42,8 +39,8 @@ type Actions =
         playerArgs: {
           decision: boolean
         }
-        segmentFacts: {}
-        periodFacts: {}
+        segmentFacts: PeriodSegmentFacts
+        periodFacts: PeriodFacts
       },
       PrismaClient
     >
@@ -53,15 +50,18 @@ type Actions =
         playerArgs: {
           decision: boolean
         }
-        segmentFacts: {}
-        periodFacts: {}
+        segmentFacts: PeriodSegmentFacts
+        periodFacts: PeriodFacts
       },
       PrismaClient
     >
 
-export function apply(state: State, action: Actions): ResultState {
+export function apply(
+  state: InputState,
+  action: Actions
+): ResultState<ActionTypes, OutputState> {
   // TODO: move this to platform? -> reducer should not have to care about isDirty and other non-user-logicstuff
-  const baseState = {
+  const baseState: ResultState<ActionTypes, OutputState> = {
     type: action.type,
     result: state,
     isDirty: false,
@@ -70,18 +70,25 @@ export function apply(state: State, action: Actions): ResultState {
   // TODO: the user reducer could just get the "draft" inside this function as first parameter
   // TODO: and platform would do all code around it
   const newState = produce(baseState, (draft) => {
-    const { decision } = action.payload.playerArgs
-
     match(action)
-      .with({ type: ActionTypes.DECIDE_BANK }, () => {
-        draft.result.decisions.bank = decision
-      })
-      .with({ type: ActionTypes.DECIDE_BONDS }, () => {
-        draft.result.decisions.bonds = decision
-      })
-      .with({ type: ActionTypes.DECIDE_STOCK }, () => {
-        draft.result.decisions.stocks = decision
-      })
+      .with(
+        { type: ActionTypes.DECIDE_BANK, payload: P.select() },
+        (payload) => {
+          draft.result.decisions.bank = payload.playerArgs.decision
+        }
+      )
+      .with(
+        { type: ActionTypes.DECIDE_BONDS, payload: P.select() },
+        (payload) => {
+          draft.result.decisions.bonds = payload.playerArgs.decision
+        }
+      )
+      .with(
+        { type: ActionTypes.DECIDE_STOCK, payload: P.select() },
+        (payload) => {
+          draft.result.decisions.stocks = payload.playerArgs.decision
+        }
+      )
       .exhaustive()
   })
 
