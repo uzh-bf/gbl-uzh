@@ -1,2 +1,2 @@
 #!/bin/sh
-podman-compose up
+docker compose up
