@@ -19,6 +19,7 @@
     "graphql-sse": "2.2.3",
     "graphql-yoga": "4.0.4",
     "i18next": "22.5.0",
+    "immer": "10.1.1",
     "jsonwebtoken": "9.0.2",
     "next": "13.4.19",
     "next-auth": "4.23.1",
