@@ -21,6 +21,12 @@ type Assets = {
 }
 type AssetsTotal = Assets & { totalAssets: number }
 
+type Decisions = {
+  bank: boolean
+  bonds: boolean
+  stocks: boolean
+}
+
 type AssetsReturn = {
   bankReturn: number
   bondsReturn: number
@@ -30,8 +36,8 @@ type AssetsTotalReturn = AssetsReturn & { totalAssetsReturn: number }
 
 type State = {
   assets: AssetsTotal
-  decisions: Assets
-  // TODO(Jakob): It actually should be with AssetsTotalReturn
+  decisions: Decisions
+  // TODO(JJ): It actually should be with AssetsTotalReturn
   assetsWithReturns?: ({ ix: number } & AssetsTotal)[]
   returns?: AssetsTotal
 }
