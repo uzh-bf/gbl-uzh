@@ -8,6 +8,13 @@ export enum ActionTypes {
   DECIDE_STOCK = 'DECIDE_STOCK',
 }
 
+// TODO(Jakob):
+// - Ponder: Make input (state) and output (newState) always having consistent
+//   properties (with optional values) vs like it is now (each case could
+//   deliver a different output
+// - For the ActionReducer it is trivial and consistent
+//   (always the same properties as output)
+
 type Actions =
   | Action<
       ActionTypes.DECIDE_BANK,
