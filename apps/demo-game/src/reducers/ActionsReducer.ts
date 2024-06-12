@@ -15,40 +15,18 @@ export enum ActionTypes {
 // - For the ActionReducer it is trivial and consistent
 //   (always the same properties as output)
 
+interface PayloadType {
+  playerArgs: {
+    decision: boolean
+  }
+  segmentFacts: {}
+  periodFacts: {}
+}
+
 type Actions =
-  | Action<
-      ActionTypes.DECIDE_BANK,
-      {
-        playerArgs: {
-          decision: boolean
-        }
-        segmentFacts: {}
-        periodFacts: {}
-      },
-      PrismaClient
-    >
-  | Action<
-      ActionTypes.DECIDE_BONDS,
-      {
-        playerArgs: {
-          decision: boolean
-        }
-        segmentFacts: {}
-        periodFacts: {}
-      },
-      PrismaClient
-    >
-  | Action<
-      ActionTypes.DECIDE_STOCK,
-      {
-        playerArgs: {
-          decision: boolean
-        }
-        segmentFacts: {}
-        periodFacts: {}
-      },
-      PrismaClient
-    >
+  | Action<ActionTypes.DECIDE_BANK, PayloadType, PrismaClient>
+  | Action<ActionTypes.DECIDE_BONDS, PayloadType, PrismaClient>
+  | Action<ActionTypes.DECIDE_STOCK, PayloadType, PrismaClient>
 
 export function apply(state: any, action: Actions) {
   const newState = {
