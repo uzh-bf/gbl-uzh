@@ -15,7 +15,7 @@ export enum ActionTypes {
 // - For the ActionReducer it is trivial and consistent
 //   (always the same properties as output)
 
-interface PayloadType {
+type PayloadType = {
   playerArgs: {
     decision: boolean
   }
