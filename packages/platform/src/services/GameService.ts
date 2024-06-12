@@ -4,7 +4,12 @@ import { nanoid } from 'nanoid'
 import { none, repeat } from 'ramda'
 import * as yup from 'yup'
 import log from '../lib/logger'
-import { CtxWithFacts, CtxWithFactsAndSchema, CtxWithPrisma } from '../types'
+import {
+  CtxWithFacts,
+  CtxWithFactsAndSchema,
+  CtxWithPrisma,
+  UserRole,
+} from '../types'
 import * as EventService from './EventService'
 
 type Context = CtxWithPrisma<PrismaClient>
@@ -992,7 +997,12 @@ export function computePeriodStartResults(
         const { result: facts, actions } = reducers.PeriodResult.apply(result, {
           type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_START,
           payload: {
-            playerRole: result.player.role ?? result.player.connect.role,
+            // playerRole: result.player.role ?? result.player.connect.role,
+            // TODO(JJ):
+            // - The game doesn't go to the next period because playerRole = null
+            // - Double-check with RS: shouldn't the player role always be
+            // UserRole.PLAYER?
+            playerRole: UserRole.PLAYER,
             periodFacts,
           },
         })
@@ -1038,7 +1048,7 @@ export function computePeriodStartResults(
       {
         type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_INITIALIZE,
         payload: {
-          playerRole: player.role,
+          playerRole: player.role ?? UserRole.PLAYER,
           periodFacts,
         },
       }
