@@ -42,26 +42,16 @@ type State = {
   returns?: AssetsTotal
 }
 
+type PayloadType = {
+  periodFacts: PeriodFacts
+  segmentFacts: PeriodSegmentFacts
+  segmentIx: number
+}
+
 type Actions =
   | Action<ActionTypes.SEGMENT_RESULTS_INITIALIZE, {}, PrismaClient>
-  | Action<
-      ActionTypes.SEGMENT_RESULTS_START,
-      {
-        periodFacts: PeriodFacts
-        segmentFacts: PeriodSegmentFacts
-        segmentIx: number
-      },
-      PrismaClient
-    >
-  | Action<
-      ActionTypes.SEGMENT_RESULTS_END,
-      {
-        periodFacts: PeriodFacts
-        segmentFacts: PeriodSegmentFacts
-        segmentIx: number
-      },
-      PrismaClient
-    >
+  | Action<ActionTypes.SEGMENT_RESULTS_START, PayloadType, PrismaClient>
+  | Action<ActionTypes.SEGMENT_RESULTS_END, PayloadType, PrismaClient>
 
 export function apply(state: State, action: Actions) {
   let newState = {
