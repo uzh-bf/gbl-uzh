@@ -1257,7 +1257,7 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
   const results = game.activePeriod.results
     .filter((result) => result.type === DB.PlayerResultType.PERIOD_START)
     .reduce((acc, result, ix, allResults) => {
-      const { result: facts } = reducers.SegmentResult.apply(result.facts, {
+      let { result: facts } = reducers.SegmentResult.apply(result.facts, {
         type: reducers.SegmentResult.ActionTypes.SEGMENT_RESULTS_INITIALIZE,
         payload: {
           playerRole: result.player.role,
@@ -1267,6 +1267,11 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
           segmentIx: nextSegmentIx,
         },
       })
+
+      // TODO(JJ): Double-check with RS
+      if (facts.facts) {
+        facts = facts.facts
+      }
 
       const common = {
         facts,
