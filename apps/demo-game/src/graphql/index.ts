@@ -1,3 +1,4 @@
+import { UserRole } from '@gbl-uzh/platform'
 import {
   generateBaseMutations,
   generateBaseQueries,
@@ -11,13 +12,13 @@ import {
   PeriodSegmentFactsInput,
   PeriodSegmentFactsSchema,
 } from './types'
-
 export * from '@gbl-uzh/platform/dist/nexus'
 export * from './types'
 
 export const Query = generateBaseQueries()
 export const Mutation = generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
-  roleAssigner: (ix) => null,
+  // TODO(JJ): Double-check with RS
+  roleAssigner: (ix) => UserRole.PLAYER,
   reducers,
   schemas: {
     PeriodFactsSchema,
