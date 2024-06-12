@@ -25,11 +25,13 @@ interface GenerateBaseMutationsArgs {
   reducers?: any
   schemas?: any
   inputTypes?: any
+  // TODO(JJ): is returning void right here? It should return a UserRole, no?
   roleAssigner?: (ix: number) => void
 }
 
 export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
   reducers = defaultReducers,
+  // TODO(JJ): What Is Unset? Why string?
   roleAssigner = () => 'UNSET',
   schemas = defaultSchemas,
   inputTypes = defaultInputTypes,
