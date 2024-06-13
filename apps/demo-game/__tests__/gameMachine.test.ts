@@ -5,6 +5,7 @@ import * as reds from '../src/reducers'
 
 // TODO(Jakob):
 // - Check where we get the facts from to addPeriod
+// - Delete game after testing it? -> delete from DB
 // - flag for clearing the prisma db and do from scratch -> only over cli?
 
 // - Why do we always provide all reducers for every function in GameServie?
@@ -104,7 +105,7 @@ describe('Testing Demo Game', () => {
       game = await findGame(gameId)
     }
 
-    let facts = {
+    let periodFacts = {
       rollsPerSegment: 1,
       scenario: {
         bankReturn: 1,
@@ -115,10 +116,27 @@ describe('Testing Demo Game', () => {
         gapBonds: 1,
       },
     }
-    GameService.addGamePeriod<PeriodFacts>({ gameId, facts }, ctx, {
-      schema: PeriodFactsSchema,
-      reducers,
-    })
+
+    GameService.addGamePeriod<PeriodFacts>(
+      { gameId, facts: periodFacts },
+      ctx,
+      {
+        schema: PeriodFactsSchema,
+        reducers,
+      }
+    )
+
+    // let segmentPeriodFacts = {
+    //   returns: []
+    //   { bank: number; bonds: number; stocks: number }[]
+    //   diceRolls: { bonds: number; stocks: number }[]
+    // }
+
+    // GameService.addPeriodSegment<PeriodSegmentFacts>(
+    //   {gameId, periodIx: 0, facts: {}}, ctx, {
+    //   schema: PeriodSegmentFactsSchema,
+    //   reducers,
+    // })
   })
 })
 
