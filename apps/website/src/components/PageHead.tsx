@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
-import LogoImage from '../../public/images/GBLUZH.png'
+import LogoImage from '../../public/images/uzh_logo_d_pos.svg'
 
 const NAVIGATION_ITEMS = [
   { href: '/games', label: 'Games & Courses' },
@@ -103,7 +103,7 @@ Navigation.defaultProps = {
 
 function Logo() {
   return (
-    <Link href="/">
+    <Link href="/" className="flex items-center justify-center">
       <div className="relative h-20 w-56 ">
         <Image
           src={LogoImage}
@@ -112,6 +112,9 @@ function Logo() {
           priority
           className="object-contain p-2"
         />
+      </div>
+      <div className="flex h-16 flex-col justify-center border-l-[1px] border-neutral-900/10">
+        <h1 className="pl-2 text-xl">Game-Based Learning</h1>
       </div>
     </Link>
   )
