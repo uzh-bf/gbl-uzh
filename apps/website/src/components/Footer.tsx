@@ -6,7 +6,7 @@ import SwissUniLogo from '../../public/images/logo_swissuniversities.png'
 import UZHLogo from '../../public/images/logo_uzh.jpeg'
 function Footer() {
   return (
-    <footer className="border-top mt-8 border-t-2 border-uzh-red-100 bg-slate-100 text-sm text-gray-600 md:text-base">
+    <footer className="border-top mt-8 bg-slate-100 text-sm text-gray-600 md:text-base">
       <div className="m-auto flex max-w-6xl flex-initial flex-col justify-between px-4 py-8 md:flex-row md:px-8 md:py-16">
         <div className="order-1 mb-4 flex flex-row items-center gap-2 self-center md:order-2 md:mb-0 md:gap-4">
           <a href="https://www.uzh.ch" target="_blank" rel="noreferrer">

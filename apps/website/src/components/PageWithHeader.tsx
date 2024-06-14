@@ -22,9 +22,7 @@ function PageWithHeader({ className, title, children, withFooter }: Props) {
       </Head>
       <div className="w-full flex-1">
         <PageHead />
-        <div className="h-full border-uzh-red-100 md:border-t-2">
-          {children}
-        </div>
+        <div className="h-full">{children}</div>
         {/* <div className="h-full">{children}</div> */}
       </div>
       {withFooter && <Footer />}
