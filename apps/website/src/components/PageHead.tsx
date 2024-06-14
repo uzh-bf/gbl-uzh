@@ -28,9 +28,10 @@ function NavigationItem({ isActive, children, href }: NavigationItemProps) {
   return (
     <Link
       href={href}
+      style={{ transition: 'border-bottom 200ms ease-in-out' }}
       className={twMerge(
-        'mb-1 ml-3 mr-3 flex-1 border-b-2 p-1 text-left text-sm text-gray-500 last:mb-0 hover:cursor-pointer hover:border-uzh-blue-40 hover:text-uzh-blue-80 md:mb-0 md:ml-0 md:mr-2 md:flex-initial md:border-b-0 md:border-t-4 md:p-2 md:last:mr-0',
-        isActive && 'border-uzh-red-100 text-gray-800'
+        'mb-1 ml-3 mr-3 flex-1 border-b-2 border-transparent text-left text-sm font-semibold last:mb-0 hover:cursor-pointer hover:border-black md:mb-0 md:ml-0 md:mr-4 md:flex-initial md:border-b-4 md:pb-4 md:last:mr-0',
+        isActive && 'border-primary'
       )}
     >
       {children as any}
@@ -110,11 +111,11 @@ function Logo() {
           alt="Logo"
           fill
           priority
-          className="object-contain p-2"
+          className="object-contain pr-4"
         />
       </div>
       <div className="flex h-16 flex-col justify-center border-l-[1px] border-neutral-900/10">
-        <h1 className="pl-2 text-xl">Game-Based Learning</h1>
+        <h1 className="pl-4 text-xl">Game-Based Learning</h1>
       </div>
     </Link>
   )
@@ -124,7 +125,7 @@ function PageHead() {
   const [isOpen, setOpen] = useState(false)
 
   return (
-    <header className="m-auto flex max-w-6xl flex-col justify-between pt-1 md:flex-row md:items-end">
+    <header className="m-auto flex max-w-6xl flex-col justify-between pt-4 ">
       <div className="flex flex-row items-end justify-between md:items-stretch">
         <div className="flex-initial">
           <Logo />
