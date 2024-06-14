@@ -2,10 +2,10 @@ import { H1, H2, Prose } from '@uzh-bf/design-system'
 import { useEffect } from 'react'
 import TreeIcon from '../../public/images/baum_icon.svg'
 import ToolboxIcon from '../../public/images/innovation_icon.svg'
+import JakobImage from '../../public/images/jakob_jakob.jpg'
 import NetworkIcon from '../../public/images/netzwerk_icon.svg'
 import ProcessIcon from '../../public/images/prozess_icon.svg'
 import RolandImage from '../../public/images/schlaefli_roland.jpg'
-import JakobImage from '../../public/images/jakob_jakob.jpg'
 import DavidImage from '../../public/images/schmocker_david.jpg'
 import UZHIcon from '../../public/images/uzh_icon.svg'
 import BenjaminImage from '../../public/images/wilding_benjamin.jpg'
@@ -141,6 +141,7 @@ function About() {
             role="Managing Director and Head of Teaching"
             link="https://www.df.uzh.ch/en/people/staff/management/benjamin-wilding.html"
             imgSrc={BenjaminImage}
+            tags={['Finance', 'Courses', 'Didactics']}
           />
 
           <Contact
@@ -149,6 +150,7 @@ function About() {
             role=""
             link="https://www.le.uzh.ch/en/about-us/Community/davidschmocker"
             imgSrc={DavidImage}
+            tags={['Didactics']}
           />
 
           <Contact
@@ -157,6 +159,7 @@ function About() {
             role="Program and Project Manager"
             link="https://www.df.uzh.ch/en/people/staff/teaching-center/anja-zgraggen.html"
             imgSrc={AnjaImage}
+            tags={['Finance', 'Courses']}
           />
 
           <Contact
@@ -165,6 +168,7 @@ function About() {
             role="IT Project Manager and Developer"
             link="https://www.df.uzh.ch/en/people/staff/teaching-center/roland-schlaefli.html"
             imgSrc={RolandImage}
+            tags={['IT', 'Artificial Intelligence', 'Games']}
           />
 
           <Contact
@@ -173,6 +177,7 @@ function About() {
             role="Computer Graphics and Game Software Engineer"
             link="https://www.df.uzh.ch/en/people/staff/teaching-center/jakob-jakob.html"
             imgSrc={JakobImage}
+            tags={['Computer Graphics', 'Games', 'Animations']}
           />
         </div>
 
