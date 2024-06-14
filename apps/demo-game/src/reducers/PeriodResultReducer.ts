@@ -2,7 +2,7 @@ import { Action, ResultState } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PrismaClient } from '@prisma/client'
 import { produce } from 'immer'
-import { P, match } from 'ts-pattern'
+import { match } from 'ts-pattern'
 
 const INITIAL_CAPITAL = 10000
 
@@ -43,30 +43,21 @@ export function apply(
 
   const newState = produce(baseState, (draft) => {
     match(action)
-      .with(
-        { type: ActionTypes.PERIOD_RESULTS_INITIALIZE, payload: P.select() },
-        (payload) => {
-          draft.result.decisions = {
-            bank: true,
-            bonds: false,
-            stocks: false,
-          }
-          draft.result.assets = {
-            bank: INITIAL_CAPITAL,
-            bonds: 0,
-            stocks: 0,
-            totalAssets: INITIAL_CAPITAL,
-          }
+      .with({ type: ActionTypes.PERIOD_RESULTS_INITIALIZE }, () => {
+        draft.result.decisions = {
+          bank: true,
+          bonds: false,
+          stocks: false,
         }
-      )
-      .with(
-        { type: ActionTypes.PERIOD_RESULTS_START, payload: P.select() },
-        (payload) => {}
-      )
-      .with(
-        { type: ActionTypes.PERIOD_RESULTS_END, payload: P.select() },
-        (payload) => {}
-      )
+        draft.result.assets = {
+          bank: INITIAL_CAPITAL,
+          bonds: 0,
+          stocks: 0,
+          totalAssets: INITIAL_CAPITAL,
+        }
+      })
+      .with({ type: ActionTypes.PERIOD_RESULTS_START }, () => {})
+      .with({ type: ActionTypes.PERIOD_RESULTS_END }, () => {})
       .exhaustive()
   })
 
