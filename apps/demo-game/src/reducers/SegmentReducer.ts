@@ -61,7 +61,7 @@ export function apply(
           )
 
           const returns = diceRolls.map((rolls) => {
-            const scenario = action.payload.periodFacts.scenario
+            const scenario = payload.periodFacts.scenario
             return {
               bank: scenario.bankReturn,
               bonds: computeScenarioOutcome(
