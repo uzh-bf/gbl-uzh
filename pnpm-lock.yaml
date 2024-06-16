@@ -115,6 +115,9 @@ importers:
       ts-pattern:
         specifier: 5.0.5
         version: 5.0.5
+      xstate:
+        specifier: ^5.13.1
+        version: 5.13.1
       yup:
         specifier: 1.2.0
         version: 1.2.0
@@ -146,9 +149,15 @@ importers:
       '@tsconfig/recommended':
         specifier: 1.0.2
         version: 1.0.2
+      '@types/jest':
+        specifier: ^29.5.4
+        version: 29.5.4
       '@types/node':
         specifier: ^18.11.9
         version: 18.17.14
+      '@types/ramda':
+        specifier: ^0.28.25
+        version: 0.28.25
       '@types/react':
         specifier: ^18.0.25
         version: 18.2.21
@@ -16807,6 +16816,10 @@ packages:
 
   /xml-name-validator@3.0.0:
     resolution: {integrity: sha512-A5CUptxDsvxKJEU3yO6DuWBSJz/qizqzJKOMIfUJHETbBw/sFaDxgd6fxm1ewUaM0jZ444Fc5vC5ROYurg/4Pw==}
+    dev: false
+
+  /xstate@5.13.1:
+    resolution: {integrity: sha512-saBUxsTb29Vq8bjq1TjLdGCYs2pneGMzQ7pqQyXh1nqZaSnKHkCkxf3EV+EDYbLnQioxK9HNMYPQrz4whj3RJQ==}
     dev: false
 
   /xtend@4.0.2:
