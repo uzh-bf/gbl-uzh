@@ -141,7 +141,7 @@ function About() {
             role="Managing Director and Head of Teaching"
             link="https://www.df.uzh.ch/en/people/staff/management/benjamin-wilding.html"
             imgSrc={BenjaminImage}
-            tags={['Finance', 'Courses', 'Didactics']}
+            tags={['Finance', 'Modelling', 'Didactics']}
           />
 
           <Contact
@@ -150,7 +150,7 @@ function About() {
             role=""
             link="https://www.le.uzh.ch/en/about-us/Community/davidschmocker"
             imgSrc={DavidImage}
-            tags={['Didactics']}
+            tags={['Didactics', 'Psychology', 'Ethics']}
           />
 
           <Contact
@@ -159,7 +159,7 @@ function About() {
             role="Program and Project Manager"
             link="https://www.df.uzh.ch/en/people/staff/teaching-center/anja-zgraggen.html"
             imgSrc={AnjaImage}
-            tags={['Finance', 'Courses']}
+            tags={['Finance', 'Didactics', 'Curriculum Design']}
           />
 
           <Contact
@@ -168,7 +168,7 @@ function About() {
             role="IT Project Manager and Developer"
             link="https://www.df.uzh.ch/en/people/staff/teaching-center/roland-schlaefli.html"
             imgSrc={RolandImage}
-            tags={['IT', 'Artificial Intelligence', 'Games']}
+            tags={['Software Engineering', 'AI', 'Modelling']}
           />
 
           <Contact
@@ -177,7 +177,7 @@ function About() {
             role="Computer Graphics and Game Software Engineer"
             link="https://www.df.uzh.ch/en/people/staff/teaching-center/jakob-jakob.html"
             imgSrc={JakobImage}
-            tags={['Computer Graphics', 'Games', 'Animations']}
+            tags={['Software Engineering', 'Computer Graphics', 'Animations']}
           />
         </div>
 
