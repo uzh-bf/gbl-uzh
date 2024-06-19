@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
-import LogoImage from '../../public/images/GBLUZH.png'
+import LogoImage from '../../public/images/uzh_logo_d_pos.svg'
 
 const NAVIGATION_ITEMS = [
   { href: '/games', label: 'Games & Courses' },
@@ -28,9 +28,10 @@ function NavigationItem({ isActive, children, href }: NavigationItemProps) {
   return (
     <Link
       href={href}
+      style={{ transition: 'border-bottom 200ms ease-in-out' }}
       className={twMerge(
-        'mb-1 ml-3 mr-3 flex-1 border-b-2 p-1 text-left text-sm text-gray-500 last:mb-0 hover:cursor-pointer hover:border-uzh-blue-40 hover:text-uzh-blue-80 md:mb-0 md:ml-0 md:mr-2 md:flex-initial md:border-b-0 md:border-t-4 md:p-2 md:last:mr-0',
-        isActive && 'border-uzh-red-100 text-gray-800'
+        'flex-1 border-l-4 border-transparent px-4 py-2 text-left text-sm font-semibold hover:cursor-pointer hover:border-black md:mx-4 md:flex-initial md:border-b-4 md:border-l-0 md:px-0 md:py-5',
+        isActive && 'border-primary'
       )}
     >
       {children as any}
@@ -103,15 +104,23 @@ Navigation.defaultProps = {
 
 function Logo() {
   return (
-    <Link href="/">
-      <div className="relative h-20 w-56 ">
+    <Link
+      href="/"
+      className="flex flex-col items-center justify-center md:flex-row"
+    >
+      <div className="relative h-20 w-56">
         <Image
           src={LogoImage}
           alt="Logo"
           fill
           priority
-          className="object-contain p-2"
+          className="object-contain pl-4"
         />
+      </div>
+      <div className="flex h-16 flex-col justify-center md:ml-6 md:border-l-[1px] md:border-neutral-900/10">
+        <h1 className="text-lg font-semibold hover:text-neutral-500 md:pl-8">
+          Game-Based Learning
+        </h1>
       </div>
     </Link>
   )
@@ -121,8 +130,8 @@ function PageHead() {
   const [isOpen, setOpen] = useState(false)
 
   return (
-    <header className="m-auto flex max-w-6xl flex-col justify-between pt-1 md:flex-row md:items-end">
-      <div className="flex flex-row items-end justify-between md:items-stretch">
+    <header className="m-auto flex max-w-6xl flex-col justify-between pt-4">
+      <div className="flex flex-row justify-between md:items-stretch">
         <div className="flex-initial">
           <Logo />
         </div>
