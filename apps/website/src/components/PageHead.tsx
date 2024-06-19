@@ -104,18 +104,21 @@ Navigation.defaultProps = {
 
 function Logo() {
   return (
-    <Link href="/" className="flex items-center justify-center">
-      <div className="relative h-20 w-56 ">
+    <Link
+      href="/"
+      className="flex flex-col items-center justify-center md:flex-row"
+    >
+      <div className="relative h-20 w-56">
         <Image
           src={LogoImage}
           alt="Logo"
           fill
           priority
-          className="object-contain"
+          className="object-contain pl-4"
         />
       </div>
-      <div className="ml-6 flex h-16 flex-col justify-center border-l-[1px] border-neutral-900/10">
-        <h1 className="pl-8 text-lg font-semibold hover:text-neutral-500">
+      <div className="flex h-16 flex-col justify-center md:ml-6 md:border-l-[1px] md:border-neutral-900/10">
+        <h1 className="text-lg font-semibold hover:text-neutral-500 md:pl-8">
           Game-Based Learning
         </h1>
       </div>
@@ -127,8 +130,8 @@ function PageHead() {
   const [isOpen, setOpen] = useState(false)
 
   return (
-    <header className="m-auto flex max-w-6xl flex-col justify-between pt-4 ">
-      <div className="flex flex-row items-end justify-between md:items-stretch">
+    <header className="m-auto flex max-w-6xl flex-col justify-between pt-4">
+      <div className="flex flex-row justify-between md:items-stretch">
         <div className="flex-initial">
           <Logo />
         </div>
