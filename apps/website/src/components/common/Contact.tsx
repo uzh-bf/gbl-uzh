@@ -1,4 +1,4 @@
-import { H3, Prose } from '@uzh-bf/design-system'
+import { H3, Prose, Tag } from '@uzh-bf/design-system'
 import Image from 'next/image'
 
 function Contact({ name, institution, role, link, imgSrc, tags }: any) {
@@ -30,9 +30,13 @@ function Contact({ name, institution, role, link, imgSrc, tags }: any) {
         <div className="flex w-full flex-col gap-1 md:flex-row">
           {tags.map((tag) => (
             <div className="flex items-center">
-              <span className="rounded-full border border-slate-200 p-2 text-[10px] text-slate-700">
-                {tag}
-              </span>
+              <Tag
+                key={tag}
+                label={tag}
+                className={{
+                  root: 'rounded-full border border-slate-200 bg-white p-2 text-[10px] text-slate-700',
+                }}
+              />
             </div>
           ))}
         </div>
