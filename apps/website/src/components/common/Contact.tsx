@@ -1,4 +1,4 @@
-import { H3,Prose } from '@uzh-bf/design-system'
+import { H3, Prose } from '@uzh-bf/design-system'
 import Image from 'next/image'
 
 function Contact({ name, institution, role, link, imgSrc, tags }: any) {
@@ -27,9 +27,11 @@ function Contact({ name, institution, role, link, imgSrc, tags }: any) {
             Profile
           </a>
         </div>
-        <div className="flex flex-col justify-end">
+        <div className="flex gap-x-1">
           {tags.map((tag) => (
-            <div className="text-xs text-slate-700">{tag}</div>
+            <div className="flex items-center justify-center rounded-full border-[1px] p-2 text-center text-xs text-slate-700">
+              {tag}
+            </div>
           ))}
         </div>
       </div>
