@@ -30,7 +30,7 @@ function Contact({ name, institution, role, link, imgSrc, tags }: any) {
         <div className="flex w-full flex-col gap-1 md:flex-row">
           {tags.map((tag) => (
             <div className="flex items-center">
-              <span className="rounded-full border-[1px] p-2 text-[10px] text-slate-700">
+              <span className="rounded-full border border-slate-200 p-2 text-[10px] text-slate-700">
                 {tag}
               </span>
             </div>

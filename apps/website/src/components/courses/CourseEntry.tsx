@@ -36,12 +36,38 @@ function CourseEntry({
           <MDXRemote {...description} />
         </Prose>
         <div className="mt-2 flex flex-row gap-1">
-          {institution && <Tag label={institution} />}
-          {semester && <Tag label={`${semester} Semester`} />}
-          {level && <Tag label={level} />}{' '}
+          {institution && (
+            <Tag
+              className={{
+                root: 'rounded-full border border-slate-200 bg-white',
+              }}
+              label={institution}
+            />
+          )}
+          {semester && (
+            <Tag
+              className={{
+                root: 'rounded-full border border-slate-200 bg-white',
+              }}
+              label={`${semester} Semester`}
+            />
+          )}
+          {level && (
+            <Tag
+              className={{
+                root: 'rounded-full border border-slate-200 bg-white',
+              }}
+              label={level}
+            />
+          )}{' '}
           {typeof ects !== 'undefined' && <Tag label={`${ects} ECTS`} />}
           {highlight && (
-            <Tag label="New" className={{ root: 'bg-orange-200' }} />
+            <Tag
+              label="New"
+              className={{
+                root: 'rounded-full border border-slate-200 bg-orange-200',
+              }}
+            />
           )}
         </div>
       </div>
