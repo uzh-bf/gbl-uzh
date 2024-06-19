@@ -86,7 +86,7 @@ export function apply(
     draft.isDirty = baseState !== newState
   })
 
-  debugLog('ActionsReducer', state, action, newState, resultState)
+  debugLog('ActionsReducer', state, action, resultState)
 
   return resultState
 }

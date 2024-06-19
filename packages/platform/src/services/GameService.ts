@@ -989,13 +989,16 @@ export function computePeriodStartResults(
       // ensure that we only work on PERIOD_END results of the preceding period
       .filter((result) => result.type === DB.PlayerResultType.PERIOD_END)
       .map((result, ix, allResults) => {
-        const { result: facts, actions } = reducers.PeriodResult.apply(result, {
-          type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_START,
-          payload: {
-            playerRole: result.player.role ?? result.player.connect.role,
-            periodFacts,
-          },
-        })
+        const { result: facts, actions } = reducers.PeriodResult.apply(
+          result.facts,
+          {
+            type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_START,
+            payload: {
+              playerRole: result.player.role ?? result.player.connect.role,
+              periodFacts,
+            },
+          }
+        )
 
         const mapper = mapAction({
           ctx,
@@ -1267,11 +1270,6 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
           segmentIx: nextSegmentIx,
         },
       })
-
-      // TODO(JJ): Double-check with RS
-      if (facts.facts) {
-        facts = facts.facts
-      }
 
       const common = {
         facts,

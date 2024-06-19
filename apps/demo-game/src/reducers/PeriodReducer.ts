@@ -59,7 +59,7 @@ export function apply(
     draft.isDirty = baseState !== newState
   })
 
-  debugLog('PeriodReducer', state, action, newState, resultState)
+  debugLog('PeriodReducer', state, action, resultState)
 
   return resultState
 }

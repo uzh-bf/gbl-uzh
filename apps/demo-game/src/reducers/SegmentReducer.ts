@@ -88,7 +88,7 @@ export function apply(
     draft.isDirty = baseState !== newState
   })
 
-  debugLog('SegmentReducer', state, action, newState, resultState)
+  debugLog('SegmentReducer', state, action, resultState)
 
   return resultState
 }
