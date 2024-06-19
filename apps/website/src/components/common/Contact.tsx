@@ -27,10 +27,12 @@ function Contact({ name, institution, role, link, imgSrc, tags }: any) {
             Profile
           </a>
         </div>
-        <div className="flex gap-x-1">
+        <div className="flex w-full flex-col gap-1 md:flex-row">
           {tags.map((tag) => (
-            <div className="flex items-center justify-center rounded-full border-[1px] p-2 text-center text-xs text-slate-700">
-              {tag}
+            <div className="flex items-center">
+              <span className="rounded-full border-[1px] p-2 text-[10px] text-slate-700">
+                {tag}
+              </span>
             </div>
           ))}
         </div>
