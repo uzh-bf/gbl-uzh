@@ -30,7 +30,7 @@ function NavigationItem({ isActive, children, href }: NavigationItemProps) {
       href={href}
       style={{ transition: 'border-bottom 200ms ease-in-out' }}
       className={twMerge(
-        'mb-1 ml-3 mr-3 flex-1 border-b-2 border-transparent text-left text-sm font-semibold last:mb-0 hover:cursor-pointer hover:border-black md:mb-0 md:ml-0 md:mr-4 md:flex-initial md:border-b-4 md:pb-4 md:last:mr-0',
+        'flex-1 border-l-4 border-transparent px-4 py-2 text-left text-sm font-semibold hover:cursor-pointer hover:border-black md:mx-4 md:flex-initial md:border-b-4 md:border-l-0 md:px-0 md:py-5',
         isActive && 'border-primary'
       )}
     >
@@ -111,11 +111,13 @@ function Logo() {
           alt="Logo"
           fill
           priority
-          className="object-contain pr-4"
+          className="object-contain"
         />
       </div>
-      <div className="flex h-16 flex-col justify-center border-l-[1px] border-neutral-900/10">
-        <h1 className="pl-4 text-xl">Game-Based Learning</h1>
+      <div className="ml-6 flex h-16 flex-col justify-center border-l-[1px] border-neutral-900/10">
+        <h1 className="pl-8 text-lg font-semibold hover:text-neutral-500">
+          Game-Based Learning
+        </h1>
       </div>
     </Link>
   )
