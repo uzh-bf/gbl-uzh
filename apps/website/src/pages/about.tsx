@@ -63,7 +63,7 @@ function About() {
             imgSrc={UZHIcon}
             title="GBL in Use"
             description="Establish an overview of how game-based learning is being used at the
-                University of Zurich."
+                Universität Zürich."
             // roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-in-use"
           />
 
@@ -95,7 +95,7 @@ function About() {
             className="mt-4"
             imgSrc={TreeIcon}
             title="GBL Community"
-            description="Establish and foster a game-based learning community at the University of Zurich and connect with interested external parties."
+            description="Establish and foster a game-based learning community at the Universität Zürich and connect with interested external parties."
             // roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-community"
           />
         </div>
@@ -128,7 +128,7 @@ function About() {
             </li>
             <li>
               Develop an overview of Game-Based Learning in practice at the
-              University of Zurich.
+              Universität Zürich.
             </li>
           </ProjectPhase>
         </div>
@@ -137,7 +137,7 @@ function About() {
         <div className="mt-2 grid gap-4 md:grid-cols-2">
           <Contact
             name="Dr. Benjamin Wilding"
-            institution="Department of Finance, University of Zurich"
+            institution="Department of Finance, Universität Zürich"
             role="Managing Director and Head of Teaching"
             link="https://www.df.uzh.ch/en/people/staff/management/benjamin-wilding.html"
             imgSrc={BenjaminImage}
@@ -146,7 +146,7 @@ function About() {
 
           <Contact
             name="Dr. David Schmocker"
-            institution="Center for University Teaching and Learning, Digitalization and Innovation, University of Zurich"
+            institution="Center for University Teaching and Learning, Digitalization and Innovation, Universität Zürich"
             role=""
             link="https://www.le.uzh.ch/en/about-us/Community/davidschmocker"
             imgSrc={DavidImage}
@@ -155,7 +155,7 @@ function About() {
 
           <Contact
             name="Anja Zgraggen"
-            institution="Department of Finance, University of Zurich"
+            institution="Department of Finance, Universität Zürich"
             role="Program and Project Manager"
             link="https://www.df.uzh.ch/en/people/staff/teaching-center/anja-zgraggen.html"
             imgSrc={AnjaImage}
@@ -164,7 +164,7 @@ function About() {
 
           <Contact
             name="Roland Schläfli"
-            institution="Department of Finance, University of Zurich"
+            institution="Department of Finance, Universität Zürich"
             role="IT Project Manager and Developer"
             link="https://www.df.uzh.ch/en/people/staff/teaching-center/roland-schlaefli.html"
             imgSrc={RolandImage}
@@ -173,7 +173,7 @@ function About() {
 
           <Contact
             name="Jakob Jakob"
-            institution="Department of Finance, University of Zurich"
+            institution="Department of Finance, Universität Zürich"
             role="Computer Graphics and Game Software Engineer"
             link="https://www.df.uzh.ch/en/people/staff/teaching-center/jakob-jakob.html"
             imgSrc={JakobImage}
