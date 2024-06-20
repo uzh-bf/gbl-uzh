@@ -39,7 +39,7 @@ function CourseEntry({
           {institution && (
             <Tag
               className={{
-                root: 'rounded-full border border-slate-200 bg-white',
+                root: 'border border-slate-200 bg-white',
               }}
               label={institution}
             />
@@ -47,7 +47,7 @@ function CourseEntry({
           {semester && (
             <Tag
               className={{
-                root: 'rounded-full border border-slate-200 bg-white',
+                root: 'border border-slate-200 bg-white',
               }}
               label={`${semester} Semester`}
             />
@@ -55,18 +55,25 @@ function CourseEntry({
           {level && (
             <Tag
               className={{
-                root: 'rounded-full border border-slate-200 bg-white',
+                root: 'border border-slate-200 bg-white',
               }}
               label={level}
             />
           )}{' '}
-          {typeof ects !== 'undefined' && <Tag label={`${ects} ECTS`} />}
+          {typeof ects !== 'undefined' && (
+            <Tag
+              className={{
+                root: 'border border-slate-200 bg-white',
+              }}
+              label={`${ects} ECTS`}
+            />
+          )}
           {highlight && (
             <Tag
-              label="New"
               className={{
-                root: 'rounded-full border border-slate-200 bg-orange-200',
+                root: 'border border-slate-200 bg-orange-200',
               }}
+              label="New"
             />
           )}
         </div>

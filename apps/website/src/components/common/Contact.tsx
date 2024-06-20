@@ -27,17 +27,15 @@ function Contact({ name, institution, role, link, imgSrc, tags }: any) {
             Profile
           </a>
         </div>
-        <div className="flex w-full flex-col gap-1 md:flex-row">
+        <div className="flex flex-wrap gap-2">
           {tags.map((tag) => (
-            <div className="flex items-center">
-              <Tag
-                key={tag}
-                label={tag}
-                className={{
-                  root: 'rounded-full border border-slate-200 bg-white p-2 text-[10px] text-slate-700',
-                }}
-              />
-            </div>
+            <Tag
+              key={tag}
+              label={tag}
+              className={{
+                root: 'bg-white p-0 text-[10px] md:rounded md:border md:border-slate-200 md:px-2 md:py-1',
+              }}
+            />
           ))}
         </div>
       </div>

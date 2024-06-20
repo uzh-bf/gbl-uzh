@@ -54,7 +54,7 @@ function Card({
                 key={tag}
                 label={tag}
                 className={{
-                  root: 'rounded-full border border-slate-200 bg-white',
+                  root: 'border border-slate-200 bg-white',
                 }}
               />
             ))}
