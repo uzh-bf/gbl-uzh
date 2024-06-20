@@ -32,15 +32,31 @@ function GBLinUse({ sourceArr }: Props) {
             {sortBy(
               ({ frontmatter }: any) => frontmatter.title,
               sourceArr[0].filter((item: any) => !item.frontmatter.external)
-            ).map(({ frontmatter }) => (
-              <GameCard
-                key={frontmatter.title}
-                name={frontmatter.title}
-                tags={frontmatter.tags}
-                linkHref={`/games/${frontmatter.slug}`}
-                imgSrc={frontmatter.imgSrc}
-              />
-            ))}
+            ).map(({ frontmatter }) => {
+              const slug = frontmatter.slug as string
+              if (slug.startsWith('http') || slug.startsWith('wwww')) {
+                return (
+                  <a href={slug}>
+                    <GameCard
+                      key={frontmatter.title}
+                      name={frontmatter.title}
+                      tags={frontmatter.tags}
+                      linkHref={slug}
+                      imgSrc={frontmatter.imgSrc}
+                    />
+                  </a>
+                )
+              }
+              return (
+                <GameCard
+                  key={frontmatter.title}
+                  name={frontmatter.title}
+                  tags={frontmatter.tags}
+                  linkHref={`/games/${slug}`}
+                  imgSrc={frontmatter.imgSrc}
+                />
+              )
+            })}
             <a href="https://forms.office.com/e/UL1CWut5ya" target="_blank">
               <Button
                 fluid
@@ -66,19 +82,17 @@ function GBLinUse({ sourceArr }: Props) {
             {sortBy(
               ({ frontmatter }: any) => frontmatter.title,
               sourceArr[0].filter((item: any) => item.frontmatter.external)
-            ).map(({ frontmatter }) => {
-              return (
-                <a href={frontmatter.slug}>
-                  <GameCard
-                    key={frontmatter.title}
-                    name={frontmatter.title}
-                    tags={frontmatter.tags}
-                    linkHref={frontmatter.slug}
-                    imgSrc={frontmatter.imgSrc}
-                  />
-                </a>
-              )
-            })}
+            ).map(({ frontmatter }) => (
+              <a href={frontmatter.slug}>
+                <GameCard
+                  key={frontmatter.title}
+                  name={frontmatter.title}
+                  tags={frontmatter.tags}
+                  linkHref={frontmatter.slug}
+                  imgSrc={frontmatter.imgSrc}
+                />
+              </a>
+            ))}
             <a href="https://forms.office.com/e/UL1CWut5ya" target="_blank">
               <Button
                 fluid
