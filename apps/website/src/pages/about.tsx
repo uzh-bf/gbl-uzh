@@ -174,7 +174,7 @@ function About() {
           <Contact
             name="Jakob Jakob"
             institution="Department of Finance, Universität Zürich"
-            role="Computer Graphics and Game Software Engineer"
+            role="Graphics and Game Software Engineer"
             link="https://www.df.uzh.ch/en/people/staff/teaching-center/jakob-jakob.html"
             imgSrc={JakobImage}
             tags={['Software Engineering', 'Computer Graphics', 'Animations']}
