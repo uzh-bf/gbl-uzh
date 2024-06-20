@@ -53,7 +53,9 @@ function Card({
               <Tag
                 key={tag}
                 label={tag}
-                className={{ root: 'border border-slate-400 bg-slate-200' }}
+                className={{
+                  root: 'border border-slate-200 bg-white',
+                }}
               />
             ))}
           </div>

@@ -2,10 +2,10 @@ import { H1, H2, Prose } from '@uzh-bf/design-system'
 import { useEffect } from 'react'
 import TreeIcon from '../../public/images/baum_icon.svg'
 import ToolboxIcon from '../../public/images/innovation_icon.svg'
+import JakobImage from '../../public/images/jakob_jakob.jpg'
 import NetworkIcon from '../../public/images/netzwerk_icon.svg'
 import ProcessIcon from '../../public/images/prozess_icon.svg'
 import RolandImage from '../../public/images/schlaefli_roland.jpg'
-import JakobImage from '../../public/images/jakob_jakob.jpg'
 import DavidImage from '../../public/images/schmocker_david.jpg'
 import UZHIcon from '../../public/images/uzh_icon.svg'
 import BenjaminImage from '../../public/images/wilding_benjamin.jpg'
@@ -63,7 +63,7 @@ function About() {
             imgSrc={UZHIcon}
             title="GBL in Use"
             description="Establish an overview of how game-based learning is being used at the
-                University of Zurich."
+                Universität Zürich."
             // roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-in-use"
           />
 
@@ -95,7 +95,7 @@ function About() {
             className="mt-4"
             imgSrc={TreeIcon}
             title="GBL Community"
-            description="Establish and foster a game-based learning community at the University of Zurich and connect with interested external parties."
+            description="Establish and foster a game-based learning community at the Universität Zürich and connect with interested external parties."
             // roadmapHref="https://gbl-uzh.feedbear.com/boards/gbl-community"
           />
         </div>
@@ -128,7 +128,7 @@ function About() {
             </li>
             <li>
               Develop an overview of Game-Based Learning in practice at the
-              University of Zurich.
+              Universität Zürich.
             </li>
           </ProjectPhase>
         </div>
@@ -137,42 +137,47 @@ function About() {
         <div className="mt-2 grid gap-4 md:grid-cols-2">
           <Contact
             name="Dr. Benjamin Wilding"
-            institution="Department of Finance, University of Zurich"
+            institution="Department of Finance, Universität Zürich"
             role="Managing Director and Head of Teaching"
             link="https://www.df.uzh.ch/en/people/staff/management/benjamin-wilding.html"
             imgSrc={BenjaminImage}
+            tags={['Finance', 'Modelling', 'Didactics']}
           />
 
           <Contact
             name="Dr. David Schmocker"
-            institution="Center for University Teaching and Learning, Digitalization and Innovation, University of Zurich"
+            institution="Center for University Teaching and Learning, Digitalization and Innovation, Universität Zürich"
             role=""
             link="https://www.le.uzh.ch/en/about-us/Community/davidschmocker"
             imgSrc={DavidImage}
+            tags={['Didactics', 'Psychology', 'Ethics']}
           />
 
           <Contact
             name="Anja Zgraggen"
-            institution="Department of Finance, University of Zurich"
+            institution="Department of Finance, Universität Zürich"
             role="Program and Project Manager"
             link="https://www.df.uzh.ch/en/people/staff/teaching-center/anja-zgraggen.html"
             imgSrc={AnjaImage}
+            tags={['Finance', 'Didactics', 'Curriculum Design']}
           />
 
           <Contact
             name="Roland Schläfli"
-            institution="Department of Finance, University of Zurich"
+            institution="Department of Finance, Universität Zürich"
             role="IT Project Manager and Developer"
             link="https://www.df.uzh.ch/en/people/staff/teaching-center/roland-schlaefli.html"
             imgSrc={RolandImage}
+            tags={['Software Engineering', 'AI', 'Modelling']}
           />
 
           <Contact
             name="Jakob Jakob"
-            institution="Department of Finance, University of Zurich"
-            role="Computer Graphics and Game Software Engineer"
+            institution="Department of Finance, Universität Zürich"
+            role="Graphics and Game Software Engineer"
             link="https://www.df.uzh.ch/en/people/staff/teaching-center/jakob-jakob.html"
             imgSrc={JakobImage}
+            tags={['Software Engineering', 'Computer Graphics', 'Animations']}
           />
         </div>
 
