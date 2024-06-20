@@ -32,6 +32,38 @@ type Actions =
       PrismaClient
     >
 
+// NOTE(JJ): action type is not needed anymore as input,
+// because the user defines it
+export function initialize(
+  state: State,
+  payload: {
+    periodIx: number
+    periodFacts: PeriodFacts
+    previousPeriodFacts?: PeriodFacts
+    previousSegmentFacts?: PeriodSegmentFacts
+  }
+) {
+  return {
+    type: ActionTypes.PERIOD_INITIALIZE,
+    result: state,
+    isDirty: false,
+  }
+}
+
+export function consolidate(
+  state: State,
+  payload: {
+    periodIx: number
+    previousSegmentFacts?: PeriodSegmentFacts
+  }
+) {
+  return {
+    type: ActionTypes.PERIOD_CONSOLIDATE,
+    result: state,
+    isDirty: false,
+  }
+}
+
 export function apply(
   state: State,
   action: Actions

@@ -48,6 +48,26 @@ export type Action<ActionType, PayloadType, PrismaType> = {
   ctx?: CtxWithPrisma<PrismaType>
 }
 
+interface PeriodReducer<
+  StateType,
+  ActionType,
+  PayloadType,
+  OutputType,
+  NotificationType,
+  EventType,
+  PrismaType
+> {
+  initialize: (
+    state: StateType,
+    payload: PayloadType
+  ) => Output<OutputType, NotificationType, EventType>
+  consolidate: (
+    state: StateType,
+    payload: PayloadType
+  ) => Output<OutputType, NotificationType, EventType>
+  ActionTypes: Record<string, string>
+}
+
 interface Reducer<
   StateType,
   ActionType,
@@ -66,11 +86,11 @@ interface Reducer<
 
 interface Reducers<PrismaType> {
   Actions: Reducer<any, any, any, any, any, any, PrismaType>
-  Period: Reducer<any, any, any, any, any, any, PrismaType>
+  Period: PeriodReducer<any, any, any, any, any, any, PrismaType>
   PeriodResult: Reducer<any, any, any, any, any, any, PrismaType>
   Segment: Reducer<any, any, any, any, any, any, PrismaType>
   SegmentResult: Reducer<any, any, any, any, any, any, PrismaType>
-  [key: string]: Reducer<any, any, any, any, any, any, PrismaType>
+  // [key: string]: Reducer<any, any, any, any, any, any, PrismaType>
 }
 
 export interface CtxWithPrisma<PrismaType> extends NextPageContext {
