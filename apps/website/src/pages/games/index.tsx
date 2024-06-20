@@ -66,15 +66,19 @@ function GBLinUse({ sourceArr }: Props) {
             {sortBy(
               ({ frontmatter }: any) => frontmatter.title,
               sourceArr[0].filter((item: any) => item.frontmatter.external)
-            ).map(({ frontmatter }) => (
-              <GameCard
-                key={frontmatter.title}
-                name={frontmatter.title}
-                tags={frontmatter.tags}
-                linkHref={`/games/${frontmatter.slug}`}
-                imgSrc={frontmatter.imgSrc}
-              />
-            ))}
+            ).map(({ frontmatter }) => {
+              return (
+                <a href={frontmatter.slug}>
+                  <GameCard
+                    key={frontmatter.title}
+                    name={frontmatter.title}
+                    tags={frontmatter.tags}
+                    linkHref={frontmatter.slug}
+                    imgSrc={frontmatter.imgSrc}
+                  />
+                </a>
+              )
+            })}
             <a href="https://forms.office.com/e/UL1CWut5ya" target="_blank">
               <Button
                 fluid
