@@ -17,9 +17,9 @@ function Contact({ name, institution, role, link, imgSrc, tags }: any) {
         <div className="flex flex-col">
           <H3>{name}</H3>
           <Prose>{role}</Prose>
-          <Prose>{institution}</Prose>
+          <Prose className={{ root: 'text-xs' }}>{institution}</Prose>
           <a
-            className="text-uzh-red-100 hover:underline"
+            className="mt-2 text-uzh-red-100 hover:underline"
             target="_blank"
             href={link}
             rel="noreferrer"
@@ -27,7 +27,7 @@ function Contact({ name, institution, role, link, imgSrc, tags }: any) {
             Profile
           </a>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-x-2 gap-y-1">
           {tags.map((tag) => (
             <Tag
               key={tag}
