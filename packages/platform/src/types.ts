@@ -58,6 +58,30 @@ export type PayloadPeriodInitialisation<
   previousSegmentFacts?: PeriodSegmentFactsType
 }
 
+export type PayloadPeriodResultInitialisation<PeriodFactsType, PlayerRoleType> =
+  {
+    playerRole: PlayerRoleType
+    periodFacts: PeriodFactsType
+  }
+
+export type PayloadPeriodResultStart<PeriodFactsType, PlayerRoleType> =
+  PayloadPeriodResultInitialisation<PeriodFactsType, PlayerRoleType>
+
+export type PayloadPeriodResultEnd<
+  PeriodFactsType,
+  PeriodSegmentFactsType,
+  PlayerRoleType
+> = {
+  periodFacts: PeriodFactsType
+  segmentFacts: PeriodSegmentFactsType
+  playerRole: PlayerRoleType
+  playerLevel: number
+  playerExperience: number
+  consolidationDecisions: any
+  periodIx: number
+  segmentIx: number
+}
+
 export type PayloadPeriodConsolidation<PeriodSegmentFactsType> = {
   periodIx: number
   previousSegmentFacts?: PeriodSegmentFactsType
@@ -94,6 +118,35 @@ interface Period<
   consolidate: (
     state: StateType,
     payload: PayloadPeriodConsolidation<PeriodSegmentFactsType>
+  ) => Output<OutputType, NotificationType, EventType>
+  ActionTypes: Record<string, string>
+}
+
+interface PeriodResult<
+  StateType,
+  PeriodFactsType,
+  PeriodSegmentFactsType,
+  PlayerRoleType,
+  OutputType,
+  NotificationType,
+  EventType,
+  PrismaType
+> {
+  initialize: (
+    state: StateType,
+    payload: PayloadPeriodResultInitialisation<PeriodFactsType, PlayerRoleType>
+  ) => Output<OutputType, NotificationType, EventType>
+  start: (
+    state: StateType,
+    payload: PayloadPeriodResultStart<PeriodFactsType, PlayerRoleType>
+  ) => Output<OutputType, NotificationType, EventType>
+  end: (
+    state: StateType,
+    payload: PayloadPeriodResultEnd<
+      PeriodFactsType,
+      PeriodSegmentFactsType,
+      PlayerRoleType
+    >
   ) => Output<OutputType, NotificationType, EventType>
   ActionTypes: Record<string, string>
 }
@@ -136,7 +189,7 @@ interface Reducer<
 interface Reducers<PrismaType> {
   Actions: Reducer<any, any, any, any, any, any, PrismaType>
   Period: Period<any, any, any, any, any, any, PrismaType>
-  PeriodResult: Reducer<any, any, any, any, any, any, PrismaType>
+  PeriodResult: PeriodResult<any, any, any, any, any, any, any, PrismaType>
   Segment: Segment<any, any, any, any, any, any, PrismaType>
   SegmentResult: Reducer<any, any, any, any, any, any, PrismaType>
   // TODO(JJ): Check with RS if safe to remove

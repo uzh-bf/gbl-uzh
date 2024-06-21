@@ -987,14 +987,11 @@ export function computePeriodStartResults(
       // ensure that we only work on PERIOD_END results of the preceding period
       .filter((result) => result.type === DB.PlayerResultType.PERIOD_END)
       .map((result, ix, allResults) => {
-        const { result: facts, actions } = reducers.PeriodResult.apply(
+        const { result: facts, actions } = reducers.PeriodResult.start(
           result.facts,
           {
-            type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_START,
-            payload: {
-              playerRole: result.player.role ?? result.player.connect.role,
-              periodFacts,
-            },
+            playerRole: result.player.role ?? result.player.connect.role,
+            periodFacts,
           }
         )
 
@@ -1034,15 +1031,9 @@ export function computePeriodStartResults(
 
   // if the game has not started yet, generate initial PERIOD_START results
   const result = players.map((player, ix, allPlayers) => {
-    const { result: facts, actions } = reducers.PeriodResult.apply(
+    const { result: facts, actions } = reducers.PeriodResult.initialize(
       {},
-      {
-        type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_INITIALIZE,
-        payload: {
-          playerRole: player.role,
-          periodFacts,
-        },
-      }
+      { playerRole: player.role, periodFacts }
     )
 
     const mapper = mapAction({
@@ -1106,20 +1097,17 @@ export async function computePeriodEndResults(
         result: facts,
         actions,
         events,
-      } = reducers.PeriodResult.apply(result.facts, {
-        type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_END,
-        payload: {
-          periodFacts,
-          segmentFacts,
+      } = reducers.PeriodResult.end(result.facts, {
+        periodFacts,
+        segmentFacts,
 
-          playerRole: result.player.role,
-          playerLevel: result.player.levelIx + 1,
-          playerExperience: result.player.experience,
+        playerRole: result.player.role,
+        playerLevel: result.player.levelIx + 1,
+        playerExperience: result.player.experience,
 
-          consolidationDecisions,
-          periodIx: activePeriodIx,
-          segmentIx: activeSegmentIx,
-        },
+        consolidationDecisions,
+        periodIx: activePeriodIx,
+        segmentIx: activeSegmentIx,
       })
 
       log.debug(actions)
