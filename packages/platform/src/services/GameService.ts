@@ -89,6 +89,7 @@ export async function addGamePeriod<TFacts>(
 
   const index = game.periods[0]?.index + 1 || 0
 
+  // TODO(JJ): Why do we provide validatedFacts twice?
   const { result: initializedFacts } = reducers.Period.initialize(
     validatedFacts,
     {
@@ -98,17 +99,6 @@ export async function addGamePeriod<TFacts>(
       periodIx: index,
     }
   )
-
-  // TODO(JJ): Why do we provide validatedFacts twice?
-  // const { result: initializedFacts } = reducers.Period.apply(validatedFacts, {
-  //   type: reducers.Period.ActionTypes.PERIOD_INITIALIZE,
-  //   payload: {
-  //     periodFacts: validatedFacts,
-  //     previousPeriodFacts: game.periods[0]?.facts as any,
-  //     previousSegmentFacts: game.periods[0]?.segments[0]?.facts as any,
-  //     periodIx: index,
-  //   },
-  // })
 
   console.log(
     game.periods[0]?.facts,
@@ -429,16 +419,6 @@ export async function activateNextPeriod(
           periodIx: currentPeriodIx,
         }
       )
-      // const { result: consolidatedFacts } = reducers.Period.apply(
-      //   game.activePeriod.facts,
-      //   {
-      //     type: reducers.Period.ActionTypes.PERIOD_CONSOLIDATE,
-      //     payload: {
-      //       previousSegmentFacts: game.activePeriod.activeSegment.facts as any,
-      //       periodIx: currentPeriodIx,
-      //     },
-      //   }
-      // )
 
       const result = await ctx.prisma.$transaction([
         ctx.prisma.game.update({

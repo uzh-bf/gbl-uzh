@@ -48,22 +48,41 @@ export type Action<ActionType, PayloadType, PrismaType> = {
   ctx?: CtxWithPrisma<PrismaType>
 }
 
+export type PayloadPeriodInitialisation<
+  PeriodFactsType,
+  PeriodSegmentFactsType
+> = {
+  periodIx: number
+  periodFacts: PeriodFactsType
+  previousPeriodFacts?: PeriodFactsType
+  previousSegmentFacts?: PeriodSegmentFactsType
+}
+
+export type PayloadPeriodConsolidation<PeriodSegmentFactsType> = {
+  periodIx: number
+  previousSegmentFacts?: PeriodSegmentFactsType
+}
+
 interface PeriodReducer<
   StateType,
-  ActionType,
-  PayloadType,
+  PeriodFactsType,
+  PeriodSegmentFactsType,
   OutputType,
   NotificationType,
   EventType,
+  // TODO(JJ): Decide what to do with prisma -> goes into payload?
   PrismaType
 > {
   initialize: (
     state: StateType,
-    payload: PayloadType
+    payload: PayloadPeriodInitialisation<
+      PeriodFactsType,
+      PeriodSegmentFactsType
+    >
   ) => Output<OutputType, NotificationType, EventType>
   consolidate: (
     state: StateType,
-    payload: PayloadType
+    payload: PayloadPeriodConsolidation<PeriodSegmentFactsType>
   ) => Output<OutputType, NotificationType, EventType>
   ActionTypes: Record<string, string>
 }
@@ -90,6 +109,7 @@ interface Reducers<PrismaType> {
   PeriodResult: Reducer<any, any, any, any, any, any, PrismaType>
   Segment: Reducer<any, any, any, any, any, any, PrismaType>
   SegmentResult: Reducer<any, any, any, any, any, any, PrismaType>
+  // TODO(JJ): Check with RS if safe to remove
   // [key: string]: Reducer<any, any, any, any, any, any, PrismaType>
 }
 
