@@ -4,3 +4,6 @@
 [submodule "apps/escapp"]
 	path = apps/escapp
 	url = https://github.com/uzh-bf/escapp.git
+[submodule "apps/quartz"]
+	path = apps/quartz
+	url = https://github.com/uzh-bf/gbl-knowledge.git
