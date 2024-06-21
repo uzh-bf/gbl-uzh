@@ -63,7 +63,18 @@ export type PayloadPeriodConsolidation<PeriodSegmentFactsType> = {
   previousSegmentFacts?: PeriodSegmentFactsType
 }
 
-interface PeriodReducer<
+export type PayloadSegmentInitialisation<
+  PeriodFactsType,
+  PeriodSegmentFactsType
+> = {
+  segmentIx: number
+  segmentCount: number
+  periodIx: number
+  periodFacts: PeriodFactsType
+  previousSegmentFacts?: PeriodSegmentFactsType
+}
+
+interface Period<
   StateType,
   PeriodFactsType,
   PeriodSegmentFactsType,
@@ -87,6 +98,25 @@ interface PeriodReducer<
   ActionTypes: Record<string, string>
 }
 
+interface Segment<
+  StateType,
+  PeriodFactsType,
+  PeriodSegmentFactsType,
+  OutputType,
+  NotificationType,
+  EventType,
+  PrismaType
+> {
+  initialize: (
+    state: StateType,
+    payload: PayloadSegmentInitialisation<
+      PeriodFactsType,
+      PeriodSegmentFactsType
+    >
+  ) => Output<OutputType, NotificationType, EventType>
+  ActionTypes: Record<string, string>
+}
+
 interface Reducer<
   StateType,
   ActionType,
@@ -105,9 +135,9 @@ interface Reducer<
 
 interface Reducers<PrismaType> {
   Actions: Reducer<any, any, any, any, any, any, PrismaType>
-  Period: PeriodReducer<any, any, any, any, any, any, PrismaType>
+  Period: Period<any, any, any, any, any, any, PrismaType>
   PeriodResult: Reducer<any, any, any, any, any, any, PrismaType>
-  Segment: Reducer<any, any, any, any, any, any, PrismaType>
+  Segment: Segment<any, any, any, any, any, any, PrismaType>
   SegmentResult: Reducer<any, any, any, any, any, any, PrismaType>
   // TODO(JJ): Check with RS if safe to remove
   // [key: string]: Reducer<any, any, any, any, any, any, PrismaType>
