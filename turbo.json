@@ -1,21 +1,40 @@
 {
   "$schema": "https://turborepo.org/schema.json",
-  "pipeline": {
+  "tasks": {
     "format": {
       "cache": false
     },
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "public/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "public/**"
+      ]
     },
     "dev": {
       "cache": false,
-      "outputs": ["dist/**", ".next/**", "public/**"],
-      "dependsOn": ["@gbl-uzh/platform#build"]
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "public/**"
+      ],
+      "dependsOn": [
+        "@gbl-uzh/platform#build"
+      ]
     },
     "start": {
-      "dependsOn": ["^build", "build"],
-      "outputs": ["dist/**", ".next/**", "public/**"]
+      "dependsOn": [
+        "^build",
+        "build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "public/**"
+      ]
     }
   }
 }
