@@ -36,7 +36,7 @@ function GBLinUse({ sourceArr }: Props) {
               const slug = frontmatter.slug as string
               if (slug.startsWith('http') || slug.startsWith('wwww')) {
                 return (
-                  <a href={slug} target="_blank">
+                  <a href={slug} target="_blank" key={frontmatter.title}>
                     <GameCard
                       key={frontmatter.title}
                       name={frontmatter.title}
@@ -82,7 +82,11 @@ function GBLinUse({ sourceArr }: Props) {
               ({ frontmatter }: any) => frontmatter.title,
               sourceArr[0].filter((item: any) => item.frontmatter.external)
             ).map(({ frontmatter }) => (
-              <a href={frontmatter.slug} target="_blank">
+              <a
+                href={frontmatter.slug}
+                target="_blank"
+                key={frontmatter.title}
+              >
                 <GameCard
                   key={frontmatter.title}
                   name={frontmatter.title}
