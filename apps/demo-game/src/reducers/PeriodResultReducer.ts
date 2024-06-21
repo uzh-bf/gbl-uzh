@@ -1,7 +1,6 @@
 import {
+  PayloadPeriodResult,
   PayloadPeriodResultEnd,
-  PayloadPeriodResultInitialisation,
-  PayloadPeriodResultStart,
   ResultState,
 } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
@@ -38,7 +37,7 @@ export enum PlayerRole {
 
 export function initialize(
   state: State,
-  payload: PayloadPeriodResultInitialisation<PlayerRole, PeriodFacts>
+  payload: PayloadPeriodResult<PlayerRole, PeriodFacts>
 ) {
   const baseState: ResultState<ActionTypes, State> = {
     type: ActionTypes.PERIOD_RESULTS_INITIALIZE,
@@ -70,7 +69,7 @@ export function initialize(
 
 export function start(
   state: State,
-  payload: PayloadPeriodResultStart<PlayerRole, PeriodFacts>
+  payload: PayloadPeriodResult<PlayerRole, PeriodFacts>
 ) {
   const baseState: ResultState<ActionTypes, State> = {
     type: ActionTypes.PERIOD_RESULTS_START,

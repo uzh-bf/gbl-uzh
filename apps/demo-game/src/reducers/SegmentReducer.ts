@@ -1,4 +1,4 @@
-import { PayloadSegmentInitialisation } from '@gbl-uzh/platform'
+import { PayloadSegment } from '@gbl-uzh/platform'
 import {
   computeScenarioOutcome,
   debugLog,
@@ -20,7 +20,7 @@ type State = {
 // TODO(JJ): baseState to platform
 export function initialize(
   state: State,
-  payload: PayloadSegmentInitialisation<PeriodFacts, PeriodSegmentFacts>
+  payload: PayloadSegment<PeriodFacts, PeriodSegmentFacts>
 ) {
   const baseState = {
     type: ActionTypes.SEGMENT_INITIALIZE,

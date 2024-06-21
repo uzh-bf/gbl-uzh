@@ -58,14 +58,15 @@ export type PayloadPeriodInitialisation<
   previousSegmentFacts?: PeriodSegmentFactsType
 }
 
-export type PayloadPeriodResultInitialisation<PeriodFactsType, PlayerRoleType> =
-  {
-    playerRole: PlayerRoleType
-    periodFacts: PeriodFactsType
-  }
+export type PayloadPeriodConsolidation<PeriodSegmentFactsType> = {
+  periodIx: number
+  previousSegmentFacts?: PeriodSegmentFactsType
+}
 
-export type PayloadPeriodResultStart<PeriodFactsType, PlayerRoleType> =
-  PayloadPeriodResultInitialisation<PeriodFactsType, PlayerRoleType>
+export type PayloadPeriodResult<PeriodFactsType, PlayerRoleType> = {
+  playerRole: PlayerRoleType
+  periodFacts: PeriodFactsType
+}
 
 export type PayloadPeriodResultEnd<
   PeriodFactsType,
@@ -82,20 +83,25 @@ export type PayloadPeriodResultEnd<
   segmentIx: number
 }
 
-export type PayloadPeriodConsolidation<PeriodSegmentFactsType> = {
-  periodIx: number
-  previousSegmentFacts?: PeriodSegmentFactsType
-}
-
-export type PayloadSegmentInitialisation<
-  PeriodFactsType,
-  PeriodSegmentFactsType
-> = {
+export type PayloadSegment<PeriodFactsType, PeriodSegmentFactsType> = {
   segmentIx: number
   segmentCount: number
   periodIx: number
   periodFacts: PeriodFactsType
   previousSegmentFacts?: PeriodSegmentFactsType
+}
+
+export type PayloadSegmentResult<
+  PeriodFactsType,
+  PeriodSegmentFactsType,
+  PlayerRoleType
+> = {
+  playerRole: PlayerRoleType
+  periodFacts: PeriodFactsType
+  segmentFacts: PeriodSegmentFactsType
+  // TODO(JJ): Double-check if segmentFacts and nextSegmentFacts have same type
+  nextSegmentFacts?: PeriodSegmentFactsType
+  segmentIx: number
 }
 
 interface Period<
@@ -134,11 +140,11 @@ interface PeriodResult<
 > {
   initialize: (
     state: StateType,
-    payload: PayloadPeriodResultInitialisation<PeriodFactsType, PlayerRoleType>
+    payload: PayloadPeriodResult<PeriodFactsType, PlayerRoleType>
   ) => Output<OutputType, NotificationType, EventType>
   start: (
     state: StateType,
-    payload: PayloadPeriodResultStart<PeriodFactsType, PlayerRoleType>
+    payload: PayloadPeriodResult<PeriodFactsType, PlayerRoleType>
   ) => Output<OutputType, NotificationType, EventType>
   end: (
     state: StateType,
@@ -162,9 +168,43 @@ interface Segment<
 > {
   initialize: (
     state: StateType,
-    payload: PayloadSegmentInitialisation<
+    payload: PayloadSegment<PeriodFactsType, PeriodSegmentFactsType>
+  ) => Output<OutputType, NotificationType, EventType>
+  ActionTypes: Record<string, string>
+}
+
+interface SegmentResult<
+  StateType,
+  PeriodFactsType,
+  PeriodSegmentFactsType,
+  PlayerRoleType,
+  OutputType,
+  NotificationType,
+  EventType,
+  PrismaType
+> {
+  initialize: (
+    state: StateType,
+    payload: PayloadSegmentResult<
       PeriodFactsType,
-      PeriodSegmentFactsType
+      PeriodSegmentFactsType,
+      PlayerRoleType
+    >
+  ) => Output<OutputType, NotificationType, EventType>
+  start: (
+    state: StateType,
+    payload: PayloadSegmentResult<
+      PeriodFactsType,
+      PeriodSegmentFactsType,
+      PlayerRoleType
+    >
+  ) => Output<OutputType, NotificationType, EventType>
+  end: (
+    state: StateType,
+    payload: PayloadSegmentResult<
+      PeriodFactsType,
+      PeriodSegmentFactsType,
+      PlayerRoleType
     >
   ) => Output<OutputType, NotificationType, EventType>
   ActionTypes: Record<string, string>
@@ -191,7 +231,7 @@ interface Reducers<PrismaType> {
   Period: Period<any, any, any, any, any, any, PrismaType>
   PeriodResult: PeriodResult<any, any, any, any, any, any, any, PrismaType>
   Segment: Segment<any, any, any, any, any, any, PrismaType>
-  SegmentResult: Reducer<any, any, any, any, any, any, PrismaType>
+  SegmentResult: SegmentResult<any, any, any, any, any, any, any, PrismaType>
   // TODO(JJ): Check with RS if safe to remove
   // [key: string]: Reducer<any, any, any, any, any, any, PrismaType>
 }

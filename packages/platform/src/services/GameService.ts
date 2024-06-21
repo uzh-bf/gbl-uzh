@@ -1177,18 +1177,15 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
     const results = game.activePeriod.activeSegment.results
       .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
       .reduce((acc, result, ix, allResults) => {
-        const { result: facts, actions } = reducers.SegmentResult.apply(
+        const { result: facts, actions } = reducers.SegmentResult.start(
           result.facts,
           {
-            type: reducers.SegmentResult.ActionTypes.SEGMENT_RESULTS_START,
-            payload: {
-              playerRole: result.player.role,
-              periodFacts: game.activePeriod.facts,
-              segmentFacts: game.activePeriod.activeSegment.facts,
-              nextSegmentFacts:
-                game.activePeriod.activeSegment.nextSegment?.facts,
-              segmentIx: nextSegmentIx,
-            },
+            playerRole: result.player.role,
+            periodFacts: game.activePeriod.facts,
+            segmentFacts: game.activePeriod.activeSegment.facts,
+            nextSegmentFacts:
+              game.activePeriod.activeSegment.nextSegment?.facts,
+            segmentIx: nextSegmentIx,
           }
         )
 
@@ -1246,15 +1243,12 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
   const results = game.activePeriod.results
     .filter((result) => result.type === DB.PlayerResultType.PERIOD_START)
     .reduce((acc, result, ix, allResults) => {
-      let { result: facts } = reducers.SegmentResult.apply(result.facts, {
-        type: reducers.SegmentResult.ActionTypes.SEGMENT_RESULTS_INITIALIZE,
-        payload: {
-          playerRole: result.player.role,
-          periodFacts: game.activePeriod.facts,
-          segmentFacts: game.activePeriod.activeSegment?.facts,
-          nextSegmentFacts: game.activePeriod.activeSegment?.nextSegment?.facts,
-          segmentIx: nextSegmentIx,
-        },
+      let { result: facts } = reducers.SegmentResult.initialize(result.facts, {
+        playerRole: result.player.role,
+        periodFacts: game.activePeriod.facts,
+        segmentFacts: game.activePeriod.activeSegment?.facts,
+        nextSegmentFacts: game.activePeriod.activeSegment?.nextSegment?.facts,
+        segmentIx: nextSegmentIx,
       })
 
       const common = {
@@ -1303,16 +1297,13 @@ export function computeSegmentEndResults(game, ctx, { reducers }) {
   const results = game.activePeriod.activeSegment.results
     .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
     .map((result, ix, allResults) => {
-      const { result: facts, actions } = reducers.SegmentResult.apply(
+      const { result: facts, actions } = reducers.SegmentResult.end(
         result.facts,
         {
-          type: reducers.SegmentResult.ActionTypes.SEGMENT_RESULTS_END,
-          payload: {
-            playerRole: result.player.role,
-            periodFacts: game.activePeriod.facts,
-            segmentFacts: game.activePeriod.activeSegment.facts,
-            segmentIx: game.activePeriod.activeSegmentIx,
-          },
+          playerRole: result.player.role,
+          periodFacts: game.activePeriod.facts,
+          segmentFacts: game.activePeriod.activeSegment.facts,
+          segmentIx: game.activePeriod.activeSegmentIx,
         }
       )
 
