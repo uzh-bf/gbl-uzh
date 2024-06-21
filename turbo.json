@@ -6,16 +6,16 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"]
+      "outputs": ["dist/**", ".next/**", "public/**"]
     },
     "dev": {
       "cache": false,
-      "outputs": ["dist/**", ".next/**"],
+      "outputs": ["dist/**", ".next/**", "public/**"],
       "dependsOn": ["@gbl-uzh/platform#build"]
     },
     "start": {
       "dependsOn": ["^build", "build"],
-      "outputs": ["dist/**", ".next/**"]
+      "outputs": ["dist/**", ".next/**", "public/**"]
     }
   }
 }
