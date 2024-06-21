@@ -12,7 +12,13 @@ function KnowledgeBase() {
     >
       <div className="h-full max-h-[calc(100vh-8rem)]">
         <iframe
-          src={`https://www.gbl.uzh.ch/md/${router.query.initialPath || ''}`}
+          src={
+            process.env.NODE_ENV === 'development'
+              ? `http://localhost:8080/${router.query.initialPath || 'index'}`
+              : `https://www.gbl.uzh.ch/quartz/${
+                  router.query.initialPath || 'index'
+                }`
+          }
           title="Game-Based Learning"
           height="100%"
           width="100%"
