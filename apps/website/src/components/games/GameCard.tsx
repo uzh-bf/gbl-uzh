@@ -12,14 +12,13 @@ interface Props {
 function GameCard({ name, tags, linkHref, imgSrc }: Props) {
   const router = useRouter()
 
-  return (
-    <Card
-      name={name}
-      tags={tags}
-      imgSrc={imgSrc}
-      onClick={linkHref ? () => router.push(linkHref) : undefined}
-    />
-  )
+  const addToRouter = () => {
+    if (linkHref) {
+      router.push(linkHref)
+    }
+  }
+
+  return <Card name={name} tags={tags} imgSrc={imgSrc} onClick={addToRouter} />
 }
 
 GameCard.defaultProps = {
