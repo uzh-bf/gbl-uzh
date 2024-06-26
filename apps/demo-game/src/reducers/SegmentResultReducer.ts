@@ -37,6 +37,10 @@ enum PlayerRole {
 }
 
 // TODO(JJ): baseState to platform
+// - isDirty is only used in PlayService => only the ActionReducer needs this
+// currently => Discuss with RS if we would like to add it
+// Also e.g. the Derivative Game sets isDirty to true for some reducers
+// But since it's not used, is has no purpose yet =? bug?
 export function initialize(
   state: State,
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>

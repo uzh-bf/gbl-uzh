@@ -32,12 +32,12 @@ export type ResultState<StateType> = {
 }
 
 export type Output<NotificationType, EventType> = {
-  extras?: any
   result: any
+  isDirty: boolean
+  extras?: any
+  actions?: any[]
   notifications?: Notification<NotificationType>[]
   events?: Event<EventType>[]
-  actions?: any[]
-  isDirty: boolean
 }
 
 export type Action<ActionType, PayloadType, PrismaType> = {
