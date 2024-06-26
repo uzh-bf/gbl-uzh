@@ -1,4 +1,4 @@
-import { PayloadSegmentResult } from '@gbl-uzh/platform'
+import { ActionTypes, PayloadSegmentResult } from '@gbl-uzh/platform'
 import {
   computePercentChange,
   debugLog,
@@ -7,12 +7,6 @@ import {
 import type { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 import * as R from 'ramda'
-
-enum ActionTypes {
-  SEGMENT_RESULTS_INITIALIZE = 'SEGMENT_RESULTS_INITIALIZE',
-  SEGMENT_RESULTS_START = 'SEGMENT_RESULTS_START',
-  SEGMENT_RESULTS_END = 'SEGMENT_RESULTS_END',
-}
 
 type Assets = {
   bank: number

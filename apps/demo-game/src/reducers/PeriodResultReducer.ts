@@ -1,4 +1,5 @@
 import {
+  ActionTypes,
   PayloadPeriodResult,
   PayloadPeriodResultEnd,
   ResultState,
@@ -8,15 +9,6 @@ import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 
 const INITIAL_CAPITAL = 10000
-
-// TODO(JJ):
-// The action types are the same for all games => move to platform
-// Only the ActionReducer has custom ActionTypes
-enum ActionTypes {
-  PERIOD_RESULTS_INITIALIZE = 'PERIOD_RESULTS_INITIALIZE',
-  PERIOD_RESULTS_START = 'PERIOD_RESULTS_START',
-  PERIOD_RESULTS_END = 'PERIOD_RESULTS_END',
-}
 
 type State = {
   decisions: {

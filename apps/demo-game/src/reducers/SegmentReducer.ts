@@ -1,4 +1,4 @@
-import { PayloadSegment } from '@gbl-uzh/platform'
+import { ActionTypes, PayloadSegment } from '@gbl-uzh/platform'
 import {
   computeScenarioOutcome,
   debugLog,
@@ -7,10 +7,6 @@ import {
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 import * as R from 'ramda'
-
-enum ActionTypes {
-  SEGMENT_INITIALIZE = 'SEGMENT_INITIALIZE',
-}
 
 type State = {
   diceRolls?: { bonds: number; stocks: number }[]

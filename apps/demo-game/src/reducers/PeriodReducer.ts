@@ -1,14 +1,10 @@
 import {
+  ActionTypes,
   PayloadPeriodConsolidation,
   PayloadPeriodInitialisation,
 } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
-
-enum ActionTypes {
-  PERIOD_INITIALIZE = 'PERIOD_INITIALIZE',
-  PERIOD_CONSOLIDATE = 'PERIOD_CONSOLIDATE',
-}
 
 type State = {
   rollsPerSegment: number
