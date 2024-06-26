@@ -10,7 +10,17 @@ enum ActionTypes {
   PERIOD_CONSOLIDATE = 'PERIOD_CONSOLIDATE',
 }
 
-type State = {}
+type State = {
+  rollsPerSegment: number
+  scenario: {
+    seed: number
+    trendStocks: number
+    trendBonds: number
+    gapStocks: number
+    gapBonds: number
+    bankReturn: number
+  }
+}
 
 // TODO(JJ):
 // - use immer

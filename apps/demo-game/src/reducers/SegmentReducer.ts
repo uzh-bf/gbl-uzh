@@ -18,6 +18,8 @@ type State = {
 }
 
 // TODO(JJ): baseState to platform
+// -> If we move baseState to the platform code we need to add the actiontypes
+// again.
 export function initialize(
   state: State,
   payload: PayloadSegment<PeriodFacts, PeriodSegmentFacts>

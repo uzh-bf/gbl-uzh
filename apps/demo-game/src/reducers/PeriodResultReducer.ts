@@ -9,6 +9,9 @@ import { produce } from 'immer'
 
 const INITIAL_CAPITAL = 10000
 
+// TODO(JJ):
+// The action types are the same for all games => move to platform
+// Only the ActionReducer has custom ActionTypes
 enum ActionTypes {
   PERIOD_RESULTS_INITIALIZE = 'PERIOD_RESULTS_INITIALIZE',
   PERIOD_RESULTS_START = 'PERIOD_RESULTS_START',
@@ -29,7 +32,7 @@ type State = {
   }
 }
 
-// TODO(JJ): Define somewhere else
+// TODO(JJ): Define somewhere else -> discuss with RS
 export enum PlayerRole {
   PLAYER = 'PLAYER',
   ADMIN = 'ADMIN',
@@ -81,7 +84,7 @@ export function start(
     draft.isDirty = baseState !== newState
   })
 
-  debugLog('PeriodResultInitialize', state, payload, resultState)
+  debugLog('PeriodResultStart', state, payload, resultState)
   return resultState
 }
 
@@ -101,6 +104,6 @@ export function end(
     draft.isDirty = baseState !== newState
   })
 
-  debugLog('PeriodResultInitialize', state, payload, resultState)
+  debugLog('PeriodResultEnd', state, payload, resultState)
   return resultState
 }

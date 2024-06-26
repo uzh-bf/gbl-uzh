@@ -125,7 +125,6 @@ interface Period<
     state: StateType,
     payload: PayloadPeriodConsolidation<PeriodSegmentFactsType>
   ) => Output<OutputType, NotificationType, EventType>
-  ActionTypes: Record<string, string>
 }
 
 interface PeriodResult<
@@ -154,7 +153,6 @@ interface PeriodResult<
       PlayerRoleType
     >
   ) => Output<OutputType, NotificationType, EventType>
-  ActionTypes: Record<string, string>
 }
 
 interface Segment<
@@ -170,7 +168,6 @@ interface Segment<
     state: StateType,
     payload: PayloadSegment<PeriodFactsType, PeriodSegmentFactsType>
   ) => Output<OutputType, NotificationType, EventType>
-  ActionTypes: Record<string, string>
 }
 
 interface SegmentResult<
@@ -207,7 +204,6 @@ interface SegmentResult<
       PlayerRoleType
     >
   ) => Output<OutputType, NotificationType, EventType>
-  ActionTypes: Record<string, string>
 }
 
 interface Reducer<
