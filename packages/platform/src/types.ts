@@ -1,22 +1,6 @@
 import { NextPageContext } from 'next'
 import type yup from 'yup'
 
-// TODO(JJ): We only need to keep track of the ActionReducer action types
-// - Discuss with RS if we should put everything into one enum or separate them
-// - Rename enum ActionTypes
-
-export enum ActionTypes {
-  PERIOD_INITIALIZE = 'PERIOD_INITIALIZE',
-  PERIOD_CONSOLIDATE = 'PERIOD_CONSOLIDATE',
-  PERIOD_RESULTS_INITIALIZE = 'PERIOD_RESULTS_INITIALIZE',
-  PERIOD_RESULTS_START = 'PERIOD_RESULTS_START',
-  PERIOD_RESULTS_END = 'PERIOD_RESULTS_END',
-  SEGMENT_INITIALIZE = 'SEGMENT_INITIALIZE',
-  SEGMENT_RESULTS_INITIALIZE = 'SEGMENT_RESULTS_INITIALIZE',
-  SEGMENT_RESULTS_START = 'SEGMENT_RESULTS_START',
-  SEGMENT_RESULTS_END = 'SEGMENT_RESULTS_END',
-}
-
 export enum UserRole {
   PLAYER = 'PLAYER',
   ADMIN = 'ADMIN',
@@ -40,16 +24,14 @@ export type Event<EventType> = {
   facts?: any
 }
 
-export type ResultState<ActionTypes, StateType> = {
-  type: ActionTypes
+export type ResultState<StateType> = {
   result: StateType
   isDirty: boolean
   events?: any[]
   notifications?: any[]
 }
 
-export type Output<OutputType, NotificationType, EventType> = {
-  type: OutputType
+export type Output<NotificationType, EventType> = {
   extras?: any
   result: any
   notifications?: Notification<NotificationType>[]
@@ -135,11 +117,11 @@ interface Period<
       PeriodFactsType,
       PeriodSegmentFactsType
     >
-  ) => Output<ActionTypes.PERIOD_INITIALIZE, NotificationType, EventType>
+  ) => Output<NotificationType, EventType>
   consolidate: (
     state: StateType,
     payload: PayloadPeriodConsolidation<PeriodSegmentFactsType>
-  ) => Output<ActionTypes.PERIOD_CONSOLIDATE, NotificationType, EventType>
+  ) => Output<NotificationType, EventType>
 }
 
 interface PeriodResult<
@@ -154,15 +136,11 @@ interface PeriodResult<
   initialize: (
     state: StateType,
     payload: PayloadPeriodResult<PeriodFactsType, PlayerRoleType>
-  ) => Output<
-    ActionTypes.PERIOD_RESULTS_INITIALIZE,
-    NotificationType,
-    EventType
-  >
+  ) => Output<NotificationType, EventType>
   start: (
     state: StateType,
     payload: PayloadPeriodResult<PeriodFactsType, PlayerRoleType>
-  ) => Output<ActionTypes.PERIOD_RESULTS_START, NotificationType, EventType>
+  ) => Output<NotificationType, EventType>
   end: (
     state: StateType,
     payload: PayloadPeriodResultEnd<
@@ -170,7 +148,7 @@ interface PeriodResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => Output<ActionTypes.PERIOD_RESULTS_END, NotificationType, EventType>
+  ) => Output<NotificationType, EventType>
 }
 
 interface Segment<
@@ -184,7 +162,7 @@ interface Segment<
   initialize: (
     state: StateType,
     payload: PayloadSegment<PeriodFactsType, PeriodSegmentFactsType>
-  ) => Output<ActionTypes.SEGMENT_INITIALIZE, NotificationType, EventType>
+  ) => Output<NotificationType, EventType>
 }
 
 interface SegmentResult<
@@ -203,11 +181,7 @@ interface SegmentResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => Output<
-    ActionTypes.SEGMENT_RESULTS_INITIALIZE,
-    NotificationType,
-    EventType
-  >
+  ) => Output<NotificationType, EventType>
   start: (
     state: StateType,
     payload: PayloadSegmentResult<
@@ -215,7 +189,7 @@ interface SegmentResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => Output<ActionTypes.SEGMENT_RESULTS_START, NotificationType, EventType>
+  ) => Output<NotificationType, EventType>
   end: (
     state: StateType,
     payload: PayloadSegmentResult<
@@ -223,14 +197,13 @@ interface SegmentResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => Output<ActionTypes.SEGMENT_RESULTS_END, NotificationType, EventType>
+  ) => Output<NotificationType, EventType>
 }
 
 interface Reducer<
   StateType,
   ActionType,
   PayloadType,
-  OutputType,
   NotificationType,
   EventType,
   PrismaType
@@ -238,12 +211,12 @@ interface Reducer<
   apply: (
     state: StateType,
     action: Action<ActionType, PayloadType, PrismaType>
-  ) => Output<OutputType, NotificationType, EventType>
+  ) => Output<NotificationType, EventType>
   ActionTypes: Record<string, string>
 }
 
 interface Reducers<PrismaType> {
-  Actions: Reducer<any, any, any, any, any, any, PrismaType>
+  Actions: Reducer<any, any, any, any, any, PrismaType>
   Period: Period<any, any, any, any, any, PrismaType>
   PeriodResult: PeriodResult<any, any, any, any, any, any, PrismaType>
   Segment: Segment<any, any, any, any, any, PrismaType>

@@ -1,4 +1,4 @@
-import { ActionTypes, PayloadSegmentResult } from '@gbl-uzh/platform'
+import { PayloadSegmentResult } from '@gbl-uzh/platform'
 import {
   computePercentChange,
   debugLog,
@@ -42,7 +42,6 @@ export function initialize(
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
 ) {
   const baseState = {
-    type: ActionTypes.SEGMENT_RESULTS_INITIALIZE,
     result: state,
     isDirty: false,
   }
@@ -62,7 +61,6 @@ export function start(
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
 ) {
   const baseState = {
-    type: ActionTypes.SEGMENT_RESULTS_START,
     result: state,
     isDirty: false,
   }
@@ -82,7 +80,6 @@ export function end(
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
 ) {
   const baseState = {
-    type: ActionTypes.SEGMENT_RESULTS_END,
     result: state,
     isDirty: false,
   }

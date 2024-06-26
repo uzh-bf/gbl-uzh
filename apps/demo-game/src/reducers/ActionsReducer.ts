@@ -44,10 +44,9 @@ type Actions =
 export function apply(
   state: InputState,
   action: Actions
-): ResultState<ActionTypes, OutputState> {
+): ResultState<OutputState> {
   // TODO: move this to platform? -> reducer should not have to care about isDirty and other non-user-logicstuff
-  const baseState: ResultState<ActionTypes, OutputState> = {
-    type: action.type,
+  const baseState: ResultState<OutputState> = {
     result: state,
     isDirty: false,
   }

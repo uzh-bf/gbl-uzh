@@ -1,5 +1,4 @@
 import {
-  ActionTypes,
   PayloadPeriodConsolidation,
   PayloadPeriodInitialisation,
 } from '@gbl-uzh/platform'
@@ -36,7 +35,6 @@ export function initialize(
   payload: PayloadPeriodInitialisation<PeriodFacts, PeriodSegmentFacts>
 ) {
   const resultState = {
-    type: ActionTypes.PERIOD_INITIALIZE,
     result: state,
     isDirty: false,
   }
@@ -49,7 +47,6 @@ export function consolidate(
   payload: PayloadPeriodConsolidation<PeriodSegmentFacts>
 ) {
   const resultState = {
-    type: ActionTypes.PERIOD_CONSOLIDATE,
     result: state,
     isDirty: false,
   }

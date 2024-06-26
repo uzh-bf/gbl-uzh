@@ -1,4 +1,4 @@
-import { ActionTypes, PayloadSegment } from '@gbl-uzh/platform'
+import { PayloadSegment } from '@gbl-uzh/platform'
 import {
   computeScenarioOutcome,
   debugLog,
@@ -13,15 +13,11 @@ type State = {
   returns?: { bank: number; bonds: number; stocks: number }[]
 }
 
-// TODO(JJ): baseState to platform
-// -> If we move baseState to the platform code we need to add the actiontypes
-// again.
 export function initialize(
   state: State,
   payload: PayloadSegment<PeriodFacts, PeriodSegmentFacts>
 ) {
   const baseState = {
-    type: ActionTypes.SEGMENT_INITIALIZE,
     result: state,
     isDirty: false,
   }

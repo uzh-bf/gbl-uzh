@@ -1,5 +1,4 @@
 import {
-  ActionTypes,
   PayloadPeriodResult,
   PayloadPeriodResultEnd,
   ResultState,
@@ -34,8 +33,7 @@ export function initialize(
   state: State,
   payload: PayloadPeriodResult<PlayerRole, PeriodFacts>
 ) {
-  const baseState: ResultState<ActionTypes, State> = {
-    type: ActionTypes.PERIOD_RESULTS_INITIALIZE,
+  const baseState: ResultState<State> = {
     result: state,
     isDirty: false,
   }
@@ -66,8 +64,7 @@ export function start(
   state: State,
   payload: PayloadPeriodResult<PlayerRole, PeriodFacts>
 ) {
-  const baseState: ResultState<ActionTypes, State> = {
-    type: ActionTypes.PERIOD_RESULTS_START,
+  const baseState: ResultState<State> = {
     result: state,
     isDirty: false,
   }
@@ -84,8 +81,7 @@ export function end(
   state: State,
   payload: PayloadPeriodResultEnd<PeriodFacts, PeriodSegmentFacts, PlayerRole>
 ) {
-  const baseState: ResultState<ActionTypes, State> = {
-    type: ActionTypes.PERIOD_RESULTS_END,
+  const baseState: ResultState<State> = {
     result: state,
     isDirty: false,
   }
