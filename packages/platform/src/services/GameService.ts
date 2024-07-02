@@ -188,16 +188,13 @@ export async function addPeriodSegment<TFacts>(
 
   const index = period.segments[0]?.index + 1 || 0
 
-  const { result: initializedFacts } = reducers.Segment.initialize(
-    validatedFacts,
-    {
-      periodFacts: period.facts,
-      previousSegmentFacts: period.segments[0]?.facts,
-      segmentIx: index,
-      segmentCount: 4,
-      periodIx,
-    }
-  )
+  const initializedFacts = reducers.Segment.initialize(validatedFacts, {
+    periodFacts: period.facts,
+    previousSegmentFacts: period.segments[0]?.facts,
+    segmentIx: index,
+    segmentCount: 4,
+    periodIx,
+  })
 
   // create or update the facts and settings of a period segment
   return ctx.prisma.periodSegment.upsert({

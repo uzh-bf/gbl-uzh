@@ -22,7 +22,6 @@ type OutputState = State & {}
 // TODO(JJ):
 // - use immer
 // 1. init baseState outside of fn and provide it as input
-// 2. isDirty is outside of fn
 // ->
 // export function initialize(
 //   baseState: BaseState<UserState>,

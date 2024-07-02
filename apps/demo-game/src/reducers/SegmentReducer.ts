@@ -13,16 +13,18 @@ type State = {
   returns?: { bank: number; bonds: number; stocks: number }[]
 }
 
+type OutputState = State & {}
+
 export function initialize(
   state: State,
   payload: PayloadSegment<PeriodFacts, PeriodSegmentFacts>
-) {
-  const baseState = {
-    result: state,
-    isDirty: false,
+): OutputState {
+  const baseState: OutputState = {
+    diceRolls: state.diceRolls?.slice(0),
+    returns: state.returns?.slice(0),
   }
 
-  const newState = produce(baseState, (draft) => {
+  const resultState: OutputState = produce(baseState, (draft: OutputState) => {
     const periodFacts = payload.periodFacts
     const segmentIx = payload.segmentIx
 
@@ -54,12 +56,8 @@ export function initialize(
       }
     })
 
-    draft.result.diceRolls = diceRolls
-    draft.result.returns = returns
-  })
-
-  const resultState = produce(newState, (draft) => {
-    draft.isDirty = baseState !== newState
+    draft.diceRolls = diceRolls
+    draft.returns = returns
   })
 
   debugLog('SegmentInitialize', state, payload, resultState)
