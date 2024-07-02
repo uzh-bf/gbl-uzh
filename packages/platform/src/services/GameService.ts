@@ -410,7 +410,7 @@ export async function activateNextPeriod(
       })
 
       // update period facts when starting consolidation
-      const { result: consolidatedFacts } = reducers.Period.consolidate(
+      const consolidatedFacts = reducers.Period.consolidate(
         game.activePeriod.facts,
         {
           previousSegmentFacts: game.activePeriod.activeSegment.facts as any,

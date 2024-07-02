@@ -49,10 +49,12 @@ export function initialize(
 export function consolidate(
   state: State,
   payload: PayloadPeriodConsolidation<PeriodSegmentFacts>
-) {
-  const resultState = {
-    result: state,
-    isDirty: false,
+): OutputState {
+  const resultState: OutputState = {
+    rollsPerSegment: state.rollsPerSegment,
+    scenario: {
+      ...state.scenario,
+    },
   }
   debugLog('PeriodReducerConsolidate', state, payload, resultState)
   return resultState
