@@ -17,6 +17,8 @@ type State = {
   }
 }
 
+type OutputState = State & {}
+
 // TODO(JJ):
 // - use immer
 // 1. init baseState outside of fn and provide it as input
@@ -33,10 +35,12 @@ type State = {
 export function initialize(
   state: State,
   payload: PayloadPeriodInitialisation<PeriodFacts, PeriodSegmentFacts>
-) {
-  const resultState = {
-    result: state,
-    isDirty: false,
+): OutputState {
+  const resultState: OutputState = {
+    rollsPerSegment: state.rollsPerSegment,
+    scenario: {
+      ...state.scenario,
+    },
   }
   debugLog('PeriodReducerInitialize', state, payload, resultState)
   return resultState

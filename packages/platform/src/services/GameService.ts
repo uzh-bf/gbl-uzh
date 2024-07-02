@@ -90,17 +90,13 @@ export async function addGamePeriod<TFacts>(
   const index = game.periods[0]?.index + 1 || 0
 
   // TODO(JJ): Why do we provide validatedFacts twice?
-  // - Here we only use result, actions are not needed
-  //   -> only return result => Discuss with RS
-  const { result: initializedFacts } = reducers.Period.initialize(
-    validatedFacts,
-    {
-      periodFacts: validatedFacts,
-      previousPeriodFacts: game.periods[0]?.facts as any,
-      previousSegmentFacts: game.periods[0]?.segments[0]?.facts as any,
-      periodIx: index,
-    }
-  )
+  // - remove periodFacts from payload for initialize?
+  const initializedFacts = reducers.Period.initialize(validatedFacts, {
+    periodFacts: validatedFacts,
+    previousPeriodFacts: game.periods[0]?.facts as any,
+    previousSegmentFacts: game.periods[0]?.segments[0]?.facts as any,
+    periodIx: index,
+  })
 
   console.log(
     game.periods[0]?.facts,
