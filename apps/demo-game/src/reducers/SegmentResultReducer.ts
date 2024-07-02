@@ -9,26 +9,46 @@ import { produce } from 'immer'
 import * as R from 'ramda'
 import { PlayerRole } from '../settings/Constants'
 
+// TODO(JJ):
+// - move States out to another file - Period result reducer has similar types
+//   -> merge
+// - rename state to facts?
 type Assets = {
   bank: number
   bonds: number
   stocks: number
+  totalAssets: number
 }
-type AssetsTotal = Assets & { totalAssets: number }
 
-type AssetsReturn = {
-  bankReturn: number
-  bondsReturn: number
-  stocksReturn: number
+type AssetsWithReturns = Assets & {
+  ix: number
+  bankReturn?: number
+  bondsReturn?: number
+  stocksReturn?: number
+  totalAssetsReturn?: number
 }
-type AssetsTotalReturn = AssetsReturn & { totalAssetsReturn: number }
+
+type StateInit = {
+  assets: Assets
+  decisions: { bank: boolean; bonds: boolean; stocks: boolean }
+  returns?: Assets
+  assetsWithReturns?: AssetsWithReturns[]
+}
 
 type State = {
-  assets: AssetsTotal
+  assets: Assets
   decisions: { bank: boolean; bonds: boolean; stocks: boolean }
-  // TODO(JJ): It actually should be with AssetsTotalReturn
-  assetsWithReturns?: ({ ix: number } & AssetsTotal)[]
-  returns?: AssetsTotal
+  returns: Assets
+  assetsWithReturns: AssetsWithReturns[]
+}
+
+type OutputStateInit = {
+  result: StateInit
+}
+
+type OutputState = {
+  result: State
+  actions?: []
 }
 
 // TODO(JJ): baseState to platform
@@ -37,19 +57,17 @@ type State = {
 // Also e.g. the Derivative Game sets isDirty to true for some reducers
 // But since it's not used, is has no purpose yet =? bug?
 export function initialize(
-  state: State,
+  state: StateInit,
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
 ) {
-  const baseState = {
+  const baseState: OutputStateInit = {
     result: state,
-    isDirty: false,
   }
 
-  const newState = produce(baseState, (draft) => {})
-
-  const resultState = produce(newState, (draft) => {
-    draft.isDirty = baseState !== newState
-  })
+  const resultState: OutputStateInit = produce(
+    baseState,
+    (draft: OutputStateInit) => {}
+  )
 
   debugLog('SegmentResultInitialize', state, payload, resultState)
   return resultState
@@ -58,17 +76,15 @@ export function initialize(
 export function start(
   state: State,
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
-) {
-  const baseState = {
+): OutputState {
+  const baseState: OutputState = {
     result: state,
-    isDirty: false,
   }
 
-  const newState = produce(baseState, (draft) => {})
-
-  const resultState = produce(newState, (draft) => {
-    draft.isDirty = baseState !== newState
-  })
+  const resultState: OutputState = produce(
+    baseState,
+    (draft: OutputState) => {}
+  )
 
   debugLog('SegmentResultStart', state, payload, resultState)
   return resultState
@@ -77,13 +93,12 @@ export function start(
 export function end(
   state: State,
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
-) {
-  const baseState = {
+): OutputState {
+  const baseState: OutputState = {
     result: state,
-    isDirty: false,
   }
 
-  const newState = produce(baseState, (draft) => {
+  const resultState: OutputState = produce(baseState, (draft: OutputState) => {
     const segmentFacts = payload.segmentFacts
     const numInvestedBuckets = R.sum(Object.values(state.decisions).map(Number))
     const totalAssets =
@@ -154,10 +169,6 @@ export function end(
         state.assets.bank
       ),
     }
-  })
-
-  const resultState = produce(newState, (draft) => {
-    draft.isDirty = baseState !== newState
   })
 
   debugLog('SegmentResultEnd', state, payload, resultState)
