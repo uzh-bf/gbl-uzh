@@ -29,14 +29,13 @@ type OutputStateInit = {
 
 type State = StateInit & {
   returns: Assets
-  assetsWithReturns: Assets &
-    {
-      ix: number
-      bankReturn?: number
-      bondsReturn?: number
-      stocksReturn?: number
-      totalAssetsReturn?: number
-    }[]
+  assetsWithReturns: (Assets & {
+    ix: number
+    bankReturn?: number
+    bondsReturn?: number
+    stocksReturn?: number
+    totalAssetsReturn?: number
+  })[]
 }
 
 type OutputStateStart = {
