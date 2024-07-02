@@ -2,6 +2,7 @@ import { PayloadPeriodResult, PayloadPeriodResultEnd } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
+import { PlayerRole } from '../settings/Constants'
 
 const INITIAL_CAPITAL = 10000
 
@@ -23,12 +24,6 @@ type State = {
 // TODO(JJ): Example output
 type OutputState = State & {
   // additional variables
-}
-
-// TODO(JJ): Define somewhere else -> discuss with RS
-export enum PlayerRole {
-  PLAYER = 'PLAYER',
-  ADMIN = 'ADMIN',
 }
 
 export function initialize(

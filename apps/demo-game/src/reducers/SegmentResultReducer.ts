@@ -7,6 +7,7 @@ import {
 import type { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 import * as R from 'ramda'
+import { PlayerRole } from '../settings/Constants'
 
 type Assets = {
   bank: number
@@ -28,12 +29,6 @@ type State = {
   // TODO(JJ): It actually should be with AssetsTotalReturn
   assetsWithReturns?: ({ ix: number } & AssetsTotal)[]
   returns?: AssetsTotal
-}
-
-// TODO(JJ): Define somewhere else
-enum PlayerRole {
-  PLAYER = 'PLAYER',
-  ADMIN = 'ADMIN',
 }
 
 // TODO(JJ): baseState to platform
