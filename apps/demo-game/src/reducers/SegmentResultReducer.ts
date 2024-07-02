@@ -1,10 +1,10 @@
 import { PayloadSegmentResult } from '@gbl-uzh/platform'
 import {
-  computePercentChange,
-  debugLog,
-  withPercentChange,
+computePercentChange,
+debugLog,
+withPercentChange,
 } from '@gbl-uzh/platform/dist/lib/util'
-import type { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
+import type { PeriodFacts,PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 import * as R from 'ramda'
 import { PlayerRole } from '../settings/Constants'
@@ -59,7 +59,7 @@ type OutputState = {
 export function initialize(
   state: StateInit,
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
-) {
+): OutputStateInit {
   const baseState: OutputStateInit = {
     result: state,
   }
