@@ -24,13 +24,6 @@ export type Event<EventType> = {
   facts?: any
 }
 
-export type ResultState<StateType> = {
-  result: StateType
-  isDirty: boolean
-  events?: any[]
-  notifications?: any[]
-}
-
 export type Output<NotificationType, EventType> = {
   result: any
   isDirty: boolean
@@ -39,6 +32,16 @@ export type Output<NotificationType, EventType> = {
   notifications?: Notification<NotificationType>[]
   events?: Event<EventType>[]
 }
+
+export type OutputState<InputState, NotificationType, EventType> = {
+  result: InputState & any
+  actions?: any[]
+  events?: Event<EventType>[]
+  notifications?: Notification<NotificationType>[]
+}
+
+export type OutputExtrasState<InputState, NotificationType, EventType> =
+  OutputState<InputState, NotificationType, EventType> & { extras?: any }
 
 export type Action<ActionType, PayloadType, PrismaType> = {
   type: ActionType
@@ -101,6 +104,14 @@ export type PayloadSegmentResult<
   nextSegmentFacts?: PeriodSegmentFactsType
   segmentIx: number
 }
+
+// TODO(JJ):
+// - Replace StateType with any?
+// - Introduce OutputStateType or should we return any as well?
+// - type OutputStateType = InputStateType & any for some, and some have also
+// events and notifications => double-check with RS which fns need events and
+// notifications (until now only period result reducer and action reducers
+// need then)
 
 interface Period<
   StateType,

@@ -1,4 +1,4 @@
-import { Action, ResultState } from '@gbl-uzh/platform'
+import { Action } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/types'
 import { PrismaClient } from '@prisma/client'
@@ -26,7 +26,7 @@ type PayloadType = {
   periodFacts: PeriodFacts
 }
 
-type InputState = {
+type State = {
   decisions: {
     bank: boolean
     bonds: boolean
@@ -34,19 +34,14 @@ type InputState = {
   }
 }
 
-type OutputState = InputState
-
 type Actions =
   | Action<ActionTypes.DECIDE_BANK, PayloadType, PrismaClient>
   | Action<ActionTypes.DECIDE_BONDS, PayloadType, PrismaClient>
   | Action<ActionTypes.DECIDE_STOCK, PayloadType, PrismaClient>
 
-export function apply(
-  state: InputState,
-  action: Actions
-): ResultState<OutputState> {
+export function apply(state: State, action: Actions) {
   // TODO: move this to platform? -> reducer should not have to care about isDirty and other non-user-logicstuff
-  const baseState: ResultState<OutputState> = {
+  const baseState = {
     result: state,
     isDirty: false,
   }

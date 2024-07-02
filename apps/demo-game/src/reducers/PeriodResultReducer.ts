@@ -1,14 +1,11 @@
-import {
-  PayloadPeriodResult,
-  PayloadPeriodResultEnd,
-  ResultState,
-} from '@gbl-uzh/platform'
+import { PayloadPeriodResult, PayloadPeriodResultEnd } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 
 const INITIAL_CAPITAL = 10000
 
+// TODO(JJ): Double-check if all defined fns have the same input type
 type State = {
   decisions: {
     bank: boolean
@@ -23,6 +20,11 @@ type State = {
   }
 }
 
+// TODO(JJ): Example output
+type OutputState = State & {
+  // additional variables
+}
+
 // TODO(JJ): Define somewhere else -> discuss with RS
 export enum PlayerRole {
   PLAYER = 'PLAYER',
@@ -33,7 +35,7 @@ export function initialize(
   state: State,
   payload: PayloadPeriodResult<PlayerRole, PeriodFacts>
 ) {
-  const baseState: ResultState<State> = {
+  const baseState = {
     result: state,
     isDirty: false,
   }
@@ -64,7 +66,7 @@ export function start(
   state: State,
   payload: PayloadPeriodResult<PlayerRole, PeriodFacts>
 ) {
-  const baseState: ResultState<State> = {
+  const baseState = {
     result: state,
     isDirty: false,
   }
@@ -81,7 +83,7 @@ export function end(
   state: State,
   payload: PayloadPeriodResultEnd<PeriodFacts, PeriodSegmentFacts, PlayerRole>
 ) {
-  const baseState: ResultState<State> = {
+  const baseState = {
     result: state,
     isDirty: false,
   }
