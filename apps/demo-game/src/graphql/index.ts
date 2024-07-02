@@ -17,7 +17,6 @@ export * from './types'
 
 export const Query = generateBaseQueries()
 export const Mutation = generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
-  // TODO(JJ): Double-check with RS
   roleAssigner: (ix) => UserRole.PLAYER,
   reducers,
   schemas: {
