@@ -3,21 +3,26 @@ import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 import { PlayerRole } from '../settings/Constants'
-import { OutputState, OutputStateInit, State, StateInit } from '../types/facts'
+import {
+  OutputPeriodResultFactsInit,
+  OutputResultFacts,
+  PeriodResultFactsInit,
+  ResultFacts,
+} from '../types/facts'
 
 const INITIAL_CAPITAL = 10000
 
 export function initialize(
-  state: StateInit,
+  facts: PeriodResultFactsInit,
   payload: PayloadPeriodResult<PlayerRole, PeriodFacts>
-): OutputStateInit {
-  const baseState: OutputStateInit = {
-    result: state,
+): OutputPeriodResultFactsInit {
+  const baseFacts: OutputPeriodResultFactsInit = {
+    result: facts,
   }
 
-  const resultState: OutputStateInit = produce(
-    baseState,
-    (draft: OutputStateInit) => {
+  const resultFacts: OutputPeriodResultFactsInit = produce(
+    baseFacts,
+    (draft: OutputPeriodResultFactsInit) => {
       draft.result.decisions = {
         bank: true,
         bonds: false,
@@ -32,37 +37,37 @@ export function initialize(
     }
   )
 
-  debugLog('PeriodResultInitialize', state, payload, resultState)
-  return resultState
+  debugLog('PeriodResultInitialize', facts, payload, resultFacts)
+  return resultFacts
 }
 
 export function start(
-  state: State,
+  facts: ResultFacts,
   payload: PayloadPeriodResult<PlayerRole, PeriodFacts>
-): OutputState {
-  const baseState: OutputState = {
-    result: state,
+): OutputResultFacts {
+  const baseFacts: OutputResultFacts = {
+    result: facts,
   }
-  const resultState = produce(baseState, (draft: OutputState) => {})
+  const resultFacts = produce(baseFacts, (draft: OutputResultFacts) => {})
 
-  debugLog('PeriodResultStart', state, payload, resultState)
-  return resultState
+  debugLog('PeriodResultStart', facts, payload, resultFacts)
+  return resultFacts
 }
 
 export function end(
-  state: State,
+  facts: ResultFacts,
   payload: PayloadPeriodResultEnd<PeriodFacts, PeriodSegmentFacts, PlayerRole>
-): OutputState {
-  const baseState: OutputState = {
-    result: state,
+): OutputResultFacts {
+  const baseFacts: OutputResultFacts = {
+    result: facts,
     events: [],
   }
 
-  const resultState: OutputState = produce(
-    baseState,
-    (draft: OutputState) => {}
+  const resultFacts: OutputResultFacts = produce(
+    baseFacts,
+    (draft: OutputResultFacts) => {}
   )
 
-  debugLog('PeriodResultEnd', state, payload, resultState)
-  return resultState
+  debugLog('PeriodResultEnd', facts, payload, resultFacts)
+  return resultFacts
 }

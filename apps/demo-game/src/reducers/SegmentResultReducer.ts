@@ -8,169 +8,140 @@ import type { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 import * as R from 'ramda'
 import { PlayerRole } from '../settings/Constants'
+import {
+  OutputResultFacts,
+  OutputSegmentResultFactsInit,
+  ResultFacts,
+  SegmentResultFactsInit,
+} from '../types/facts'
 
 // TODO(JJ):
-// - move States out to another file - Period result reducer has similar types
-//   -> merge
-// - rename state to facts?
-type Assets = {
-  bank: number
-  bonds: number
-  stocks: number
-  totalAssets: number
-}
-
-type AssetsWithReturns = Assets & {
-  ix: number
-  bankReturn?: number
-  bondsReturn?: number
-  stocksReturn?: number
-  totalAssetsReturn?: number
-}
-
-type StateInit = {
-  assets: Assets
-  decisions: { bank: boolean; bonds: boolean; stocks: boolean }
-  returns?: Assets
-  assetsWithReturns?: AssetsWithReturns[]
-}
-
-type State = {
-  assets: Assets
-  decisions: { bank: boolean; bonds: boolean; stocks: boolean }
-  returns: Assets
-  assetsWithReturns: AssetsWithReturns[]
-}
-
-// TODO(JJ):
-// - Make it generic like in types.ts, only one output type
 // for all separate functions
-// - Rename state to facts
 // - Rename result to resultFacts
-type OutputStateInit = {
-  result: StateInit
-}
-
-type OutputState = {
-  result: State
-  actions?: []
-}
 
 export function initialize(
-  state: StateInit,
+  facts: SegmentResultFactsInit,
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
-): OutputStateInit {
-  const baseState: OutputStateInit = {
-    result: state,
+): OutputSegmentResultFactsInit {
+  const basefacts: OutputSegmentResultFactsInit = {
+    result: facts,
   }
 
-  const resultState: OutputStateInit = produce(
-    baseState,
-    (draft: OutputStateInit) => {}
+  const resultFacts: OutputSegmentResultFactsInit = produce(
+    basefacts,
+    (draft: OutputSegmentResultFactsInit) => {}
   )
 
-  debugLog('SegmentResultInitialize', state, payload, resultState)
-  return resultState
+  debugLog('SegmentResultInitialize', facts, payload, resultFacts)
+  return resultFacts
 }
 
 export function start(
-  state: State,
+  facts: ResultFacts,
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
-): OutputState {
-  const baseState: OutputState = {
-    result: state,
+): OutputResultFacts {
+  const basefacts: OutputResultFacts = {
+    result: facts,
   }
 
-  const resultState: OutputState = produce(
-    baseState,
-    (draft: OutputState) => {}
+  const resultFacts: OutputResultFacts = produce(
+    basefacts,
+    (draft: OutputResultFacts) => {}
   )
 
-  debugLog('SegmentResultStart', state, payload, resultState)
-  return resultState
+  debugLog('SegmentResultStart', facts, payload, resultFacts)
+  return resultFacts
 }
 
 export function end(
-  state: State,
+  facts: ResultFacts,
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
-): OutputState {
-  const baseState: OutputState = {
-    result: state,
+): OutputResultFacts {
+  const basefacts: OutputResultFacts = {
+    result: facts,
   }
 
-  const resultState: OutputState = produce(baseState, (draft: OutputState) => {
-    const segmentFacts = payload.segmentFacts
-    const numInvestedBuckets = R.sum(Object.values(state.decisions).map(Number))
-    const totalAssets =
-      state.assets.bank + state.assets.bonds + state.assets.stocks
+  const resultFacts: OutputResultFacts = produce(
+    basefacts,
+    (draft: OutputResultFacts) => {
+      const segmentFacts = payload.segmentFacts
+      const numInvestedBuckets = R.sum(
+        Object.values(facts.decisions).map(Number)
+      )
+      const totalAssets =
+        facts.assets.bank + facts.assets.bonds + facts.assets.stocks
 
-    const invNumInvestedBuckets = 1 / numInvestedBuckets
-    const targetAsset = invNumInvestedBuckets * totalAssets
-    const targetAssets = {
-      bank: state.decisions.bank ? targetAsset : 0,
-      bonds: state.decisions.bonds ? targetAsset : 0,
-      stocks: state.decisions.stocks ? targetAsset : 0,
-    }
+      const invNumInvestedBuckets = 1 / numInvestedBuckets
+      const targetAsset = invNumInvestedBuckets * totalAssets
+      const targetAssets = {
+        bank: facts.decisions.bank ? targetAsset : 0,
+        bonds: facts.decisions.bonds ? targetAsset : 0,
+        stocks: facts.decisions.stocks ? targetAsset : 0,
+      }
 
-    const assetsWithReturns = segmentFacts.returns.reduce(
-      (acc, returns, ix) => {
-        const last = acc[acc.length - 1]
+      const assetsWithReturns = segmentFacts.returns.reduce(
+        (acc, returns, ix) => {
+          const last = acc[acc.length - 1]
 
-        const bankWithReturn = withPercentChange(last.bank, returns.bank)
-        const bondsWithReturn = withPercentChange(last.bonds, returns.bonds)
-        const stocksWithReturn = withPercentChange(last.stocks, returns.stocks)
+          const bankWithReturn = withPercentChange(last.bank, returns.bank)
+          const bondsWithReturn = withPercentChange(last.bonds, returns.bonds)
+          const stocksWithReturn = withPercentChange(
+            last.stocks,
+            returns.stocks
+          )
 
-        const totalAssetsWithReturn =
-          bankWithReturn + bondsWithReturn + stocksWithReturn
-        const totalAssetsReturn = computePercentChange(
-          totalAssetsWithReturn,
-          last.totalAssets
-        )
+          const totalAssetsWithReturn =
+            bankWithReturn + bondsWithReturn + stocksWithReturn
+          const totalAssetsReturn = computePercentChange(
+            totalAssetsWithReturn,
+            last.totalAssets
+          )
 
-        return [
-          ...acc,
+          return [
+            ...acc,
+            {
+              ix: ix + 1,
+              bank: bankWithReturn,
+              bankReturn: returns.bank,
+              bonds: bondsWithReturn,
+              bondsReturn: returns.bonds,
+              stocks: stocksWithReturn,
+              stocksReturn: returns.stocks,
+              totalAssets: totalAssetsWithReturn,
+              totalAssetsReturn,
+            },
+          ]
+        },
+        [
           {
-            ix: ix + 1,
-            bank: bankWithReturn,
-            bankReturn: returns.bank,
-            bonds: bondsWithReturn,
-            bondsReturn: returns.bonds,
-            stocks: stocksWithReturn,
-            stocksReturn: returns.stocks,
-            totalAssets: totalAssetsWithReturn,
-            totalAssetsReturn,
+            ix: 0,
+            ...targetAssets,
+            totalAssets,
           },
         ]
-      },
-      [
-        {
-          ix: 0,
-          ...targetAssets,
-          totalAssets,
-        },
-      ]
-    )
+      )
 
-    const finalAssets = R.omit(
-      ['ix'],
-      assetsWithReturns[assetsWithReturns.length - 1]
-    )
+      const finalAssets = R.omit(
+        ['ix'],
+        assetsWithReturns[assetsWithReturns.length - 1]
+      )
 
-    draft.result.assetsWithReturns = assetsWithReturns
-    draft.result.assets = {
-      ...R.pick(['bank', 'bonds', 'stocks', 'totalAssets'], finalAssets),
+      draft.result.assetsWithReturns = assetsWithReturns
+      draft.result.assets = {
+        ...R.pick(['bank', 'bonds', 'stocks', 'totalAssets'], finalAssets),
+      }
+      draft.result.returns = {
+        bank: computePercentChange(finalAssets.bank, targetAssets.bank),
+        bonds: computePercentChange(finalAssets.bonds, targetAssets.bonds),
+        stocks: computePercentChange(finalAssets.stocks, targetAssets.stocks),
+        totalAssets: computePercentChange(
+          finalAssets.totalAssets,
+          facts.assets.bank
+        ),
+      }
     }
-    draft.result.returns = {
-      bank: computePercentChange(finalAssets.bank, targetAssets.bank),
-      bonds: computePercentChange(finalAssets.bonds, targetAssets.bonds),
-      stocks: computePercentChange(finalAssets.stocks, targetAssets.stocks),
-      totalAssets: computePercentChange(
-        finalAssets.totalAssets,
-        state.assets.bank
-      ),
-    }
-  })
+  )
 
-  debugLog('SegmentResultEnd', state, payload, resultState)
-  return resultState
+  debugLog('SegmentResultEnd', facts, payload, resultFacts)
+  return resultFacts
 }

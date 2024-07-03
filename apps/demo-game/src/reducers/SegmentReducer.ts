@@ -8,57 +8,60 @@ import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 import * as R from 'ramda'
 
-type State = {
+type SegmentFacts = {
   diceRolls?: { bonds: number; stocks: number }[]
   returns?: { bank: number; bonds: number; stocks: number }[]
 }
 
-type OutputState = OutputFacts<State, any, any>
+type OutputSegmentFacts = OutputFacts<SegmentFacts, any, any>
 
 export function initialize(
-  state: State,
+  facts: SegmentFacts,
   payload: PayloadSegment<PeriodFacts, PeriodSegmentFacts>
-): OutputState {
-  const baseState: OutputState = {
-    result: state,
+): OutputSegmentFacts {
+  const baseFacts: OutputSegmentFacts = {
+    result: facts,
   }
 
-  const resultState: OutputState = produce(baseState, (draft: OutputState) => {
-    const periodFacts = payload.periodFacts
-    const segmentIx = payload.segmentIx
+  const resultFacts: OutputSegmentFacts = produce(
+    baseFacts,
+    (draft: OutputSegmentFacts) => {
+      const periodFacts = payload.periodFacts
+      const segmentIx = payload.segmentIx
 
-    const diceRolls = R.range(0, periodFacts.rollsPerSegment).map(
-      (rollIx: number) => {
-        const seed = periodFacts.scenario.seed
-        const bondsAndStocks = diceRoll([seed, segmentIx, rollIx, 0])
-        return {
-          bonds: diceRoll([seed, segmentIx, rollIx, 1]) + bondsAndStocks,
-          stocks: diceRoll([seed, segmentIx, rollIx, 2]) + bondsAndStocks,
+      const diceRolls = R.range(0, periodFacts.rollsPerSegment).map(
+        (rollIx: number) => {
+          const seed = periodFacts.scenario.seed
+          const bondsAndStocks = diceRoll([seed, segmentIx, rollIx, 0])
+          return {
+            bonds: diceRoll([seed, segmentIx, rollIx, 1]) + bondsAndStocks,
+            stocks: diceRoll([seed, segmentIx, rollIx, 2]) + bondsAndStocks,
+          }
         }
-      }
-    )
+      )
 
-    const returns = diceRolls.map((rolls) => {
-      const scenario = payload.periodFacts.scenario
-      return {
-        bank: scenario.bankReturn,
-        bonds: computeScenarioOutcome(
-          scenario.trendBonds,
-          scenario.gapBonds,
-          rolls.bonds
-        ),
-        stocks: computeScenarioOutcome(
-          scenario.trendStocks,
-          scenario.gapStocks,
-          rolls.stocks
-        ),
-      }
-    })
+      const returns = diceRolls.map((rolls) => {
+        const scenario = payload.periodFacts.scenario
+        return {
+          bank: scenario.bankReturn,
+          bonds: computeScenarioOutcome(
+            scenario.trendBonds,
+            scenario.gapBonds,
+            rolls.bonds
+          ),
+          stocks: computeScenarioOutcome(
+            scenario.trendStocks,
+            scenario.gapStocks,
+            rolls.stocks
+          ),
+        }
+      })
 
-    draft.result.diceRolls = diceRolls
-    draft.result.returns = returns
-  })
+      draft.result.diceRolls = diceRolls
+      draft.result.returns = returns
+    }
+  )
 
-  debugLog('SegmentInitialize', state, payload, resultState)
-  return resultState
+  debugLog('SegmentInitialize', facts, payload, resultFacts)
+  return resultFacts
 }

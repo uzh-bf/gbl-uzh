@@ -7,41 +7,41 @@ import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 
-type OutputState = OutputFacts<PeriodFacts, any, any>
+type OutputPeriodFacts = OutputFacts<PeriodFacts, any, any>
 
 // TODO(JJ):
-// - Init baseState outside of fn and provide only draft as input
+// - Init baseFacts outside of fn and provide only draft as input
 // - PrismaClient
 
 export function initialize(
-  state: PeriodFacts,
+  facts: PeriodFacts,
   payload: PayloadPeriodInitialisation<PeriodFacts, PeriodSegmentFacts>
-): OutputState {
-  const baseState: OutputState = {
-    result: state,
+): OutputPeriodFacts {
+  const baseFacts: OutputPeriodFacts = {
+    result: facts,
   }
 
-  const resultState: OutputState = produce(
-    baseState,
-    (draft: OutputState) => {}
+  const resultFacts: OutputPeriodFacts = produce(
+    baseFacts,
+    (draft: OutputPeriodFacts) => {}
   )
 
-  debugLog('PeriodReducerInitialize', state, payload, resultState)
-  return resultState
+  debugLog('PeriodReducerInitialize', facts, payload, resultFacts)
+  return resultFacts
 }
 
 export function consolidate(
-  state: PeriodFacts,
+  facts: PeriodFacts,
   payload: PayloadPeriodConsolidation<PeriodSegmentFacts>
-): OutputState {
-  const baseState: OutputState = {
-    result: state,
+): OutputPeriodFacts {
+  const baseFacts: OutputPeriodFacts = {
+    result: facts,
   }
 
-  const resultState: OutputState = produce(
-    baseState,
-    (draft: OutputState) => {}
+  const resultFacts: OutputPeriodFacts = produce(
+    baseFacts,
+    (draft: OutputPeriodFacts) => {}
   )
-  debugLog('PeriodReducerConsolidate', state, payload, resultState)
-  return resultState
+  debugLog('PeriodReducerConsolidate', facts, payload, resultFacts)
+  return resultFacts
 }

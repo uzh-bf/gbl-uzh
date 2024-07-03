@@ -113,7 +113,7 @@ export type PayloadSegmentResult<
 // need then) -> we do it consistently
 
 interface Period<
-  StateType,
+  FactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
   NotificationType,
@@ -123,20 +123,20 @@ interface Period<
   PrismaType
 > {
   initialize: (
-    state: StateType,
+    facts: FactsType,
     payload: PayloadPeriodInitialisation<
       PeriodFactsType,
       PeriodSegmentFactsType
     >
-  ) => OutputFacts<StateType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
   consolidate: (
-    state: StateType,
+    facts: FactsType,
     payload: PayloadPeriodConsolidation<PeriodSegmentFactsType>
-  ) => OutputFacts<StateType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
 }
 
 interface PeriodResult<
-  StateType,
+  FactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
   PlayerRoleType,
@@ -145,25 +145,25 @@ interface PeriodResult<
   PrismaType
 > {
   initialize: (
-    state: StateType,
+    facts: FactsType,
     payload: PayloadPeriodResult<PeriodFactsType, PlayerRoleType>
-  ) => OutputFacts<StateType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
   start: (
-    state: StateType,
+    facts: FactsType,
     payload: PayloadPeriodResult<PeriodFactsType, PlayerRoleType>
-  ) => OutputFacts<StateType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
   end: (
-    state: StateType,
+    facts: FactsType,
     payload: PayloadPeriodResultEnd<
       PeriodFactsType,
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => OutputFacts<StateType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
 }
 
 interface Segment<
-  StateType,
+  FactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
   NotificationType,
@@ -171,13 +171,13 @@ interface Segment<
   PrismaType
 > {
   initialize: (
-    state: StateType,
+    facts: FactsType,
     payload: PayloadSegment<PeriodFactsType, PeriodSegmentFactsType>
-  ) => OutputFacts<StateType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
 }
 
 interface SegmentResult<
-  StateType,
+  FactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
   PlayerRoleType,
@@ -186,29 +186,29 @@ interface SegmentResult<
   PrismaType
 > {
   initialize: (
-    state: StateType,
+    facts: FactsType,
     payload: PayloadSegmentResult<
       PeriodFactsType,
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => OutputFacts<StateType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
   start: (
-    state: StateType,
+    facts: FactsType,
     payload: PayloadSegmentResult<
       PeriodFactsType,
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => OutputFacts<StateType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
   end: (
-    state: StateType,
+    facts: FactsType,
     payload: PayloadSegmentResult<
       PeriodFactsType,
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => OutputFacts<StateType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
 }
 
 interface Reducer<

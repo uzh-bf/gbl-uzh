@@ -1,32 +1,51 @@
 import { OutputFacts } from '@gbl-uzh/platform'
 
-export type Assets = {
+type Assets = {
   bank: number
   bonds: number
   stocks: number
   totalAssets: number
 }
 
-export type StateInit = {
-  decisions: {
-    bank: boolean
-    bonds: boolean
-    stocks: boolean
-  }
+type Decisions = {
+  bank: boolean
+  bonds: boolean
+  stocks: boolean
+}
+
+type AssetsWithReturns = Assets & {
+  ix: number
+  bankReturn?: number
+  bondsReturn?: number
+  stocksReturn?: number
+  totalAssetsReturn?: number
+}
+
+export type PeriodResultFactsInit = {
+  decisions: Decisions
   assets: Assets
 }
 
-export type OutputStateInit = OutputFacts<StateInit, any, any>
-
-export type State = StateInit & {
+export type ResultFacts = PeriodResultFactsInit & {
   returns: Assets
-  assetsWithReturns: (Assets & {
-    ix: number
-    bankReturn?: number
-    bondsReturn?: number
-    stocksReturn?: number
-    totalAssetsReturn?: number
-  })[]
+  assetsWithReturns: AssetsWithReturns[]
 }
 
-export type OutputState = OutputFacts<State, any, any>
+export type SegmentResultFactsInit = PeriodResultFactsInit & {
+  returns?: Assets
+  assetsWithReturns?: AssetsWithReturns[]
+}
+
+export type OutputPeriodResultFactsInit = OutputFacts<
+  PeriodResultFactsInit,
+  any,
+  any
+>
+
+export type OutputResultFacts = OutputFacts<ResultFacts, any, any>
+
+export type OutputSegmentResultFactsInit = OutputFacts<
+  SegmentResultFactsInit,
+  any,
+  any
+>
