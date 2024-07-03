@@ -220,7 +220,7 @@ interface Reducer<
   ActionTypes: Record<string, string>
 }
 
-interface Reducers<PrismaType> {
+interface Services<PrismaType> {
   Actions: Reducer<any, any, any, any, any, PrismaType>
   Period: Period<any, any, any, any, any, PrismaType>
   PeriodResult: PeriodResult<any, any, any, any, any, any, PrismaType>
@@ -238,12 +238,12 @@ export interface CtxWithPrisma<PrismaType> extends NextPageContext {
 }
 
 export interface CtxWithFacts<FactsType, PrismaType> {
-  reducers: Reducers<PrismaType>
+  services: Services<PrismaType>
 }
 
 export interface CtxWithFactsAndSchema<FactsType, PrismaType> {
   schema: yup.Schema<FactsType>
-  reducers: Reducers<PrismaType>
+  services: Services<PrismaType>
 }
 
 export enum BaseGlobalNotificationType {

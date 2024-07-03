@@ -3,7 +3,7 @@ import {
   generateBaseQueries,
   generateBaseSubscriptions,
 } from '@gbl-uzh/platform/dist/nexus'
-import * as reducers from '../reducers'
+import * as services from '../services'
 import type { PeriodFacts, PeriodSegmentFacts } from './types'
 import {
   PeriodFactsInput,
@@ -16,7 +16,7 @@ export * from './types'
 
 export const Query = generateBaseQueries()
 export const Mutation = generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
-  reducers,
+  services,
   schemas: {
     PeriodFactsSchema,
     PeriodSegmentFactsSchema,

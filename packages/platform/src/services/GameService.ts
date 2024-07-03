@@ -59,7 +59,7 @@ interface AddGamePeriodArgs<T> {
 export async function addGamePeriod<TFacts>(
   { gameId, facts }: AddGamePeriodArgs<TFacts>,
   ctx: Context,
-  { schema, reducers }: CtxWithFactsAndSchema<TFacts, PrismaClient>
+  { schema, services }: CtxWithFactsAndSchema<TFacts, PrismaClient>
 ) {
   const validatedFacts = schema.validateSync(facts)
 
@@ -91,7 +91,7 @@ export async function addGamePeriod<TFacts>(
 
   // TODO(JJ): Why do we provide validatedFacts twice?
   // - remove periodFacts from payload for initialize?
-  const { resultFacts: initializedFacts } = reducers.Period.initialize(
+  const { resultFacts: initializedFacts } = services.Period.initialize(
     validatedFacts,
     {
       // TODO(JJ): replace with undefined
@@ -170,7 +170,7 @@ export async function addPeriodSegment<TFacts>(
     storyElements,
   }: AddPeriodSegmentArgs<TFacts>,
   ctx: Context,
-  { schema, reducers }: CtxWithFactsAndSchema<TFacts, PrismaClient>
+  { schema, services }: CtxWithFactsAndSchema<TFacts, PrismaClient>
 ) {
   const validatedFacts = schema.validateSync(facts)
 
@@ -195,12 +195,13 @@ export async function addPeriodSegment<TFacts>(
 
   const index = period.segments[0]?.index + 1 || 0
 
-  const { resultFacts: initializedFacts } = reducers.Segment.initialize(
+  const { resultFacts: initializedFacts } = services.Segment.initialize(
     validatedFacts,
     {
       periodFacts: period.facts,
       previousSegmentFacts: period.segments[0]?.facts,
       segmentIx: index,
+      // TODO(JJ): Remove hardcode, use from form input for Derivative Game
       segmentCount: 4,
       periodIx,
     }
@@ -282,7 +283,7 @@ interface ActivateNextPeriodArgs {
 export async function activateNextPeriod(
   { gameId }: ActivateNextPeriodArgs,
   ctx: Context,
-  { reducers }: CtxWithFacts<any, PrismaClient>
+  { services }: CtxWithFacts<any, PrismaClient>
 ) {
   log.info('activating next period')
 
@@ -355,7 +356,7 @@ export async function activateNextPeriod(
           periodFacts: game.periods?.[0].facts,
         },
         ctx,
-        { reducers }
+        { services }
       )
 
       // update the status and active period of the current game
@@ -413,11 +414,11 @@ export async function activateNextPeriod(
       if (!game.activePeriod?.activeSegment || !currentSegmentIx) return null
 
       const { results, extras } = computeSegmentEndResults(game, ctx, {
-        reducers,
+        services,
       })
 
       // update period facts when starting consolidation
-      const { resultFacts: consolidatedFacts } = reducers.Period.consolidate(
+      const { resultFacts: consolidatedFacts } = services.Period.consolidate(
         game.activePeriod.facts,
         {
           previousSegmentFacts: game.activePeriod.activeSegment.facts as any,
@@ -499,7 +500,7 @@ export async function activateNextPeriod(
           gameId: game.id,
         },
         ctx,
-        { reducers }
+        { services }
       )
 
       await Promise.all(promises)
@@ -574,7 +575,7 @@ export async function activateNextPeriod(
           periodFacts: game.activePeriod.facts,
         },
         ctx,
-        { reducers }
+        { services }
       )
 
       const result = await ctx.prisma.$transaction([
@@ -629,7 +630,7 @@ interface ActivateSegmentArgs {
 export async function activateNextSegment(
   { gameId }: ActivateSegmentArgs,
   ctx: Context,
-  { reducers }: CtxWithFacts<any, PrismaClient>
+  { services }: CtxWithFacts<any, PrismaClient>
 ) {
   const game = await ctx.prisma.game.findUnique({
     where: {
@@ -677,7 +678,7 @@ export async function activateNextSegment(
     case DB.GameStatus.PREPARATION:
     case DB.GameStatus.PAUSED: {
       const { results, extras } = computeSegmentStartResults(game, ctx, {
-        reducers,
+        services,
       })
 
       const result = await ctx.prisma.$transaction([
@@ -751,7 +752,7 @@ export async function activateNextSegment(
       }
 
       const { results, extras } = computeSegmentEndResults(game, ctx, {
-        reducers,
+        services,
       })
 
       const result = await ctx.prisma.$transaction([
@@ -979,7 +980,7 @@ function mapAction({ ctx, gameId, activePeriodIx, playerId }) {
 export function computePeriodStartResults(
   { results, players, activePeriodIx, gameId, periodFacts },
   ctx,
-  { reducers }
+  { services }
 ) {
   const currentPeriodIx = activePeriodIx
   const nextPeriodIx = currentPeriodIx + 1
@@ -992,7 +993,7 @@ export function computePeriodStartResults(
       // ensure that we only work on PERIOD_END results of the preceding period
       .filter((result) => result.type === DB.PlayerResultType.PERIOD_END)
       .map((result, ix, allResults) => {
-        const { resultFacts: facts, actions } = reducers.PeriodResult.start(
+        const { resultFacts: facts, actions } = services.PeriodResult.start(
           result.facts,
           {
             playerRole: result.player?.role ?? result.player.connect?.role,
@@ -1036,7 +1037,7 @@ export function computePeriodStartResults(
 
   // if the game has not started yet, generate initial PERIOD_START results
   const result = players.map((player, ix, allPlayers) => {
-    const { resultFacts: facts, actions } = reducers.PeriodResult.initialize(
+    const { resultFacts: facts, actions } = services.PeriodResult.initialize(
       {},
       { playerRole: player.role, periodFacts }
     )
@@ -1086,7 +1087,7 @@ export async function computePeriodEndResults(
     gameId,
   },
   ctx: Context,
-  { reducers }
+  { services }
 ) {
   let extras: any[] = []
   let promises: Promise<any>[] = []
@@ -1102,7 +1103,7 @@ export async function computePeriodEndResults(
         resultFacts: facts,
         actions,
         events,
-      } = reducers.PeriodResult.end(result.facts, {
+      } = services.PeriodResult.end(result.facts, {
         periodFacts,
         segmentFacts,
 
@@ -1171,9 +1172,7 @@ export async function computePeriodEndResults(
   }
 }
 
-// TODO(JJ):
-// - rename reducers to services
-export function computeSegmentStartResults(game, ctx, { reducers }) {
+export function computeSegmentStartResults(game, ctx, { services }) {
   const currentSegmentIx = game.activePeriod.activeSegmentIx
   const nextSegmentIx = currentSegmentIx + 1
 
@@ -1184,7 +1183,7 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
     const results = game.activePeriod.activeSegment.results
       .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
       .reduce((acc, result, ix, allResults) => {
-        const { resultFacts: facts, actions } = reducers.SegmentResult.start(
+        const { resultFacts: facts, actions } = services.SegmentResult.start(
           result.facts,
           {
             playerRole: result.player.role,
@@ -1250,7 +1249,7 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
   const results = game.activePeriod.results
     .filter((result) => result.type === DB.PlayerResultType.PERIOD_START)
     .reduce((acc, result, ix, allResults) => {
-      let { resultFacts: facts } = reducers.SegmentResult.initialize(
+      let { resultFacts: facts } = services.SegmentResult.initialize(
         result.facts,
         {
           playerRole: result.player.role,
@@ -1301,13 +1300,13 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
   }
 }
 
-export function computeSegmentEndResults(game, ctx, { reducers }) {
+export function computeSegmentEndResults(game, ctx, { services }) {
   let extras: any[] = []
 
   const results = game.activePeriod.activeSegment.results
     .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
     .map((result, ix, allResults) => {
-      const { resultFacts: facts, actions } = reducers.SegmentResult.end(
+      const { resultFacts: facts, actions } = services.SegmentResult.end(
         result.facts,
         {
           playerRole: result.player.role,

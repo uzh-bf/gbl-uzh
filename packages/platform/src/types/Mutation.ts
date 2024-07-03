@@ -17,12 +17,12 @@ import { Game, Period, PeriodSegment } from './Game'
 import { LearningElementAttempt } from './LearningElement'
 import { Player, PlayerDecision, PlayerResult } from './Player'
 
-const defaultReducers = {}
+const defaultServices = {}
 const defaultSchemas = {}
 const defaultInputTypes = {}
 
 interface GenerateBaseMutationsArgs {
-  reducers?: any
+  services?: any
   schemas?: any
   inputTypes?: any
   // TODO(JJ): return value should be unknown
@@ -30,7 +30,7 @@ interface GenerateBaseMutationsArgs {
 }
 
 export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
-  reducers = defaultReducers,
+  services = defaultServices,
   roleAssigner,
   schemas = defaultSchemas,
   inputTypes = defaultInputTypes,
@@ -88,7 +88,7 @@ export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
         async resolve(_, args, ctx) {
           return GameService.addGamePeriod<PeriodFacts>(args, ctx, {
             schema: schemas.PeriodFactsSchema,
-            reducers,
+            services,
           })
         },
       })
@@ -107,7 +107,7 @@ export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
         async resolve(_, args, ctx) {
           return GameService.addPeriodSegment<PeriodSegmentFacts>(args, ctx, {
             schema: schemas.PeriodSegmentFactsSchema,
-            reducers,
+            services,
           })
         },
       })
@@ -119,7 +119,7 @@ export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
         },
         async resolve(_, args, ctx) {
           const results = await GameService.activateNextPeriod(args, ctx, {
-            reducers,
+            services,
           })
           if (!results) return
           return results[0] as any
@@ -133,7 +133,7 @@ export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
         },
         async resolve(_, args, ctx) {
           const results = await GameService.activateNextSegment(args, ctx, {
-            reducers,
+            services,
           })
           if (!results) return
           return results[0] as any
@@ -163,7 +163,7 @@ export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
               facts,
             },
             ctx,
-            { reducers }
+            { services }
           )
 
           return result

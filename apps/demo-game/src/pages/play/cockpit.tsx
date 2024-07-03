@@ -5,7 +5,7 @@ import {
   PerformActionDocument,
   ResultDocument,
 } from 'src/graphql/generated/ops'
-import { ActionTypes } from 'src/reducers/ActionsReducer'
+import { ActionTypes } from 'src/services/ActionsReducer'
 
 function Cockpit() {
   const playerState = useQuery(ResultDocument, { fetchPolicy: 'cache-first' })
