@@ -17,7 +17,7 @@ interface CreateGameArgs {
 export async function createGame(
   { name, playerCount }: CreateGameArgs,
   ctx: Context,
-  { roleAssigner }: { roleAssigner: (ix: number) => any }
+  { roleAssigner }: { roleAssigner?: (ix: number) => any }
 ) {
   return ctx.prisma.game.create({
     data: {
@@ -32,7 +32,7 @@ export async function createGame(
           return {
             facts: {},
             token: nanoid(),
-            role: roleAssigner(ix),
+            role: roleAssigner ? roleAssigner(ix) : undefined,
             number: playerCount - ix,
             name: `Team ${playerCount - ix}`,
             level: {
@@ -92,6 +92,7 @@ export async function addGamePeriod<TFacts>(
   // TODO(JJ): Why do we provide validatedFacts twice?
   // - remove periodFacts from payload for initialize?
   const initializedFacts = reducers.Period.initialize(validatedFacts, {
+    // TODO(JJ): replace with undefined
     periodFacts: validatedFacts,
     previousPeriodFacts: game.periods[0]?.facts as any,
     previousSegmentFacts: game.periods[0]?.segments[0]?.facts as any,
@@ -985,7 +986,7 @@ export function computePeriodStartResults(
         const { result: facts, actions } = reducers.PeriodResult.start(
           result.facts,
           {
-            playerRole: result.player.role ?? result.player.connect.role,
+            playerRole: result.player?.role ?? result.player.connect?.role,
             periodFacts,
           }
         )
@@ -1161,6 +1162,8 @@ export async function computePeriodEndResults(
   }
 }
 
+// TODO(JJ):
+// - rename reducers to services
 export function computeSegmentStartResults(game, ctx, { reducers }) {
   const currentSegmentIx = game.activePeriod.activeSegmentIx
   const nextSegmentIx = currentSegmentIx + 1

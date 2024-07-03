@@ -25,13 +25,13 @@ interface GenerateBaseMutationsArgs {
   reducers?: any
   schemas?: any
   inputTypes?: any
-  roleAssigner?: (ix: number) => void
+  // TODO(JJ): return value should be unknown
+  roleAssigner?: (ix: number) => any
 }
 
 export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
   reducers = defaultReducers,
-  // TODO(JJ): What Is Unset? Why string?
-  roleAssigner = () => 'UNSET',
+  roleAssigner,
   schemas = defaultSchemas,
   inputTypes = defaultInputTypes,
 }: GenerateBaseMutationsArgs = {}) {
