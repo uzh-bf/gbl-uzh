@@ -20,7 +20,7 @@ export function initialize(
   payload: PayloadSegment<PeriodFacts, PeriodSegmentFacts>
 ): OutputSegmentFacts {
   const baseFacts: OutputSegmentFacts = {
-    result: facts,
+    resultFacts: facts,
   }
 
   const resultFacts: OutputSegmentFacts = produce(
@@ -57,8 +57,8 @@ export function initialize(
         }
       })
 
-      draft.result.diceRolls = diceRolls
-      draft.result.returns = returns
+      draft.resultFacts.diceRolls = diceRolls
+      draft.resultFacts.returns = returns
     }
   )
 

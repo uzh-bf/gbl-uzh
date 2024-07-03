@@ -35,7 +35,7 @@ export type OutputFactsUser<FactsType, NotificationType, EventType> = {
 }
 
 export type OutputFacts<FactsType, NotificationType, EventType> = {
-  result: FactsType
+  resultFacts: FactsType
   actions?: any[]
   extras?: any
   events?: Event<EventType>[]
@@ -105,12 +105,6 @@ export type PayloadSegmentResult<
 
 // TODO(JJ):
 // - Replace StateType with unknown -> second step in a different branch
-
-// - Introduce OutputStateType or should we return any as well?
-// - type OutputStateType = InputStateType & any for some, and some have also
-// events and notifications => double-check with RS which fns need events and
-// notifications (until now only period result reducer and action reducers
-// need then) -> we do it consistently
 
 interface Period<
   FactsType,

@@ -17,18 +17,18 @@ export function initialize(
   payload: PayloadPeriodResult<PlayerRole, PeriodFacts>
 ): OutputPeriodResultFactsInit {
   const baseFacts: OutputPeriodResultFactsInit = {
-    result: facts,
+    resultFacts: facts,
   }
 
   const resultFacts: OutputPeriodResultFactsInit = produce(
     baseFacts,
     (draft: OutputPeriodResultFactsInit) => {
-      draft.result.decisions = {
+      draft.resultFacts.decisions = {
         bank: true,
         bonds: false,
         stocks: false,
       }
-      draft.result.assets = {
+      draft.resultFacts.assets = {
         bank: INITIAL_CAPITAL,
         bonds: 0,
         stocks: 0,
@@ -46,7 +46,7 @@ export function start(
   payload: PayloadPeriodResult<PlayerRole, PeriodFacts>
 ): OutputResultFacts {
   const baseFacts: OutputResultFacts = {
-    result: facts,
+    resultFacts: facts,
   }
   const resultFacts = produce(baseFacts, (draft: OutputResultFacts) => {})
 
@@ -59,7 +59,7 @@ export function end(
   payload: PayloadPeriodResultEnd<PeriodFacts, PeriodSegmentFacts, PlayerRole>
 ): OutputResultFacts {
   const baseFacts: OutputResultFacts = {
-    result: facts,
+    resultFacts: facts,
     events: [],
   }
 

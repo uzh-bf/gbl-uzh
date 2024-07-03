@@ -91,10 +91,13 @@ export async function addGamePeriod<TFacts>(
 
   // TODO(JJ): Why do we provide validatedFacts twice?
   // - remove periodFacts from payload for initialize?
-  const { result: initializedFacts } = reducers.Period.initialize(
+  const { resultFacts: initializedFacts } = reducers.Period.initialize(
     validatedFacts,
     {
       // TODO(JJ): replace with undefined
+      // At RS: If we replace validatedFacts with periodFacts the
+      // Derivative Game will be broken, as it computes the trend from
+      // periodFacts instead of the first arguement
       periodFacts: validatedFacts,
       previousPeriodFacts: game.periods[0]?.facts as any,
       previousSegmentFacts: game.periods[0]?.segments[0]?.facts as any,
@@ -192,7 +195,7 @@ export async function addPeriodSegment<TFacts>(
 
   const index = period.segments[0]?.index + 1 || 0
 
-  const { result: initializedFacts } = reducers.Segment.initialize(
+  const { resultFacts: initializedFacts } = reducers.Segment.initialize(
     validatedFacts,
     {
       periodFacts: period.facts,
@@ -414,7 +417,7 @@ export async function activateNextPeriod(
       })
 
       // update period facts when starting consolidation
-      const { result: consolidatedFacts } = reducers.Period.consolidate(
+      const { resultFacts: consolidatedFacts } = reducers.Period.consolidate(
         game.activePeriod.facts,
         {
           previousSegmentFacts: game.activePeriod.activeSegment.facts as any,
@@ -989,7 +992,7 @@ export function computePeriodStartResults(
       // ensure that we only work on PERIOD_END results of the preceding period
       .filter((result) => result.type === DB.PlayerResultType.PERIOD_END)
       .map((result, ix, allResults) => {
-        const { result: facts, actions } = reducers.PeriodResult.start(
+        const { resultFacts: facts, actions } = reducers.PeriodResult.start(
           result.facts,
           {
             playerRole: result.player?.role ?? result.player.connect?.role,
@@ -1033,7 +1036,7 @@ export function computePeriodStartResults(
 
   // if the game has not started yet, generate initial PERIOD_START results
   const result = players.map((player, ix, allPlayers) => {
-    const { result: facts, actions } = reducers.PeriodResult.initialize(
+    const { resultFacts: facts, actions } = reducers.PeriodResult.initialize(
       {},
       { playerRole: player.role, periodFacts }
     )
@@ -1096,7 +1099,7 @@ export async function computePeriodEndResults(
       )
 
       const {
-        result: facts,
+        resultFacts: facts,
         actions,
         events,
       } = reducers.PeriodResult.end(result.facts, {
@@ -1181,7 +1184,7 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
     const results = game.activePeriod.activeSegment.results
       .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
       .reduce((acc, result, ix, allResults) => {
-        const { result: facts, actions } = reducers.SegmentResult.start(
+        const { resultFacts: facts, actions } = reducers.SegmentResult.start(
           result.facts,
           {
             playerRole: result.player.role,
@@ -1247,13 +1250,16 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
   const results = game.activePeriod.results
     .filter((result) => result.type === DB.PlayerResultType.PERIOD_START)
     .reduce((acc, result, ix, allResults) => {
-      let { result: facts } = reducers.SegmentResult.initialize(result.facts, {
-        playerRole: result.player.role,
-        periodFacts: game.activePeriod.facts,
-        segmentFacts: game.activePeriod.activeSegment?.facts,
-        nextSegmentFacts: game.activePeriod.activeSegment?.nextSegment?.facts,
-        segmentIx: nextSegmentIx,
-      })
+      let { resultFacts: facts } = reducers.SegmentResult.initialize(
+        result.facts,
+        {
+          playerRole: result.player.role,
+          periodFacts: game.activePeriod.facts,
+          segmentFacts: game.activePeriod.activeSegment?.facts,
+          nextSegmentFacts: game.activePeriod.activeSegment?.nextSegment?.facts,
+          segmentIx: nextSegmentIx,
+        }
+      )
 
       const common = {
         facts,
@@ -1301,7 +1307,7 @@ export function computeSegmentEndResults(game, ctx, { reducers }) {
   const results = game.activePeriod.activeSegment.results
     .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
     .map((result, ix, allResults) => {
-      const { result: facts, actions } = reducers.SegmentResult.end(
+      const { resultFacts: facts, actions } = reducers.SegmentResult.end(
         result.facts,
         {
           playerRole: result.player.role,

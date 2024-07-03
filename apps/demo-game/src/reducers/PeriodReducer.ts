@@ -11,6 +11,8 @@ type OutputPeriodFacts = OutputFacts<PeriodFacts, any, any>
 
 // TODO(JJ):
 // - Init baseFacts outside of fn and provide only draft as input
+// - Payload was used because of the reducer concept, maybe rename to something
+//   else...
 // - PrismaClient
 
 export function initialize(
@@ -18,7 +20,7 @@ export function initialize(
   payload: PayloadPeriodInitialisation<PeriodFacts, PeriodSegmentFacts>
 ): OutputPeriodFacts {
   const baseFacts: OutputPeriodFacts = {
-    result: facts,
+    resultFacts: facts,
   }
 
   const resultFacts: OutputPeriodFacts = produce(
@@ -35,7 +37,7 @@ export function consolidate(
   payload: PayloadPeriodConsolidation<PeriodSegmentFacts>
 ): OutputPeriodFacts {
   const baseFacts: OutputPeriodFacts = {
-    result: facts,
+    resultFacts: facts,
   }
 
   const resultFacts: OutputPeriodFacts = produce(

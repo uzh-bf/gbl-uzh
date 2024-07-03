@@ -15,16 +15,12 @@ import {
   SegmentResultFactsInit,
 } from '../types/facts'
 
-// TODO(JJ):
-// for all separate functions
-// - Rename result to resultFacts
-
 export function initialize(
   facts: SegmentResultFactsInit,
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
 ): OutputSegmentResultFactsInit {
   const basefacts: OutputSegmentResultFactsInit = {
-    result: facts,
+    resultFacts: facts,
   }
 
   const resultFacts: OutputSegmentResultFactsInit = produce(
@@ -41,7 +37,7 @@ export function start(
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
 ): OutputResultFacts {
   const basefacts: OutputResultFacts = {
-    result: facts,
+    resultFacts: facts,
   }
 
   const resultFacts: OutputResultFacts = produce(
@@ -58,7 +54,7 @@ export function end(
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
 ): OutputResultFacts {
   const basefacts: OutputResultFacts = {
-    result: facts,
+    resultFacts: facts,
   }
 
   const resultFacts: OutputResultFacts = produce(
@@ -126,11 +122,11 @@ export function end(
         assetsWithReturns[assetsWithReturns.length - 1]
       )
 
-      draft.result.assetsWithReturns = assetsWithReturns
-      draft.result.assets = {
+      draft.resultFacts.assetsWithReturns = assetsWithReturns
+      draft.resultFacts.assets = {
         ...R.pick(['bank', 'bonds', 'stocks', 'totalAssets'], finalAssets),
       }
-      draft.result.returns = {
+      draft.resultFacts.returns = {
         bank: computePercentChange(finalAssets.bank, targetAssets.bank),
         bonds: computePercentChange(finalAssets.bonds, targetAssets.bonds),
         stocks: computePercentChange(finalAssets.stocks, targetAssets.stocks),
