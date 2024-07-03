@@ -1,22 +1,15 @@
 import { Action } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
-import { PeriodFacts, PeriodSegmentFacts } from '@graphql/types'
 import { PrismaClient } from '@prisma/client'
 import { produce } from 'immer'
 import { P, match } from 'ts-pattern'
+import { PeriodFacts, PeriodSegmentFacts } from '../types/index'
 
 export enum ActionTypes {
   DECIDE_BANK = 'DECIDE_BANK',
   DECIDE_BONDS = 'DECIDE_BONDS',
   DECIDE_STOCK = 'DECIDE_STOCK',
 }
-
-// TODO(Jakob):
-// - Ponder: Make input (state) and output (newState) always having consistent
-//   properties (with optional values) vs like it is now (each case could
-//   deliver a different output
-// - For the ActionReducer it is trivial and consistent
-//   (always the same properties as output)
 
 type PayloadType = {
   playerArgs: {

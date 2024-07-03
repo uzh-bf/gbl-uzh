@@ -1,6 +1,5 @@
 import { PayloadPeriodResult, PayloadPeriodResultEnd } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
-import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 import { PlayerRole } from '../settings/Constants'
 import {
@@ -9,6 +8,7 @@ import {
   PeriodResultFactsInit,
   ResultFacts,
 } from '../types/facts'
+import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
 const INITIAL_CAPITAL = 10000
 

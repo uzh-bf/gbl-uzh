@@ -4,9 +4,9 @@ import {
   debugLog,
   diceRoll,
 } from '@gbl-uzh/platform/dist/lib/util'
-import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 import * as R from 'ramda'
+import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
 type SegmentFacts = {
   diceRolls?: { bonds: number; stocks: number }[]

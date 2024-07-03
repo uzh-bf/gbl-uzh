@@ -4,8 +4,8 @@ import {
   PayloadPeriodInitialisation,
 } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
-import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
+import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
 type OutputPeriodFacts = OutputFacts<PeriodFacts, any, any>
 

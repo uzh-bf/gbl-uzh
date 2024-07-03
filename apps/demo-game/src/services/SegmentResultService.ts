@@ -4,10 +4,10 @@ import {
   debugLog,
   withPercentChange,
 } from '@gbl-uzh/platform/dist/lib/util'
-import type { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 import * as R from 'ramda'
 import { PlayerRole } from '../settings/Constants'
+import type { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 import {
   OutputResultFacts,
   OutputSegmentResultFactsInit,
