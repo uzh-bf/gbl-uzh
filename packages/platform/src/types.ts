@@ -24,24 +24,23 @@ export type Event<EventType> = {
   facts?: any
 }
 
-export type Output<NotificationType, EventType> = {
-  result: any
-  isDirty: boolean
+// TODO(JJ): remove isDirty for ActionReducer
+export type OutputFactsUser<FactsType, NotificationType, EventType> = {
+  result: FactsType
+  isDirty?: boolean
   extras?: any
   actions?: any[]
   notifications?: Notification<NotificationType>[]
   events?: Event<EventType>[]
 }
 
-export type OutputState<InputState, NotificationType, EventType> = {
-  result: InputState & any
+export type OutputFacts<FactsType, NotificationType, EventType> = {
+  result: FactsType
   actions?: any[]
+  extras?: any
   events?: Event<EventType>[]
   notifications?: Notification<NotificationType>[]
 }
-
-export type OutputExtrasState<InputState, NotificationType, EventType> =
-  OutputState<InputState, NotificationType, EventType> & { extras?: any }
 
 export type Action<ActionType, PayloadType, PrismaType> = {
   type: ActionType
@@ -100,18 +99,18 @@ export type PayloadSegmentResult<
   playerRole: PlayerRoleType
   periodFacts: PeriodFactsType
   segmentFacts: PeriodSegmentFactsType
-  // TODO(JJ): Double-check if segmentFacts and nextSegmentFacts have same type
   nextSegmentFacts?: PeriodSegmentFactsType
   segmentIx: number
 }
 
 // TODO(JJ):
-// - Replace StateType with any?
+// - Replace StateType with unknown -> second step in a different branch
+
 // - Introduce OutputStateType or should we return any as well?
 // - type OutputStateType = InputStateType & any for some, and some have also
 // events and notifications => double-check with RS which fns need events and
 // notifications (until now only period result reducer and action reducers
-// need then)
+// need then) -> we do it consistently
 
 interface Period<
   StateType,
@@ -120,6 +119,7 @@ interface Period<
   NotificationType,
   EventType,
   // TODO(JJ): Decide what to do with prisma -> goes into payload?
+  // -> add a third param: ctx: CtxWithPrisma
   PrismaType
 > {
   initialize: (
@@ -128,11 +128,11 @@ interface Period<
       PeriodFactsType,
       PeriodSegmentFactsType
     >
-  ) => Output<NotificationType, EventType>
+  ) => OutputFacts<StateType, NotificationType, EventType>
   consolidate: (
     state: StateType,
     payload: PayloadPeriodConsolidation<PeriodSegmentFactsType>
-  ) => Output<NotificationType, EventType>
+  ) => OutputFacts<StateType, NotificationType, EventType>
 }
 
 interface PeriodResult<
@@ -147,11 +147,11 @@ interface PeriodResult<
   initialize: (
     state: StateType,
     payload: PayloadPeriodResult<PeriodFactsType, PlayerRoleType>
-  ) => Output<NotificationType, EventType>
+  ) => OutputFacts<StateType, NotificationType, EventType>
   start: (
     state: StateType,
     payload: PayloadPeriodResult<PeriodFactsType, PlayerRoleType>
-  ) => Output<NotificationType, EventType>
+  ) => OutputFacts<StateType, NotificationType, EventType>
   end: (
     state: StateType,
     payload: PayloadPeriodResultEnd<
@@ -159,7 +159,7 @@ interface PeriodResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => Output<NotificationType, EventType>
+  ) => OutputFacts<StateType, NotificationType, EventType>
 }
 
 interface Segment<
@@ -173,7 +173,7 @@ interface Segment<
   initialize: (
     state: StateType,
     payload: PayloadSegment<PeriodFactsType, PeriodSegmentFactsType>
-  ) => Output<NotificationType, EventType>
+  ) => OutputFacts<StateType, NotificationType, EventType>
 }
 
 interface SegmentResult<
@@ -192,7 +192,7 @@ interface SegmentResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => Output<NotificationType, EventType>
+  ) => OutputFacts<StateType, NotificationType, EventType>
   start: (
     state: StateType,
     payload: PayloadSegmentResult<
@@ -200,7 +200,7 @@ interface SegmentResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => Output<NotificationType, EventType>
+  ) => OutputFacts<StateType, NotificationType, EventType>
   end: (
     state: StateType,
     payload: PayloadSegmentResult<
@@ -208,7 +208,7 @@ interface SegmentResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => Output<NotificationType, EventType>
+  ) => OutputFacts<StateType, NotificationType, EventType>
 }
 
 interface Reducer<
@@ -222,7 +222,7 @@ interface Reducer<
   apply: (
     state: StateType,
     action: Action<ActionType, PayloadType, PrismaType>
-  ) => Output<NotificationType, EventType>
+  ) => OutputFactsUser<StateType, NotificationType, EventType>
   ActionTypes: Record<string, string>
 }
 
@@ -232,8 +232,6 @@ interface Reducers<PrismaType> {
   PeriodResult: PeriodResult<any, any, any, any, any, any, PrismaType>
   Segment: Segment<any, any, any, any, any, PrismaType>
   SegmentResult: SegmentResult<any, any, any, any, any, any, PrismaType>
-  // TODO(JJ): Check with RS if safe to remove
-  // [key: string]: Reducer<any, any, any, any, any, any, PrismaType>
 }
 
 export interface CtxWithPrisma<PrismaType> extends NextPageContext {

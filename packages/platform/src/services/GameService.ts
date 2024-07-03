@@ -91,13 +91,16 @@ export async function addGamePeriod<TFacts>(
 
   // TODO(JJ): Why do we provide validatedFacts twice?
   // - remove periodFacts from payload for initialize?
-  const initializedFacts = reducers.Period.initialize(validatedFacts, {
-    // TODO(JJ): replace with undefined
-    periodFacts: validatedFacts,
-    previousPeriodFacts: game.periods[0]?.facts as any,
-    previousSegmentFacts: game.periods[0]?.segments[0]?.facts as any,
-    periodIx: index,
-  })
+  const { result: initializedFacts } = reducers.Period.initialize(
+    validatedFacts,
+    {
+      // TODO(JJ): replace with undefined
+      periodFacts: validatedFacts,
+      previousPeriodFacts: game.periods[0]?.facts as any,
+      previousSegmentFacts: game.periods[0]?.segments[0]?.facts as any,
+      periodIx: index,
+    }
+  )
 
   console.log(
     game.periods[0]?.facts,
@@ -189,13 +192,16 @@ export async function addPeriodSegment<TFacts>(
 
   const index = period.segments[0]?.index + 1 || 0
 
-  const initializedFacts = reducers.Segment.initialize(validatedFacts, {
-    periodFacts: period.facts,
-    previousSegmentFacts: period.segments[0]?.facts,
-    segmentIx: index,
-    segmentCount: 4,
-    periodIx,
-  })
+  const { result: initializedFacts } = reducers.Segment.initialize(
+    validatedFacts,
+    {
+      periodFacts: period.facts,
+      previousSegmentFacts: period.segments[0]?.facts,
+      segmentIx: index,
+      segmentCount: 4,
+      periodIx,
+    }
+  )
 
   // create or update the facts and settings of a period segment
   return ctx.prisma.periodSegment.upsert({
@@ -408,7 +414,7 @@ export async function activateNextPeriod(
       })
 
       // update period facts when starting consolidation
-      const consolidatedFacts = reducers.Period.consolidate(
+      const { result: consolidatedFacts } = reducers.Period.consolidate(
         game.activePeriod.facts,
         {
           previousSegmentFacts: game.activePeriod.activeSegment.facts as any,

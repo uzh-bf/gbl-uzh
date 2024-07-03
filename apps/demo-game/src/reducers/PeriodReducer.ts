@@ -1,60 +1,47 @@
 import {
+  OutputFacts,
   PayloadPeriodConsolidation,
   PayloadPeriodInitialisation,
 } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
+import { produce } from 'immer'
 
-type State = {
-  rollsPerSegment: number
-  scenario: {
-    seed: number
-    trendStocks: number
-    trendBonds: number
-    gapStocks: number
-    gapBonds: number
-    bankReturn: number
-  }
-}
-
-type OutputState = State & {}
+type OutputState = OutputFacts<PeriodFacts, any, any>
 
 // TODO(JJ):
-// - use immer
-// 1. init baseState outside of fn and provide it as input
-// ->
-// export function initialize(
-//   baseState: BaseState<UserState>,
-//   payload: PayloadPeriodInitialisation<PeriodFacts, PeriodSegmentFacts>
-// ) {
-//   return produce(baseState, (draft) => {})
-// }
+// - Init baseState outside of fn and provide only draft as input
 // - PrismaClient
 
 export function initialize(
-  state: State,
+  state: PeriodFacts,
   payload: PayloadPeriodInitialisation<PeriodFacts, PeriodSegmentFacts>
 ): OutputState {
-  const resultState: OutputState = {
-    rollsPerSegment: state.rollsPerSegment,
-    scenario: {
-      ...state.scenario,
-    },
+  const baseState: OutputState = {
+    result: state,
   }
+
+  const resultState: OutputState = produce(
+    baseState,
+    (draft: OutputState) => {}
+  )
+
   debugLog('PeriodReducerInitialize', state, payload, resultState)
   return resultState
 }
 
 export function consolidate(
-  state: State,
+  state: PeriodFacts,
   payload: PayloadPeriodConsolidation<PeriodSegmentFacts>
 ): OutputState {
-  const resultState: OutputState = {
-    rollsPerSegment: state.rollsPerSegment,
-    scenario: {
-      ...state.scenario,
-    },
+  const baseState: OutputState = {
+    result: state,
   }
+
+  const resultState: OutputState = produce(
+    baseState,
+    (draft: OutputState) => {}
+  )
   debugLog('PeriodReducerConsolidate', state, payload, resultState)
   return resultState
 }

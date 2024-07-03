@@ -1,4 +1,4 @@
-import { PayloadSegment } from '@gbl-uzh/platform'
+import { OutputFacts, PayloadSegment } from '@gbl-uzh/platform'
 import {
   computeScenarioOutcome,
   debugLog,
@@ -13,15 +13,14 @@ type State = {
   returns?: { bank: number; bonds: number; stocks: number }[]
 }
 
-type OutputState = State & {}
+type OutputState = OutputFacts<State, any, any>
 
 export function initialize(
   state: State,
   payload: PayloadSegment<PeriodFacts, PeriodSegmentFacts>
 ): OutputState {
   const baseState: OutputState = {
-    diceRolls: state.diceRolls?.slice(0),
-    returns: state.returns?.slice(0),
+    result: state,
   }
 
   const resultState: OutputState = produce(baseState, (draft: OutputState) => {
@@ -56,8 +55,8 @@ export function initialize(
       }
     })
 
-    draft.diceRolls = diceRolls
-    draft.returns = returns
+    draft.result.diceRolls = diceRolls
+    draft.result.returns = returns
   })
 
   debugLog('SegmentInitialize', state, payload, resultState)

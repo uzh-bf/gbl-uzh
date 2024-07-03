@@ -1,10 +1,10 @@
 import { PayloadSegmentResult } from '@gbl-uzh/platform'
 import {
-computePercentChange,
-debugLog,
-withPercentChange,
+  computePercentChange,
+  debugLog,
+  withPercentChange,
 } from '@gbl-uzh/platform/dist/lib/util'
-import type { PeriodFacts,PeriodSegmentFacts } from '@graphql/index'
+import type { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
 import { produce } from 'immer'
 import * as R from 'ramda'
 import { PlayerRole } from '../settings/Constants'
@@ -42,6 +42,11 @@ type State = {
   assetsWithReturns: AssetsWithReturns[]
 }
 
+// TODO(JJ):
+// - Make it generic like in types.ts, only one output type
+// for all separate functions
+// - Rename state to facts
+// - Rename result to resultFacts
 type OutputStateInit = {
   result: StateInit
 }
@@ -51,11 +56,6 @@ type OutputState = {
   actions?: []
 }
 
-// TODO(JJ): baseState to platform
-// - isDirty is only used in PlayService => only the ActionReducer needs this
-// currently => Discuss with RS if we would like to add it
-// Also e.g. the Derivative Game sets isDirty to true for some reducers
-// But since it's not used, is has no purpose yet =? bug?
 export function initialize(
   state: StateInit,
   payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
