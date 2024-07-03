@@ -990,14 +990,14 @@ export function computePeriodStartResults(
           }
         )
 
-        const mapper = mapAction({
-          ctx,
-          gameId,
-          activePeriodIx: currentPeriodIx,
-          playerId: result.player.id,
-        })
-
         if (actions && actions.length > 0) {
+          const mapper = mapAction({
+            ctx,
+            gameId,
+            activePeriodIx: currentPeriodIx,
+            playerId: result.player.id,
+          })
+
           extras = [...extras, ...actions.map(mapper)]
         }
 
@@ -1031,14 +1031,14 @@ export function computePeriodStartResults(
       { playerRole: player.role, periodFacts }
     )
 
-    const mapper = mapAction({
-      ctx,
-      gameId,
-      activePeriodIx: nextPeriodIx,
-      playerId: player.id,
-    })
-
     if (actions && actions.length > 0) {
+      const mapper = mapAction({
+        ctx,
+        gameId,
+        activePeriodIx: nextPeriodIx,
+        playerId: player.id,
+      })
+
       extras = [...extras, ...actions.map(mapper)]
     }
 
@@ -1107,14 +1107,14 @@ export async function computePeriodEndResults(
 
       log.debug(actions)
 
-      const mapper = mapAction({
-        ctx,
-        gameId,
-        activePeriodIx,
-        playerId: result.player.id,
-      })
-
       if (actions && actions.length > 0) {
+        const mapper = mapAction({
+          ctx,
+          gameId,
+          activePeriodIx,
+          playerId: result.player.id,
+        })
+
         extras = [...extras, ...actions.map(mapper)]
       }
 
@@ -1184,14 +1184,14 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
           }
         )
 
-        const mapper = mapAction({
-          ctx,
-          gameId: game.id,
-          activePeriodIx: game.activePeriodIx,
-          playerId: result.player.id,
-        })
-
         if (actions && actions.length > 0) {
+          const mapper = mapAction({
+            ctx,
+            gameId: game.id,
+            activePeriodIx: game.activePeriodIx,
+            playerId: result.player.id,
+          })
+
           extras = [...extras, ...actions.map(mapper)]
         }
 
@@ -1302,14 +1302,14 @@ export function computeSegmentEndResults(game, ctx, { reducers }) {
         }
       )
 
-      const mapper = mapAction({
-        ctx,
-        gameId: game.id,
-        activePeriodIx: game.activePeriodIx,
-        playerId: result.player.id,
-      })
-
       if (actions && actions.length > 0) {
+        const mapper = mapAction({
+          ctx,
+          gameId: game.id,
+          activePeriodIx: game.activePeriodIx,
+          playerId: result.player.id,
+        })
+
         extras = [...extras, ...actions.map(mapper)]
       }
 
