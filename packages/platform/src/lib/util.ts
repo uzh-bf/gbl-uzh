@@ -26,15 +26,15 @@ export function diceRoll(seeds: number[] = []) {
   return integer(1, 6)(rng)
 }
 
-export function computeScenarioOutcome(trend, gap, diceRoll) {
+export function computeScenarioOutcome(trend: number, gap: number, diceRoll: number) {
   return trend + (diceRoll - 7) * gap
 }
 
-export function computePercentChange(newValue, oldValue) {
+export function computePercentChange(newValue: number, oldValue: number) {
   return (newValue - oldValue) / oldValue
 }
 
-export function withPercentChange(value, percentChange) {
+export function withPercentChange(value: number, percentChange: number) {
   return value * (1 + percentChange)
 }
 

@@ -5,7 +5,7 @@ import {
   PerformActionDocument,
   ResultDocument,
 } from 'src/graphql/generated/ops'
-import { ActionTypes } from 'src/reducers/ActionsReducer'
+import { ActionTypes } from 'src/services/ActionsReducer'
 
 function Cockpit() {
   const playerState = useQuery(ResultDocument, { fetchPolicy: 'cache-first' })
@@ -108,7 +108,9 @@ function Cockpit() {
     { label: 'Value', accessor: 'val', sortable: false },
   ]
 
-  const bankResults = Object.values(resultFacts.assetsWithReturns ?? {}).reduce(
+  const bankResults = Object.values(
+    resultFacts?.assetsWithReturns ?? {}
+  ).reduce(
     (acc, value) => {
       return {
         ...acc,
@@ -119,7 +121,7 @@ function Cockpit() {
   )
 
   const bondsResults = Object.values(
-    resultFacts.assetsWithReturns ?? {}
+    resultFacts?.assetsWithReturns ?? {}
   ).reduce(
     (acc, value) => {
       return {
@@ -131,7 +133,7 @@ function Cockpit() {
   )
 
   const stocksResults = Object.values(
-    resultFacts.assetsWithReturns ?? {}
+    resultFacts?.assetsWithReturns ?? {}
   ).reduce(
     (acc, value) => {
       return {
@@ -143,7 +145,7 @@ function Cockpit() {
   )
 
   const totalResults = Object.values(
-    resultFacts.assetsWithReturns ?? {}
+    resultFacts?.assetsWithReturns ?? {}
   ).reduce(
     (acc, value) => {
       return {
@@ -164,19 +166,19 @@ function Cockpit() {
   const data_portfolio = [
     {
       cat: 'Savings',
-      val: `CHF ${resultFacts.assets.bank.toFixed(2)}`,
+      val: `CHF ${resultFacts?.assets.bank.toFixed(2)}`,
     },
     {
       cat: 'Bonds',
-      val: `CHF ${resultFacts.assets.bonds.toFixed(2)}`,
+      val: `CHF ${resultFacts?.assets.bonds.toFixed(2)}`,
     },
     {
       cat: 'Stocks',
-      val: `CHF ${resultFacts.assets.stocks.toFixed(2)}`,
+      val: `CHF ${resultFacts?.assets.stocks.toFixed(2)}`,
     },
     {
       cat: 'Total',
-      val: `CHF ${resultFacts.assets.totalAssets.toFixed(2)}`,
+      val: `CHF ${resultFacts?.assets.totalAssets.toFixed(2)}`,
     },
   ]
 

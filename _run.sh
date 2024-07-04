@@ -1,3 +1,3 @@
 #!/bin/sh
 cd apps/demo-game
-podman-compose up
+docker compose up
