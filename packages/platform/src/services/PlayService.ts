@@ -20,7 +20,7 @@ interface PerformActionArgs<ActionTypes> {
 export async function performAction<ActionTypes>(
   args: PerformActionArgs<ActionTypes>,
   ctx: Context,
-  { reducers }: any
+  { services }: any
 ) {
   const periodIx_segmentIx_playerId_type = {
     periodIx: args.periodIx,
@@ -48,7 +48,7 @@ export async function performAction<ActionTypes>(
   }
 
   const { result, events, notifications, isDirty, extras } =
-    reducers.Actions.apply(previousResult.facts, {
+    services.Actions.apply(previousResult.facts, {
       type: args.actionType,
       payload: {
         playerArgs: args.facts,

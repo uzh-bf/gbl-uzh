@@ -1,41 +1,35 @@
-import { Action } from '@gbl-uzh/platform'
+import { OutputFacts, PayloadSegment } from '@gbl-uzh/platform'
 import {
   computeScenarioOutcome,
   debugLog,
   diceRoll,
 } from '@gbl-uzh/platform/dist/lib/util'
-import { PeriodFacts, PeriodSegmentFacts } from '@graphql/index'
-import { PrismaClient } from '@prisma/client'
+import { produce } from 'immer'
 import * as R from 'ramda'
+import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
-export enum ActionTypes {
-  SEGMENT_INITIALIZE = 'SEGMENT_INITIALIZE',
-}
-
-type Actions = Action<
-  ActionTypes.SEGMENT_INITIALIZE,
-  {
-    segmentIx: number
-    segmentCount: number
-    periodIx: number
-    periodFacts: PeriodFacts
-    previousSegmentFacts?: PeriodSegmentFacts
-  },
-  PrismaClient
+type InputSegmentFacts = {}
+type OutputSegmentFacts = OutputFacts<
+  InputSegmentFacts & PeriodSegmentFacts,
+  any,
+  any
 >
 
-export function apply(state: any, action: Actions) {
-  let newState = {
-    type: action.type,
-    result: {},
-    events: [],
-    notifiaction: [],
-    isDirty: false,
+export function initialize(
+  facts: InputSegmentFacts,
+  payload: PayloadSegment<PeriodFacts, PeriodSegmentFacts>
+): OutputSegmentFacts {
+  const baseFacts: OutputSegmentFacts = {
+    resultFacts: {
+      ...facts,
+      diceRolls: [],
+      returns: [],
+    },
   }
 
-  switch (action.type) {
-    case ActionTypes.SEGMENT_INITIALIZE:
-      const payload = action.payload
+  const resultFacts: OutputSegmentFacts = produce(
+    baseFacts,
+    (draft: OutputSegmentFacts) => {
       const periodFacts = payload.periodFacts
       const segmentIx = payload.segmentIx
 
@@ -51,7 +45,7 @@ export function apply(state: any, action: Actions) {
       )
 
       const returns = diceRolls.map((rolls) => {
-        const scenario = action.payload.periodFacts.scenario
+        const scenario = payload.periodFacts.scenario
         return {
           bank: scenario.bankReturn,
           bonds: computeScenarioOutcome(
@@ -67,21 +61,11 @@ export function apply(state: any, action: Actions) {
         }
       })
 
-      newState = {
-        ...newState,
-        result: {
-          ...state,
-          diceRolls,
-          returns,
-        },
-      }
-      break
+      draft.resultFacts.diceRolls = diceRolls
+      draft.resultFacts.returns = returns
+    }
+  )
 
-    default:
-      break
-  }
-
-  debugLog('SegmentReducer', state, action, newState)
-
-  return newState
+  debugLog('SegmentInitialize', facts, payload, resultFacts)
+  return resultFacts
 }

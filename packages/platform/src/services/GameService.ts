@@ -17,7 +17,7 @@ interface CreateGameArgs {
 export async function createGame(
   { name, playerCount }: CreateGameArgs,
   ctx: Context,
-  { roleAssigner }: { roleAssigner: (ix: number) => any }
+  { roleAssigner }: { roleAssigner?: (ix: number) => any }
 ) {
   return ctx.prisma.game.create({
     data: {
@@ -32,7 +32,7 @@ export async function createGame(
           return {
             facts: {},
             token: nanoid(),
-            role: roleAssigner(ix),
+            role: roleAssigner ? roleAssigner(ix) : undefined,
             number: playerCount - ix,
             name: `Team ${playerCount - ix}`,
             level: {
@@ -59,7 +59,7 @@ interface AddGamePeriodArgs<T> {
 export async function addGamePeriod<TFacts>(
   { gameId, facts }: AddGamePeriodArgs<TFacts>,
   ctx: Context,
-  { schema, reducers }: CtxWithFactsAndSchema<TFacts, PrismaClient>
+  { schema, services }: CtxWithFactsAndSchema<TFacts, PrismaClient>
 ) {
   const validatedFacts = schema.validateSync(facts)
 
@@ -89,15 +89,21 @@ export async function addGamePeriod<TFacts>(
 
   const index = game.periods[0]?.index + 1 || 0
 
-  const { result: initializedFacts } = reducers.Period.apply(validatedFacts, {
-    type: reducers.Period.ActionTypes.PERIOD_INITIALIZE,
-    payload: {
+  // TODO(JJ): Why do we provide validatedFacts twice?
+  // - remove periodFacts from payload for initialize?
+  const { resultFacts: initializedFacts } = services.Period.initialize(
+    validatedFacts,
+    {
+      // TODO(JJ): replace with undefined
+      // At RS: If we replace validatedFacts with periodFacts the
+      // Derivative Game will be broken, as it computes the trend from
+      // periodFacts instead of the first arguement
       periodFacts: validatedFacts,
       previousPeriodFacts: game.periods[0]?.facts as any,
       previousSegmentFacts: game.periods[0]?.segments[0]?.facts as any,
       periodIx: index,
-    },
-  })
+    }
+  )
 
   console.log(
     game.periods[0]?.facts,
@@ -164,7 +170,7 @@ export async function addPeriodSegment<TFacts>(
     storyElements,
   }: AddPeriodSegmentArgs<TFacts>,
   ctx: Context,
-  { schema, reducers }: CtxWithFactsAndSchema<TFacts, PrismaClient>
+  { schema, services }: CtxWithFactsAndSchema<TFacts, PrismaClient>
 ) {
   const validatedFacts = schema.validateSync(facts)
 
@@ -189,16 +195,17 @@ export async function addPeriodSegment<TFacts>(
 
   const index = period.segments[0]?.index + 1 || 0
 
-  const { result: initializedFacts } = reducers.Segment.apply(validatedFacts, {
-    type: reducers.Segment.ActionTypes.SEGMENT_INITIALIZE,
-    payload: {
+  const { resultFacts: initializedFacts } = services.Segment.initialize(
+    validatedFacts,
+    {
       periodFacts: period.facts,
       previousSegmentFacts: period.segments[0]?.facts,
       segmentIx: index,
+      // TODO(JJ): Remove hardcode, use from form input for Derivative Game
       segmentCount: 4,
       periodIx,
-    },
-  })
+    }
+  )
 
   // create or update the facts and settings of a period segment
   return ctx.prisma.periodSegment.upsert({
@@ -276,7 +283,7 @@ interface ActivateNextPeriodArgs {
 export async function activateNextPeriod(
   { gameId }: ActivateNextPeriodArgs,
   ctx: Context,
-  { reducers }: CtxWithFacts<any, PrismaClient>
+  { services }: CtxWithFacts<any, PrismaClient>
 ) {
   log.info('activating next period')
 
@@ -349,7 +356,7 @@ export async function activateNextPeriod(
           periodFacts: game.periods?.[0].facts,
         },
         ctx,
-        { reducers }
+        { services }
       )
 
       // update the status and active period of the current game
@@ -407,18 +414,15 @@ export async function activateNextPeriod(
       if (!game.activePeriod?.activeSegment || !currentSegmentIx) return null
 
       const { results, extras } = computeSegmentEndResults(game, ctx, {
-        reducers,
+        services,
       })
 
       // update period facts when starting consolidation
-      const { result: consolidatedFacts } = reducers.Period.apply(
+      const { resultFacts: consolidatedFacts } = services.Period.consolidate(
         game.activePeriod.facts,
         {
-          type: reducers.Period.ActionTypes.PERIOD_CONSOLIDATE,
-          payload: {
-            previousSegmentFacts: game.activePeriod.activeSegment.facts as any,
-            periodIx: currentPeriodIx,
-          },
+          previousSegmentFacts: game.activePeriod.activeSegment.facts as any,
+          periodIx: currentPeriodIx,
         }
       )
 
@@ -496,7 +500,7 @@ export async function activateNextPeriod(
           gameId: game.id,
         },
         ctx,
-        { reducers }
+        { services }
       )
 
       await Promise.all(promises)
@@ -571,7 +575,7 @@ export async function activateNextPeriod(
           periodFacts: game.activePeriod.facts,
         },
         ctx,
-        { reducers }
+        { services }
       )
 
       const result = await ctx.prisma.$transaction([
@@ -626,7 +630,7 @@ interface ActivateSegmentArgs {
 export async function activateNextSegment(
   { gameId }: ActivateSegmentArgs,
   ctx: Context,
-  { reducers }: CtxWithFacts<any, PrismaClient>
+  { services }: CtxWithFacts<any, PrismaClient>
 ) {
   const game = await ctx.prisma.game.findUnique({
     where: {
@@ -674,7 +678,7 @@ export async function activateNextSegment(
     case DB.GameStatus.PREPARATION:
     case DB.GameStatus.PAUSED: {
       const { results, extras } = computeSegmentStartResults(game, ctx, {
-        reducers,
+        services,
       })
 
       const result = await ctx.prisma.$transaction([
@@ -748,7 +752,7 @@ export async function activateNextSegment(
       }
 
       const { results, extras } = computeSegmentEndResults(game, ctx, {
-        reducers,
+        services,
       })
 
       const result = await ctx.prisma.$transaction([
@@ -976,7 +980,7 @@ function mapAction({ ctx, gameId, activePeriodIx, playerId }) {
 export function computePeriodStartResults(
   { results, players, activePeriodIx, gameId, periodFacts },
   ctx,
-  { reducers }
+  { services }
 ) {
   const currentPeriodIx = activePeriodIx
   const nextPeriodIx = currentPeriodIx + 1
@@ -989,22 +993,22 @@ export function computePeriodStartResults(
       // ensure that we only work on PERIOD_END results of the preceding period
       .filter((result) => result.type === DB.PlayerResultType.PERIOD_END)
       .map((result, ix, allResults) => {
-        const { result: facts, actions } = reducers.PeriodResult.apply(result, {
-          type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_START,
-          payload: {
-            playerRole: result.player.role ?? result.player.connect.role,
+        const { resultFacts: facts, actions } = services.PeriodResult.start(
+          result.facts,
+          {
+            playerRole: result.player?.role ?? result.player.connect?.role,
             periodFacts,
-          },
-        })
-
-        const mapper = mapAction({
-          ctx,
-          gameId,
-          activePeriodIx: currentPeriodIx,
-          playerId: result.player.id,
-        })
+          }
+        )
 
         if (actions && actions.length > 0) {
+          const mapper = mapAction({
+            ctx,
+            gameId,
+            activePeriodIx: currentPeriodIx,
+            playerId: result.player.id,
+          })
+
           extras = [...extras, ...actions.map(mapper)]
         }
 
@@ -1033,25 +1037,19 @@ export function computePeriodStartResults(
 
   // if the game has not started yet, generate initial PERIOD_START results
   const result = players.map((player, ix, allPlayers) => {
-    const { result: facts, actions } = reducers.PeriodResult.apply(
+    const { resultFacts: facts, actions } = services.PeriodResult.initialize(
       {},
-      {
-        type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_INITIALIZE,
-        payload: {
-          playerRole: player.role,
-          periodFacts,
-        },
-      }
+      { playerRole: player.role, periodFacts }
     )
 
-    const mapper = mapAction({
-      ctx,
-      gameId,
-      activePeriodIx: nextPeriodIx,
-      playerId: player.id,
-    })
-
     if (actions && actions.length > 0) {
+      const mapper = mapAction({
+        ctx,
+        gameId,
+        activePeriodIx: nextPeriodIx,
+        playerId: player.id,
+      })
+
       extras = [...extras, ...actions.map(mapper)]
     }
 
@@ -1089,7 +1087,7 @@ export async function computePeriodEndResults(
     gameId,
   },
   ctx: Context,
-  { reducers }
+  { services }
 ) {
   let extras: any[] = []
   let promises: Promise<any>[] = []
@@ -1102,35 +1100,32 @@ export async function computePeriodEndResults(
       )
 
       const {
-        result: facts,
+        resultFacts: facts,
         actions,
         events,
-      } = reducers.PeriodResult.apply(result.facts, {
-        type: reducers.PeriodResult.ActionTypes.PERIOD_RESULTS_END,
-        payload: {
-          periodFacts,
-          segmentFacts,
+      } = services.PeriodResult.end(result.facts, {
+        periodFacts,
+        segmentFacts,
 
-          playerRole: result.player.role,
-          playerLevel: result.player.levelIx + 1,
-          playerExperience: result.player.experience,
+        playerRole: result.player.role,
+        playerLevel: result.player.levelIx + 1,
+        playerExperience: result.player.experience,
 
-          consolidationDecisions,
-          periodIx: activePeriodIx,
-          segmentIx: activeSegmentIx,
-        },
+        consolidationDecisions,
+        periodIx: activePeriodIx,
+        segmentIx: activeSegmentIx,
       })
 
       log.debug(actions)
 
-      const mapper = mapAction({
-        ctx,
-        gameId,
-        activePeriodIx,
-        playerId: result.player.id,
-      })
-
       if (actions && actions.length > 0) {
+        const mapper = mapAction({
+          ctx,
+          gameId,
+          activePeriodIx,
+          playerId: result.player.id,
+        })
+
         extras = [...extras, ...actions.map(mapper)]
       }
 
@@ -1177,7 +1172,7 @@ export async function computePeriodEndResults(
   }
 }
 
-export function computeSegmentStartResults(game, ctx, { reducers }) {
+export function computeSegmentStartResults(game, ctx, { services }) {
   const currentSegmentIx = game.activePeriod.activeSegmentIx
   const nextSegmentIx = currentSegmentIx + 1
 
@@ -1188,29 +1183,26 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
     const results = game.activePeriod.activeSegment.results
       .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
       .reduce((acc, result, ix, allResults) => {
-        const { result: facts, actions } = reducers.SegmentResult.apply(
+        const { resultFacts: facts, actions } = services.SegmentResult.start(
           result.facts,
           {
-            type: reducers.SegmentResult.ActionTypes.SEGMENT_RESULTS_START,
-            payload: {
-              playerRole: result.player.role,
-              periodFacts: game.activePeriod.facts,
-              segmentFacts: game.activePeriod.activeSegment.facts,
-              nextSegmentFacts:
-                game.activePeriod.activeSegment.nextSegment?.facts,
-              segmentIx: nextSegmentIx,
-            },
+            playerRole: result.player.role,
+            periodFacts: game.activePeriod.facts,
+            segmentFacts: game.activePeriod.activeSegment.facts,
+            nextSegmentFacts:
+              game.activePeriod.activeSegment.nextSegment?.facts,
+            segmentIx: nextSegmentIx,
           }
         )
 
-        const mapper = mapAction({
-          ctx,
-          gameId: game.id,
-          activePeriodIx: game.activePeriodIx,
-          playerId: result.player.id,
-        })
-
         if (actions && actions.length > 0) {
+          const mapper = mapAction({
+            ctx,
+            gameId: game.id,
+            activePeriodIx: game.activePeriodIx,
+            playerId: result.player.id,
+          })
+
           extras = [...extras, ...actions.map(mapper)]
         }
 
@@ -1257,21 +1249,16 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
   const results = game.activePeriod.results
     .filter((result) => result.type === DB.PlayerResultType.PERIOD_START)
     .reduce((acc, result, ix, allResults) => {
-      let { result: facts } = reducers.SegmentResult.apply(result.facts, {
-        type: reducers.SegmentResult.ActionTypes.SEGMENT_RESULTS_INITIALIZE,
-        payload: {
+      let { resultFacts: facts } = services.SegmentResult.initialize(
+        result.facts,
+        {
           playerRole: result.player.role,
           periodFacts: game.activePeriod.facts,
           segmentFacts: game.activePeriod.activeSegment?.facts,
           nextSegmentFacts: game.activePeriod.activeSegment?.nextSegment?.facts,
           segmentIx: nextSegmentIx,
-        },
-      })
-
-      // TODO(JJ): Double-check with RS
-      if (facts.facts) {
-        facts = facts.facts
-      }
+        }
+      )
 
       const common = {
         facts,
@@ -1313,33 +1300,30 @@ export function computeSegmentStartResults(game, ctx, { reducers }) {
   }
 }
 
-export function computeSegmentEndResults(game, ctx, { reducers }) {
+export function computeSegmentEndResults(game, ctx, { services }) {
   let extras: any[] = []
 
   const results = game.activePeriod.activeSegment.results
     .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
     .map((result, ix, allResults) => {
-      const { result: facts, actions } = reducers.SegmentResult.apply(
+      const { resultFacts: facts, actions } = services.SegmentResult.end(
         result.facts,
         {
-          type: reducers.SegmentResult.ActionTypes.SEGMENT_RESULTS_END,
-          payload: {
-            playerRole: result.player.role,
-            periodFacts: game.activePeriod.facts,
-            segmentFacts: game.activePeriod.activeSegment.facts,
-            segmentIx: game.activePeriod.activeSegmentIx,
-          },
+          playerRole: result.player.role,
+          periodFacts: game.activePeriod.facts,
+          segmentFacts: game.activePeriod.activeSegment.facts,
+          segmentIx: game.activePeriod.activeSegmentIx,
         }
       )
 
-      const mapper = mapAction({
-        ctx,
-        gameId: game.id,
-        activePeriodIx: game.activePeriodIx,
-        playerId: result.player.id,
-      })
-
       if (actions && actions.length > 0) {
+        const mapper = mapAction({
+          ctx,
+          gameId: game.id,
+          activePeriodIx: game.activePeriodIx,
+          playerId: result.player.id,
+        })
+
         extras = [...extras, ...actions.map(mapper)]
       }
 

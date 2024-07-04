@@ -1,5 +1,0 @@
-export * as Actions from './ActionsReducer'
-export * as Period from './PeriodReducer'
-export * as PeriodResult from './PeriodResultReducer'
-export * as Segment from './SegmentReducer'
-export * as SegmentResult from './SegmentResultReducer'

@@ -24,14 +24,22 @@ export type Event<EventType> = {
   facts?: any
 }
 
-export type Output<OutputType, NotificationType, EventType> = {
-  type: OutputType
+// TODO(JJ): remove isDirty for ActionReducer
+export type OutputFactsUser<FactsType, NotificationType, EventType> = {
+  result: FactsType
+  isDirty?: boolean
   extras?: any
-  result: any
+  actions?: any[]
   notifications?: Notification<NotificationType>[]
   events?: Event<EventType>[]
+}
+
+export type OutputFacts<FactsType, NotificationType, EventType> = {
+  resultFacts: FactsType
   actions?: any[]
-  isDirty: boolean
+  extras?: any
+  events?: Event<EventType>[]
+  notifications?: Notification<NotificationType>[]
 }
 
 export type Action<ActionType, PayloadType, PrismaType> = {
@@ -40,11 +48,167 @@ export type Action<ActionType, PayloadType, PrismaType> = {
   ctx?: CtxWithPrisma<PrismaType>
 }
 
+export type PayloadPeriodInitialisation<
+  PeriodFactsType,
+  PeriodSegmentFactsType
+> = {
+  periodIx: number
+  periodFacts: PeriodFactsType
+  previousPeriodFacts?: PeriodFactsType
+  previousSegmentFacts?: PeriodSegmentFactsType
+}
+
+export type PayloadPeriodConsolidation<PeriodSegmentFactsType> = {
+  periodIx: number
+  previousSegmentFacts?: PeriodSegmentFactsType
+}
+
+export type PayloadPeriodResult<PeriodFactsType, PlayerRoleType> = {
+  playerRole: PlayerRoleType
+  periodFacts: PeriodFactsType
+}
+
+export type PayloadPeriodResultEnd<
+  PeriodFactsType,
+  PeriodSegmentFactsType,
+  PlayerRoleType
+> = {
+  periodFacts: PeriodFactsType
+  segmentFacts: PeriodSegmentFactsType
+  playerRole: PlayerRoleType
+  playerLevel: number
+  playerExperience: number
+  consolidationDecisions: any
+  periodIx: number
+  segmentIx: number
+}
+
+export type PayloadSegment<PeriodFactsType, PeriodSegmentFactsType> = {
+  segmentIx: number
+  segmentCount: number
+  periodIx: number
+  periodFacts: PeriodFactsType
+  previousSegmentFacts?: PeriodSegmentFactsType
+}
+
+export type PayloadSegmentResult<
+  PeriodFactsType,
+  PeriodSegmentFactsType,
+  PlayerRoleType
+> = {
+  playerRole: PlayerRoleType
+  periodFacts: PeriodFactsType
+  segmentFacts: PeriodSegmentFactsType
+  nextSegmentFacts?: PeriodSegmentFactsType
+  segmentIx: number
+}
+
+// TODO(JJ):
+// - Replace StateType with unknown -> second step in a different branch
+
+interface Period<
+  FactsType,
+  PeriodFactsType,
+  PeriodSegmentFactsType,
+  NotificationType,
+  EventType,
+  // TODO(JJ): Decide what to do with prisma -> goes into payload?
+  // -> add a third param: ctx: CtxWithPrisma
+  PrismaType
+> {
+  initialize: (
+    facts: FactsType,
+    payload: PayloadPeriodInitialisation<
+      PeriodFactsType,
+      PeriodSegmentFactsType
+    >
+  ) => OutputFacts<FactsType, NotificationType, EventType>
+  consolidate: (
+    facts: FactsType,
+    payload: PayloadPeriodConsolidation<PeriodSegmentFactsType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
+}
+
+interface PeriodResult<
+  FactsType,
+  PeriodFactsType,
+  PeriodSegmentFactsType,
+  PlayerRoleType,
+  NotificationType,
+  EventType,
+  PrismaType
+> {
+  initialize: (
+    facts: FactsType,
+    payload: PayloadPeriodResult<PeriodFactsType, PlayerRoleType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
+  start: (
+    facts: FactsType,
+    payload: PayloadPeriodResult<PeriodFactsType, PlayerRoleType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
+  end: (
+    facts: FactsType,
+    payload: PayloadPeriodResultEnd<
+      PeriodFactsType,
+      PeriodSegmentFactsType,
+      PlayerRoleType
+    >
+  ) => OutputFacts<FactsType, NotificationType, EventType>
+}
+
+interface Segment<
+  FactsType,
+  PeriodFactsType,
+  PeriodSegmentFactsType,
+  NotificationType,
+  EventType,
+  PrismaType
+> {
+  initialize: (
+    facts: FactsType,
+    payload: PayloadSegment<PeriodFactsType, PeriodSegmentFactsType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
+}
+
+interface SegmentResult<
+  FactsType,
+  PeriodFactsType,
+  PeriodSegmentFactsType,
+  PlayerRoleType,
+  NotificationType,
+  EventType,
+  PrismaType
+> {
+  initialize: (
+    facts: FactsType,
+    payload: PayloadSegmentResult<
+      PeriodFactsType,
+      PeriodSegmentFactsType,
+      PlayerRoleType
+    >
+  ) => OutputFacts<FactsType, NotificationType, EventType>
+  start: (
+    facts: FactsType,
+    payload: PayloadSegmentResult<
+      PeriodFactsType,
+      PeriodSegmentFactsType,
+      PlayerRoleType
+    >
+  ) => OutputFacts<FactsType, NotificationType, EventType>
+  end: (
+    facts: FactsType,
+    payload: PayloadSegmentResult<
+      PeriodFactsType,
+      PeriodSegmentFactsType,
+      PlayerRoleType
+    >
+  ) => OutputFacts<FactsType, NotificationType, EventType>
+}
+
 interface Reducer<
   StateType,
   ActionType,
   PayloadType,
-  OutputType,
   NotificationType,
   EventType,
   PrismaType
@@ -52,17 +216,16 @@ interface Reducer<
   apply: (
     state: StateType,
     action: Action<ActionType, PayloadType, PrismaType>
-  ) => Output<OutputType, NotificationType, EventType>
+  ) => OutputFactsUser<StateType, NotificationType, EventType>
   ActionTypes: Record<string, string>
 }
 
-interface Reducers<PrismaType> {
-  Actions: Reducer<any, any, any, any, any, any, PrismaType>
-  Period: Reducer<any, any, any, any, any, any, PrismaType>
-  PeriodResult: Reducer<any, any, any, any, any, any, PrismaType>
-  Segment: Reducer<any, any, any, any, any, any, PrismaType>
-  SegmentResult: Reducer<any, any, any, any, any, any, PrismaType>
-  [key: string]: Reducer<any, any, any, any, any, any, PrismaType>
+interface Services<PrismaType> {
+  Actions: Reducer<any, any, any, any, any, PrismaType>
+  Period: Period<any, any, any, any, any, PrismaType>
+  PeriodResult: PeriodResult<any, any, any, any, any, any, PrismaType>
+  Segment: Segment<any, any, any, any, any, PrismaType>
+  SegmentResult: SegmentResult<any, any, any, any, any, any, PrismaType>
 }
 
 export interface CtxWithPrisma<PrismaType> extends NextPageContext {
@@ -75,12 +238,12 @@ export interface CtxWithPrisma<PrismaType> extends NextPageContext {
 }
 
 export interface CtxWithFacts<FactsType, PrismaType> {
-  reducers: Reducers<PrismaType>
+  services: Services<PrismaType>
 }
 
 export interface CtxWithFactsAndSchema<FactsType, PrismaType> {
   schema: yup.Schema<FactsType>
-  reducers: Reducers<PrismaType>
+  services: Services<PrismaType>
 }
 
 export enum BaseGlobalNotificationType {
