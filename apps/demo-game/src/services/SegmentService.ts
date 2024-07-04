@@ -8,19 +8,23 @@ import { produce } from 'immer'
 import * as R from 'ramda'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
-type SegmentFacts = {
-  diceRolls?: { bonds: number; stocks: number }[]
-  returns?: { bank: number; bonds: number; stocks: number }[]
-}
-
-type OutputSegmentFacts = OutputFacts<SegmentFacts, any, any>
+type InputSegmentFacts = {}
+type OutputSegmentFacts = OutputFacts<
+  InputSegmentFacts & PeriodSegmentFacts,
+  any,
+  any
+>
 
 export function initialize(
-  facts: SegmentFacts,
+  facts: InputSegmentFacts,
   payload: PayloadSegment<PeriodFacts, PeriodSegmentFacts>
 ): OutputSegmentFacts {
   const baseFacts: OutputSegmentFacts = {
-    resultFacts: facts,
+    resultFacts: {
+      ...facts,
+      diceRolls: [],
+      returns: [],
+    },
   }
 
   const resultFacts: OutputSegmentFacts = produce(
