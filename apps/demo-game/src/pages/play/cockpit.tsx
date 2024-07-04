@@ -32,11 +32,26 @@ function Cockpit() {
     }
   )
 
-  const resultFacts = playerState.data?.result?.playerResult?.facts
-  const currentGame = playerState?.data?.result?.currentGame
+  const playerData = playerState.data
+  const playerDataResult = playerData?.result
+
+  const resultFacts = playerDataResult?.playerResult?.facts
+  const currentGame = playerDataResult?.currentGame
   const self = playerState?.data?.self
 
-  if (!currentGame) return null
+  // TODO(JJ):
+  // - Make it visually more appealing
+  // - Add title to every gamge state
+  // - Add a color to the info
+  // console.log(playerState)
+  if (!currentGame) {
+    return (
+      <div>
+        <h1> Demo Game </h1>
+        <p>The game has not started yet.</p>
+      </div>
+    )
+  }
 
   const decisions = [
     {
