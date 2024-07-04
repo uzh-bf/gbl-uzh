@@ -1,4 +1,4 @@
-import { PayloadSegmentResult } from '@gbl-uzh/platform'
+import { OutputFacts, PayloadSegmentResult } from '@gbl-uzh/platform'
 import {
   computePercentChange,
   debugLog,
@@ -9,11 +9,23 @@ import * as R from 'ramda'
 import { PlayerRole } from '../settings/Constants'
 import type { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 import {
+  Assets,
+  AssetsWithReturns,
   OutputResultFacts,
-  OutputSegmentResultFactsInit,
   ResultFacts,
-  SegmentResultFactsInit,
+  ResultFactsInit,
 } from '../types/facts'
+
+type SegmentResultFactsInit = ResultFactsInit & {
+  returns?: Assets
+  assetsWithReturns?: AssetsWithReturns[]
+}
+
+type OutputSegmentResultFactsInit = OutputFacts<
+  SegmentResultFactsInit,
+  any,
+  any
+>
 
 export function initialize(
   facts: SegmentResultFactsInit,

@@ -1,19 +1,19 @@
 import { OutputFacts } from '@gbl-uzh/platform'
 
-type Assets = {
+export type Assets = {
   bank: number
   bonds: number
   stocks: number
   totalAssets: number
 }
 
-type Decisions = {
+export type Decisions = {
   bank: boolean
   bonds: boolean
   stocks: boolean
 }
 
-type AssetsWithReturns = Assets & {
+export type AssetsWithReturns = Assets & {
   ix: number
   bankReturn?: number
   bondsReturn?: number
@@ -21,31 +21,14 @@ type AssetsWithReturns = Assets & {
   totalAssetsReturn?: number
 }
 
-export type PeriodResultFactsInit = {
+export type ResultFactsInit = {
   decisions: Decisions
   assets: Assets
 }
 
-export type ResultFacts = PeriodResultFactsInit & {
+export type ResultFacts = ResultFactsInit & {
   returns: Assets
   assetsWithReturns: AssetsWithReturns[]
 }
 
-export type SegmentResultFactsInit = PeriodResultFactsInit & {
-  returns?: Assets
-  assetsWithReturns?: AssetsWithReturns[]
-}
-
-export type OutputPeriodResultFactsInit = OutputFacts<
-  PeriodResultFactsInit,
-  any,
-  any
->
-
 export type OutputResultFacts = OutputFacts<ResultFacts, any, any>
-
-export type OutputSegmentResultFactsInit = OutputFacts<
-  SegmentResultFactsInit,
-  any,
-  any
->

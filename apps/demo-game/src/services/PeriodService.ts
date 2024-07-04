@@ -7,7 +7,8 @@ import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
-type OutputPeriodFacts = OutputFacts<PeriodFacts, any, any>
+type InputPeriodFacts = PeriodFacts
+type OutputPeriodFacts = OutputFacts<InputPeriodFacts, any, any>
 
 // TODO(JJ):
 // - Init baseFacts outside of fn and provide only draft as input
@@ -16,7 +17,7 @@ type OutputPeriodFacts = OutputFacts<PeriodFacts, any, any>
 // - PrismaClient
 
 export function initialize(
-  facts: PeriodFacts,
+  facts: InputPeriodFacts,
   payload: PayloadPeriodInitialisation<PeriodFacts, PeriodSegmentFacts>
 ): OutputPeriodFacts {
   const baseFacts: OutputPeriodFacts = {
@@ -28,12 +29,12 @@ export function initialize(
     (draft: OutputPeriodFacts) => {}
   )
 
-  debugLog('PeriodReducerInitialize', facts, payload, resultFacts)
+  debugLog('PeriodInitialize', facts, payload, resultFacts)
   return resultFacts
 }
 
 export function consolidate(
-  facts: PeriodFacts,
+  facts: InputPeriodFacts,
   payload: PayloadPeriodConsolidation<PeriodSegmentFacts>
 ): OutputPeriodFacts {
   const baseFacts: OutputPeriodFacts = {
@@ -44,6 +45,6 @@ export function consolidate(
     baseFacts,
     (draft: OutputPeriodFacts) => {}
   )
-  debugLog('PeriodReducerConsolidate', facts, payload, resultFacts)
+  debugLog('PeriodConsolidate', facts, payload, resultFacts)
   return resultFacts
 }
