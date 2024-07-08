@@ -86,37 +86,27 @@ function Cockpit() {
     },
   ]
 
+  const transformer = ({ row, ix }: { row: any; ix: number }) =>
+    typeof row[ix] === 'number' && `CHF ${row[ix].toFixed(2)}`
+
   const columns_segment_results = [
     { label: '', accessor: 'cat', sortable: false },
     {
       label: 'Initial',
       accessor: 0,
       sortable: false,
-      transformer: (val, row) =>
-        typeof val === 'number' && `CHF ${val.toFixed(2)}`,
-    },
-    {
-      label: 'Month 1',
-      accessor: 1,
-      sortable: false,
-      transformer: (val, row) =>
-        typeof val === 'number' && `CHF ${val.toFixed(2)}`,
-    },
-    {
-      label: 'Month 2',
-      accessor: 2,
-      sortable: false,
-      transformer: (val, row) =>
-        typeof val === 'number' && `CHF ${val.toFixed(2)}`,
-    },
-    {
-      label: 'Month 3',
-      accessor: 3,
-      sortable: false,
-      transformer: (val, row) =>
-        typeof val === 'number' && `CHF ${val.toFixed(2)}`,
+      transformer: transformer,
     },
   ]
+
+  for (let i = 1; i < 4; i++) {
+    columns_segment_results.push({
+      label: 'Month ' + String(i),
+      accessor: i,
+      sortable: false,
+      transformer: transformer,
+    })
+  }
 
   const columns_portfolio = [
     { label: 'Category', accessor: 'cat', sortable: false },
