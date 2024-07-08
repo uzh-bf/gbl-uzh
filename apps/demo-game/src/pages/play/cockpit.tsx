@@ -86,23 +86,24 @@ function Cockpit() {
     },
   ]
 
-  const transformer = ({ row, ix }: { row: any; ix: number }) =>
-    typeof row[ix] === 'number' && `CHF ${row[ix].toFixed(2)}`
+  const transformer = ({ row, ix }: { row: any; ix?: number }) =>
+    typeof row[ix ?? 0] === 'number' && `CHF ${row[ix ?? 0].toFixed(2)}`
 
   const columns_segment_results = [
     { label: '', accessor: 'cat', sortable: false },
     {
       label: 'Initial',
-      accessor: 0,
+      accessor: '0',
       sortable: false,
       transformer: transformer,
     },
   ]
 
   for (let i = 1; i < 4; i++) {
+    const strNum = String(i)
     columns_segment_results.push({
-      label: 'Month ' + String(i),
-      accessor: i,
+      label: 'Month ' + strNum,
+      accessor: strNum,
       sortable: false,
       transformer: transformer,
     })
@@ -113,59 +114,33 @@ function Cockpit() {
     { label: 'Value', accessor: 'val', sortable: false },
   ]
 
-  const bankResults = Object.values(
+  const assetsWithReturnsArr = Object.values(
     resultFacts?.assetsWithReturns ?? {}
-  ).reduce(
-    (acc, value) => {
-      return {
-        ...acc,
-        [value.ix]: value.bank,
-      }
-    },
-    { cat: 'Savings' }
   )
 
-  const bondsResults = Object.values(
-    resultFacts?.assetsWithReturns ?? {}
-  ).reduce(
-    (acc, value) => {
+  const reduceFn = (type: string) => {
+    return (acc, value) => {
+      console.log(value)
+      let val = value.bank
+      if (type == 'bonds') {
+        val = value.bonds
+      } else if (type == 'stocks') {
+        val = value.stocks
+      } else if (type == 'total') {
+        val = value.totalAssets
+      }
       return {
         ...acc,
-        [value.ix]: value.bonds,
+        [value.ix]: val,
       }
-    },
-    { cat: 'Bonds' }
-  )
-
-  const stocksResults = Object.values(
-    resultFacts?.assetsWithReturns ?? {}
-  ).reduce(
-    (acc, value) => {
-      return {
-        ...acc,
-        [value.ix]: value.stocks,
-      }
-    },
-    { cat: 'Stocks' }
-  )
-
-  const totalResults = Object.values(
-    resultFacts?.assetsWithReturns ?? {}
-  ).reduce(
-    (acc, value) => {
-      return {
-        ...acc,
-        [value.ix]: value.totalAssets,
-      }
-    },
-    { cat: 'Total' }
-  )
+    }
+  }
 
   const data_segment_results = [
-    bankResults,
-    bondsResults,
-    stocksResults,
-    totalResults,
+    assetsWithReturnsArr.reduce(reduceFn('bank'), { cat: 'Savings' }),
+    assetsWithReturnsArr.reduce(reduceFn('bonds'), { cat: 'Bonds' }),
+    assetsWithReturnsArr.reduce(reduceFn('stocks'), { cat: 'Stocks' }),
+    assetsWithReturnsArr.reduce(reduceFn('total'), { cat: 'Total' }),
   ]
 
   const data_portfolio = [
