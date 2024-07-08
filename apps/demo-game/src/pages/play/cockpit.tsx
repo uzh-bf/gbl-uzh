@@ -1,11 +1,27 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { Switch, Table } from '@uzh-bf/design-system'
 import { useEffect, useState } from 'react'
+import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts'
 import {
   PerformActionDocument,
   ResultDocument,
 } from 'src/graphql/generated/ops'
 import { ActionTypes } from 'src/services/ActionsReducer'
+
+function getTotalAssetsOfPreviousResults(previousResults: any[]) {
+  const filtered = previousResults.filter((o) => o.type == 'SEGMENT_END')
+
+  filtered.sort((a, b) =>
+    a.period.index > b.period.index && a.segment.index > b.segment.index
+      ? -1
+      : 1
+  )
+
+  return filtered
+    .map((e) => e.facts.assetsWithReturns)
+    .flat()
+    .map((e) => e.totalAssets)
+}
 
 function Cockpit() {
   const playerState = useQuery(ResultDocument, { fetchPolicy: 'cache-first' })
@@ -34,10 +50,7 @@ function Cockpit() {
 
   const playerData = playerState.data
   const playerDataResult = playerData?.result
-
-  const resultFacts = playerDataResult?.playerResult?.facts
   const currentGame = playerDataResult?.currentGame
-  const self = playerState?.data?.self
 
   // TODO(JJ):
   // - Make it visually more appealing
@@ -52,6 +65,9 @@ function Cockpit() {
       </div>
     )
   }
+  const resultFacts = playerDataResult?.playerResult?.facts
+  const previousResults = playerDataResult?.previousResults
+  const self = playerState?.data?.self
 
   const decisions = [
     {
@@ -120,7 +136,6 @@ function Cockpit() {
 
   const reduceFn = (type: string) => {
     return (acc, value) => {
-      console.log(value)
       let val = value.bank
       if (type == 'bonds') {
         val = value.bonds
@@ -192,6 +207,9 @@ function Cockpit() {
       return <div> Game is scheduled. </div>
 
     case 'PAUSED':
+      const totalAssetsPerMonth = getTotalAssetsOfPreviousResults(
+        previousResults
+      ).map((s, i) => ({ total: s, month: 'month_' + String(i) }))
       return (
         <div>
           {header}
@@ -201,6 +219,16 @@ function Cockpit() {
               data={data_segment_results}
               caption=""
             />
+          </div>
+          <div className="max-w-2xl">
+            <div className="flex justify-center">Total over time chart</div>
+            <LineChart width={600} height={400} data={totalAssetsPerMonth}>
+              <Line type="monotone" dataKey="total" stroke="#8884d8" />
+              <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+            </LineChart>
           </div>
         </div>
       )
