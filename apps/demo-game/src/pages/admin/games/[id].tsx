@@ -81,6 +81,74 @@ function ManageGame() {
     return <div>{error.message}</div>
   }
 
+  const game = data.game
+  const activePeriod = game?.activePeriod
+  const segments = activePeriod?.segments
+  const activeSegmentIx = activePeriod?.activeSegmentIx
+
+  const nextPeriod = () => {
+    activateNextPeriod({
+      variables: {
+        gameId: Number(router.query.id),
+      },
+    })
+  }
+
+  const nextSegment = () => {
+    activateNextSegment({
+      variables: {
+        gameId: Number(router.query.id),
+      },
+    })
+  }
+
+  const getButton = () => {
+    const isScheduled = game.status === GameStatus.Scheduled
+    const isResultState = game.status === GameStatus.Results
+    if (!activePeriod || isScheduled || isResultState) {
+      return {
+        buttonName: 'Next Period',
+        disabled: false,
+        onClick: nextPeriod,
+      }
+    }
+
+    const atLastSegment = activeSegmentIx >= segments.length - 1
+    if (!atLastSegment) {
+      return {
+        buttonName: 'Next Segment',
+        disabled: nextSegmentLoading,
+        onClick: nextSegment,
+      }
+    }
+    // TODO(JJ):
+    // - Fix consolidation for the last period
+    // - const periods = game?.periods
+    //   const activePeriodIx = game?.activePeriodIx
+    //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
+    if (game.status === GameStatus.Consolidation) {
+      return {
+        buttonName: 'Consolidate',
+        disabled: nextPeriodLoading,
+        onClick: nextPeriod,
+      }
+    }
+    if (game.status === GameStatus.Completed) {
+      return {
+        buttonName: 'Completed',
+        disabled: true,
+        onClick: () => {},
+      }
+    }
+    return {
+      buttonName: 'Period Results',
+      disabled: nextPeriodLoading,
+      onClick: nextPeriod,
+    }
+  }
+
+  const actionButton = getButton()
+
   return (
     <div className="p-4">
       <div>
@@ -356,38 +424,10 @@ function ManageGame() {
 
       <div className="mt-2 flex flex-row gap-2">
         <Button
-          // disabled={
-          //   data.game.status === GameStatus.Preparation ||
-          //   data.game?.activePeriod?.activeSegmentIx <
-          //     data.game?.activePeriod?.segments.length - 1 ||
-          //   nextPeriodLoading
-          // }
-          onClick={() => {
-            activateNextPeriod({
-              variables: {
-                gameId: Number(router.query.id),
-              },
-            })
-          }}
+          disabled={actionButton?.disabled}
+          onClick={actionButton?.onClick}
         >
-          Next Period
-        </Button>
-        <Button
-          disabled={
-            (data.game.status !== GameStatus.Preparation &&
-              data.game?.activePeriod?.activeSegmentIx >=
-                data.game?.activePeriod?.segments.length - 1) ||
-            nextSegmentLoading
-          }
-          onClick={() => {
-            activateNextSegment({
-              variables: {
-                gameId: Number(router.query.id),
-              },
-            })
-          }}
-        >
-          Next Segment
+          {actionButton?.buttonName}
         </Button>
       </div>
 
