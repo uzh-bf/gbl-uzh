@@ -738,9 +738,6 @@ importers:
       '@radix-ui/react-avatar':
         specifier: ^1.1.0
         version: 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.2.0)(react@18.2.0)
-      '@types/ramda':
-        specifier: ^0.28.25
-        version: 0.28.25
       '@uzh-bf/design-system':
         specifier: 2.13.3
         version: 2.13.3(@fortawesome/fontawesome-svg-core@6.4.2)(@fortawesome/free-regular-svg-icons@6.4.2)(@fortawesome/free-solid-svg-icons@6.4.2)(@fortawesome/react-fontawesome@0.2.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(autoprefixer@10.4.19)(dayjs@1.11.11)(formik@2.4.3)(postcss-import@15.1.0)(react-dom@18.2.0)(react@18.2.0)(tailwind-merge@1.14.0)(tailwindcss-radix@2.9.0)(tailwindcss@3.4.4)(yup@1.2.0)
@@ -766,6 +763,9 @@ importers:
       '@types/node':
         specifier: ^20.14.9
         version: 20.14.9
+      '@types/ramda':
+        specifier: ^0.28.25
+        version: 0.28.25
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
@@ -7403,6 +7403,7 @@ packages:
     resolution: {integrity: sha512-HrQNqQAGcITpn9HAJFamDxm7iZeeXiP/95pN5OMbNniDjzCCeOHbBKNGmUy8NRi0fhYS+/cXeo91MFC+06gbow==}
     dependencies:
       ts-toolbelt: 6.15.5
+    dev: true
 
   /@types/react-dom@18.2.7:
     resolution: {integrity: sha512-GRaAEriuT4zp9N4p1i8BDBYmEyfo+xQ3yHjJU4eiK5NDa1RmUZG+unZABUTK4/Ox/M+GaHwb6Ow8rUITrtjszA==}
@@ -19505,6 +19506,7 @@ packages:
 
   /ts-toolbelt@6.15.5:
     resolution: {integrity: sha512-FZIXf1ksVyLcfr7M317jbB67XFJhOO1YqdTcuGaq9q5jLUoTikukZ+98TPjKiP2jC5CgmYdWWYs0s2nLSU0/1A==}
+    dev: true
 
   /ts-toolbelt@9.6.0:
     resolution: {integrity: sha512-nsZd8ZeNUzukXPlJmTBwUAuABDe/9qtVDelJeT/qW0ow3ZS3BsQJtNkan1802aM9Uf68/Y8ljw86Hu0h5IUW3w==}
