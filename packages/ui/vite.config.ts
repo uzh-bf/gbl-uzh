@@ -13,14 +13,13 @@ export default defineConfig({
       fileName: 'index',
     },
     rollupOptions: {
-      external: ['react'],
-      // output: {
-      //   // Provide global variables to use in the UMD build
-      //   // for externalized deps
-      //   globals: {
-      //     vue: 'Vue',
-      //   },
-      // },
+      external: ['react', 'react-dom'],
+      output: {
+        globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM',
+        },
+      },
     },
   },
   resolve: {
