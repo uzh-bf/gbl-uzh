@@ -17,11 +17,14 @@
     "@uzh-bf/design-system": "2.13.3",
     "clsx": "^2.0.0",
     "react": "^18.2.0",
-    "tailwind-merge": "1.14.0"
+    "tailwind-merge": "1.14.0",
+    "react-dice-complete": "2.2.0",
+    "@radix-ui/react-avatar": "^1.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.9",
     "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "7.15.0",
     "@typescript-eslint/parser": "7.15.0",
     "@vitejs/plugin-react-swc": "3.7.0",
