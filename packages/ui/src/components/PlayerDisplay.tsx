@@ -10,15 +10,15 @@ interface AchievementProps {
 }
 
 interface PlayerDataProps {
-  achievements: any[]
-  name: string
-  color: string
+  achievements?: any[]
+  name?: string
+  color?: string
   xp?: number
   level: number
   xpToNext: number
-  avatar: string
-  location: string
-  onClick: () => void
+  avatar?: string
+  location?: string
+  onClick?: () => void
 }
 
 function Achievement({ name, xpReward, image, count }: AchievementProps) {
@@ -71,7 +71,7 @@ function PlayerDisplay({
         />
 
         <div className="flex flex-row flex-wrap flex-initial gap-2">
-          {achievements.map((achievement) => (
+          {achievements?.map((achievement) => (
             <Achievement
               key={achievement.achievement.id}
               name={achievement.achievement.name}
@@ -81,12 +81,6 @@ function PlayerDisplay({
             />
           ))}
         </div>
-
-        {/* <div>
-            <div className="p-2 text-sm bg-orange-400 border rounded w-28">
-              5% Storage Cost
-            </div>
-          </div> */}
       </div>
     </div>
   )

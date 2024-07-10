@@ -1,5 +1,4 @@
 import { PlayerDisplay } from '@gbl-uzh/ui'
-import { Progress } from '@uzh-bf/design-system'
 import { useRouter } from 'next/router'
 
 export default function Home() {
@@ -9,20 +8,22 @@ export default function Home() {
       hello world
       {/* <Button /> */}
       {/* <Dice dice1={'dice1'} dice2={'dice2'} /> */}
-      <Progress value={50} max={100} formatter={(val) => `${val}XP`} />
-      <PlayerDisplay
-        name={'playerName'}
-        avatar={''}
-        color={'Red'}
-        achievements={[]}
-        location={'playerFactsLocation'}
-        xp={20}
-        xpToNext={50}
-        level={1}
-        onClick={() => {
-          router.replace('/play/welcome')
-        }}
-      />
+      {/* <Progress value={50} max={100} formatter={(val) => `${val}XP`} /> */}
+      <div className="flex w-1/3">
+        <PlayerDisplay
+          name={'playerName'}
+          avatar={'avatar_placeholder'}
+          color={'Red'}
+          achievements={[]}
+          location={'ZH'}
+          xp={20}
+          xpToNext={50}
+          level={1}
+          onClick={() => {
+            router.replace('/play/welcome')
+          }}
+        />
+      </div>
     </div>
   )
 }
