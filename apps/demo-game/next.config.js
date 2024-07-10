@@ -9,7 +9,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // transpilePackages: ['@gbl-uzh/ui'],
+  transpilePackages: ['@gbl-uzh/ui'],
 }
 
 module.exports = nextConfig
