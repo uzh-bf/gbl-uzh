@@ -1,4 +1,4 @@
-import { PlayerDisplay } from '@gbl-uzh/ui'
+import { PlayerDisplay, StorageOverview } from '@gbl-uzh/ui'
 import { useRouter } from 'next/router'
 
 export default function Home() {
@@ -24,6 +24,12 @@ export default function Home() {
           }}
         />
       </div>
+      <StorageOverview
+        storageTotal={3}
+        storageUsed={1}
+        imgSrcTotal={'/avatars/cocoa_0.png'}
+        imgSrcUsed={'/avatars/cocoa_3.png'}
+      />
     </div>
   )
 }
