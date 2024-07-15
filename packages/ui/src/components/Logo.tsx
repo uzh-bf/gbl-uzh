@@ -14,6 +14,7 @@ interface Props {
 // TODO(JJ): Discuss with RS
 // - path to avatar/locations/ and images in general directly?
 // - double-check: absolute vs relative - something is off
+// - bg color of name is off
 function Logo({ color, avatar, name, location, level }: Props) {
   return (
     <div
@@ -29,18 +30,18 @@ function Logo({ color, avatar, name, location, level }: Props) {
       )}
       {location && (
         <img
-          className="relative w-1/4 p-1 bg-white rounded-lg shadow left-2 top-2"
+          className="absolute w-10 p-1 bg-white rounded-lg shadow left-2 top-1"
           src={`/locations/${location}.svg`}
         />
       )}
       {name && (
-        <div className="relative left-0 right-0 p-1 text-center text-black shadow bg-slate-600 bg-opacity-90 bottom-2">
+        <div className="absolute left-0 right-0 p-1 text-center text-black shadow bg-slate-600 bg-opacity-90 bottom-8">
           <div className="text-sm font-semibold">{name}</div>
           <div className="text-xs">HQ: {location}</div>
         </div>
       )}
       {level && (
-        <div className="relative flex flex-col items-center justify-center w-8 h-8 text-lg font-bold text-black bg-red-500 rounded-full shadow top-2 right-2">
+        <div className="absolute flex flex-col items-center justify-center w-8 h-8 text-lg font-bold text-black bg-red-500 rounded-full shadow top-0 right-0">
           {level}
         </div>
       )}
