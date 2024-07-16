@@ -1,4 +1,4 @@
-import { PlayerDisplay, StorageOverview } from '@gbl-uzh/ui'
+import { PlayerDisplay, ProbabilityChart, StorageOverview } from '@gbl-uzh/ui'
 import { useRouter } from 'next/router'
 
 export default function Home() {
@@ -9,7 +9,7 @@ export default function Home() {
       {/* <Button /> */}
       {/* <Dice dice1={'dice1'} dice2={'dice2'} /> */}
       {/* <Progress value={50} max={100} formatter={(val) => `${val}XP`} /> */}
-      <div className="flex w-1/3">
+      <div className="flex w-1/3 flex-col">
         <PlayerDisplay
           name={'playerName'}
           avatar={'avatar_placeholder'}
@@ -23,13 +23,14 @@ export default function Home() {
             router.replace('/play/welcome')
           }}
         />
+        <StorageOverview
+          storageTotal={3}
+          storageUsed={1}
+          imgSrcTotal={'/avatars/cocoa_0.png'}
+          imgSrcUsed={'/avatars/cocoa_3.png'}
+        />
       </div>
-      <StorageOverview
-        storageTotal={3}
-        storageUsed={1}
-        imgSrcTotal={'/avatars/cocoa_0.png'}
-        imgSrcUsed={'/avatars/cocoa_3.png'}
-      />
+      <ProbabilityChart trendE={5} trendGap={8} totalEyes={'12'} />
     </div>
   )
 }

@@ -46,6 +46,7 @@
     "@fortawesome/free-solid-svg-icons": "6.4.2",
     "@fortawesome/react-fontawesome": "0.2.0",
     "@types/ramda": "^0.28.25",
-    "ramda": "0.29.0"
+    "ramda": "0.29.0",
+    "recharts": "2.8.0"
   }
 }
