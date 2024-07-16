@@ -1,4 +1,9 @@
-import { PlayerDisplay, ProbabilityChart, StorageOverview } from '@gbl-uzh/ui'
+import {
+  PlayerDisplay,
+  ProbabilityChart,
+  StorageOverview,
+  TimelineEntry,
+} from '@gbl-uzh/ui'
 import { useRouter } from 'next/router'
 
 export default function Home() {
@@ -31,6 +36,15 @@ export default function Home() {
         />
       </div>
       <ProbabilityChart trendE={5} trendGap={8} totalEyes={'12'} />
+      <TimelineEntry
+        periodIx={1}
+        segmentIx={1}
+        isCurrentEntry={true}
+        isPastEntry={false}
+        type={'PERIOD_END'}
+        cashBalance={1}
+        storageAmount={1}
+      />
     </div>
   )
 }
