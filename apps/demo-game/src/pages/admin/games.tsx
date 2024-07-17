@@ -94,14 +94,29 @@ function Games() {
         )}
       </Formik>
 
-      <div className="mt-4 grid grid-cols-10 gap-1">
-        {data.games.map((game) => (
-          <div className="border p-2" key={game?.id}>
-            <Link href={`/admin/games/${game?.id}`}>
-              {game?.name} {game?.activePeriodIx}
-            </Link>
-          </div>
-        ))}
+      <div className="mt-4 flex flex-col gap-1">
+        {[...data.games]
+          .sort((gameA, gameB) => Number(gameB.id) - Number(gameA.id))
+          .map((game, index, array) => {
+            return (
+              <div className="flex w-96 border p-2" key={game?.id}>
+                <div className="w-10 pr-2 text-right">
+                  {array.length - index}.
+                </div>
+                <Link
+                  className="flex w-full flex-col justify-between"
+                  href={`/admin/games/${game?.id}`}
+                >
+                  <div>{game?.name}</div>
+                  <div className="flex gap-x-4 text-sm">
+                    <div>Id: {game?.id}</div>
+                    <div>Active period: {game?.activePeriodIx}</div>
+                    <div>Status: {game?.status}</div>
+                  </div>
+                </Link>
+              </div>
+            )
+          })}
       </div>
     </div>
   )
