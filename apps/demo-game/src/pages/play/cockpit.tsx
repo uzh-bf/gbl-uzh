@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client'
+import { PlayerDisplay } from '@gbl-uzh/ui'
 import { Switch, Table } from '@uzh-bf/design-system'
 import { useEffect, useState } from 'react'
 import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts'
@@ -177,6 +178,28 @@ function Cockpit() {
     },
   ]
 
+  // TODO(JJ):
+  // - Level is not consistent with component
+  // Component wants a number, level is an object, though.
+  // console.log(self)
+  // - Do onclick logic
+  // - PlayerDisplay is not ideal/nice yet
+  const playerDisplay = (
+    <div className="w-1/4">
+      <PlayerDisplay
+        achievements={self?.achievements}
+        name={self?.name}
+        color={self?.color}
+        level={0}
+        xpToNext={self?.experienceToNext}
+        xp={self?.experience}
+        avatar={self?.avatar}
+        location={self?.location}
+        onClick={() => {}}
+      />
+    </div>
+  )
+
   const header = (
     <div className="rounded border p-4">
       <div className="font-bold">
@@ -189,38 +212,56 @@ function Cockpit() {
 
   switch (currentGame?.status) {
     case 'PREPARATION':
-      return <div>{header} Game is begin prepared.</div>
+      return (
+        <div className="flex w-full justify-between">
+          <div>{header} Game is begin prepared.</div>
+          {/* <div>{playerDisplay}</div> */}
+          {playerDisplay}
+        </div>
+      )
 
     case 'COMPLETED':
       return <div> Game is completed. </div>
 
     case 'CONSOLIDATION':
-      return <div> Game is being consolidated. </div>
-
-    case 'PREPARATION':
-      return <div> Game is being prepared. </div>
+      return (
+        <div className="flex w-full justify-between">
+          <div> Game is being consolidated. </div>
+          {playerDisplay}
+        </div>
+      )
 
     case 'RESULTS':
-      return <div> RESULTS </div>
+      return (
+        <div className="flex w-full justify-between">
+          <div> RESULTS </div>
+          {playerDisplay}
+        </div>
+      )
 
     case 'SCHEDULED':
-      return <div> Game is scheduled. </div>
+      return (
+        <div className="flex w-full justify-between">
+          <div> Game is scheduled. </div>
+          {playerDisplay}
+        </div>
+      )
 
     case 'PAUSED':
       const totalAssetsPerMonth = getTotalAssetsOfPreviousResults(
         previousResults
       ).map((s, i) => ({ total: s, month: 'month_' + String(i) }))
       return (
-        <div>
-          {header}
-          <div className="max-w-2xl">
-            <Table
-              columns={columns_segment_results}
-              data={data_segment_results}
-              caption=""
-            />
-          </div>
-          <div className="max-w-2xl">
+        <div className="flex w-full justify-between">
+          <div>
+            {header}
+            <div className="max-w-2xl">
+              <Table
+                columns={columns_segment_results}
+                data={data_segment_results}
+                caption=""
+              />
+            </div>
             <div className="flex justify-center">Total over time chart</div>
             <LineChart width={600} height={400} data={totalAssetsPerMonth}>
               <Line type="monotone" dataKey="total" stroke="#8884d8" />
@@ -230,55 +271,62 @@ function Cockpit() {
               <Tooltip />
             </LineChart>
           </div>
+
+          {playerDisplay}
         </div>
       )
 
     case 'RUNNING':
       return (
-        <div>
-          {header}
-          <div className="max-w-md">
-            <Table
-              columns={columns_portfolio}
-              data={data_portfolio}
-              caption=""
-            />
-          </div>
+        <div className="flex w-full justify-between">
+          <div>
+            {header}
+            <div className="max-w-md">
+              <Table
+                columns={columns_portfolio}
+                data={data_portfolio}
+                caption=""
+              />
+            </div>
 
-          <div className="rounded border p-4">
-            {decisions.map(function (decision, i) {
-              return (
-                <div className="p-1" key={decision.name}>
-                  <Switch
-                    label={decision.label(
-                      decision.state
-                        ? 1 /
-                            (+bankDecisionState +
-                              +bondsDecisionState +
-                              +stockDecisionState)
-                        : 0,
-                      resultFacts.assets.totalAssets
-                    )}
-                    checked={decision.state}
-                    id="switch"
-                    onCheckedChange={async (checked) => {
-                      decision.effect(checked)
-                      await performAction({
-                        variables: {
-                          type: decision.action,
-                          payload: JSON.stringify({
-                            decision: checked,
-                          }),
-                        },
-                      })
-                    }}
-                  />
-                </div>
-              )
-            })}
+            <div className="rounded border p-4">
+              {decisions.map(function (decision, i) {
+                return (
+                  <div className="p-1" key={decision.name}>
+                    <Switch
+                      label={decision.label(
+                        decision.state
+                          ? 1 /
+                              (+bankDecisionState +
+                                +bondsDecisionState +
+                                +stockDecisionState)
+                          : 0,
+                        resultFacts.assets.totalAssets
+                      )}
+                      checked={decision.state}
+                      id="switch"
+                      onCheckedChange={async (checked) => {
+                        decision.effect(checked)
+                        await performAction({
+                          variables: {
+                            type: decision.action,
+                            payload: JSON.stringify({
+                              decision: checked,
+                            }),
+                          },
+                        })
+                      }}
+                    />
+                  </div>
+                )
+              })}
+            </div>
           </div>
+          {playerDisplay}
         </div>
       )
+    default:
+      return <div> Game has not been created yet. </div>
   }
 }
 
