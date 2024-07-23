@@ -149,11 +149,18 @@ function ManageGame() {
 
   const actionButton = getButton()
 
+  // NOTE: Somehow when clicking on the nextSegment/nextPeriod button
+  // the ordering of the periods is changed for a short time, that is why
+  // we sort it here.
+  const periodsSorted = data.game.periods
+    .slice()
+    .sort((periodA, periodB) => periodA.index - periodB.index)
+
   return (
     <div className="p-4">
       <div>
         <div className="flex flex-col gap-2 overflow-x-auto md:flex-row">
-          {data.game.periods.map((period, ix) => {
+          {periodsSorted.map((period, ix) => {
             const periodStatus = computePeriodStatus(data.game as Game, ix)
 
             const labels = [
@@ -196,6 +203,7 @@ function ManageGame() {
                         )}
                       </div>
                       <div className="font-bold">Period {period.index + 1}</div>
+                      {isPeriodActive && <div>{game.status}</div>}
                     </div>
                     <div className="flex flex-row gap-1">
                       {labels.map((label) => (
@@ -421,8 +429,6 @@ function ManageGame() {
           </Formik>
         </div>
       </div>
-
-      <div>Game status: {game.status} </div>
       <div className="mt-2 flex flex-row gap-2">
         <Button
           disabled={actionButton?.disabled}
