@@ -422,6 +422,7 @@ function ManageGame() {
         </div>
       </div>
 
+      <div>Game status: {game.status} </div>
       <div className="mt-2 flex flex-row gap-2">
         <Button
           disabled={actionButton?.disabled}
