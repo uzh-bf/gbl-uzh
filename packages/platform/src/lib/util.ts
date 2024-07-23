@@ -26,7 +26,11 @@ export function diceRoll(seeds: number[] = []) {
   return integer(1, 6)(rng)
 }
 
-export function computeScenarioOutcome(trend: number, gap: number, diceRoll: number) {
+export function computeScenarioOutcome(
+  trend: number,
+  gap: number,
+  diceRoll: number
+) {
   return trend + (diceRoll - 7) * gap
 }
 

@@ -60,7 +60,7 @@ function Welcome() {
                 />
               </div>
               <div className="prose flex-1">
-                Welcome, {values.name}! Your company has its headquarters in{' '}
+                Welcome, {values.name}! Your bank has its headquarters in{' '}
                 {values.location}.
               </div>
             </div>
