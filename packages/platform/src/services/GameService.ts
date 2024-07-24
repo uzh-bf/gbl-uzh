@@ -505,6 +505,23 @@ export async function activateNextPeriod(
 
       await Promise.all(promises)
 
+      // TODO(JJ): The error happens here for the last consolidation
+      // - there are no more periods
+      // - we prob. need to change the nextPeriodIx if it the last period
+      // suggestion
+      // - maybe setting game.activePeriod to undefined is enough
+      // - In the DB.GameStatus.RESULTS case set the new status
+      // to completed when we are done
+      // - we prob. need to update the game to completed state
+      // -> Discuss with RS
+
+      // const lastPeriodIx = game.periods.length - 1
+
+      let periodIx = nextPeriodIx
+      // if (nextPeriodIx > lastPeriodIx) {
+      //   periodIx = lastPeriodIx
+      // }
+
       const result = await ctx.prisma.$transaction([
         // update the status and active period of the current game
         ctx.prisma.game.update({
@@ -520,12 +537,12 @@ export async function activateNextPeriod(
           },
           data: {
             status: DB.GameStatus.RESULTS,
-            activePeriodIx: nextPeriodIx,
+            activePeriodIx: periodIx,
             activePeriod: {
               connect: {
                 gameId_index: {
                   gameId,
-                  index: nextPeriodIx,
+                  index: periodIx,
                 },
               },
             },
