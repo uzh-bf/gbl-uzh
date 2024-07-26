@@ -513,15 +513,31 @@ export async function activateNextPeriod(
       // - In the DB.GameStatus.RESULTS case set the new status
       // to completed when we are done
       // - we prob. need to update the game to completed state
+      // - maybe we would like to add a button that finishes the game?
+      //    => it's better not imo, but open for discussion
       // -> Discuss with RS
 
       // const lastPeriodIx = game.periods.length - 1
-
       let periodIx = nextPeriodIx
-      // if (nextPeriodIx > lastPeriodIx) {
-      //   periodIx = lastPeriodIx
+
+      // let data: any = {
+      //   status: DB.GameStatus.RESULTS,
+      // }
+      // if (nextPeriodIx <= lastPeriodIx) {
+      //   // periodIx = lastPeriodIx
+      //   data.activePeriodIx = periodIx
+      //   data.activePeriod = {
+      //     connect: {
+      //       gameId_index: {
+      //         gameId,
+      //         index: periodIx,
+      //       },
+      //     },
+      //   }
       // }
 
+      // TODO(JJ): Check with RS
+      // - when updating the game with the nextPeriodIx it crashes
       const result = await ctx.prisma.$transaction([
         // update the status and active period of the current game
         ctx.prisma.game.update({
@@ -582,6 +598,29 @@ export async function activateNextPeriod(
         log.warn('no next period available')
         return null
       }
+
+      // if (game.activePeriodIx >= game.periods.length) {
+      //   const result = await ctx.prisma.$transaction([
+      //     ctx.prisma.game.update({
+      //       where: {
+      //         id: gameId,
+      //       },
+      //       include: {
+      //         periods: {
+      //           include: {
+      //             segments: true,
+      //           },
+      //         },
+      //       },
+      //       data: {
+      //         // TODO(JJ): Double-check there is not else to update?
+      //         status: DB.GameStatus.COMPLETED,
+      //       },
+      //     }),
+      //   ])
+
+      //   return result
+      // }
 
       const { results, extras } = computePeriodStartResults(
         {
