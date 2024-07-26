@@ -39,7 +39,7 @@ function ManageGame() {
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
 
-  const { data, error, loading } = useQuery(GameDocument, {
+  const { data, error, loading, refetch } = useQuery(GameDocument, {
     variables: { id: Number(router.query.id) },
     pollInterval: 15000,
     skip: !router.query.id,
@@ -86,20 +86,26 @@ function ManageGame() {
   const segments = activePeriod?.segments
   const activeSegmentIx = activePeriod?.activeSegmentIx
 
-  const nextPeriod = () => {
+  const delay = (ms) => new Promise((res) => setTimeout(res, ms))
+
+  const nextPeriod = async () => {
     activateNextPeriod({
       variables: {
         gameId: Number(router.query.id),
       },
     })
+    await delay(500)
+    refetch()
   }
 
-  const nextSegment = () => {
+  const nextSegment = async () => {
     activateNextSegment({
       variables: {
         gameId: Number(router.query.id),
       },
     })
+    await delay(500)
+    refetch()
   }
 
   const getButton = () => {
@@ -155,6 +161,12 @@ function ManageGame() {
   const periodsSorted = data.game.periods
     .slice()
     .sort((periodA, periodB) => periodA.index - periodB.index)
+
+  // TODO(JJ): Since it is not refreshing nicely after a new status update of
+  // period or one of the segments, I am wondering if we should precompute
+  // the periodsSorted.map and their segments into new arrays -> check with RS
+  // -> appearantly the pollIntervall can increase the refresh rate
+  // there is also refetching which refreshes in response to a user action
 
   return (
     <div className="p-4">
