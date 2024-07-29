@@ -1,15 +1,14 @@
-import { Progress } from '@uzh-bf/design-system'
-
 import Logo from './Logo'
 import Achievement from './Achievement'
+import XpBar from './XpBar'
 
 interface PlayerDataProps {
   achievements?: any[]
   name?: string
   color?: string
   xp?: number
+  xpMax: number
   level: number
-  xpToNext: number
   imgPathAvatar?: string
   imgPathLocation?: string
   location?: string
@@ -21,8 +20,8 @@ function PlayerDisplay({
   name,
   color,
   xp,
+  xpMax,
   level,
-  xpToNext,
   imgPathAvatar,
   imgPathLocation,
   location,
@@ -42,11 +41,7 @@ function PlayerDisplay({
           />
         </div>
 
-        <Progress
-          value={xp ?? 0}
-          max={xpToNext}
-          formatter={(val) => `${val}XP`}
-        />
+        <XpBar value={xp ?? 0} max={xpMax} />
 
         <div className="flex flex-row flex-wrap flex-initial gap-2">
           {achievements?.map((achievement) => (

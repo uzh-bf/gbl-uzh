@@ -24,7 +24,7 @@ export default function Home() {
           imgPathLocation={'/locations/ZH.svg'}
           location={'ZH'}
           xp={20}
-          xpToNext={50}
+          xpMax={50}
           level={1}
           onClick={() => {
             router.replace('/play/welcome')
