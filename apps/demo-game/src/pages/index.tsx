@@ -33,8 +33,8 @@ export default function Home() {
         <StorageOverview
           storageTotal={3}
           storageUsed={1}
-          imgSrcTotal={'/avatars/cocoa_0.png'}
-          imgSrcUsed={'/avatars/cocoa_3.png'}
+          imgPathEmpty={'/avatars/cocoa_0.png'}
+          imgPathFull={'/avatars/cocoa_3.png'}
         />
       </div>
       <ProbabilityChart trendE={5} trendGap={8} totalEyes={'12'} />

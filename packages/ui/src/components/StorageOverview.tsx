@@ -8,15 +8,15 @@ const baseStyle =
 interface Props {
   storageUsed: number
   storageTotal: number
-  imgSrcUsed: string
-  imgSrcTotal: string
+  imgPathEmpty: string
+  imgPathFull: string
 }
 
 function StorageOverview({
   storageUsed,
   storageTotal,
-  imgSrcUsed,
-  imgSrcTotal,
+  imgPathEmpty,
+  imgPathFull,
 }: Props) {
   const storageEmpty = useMemo(
     () => storageTotal - storageUsed,
@@ -26,7 +26,7 @@ function StorageOverview({
   return (
     <div className="">
       <h2 className="mb-2 font-bold">Storage</h2>
-      <div className="grid grid-cols-10 gap-1 p-2 bg-white border rounded shadow aspect-square">
+      <div className="flex w-auto flex-wrap gap-1 p-2 bg-white border rounded shadow">
         {repeat(1, storageUsed).map((ix: number) => (
           <div
             key={ix}
@@ -35,7 +35,7 @@ function StorageOverview({
               'bg-transparent text-amber-800 border-none'
             )}
           >
-            <img src={imgSrcUsed} />
+            <img src={imgPathEmpty} />
           </div>
         ))}
         {repeat(1, storageEmpty).map((ix: number) => (
@@ -43,7 +43,7 @@ function StorageOverview({
             key={ix}
             className={twMerge(baseStyle, 'text-gray-200 bg-gray-100')}
           >
-            <img src={imgSrcTotal} className="opacity-30" />
+            <img src={imgPathFull} className="opacity-30" />
           </div>
         ))}
       </div>
@@ -56,7 +56,7 @@ function StorageOverview({
               'bg-transparent text-amber-800 border-none w-4 h-4'
             )}
           >
-            <img src={imgSrcUsed} />
+            <img src={imgPathEmpty} />
           </div>
           <div>Storage</div>
         </div>
@@ -65,7 +65,7 @@ function StorageOverview({
           <div
             className={twMerge(baseStyle, 'text-gray-200 bg-gray-100 w-4 h-4')}
           >
-            <img src={imgSrcTotal} className="opacity-30" />{' '}
+            <img src={imgPathFull} className="opacity-30" />{' '}
           </div>
           <div>Empty</div>
         </div>
