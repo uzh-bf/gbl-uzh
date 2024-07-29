@@ -2,7 +2,6 @@ import {
   PlayerDisplay,
   ProbabilityChart,
   StorageOverview,
-  Timeline,
   TimelineEntry,
 } from '@gbl-uzh/ui'
 import { useRouter } from 'next/router'
@@ -46,8 +45,12 @@ export default function Home() {
         type={'PERIOD_END'}
         cashBalance={1}
         storageAmount={1}
+        spotPrice={2}
+        spotPriceDelta={1}
+        futuresPrice={4}
+        futuresPriceDelta={3}
       />
-      <Timeline
+      {/* <Timeline
         periods={[
           {
             segments: [{ index: 0 }],
@@ -62,7 +65,7 @@ export default function Home() {
         entries={[{ type: 'PERIOD_START', period: { index: 0 }, segment: {} }]}
         activePeriodIx={0}
         activeSegmentIx={0}
-      />
+      /> */}
     </div>
   )
 }

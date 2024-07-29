@@ -19,6 +19,10 @@ export function optionalValueToCHFString(value: number, digits = 2) {
 // TODO(JJ):
 // - Replace img, maybe get rid of it or keep it general
 // - Maybe get rid of Type names?
+// - This one is very specific currently
+// - Discuss with RS what data we would like to represent here in the general
+//   case
+// -> I think this should be more like a layout
 function TimelineEntry({
   periodIx,
   segmentIx,
