@@ -18,9 +18,10 @@ export default function Home() {
       <div className="flex w-1/3 flex-col">
         <PlayerDisplay
           name={'playerName'}
-          avatar={'avatar_placeholder'}
+          imgPathAvatar={'/avatars/avatar_placeholder.png'}
           color={'Red'}
           achievements={[]}
+          imgPathLocation={'/locations/ZH.svg'}
           location={'ZH'}
           xp={20}
           xpToNext={50}

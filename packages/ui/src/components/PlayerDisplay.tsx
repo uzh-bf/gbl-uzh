@@ -10,7 +10,8 @@ interface PlayerDataProps {
   xp?: number
   level: number
   xpToNext: number
-  avatar?: string
+  imgPathAvatar?: string
+  imgPathLocation?: string
   location?: string
   onClick?: () => void
 }
@@ -22,7 +23,8 @@ function PlayerDisplay({
   xp,
   level,
   xpToNext,
-  avatar,
+  imgPathAvatar,
+  imgPathLocation,
   location,
   onClick,
 }: PlayerDataProps) {
@@ -32,8 +34,9 @@ function PlayerDisplay({
         <div className="cursor-pointer" onClick={onClick}>
           <Logo
             color={color}
-            avatar={avatar}
             name={name}
+            imgPathAvatar={imgPathAvatar}
+            imgPathLocation={imgPathLocation}
             location={location}
             level={level}
           />
