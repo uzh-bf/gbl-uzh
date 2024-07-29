@@ -967,7 +967,11 @@ export async function getGame(args, ctx: Context) {
       },
       activePeriod: {
         include: {
-          segments: true,
+          segments: {
+            orderBy: {
+              index: 'asc',
+            },
+          },
           activeSegment: true,
         },
       },

@@ -86,27 +86,21 @@ function ManageGame() {
   const segments = activePeriod?.segments
   const activeSegmentIx = activePeriod?.activeSegmentIx
 
-  const delay = (ms) => new Promise((res) => setTimeout(res, ms))
-
-  const nextPeriod = async () => {
+  const nextPeriod = () =>
     activateNextPeriod({
       variables: {
         gameId: Number(router.query.id),
       },
+      refetchQueries: [GameDocument],
     })
-    await delay(500)
-    refetch()
-  }
 
-  const nextSegment = async () => {
+  const nextSegment = () =>
     activateNextSegment({
       variables: {
         gameId: Number(router.query.id),
       },
+      refetchQueries: [GameDocument],
     })
-    await delay(500)
-    refetch()
-  }
 
   const getButton = () => {
     const isScheduled = game.status === GameStatus.Scheduled
@@ -159,8 +153,8 @@ function ManageGame() {
   // the ordering of the periods is changed for a short time, that is why
   // we sort it here.
   const periodsSorted = data.game.periods
-    .slice()
-    .sort((periodA, periodB) => periodA.index - periodB.index)
+  // .slice()
+  // .sort((periodA, periodB) => periodA.index - periodB.index)
 
   // TODO(JJ): Since it is not refreshing nicely after a new status update of
   // period or one of the segments, I am wondering if we should precompute
