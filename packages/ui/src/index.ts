@@ -6,6 +6,7 @@ import ProbabilityChart from '~/components/ProbabilityChart'
 import TimelineEntry from '~/components/TimelineEntry'
 import Timeline from '~/components/Timeline'
 import XpBar from '~/components/XpBar'
+import TradingForm from '~/components/TradingForm'
 
 export { Button } from '~/components/Button'
 export {
@@ -16,5 +17,6 @@ export {
   TimelineEntry,
   Timeline,
   XpBar,
+  TradingForm,
 }
 // export { Dice } from '~/components/Dice'

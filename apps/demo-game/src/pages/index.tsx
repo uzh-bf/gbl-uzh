@@ -4,7 +4,9 @@ import {
   StorageOverview,
   Timeline,
   TimelineEntry,
+  TradingForm,
 } from '@gbl-uzh/ui'
+
 import { useRouter } from 'next/router'
 
 export default function Home() {
@@ -150,6 +152,22 @@ export default function Home() {
               {futuresPriceDelta && <div>F {futuresPriceDelta}</div>}
             </>
           )
+        }}
+      />
+      <TradingForm
+        nameButtonA={'Buy'}
+        nameButtonB={'Sell'}
+        onSubmit={async (values, helpers) => {
+          console.log(values)
+          // await performAction({
+          //   variables: {
+          //     type: ActionTypes.SPOT_TRADE,
+          //     payload: JSON.stringify({
+          //       volume: values.modifier * Number(values.volume),
+          //     }),
+          //   },
+          // })
+          helpers.resetForm()
         }}
       />
     </div>
