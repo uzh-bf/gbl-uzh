@@ -2,6 +2,7 @@ import {
   PlayerDisplay,
   ProbabilityChart,
   StorageOverview,
+  Timeline,
   TimelineEntry,
 } from '@gbl-uzh/ui'
 import { useRouter } from 'next/router'
@@ -42,30 +43,115 @@ export default function Home() {
         segmentIx={1}
         isCurrentEntry={true}
         isPastEntry={false}
-        type={'PERIOD_END'}
-        cashBalance={1}
-        storageAmount={1}
-        spotPrice={2}
-        spotPriceDelta={1}
-        futuresPrice={4}
-        futuresPriceDelta={3}
-      />
-      {/* <Timeline
+        gameStatus={'PERIOD_END'}
+      >
+        <div>Child</div>
+      </TimelineEntry>
+      <Timeline
+        // NOTE(JJ): Check the prisma schema what Period includes
         periods={[
           {
-            segments: [{ index: 0 }],
+            segments: [
+              {
+                index: 0,
+                facts: {
+                  cashBalance: 3,
+                  storageAmount: 6,
+                  spotPrice: 1,
+                  futuresPrice: 1,
+                },
+              },
+              {
+                index: 1,
+                facts: {
+                  cashBalance: 3,
+                  storageAmount: 6,
+                  spotPrice: 2,
+                  futuresPrice: 3,
+                },
+              },
+            ],
             index: 0,
             facts: {
-              cashBalance: 1,
-              storageAmount: 1,
-              finalSpotprice: 1,
+              cashBalance: 3,
+              storageAmount: 6,
+              spotPrice: 2,
+              futuresPrice: 2,
             },
           },
         ]}
-        entries={[{ type: 'PERIOD_START', period: { index: 0 }, segment: {} }]}
+        entries={[
+          {
+            id: 0,
+            type: 'PERIOD_START',
+            period: { id: 0, index: 0 },
+            segment: { id: 0, index: 0 },
+            facts: {
+              finalSpotPrice: 9,
+            },
+          },
+          {
+            id: 1,
+            type: 'SEGMENT_START',
+            period: { id: 0, index: 0 },
+            segment: { id: 0, index: 0 },
+            facts: {
+              finalSpotPrice: 9,
+            },
+          },
+          {
+            id: 2,
+            type: 'SEGMENT_END',
+            period: { id: 0, index: 0 },
+            segment: { id: 0, index: 0 },
+            facts: {
+              finalSpotPrice: 9,
+            },
+          },
+          {
+            id: 3,
+            type: 'SEGMENT_START',
+            period: { id: 0, index: 0 },
+            segment: { id: 1, index: 1 },
+            facts: {
+              finalSpotPrice: 9,
+            },
+          },
+          {
+            id: 4,
+            type: 'SEGMENT_END',
+            period: { id: 0, index: 0 },
+            segment: { id: 1, index: 1 },
+            facts: {
+              finalSpotPrice: 9,
+            },
+          },
+        ]}
         activePeriodIx={0}
         activeSegmentIx={0}
-      /> */}
+        formatter={(current, prev) => {
+          // Do computation here
+          const spotPrice =
+            current.segmentFlat?.facts.spotPrice ?? current.facts.finalSpotPrice
+          const futuresPrice =
+            current.segmentFlat?.facts.futuresPrice ??
+            current.facts.finalSpotPrice
+
+          const spotPriceDelta =
+            prev?.segmentFlat?.facts.spotPrice &&
+            (spotPrice / prev.segmentFlat.facts.spotPrice - 1) * 100
+
+          const futuresPriceDelta =
+            prev?.segmentFlat?.facts.futuresPrice &&
+            (futuresPrice / prev.segmentFlat.facts.futuresPrice - 1) * 100
+          return (
+            <>
+              {spotPriceDelta && <div>S {spotPriceDelta}</div>}
+              {futuresPriceDelta && <div>F {futuresPriceDelta}</div>}
+            </>
+          )
+        }}
+      />
     </div>
   )
 }
