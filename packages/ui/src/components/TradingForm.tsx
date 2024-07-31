@@ -16,6 +16,7 @@ function optionalValueToCHFString(value: number, digits = 2) {
 }
 
 interface Props {
+  price: number
   nameButtonA: string
   nameButtonB: string
   onSubmit: (values: any, helpers: any) => Promise<void>
@@ -24,6 +25,7 @@ interface Props {
 }
 
 function TradingForm({
+  price,
   nameButtonA,
   nameButtonB,
   onSubmit,
@@ -53,10 +55,7 @@ function TradingForm({
             />
             <div className="mt-2">
               Trading {tradeInterface.values.volume}T for{' '}
-              {optionalValueToCHFString(
-                tradeInterface.values.volume
-                // * spotPrice
-              )}
+              {optionalValueToCHFString(tradeInterface.values.volume * price)}
             </div>
 
             {/* {!sufficientFunds && !sufficientStorage && (

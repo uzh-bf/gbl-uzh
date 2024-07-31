@@ -155,6 +155,7 @@ export default function Home() {
         }}
       />
       <TradingForm
+        price={10}
         nameButtonA={'Buy'}
         nameButtonB={'Sell'}
         onSubmit={async (values, helpers) => {
