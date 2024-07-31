@@ -73,35 +73,6 @@ function ManageGame() {
     }
   )
 
-  if (loading || !data?.game) {
-    return <div>loading...</div>
-  }
-
-  if (error) {
-    return <div>{error.message}</div>
-  }
-
-  const game = data.game
-  const activePeriod = game?.activePeriod
-  const segments = activePeriod?.segments
-  const activeSegmentIx = activePeriod?.activeSegmentIx
-
-  const nextPeriod = () =>
-    activateNextPeriod({
-      variables: {
-        gameId: Number(router.query.id),
-      },
-      refetchQueries: [GameDocument],
-    })
-
-  const nextSegment = () =>
-    activateNextSegment({
-      variables: {
-        gameId: Number(router.query.id),
-      },
-      refetchQueries: [GameDocument],
-    })
-
   const getButton = useCallback(() => {
     const isScheduled = game.status === GameStatus.Scheduled
     const isResultState = game.status === GameStatus.Results
@@ -144,7 +115,36 @@ function ManageGame() {
         Period Results
       </Button>
     )
-  }, [game.status])
+  }, [data?.game?.status])
+
+  if (loading || !data?.game) {
+    return <div>loading...</div>
+  }
+
+  if (error) {
+    return <div>{error.message}</div>
+  }
+
+  const game = data.game
+  const activePeriod = game?.activePeriod
+  const segments = activePeriod?.segments
+  const activeSegmentIx = activePeriod?.activeSegmentIx
+
+  const nextPeriod = () =>
+    activateNextPeriod({
+      variables: {
+        gameId: Number(router.query.id),
+      },
+      refetchQueries: [GameDocument],
+    })
+
+  const nextSegment = () =>
+    activateNextSegment({
+      variables: {
+        gameId: Number(router.query.id),
+      },
+      refetchQueries: [GameDocument],
+    })
 
   // TODO(JJ): Since it is not refreshing nicely after a new status update of
   // period or one of the segments, I am wondering if we should precompute
