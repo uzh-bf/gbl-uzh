@@ -14,7 +14,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "peerDependencies": {
-    "@uzh-bf/design-system": "2.7.0",
+    "@uzh-bf/design-system": "2.13.3",
     "clsx": "^2.0.0",
     "react": "^18.2.0",
     "tailwind-merge": "1.14.0"

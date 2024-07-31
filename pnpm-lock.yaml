@@ -56,8 +56,8 @@ importers:
         specifier: 5.17.0
         version: 5.17.0(prisma@5.17.0)
       '@uzh-bf/design-system':
-        specifier: 2.7.0
-        version: 2.7.0(@fortawesome/fontawesome-svg-core@6.4.2)(@fortawesome/free-regular-svg-icons@6.4.2)(@fortawesome/free-solid-svg-icons@6.4.2)(@fortawesome/react-fontawesome@0.2.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(autoprefixer@10.4.19)(dayjs@1.11.12)(formik@2.4.3)(postcss-import@15.1.0)(react-dom@18.2.0)(react@18.2.0)(tailwind-merge@1.14.0)(tailwindcss-radix@2.9.0)(tailwindcss@3.4.4)(yup@1.2.0)
+        specifier: 2.13.3
+        version: 2.13.3(@fortawesome/fontawesome-svg-core@6.4.2)(@fortawesome/free-regular-svg-icons@6.4.2)(@fortawesome/free-solid-svg-icons@6.4.2)(@fortawesome/react-fontawesome@0.2.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(autoprefixer@10.4.19)(dayjs@1.11.12)(formik@2.4.3)(postcss-import@15.1.0)(react-dom@18.2.0)(react@18.2.0)(tailwind-merge@1.14.0)(tailwindcss-radix@2.9.0)(tailwindcss@3.4.4)(yup@1.2.0)
       date-fns:
         specifier: 2.30.0
         version: 2.30.0
@@ -243,7 +243,7 @@ importers:
         specifier: ^3.1.7
         version: 3.1.10
       eslint:
-        specifier: 8.57.0
+        specifier: ^8.14.0
         version: 8.57.0
       express:
         specifier: ^4.17.3
@@ -557,8 +557,8 @@ importers:
         specifier: 0.5.10
         version: 0.5.10(tailwindcss@3.4.4)
       '@uzh-bf/design-system':
-        specifier: 2.7.0
-        version: 2.7.0(@fortawesome/fontawesome-svg-core@6.4.2)(@fortawesome/free-regular-svg-icons@6.4.2)(@fortawesome/free-solid-svg-icons@6.4.2)(@fortawesome/react-fontawesome@0.2.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(autoprefixer@10.4.19)(dayjs@1.11.12)(formik@2.4.3)(postcss-import@15.1.0)(react-dom@18.2.0)(react@18.2.0)(tailwind-merge@1.14.0)(tailwindcss-radix@2.9.0)(tailwindcss@3.4.4)(yup@1.2.0)
+        specifier: 2.13.3
+        version: 2.13.3(@fortawesome/fontawesome-svg-core@6.4.2)(@fortawesome/free-regular-svg-icons@6.4.2)(@fortawesome/free-solid-svg-icons@6.4.2)(@fortawesome/react-fontawesome@0.2.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(autoprefixer@10.4.19)(dayjs@1.11.12)(formik@2.4.3)(postcss-import@15.1.0)(react-dom@18.2.0)(react@18.2.0)(tailwind-merge@1.14.0)(tailwindcss-radix@2.9.0)(tailwindcss@3.4.4)(yup@1.2.0)
       autoprefixer:
         specifier: 10.4.19
         version: 10.4.19(postcss@8.4.39)
@@ -730,8 +730,8 @@ importers:
   packages/ui:
     dependencies:
       '@uzh-bf/design-system':
-        specifier: 2.7.0
-        version: 2.7.0(@fortawesome/fontawesome-svg-core@6.4.2)(@fortawesome/free-regular-svg-icons@6.4.2)(@fortawesome/free-solid-svg-icons@6.4.2)(@fortawesome/react-fontawesome@0.2.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(autoprefixer@10.4.19)(dayjs@1.11.12)(formik@2.4.3)(postcss-import@15.1.0)(react-dom@18.2.0)(react@18.2.0)(tailwind-merge@1.14.0)(tailwindcss-radix@2.9.0)(tailwindcss@3.4.4)(yup@1.2.0)
+        specifier: 2.13.3
+        version: 2.13.3(@fortawesome/fontawesome-svg-core@6.4.2)(@fortawesome/free-regular-svg-icons@6.4.2)(@fortawesome/free-solid-svg-icons@6.4.2)(@fortawesome/react-fontawesome@0.2.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(autoprefixer@10.4.19)(dayjs@1.11.12)(formik@2.4.3)(postcss-import@15.1.0)(react-dom@18.2.0)(react@18.2.0)(tailwind-merge@1.14.0)(tailwindcss-radix@2.9.0)(tailwindcss@3.4.4)(yup@1.2.0)
       clsx:
         specifier: ^2.0.0
         version: 2.1.1
@@ -6103,8 +6103,8 @@ packages:
   /@ungap/structured-clone@1.2.0:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  /@uzh-bf/design-system@2.7.0(@fortawesome/fontawesome-svg-core@6.4.2)(@fortawesome/free-regular-svg-icons@6.4.2)(@fortawesome/free-solid-svg-icons@6.4.2)(@fortawesome/react-fontawesome@0.2.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(autoprefixer@10.4.19)(dayjs@1.11.12)(formik@2.4.3)(postcss-import@15.1.0)(react-dom@18.2.0)(react@18.2.0)(tailwind-merge@1.14.0)(tailwindcss-radix@2.9.0)(tailwindcss@3.4.4)(yup@1.2.0):
-    resolution: {integrity: sha512-3Q4nE6uTjXwvzJGqe8rFDkZ8rzXDAF8lByav1xTCDYp2bx9u15GPDF2+DdOv5Uo23lT+4sK2djvADYfcF39Yuw==}
+  /@uzh-bf/design-system@2.13.3(@fortawesome/fontawesome-svg-core@6.4.2)(@fortawesome/free-regular-svg-icons@6.4.2)(@fortawesome/free-solid-svg-icons@6.4.2)(@fortawesome/react-fontawesome@0.2.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(autoprefixer@10.4.19)(dayjs@1.11.12)(formik@2.4.3)(postcss-import@15.1.0)(react-dom@18.2.0)(react@18.2.0)(tailwind-merge@1.14.0)(tailwindcss-radix@2.9.0)(tailwindcss@3.4.4)(yup@1.2.0):
+    resolution: {integrity: sha512-mCktypbNfPo664NnuYpRJxrg4rPsa1v23piJIJebV5cgm+7jaEEI/7bwvrf5kZBFORFI+8RhabpyANJO4rGukA==}
     engines: {node: '>=16'}
     peerDependencies:
       '@fortawesome/fontawesome-svg-core': ^6.3.0
