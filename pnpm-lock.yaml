@@ -503,7 +503,7 @@ importers:
         specifier: ^4.0.9
         version: 4.0.9
       '@types/node':
-        specifier: ^20.12.5
+        specifier: ^20.14.9
         version: 20.14.9
       '@types/pretty-time':
         specifier: ^1.1.5
@@ -527,8 +527,8 @@ importers:
         specifier: ^4.11.2
         version: 4.16.2
       typescript:
-        specifier: ^5.4.5
-        version: 5.4.5
+        specifier: 5.5.4
+        version: 5.5.4
 
   apps/website:
     dependencies:
@@ -19758,12 +19758,6 @@ packages:
 
   /typescript@5.4.2:
     resolution: {integrity: sha512-+2/g0Fds1ERlP6JsakQQDXjZdZMM+rqpamFZJEKh4kwTIn3iDkgKtby0CeNd5ATNZ4Ry1ax15TMx0W2V+miizQ==}
-    engines: {node: '>=14.17'}
-    hasBin: true
-    dev: true
-
-  /typescript@5.4.5:
-    resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: true
