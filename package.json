@@ -35,6 +35,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev-web": "turbo run dev-web",
     "format": "turbo run format",
     "prisma:setup": "pnpm run --filter @gbl-uzh/demo-game prisma:setup",
     "publish": "turbo run publish",

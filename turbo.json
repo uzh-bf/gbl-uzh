@@ -5,36 +5,21 @@
       "cache": false
     },
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**",
-        ".next/**",
-        "public/**"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "public/**"]
     },
     "dev": {
       "cache": false,
-      "outputs": [
-        "dist/**",
-        ".next/**",
-        "public/**"
-      ],
-      "dependsOn": [
-        "@gbl-uzh/platform#build"
-      ]
+      "outputs": ["dist/**", ".next/**", "public/**"],
+      "dependsOn": ["@gbl-uzh/platform#build"]
+    },
+    "dev-web": {
+      "cache": false,
+      "outputs": ["dist/**", ".next/**", "public/**"]
     },
     "start": {
-      "dependsOn": [
-        "^build",
-        "build"
-      ],
-      "outputs": [
-        "dist/**",
-        ".next/**",
-        "public/**"
-      ]
+      "dependsOn": ["^build", "build"],
+      "outputs": ["dist/**", ".next/**", "public/**"]
     }
   }
 }
