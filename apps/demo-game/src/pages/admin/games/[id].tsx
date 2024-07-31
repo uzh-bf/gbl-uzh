@@ -20,7 +20,7 @@ import {
   computeSegmentStatus,
 } from '@gbl-uzh/platform/dist/lib/util'
 import { pick } from 'ramda'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
@@ -102,59 +102,49 @@ function ManageGame() {
       refetchQueries: [GameDocument],
     })
 
-  const getButton = () => {
+  const getButton = useCallback(() => {
     const isScheduled = game.status === GameStatus.Scheduled
     const isResultState = game.status === GameStatus.Results
     if (!activePeriod || isScheduled || isResultState) {
-      return {
-        buttonName: 'Next Period',
-        disabled: false,
-        onClick: nextPeriod,
-      }
+      return <Button onClick={nextPeriod}>Next Period</Button>
     }
 
     const atLastSegment = activeSegmentIx >= segments.length - 1
     if (!atLastSegment) {
-      return {
-        buttonName: 'Next Segment',
-        disabled: nextSegmentLoading,
-        onClick: nextSegment,
-      }
+      return (
+        <Button disabled={nextSegmentLoading} onClick={nextSegment}>
+          Next Segment
+        </Button>
+      )
     }
+
     // TODO(JJ):
     // - Fix consolidation for the last period
     // - const periods = game?.periods
     //   const activePeriodIx = game?.activePeriodIx
     //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
     if (game.status === GameStatus.Consolidation) {
-      return {
-        buttonName: 'Consolidate',
-        disabled: nextPeriodLoading,
-        onClick: nextPeriod,
-      }
+      return (
+        <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+          Consolidate
+        </Button>
+      )
     }
+
     if (game.status === GameStatus.Completed) {
-      return {
-        buttonName: 'Completed',
-        disabled: true,
-        onClick: () => {},
-      }
+      return (
+        <Button disabled onClick={() => null}>
+          Completed
+        </Button>
+      )
     }
-    return {
-      buttonName: 'Period Results',
-      disabled: nextPeriodLoading,
-      onClick: nextPeriod,
-    }
-  }
 
-  const actionButton = getButton()
-
-  // NOTE: Somehow when clicking on the nextSegment/nextPeriod button
-  // the ordering of the periods is changed for a short time, that is why
-  // we sort it here.
-  const periodsSorted = data.game.periods
-  // .slice()
-  // .sort((periodA, periodB) => periodA.index - periodB.index)
+    return (
+      <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+        Period Results
+      </Button>
+    )
+  }, [game.status])
 
   // TODO(JJ): Since it is not refreshing nicely after a new status update of
   // period or one of the segments, I am wondering if we should precompute
@@ -166,7 +156,7 @@ function ManageGame() {
     <div className="p-4">
       <div>
         <div className="flex flex-col gap-2 overflow-x-auto md:flex-row">
-          {periodsSorted.map((period, ix) => {
+          {data.game.periods.map((period, ix) => {
             const periodStatus = computePeriodStatus(data.game as Game, ix)
 
             const labels = [
@@ -435,14 +425,7 @@ function ManageGame() {
           </Formik>
         </div>
       </div>
-      <div className="mt-2 flex flex-row gap-2">
-        <Button
-          disabled={actionButton?.disabled}
-          onClick={actionButton?.onClick}
-        >
-          {actionButton?.buttonName}
-        </Button>
-      </div>
+      <div className="mt-2 flex flex-row gap-2">{getButton()}</div>
 
       <div className="mt-4 max-w-sm">
         <div className="font-bold">Players</div>
