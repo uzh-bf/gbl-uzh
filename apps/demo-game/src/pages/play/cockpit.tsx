@@ -103,16 +103,14 @@ function Cockpit() {
     },
   ]
 
-  const transformer = ({ row, ix }: { row: any; ix?: number }) =>
-    typeof row[ix ?? 0] === 'number' && `CHF ${row[ix ?? 0].toFixed(2)}`
-
   const columns_segment_results = [
     { label: '', accessor: 'cat', sortable: false },
     {
       label: 'Initial',
       accessor: '0',
       sortable: false,
-      transformer: transformer,
+      transformer: ({ row }: { row: any }) =>
+        typeof row['0'] === 'number' && `CHF ${row['0'].toFixed(2)}`,
     },
   ]
 
@@ -122,7 +120,8 @@ function Cockpit() {
       label: 'Month ' + strNum,
       accessor: strNum,
       sortable: false,
-      transformer: transformer,
+      transformer: ({ row }: { row: any }) =>
+        typeof row[strNum] === 'number' && `CHF ${row[strNum].toFixed(2)}`,
     })
   }
 
