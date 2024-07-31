@@ -15,6 +15,8 @@ interface PlayerDataProps {
   onClick?: () => void
 }
 
+// TODO(JJ): Discuss with RS
+// - Instead of having an onClick, provide only a href with a Link component
 function PlayerDisplay({
   achievements,
   name,

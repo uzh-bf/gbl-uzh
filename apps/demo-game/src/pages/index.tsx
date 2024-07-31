@@ -1,5 +1,5 @@
 import {
-  NavBar,
+  Layout,
   PlayerDisplay,
   ProbabilityChart,
   StorageOverview,
@@ -14,14 +14,9 @@ export default function Home() {
   const router = useRouter()
   return (
     <div>
-      <NavBar
-        tabs={[
-          { name: 'Cockpit', href: '/play/cockpit' },
-          { name: 'Cockpit', href: '/play/cockpit' },
-        ]}
-        playerName={'Team1'}
-        playerLevel={2}
-      />
+      <Layout>
+        <div className="w-full rounded bg-black"></div>
+      </Layout>
       <div className="font-source-sans p-4">
         hello world
         {/* <Button /> */}

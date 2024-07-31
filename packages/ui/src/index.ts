@@ -8,6 +8,7 @@ import Timeline from '~/components/Timeline'
 import XpBar from '~/components/XpBar'
 import TradingForm from '~/components/TradingForm'
 import NavBar from '~/components/NavBar'
+import Layout from '~/components/Layout'
 
 export { Button } from '~/components/Button'
 export {
@@ -20,5 +21,6 @@ export {
   XpBar,
   TradingForm,
   NavBar,
+  Layout,
 }
 // export { Dice } from '~/components/Dice'
