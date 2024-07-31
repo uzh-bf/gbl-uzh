@@ -11,18 +11,19 @@
   "repository": "uzh-bf/gbl-uzh.git",
   "homepage": "https://www.gbl.uzh.ch",
   "maintainers": [
-    "Roland Schlaefli <roland.schlaefli@bf.uzh.ch>",
-    "Benjamin Wilding <benjamin.wilding@bf.uzh.ch>",
-    "Anja Zgraggen <anja.zgraggen@bf.uzh.ch>"
+    "Roland Schlaefli <roland.schlaefli@df.uzh.ch>",
+    "Benjamin Wilding <benjamin.wilding@df.uzh.ch>",
+    "Anja Zgraggen <anja.zgraggen@df.uzh.ch>",
+    "Jakob Jakob <jakob.jakob@bf.uzh.ch>"
   ],
   "contributors": [
-    "Julius Schlapbach <julius.schlapbach@bf.uzh.ch>",
-    "Alex Scheitlin <alex.scheitlin@bf.uzh.ch>",
+    "Julius Schlapbach <julius.schlapbach@df.uzh.ch>",
+    "Alex Scheitlin <alex.scheitlin@df.uzh.ch>",
     "Moritz Eck <moritz.eck@gmail.com>",
     "Nik Zaugg <zauggnik@gmail.com>",
     "David Schmocker <david.schmocker@uzh.ch>",
-    "Johann Gandolfo <johann.gandolfo@bf.uzh.ch>",
-    "Andrin Rehmann <andrin.rehmann@bf.uzh.ch>"
+    "Johann Gandolfo <johann.gandolfo@df.uzh.ch>",
+    "Andrin Rehmann <andrin.rehmann@df.uzh.ch>"
   ],
   "devDependencies": {
     "@testing-library/cypress": "9.0.0",
@@ -34,6 +35,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev-web": "turbo run dev-web",
     "format": "turbo run format",
     "prisma:setup": "pnpm run --filter @gbl-uzh/demo-game prisma:setup",
     "publish": "turbo run publish",

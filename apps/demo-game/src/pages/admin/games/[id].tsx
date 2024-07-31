@@ -20,7 +20,7 @@ import {
   computeSegmentStatus,
 } from '@gbl-uzh/platform/dist/lib/util'
 import { pick } from 'ramda'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
@@ -39,7 +39,7 @@ function ManageGame() {
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
 
-  const { data, error, loading } = useQuery(GameDocument, {
+  const { data, error, loading, refetch } = useQuery(GameDocument, {
     variables: { id: Number(router.query.id) },
     pollInterval: 15000,
     skip: !router.query.id,
@@ -80,6 +80,77 @@ function ManageGame() {
   if (error) {
     return <div>{error.message}</div>
   }
+
+  const game = data.game
+  const activePeriod = game?.activePeriod
+  const segments = activePeriod?.segments
+  const activeSegmentIx = activePeriod?.activeSegmentIx
+
+  const nextPeriod = () =>
+    activateNextPeriod({
+      variables: {
+        gameId: Number(router.query.id),
+      },
+      refetchQueries: [GameDocument],
+    })
+
+  const nextSegment = () =>
+    activateNextSegment({
+      variables: {
+        gameId: Number(router.query.id),
+      },
+      refetchQueries: [GameDocument],
+    })
+
+  const getButton = useCallback(() => {
+    const isScheduled = game.status === GameStatus.Scheduled
+    const isResultState = game.status === GameStatus.Results
+    if (!activePeriod || isScheduled || isResultState) {
+      return <Button onClick={nextPeriod}>Next Period</Button>
+    }
+
+    const atLastSegment = activeSegmentIx >= segments.length - 1
+    if (!atLastSegment) {
+      return (
+        <Button disabled={nextSegmentLoading} onClick={nextSegment}>
+          Next Segment
+        </Button>
+      )
+    }
+
+    // TODO(JJ):
+    // - Fix consolidation for the last period
+    // - const periods = game?.periods
+    //   const activePeriodIx = game?.activePeriodIx
+    //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
+    if (game.status === GameStatus.Consolidation) {
+      return (
+        <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+          Consolidate
+        </Button>
+      )
+    }
+
+    if (game.status === GameStatus.Completed) {
+      return (
+        <Button disabled onClick={() => null}>
+          Completed
+        </Button>
+      )
+    }
+
+    return (
+      <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+        Period Results
+      </Button>
+    )
+  }, [game.status])
+
+  // TODO(JJ): Since it is not refreshing nicely after a new status update of
+  // period or one of the segments, I am wondering if we should precompute
+  // the periodsSorted.map and their segments into new arrays -> check with RS
+  // -> appearantly the pollIntervall can increase the refresh rate
+  // there is also refetching which refreshes in response to a user action
 
   return (
     <div className="p-4">
@@ -128,6 +199,7 @@ function ManageGame() {
                         )}
                       </div>
                       <div className="font-bold">Period {period.index + 1}</div>
+                      {isPeriodActive && <div>{game.status}</div>}
                     </div>
                     <div className="flex flex-row gap-1">
                       {labels.map((label) => (
@@ -353,43 +425,7 @@ function ManageGame() {
           </Formik>
         </div>
       </div>
-
-      <div className="mt-2 flex flex-row gap-2">
-        <Button
-          // disabled={
-          //   data.game.status === GameStatus.Preparation ||
-          //   data.game?.activePeriod?.activeSegmentIx <
-          //     data.game?.activePeriod?.segments.length - 1 ||
-          //   nextPeriodLoading
-          // }
-          onClick={() => {
-            activateNextPeriod({
-              variables: {
-                gameId: Number(router.query.id),
-              },
-            })
-          }}
-        >
-          Next Period
-        </Button>
-        <Button
-          disabled={
-            (data.game.status !== GameStatus.Preparation &&
-              data.game?.activePeriod?.activeSegmentIx >=
-                data.game?.activePeriod?.segments.length - 1) ||
-            nextSegmentLoading
-          }
-          onClick={() => {
-            activateNextSegment({
-              variables: {
-                gameId: Number(router.query.id),
-              },
-            })
-          }}
-        >
-          Next Segment
-        </Button>
-      </div>
+      <div className="mt-2 flex flex-row gap-2">{getButton()}</div>
 
       <div className="mt-4 max-w-sm">
         <div className="font-bold">Players</div>
