@@ -748,7 +748,7 @@ importers:
         specifier: 2.4.3
         version: 2.4.3(react@18.2.0)
       next:
-        specifier: ^14.2.5
+        specifier: 14.2.5
         version: 14.2.5(@babel/core@7.24.5)(react-dom@18.2.0)(react@18.2.0)
       ramda:
         specifier: 0.29.0
