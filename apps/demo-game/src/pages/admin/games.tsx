@@ -97,12 +97,9 @@ function Games() {
       <div className="mt-4 flex flex-col gap-1">
         {[...data.games].map((game, index, array) => {
           return (
-            <div className="flex w-96 border p-2" key={game?.id}>
-              <div className="w-10 pr-2 text-right">
-                {array.length - index}.
-              </div>
+            <div className="flex w-96 rounded border px-2" key={game?.id}>
               <Link
-                className="flex w-full flex-col justify-between"
+                className="flex w-full flex-col justify-between p-2"
                 href={`/admin/games/${game?.id}`}
               >
                 <div>{game?.name}</div>
