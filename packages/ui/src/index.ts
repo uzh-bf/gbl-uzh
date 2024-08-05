@@ -9,6 +9,7 @@ import XpBar from '~/components/XpBar'
 import TradingForm from '~/components/TradingForm'
 import NavBar from '~/components/NavBar'
 import Layout from '~/components/Layout'
+// import Dice from '~/components/Dice'
 
 export { Button } from '~/components/Button'
 export {
@@ -22,5 +23,5 @@ export {
   TradingForm,
   NavBar,
   Layout,
+  // Dice,
 }
-// export { Dice } from '~/components/Dice'

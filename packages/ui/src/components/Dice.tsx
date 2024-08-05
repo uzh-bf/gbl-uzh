@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import ReactDice, { ReactDiceRef } from 'react-dice-complete'
 
-function Dice({ dice1, dice2 }: { dice1: any; dice2: any }) {
+function Dice({ dice1, dice2 }: { dice1: number; dice2: number }) {
   const dice = useRef<ReactDiceRef>(null)
 
   useEffect(() => {
@@ -35,4 +35,4 @@ function Dice({ dice1, dice2 }: { dice1: any; dice2: any }) {
   )
 }
 
-export { Dice }
+export default Dice
