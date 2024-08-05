@@ -19,6 +19,7 @@ const Schema = Yup.object().shape({
 // - LogoSelector
 // - Will all games have the same greeting layout?
 // - Maybe change title (now: Demo Game)
+// -> DISCUSS WITH RS
 function Welcome() {
   const router = useRouter()
 
