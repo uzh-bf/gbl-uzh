@@ -71,10 +71,12 @@ function Timeline({
       if (item.type === 'SEGMENT_START') return []
 
       const periodIx = item.period.index
-      // TODO(JJ): Seems like the index is hardcoded to 4?
+      // TODO(JJ): Double-check if the periodIx is the right index for the
+      // periods
+      const numSegments = periods[periodIx].segments.length
       const segmentIx =
         (item.type === 'PERIOD_START' && -1) ||
-        (item.type === 'PERIOD_END' && 4) ||
+        (item.type === 'PERIOD_END' && numSegments) ||
         item.segment?.index
       const key = `${periodIx + 1}${segmentIx + 1}`
 
