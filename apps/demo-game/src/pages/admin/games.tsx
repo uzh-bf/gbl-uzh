@@ -97,19 +97,21 @@ function Games() {
       <div className="mt-4 flex flex-col gap-1">
         {[...data.games].map((game, index, array) => {
           return (
-            <div className="flex w-96 rounded border px-2" key={game?.id}>
+            <Button className={{ root: 'w-96' }} key={game?.id}>
               <Link
-                className="flex w-full flex-col justify-between p-2"
+                className="flex w-full flex-col items-start justify-between p-2"
                 href={`/admin/games/${game?.id}`}
               >
                 <div>{game?.name}</div>
                 <div className="flex gap-x-4 text-sm">
-                  <div>Id: {game?.id}</div>
-                  <div>Active period: {game?.activePeriodIx}</div>
+                  <div className="flex w-10">Id: {game?.id}</div>
+                  <div className="flex w-28">
+                    Active period: {game?.activePeriodIx}
+                  </div>
                   <div>Status: {game?.status}</div>
                 </div>
               </Link>
-            </div>
+            </Button>
           )
         })}
       </div>
