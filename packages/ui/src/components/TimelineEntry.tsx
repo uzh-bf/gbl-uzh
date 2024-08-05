@@ -12,6 +12,8 @@ interface Props {
   isCurrentEntry: boolean
   isPastEntry: boolean
   gameStatus: string
+  periodName?: string
+  segmentName?: string
 }
 
 function TimelineEntry({
@@ -21,6 +23,8 @@ function TimelineEntry({
   isCurrentEntry,
   isPastEntry,
   gameStatus,
+  periodName = 'Period',
+  segmentName = 'Segment',
 }: Props) {
   return (
     <div
@@ -33,8 +37,12 @@ function TimelineEntry({
     >
       <header className="flex flex-col">
         <div className="flex gap-x-2">
-          <div className="font-bold">Period {periodIx + 1}</div>
-          <div>Quarter {segmentIx + 1}</div>
+          <div className="font-bold">
+            {periodName} {periodIx + 1}
+          </div>
+          <div>
+            {segmentName} {segmentIx + 1}
+          </div>
         </div>
         <div className="text-xs">
           <div>Status: {gameStatus}</div>
