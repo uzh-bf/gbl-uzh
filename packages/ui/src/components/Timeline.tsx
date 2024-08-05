@@ -84,7 +84,7 @@ function Timeline({
         {
           ...item,
           key,
-          segmentFlat: segmentFlat,
+          segmentFlat,
         },
       ]
     })
