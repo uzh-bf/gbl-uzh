@@ -213,7 +213,7 @@ function Cockpit() {
     case 'PREPARATION':
       return (
         <div className="flex w-full justify-between">
-          <div>{header} Game is begin prepared.</div>
+          <div>{header} Game is being prepared.</div>
           {/* <div>{playerDisplay}</div> */}
           {playerDisplay}
         </div>
