@@ -4,14 +4,15 @@ import { twMerge } from 'tailwind-merge'
 // TODO(JJ):
 // - Add max num periods?
 // - Add max num segments?
+// - Provide enum instead of isCurrentEntry, isPastEntry?
 
 interface Props {
   children?: ReactNode
   periodIx: number
   segmentIx: number
-  isCurrentEntry: boolean
-  isPastEntry: boolean
   gameStatus: string
+  isCurrentEntry?: boolean
+  isPastEntry?: boolean
   periodName?: string
   segmentName?: string
 }
@@ -20,9 +21,9 @@ function TimelineEntry({
   children,
   periodIx,
   segmentIx,
-  isCurrentEntry,
-  isPastEntry,
   gameStatus,
+  isCurrentEntry = false,
+  isPastEntry = false,
   periodName = 'Period',
   segmentName = 'Segment',
 }: Props) {
