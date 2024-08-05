@@ -45,7 +45,7 @@ function TradingForm({
         // })}
         onSubmit={onSubmit}
       >
-        {(tradeInterface: any) => (
+        {(tradeInterface) => (
           <Form className="">
             <FormikTextField
               min={0}
