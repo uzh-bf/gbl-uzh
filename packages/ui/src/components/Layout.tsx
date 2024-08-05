@@ -21,12 +21,12 @@ function Layout({ children }: Props) {
         {children}
         <div id="sidebar" className="flex w-60 flex-col">
           <PlayerDisplay
-            name={'playerName'}
-            imgPathAvatar={'/avatars/avatar_placeholder.png'}
-            color={'Red'}
+            name="playerName"
+            imgPathAvatar="/avatars/avatar_placeholder.png"
+            color="Red"
             achievements={[]}
-            imgPathLocation={'/locations/ZH.svg'}
-            location={'ZH'}
+            imgPathLocation="/locations/ZH.svg"
+            location="ZH"
             xp={20}
             xpMax={50}
             level={1}
@@ -35,8 +35,8 @@ function Layout({ children }: Props) {
           <StorageOverview
             storageTotal={3}
             storageUsed={1}
-            imgPathEmpty={'/avatars/cocoa_0.png'}
-            imgPathFull={'/avatars/cocoa_3.png'}
+            imgPathEmpty="/avatars/cocoa_0.png"
+            imgPathFull="/avatars/cocoa_3.png"
           />
         </div>
       </div>
