@@ -62,7 +62,6 @@ function Games() {
           Logout
         </Button>
       )}
-
       <Formik
         initialValues={{
           name: '',
@@ -93,14 +92,18 @@ function Games() {
           </Form>
         )}
       </Formik>
-
       <div className="mt-4 flex flex-col gap-1">
         {[...data.games].map((game, index, array) => {
           return (
-            <Button className={{ root: 'w-96' }} key={game?.id}>
-              <Link
-                className="flex w-full flex-col items-start justify-between p-2"
-                href={`/admin/games/${game?.id}`}
+            <Link
+              className="w-96"
+              href={`/admin/games/${game?.id}`}
+              key={game?.id}
+            >
+              <Button
+                className={{
+                  root: 'flex h-20 w-full flex-col items-start justify-around',
+                }}
               >
                 <div>{game?.name}</div>
                 <div className="flex gap-x-4 text-sm">
@@ -110,8 +113,8 @@ function Games() {
                   </div>
                   <div>Status: {game?.status}</div>
                 </div>
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           )
         })}
       </div>
