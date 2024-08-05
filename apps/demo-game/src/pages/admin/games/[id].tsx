@@ -433,7 +433,7 @@ function ManageGame() {
         <div className="mt-2 flex flex-col gap-4">
           {game.players.map((player, ix) => (
             <div key={player.id} data-cy={`player-${ix}`}>
-              <PlayerCompact key={player.id} player={player as Player} />
+              <PlayerCompact player={player as Player} />
             </div>
           ))}
         </div>
