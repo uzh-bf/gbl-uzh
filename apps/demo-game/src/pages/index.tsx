@@ -33,8 +33,6 @@ export default function Home() {
   const storageInfo = {
     storageTotal: 3,
     storageUsed: 1,
-    imgPathEmpty: '/avatars/cocoa_0.png',
-    imgPathFull: '/avatars/cocoa_3.png',
   }
   return (
     <div>

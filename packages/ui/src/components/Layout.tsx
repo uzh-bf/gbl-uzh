@@ -20,8 +20,8 @@ interface Props {
   storageInfo: {
     storageTotal: number
     storageUsed: number
-    imgPathEmpty: string
-    imgPathFull: string
+    imgPathEmpty?: string
+    imgPathFull?: string
   }
 }
 

@@ -8,8 +8,8 @@ const baseStyle =
 interface Props {
   storageUsed: number
   storageTotal: number
-  imgPathEmpty: string
-  imgPathFull: string
+  imgPathEmpty?: string
+  imgPathFull?: string
 }
 
 function StorageOverview({
@@ -32,40 +32,58 @@ function StorageOverview({
             key={ix}
             className={twMerge(
               baseStyle,
-              'bg-transparent text-amber-800 border-none'
+              'border-none w-4 h-4',
+              typeof imgPathEmpty !== 'string'
+                ? ' bg-slate-900 rounded-full'
+                : ''
             )}
           >
-            <img src={imgPathEmpty} />
+            <img src={imgPathEmpty ? imgPathEmpty : ''} />
           </div>
         ))}
         {repeat(1, storageEmpty).map((ix: number) => (
           <div
             key={ix}
-            className={twMerge(baseStyle, 'text-gray-200 bg-gray-100')}
+            className={twMerge(
+              baseStyle,
+              'text-gray-200 bg-gray-100',
+              typeof imgPathFull !== 'string'
+                ? ' bg-slate-900 opacity-30 rounded-full'
+                : ''
+            )}
           >
-            <img src={imgPathFull} className="opacity-30" />
+            <img src={imgPathFull ? imgPathFull : ''} className="opacity-30" />
           </div>
         ))}
       </div>
       <div className="flex flex-row flex-wrap gap-2 p-2 text-xs md:gap-4">
         <div className="flex flex-row items-center gap-2">
-          <div className="text-base text-amber-800">{storageUsed}</div>
+          <div className="text-base text-slate-900">{storageUsed}</div>
           <div
             className={twMerge(
               baseStyle,
-              'bg-transparent text-amber-800 border-none w-4 h-4'
+              'border-none w-4 h-4',
+              typeof imgPathEmpty !== 'string'
+                ? ' bg-slate-900 rounded-full'
+                : ''
             )}
           >
-            <img src={imgPathEmpty} />
+            <img src={imgPathEmpty ? imgPathEmpty : ''} />
           </div>
           <div>Storage</div>
         </div>
         <div className="flex flex-row items-center gap-2">
           <div className="text-base text-gray-500">{storageEmpty}</div>
           <div
-            className={twMerge(baseStyle, 'text-gray-200 bg-gray-100 w-4 h-4')}
+            className={twMerge(
+              baseStyle,
+              'text-gray-200 bg-gray-100 w-4 h-4',
+              typeof imgPathFull !== 'string'
+                ? ' bg-slate-900 opacity-30 rounded-full'
+                : ''
+            )}
           >
-            <img src={imgPathFull} className="opacity-30" />{' '}
+            <img src={imgPathFull ? imgPathFull : ''} className="opacity-30" />
           </div>
           <div>Empty</div>
         </div>
