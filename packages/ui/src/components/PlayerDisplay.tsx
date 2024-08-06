@@ -3,30 +3,30 @@ import Achievement from './Achievement'
 import XpBar from './XpBar'
 
 interface PlayerDataProps {
-  achievements?: any[]
   name?: string
   color?: string
   xp?: number
   xpMax: number
   level: number
+  location?: string
+  achievements?: any[]
   imgPathAvatar?: string
   imgPathLocation?: string
-  location?: string
   onClick?: () => void
 }
 
 // TODO(JJ): Discuss with RS
 // - Instead of having an onClick, provide only a href with a Link component
 function PlayerDisplay({
-  achievements,
   name,
   color,
   xp,
   xpMax,
   level,
+  location,
+  achievements,
   imgPathAvatar,
   imgPathLocation,
-  location,
   onClick,
 }: PlayerDataProps) {
   return (

@@ -4,6 +4,7 @@ import {
   ProbabilityChart,
   StorageOverview,
   Timeline,
+  TimelineAdmin,
   TimelineEntry,
   TradingForm,
 } from '@gbl-uzh/ui'
@@ -179,6 +180,7 @@ export default function Home() {
             helpers.resetForm()
           }}
         />
+        <TimelineAdmin />
       </div>
     </div>
   )

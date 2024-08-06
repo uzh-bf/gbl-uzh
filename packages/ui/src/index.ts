@@ -5,6 +5,7 @@ import StorageOverview from '~/components/StorageOverview'
 import ProbabilityChart from '~/components/ProbabilityChart'
 import TimelineEntry from '~/components/TimelineEntry'
 import Timeline from '~/components/Timeline'
+import TimelineAdmin from '~/components/TimelineAdmin'
 import XpBar from '~/components/XpBar'
 import TradingForm from '~/components/TradingForm'
 import NavBar from '~/components/NavBar'
@@ -19,6 +20,7 @@ export {
   ProbabilityChart,
   TimelineEntry,
   Timeline,
+  TimelineAdmin,
   XpBar,
   TradingForm,
   NavBar,
