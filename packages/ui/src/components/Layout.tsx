@@ -4,40 +4,40 @@ import NavBar from './NavBar'
 
 interface Props {
   children: React.ReactNode
+  tabs: { name: string; href: string }[]
+  playerInfo: {
+    name: string
+    color: string
+    location: string
+    level: number
+    xp: number
+    xpMax: number
+    achievements: any[]
+    imgPathAvatar?: string
+    imgPathLocation?: string
+    onClick: () => void
+  }
+  storageInfo: {
+    storageTotal: number
+    storageUsed: number
+    imgPathEmpty: string
+    imgPathFull: string
+  }
 }
 
-function Layout({ children }: Props) {
+function Layout({ children, tabs, playerInfo, storageInfo }: Props) {
   return (
     <>
       <NavBar
-        tabs={[
-          { name: 'Cockpit', href: '/play/cockpit' },
-          { name: 'Cockpit', href: '/play/cockpit' },
-        ]}
-        playerName={'Team1'}
-        playerLevel={2}
+        tabs={tabs}
+        playerName={playerInfo.name}
+        playerLevel={playerInfo.level}
       />
       <div className="flex w-full justify-between gap-x-4 p-4">
         {children}
         <div id="sidebar" className="flex w-60 flex-col">
-          <PlayerDisplay
-            name="playerName"
-            imgPathAvatar="/avatars/avatar_placeholder.png"
-            color="Red"
-            achievements={[]}
-            imgPathLocation="/locations/ZH.svg"
-            location="ZH"
-            xp={20}
-            xpMax={50}
-            level={1}
-            onClick={() => {}}
-          />
-          <StorageOverview
-            storageTotal={3}
-            storageUsed={1}
-            imgPathEmpty="/avatars/cocoa_0.png"
-            imgPathFull="/avatars/cocoa_3.png"
-          />
+          <PlayerDisplay {...playerInfo} />
+          <StorageOverview {...storageInfo} />
         </div>
       </div>
     </>

@@ -12,9 +12,33 @@ import { useRouter } from 'next/router'
 
 export default function Home() {
   const router = useRouter()
+  const tabs = [
+    { name: 'Cockpit', href: '/play/cockpit' },
+    { name: 'Cockpit', href: '/play/cockpit' },
+  ]
+  const playerInfo = {
+    name: 'playerName',
+    color: 'Red',
+    location: 'ZH',
+    level: 1,
+    xp: 20,
+    xpMax: 50,
+    achievements: [],
+    imgPathAvatar: '/avatars/avatar_placeholder.png',
+    imgPathLocation: '/locations/ZH.svg',
+    onClick: () => {
+      router.replace('/play/welcome')
+    },
+  }
+  const storageInfo = {
+    storageTotal: 3,
+    storageUsed: 1,
+    imgPathEmpty: '/avatars/cocoa_0.png',
+    imgPathFull: '/avatars/cocoa_3.png',
+  }
   return (
     <div>
-      <Layout>
+      <Layout tabs={tabs} playerInfo={playerInfo} storageInfo={storageInfo}>
         <div className="w-full rounded bg-black"></div>
       </Layout>
       <div className="font-source-sans p-4">
@@ -22,26 +46,8 @@ export default function Home() {
         {/* <Dice dice1={6} dice2={6} /> */}
         {/* <Progress value={50} max={100} formatter={(val) => `${val}XP`} /> */}
         <div className="flex w-1/3 flex-col">
-          <PlayerDisplay
-            name={'playerName'}
-            imgPathAvatar={'/avatars/avatar_placeholder.png'}
-            color={'Red'}
-            achievements={[]}
-            imgPathLocation={'/locations/ZH.svg'}
-            location={'ZH'}
-            xp={20}
-            xpMax={50}
-            level={1}
-            onClick={() => {
-              router.replace('/play/welcome')
-            }}
-          />
-          <StorageOverview
-            storageTotal={3}
-            storageUsed={1}
-            imgPathEmpty={'/avatars/cocoa_0.png'}
-            imgPathFull={'/avatars/cocoa_3.png'}
-          />
+          <PlayerDisplay {...playerInfo} />
+          <StorageOverview {...storageInfo} />
         </div>
         <ProbabilityChart trendE={5} trendGap={8} totalEyes={'12'} />
         <TimelineEntry
