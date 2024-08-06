@@ -13,7 +13,7 @@ import { useRouter } from 'next/router'
 export default function Home() {
   const router = useRouter()
   const tabs = [
-    { name: 'Cockpit', href: '/play/cockpit' },
+    { name: 'Welcome', href: '/play/welcome' },
     { name: 'Cockpit', href: '/play/cockpit' },
   ]
   const playerInfo = {

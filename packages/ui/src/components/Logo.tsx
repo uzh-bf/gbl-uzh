@@ -23,7 +23,7 @@ function Logo({
   return (
     <div
       className={twMerge(
-        'relative p-2 m-auto bg-white border shadow rounded-md',
+        'relative p-2 m-auto bg-white rounded',
         color && COLORS[color]
       )}
     >
@@ -34,7 +34,7 @@ function Logo({
       )}
       {imgPathLocation && (
         <img
-          className="absolute w-1/4 p-1 bg-white rounded-lg shadow left-2 top-2"
+          className="absolute w-1/4 p-1 bg-white rounded shadow left-2 top-2"
           src={imgPathLocation}
         />
       )}
