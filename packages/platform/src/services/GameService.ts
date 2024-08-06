@@ -925,11 +925,22 @@ export async function updatePlayerData(
 }
 
 export async function getGames(args, ctx: Context) {
-  return ctx.prisma.game.findMany({
+  let result = await ctx.prisma.game.findMany({
     orderBy: {
       id: 'desc',
     },
+    include: {
+      _count: {
+        select: { players: true },
+      },
+      activePeriod: true,
+    },
   })
+  return result.map((game) => ({
+    ...game,
+    playerCount: game._count.players,
+    activeSegmentIx: game.activePeriod?.activeSegmentIx,
+  }))
 }
 
 export async function getGame(args, ctx: Context) {

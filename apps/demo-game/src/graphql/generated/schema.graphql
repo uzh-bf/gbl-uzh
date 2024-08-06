@@ -34,9 +34,11 @@ type Event {
 type Game {
   activePeriod: Period
   activePeriodIx: Int
+  activeSegmentIx: Int
   id: ID!
   name: String!
   periods: [Period!]!
+  playerCount: Int
   players: [Player!]!
   status: GameStatus!
 }

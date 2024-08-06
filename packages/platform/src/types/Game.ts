@@ -24,6 +24,9 @@ export const Game = objectType({
       type: Period,
     })
 
+    t.int('playerCount')
+    t.int('activeSegmentIx')
+
     t.nonNull.list.nonNull.field('players', {
       type: Player,
     })

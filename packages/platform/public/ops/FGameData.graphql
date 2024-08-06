@@ -4,4 +4,6 @@ fragment GameData on Game {
   status
   name
   activePeriodIx
+  activeSegmentIx
+  playerCount
 }

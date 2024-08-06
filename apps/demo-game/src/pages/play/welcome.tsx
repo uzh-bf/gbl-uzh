@@ -20,6 +20,10 @@ const Schema = Yup.object().shape({
 // - Will all games have the same greeting layout?
 // - Maybe change title (now: Demo Game)
 // -> DISCUSS WITH RS
+
+// props:
+// - descriptions
+// - avatar info, color, location, onSubmit, no player.role
 function Welcome() {
   const router = useRouter()
 

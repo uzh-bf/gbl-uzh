@@ -94,9 +94,11 @@ export interface NexusGenObjects {
   Game: { // root type
     activePeriod?: NexusGenRootTypes['Period'] | null; // Period
     activePeriodIx?: number | null; // Int
+    activeSegmentIx?: number | null; // Int
     id: string; // ID!
     name: string; // String!
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
+    playerCount?: number | null; // Int
     players: NexusGenRootTypes['Player'][]; // [Player!]!
     status: NexusGenEnums['GameStatus']; // GameStatus!
   }
@@ -253,9 +255,11 @@ export interface NexusGenFieldTypes {
   Game: { // field return type
     activePeriod: NexusGenRootTypes['Period'] | null; // Period
     activePeriodIx: number | null; // Int
+    activeSegmentIx: number | null; // Int
     id: string; // ID!
     name: string; // String!
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
+    playerCount: number | null; // Int
     players: NexusGenRootTypes['Player'][]; // [Player!]!
     status: NexusGenEnums['GameStatus']; // GameStatus!
   }
@@ -429,9 +433,11 @@ export interface NexusGenFieldTypeNames {
   Game: { // field return type name
     activePeriod: 'Period'
     activePeriodIx: 'Int'
+    activeSegmentIx: 'Int'
     id: 'ID'
     name: 'String'
     periods: 'Period'
+    playerCount: 'Int'
     players: 'Player'
     status: 'GameStatus'
   }
