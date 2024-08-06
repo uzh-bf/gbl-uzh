@@ -186,6 +186,41 @@ function Cockpit() {
     </div>
   )
 
+  // Transactions
+  // TODO(JJ): Integrate into the layout
+  // The following is only temporary
+
+  console.log(data.result.transactions)
+  const transactions = (
+    <div className="m-4">
+      <h1 className="border-b-2 text-xl font-bold">History</h1>
+      {data.result.transactions
+        .slice(0)
+        .reverse()
+        .map(
+          (transaction: {
+            periodIx: number
+            segmentIx: number
+            type: string
+            facts: { decision: boolean }
+          }) => {
+            return (
+              <div className="flex flex-col border-b-2 py-2">
+                <div className="flex">
+                  <div>P {transaction.periodIx}</div>
+                  <div>Q {transaction.segmentIx}</div>
+                </div>
+                <div className="flex justify-between">
+                  <div>Decision: {transaction.type}</div>
+                  <div> {transaction.facts.decision ? 'On' : 'Off'} </div>
+                </div>
+              </div>
+            )
+          }
+        )}
+    </div>
+  )
+
   const header = (
     <div className="rounded border p-4">
       <div className="font-bold">
@@ -264,7 +299,7 @@ function Cockpit() {
     case 'RUNNING':
       return (
         <div className="flex w-full justify-between">
-          <div>
+          <div className="w-3/4">
             {header}
             <div className="max-w-md">
               <Table
@@ -291,6 +326,8 @@ function Cockpit() {
                       checked={decision.state}
                       id="switch"
                       onCheckedChange={async (checked) => {
+                        // TODO(JJ): Discuss with @RS if we should rename
+                        // payload -> facts
                         await performAction({
                           variables: {
                             type: decision.action,
@@ -306,6 +343,7 @@ function Cockpit() {
                 )
               })}
             </div>
+            {transactions}
           </div>
           {playerDisplay}
         </div>
