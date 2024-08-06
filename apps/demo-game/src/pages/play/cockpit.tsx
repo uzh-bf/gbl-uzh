@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { PlayerDisplay } from '@gbl-uzh/ui'
 import { Switch, Table } from '@uzh-bf/design-system'
-import { useEffect, useState } from 'react'
 import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts'
 import {
   PerformActionDocument,
@@ -25,22 +24,10 @@ function getTotalAssetsOfPreviousResults(previousResults: any[]) {
 }
 
 function Cockpit() {
-  const playerState = useQuery(ResultDocument, { fetchPolicy: 'cache-first' })
-  const [bankDecisionState, setBankDecisionState] = useState(false)
-  const [bondsDecisionState, setBondsDecisionState] = useState(false)
-  const [stockDecisionState, setStockDecisionState] = useState(false)
-
-  useEffect(() => {
-    setBankDecisionState(
-      playerState?.data?.result?.playerResult?.facts.decisions.bank
-    )
-    setBondsDecisionState(
-      playerState?.data?.result?.playerResult?.facts.decisions.bonds
-    )
-    setStockDecisionState(
-      playerState?.data?.result?.playerResult?.facts.decisions.stocks
-    )
-  }, [playerState])
+  const { loading, error, data } = useQuery(ResultDocument, {
+    // TODO(JJ): This is the default fetchPolicy -> Remove? @RS
+    fetchPolicy: 'cache-first',
+  })
 
   const [performAction, updatedPlayerResult] = useMutation(
     PerformActionDocument,
@@ -49,9 +36,11 @@ function Cockpit() {
     }
   )
 
-  const playerData = playerState.data
-  const playerDataResult = playerData?.result
-  const currentGame = playerDataResult?.currentGame
+  if (loading) return null
+  if (error) return `Error! ${error}`
+
+  const playerDataResult = data.result
+  const currentGame = playerDataResult.currentGame
 
   // TODO(JJ):
   // - Make it visually more appealing
@@ -66,9 +55,11 @@ function Cockpit() {
       </div>
     )
   }
-  const resultFacts = playerDataResult?.playerResult?.facts
-  const previousResults = playerDataResult?.previousResults
-  const self = playerState?.data?.self
+
+  const resultFacts = playerDataResult.playerResult.facts
+  const previousResults = playerDataResult.previousResults
+  const resultFactsDecisions = resultFacts.decisions
+  const assets = resultFacts.assets
 
   const decisions = [
     {
@@ -77,8 +68,7 @@ function Cockpit() {
         `Invest ${(percentage * 100).toFixed()}% (CHF ${(
           totalAssets * percentage
         ).toFixed(2)}) into bank.`,
-      effect: setBankDecisionState,
-      state: bankDecisionState,
+      state: resultFactsDecisions.bank,
       action: ActionTypes.DECIDE_BANK,
     },
     {
@@ -87,8 +77,7 @@ function Cockpit() {
         `Invest ${(percentage * 100).toFixed()}% (CHF ${(
           totalAssets * percentage
         ).toFixed(2)}) into bonds.`,
-      effect: setBondsDecisionState,
-      state: bondsDecisionState,
+      state: resultFactsDecisions.bonds,
       action: ActionTypes.DECIDE_BONDS,
     },
     {
@@ -97,8 +86,7 @@ function Cockpit() {
         `Invest ${(percentage * 100).toFixed()}% (CHF ${(
           totalAssets * percentage
         ).toFixed(2)}) into stocks.`,
-      effect: setStockDecisionState,
-      state: stockDecisionState,
+      state: resultFactsDecisions.stocks,
       action: ActionTypes.DECIDE_STOCK,
     },
   ]
@@ -130,10 +118,6 @@ function Cockpit() {
     { label: 'Value', accessor: 'val', sortable: false },
   ]
 
-  const assetsWithReturnsArr = Object.values(
-    resultFacts?.assetsWithReturns ?? {}
-  )
-
   const reduceFn = (type: string) => {
     return (acc, value) => {
       let val = value.bank
@@ -151,6 +135,7 @@ function Cockpit() {
     }
   }
 
+  const assetsWithReturnsArr = resultFacts.assetsWithReturns
   const data_segment_results = [
     assetsWithReturnsArr.reduce(reduceFn('bank'), { cat: 'Savings' }),
     assetsWithReturnsArr.reduce(reduceFn('bonds'), { cat: 'Bonds' }),
@@ -161,19 +146,19 @@ function Cockpit() {
   const data_portfolio = [
     {
       cat: 'Savings',
-      val: `CHF ${resultFacts?.assets.bank.toFixed(2)}`,
+      val: `CHF ${assets.bank.toFixed(2)}`,
     },
     {
       cat: 'Bonds',
-      val: `CHF ${resultFacts?.assets.bonds.toFixed(2)}`,
+      val: `CHF ${assets.bonds.toFixed(2)}`,
     },
     {
       cat: 'Stocks',
-      val: `CHF ${resultFacts?.assets.stocks.toFixed(2)}`,
+      val: `CHF ${assets.stocks.toFixed(2)}`,
     },
     {
       cat: 'Total',
-      val: `CHF ${resultFacts?.assets.totalAssets.toFixed(2)}`,
+      val: `CHF ${assets.totalAssets.toFixed(2)}`,
     },
   ]
 
@@ -183,17 +168,19 @@ function Cockpit() {
   // console.log(self)
   // - Do onclick logic
   // - PlayerDisplay is not ideal/nice yet
+
+  const playerInfo = data.self
   const playerDisplay = (
     <div className="w-1/4">
       <PlayerDisplay
-        achievements={self?.achievements}
-        name={self?.name}
-        color={self?.color}
-        level={0}
-        xpToNext={self?.experienceToNext}
-        xp={self?.experience}
-        avatar={self?.avatar}
-        location={self?.location}
+        achievements={playerInfo.achievements}
+        name={playerInfo.name}
+        color={playerInfo.color}
+        level={playerInfo.level.id}
+        xpToNext={playerInfo.experienceToNext}
+        xp={playerInfo.experience}
+        avatar={playerInfo.avatar}
+        location={playerInfo.location}
         onClick={() => {}}
       />
     </div>
@@ -202,7 +189,7 @@ function Cockpit() {
   const header = (
     <div className="rounded border p-4">
       <div className="font-bold">
-        Playing as {self?.name} in game {currentGame.id}
+        Playing as {playerInfo.name} in game {currentGame.id}
       </div>
 
       <div className="">Current status: {currentGame.status}</div>
@@ -214,7 +201,6 @@ function Cockpit() {
       return (
         <div className="flex w-full justify-between">
           <div>{header} Game is being prepared.</div>
-          {/* <div>{playerDisplay}</div> */}
           {playerDisplay}
         </div>
       )
@@ -296,16 +282,15 @@ function Cockpit() {
                       label={decision.label(
                         decision.state
                           ? 1 /
-                              (+bankDecisionState +
-                                +bondsDecisionState +
-                                +stockDecisionState)
+                              (+resultFactsDecisions.bank +
+                                +resultFactsDecisions.bonds +
+                                +resultFactsDecisions.stocks)
                           : 0,
-                        resultFacts.assets.totalAssets
+                        assets.totalAssets
                       )}
                       checked={decision.state}
                       id="switch"
                       onCheckedChange={async (checked) => {
-                        decision.effect(checked)
                         await performAction({
                           variables: {
                             type: decision.action,
@@ -313,6 +298,7 @@ function Cockpit() {
                               decision: checked,
                             }),
                           },
+                          refetchQueries: [ResultDocument],
                         })
                       }}
                     />
