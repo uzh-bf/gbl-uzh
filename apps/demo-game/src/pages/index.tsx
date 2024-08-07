@@ -1,3 +1,5 @@
+import { faStar } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Layout,
   PlayerDisplay,
@@ -34,6 +36,9 @@ export default function Home() {
   const storageInfo = {
     storageTotal: 3,
     storageUsed: 1,
+    icon: <FontAwesomeIcon icon={faStar} />,
+    // icon: <img src={'/avatars/avatar_placeholder.png'} />,
+    // icon: <img src={'/cocoa_1.png'} />,
   }
   return (
     <div>
