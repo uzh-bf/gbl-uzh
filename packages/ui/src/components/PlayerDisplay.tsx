@@ -1,6 +1,7 @@
 import Logo from './Logo'
 import Achievement from './Achievement'
 import XpBar from './XpBar'
+import { Button } from '@uzh-bf/design-system'
 
 interface PlayerDataProps {
   name?: string
@@ -15,8 +16,9 @@ interface PlayerDataProps {
   onClick?: () => void
 }
 
-// TODO(JJ): Discuss with RS
-// - Instead of having an onClick, provide only a href with a Link component
+// TODO(JJ):
+// - Change basic styling of button
+
 function PlayerDisplay({
   name,
   color,
@@ -32,7 +34,7 @@ function PlayerDisplay({
   return (
     <div>
       <div className="flex flex-col gap-2">
-        <div className="cursor-pointer" onClick={onClick}>
+        <Button basic onClick={onClick}>
           <Logo
             color={color}
             name={name}
@@ -41,7 +43,7 @@ function PlayerDisplay({
             location={location}
             level={level}
           />
-        </div>
+        </Button>
 
         <XpBar value={xp ?? 0} max={xpMax} />
 
