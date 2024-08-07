@@ -1,3 +1,4 @@
+// import { useQuery } from '@apollo/client'
 import { faStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -10,10 +11,19 @@ import {
   TimelineEntry,
   TradingForm,
 } from '@gbl-uzh/ui'
+// import { ResultDocument } from 'src/graphql/generated/ops'
 
 import { useRouter } from 'next/router'
 
 export default function Home() {
+  // const { data, loading, error } = useQuery(ResultDocument, {
+  //   fetchPolicy: 'cache-first',
+  // })
+
+  // if (loading) return <div>Loading...</div>
+  // if (error) return <div>Error {error.message}</div>
+  // console.log(data)
+
   const router = useRouter()
   const tabs = [
     { name: 'Welcome', href: '/play/welcome' },
@@ -37,7 +47,6 @@ export default function Home() {
     storageTotal: 3,
     storageUsed: 1,
     icon: <FontAwesomeIcon icon={faStar} />,
-    // icon: <img src={'/avatars/avatar_placeholder.png'} />,
     // icon: <img src={'/cocoa_1.png'} />,
   }
   return (
@@ -57,6 +66,7 @@ export default function Home() {
         <TimelineEntry
           periodIx={1}
           segmentIx={1}
+          numSegments={2}
           gameStatus="PERIOD_END"
           entryStatus="CURRENT"
         >
@@ -86,6 +96,7 @@ export default function Home() {
                   },
                 },
               ],
+              segmentCount: 2,
               index: 0,
               facts: {
                 cashBalance: 3,

@@ -2,12 +2,13 @@ import { ReactNode } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 // TODO(JJ):
-// - Add max num periods and segments?
+// - Add max num periods?
 
 interface Props {
   children?: ReactNode
   periodIx: number
   segmentIx: number
+  numSegments: number
   gameStatus: string
   entryStatus: 'PAST' | 'CURRENT' | 'FUTURE'
   periodName?: string
@@ -18,6 +19,7 @@ function TimelineEntry({
   children,
   periodIx,
   segmentIx,
+  numSegments,
   gameStatus,
   entryStatus,
   periodName = 'Period',
@@ -53,7 +55,7 @@ function TimelineEntry({
             {periodName} {periodIx + 1}
           </div>
           <div>
-            {segmentName} {segmentIx + 1}
+            {segmentName} {segmentIx + 1}/{numSegments}
           </div>
         </div>
         <div className="text-xs">

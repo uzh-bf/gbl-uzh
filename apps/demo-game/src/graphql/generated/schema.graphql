@@ -112,6 +112,7 @@ type Period {
   id: ID!
   index: Int!
   results: [PlayerResult!]!
+  segmentCount: Int
   segments: [PeriodSegment!]!
 }
 

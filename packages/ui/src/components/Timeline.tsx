@@ -13,6 +13,7 @@ interface Period {
   index: number
   facts: any
   segments: Segment[]
+  segmentCount: number
 }
 
 // NOTE(JJ): Entries are mainly results -> check FResultData.graphql
@@ -55,6 +56,7 @@ function Timeline({
       .flatMap((period) =>
         period.segments.map((segment) => ({
           ...segment,
+          segmentCount: period.segmentCount,
           periodIx: period.index,
           periodFacts: period.facts,
         }))
@@ -71,10 +73,7 @@ function Timeline({
       if (item.type === 'SEGMENT_START') return []
 
       const periodIx = item.period.index
-      // TODO(JJ): Double-check if the periodIx is the right index for the
-      // periods
-      // -> Extend period with count and fetch it from graphql and provide it here
-      const numSegments = periods[periodIx].segments.length
+      const numSegments = periods[periodIx].segmentCount
       const segmentIx =
         (item.type === 'PERIOD_START' && -1) ||
         (item.type === 'PERIOD_END' && numSegments) ||
@@ -120,6 +119,10 @@ function Timeline({
             key={`${item.period.index}-${item.segment?.index}`}
             periodIx={item.period.index}
             segmentIx={item.segment?.index}
+            // TODO(JJ): @RS This is not really nice, the segement count is
+            // not in the period, but in the segment => provide segement count
+            // in the entries (playerResult)?
+            numSegments={item.segmentFlat.segmentCount}
             entryStatus={entryStatus}
             gameStatus={item.type}
           >
