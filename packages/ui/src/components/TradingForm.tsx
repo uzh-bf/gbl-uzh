@@ -1,9 +1,8 @@
 import { Button, FormikTextField } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
-// import * as yup from 'yup'
+import * as yup from 'yup'
 
 // TODO(JJ):
-// - Check with RS if we would like to use yup in the ui?
 // - UserNotification as child?
 // - Name is currently Trading -> input spotPrice, how to name?
 
@@ -17,38 +16,40 @@ function optionalValueToCHFString(value: number, digits = 2) {
 
 interface Props {
   price: number
-  nameButtonA: string
-  nameButtonB: string
+  nameButtonBuy: string
+  nameButtonSell: string
   onSubmit: (values: any, helpers: any) => Promise<void>
-  disableButtonA?: boolean
-  disableButtonB?: boolean
+  min?: number
+  disableButtonBuy?: boolean
+  disableButtonSell?: boolean
 }
 
 function TradingForm({
   price,
-  nameButtonA,
-  nameButtonB,
+  nameButtonBuy,
+  nameButtonSell,
   onSubmit,
-  disableButtonA = false,
-  disableButtonB = false,
+  min = 0,
+  disableButtonBuy = false,
+  disableButtonSell = false,
 }: Props) {
   return (
     <div className="flex w-max gap-4 rounded border p-8">
       <Formik
         initialValues={{
           modifier: 1,
-          volume: 0,
+          volume: min,
         }}
         isInitialValid={false}
-        // validationSchema={yup.object({
-        //   volume: yup.number().min(1).required(),
-        // })}
+        validationSchema={yup.object({
+          volume: yup.number().min(min).required(),
+        })}
         onSubmit={onSubmit}
       >
         {(tradeInterface) => (
           <Form className="">
             <FormikTextField
-              min={0}
+              min={min}
               type="number"
               label="Volume"
               name="volume"
@@ -70,7 +71,7 @@ function TradingForm({
                 disabled={
                   tradeInterface.isSubmitting ||
                   !tradeInterface.isValid ||
-                  disableButtonA
+                  disableButtonBuy
                 }
                 type="button"
                 onClick={async () => {
@@ -78,13 +79,13 @@ function TradingForm({
                   tradeInterface.handleSubmit()
                 }}
               >
-                {nameButtonA}
+                {nameButtonBuy}
               </Button>
               <Button
                 disabled={
                   tradeInterface.isSubmitting ||
                   !tradeInterface.isValid ||
-                  disableButtonB
+                  disableButtonSell
                 }
                 type="button"
                 onClick={async () => {
@@ -92,7 +93,7 @@ function TradingForm({
                   tradeInterface.handleSubmit()
                 }}
               >
-                {nameButtonB}
+                {nameButtonSell}
               </Button>
             </div>
           </Form>
