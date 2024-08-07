@@ -57,8 +57,8 @@ export default function Home() {
         <TimelineEntry
           periodIx={1}
           segmentIx={1}
-          isCurrentEntry
-          gameStatus={'PERIOD_END'}
+          gameStatus="PERIOD_END"
+          entryStatus="CURRENT"
         >
           <div>Child</div>
         </TimelineEntry>

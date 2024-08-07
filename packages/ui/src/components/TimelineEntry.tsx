@@ -2,17 +2,14 @@ import { ReactNode } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 // TODO(JJ):
-// - Add max num periods?
-// - Add max num segments?
-// - Provide enum instead of isCurrentEntry, isPastEntry?
+// - Add max num periods and segments?
 
 interface Props {
   children?: ReactNode
   periodIx: number
   segmentIx: number
   gameStatus: string
-  isCurrentEntry?: boolean
-  isPastEntry?: boolean
+  entryStatus: 'PAST' | 'CURRENT' | 'FUTURE'
   periodName?: string
   segmentName?: string
 }
@@ -22,18 +19,32 @@ function TimelineEntry({
   periodIx,
   segmentIx,
   gameStatus,
-  isCurrentEntry = false,
-  isPastEntry = false,
+  entryStatus,
   periodName = 'Period',
   segmentName = 'Segment',
 }: Props) {
+  let id = ''
+  let styling = ''
+  switch (entryStatus) {
+    case 'PAST':
+      styling = 'text-gray-400'
+      break
+    case 'CURRENT':
+      id = 'current'
+      styling = 'border-red-200 bg-red-50 shadow'
+      break
+    case 'FUTURE':
+      break
+
+    default:
+      break
+  }
   return (
     <div
-      id={isCurrentEntry ? 'current' : ''}
+      id={id}
       className={twMerge(
         'flex flex-col rounded border p-4 pt-2 w-max',
-        isPastEntry && ' text-gray-400',
-        isCurrentEntry && 'border-red-200 bg-red-50 shadow'
+        styling
       )}
     >
       <header className="flex flex-col">

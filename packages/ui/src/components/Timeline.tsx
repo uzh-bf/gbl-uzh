@@ -73,6 +73,7 @@ function Timeline({
       const periodIx = item.period.index
       // TODO(JJ): Double-check if the periodIx is the right index for the
       // periods
+      // -> Extend period with count and fetch it from graphql and provide it here
       const numSegments = periods[periodIx].segments.length
       const segmentIx =
         (item.type === 'PERIOD_START' && -1) ||
@@ -105,16 +106,21 @@ function Timeline({
     <div className="flex flex-row gap-2 overflow-x-auto">
       {data.map((item, ix, all) => {
         const prev = all[ix - 1]
+        let entryStatus: 'PAST' | 'CURRENT' | 'FUTURE' = 'FUTURE'
+        if (
+          item.period.index === activePeriodIx &&
+          item.segment?.index === activeSegmentIx
+        ) {
+          entryStatus = 'CURRENT'
+        } else if (item.period.index < activePeriodIx) {
+          entryStatus = 'PAST'
+        }
         return (
           <TimelineEntry
             key={`${item.period.index}-${item.segment?.index}`}
             periodIx={item.period.index}
             segmentIx={item.segment?.index}
-            isCurrentEntry={
-              item.period.index === activePeriodIx &&
-              item.segment?.index === activeSegmentIx
-            }
-            isPastEntry={item.period.index < activePeriodIx}
+            entryStatus={entryStatus}
             gameStatus={item.type}
           >
             {formatter(item, prev)}
