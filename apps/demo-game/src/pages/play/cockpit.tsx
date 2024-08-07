@@ -145,10 +145,8 @@ function Cockpit() {
       } else if (type == 'total') {
         val = value.totalAssets
       }
-      return {
-        ...acc,
-        [value.ix]: val,
-      }
+      acc[value.ix] = val
+      return acc
     }
   }
 

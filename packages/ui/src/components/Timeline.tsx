@@ -62,10 +62,8 @@ function Timeline({
         }))
       )
       .reduce((acc: any, element: any) => {
-        return {
-          ...acc,
-          [`${element.periodIx + 1}${element.index + 1}`]: element,
-        }
+        acc[`${element.periodIx + 1}${element.index + 1}`] = element
+        return acc
       }, {})
 
     const mapped: any[] = entries.flatMap((item) => {
