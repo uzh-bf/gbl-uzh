@@ -238,23 +238,22 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
 
   if (!currentGame?.activePeriod) return null
 
-  // TODO(JJ): @RS Is is ok that the active period doesn't have segmentCount?
+  // The segementCount for active period is currently not needed
   currentGame.periods = currentGame.periods.map((period) => ({
     ...period,
     segmentCount: period.segments.length,
   }))
 
+  // We filter up to the active period (and active segemnt) - future periods
+  // should not be visible to the user
   currentGame.periods = currentGame.periods.filter(
     (period, ix) => ix <= currentGame.activePeriodIx
   )
   const activeSegmentIx = currentGame.activePeriod.activeSegmentIx
 
-  // NOTE(JJ): We filter only the active period, although we add segementCount
-  // to all the periods
   currentGame.activePeriod.segments = currentGame.activePeriod.segments.filter(
     (segment, ix) => ix <= activeSegmentIx
   )
-  // TODO(JJ): Is this necessary? @RS
   currentGame.periods[currentGame.activePeriodIx].segments =
     currentGame.periods[currentGame.activePeriodIx].segments.filter(
       (segment, ix) => ix <= activeSegmentIx
@@ -273,7 +272,6 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
     },
   })
 
-  // TODO(JJ): @RS We need the count of segments in the period here as well
   const playerResult = await ctx.prisma.playerResult.findUnique({
     where: {
       periodIx_segmentIx_playerId_type: {

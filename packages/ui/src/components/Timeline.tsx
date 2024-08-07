@@ -117,9 +117,6 @@ function Timeline({
             key={`${item.period.index}-${item.segment?.index}`}
             periodIx={item.period.index}
             segmentIx={item.segment?.index}
-            // TODO(JJ): @RS This is not really nice, the segement count is
-            // not in the period, but in the segment => provide segement count
-            // in the entries (playerResult)?
             numSegments={item.segmentFlat.segmentCount}
             entryStatus={entryStatus}
             gameStatus={item.type}
