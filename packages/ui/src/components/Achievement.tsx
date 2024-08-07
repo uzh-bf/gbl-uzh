@@ -4,7 +4,7 @@ interface AchievementProps {
   image: string
   count: number
 }
-
+// TODO(JJ): replace img with react node instead of providing image path
 function Achievement({ name, xpReward, image, count }: AchievementProps) {
   return (
     <div

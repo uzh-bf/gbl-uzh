@@ -10,7 +10,17 @@ interface PlayerDataProps {
   xpMax: number
   level: number
   location?: string
-  achievements?: any[]
+  achievements?: {
+    id: number
+    count: number
+    achievement: {
+      id: number
+      name: string
+      descpription: string
+      image: string
+      reward?: any
+    }
+  }[]
   imgPathAvatar?: string
   imgPathLocation?: string
   onClick?: () => void
