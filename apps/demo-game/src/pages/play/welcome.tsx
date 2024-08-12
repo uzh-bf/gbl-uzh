@@ -1,6 +1,11 @@
 import { useMutation } from '@apollo/client'
+import { COLORS } from '@gbl-uzh/platform/src/lib/constants'
 import { Logo } from '@gbl-uzh/ui'
-import { Button, FormikTextField } from '@uzh-bf/design-system'
+import {
+  Button,
+  FormikSelectField,
+  FormikTextField,
+} from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import { UpdatePlayerDataDocument } from 'src/graphql/generated/ops'
@@ -17,7 +22,6 @@ const Schema = Yup.object().shape({
 // - Maybe move to ui package
 // - Double-check if for this game location is needed?
 // - LogoSelector
-// - Will all games have the same greeting layout?
 // - Maybe change title (now: Demo Game)
 // -> DISCUSS WITH RS
 
@@ -27,6 +31,7 @@ const Schema = Yup.object().shape({
 function Welcome() {
   const router = useRouter()
 
+  // TODO(JJ): @RS what is the corresponding query?
   const [updatePlayerData, { loading }] = useMutation(UpdatePlayerDataDocument)
 
   return (
@@ -34,10 +39,9 @@ function Welcome() {
       <Formik
         initialValues={{
           name: 'Your Name',
-          color: 'red',
+          color: 'Red',
           location: 'ZH',
-          avatar: 'avatar_placeholder',
-          // color: player.color,
+          imgPathAvatar: '/avatars/avatar_placeholder.png',
           // avatar: AVATARS[player.role][0]['key'],
           // name: player.name,
           // location: LOCATIONS[player.role][0],
@@ -47,6 +51,9 @@ function Welcome() {
           await updatePlayerData({
             variables: {
               name: values.name,
+              color: values.color,
+              location: values.location,
+              avatar: values.imgPathAvatar,
             },
           })
           router.replace('/play/cockpit')
@@ -61,7 +68,7 @@ function Welcome() {
                   color={values.color}
                   location={values.location}
                   name={values.name}
-                  avatar={values.avatar}
+                  imgPathAvatar={values.imgPathAvatar}
                 />
               </div>
               <div className="prose flex-1">
@@ -87,7 +94,7 @@ function Welcome() {
                       value: key,
                       label: key,
                     }))}
-                  />
+                  /> */}
                   <FormikSelectField
                     label="Color"
                     name="color"
@@ -95,11 +102,9 @@ function Welcome() {
                       value: label,
                       label,
                     }))}
-                  /> */}
+                  />
                 </div>
               </div>
-
-              {/* <FormikTextField label="Trader Name" name="name" /> */}
               <Button className={{ root: 'mt-8' }} type="submit">
                 Start Game
               </Button>
