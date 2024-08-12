@@ -9,6 +9,7 @@ import {
 import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import { UpdatePlayerDataDocument } from 'src/graphql/generated/ops'
+import { LOCATIONS } from 'src/lib/constants'
 import * as Yup from 'yup'
 
 const Schema = Yup.object().shape({
@@ -39,15 +40,14 @@ function Welcome() {
       <Formik
         initialValues={{
           name: 'Your Name',
-          color: 'Red',
-          location: 'ZH',
+          color: Object.keys(COLORS)[0],
+          location: LOCATIONS.Trader[0],
           imgPathAvatar: '/avatars/avatar_placeholder.png',
           // avatar: AVATARS[player.role][0]['key'],
           // name: player.name,
           // location: LOCATIONS[player.role][0],
         }}
         onSubmit={async (values) => {
-          console.log(values)
           await updatePlayerData({
             variables: {
               name: values.name,
@@ -87,14 +87,14 @@ function Welcome() {
 
                 <div className="flex-initial space-y-3">
                   <FormikTextField label="Trader Name" name="name" />
-                  {/* <FormikSelectField
+                  <FormikSelectField
                     label="Location"
                     name="location"
-                    items={LOCATIONS[player.role].map((key) => ({
+                    items={LOCATIONS.Trader.map((key) => ({
                       value: key,
                       label: key,
                     }))}
-                  /> */}
+                  />
                   <FormikSelectField
                     label="Color"
                     name="color"
