@@ -18,8 +18,8 @@ function NavBar({
     <>
       <nav className="flex w-full items-center justify-between border-b px-2">
         <div className="flex">
-          {tabs.map((tab) => (
-            <Link href={tab.href} className="m-2">
+          {tabs.map((tab, ix) => (
+            <Link href={tab.href} key={ix} className="m-2">
               {tab.name}
             </Link>
           ))}

@@ -175,9 +175,9 @@ function Cockpit() {
         name={playerInfo.name}
         color={playerInfo.color}
         level={playerInfo.level.id}
-        xpToNext={playerInfo.experienceToNext}
+        xpMax={playerInfo.experienceToNext}
         xp={playerInfo.experience}
-        avatar={playerInfo.avatar}
+        imgPathAvatar={playerInfo.avatar}
         location={playerInfo.location}
         onClick={() => {}}
       />
@@ -202,8 +202,9 @@ function Cockpit() {
             type: string
             facts: { decision: boolean }
           }) => {
+            const key = `transaction-${transaction.periodIx}-${transaction.segmentIx}`
             return (
-              <div className="flex flex-col border-b-2 py-2">
+              <div className="flex flex-col border-b-2 py-2" key={key}>
                 <div className="flex">
                   <div>P {transaction.periodIx}</div>
                   <div>Q {transaction.segmentIx}</div>

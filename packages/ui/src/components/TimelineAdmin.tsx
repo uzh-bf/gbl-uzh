@@ -120,7 +120,7 @@ function TimelineAdmin() {
                   // const dice1 = segment.facts.dice1 ?? period.facts.initialDice1
                   // const dice2 = segment.facts.dice2 ?? period.facts.initialDice2
 
-                  return <SegmentEntry segment={segment} />
+                  return <SegmentEntry segment={segment} key={segment.id} />
                 })}
                 {/* {!isPeriodCompleted && periods.length - 1 === ix && (
                   <Formik
