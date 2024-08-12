@@ -2,68 +2,92 @@ import { sortBy } from 'ramda'
 import { useEffect, useMemo } from 'react'
 import TimelineEntry from './TimelineEntry'
 
-// TODO(JJ):
-// - typing
-// - Currently it is very specific to the derivative game
-//   -> adjust s.t. it's generic
+// Maybe add more data, see schema.prisma
+interface Segment {
+  id?: number
+  index: number
+  facts: any
+}
+
+interface Period {
+  index: number
+  facts: any
+  segments: Segment[]
+  segmentCount: number
+}
+
+// NOTE(JJ): Entries are mainly results -> check FResultData.graphql
+// - Maybe renaming? @RS
+interface Entry {
+  id?: number
+  type: string
+  facts: any
+  period: {
+    id?: number
+    index: number
+  }
+  segment: {
+    id?: number
+    index: number
+  }
+}
+
+interface DataProps {
+  segmentFlat?: { facts: any }
+  facts: any
+}
+
 function Timeline({
   periods,
   entries,
   activePeriodIx,
   activeSegmentIx,
+  formatter,
 }: {
-  periods: any[]
-  entries: any[]
+  periods: Period[]
+  entries: Entry[]
   activePeriodIx: number
   activeSegmentIx: number
+  formatter: (current: DataProps, prev: DataProps) => React.ReactNode
 }) {
-  console.log(periods, entries, activePeriodIx, activeSegmentIx)
-
   const data = useMemo(() => {
-    const periodData = periods
-      .flatMap((period: any) =>
-        period.segments.map((segment: any) => ({
+    // Segments of all periods with new keys
+    const segmentsFlat = periods
+      .flatMap((period) =>
+        period.segments.map((segment) => ({
           ...segment,
+          segmentCount: period.segmentCount,
           periodIx: period.index,
           periodFacts: period.facts,
         }))
       )
       .reduce((acc: any, element: any) => {
-        return {
-          ...acc,
-          [`${element.periodIx + 1}${element.index + 1}`]: element,
-        }
+        acc[`${element.periodIx + 1}${element.index + 1}`] = element
+        return acc
       }, {})
 
-    console.log(periodData)
-
-    const mapped: any[] = entries.flatMap((item: any) => {
+    const mapped: any[] = entries.flatMap((item) => {
       if (item.type === 'PERIOD_START') return []
       if (item.type === 'SEGMENT_START') return []
 
-      console.log(item)
-
       const periodIx = item.period.index
+      const numSegments = periods[periodIx].segmentCount
       const segmentIx =
         (item.type === 'PERIOD_START' && -1) ||
-        (item.type === 'PERIOD_END' && 4) ||
+        (item.type === 'PERIOD_END' && numSegments) ||
         item.segment?.index
       const key = `${periodIx + 1}${segmentIx + 1}`
 
-      console.log(key)
-
-      const matchingData = periodData[key]
+      const segmentFlat = segmentsFlat[key]
 
       return [
         {
           ...item,
           key,
-          data: matchingData,
+          segmentFlat,
         },
       ]
     })
-
-    console.log(mapped)
 
     return sortBy((item) => item.key, mapped)
   }, [entries, periods])
@@ -79,39 +103,26 @@ function Timeline({
     <div className="flex flex-row gap-2 overflow-x-auto">
       {data.map((item, ix, all) => {
         const prev = all[ix - 1]
-
-        const spotPrice =
-          item.data?.facts.spotPrice ?? item.facts.finalSpotPrice
-        const futuresPrice =
-          item.data?.facts.futuresPrice ?? item.facts.finalSpotPrice
-
-        const spotPriceDelta =
-          prev?.data?.facts.spotPrice &&
-          (spotPrice / prev.data.facts.spotPrice - 1) * 100
-
-        const futuresPriceDelta =
-          prev?.data?.facts.futuresPrice &&
-          (futuresPrice / prev.data.facts.futuresPrice - 1) * 100
-
+        let entryStatus: 'PAST' | 'CURRENT' | 'FUTURE' = 'FUTURE'
+        if (
+          item.period.index === activePeriodIx &&
+          item.segment?.index === activeSegmentIx
+        ) {
+          entryStatus = 'CURRENT'
+        } else if (item.period.index < activePeriodIx) {
+          entryStatus = 'PAST'
+        }
         return (
           <TimelineEntry
             key={`${item.period.index}-${item.segment?.index}`}
             periodIx={item.period.index}
             segmentIx={item.segment?.index}
-            isCurrentEntry={
-              item.period.index === activePeriodIx &&
-              item.segment?.index === activeSegmentIx
-            }
-            isPastEntry={item.period.index < activePeriodIx}
-            type={item.type}
-            cashBalance={item.facts.cashBalance}
-            storageAmount={item.facts.storageAmount}
-            spotPrice={spotPrice}
-            futuresPrice={futuresPrice}
-            spotPriceDelta={spotPriceDelta}
-            futuresPriceDelta={futuresPriceDelta}
-            t={item.data?.facts.t ?? (item.type === 'PERIOD_END' && 0)}
-          />
+            numSegments={item.segmentFlat.segmentCount}
+            entryStatus={entryStatus}
+            gameStatus={item.type}
+          >
+            {formatter(item, prev)}
+          </TimelineEntry>
         )
       })}
     </div>

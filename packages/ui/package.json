@@ -14,15 +14,16 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "peerDependencies": {
+    "@radix-ui/react-avatar": "^1.1.0",
     "@uzh-bf/design-system": "2.13.3",
     "clsx": "^2.0.0",
     "react": "^18.2.0",
-    "tailwind-merge": "1.14.0",
     "react-dice-complete": "2.2.0",
-    "@radix-ui/react-avatar": "^1.1.0"
+    "tailwind-merge": "1.14.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.9",
+    "@types/ramda": "^0.28.25",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "7.15.0",
@@ -43,10 +44,13 @@
     "extends": "../../package.json"
   },
   "dependencies": {
+    "@fortawesome/free-regular-svg-icons": "6.4.2",
     "@fortawesome/free-solid-svg-icons": "6.4.2",
     "@fortawesome/react-fontawesome": "0.2.0",
-    "@types/ramda": "^0.28.25",
+    "formik": "2.4.3",
+    "next": "14.2.5",
     "ramda": "0.29.0",
-    "recharts": "2.8.0"
+    "recharts": "2.8.0",
+    "yup": "1.2.0"
   }
 }

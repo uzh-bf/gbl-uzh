@@ -138,6 +138,7 @@ export interface NexusGenObjects {
     id: string; // ID!
     index: number; // Int!
     results: NexusGenRootTypes['PlayerResult'][]; // [PlayerResult!]!
+    segmentCount?: number | null; // Int
     segments: NexusGenRootTypes['PeriodSegment'][]; // [PeriodSegment!]!
   }
   PeriodSegment: { // root type
@@ -314,6 +315,7 @@ export interface NexusGenFieldTypes {
     id: string; // ID!
     index: number; // Int!
     results: NexusGenRootTypes['PlayerResult'][]; // [PlayerResult!]!
+    segmentCount: number | null; // Int
     segments: NexusGenRootTypes['PeriodSegment'][]; // [PeriodSegment!]!
   }
   PeriodSegment: { // field return type
@@ -492,6 +494,7 @@ export interface NexusGenFieldTypeNames {
     id: 'ID'
     index: 'Int'
     results: 'PlayerResult'
+    segmentCount: 'Int'
     segments: 'PeriodSegment'
   }
   PeriodSegment: { // field return type name

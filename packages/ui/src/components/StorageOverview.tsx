@@ -1,5 +1,5 @@
 import { repeat } from 'ramda'
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 const baseStyle =
@@ -8,16 +8,10 @@ const baseStyle =
 interface Props {
   storageUsed: number
   storageTotal: number
-  imgSrcUsed: string
-  imgSrcTotal: string
+  icon: React.ReactNode
 }
 
-function StorageOverview({
-  storageUsed,
-  storageTotal,
-  imgSrcUsed,
-  imgSrcTotal,
-}: Props) {
+function StorageOverview({ storageUsed, storageTotal, icon }: Props) {
   const storageEmpty = useMemo(
     () => storageTotal - storageUsed,
     [storageTotal, storageUsed]
@@ -26,46 +20,60 @@ function StorageOverview({
   return (
     <div className="">
       <h2 className="mb-2 font-bold">Storage</h2>
-      <div className="grid grid-cols-10 gap-1 p-2 bg-white border rounded shadow aspect-square">
-        {repeat(1, storageUsed).map((ix: number) => (
-          <div
-            key={ix}
-            className={twMerge(
-              baseStyle,
-              'bg-transparent text-amber-800 border-none'
-            )}
-          >
-            <img src={imgSrcUsed} />
-          </div>
-        ))}
-        {repeat(1, storageEmpty).map((ix: number) => (
-          <div
-            key={ix}
-            className={twMerge(baseStyle, 'text-gray-200 bg-gray-100')}
-          >
-            <img src={imgSrcTotal} className="opacity-30" />
-          </div>
-        ))}
+      <div className="flex w-auto flex-wrap gap-1 p-2 bg-white border rounded shadow">
+        {repeat(1, storageUsed).map((ix: number) => {
+          const isReactNode = React.isValidElement(icon)
+          return (
+            <div
+              key={ix}
+              className={twMerge(
+                baseStyle,
+                !isReactNode ? ' bg-slate-900' : ''
+              )}
+            >
+              {isReactNode && icon}
+            </div>
+          )
+        })}
+        {repeat(1, storageEmpty).map((ix: number) => {
+          const isReactNode = React.isValidElement(icon)
+          return (
+            <div
+              key={ix}
+              className={twMerge(
+                baseStyle,
+                'opacity-30',
+                !isReactNode ? ' bg-slate-900 ' : ''
+              )}
+            >
+              {isReactNode && icon}
+            </div>
+          )
+        })}
       </div>
       <div className="flex flex-row flex-wrap gap-2 p-2 text-xs md:gap-4">
         <div className="flex flex-row items-center gap-2">
-          <div className="text-base text-amber-800">{storageUsed}</div>
+          <div className="text-base text-slate-900">{storageUsed}</div>
           <div
             className={twMerge(
               baseStyle,
-              'bg-transparent text-amber-800 border-none w-4 h-4'
+              !React.isValidElement(icon) ? ' bg-slate-900' : ''
             )}
           >
-            <img src={imgSrcUsed} />
+            {React.isValidElement(icon) && icon}
           </div>
           <div>Storage</div>
         </div>
         <div className="flex flex-row items-center gap-2">
-          <div className="text-base text-gray-500">{storageEmpty}</div>
+          <div className="text-base text-slate-500">{storageEmpty}</div>
           <div
-            className={twMerge(baseStyle, 'text-gray-200 bg-gray-100 w-4 h-4')}
+            className={twMerge(
+              baseStyle,
+              'opacity-30',
+              !React.isValidElement(icon) ? 'bg-slate-900' : ''
+            )}
           >
-            <img src={imgSrcTotal} className="opacity-30" />{' '}
+            {React.isValidElement(icon) && icon}
           </div>
           <div>Empty</div>
         </div>

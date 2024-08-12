@@ -1,49 +1,61 @@
-import { Progress } from '@uzh-bf/design-system'
-
 import Logo from './Logo'
 import Achievement from './Achievement'
+import XpBar from './XpBar'
+import { Button } from '@uzh-bf/design-system'
 
 interface PlayerDataProps {
-  achievements?: any[]
   name?: string
   color?: string
   xp?: number
+  xpMax: number
   level: number
-  xpToNext: number
-  avatar?: string
   location?: string
+  achievements?: {
+    id: number
+    count: number
+    achievement: {
+      id: number
+      name: string
+      descpription: string
+      image: string
+      reward?: any
+    }
+  }[]
+  imgPathAvatar?: string
+  imgPathLocation?: string
   onClick?: () => void
 }
 
+// TODO(JJ):
+// - Change basic styling of button
+
 function PlayerDisplay({
-  achievements,
   name,
   color,
   xp,
+  xpMax,
   level,
-  xpToNext,
-  avatar,
   location,
+  achievements,
+  imgPathAvatar,
+  imgPathLocation,
   onClick,
 }: PlayerDataProps) {
   return (
     <div>
       <div className="flex flex-col gap-2">
-        <div className="cursor-pointer" onClick={onClick}>
+        <Button basic onClick={onClick}>
           <Logo
             color={color}
-            avatar={avatar}
             name={name}
+            imgPathAvatar={imgPathAvatar}
+            imgPathLocation={imgPathLocation}
             location={location}
             level={level}
           />
-        </div>
+        </Button>
 
-        <Progress
-          value={xp ?? 0}
-          max={xpToNext}
-          formatter={(val) => `${val}XP`}
-        />
+        <XpBar value={xp ?? 0} max={xpMax} />
 
         <div className="flex flex-row flex-wrap flex-initial gap-2">
           {achievements?.map((achievement) => (

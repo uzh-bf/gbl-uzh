@@ -60,6 +60,7 @@ export const Period = objectType({
     t.nonNull.field('facts', {
       type: 'JSONObject',
     })
+    t.int('segmentCount')
   },
 })
 

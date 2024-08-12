@@ -202,7 +202,7 @@ interface GetPlayerResultArgs {
 }
 
 export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
-  const currentGame = await ctx.prisma.game.findUnique({
+  let currentGame = await ctx.prisma.game.findUnique({
     where: {
       id: args.gameId,
     },
@@ -237,6 +237,27 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
   })
 
   if (!currentGame?.activePeriod) return null
+
+  // The segementCount for active period is currently not needed
+  currentGame.periods = currentGame.periods.map((period) => ({
+    ...period,
+    segmentCount: period.segments.length,
+  }))
+
+  // We filter up to the active period (and active segemnt) - future periods
+  // should not be visible to the user
+  currentGame.periods = currentGame.periods.filter(
+    (period, ix) => ix <= currentGame.activePeriodIx
+  )
+  const activeSegmentIx = currentGame.activePeriod.activeSegmentIx
+
+  currentGame.activePeriod.segments = currentGame.activePeriod.segments.filter(
+    (segment, ix) => ix <= activeSegmentIx
+  )
+  currentGame.periods[currentGame.activePeriodIx].segments =
+    currentGame.periods[currentGame.activePeriodIx].segments.filter(
+      (segment, ix) => ix <= activeSegmentIx
+    )
 
   const previousResults = ctx.prisma.playerResult.findMany({
     where: {
