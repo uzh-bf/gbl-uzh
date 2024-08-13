@@ -1,4 +1,4 @@
-import { Button, FormikTextField } from '@uzh-bf/design-system'
+import { Button, FormikNumberField } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import * as yup from 'yup'
 
@@ -44,13 +44,22 @@ function TradingForm({
         }}
         isInitialValid={false}
         validationSchema={yup.object({
-          volume: yup.number().min(0).max(max).required(),
+          volume: yup
+            .number()
+            .min(0, 'Volume must be greater than 0')
+            .max(max, 'Volume must be smaller equal than ' + max)
+            .required('Volume is required'),
         })}
         onSubmit={onSubmit}
       >
         {(tradeInterface) => (
           <Form className="">
-            <FormikTextField type="number" label="Volume" name="volume" />
+            <FormikNumberField
+              placeholder="0"
+              label="Volume"
+              name="volume"
+              required
+            />
             <div className="mt-2">
               Trading {tradeInterface.values.volume} {unitName} for{' '}
               {optionalValueToCHFString(tradeInterface.values.volume * price)}
