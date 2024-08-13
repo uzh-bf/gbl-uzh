@@ -727,46 +727,46 @@ importers:
   packages/ui:
     dependencies:
       '@fortawesome/free-regular-svg-icons':
-        specifier: 6.4.2
+        specifier: ^6.4.2
         version: 6.4.2
       '@fortawesome/free-solid-svg-icons':
-        specifier: 6.4.2
+        specifier: ^6.4.2
         version: 6.4.2
       '@fortawesome/react-fontawesome':
-        specifier: 0.2.0
+        specifier: ^0.2.0
         version: 0.2.0(@fortawesome/fontawesome-svg-core@6.4.2)(react@18.2.0)
       '@radix-ui/react-avatar':
         specifier: ^1.1.0
         version: 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.2.0)(react@18.2.0)
       '@uzh-bf/design-system':
-        specifier: 2.13.3
+        specifier: ^2.13.3
         version: 2.13.3(@fortawesome/fontawesome-svg-core@6.4.2)(@fortawesome/free-regular-svg-icons@6.4.2)(@fortawesome/free-solid-svg-icons@6.4.2)(@fortawesome/react-fontawesome@0.2.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(autoprefixer@10.4.19)(dayjs@1.11.12)(formik@2.4.3)(postcss-import@15.1.0)(react-dom@18.2.0)(react@18.2.0)(tailwind-merge@1.14.0)(tailwindcss-radix@2.9.0)(tailwindcss@3.4.4)(yup@1.2.0)
       clsx:
         specifier: ^2.0.0
         version: 2.1.1
       formik:
-        specifier: 2.4.3
+        specifier: ^2.4.3
         version: 2.4.3(react@18.2.0)
       next:
-        specifier: 14.2.5
+        specifier: ^14.2.5
         version: 14.2.5(@babel/core@7.24.5)(react-dom@18.2.0)(react@18.2.0)
       ramda:
-        specifier: 0.29.0
+        specifier: ^0.29.0
         version: 0.29.0
       react:
         specifier: ^18.2.0
         version: 18.2.0
       react-dice-complete:
-        specifier: 2.2.0
+        specifier: ^2.2.0
         version: 2.2.0(react-dom@18.2.0)(react@18.2.0)
       recharts:
-        specifier: 2.8.0
+        specifier: ^2.8.0
         version: 2.8.0(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0)
       tailwind-merge:
-        specifier: 1.14.0
+        specifier: ^1.14.0
         version: 1.14.0
       yup:
-        specifier: 1.2.0
+        specifier: ^1.2.0
         version: 1.2.0
     devDependencies:
       '@types/node':
