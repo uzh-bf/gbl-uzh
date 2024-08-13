@@ -1,4 +1,4 @@
-import { sourceSansPro } from '@lib/fonts'
+import { sourceSansPro } from '~/lib/fonts'
 
 import type { PropsWithChildren } from 'react'
 
