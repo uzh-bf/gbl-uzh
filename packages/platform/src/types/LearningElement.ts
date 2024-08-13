@@ -1,5 +1,5 @@
 import { objectType } from 'nexus'
-import { Player } from './Player'
+import { Player } from './Player.js'
 
 export const LearningAnswerOption = objectType({
   name: 'LearningAnswerOption',

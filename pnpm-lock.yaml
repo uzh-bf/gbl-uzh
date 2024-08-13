@@ -149,12 +149,6 @@ importers:
       '@graphql-codegen/typescript-resolvers':
         specifier: 4.0.1
         version: 4.0.1(graphql@16.9.0)
-      '@tsconfig/node18':
-        specifier: 18.2.4
-        version: 18.2.4
-      '@tsconfig/recommended':
-        specifier: 1.0.2
-        version: 1.0.2
       '@types/node':
         specifier: ^20.14.9
         version: 20.14.13
@@ -690,18 +684,21 @@ importers:
         specifier: 1.2.0
         version: 1.2.0
     devDependencies:
-      '@tsconfig/node18':
-        specifier: 18.2.4
-        version: 18.2.4
-      '@tsconfig/recommended':
-        specifier: 1.0.2
-        version: 1.0.2
       '@types/jest':
         specifier: ^29.2.2
         version: 29.5.12
+      '@types/jsonwebtoken':
+        specifier: ^9.0.6
+        version: 9.0.6
       '@types/node':
         specifier: ^20.14.9
         version: 20.14.13
+      '@types/ramda':
+        specifier: ^0.28.25
+        version: 0.28.25
+      '@types/react':
+        specifier: ^18.2.0
+        version: 18.3.3
       cross-env:
         specifier: 7.0.3
         version: 7.0.3
@@ -5443,14 +5440,6 @@ packages:
       pretty-format: 27.5.1
     dev: true
 
-  /@tsconfig/node18@18.2.4:
-    resolution: {integrity: sha512-5xxU8vVs9/FNcvm3gE07fPbn9tl6tqGGWA9tSlwsUEkBxtRnTsNmwrV8gasZ9F/EobaSv9+nu8AxUKccw77JpQ==}
-    dev: true
-
-  /@tsconfig/recommended@1.0.2:
-    resolution: {integrity: sha512-dbHBtbWBOjq0/otpopAE02NT2Cm05Qe2JsEKeCf/wjSYbI2hz8nCqnpnOJWHATgjDz4fd3dchs3Wy1gQGjfN6w==}
-    dev: true
-
   /@types/acorn@4.0.6:
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==}
     dependencies:
@@ -5759,6 +5748,12 @@ packages:
 
   /@types/json5@0.0.29:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
+    dev: true
+
+  /@types/jsonwebtoken@9.0.6:
+    resolution: {integrity: sha512-/5hndP5dCjloafCXns6SZyESp3Ldq7YjH3zwzwczYnjxIT0Fqzk5ROSYVGfFyczIue7IUEj8hkvLbPoLQ18vQw==}
+    dependencies:
+      '@types/node': 20.14.13
     dev: true
 
   /@types/katex@0.16.7:

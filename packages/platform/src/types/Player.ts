@@ -1,10 +1,10 @@
 import * as DB from '@prisma/client'
 
 import { enumType, objectType } from 'nexus'
-import { AchievementInstance } from './Achievement'
-import { Game, Period, PeriodSegment } from './Game'
-import { LearningElement } from './LearningElement'
-import { StoryElement } from './StoryElement'
+import { AchievementInstance } from './Achievement.js'
+import { Game, Period, PeriodSegment } from './Game.js'
+import { LearningElement } from './LearningElement.js'
+import { StoryElement } from './StoryElement.js'
 
 export const PlayerDecisionType = enumType({
   name: 'PlayerDecisionType',

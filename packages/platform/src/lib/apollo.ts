@@ -4,7 +4,7 @@ import { getMainDefinition } from '@apollo/client/utilities'
 import assert from 'node:assert'
 import { useMemo } from 'react'
 
-import SSELink from './SSELink'
+import SSELink from './SSELink.js'
 
 let apolloClient
 

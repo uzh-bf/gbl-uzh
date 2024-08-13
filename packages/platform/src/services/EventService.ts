@@ -1,6 +1,6 @@
 import * as DB from '@prisma/client'
-import { pubSub } from '../lib/pubsub'
-import { BaseUserNotificationType as UserNotificationType } from '../types'
+import { pubSub } from '../lib/pubsub.js'
+import { BaseUserNotificationType as UserNotificationType } from '../types.js'
 
 export async function receiveEvents({ events, ctx, prisma }) {
   if (!Array.isArray(events)) return

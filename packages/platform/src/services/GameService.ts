@@ -3,9 +3,9 @@ import { PrismaClient } from '@prisma/client'
 import { nanoid } from 'nanoid'
 import { none, repeat } from 'ramda'
 import * as yup from 'yup'
-import log from '../lib/logger'
-import { CtxWithFacts, CtxWithFactsAndSchema, CtxWithPrisma } from '../types'
-import * as EventService from './EventService'
+import log from '../lib/logger.js'
+import { CtxWithFacts, CtxWithFactsAndSchema, CtxWithPrisma } from '../types.js'
+import * as EventService from './EventService.js'
 
 type Context = CtxWithPrisma<PrismaClient>
 
@@ -87,7 +87,7 @@ export async function addGamePeriod<TFacts>(
 
   if (!game) return null
 
-  const index = game.periods[0]?.index + 1 || 0
+  const index = (game.periods[0]?.index ?? -1) + 1
 
   // TODO(JJ): Why do we provide validatedFacts twice?
   // - remove periodFacts from payload for initialize?
@@ -193,7 +193,7 @@ export async function addPeriodSegment<TFacts>(
 
   if (!period) return null
 
-  const index = period.segments[0]?.index + 1 || 0
+  const index = (period.segments[0]?.index ?? -1) + 1
 
   const { resultFacts: initializedFacts } = services.Segment.initialize(
     validatedFacts,
@@ -353,7 +353,7 @@ export async function activateNextPeriod(
           players: game.players,
           activePeriodIx: currentPeriodIx,
           gameId: game.id,
-          periodFacts: game.periods?.[0].facts,
+          periodFacts: game.periods?.[0]?.facts,
         },
         ctx,
         { services }
@@ -624,7 +624,7 @@ export async function activateNextPeriod(
 
       const { results, extras } = computePeriodStartResults(
         {
-          results: game.activePeriod.previousPeriod[0].results,
+          results: game.activePeriod.previousPeriod[0]?.results,
           players: game.players,
           activePeriodIx: currentPeriodIx,
           gameId: game.id,

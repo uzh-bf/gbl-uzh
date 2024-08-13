@@ -9,13 +9,13 @@ import {
   objectType,
   stringArg,
 } from 'nexus'
-import * as AccountService from '../services/AccountService'
-import * as GameService from '../services/GameService'
+import * as AccountService from '../services/AccountService.js'
+import * as GameService from '../services/GameService.js'
 
-import * as PlayService from '../services/PlayService'
-import { Game, Period, PeriodSegment } from './Game'
-import { LearningElementAttempt } from './LearningElement'
-import { Player, PlayerDecision, PlayerResult } from './Player'
+import * as PlayService from '../services/PlayService.js'
+import { Game, Period, PeriodSegment } from './Game.js'
+import { LearningElementAttempt } from './LearningElement.js'
+import { Player, PlayerDecision, PlayerResult } from './Player.js'
 
 const defaultServices = {}
 const defaultSchemas = {}

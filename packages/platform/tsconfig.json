@@ -1,11 +1,39 @@
 {
-  "extends": "@tsconfig/node18/tsconfig.json",
-  "include": ["src"],
+  "include": [
+    "./**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+  ],
   "compilerOptions": {
-    "lib": ["es2022", "dom"],
-    "noImplicitAny": false,
-    "strictNullChecks": true,
-    "moduleResolution": "node",
-    "module": "CommonJS"
+    "baseUrl": ".",
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": false,
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    /* If transpiling with TypeScript: */
+    "module": "NodeNext",
+    "outDir": "dist",
+    "sourceMap": true,
+    /* AND if you're building for a library: */
+    "declaration": true,
+    /* AND if you're building for a library in a monorepo: */
+    "composite": false,
+    "declarationMap": true,
+    /* If your code doesn't run in the DOM: */
+    "lib": [
+      "es2022"
+    ],
+    "noImplicitAny": false
   }
 }
