@@ -7,6 +7,7 @@ export default defineConfig({
     'src/lib/util.ts',
     'src/lib/apollo.ts',
   ],
+  format: ['esm'],
   clean: false,
   dts: true,
   publicDir: true,
