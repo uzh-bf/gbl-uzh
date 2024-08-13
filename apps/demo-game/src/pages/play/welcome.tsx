@@ -40,12 +40,11 @@ function Welcome() {
       <Formik
         initialValues={{
           name: 'Your Name',
+          // name: player.name,
           color: Object.keys(COLORS)[0],
           location: LOCATIONS.Trader[0],
           imgPathAvatar: '/avatars/avatar_placeholder.png',
           // avatar: AVATARS[player.role][0]['key'],
-          // name: player.name,
-          // location: LOCATIONS[player.role][0],
         }}
         onSubmit={async (values) => {
           await updatePlayerData({

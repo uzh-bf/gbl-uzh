@@ -17,11 +17,10 @@ interface Props {
     imgPathLocation?: string
     onClick: () => void
   }
-  storageInfo: {
+  storageInfo?: {
     storageTotal: number
     storageUsed: number
-    imgPathEmpty?: string
-    imgPathFull?: string
+    icon: React.ReactNode
   }
 }
 
@@ -32,12 +31,14 @@ function Layout({ children, tabs, playerInfo, storageInfo }: Props) {
         tabs={tabs}
         playerName={playerInfo.name}
         playerLevel={playerInfo.level}
+        playerImgPathAvatar={playerInfo.imgPathAvatar}
+        playerColor={playerInfo.color}
       />
       <div className="flex w-full justify-between gap-x-4 p-4">
         {children}
         <div id="sidebar" className="flex w-60 flex-col">
           <PlayerDisplay {...playerInfo} />
-          <StorageOverview {...storageInfo} />
+          {storageInfo && <StorageOverview {...storageInfo} />}
         </div>
       </div>
     </>

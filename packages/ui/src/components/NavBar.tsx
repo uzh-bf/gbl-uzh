@@ -5,6 +5,8 @@ interface Props {
   tabs: { name: string; href: string }[]
   playerName: string
   playerLevel: number
+  playerColor?: string
+  playerImgPathAvatar?: string
   playerHref?: string
 }
 
@@ -12,11 +14,13 @@ function NavBar({
   tabs,
   playerName,
   playerLevel,
+  playerColor,
+  playerImgPathAvatar,
   playerHref = '/play/cockpit',
 }: Props) {
   return (
     <>
-      <nav className="flex w-full items-center justify-between border-b px-2">
+      <nav className="flex w-full items-center justify-between border-b px-4">
         <div className="flex">
           {tabs.map((tab, ix) => (
             <Link href={tab.href} key={ix} className="m-2">
@@ -31,7 +35,7 @@ function NavBar({
               <div className="text-orange-700">Level {playerLevel}</div>
             </div>
             <div className="w-10">
-              <Logo />
+              <Logo imgPathAvatar={playerImgPathAvatar} color={playerColor} />
             </div>
           </div>
         </Link>

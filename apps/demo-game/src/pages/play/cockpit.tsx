@@ -1,7 +1,15 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { PlayerDisplay } from '@gbl-uzh/ui'
+import { Layout } from '@gbl-uzh/ui'
 import { Switch, Table } from '@uzh-bf/design-system'
-import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 import {
   PerformActionDocument,
   ResultDocument,
@@ -46,7 +54,7 @@ function Cockpit() {
   // - Make it visually more appealing
   // - Add title to every gamge state
   // - Add a color to the info
-  // console.log(playerState)
+
   if (!currentGame) {
     return (
       <div>
@@ -54,6 +62,9 @@ function Cockpit() {
         <p>The game has not started yet.</p>
       </div>
     )
+  }
+  if (!playerDataResult.playerResult) {
+    return <div>No player results. </div>
   }
 
   const resultFacts = playerDataResult.playerResult.facts
@@ -167,31 +178,36 @@ function Cockpit() {
   // - Do onclick logic
   // - PlayerDisplay is not ideal/nice yet
 
-  const playerInfo = data.self
-  const playerDisplay = (
-    <div className="w-1/4">
-      <PlayerDisplay
-        achievements={playerInfo.achievements}
-        name={playerInfo.name}
-        color={playerInfo.color}
-        level={playerInfo.level.id}
-        xpMax={playerInfo.experienceToNext}
-        xp={playerInfo.experience}
-        imgPathAvatar={playerInfo.avatar}
-        location={playerInfo.location}
-        onClick={() => {}}
-      />
-    </div>
-  )
+  const tabs = [
+    { name: 'Welcome', href: '/play/welcome' },
+    { name: 'Cockpit', href: '/play/cockpit' },
+  ]
+
+  // TODO(JJ):
+  // - location is buggy -> check welcome.tsx
+  const playerInfo = {
+    name: data.self.name,
+    color: data.self.color,
+    location: data.self.location,
+    level: data.self.level.id,
+    xp: data.self.experience,
+    xpMax: data.self.experienceToNext,
+    achievements: data.self.achievements,
+    imgPathAvatar: data.self.avatar,
+    imgPathLocation: `/locations/${data.self.location}.svg`,
+    onClick: () => {
+      // router.replace('/play/welcome')
+    },
+  }
 
   // Transactions
   // TODO(JJ): Integrate into the layout
   // The following is only temporary
-
+  // - Should only display final transactions, or really every decision?
   console.log(data.result.transactions)
   const transactions = (
     <div className="m-4">
-      <h1 className="border-b-2 text-xl font-bold">History</h1>
+      <h1 className="border-b-2 text-xl font-bold">Transaction history</h1>
       {data.result.transactions
         .slice(0)
         .reverse()
@@ -221,11 +237,8 @@ function Cockpit() {
   )
 
   const header = (
-    <div className="rounded border p-4">
-      <div className="font-bold">
-        Playing as {playerInfo.name} in game {currentGame.id}
-      </div>
-
+    <div className="flex justify-between rounded border p-4">
+      <div className="font-bold">Game {currentGame.id}</div>
       <div className="">Current status: {currentGame.status}</div>
     </div>
   )
@@ -233,36 +246,46 @@ function Cockpit() {
   switch (currentGame?.status) {
     case 'PREPARATION':
       return (
-        <div className="flex w-full justify-between">
-          <div>{header} Game is being prepared.</div>
-          {playerDisplay}
+        <div>
+          <Layout tabs={tabs} playerInfo={playerInfo}>
+            <div>{header} Game is being prepared.</div>
+          </Layout>
         </div>
       )
 
     case 'COMPLETED':
-      return <div> Game is completed. </div>
+      return (
+        <div>
+          <Layout tabs={tabs} playerInfo={playerInfo}>
+            <div> Game is completed. </div>
+          </Layout>
+        </div>
+      )
 
     case 'CONSOLIDATION':
       return (
-        <div className="flex w-full justify-between">
-          <div> Game is being consolidated. </div>
-          {playerDisplay}
+        <div>
+          <Layout tabs={tabs} playerInfo={playerInfo}>
+            <div> Game is being consolidated. </div>
+          </Layout>
         </div>
       )
 
     case 'RESULTS':
       return (
-        <div className="flex w-full justify-between">
-          <div> RESULTS </div>
-          {playerDisplay}
+        <div>
+          <Layout tabs={tabs} playerInfo={playerInfo}>
+            <div> RESULTS </div>
+          </Layout>
         </div>
       )
 
     case 'SCHEDULED':
       return (
-        <div className="flex w-full justify-between">
-          <div> Game is scheduled. </div>
-          {playerDisplay}
+        <div>
+          <Layout tabs={tabs} playerInfo={playerInfo}>
+            <div> Game is scheduled. </div>
+          </Layout>
         </div>
       )
 
@@ -271,80 +294,89 @@ function Cockpit() {
         previousResults
       ).map((s, i) => ({ total: s, month: 'month_' + String(i) }))
       return (
-        <div className="flex w-full justify-between">
-          <div>
-            {header}
-            <div className="max-w-2xl">
-              <Table
-                columns={columns_segment_results}
-                data={data_segment_results}
-                caption=""
-              />
+        <div>
+          <Layout tabs={tabs} playerInfo={playerInfo}>
+            <div className="flex flex-col">
+              <div>
+                {header}
+                <div className="max-w-2xl">
+                  <Table
+                    columns={columns_segment_results}
+                    data={data_segment_results}
+                    caption=""
+                  />
+                </div>
+                <div className="flex justify-center">Total over time chart</div>
+                <ResponsiveContainer width="100%" height="50%">
+                  <LineChart
+                    width={600}
+                    height={400}
+                    data={totalAssetsPerMonth}
+                  >
+                    <Line type="monotone" dataKey="total" stroke="#8884d8" />
+                    <CartesianGrid stroke="#ccc" strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-            <div className="flex justify-center">Total over time chart</div>
-            <LineChart width={600} height={400} data={totalAssetsPerMonth}>
-              <Line type="monotone" dataKey="total" stroke="#8884d8" />
-              <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-            </LineChart>
-          </div>
-
-          {playerDisplay}
+          </Layout>
         </div>
       )
 
     case 'RUNNING':
       return (
-        <div className="flex w-full justify-between">
-          <div className="w-3/4">
-            {header}
-            <div className="max-w-md">
-              <Table
-                columns={columns_portfolio}
-                data={data_portfolio}
-                caption=""
-              />
-            </div>
+        <div>
+          <Layout tabs={tabs} playerInfo={playerInfo}>
+            <div className="flex w-full flex-col">
+              {header}
+              <div className="max-w-md">
+                <Table
+                  columns={columns_portfolio}
+                  data={data_portfolio}
+                  caption=""
+                />
+              </div>
 
-            <div className="rounded border p-4">
-              {decisions.map(function (decision, i) {
-                return (
-                  <div className="p-1" key={decision.name}>
-                    <Switch
-                      label={decision.label(
-                        decision.state
-                          ? 1 /
-                              (+resultFactsDecisions.bank +
-                                +resultFactsDecisions.bonds +
-                                +resultFactsDecisions.stocks)
-                          : 0,
-                        assets.totalAssets
-                      )}
-                      checked={decision.state}
-                      id="switch"
-                      onCheckedChange={async (checked) => {
-                        // TODO(JJ): Discuss with @RS if we should rename
-                        // payload -> facts
-                        await performAction({
-                          variables: {
-                            type: decision.action,
-                            payload: JSON.stringify({
-                              decision: checked,
-                            }),
-                          },
-                          refetchQueries: [ResultDocument],
-                        })
-                      }}
-                    />
-                  </div>
-                )
-              })}
+              <div className="rounded border p-4">
+                {decisions.map(function (decision, i) {
+                  return (
+                    <div className="p-1" key={decision.name}>
+                      <Switch
+                        label={decision.label(
+                          decision.state
+                            ? 1 /
+                                (+resultFactsDecisions.bank +
+                                  +resultFactsDecisions.bonds +
+                                  +resultFactsDecisions.stocks)
+                            : 0,
+                          assets.totalAssets
+                        )}
+                        checked={decision.state}
+                        id="switch"
+                        onCheckedChange={async (checked) => {
+                          // TODO(JJ): Discuss with @RS if we should rename
+                          // payload -> facts
+                          await performAction({
+                            variables: {
+                              type: decision.action,
+                              payload: JSON.stringify({
+                                decision: checked,
+                              }),
+                            },
+                            refetchQueries: [ResultDocument],
+                          })
+                        }}
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+              {transactions}
             </div>
-            {transactions}
-          </div>
-          {playerDisplay}
+          </Layout>
         </div>
       )
     default:
