@@ -925,7 +925,7 @@ export async function updatePlayerData(
 }
 
 export async function getGames(args, ctx: Context) {
-  let result = await ctx.prisma.game.findMany({
+  const result = await ctx.prisma.game.findMany({
     orderBy: {
       id: 'desc',
     },
