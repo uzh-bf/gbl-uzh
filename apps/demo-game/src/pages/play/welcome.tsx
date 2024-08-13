@@ -21,9 +21,7 @@ const Schema = Yup.object().shape({
 
 // TODO(JJ):
 // - Maybe move to ui package
-// - Double-check if for this game location is needed?
 // - LogoSelector
-// - Maybe change title (now: Demo Game)
 // -> DISCUSS WITH RS
 
 // props:
@@ -32,8 +30,18 @@ const Schema = Yup.object().shape({
 function Welcome() {
   const router = useRouter()
 
-  // TODO(JJ): @RS what is the corresponding query?
-  const [updatePlayerData, { loading }] = useMutation(UpdatePlayerDataDocument)
+  const [updatePlayerData, { data: playerData, loading, error }] = useMutation(
+    UpdatePlayerDataDocument
+  )
+
+  if (loading) return null
+  if (error) return `Error! ${error}`
+
+  const gameName = 'Minigame'
+
+  // TODO(JJ): @RS We have the location twice, once in facts and once in the query. Why?
+  // - maybe change MUpdatePlayerDataDocument to include location?
+  console.log(playerData)
 
   return (
     <div className="m-auto w-full max-w-2xl gap-8 rounded border p-8">
@@ -46,13 +54,16 @@ function Welcome() {
           imgPathAvatar: '/avatars/avatar_placeholder.png',
           // avatar: AVATARS[player.role][0]['key'],
         }}
+        validationSchema={Schema}
         onSubmit={async (values) => {
           await updatePlayerData({
             variables: {
               name: values.name,
               color: values.color,
-              location: values.location,
               avatar: values.imgPathAvatar,
+              facts: JSON.stringify({
+                location: values.location,
+              }),
             },
           })
           router.replace('/play/cockpit')
@@ -60,7 +71,7 @@ function Welcome() {
       >
         {({ values, errors, touched }) => (
           <div className="flex flex-col gap-4">
-            <div className="text-xl font-bold">Welcome to the Demo Game!</div>
+            <div className="text-xl font-bold">Welcome to the {gameName}!</div>
             <div className="flex flex-row gap-8">
               <div className="w-48 flex-initial">
                 <Logo
@@ -68,6 +79,7 @@ function Welcome() {
                   location={values.location}
                   name={values.name}
                   imgPathAvatar={values.imgPathAvatar}
+                  imgPathLocation={`/locations/${values.location}.svg`}
                 />
               </div>
               <div className="prose flex-1">
@@ -89,9 +101,9 @@ function Welcome() {
                   <FormikSelectField
                     label="Location"
                     name="location"
-                    items={LOCATIONS.Trader.map((key) => ({
-                      value: key,
-                      label: key,
+                    items={LOCATIONS.Trader.map((label) => ({
+                      value: label,
+                      label,
                     }))}
                   />
                   <FormikSelectField
