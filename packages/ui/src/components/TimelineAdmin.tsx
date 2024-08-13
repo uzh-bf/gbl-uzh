@@ -64,7 +64,7 @@ function TimelineAdmin() {
           <div
             className="flex flex-row gap-2"
             key={period.id}
-            id={'active-period'}
+            id="active-period"
           >
             <div
               className={twMerge(
