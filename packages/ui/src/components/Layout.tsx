@@ -1,9 +1,8 @@
-import StorageOverview from './StorageOverview'
 import PlayerDisplay from './PlayerDisplay'
 import NavBar from './NavBar'
+import React from 'react'
 
 interface Props {
-  children: React.ReactNode
   tabs: { name: string; href: string }[]
   playerInfo: {
     name: string
@@ -17,14 +16,11 @@ interface Props {
     imgPathLocation?: string
     onClick: () => void
   }
-  storageInfo?: {
-    storageTotal: number
-    storageUsed: number
-    icon: React.ReactNode
-  }
+  children?: React.ReactNode
+  sidebar?: React.ReactNode
 }
 
-function Layout({ children, tabs, playerInfo, storageInfo }: Props) {
+function Layout({ children, tabs, playerInfo, sidebar }: Props) {
   return (
     <>
       <NavBar
@@ -38,7 +34,7 @@ function Layout({ children, tabs, playerInfo, storageInfo }: Props) {
         {children}
         <div id="sidebar" className="flex w-60 flex-col">
           <PlayerDisplay {...playerInfo} />
-          {storageInfo && <StorageOverview {...storageInfo} />}
+          {sidebar}
         </div>
       </div>
     </>

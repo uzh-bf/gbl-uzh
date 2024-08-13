@@ -51,7 +51,11 @@ export default function Home() {
   }
   return (
     <div>
-      <Layout tabs={tabs} playerInfo={playerInfo} storageInfo={storageInfo}>
+      <Layout
+        tabs={tabs}
+        playerInfo={playerInfo}
+        sidebar={<StorageOverview {...storageInfo} />}
+      >
         <div className="w-full rounded bg-black"></div>
       </Layout>
       <div className="font-source-sans p-4">

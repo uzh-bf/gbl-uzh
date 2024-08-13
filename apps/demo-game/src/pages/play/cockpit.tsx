@@ -243,59 +243,39 @@ function Cockpit() {
     </div>
   )
 
+  // TODO(JJ): Maybe we want to have two components, one for the sidebar
+  // and one for the game layout. But then the sidebar would be static
+  // -> conflict with component purpose
+  const sidebar = <div>SidebarAddons</div>
+  const gameLayout = (children: React.ReactNode) => (
+    <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
+      {children}
+    </Layout>
+  )
+
   switch (currentGame?.status) {
     case 'PREPARATION':
-      return (
-        <div>
-          <Layout tabs={tabs} playerInfo={playerInfo}>
-            <div>{header} Game is being prepared.</div>
-          </Layout>
-        </div>
-      )
+      return <>{gameLayout(<div>{header} Game is being prepared.</div>)}</>
 
     case 'COMPLETED':
-      return (
-        <div>
-          <Layout tabs={tabs} playerInfo={playerInfo}>
-            <div> Game is completed. </div>
-          </Layout>
-        </div>
-      )
+      return <>{gameLayout(<div> Game is completed. </div>)}</>
 
     case 'CONSOLIDATION':
-      return (
-        <div>
-          <Layout tabs={tabs} playerInfo={playerInfo}>
-            <div> Game is being consolidated. </div>
-          </Layout>
-        </div>
-      )
+      return <>{gameLayout(<div> Game is being consolidated. </div>)}</>
 
     case 'RESULTS':
-      return (
-        <div>
-          <Layout tabs={tabs} playerInfo={playerInfo}>
-            <div> RESULTS </div>
-          </Layout>
-        </div>
-      )
+      return <>{gameLayout(<div> RESULTS </div>)}</>
 
     case 'SCHEDULED':
-      return (
-        <div>
-          <Layout tabs={tabs} playerInfo={playerInfo}>
-            <div> Game is scheduled. </div>
-          </Layout>
-        </div>
-      )
+      return <>{gameLayout(<div> Game is scheduled. </div>)}</>
 
     case 'PAUSED':
       const totalAssetsPerMonth = getTotalAssetsOfPreviousResults(
         previousResults
       ).map((s, i) => ({ total: s, month: 'month_' + String(i) }))
       return (
-        <div>
-          <Layout tabs={tabs} playerInfo={playerInfo}>
+        <>
+          {gameLayout(
             <div className="flex flex-col">
               <div>
                 {header}
@@ -322,14 +302,14 @@ function Cockpit() {
                 </ResponsiveContainer>
               </div>
             </div>
-          </Layout>
-        </div>
+          )}
+        </>
       )
 
     case 'RUNNING':
       return (
-        <div>
-          <Layout tabs={tabs} playerInfo={playerInfo}>
+        <>
+          {gameLayout(
             <div className="flex w-full flex-col">
               {header}
               <div className="max-w-md">
@@ -376,8 +356,8 @@ function Cockpit() {
               </div>
               {transactions}
             </div>
-          </Layout>
-        </div>
+          )}
+        </>
       )
     default:
       return <div> Game has not been created yet. </div>
