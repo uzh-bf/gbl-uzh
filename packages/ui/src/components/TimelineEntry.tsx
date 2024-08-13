@@ -25,28 +25,13 @@ function TimelineEntry({
   periodName = 'Period',
   segmentName = 'Segment',
 }: Props) {
-  let id = ''
-  let styling = ''
-  switch (entryStatus) {
-    case 'PAST':
-      styling = 'text-gray-400'
-      break
-    case 'CURRENT':
-      id = 'current'
-      styling = 'border-red-200 bg-red-50 shadow'
-      break
-    case 'FUTURE':
-      break
-
-    default:
-      break
-  }
   return (
     <div
-      id={id}
+      id={entryStatus === 'CURRENT' ? 'current' : undefined}
       className={twMerge(
         'flex flex-col rounded border p-4 pt-2 w-max',
-        styling
+        entryStatus === 'PAST' && 'text-gray-400',
+        entryStatus === 'CURRENT' && 'border-red-200 bg-red-50 shadow'
       )}
     >
       <header className="flex flex-col">
