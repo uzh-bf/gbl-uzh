@@ -1,6 +1,6 @@
 import { subscriptionType } from 'nexus'
-import { pubSub } from '../lib/pubsub'
-import { Event } from '../nexus'
+import { pubSub } from '../lib/pubsub.js'
+import { Event } from '../nexus.js'
 
 export function generateBaseSubscriptions() {
   return subscriptionType({

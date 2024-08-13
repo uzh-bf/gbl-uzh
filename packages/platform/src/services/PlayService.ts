@@ -3,8 +3,8 @@ import {
   CtxWithPrisma,
   LearningElementState,
   BaseUserNotificationType as UserNotificationType,
-} from '../types'
-import * as EventService from './EventService'
+} from '../types.js'
+import * as EventService from './EventService.js'
 
 type Context = CtxWithPrisma<DB.PrismaClient>
 

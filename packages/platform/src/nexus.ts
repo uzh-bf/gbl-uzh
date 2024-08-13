@@ -17,9 +17,9 @@ export const Event = objectType({
   },
 })
 
-export * from './types/Game'
-export * from './types/LearningElement'
-export * from './types/Mutation'
-export * from './types/Player'
-export * from './types/Query'
-export * from './types/Subscription'
+export * from './types/Game.js'
+export * from './types/LearningElement.js'
+export * from './types/Mutation.js'
+export * from './types/Player.js'
+export * from './types/Query.js'
+export * from './types/Subscription.js'

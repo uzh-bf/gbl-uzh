@@ -1,9 +1,9 @@
 import { idArg, intArg, nonNull, objectType } from 'nexus'
-import * as GameService from '../services/GameService'
-import * as PlayService from '../services/PlayService'
-import { Game } from './Game'
-import { LearningElement, LearningElementState } from './LearningElement'
-import { Player, PlayerResult, PlayerState } from './Player'
+import * as GameService from '../services/GameService.js'
+import * as PlayService from '../services/PlayService.js'
+import { Game } from './Game.js'
+import { LearningElement, LearningElementState } from './LearningElement.js'
+import { Player, PlayerResult, PlayerState } from './Player.js'
 
 export function generateBaseQueries() {
   return objectType({

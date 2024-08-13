@@ -1,9 +1,9 @@
 import * as DB from '@prisma/client'
 
 import { enumType, objectType } from 'nexus'
-import { LearningElement } from './LearningElement'
-import { Player, PlayerAction, PlayerResult } from './Player'
-import { StoryElement } from './StoryElement'
+import { LearningElement } from './LearningElement.js'
+import { Player, PlayerAction, PlayerResult } from './Player.js'
+import { StoryElement } from './StoryElement.js'
 
 export const GameStatus = enumType({
   name: 'GameStatus',
