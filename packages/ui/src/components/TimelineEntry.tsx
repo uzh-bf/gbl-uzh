@@ -68,4 +68,4 @@ function TimelineEntry({
   )
 }
 
-export default TimelineEntry
+export { TimelineEntry }

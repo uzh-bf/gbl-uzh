@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import Logo from './Logo'
+import { Logo } from './Logo'
 
 interface Props {
   tabs: { name: string; href: string }[]
@@ -44,4 +44,4 @@ function NavBar({
   )
 }
 
-export default NavBar
+export { NavBar }

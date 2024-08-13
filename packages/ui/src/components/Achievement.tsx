@@ -24,4 +24,4 @@ function Achievement({ name, xpReward, image, count }: AchievementProps) {
   )
 }
 
-export default Achievement
+export { Achievement }

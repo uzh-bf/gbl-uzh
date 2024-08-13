@@ -103,4 +103,4 @@ function TradingForm({
   )
 }
 
-export default TradingForm
+export { TradingForm }

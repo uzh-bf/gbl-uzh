@@ -156,4 +156,4 @@ function ProbabilityChart({
   )
 }
 
-export default ProbabilityChart
+export { ProbabilityChart }

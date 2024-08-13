@@ -81,4 +81,4 @@ function SegmentEntry({ segment }: Props) {
   )
 }
 
-export default SegmentEntry
+export { SegmentEntry }

@@ -3,7 +3,7 @@ import { faCalendar, faPauseCircle } from '@fortawesome/free-regular-svg-icons'
 import { faCheck, faPause, faSync } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 // import { STATUS } from '@gbl-uzh/platform/dist/lib/util'
-import SegmentEntry from './SegmentEntry'
+import { SegmentEntry } from './SegmentEntry'
 
 // interface Props {
 //   periodStatus: string
@@ -214,4 +214,4 @@ function TimelineAdmin() {
   )
 }
 
-export default TimelineAdmin
+export { TimelineAdmin }

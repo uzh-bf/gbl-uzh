@@ -13,4 +13,4 @@ function XpBar({ value, max }: XpBarProps) {
   )
 }
 
-export default XpBar
+export { XpBar }

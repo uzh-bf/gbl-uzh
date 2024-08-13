@@ -1,6 +1,6 @@
-import Logo from './Logo'
-import Achievement from './Achievement'
-import XpBar from './XpBar'
+import { Logo } from './Logo'
+import { Achievement } from './Achievement'
+import { XpBar } from './XpBar'
 import { Button } from '@uzh-bf/design-system'
 
 interface PlayerDataProps {
@@ -73,4 +73,4 @@ function PlayerDisplay({
   )
 }
 
-export default PlayerDisplay
+export { PlayerDisplay }

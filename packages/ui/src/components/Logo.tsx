@@ -53,4 +53,4 @@ function Logo({
   )
 }
 
-export default Logo
+export { Logo }

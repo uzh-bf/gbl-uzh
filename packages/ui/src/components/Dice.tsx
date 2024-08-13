@@ -35,4 +35,4 @@ function Dice({ dice1, dice2 }: { dice1: number; dice2: number }) {
   )
 }
 
-export default Dice
+export { Dice }

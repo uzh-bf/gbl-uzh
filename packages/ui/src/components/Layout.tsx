@@ -1,5 +1,5 @@
-import PlayerDisplay from './PlayerDisplay'
-import NavBar from './NavBar'
+import { PlayerDisplay } from './PlayerDisplay'
+import { NavBar } from './NavBar'
 import React from 'react'
 
 interface Props {
@@ -41,4 +41,4 @@ function Layout({ children, tabs, playerInfo, sidebar }: Props) {
   )
 }
 
-export default Layout
+export { Layout }

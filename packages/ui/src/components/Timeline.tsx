@@ -1,6 +1,6 @@
 import { sortBy } from 'ramda'
 import { useEffect, useMemo } from 'react'
-import TimelineEntry from './TimelineEntry'
+import { TimelineEntry } from './TimelineEntry'
 
 // Maybe add more data, see schema.prisma
 interface Segment {
@@ -129,4 +129,4 @@ function Timeline({
   )
 }
 
-export default Timeline
+export { Timeline }

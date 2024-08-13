@@ -82,4 +82,4 @@ function StorageOverview({ storageUsed, storageTotal, icon }: Props) {
   )
 }
 
-export default StorageOverview
+export { StorageOverview }
