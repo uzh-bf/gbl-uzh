@@ -3,7 +3,6 @@ import { faStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Layout,
-  PlayerDisplay,
   ProbabilityChart,
   StorageOverview,
   Timeline,
@@ -62,10 +61,6 @@ export default function Home() {
         hello world
         {/* <Dice dice1={6} dice2={6} /> */}
         {/* <Progress value={50} max={100} formatter={(val) => `${val}XP`} /> */}
-        <div className="flex w-1/3 flex-col">
-          <PlayerDisplay {...playerInfo} />
-          <StorageOverview {...storageInfo} />
-        </div>
         <ProbabilityChart trendE={5} trendGap={8} totalEyes={'12'} />
         <TimelineEntry
           periodIx={1}
@@ -185,8 +180,9 @@ export default function Home() {
         />
         <TradingForm
           price={10}
-          nameButtonBuy={'Buy'}
-          nameButtonSell={'Sell'}
+          nameButtonBuy="Buy"
+          nameButtonSell="Sell"
+          max={10}
           onSubmit={async (values, helpers) => {
             console.log(values)
             // await performAction({

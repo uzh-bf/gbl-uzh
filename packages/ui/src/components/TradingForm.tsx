@@ -19,7 +19,8 @@ interface Props {
   nameButtonBuy: string
   nameButtonSell: string
   onSubmit: (values: any, helpers: any) => Promise<void>
-  min?: number
+  max: number
+  unitName?: string
   disableButtonBuy?: boolean
   disableButtonSell?: boolean
 }
@@ -29,7 +30,8 @@ function TradingForm({
   nameButtonBuy,
   nameButtonSell,
   onSubmit,
-  min = 0,
+  max,
+  unitName = 'units',
   disableButtonBuy = false,
   disableButtonSell = false,
 }: Props) {
@@ -38,24 +40,19 @@ function TradingForm({
       <Formik
         initialValues={{
           modifier: 1,
-          volume: min,
+          volume: 0,
         }}
         isInitialValid={false}
         validationSchema={yup.object({
-          volume: yup.number().min(min).required(),
+          volume: yup.number().min(0).max(max).required(),
         })}
         onSubmit={onSubmit}
       >
         {(tradeInterface) => (
           <Form className="">
-            <FormikTextField
-              min={min}
-              type="number"
-              label="Volume"
-              name="volume"
-            />
+            <FormikTextField type="number" label="Volume" name="volume" />
             <div className="mt-2">
-              Trading {tradeInterface.values.volume}T for{' '}
+              Trading {tradeInterface.values.volume} {unitName} for{' '}
               {optionalValueToCHFString(tradeInterface.values.volume * price)}
             </div>
 
