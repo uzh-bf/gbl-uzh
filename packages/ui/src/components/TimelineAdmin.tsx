@@ -1,6 +1,8 @@
 import { twMerge } from 'tailwind-merge'
-import { faCalendar, faPauseCircle } from '@fortawesome/free-regular-svg-icons'
-import { faCheck, faPause, faSync } from '@fortawesome/free-solid-svg-icons'
+// import { faCalendar, faPauseCircle } from '@fortawesome/free-regular-svg-icons'
+import { faPauseCircle } from '@fortawesome/free-regular-svg-icons'
+// import { faCheck, faPause, faSync } from '@fortawesome/free-solid-svg-icons'
+import { faPause } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 // import { STATUS } from '@gbl-uzh/platform/dist/lib/util'
 import { SegmentEntry } from './SegmentEntry'
@@ -114,8 +116,9 @@ function TimelineAdmin() {
                   // const isSegmentCompleted =
                   //   periodStatus === STATUS.COMPLETED ||
                   //   segmentStatus === STATUS.COMPLETED
-                  const isSegmentActive = false
-                  const isSegmentCompleted = false
+
+                  // const isSegmentActive = false
+                  // const isSegmentCompleted = false
 
                   // const dice1 = segment.facts.dice1 ?? period.facts.initialDice1
                   // const dice2 = segment.facts.dice2 ?? period.facts.initialDice2
