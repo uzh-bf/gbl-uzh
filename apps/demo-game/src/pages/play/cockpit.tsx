@@ -2,6 +2,11 @@ import { useMutation, useQuery } from '@apollo/client'
 import { Layout } from '@gbl-uzh/ui'
 import { Switch, Table } from '@uzh-bf/design-system'
 import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@uzh-bf/design-system/dist/future'
+import {
   CartesianGrid,
   Line,
   LineChart,
@@ -288,17 +293,36 @@ function Cockpit() {
                 </div>
                 <div className="flex justify-center">Total over time chart</div>
                 <ResponsiveContainer width="100%" height="50%">
-                  <LineChart
-                    width={600}
-                    height={400}
-                    data={totalAssetsPerMonth}
+                  <ChartContainer
+                    config={{
+                      desktop: {
+                        label: 'Desktop',
+                      },
+                    }}
                   >
-                    <Line type="monotone" dataKey="total" stroke="#8884d8" />
-                    <CartesianGrid stroke="#ccc" strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                  </LineChart>
+                    <LineChart data={totalAssetsPerMonth}>
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent hideLabel />}
+                      />
+                      <Line
+                        type="natural"
+                        dataKey="total"
+                        stroke="#8884d8"
+                        dot={false}
+                        strokeWidth={2}
+                      />
+                      <CartesianGrid vertical={false} />
+                      <XAxis
+                        dataKey="month"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                      />
+                      <YAxis />
+                      <Tooltip />
+                    </LineChart>
+                  </ChartContainer>
                 </ResponsiveContainer>
               </div>
             </div>
