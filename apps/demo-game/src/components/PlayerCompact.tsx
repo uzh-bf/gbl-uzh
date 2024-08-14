@@ -12,7 +12,7 @@ function PlayerCompact({ player }: { player: Player }) {
     <div className="flex w-4/5 flex-col border-b py-1 last:border-0">
       <div className="flex justify-between">
         <div>{player.name}</div>
-        <img width="20px" src={`/avatars/${player.avatar}.png`} />
+        <img width="20px" src={player.facts.avatar} />
       </div>
       <div className="flex justify-between">
         <div className="flex flex-col justify-between text-sm">

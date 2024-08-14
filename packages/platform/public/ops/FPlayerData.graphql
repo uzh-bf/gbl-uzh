@@ -6,10 +6,6 @@ fragment PlayerData on Player {
   role
 
   name
-  avatar
-  location
-  color
-
   facts
 
   experience

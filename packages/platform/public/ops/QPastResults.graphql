@@ -15,9 +15,6 @@ query PastResults {
       role
 
       name
-      avatar
-      location
-      color
 
       facts
 

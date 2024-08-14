@@ -30,7 +30,7 @@ const Schema = Yup.object().shape({
 function Welcome() {
   const router = useRouter()
 
-  const [updatePlayerData, { data: playerData, loading, error }] = useMutation(
+  const [updatePlayerData, { data: _, loading, error }] = useMutation(
     UpdatePlayerDataDocument
   )
 
@@ -38,10 +38,6 @@ function Welcome() {
   if (error) return `Error! ${error}`
 
   const gameName = 'Minigame'
-
-  // TODO(JJ): @RS We have the location twice, once in facts and once in the query. Why?
-  // - maybe change MUpdatePlayerDataDocument to include location?
-  console.log(playerData)
 
   return (
     <div className="m-auto w-full max-w-2xl gap-8 rounded border p-8">
@@ -59,9 +55,9 @@ function Welcome() {
           await updatePlayerData({
             variables: {
               name: values.name,
-              color: values.color,
-              avatar: values.imgPathAvatar,
               facts: JSON.stringify({
+                color: values.color,
+                avatar: values.imgPathAvatar,
                 location: values.location,
               }),
             },

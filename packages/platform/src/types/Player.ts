@@ -54,9 +54,6 @@ export const Player = objectType({
 
     t.nonNull.int('number')
     t.nonNull.string('name')
-    t.nonNull.string('avatar')
-    t.nonNull.string('location')
-    t.nonNull.string('color')
     t.nonNull.string('token')
     t.nonNull.boolean('tutorialCompleted')
     t.string('role')

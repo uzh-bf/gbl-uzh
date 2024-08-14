@@ -102,7 +102,7 @@ type Mutation {
   markStoryElement(elementId: ID!): Player
   performAction(payload: String!, type: String!): PlayerResult
   saveConsolidationDecision(payload: String!): PlayerDecision
-  updatePlayerData(avatar: String, color: String, facts: String, name: String): Player
+  updatePlayerData(facts: String, name: String): Player
   updateReadyState(isReady: Boolean!): Player
 }
 
@@ -154,8 +154,6 @@ type Player {
   achievementIds: [String!]!
   achievementKeys: [String!]!
   achievements: [AchievementInstance!]!
-  avatar: String!
-  color: String!
   completedLearningElementIds: [String!]!
   completedLearningElements: [LearningElement!]!
   experience: Int!
@@ -165,7 +163,6 @@ type Player {
   isReady: Boolean!
   level: PlayerLevel!
   levelIx: Int!
-  location: String!
   name: String!
   number: Int!
   role: String

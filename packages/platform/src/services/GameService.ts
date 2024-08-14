@@ -869,24 +869,24 @@ export async function activateNextSegment(
 }
 
 const PlayerFactsSchema = yup.object({
-  location: yup.string().default('Zurich'),
+  location: yup.string().default('ZH'),
+  color: yup.string().default('White'),
+  avatar: yup.string().default(''),
 })
 
 export interface PlayerFacts extends yup.InferType<typeof PlayerFactsSchema> {}
 
 interface UpdatePlayerDataArgs {
   name?: string
-  avatar?: string
-  color?: string
   facts: PlayerFacts
 }
 
 export async function updatePlayerData(
-  { name, avatar, color, facts }: UpdatePlayerDataArgs,
+  { name, facts }: UpdatePlayerDataArgs,
   ctx: Context
 ) {
   // if none of the arguments have been provided, no update is performed
-  if (none(Boolean, [name, avatar, color, facts])) {
+  if (none(Boolean, [name, facts])) {
     return null
   }
 
@@ -894,12 +894,7 @@ export async function updatePlayerData(
   if (name) {
     data['name'] = name
   }
-  if (avatar) {
-    data['avatar'] = avatar
-  }
-  if (color) {
-    data['color'] = color
-  }
+
   if (facts) {
     data['facts'] = PlayerFactsSchema.validateSync(facts, {
       stripUnknown: true,

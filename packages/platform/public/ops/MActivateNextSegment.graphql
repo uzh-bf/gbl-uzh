@@ -28,9 +28,6 @@ mutation ActivateNextSegment($gameId: Int!) {
       role
 
       name
-      avatar
-      location
-      color
 
       facts
 

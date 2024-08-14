@@ -195,8 +195,6 @@ export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
         type: Player,
         args: {
           name: stringArg(),
-          avatar: stringArg(),
-          color: stringArg(),
           facts: stringArg(),
         },
         async resolve(_, args, ctx) {

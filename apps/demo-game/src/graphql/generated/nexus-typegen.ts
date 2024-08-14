@@ -156,8 +156,6 @@ export interface NexusGenObjects {
     achievementIds: string[]; // [String!]!
     achievementKeys: string[]; // [String!]!
     achievements: NexusGenRootTypes['AchievementInstance'][]; // [AchievementInstance!]!
-    avatar: string; // String!
-    color: string; // String!
     completedLearningElementIds: string[]; // [String!]!
     completedLearningElements: NexusGenRootTypes['LearningElement'][]; // [LearningElement!]!
     experience: number; // Int!
@@ -167,7 +165,6 @@ export interface NexusGenObjects {
     isReady: boolean; // Boolean!
     level: NexusGenRootTypes['PlayerLevel']; // PlayerLevel!
     levelIx: number; // Int!
-    location: string; // String!
     name: string; // String!
     number: number; // Int!
     role?: string | null; // String
@@ -333,8 +330,6 @@ export interface NexusGenFieldTypes {
     achievementIds: string[]; // [String!]!
     achievementKeys: string[]; // [String!]!
     achievements: NexusGenRootTypes['AchievementInstance'][]; // [AchievementInstance!]!
-    avatar: string; // String!
-    color: string; // String!
     completedLearningElementIds: string[]; // [String!]!
     completedLearningElements: NexusGenRootTypes['LearningElement'][]; // [LearningElement!]!
     experience: number; // Int!
@@ -344,7 +339,6 @@ export interface NexusGenFieldTypes {
     isReady: boolean; // Boolean!
     level: NexusGenRootTypes['PlayerLevel']; // PlayerLevel!
     levelIx: number; // Int!
-    location: string; // String!
     name: string; // String!
     number: number; // Int!
     role: string | null; // String
@@ -512,8 +506,6 @@ export interface NexusGenFieldTypeNames {
     achievementIds: 'String'
     achievementKeys: 'String'
     achievements: 'AchievementInstance'
-    avatar: 'String'
-    color: 'String'
     completedLearningElementIds: 'String'
     completedLearningElements: 'LearningElement'
     experience: 'Int'
@@ -523,7 +515,6 @@ export interface NexusGenFieldTypeNames {
     isReady: 'Boolean'
     level: 'PlayerLevel'
     levelIx: 'Int'
-    location: 'String'
     name: 'String'
     number: 'Int'
     role: 'String'
@@ -639,8 +630,6 @@ export interface NexusGenArgTypes {
       payload: string; // String!
     }
     updatePlayerData: { // args
-      avatar?: string | null; // String
-      color?: string | null; // String
       facts?: string | null; // String
       name?: string | null; // String
     }

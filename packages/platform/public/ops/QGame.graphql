@@ -28,9 +28,6 @@ query Game($id: Int) {
 
       number
       name
-      avatar
-      location
-      color
 
       facts
 

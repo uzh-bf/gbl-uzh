@@ -188,18 +188,16 @@ function Cockpit() {
     { name: 'Cockpit', href: '/play/cockpit' },
   ]
 
-  // TODO(JJ):
-  // - location is buggy -> check welcome.tsx
   const playerInfo = {
     name: data.self.name,
-    color: data.self.color,
-    location: data.self.location,
+    color: data.self.facts.color,
+    location: data.self.facts.location,
     level: data.self.level.id,
     xp: data.self.experience,
     xpMax: data.self.experienceToNext,
     achievements: data.self.achievements,
-    imgPathAvatar: data.self.avatar,
-    imgPathLocation: `/locations/${data.self.location}.svg`,
+    imgPathAvatar: data.self.facts.avatar,
+    imgPathLocation: `/locations/${data.self.facts.location}.svg`,
     onClick: () => {
       // router.replace('/play/welcome')
     },

@@ -183,9 +183,6 @@ model Player {
 
   number   Int     @default(-1)
   name     String  @default("Anonymous")
-  avatar   String  @default("")
-  location String  @default("")
-  color    String  @default("White")
   isReady  Boolean @default(false)
 
   experience        Int         @default(0)
