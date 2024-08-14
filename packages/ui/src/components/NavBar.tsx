@@ -1,5 +1,12 @@
 import Link from 'next/link'
 import { Logo } from './Logo'
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  navigationMenuTriggerStyle,
+} from '@uzh-bf/design-system/dist/future'
 
 interface Props {
   tabs: { name: string; href: string }[]
@@ -21,14 +28,20 @@ function NavBar({
   return (
     <>
       <nav className="flex w-full items-center justify-between border-b px-4">
-        <div className="flex">
-          {tabs.map((tab, ix) => (
-            <Link href={tab.href} key={ix} className="m-2">
-              {tab.name}
-            </Link>
-          ))}
-        </div>
-        <Link href={playerHref}>
+        <NavigationMenu>
+          <NavigationMenuList>
+            {tabs.map((tab, ix) => (
+              <NavigationMenuItem key={ix}>
+                <Link href={tab.href} legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    {tab.name}
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+            ))}
+          </NavigationMenuList>
+        </NavigationMenu>
+        <Link href={playerHref} legacyBehavior passHref>
           <div className="flex items-center">
             <div className="m-2 flex flex-col text-right text-sm">
               <div className="font-semibold">{playerName}</div>
