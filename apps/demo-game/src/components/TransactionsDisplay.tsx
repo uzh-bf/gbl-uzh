@@ -1,3 +1,12 @@
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  ScrollArea,
+  Separator,
+} from '@uzh-bf/design-system/dist/future'
 import { twMerge } from 'tailwind-merge'
 
 interface TransactionProps {
@@ -11,38 +20,95 @@ interface TransactionsDisplayProps {
   transactions: TransactionProps[]
 }
 
+function TransactionLayout({
+  title,
+  actionTitle,
+  activeTitle,
+  icon,
+  children,
+  separator = true,
+}: {
+  title?: string
+  actionTitle?: string
+  activeTitle?: string
+  icon?: React.ReactNode
+  children?: React.ReactNode
+  separator?: boolean
+}) {
+  return (
+    <div>
+      <div className="flex justify-between">
+        {title && <div>{title}</div>}
+        <div className="flex w-1/2 items-center justify-between">
+          {actionTitle && <div>{actionTitle}</div>}
+          {activeTitle && <div>{activeTitle}</div>}
+          {icon}
+        </div>
+      </div>
+      {separator && <Separator className="my-2" />}
+      {children}
+    </div>
+  )
+}
+
+function OnOffIcon({ on = false }: { on?: boolean }) {
+  return (
+    <div
+      className={twMerge(
+        'h-4 w-4 rounded-full',
+        on ? 'bg-uzh-blue-100' : 'bg-uzh-blue-20'
+      )}
+    />
+  )
+}
+
 function TransactionDisplay({
   transaction,
 }: {
   transaction: TransactionProps
 }) {
-  const key = `transaction-${transaction.periodIx}-${transaction.segmentIx}`
   return (
-    <div className="flex flex-col border-b-2 py-2" key={key}>
-      <div className="flex gap-2">
-        <div>P {transaction.periodIx}</div>
-        <div>Q {transaction.segmentIx}</div>
-      </div>
-      <div className="flex justify-between">
-        <div>Decision: {transaction.type}</div>
-        <div> {transaction.facts.decision ? 'On' : 'Off'} </div>
-      </div>
+    <div>
+      <TransactionLayout
+        title={`P ${transaction.periodIx} S ${transaction.segmentIx}`}
+        actionTitle={transaction.type.substring('DECIDE_'.length)}
+        icon={<OnOffIcon on={transaction.facts.decision} />}
+      />
     </div>
   )
 }
 
 function TransactionsDisplay({ transactions }: TransactionsDisplayProps) {
   return (
-    <div className="m-4">
-      <h1 className="border-b-2 text-xl font-bold">Transaction history</h1>
-      {transactions
-        .slice(0)
-        .reverse()
-        .map((transaction) => {
-          const key = `transaction-${transaction.periodIx}-${transaction.segmentIx}`
-          return <TransactionDisplay transaction={transaction} key={key} />
-        })}
-    </div>
+    <>
+      <Card className="w-[350px]">
+        <CardHeader>
+          <CardTitle>Transaction history</CardTitle>
+          <CardDescription>
+            Here is an overview of all the transactions that have been made.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-96 w-full rounded-md border p-4">
+            <TransactionLayout
+              title="Time"
+              actionTitle="Action"
+              activeTitle="On/Off"
+            >
+              {transactions
+                .slice(0)
+                .reverse()
+                .map((transaction) => {
+                  const key = `transaction-${transaction.periodIx}-${transaction.segmentIx}`
+                  return (
+                    <TransactionDisplay transaction={transaction} key={key} />
+                  )
+                })}
+            </TransactionLayout>
+          </ScrollArea>
+        </CardContent>
+      </Card>
+    </>
   )
 }
 
@@ -51,8 +117,7 @@ function TransactionsDisplayCompact({
 }: TransactionsDisplayProps) {
   const transactionsReduced = transactions.reduce((acc, transaction) => {
     const key = `transaction-${transaction.periodIx}-${transaction.segmentIx}`
-    // TODO(JJ): Not sure if this way or the other (directly adding to
-    // the object) is better -> @RS please review
+
     if (!acc.hasOwnProperty(key)) {
       acc[key] = {
         periodIx: transaction.periodIx,
@@ -68,43 +133,70 @@ function TransactionsDisplayCompact({
     return acc
   }, {})
   return (
-    <div className="m-4">
-      <h1 className="border-b-2 text-xl font-bold">Decision history</h1>
-      {Object.keys(transactionsReduced).map((key) => {
-        const transaction = transactionsReduced[key]
-        return (
-          <div className="flex flex-col border-b-2 py-2" key={key}>
-            <div className="flex gap-2">
-              <div>P {transaction.periodIx}</div>
-              <div>Q {transaction.segmentIx}</div>
-            </div>
+    <>
+      <Card className="w-min-[350px]">
+        <CardHeader>
+          <CardTitle>Final decision history</CardTitle>
+          <CardDescription>
+            Here is an overview of the final decisions per segment that have
+            been made.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-96 w-full rounded-md border p-4">
+            <TransactionLayout
+              title="Time"
+              actionTitle="Action"
+              activeTitle="On/Off"
+            >
+              <div className="flex flex-col justify-between">
+                {Object.keys(transactionsReduced)
+                  .sort()
+                  .reverse()
+                  .map((key) => {
+                    const transaction = transactionsReduced[key]
+                    return (
+                      <div
+                        className="flex flex-col justify-between py-2"
+                        key={key}
+                      >
+                        <div className="flex justify-between">
+                          <h4 className="flex gap-2">
+                            <div>P {transaction.periodIx}</div>
+                            <div>S {transaction.segmentIx}</div>
+                          </h4>
 
-            <div className="flex justify-between">
-              <div>Decisions:</div>
-              {Object.keys(transaction.transactions)
-                .sort()
-                .map((type) => {
-                  return (
-                    <div className="flex justify-between">
-                      <div className="flex flex-col items-center">
-                        <div>{type.substring('DECIDE_'.length)}</div>
-                        <div
-                          className={twMerge(
-                            'h-4 w-4 rounded-full',
-                            transaction.transactions[type]
-                              ? 'bg-uzh-blue-100'
-                              : 'bg-uzh-blue-20'
-                          )}
-                        />
+                          <div className="flex w-1/2 flex-col justify-between">
+                            {Object.keys(transaction.transactions)
+                              .sort()
+                              .map((type) => {
+                                return (
+                                  <TransactionLayout
+                                    key={type}
+                                    actionTitle={type.substring(
+                                      'DECIDE_'.length
+                                    )}
+                                    icon={
+                                      <OnOffIcon
+                                        on={transaction.transactions[type]}
+                                      />
+                                    }
+                                    separator={false}
+                                  />
+                                )
+                              })}
+                          </div>
+                        </div>
+                        <Separator className="my-2" />
                       </div>
-                    </div>
-                  )
-                })}
-            </div>
-          </div>
-        )
-      })}
-    </div>
+                    )
+                  })}
+              </div>
+            </TransactionLayout>
+          </ScrollArea>
+        </CardContent>
+      </Card>
+    </>
   )
 }
 

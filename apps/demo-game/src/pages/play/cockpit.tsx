@@ -25,6 +25,36 @@ import {
 } from 'src/graphql/generated/ops'
 import { ActionTypes } from 'src/services/ActionsReducer'
 
+function GameLayout({ children }: { children: React.ReactNode }) {
+  // TODO(JJ): Try cache-only
+  const { data } = useQuery(ResultDocument, {
+    fetchPolicy: 'cache-only',
+  })
+
+  const playerInfo = {
+    name: data.self.name,
+    color: data.self.facts.color,
+    location: data.self.facts.location,
+    level: data.self.level.index,
+    xp: data.self.experience,
+    xpMax: data.self.experienceToNext,
+    achievements: data.self.achievements,
+    imgPathAvatar: data.self.facts.avatar,
+    imgPathLocation: `/locations/${data.self.facts.location}.svg`,
+    onClick: () => {
+      // router.replace('/play/welcome')
+    },
+  }
+
+  const sidebar = <div>SidebarAddons</div>
+
+  return (
+    <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
+      {children}
+    </Layout>
+  )
+}
+
 function getTotalAssetsOfPreviousResults(previousResults: any[]) {
   const filtered = previousResults.filter((o) => o.type == 'SEGMENT_END')
 
@@ -47,7 +77,6 @@ const tabs = [
 
 function Cockpit() {
   const { loading, error, data } = useQuery(ResultDocument, {
-    // TODO(JJ): This is the default fetchPolicy -> Remove? @RS
     fetchPolicy: 'cache-first',
   })
 
@@ -63,11 +92,6 @@ function Cockpit() {
 
   const playerDataResult = data.result
   const currentGame = playerDataResult.currentGame
-
-  // TODO(JJ):
-  // - Make it visually more appealing
-  // - Add title to every gamge state
-  // - Add a color to the info
 
   if (!currentGame) {
     return (
@@ -185,36 +209,7 @@ function Cockpit() {
     },
   ]
 
-  // TODO(JJ):
-  // - Level is not consistent with component
-  // Component wants a number, level is an object, though.
-  // console.log(self)
-  // - Do onclick logic
-  // - PlayerDisplay is not ideal/nice yet
-
-  const playerInfo = {
-    name: data.self.name,
-    color: data.self.facts.color,
-    location: data.self.facts.location,
-    level: data.self.level.id,
-    xp: data.self.experience,
-    xpMax: data.self.experienceToNext,
-    achievements: data.self.achievements,
-    imgPathAvatar: data.self.facts.avatar,
-    imgPathLocation: `/locations/${data.self.facts.location}.svg`,
-    onClick: () => {
-      // router.replace('/play/welcome')
-    },
-  }
-
-  // Transactions
-  // TODO(JJ): Integrate into the layout
-  // The following is only temporary
-  // - Should only display final transactions, or really every decision?
-
-  // TODO(JJ): IMPORTANT: There are no transactions if the user does not
-  // toggle anything.
-  console.log(data.result.transactions)
+  // console.log(data.result.transactions)
 
   const header = (
     <div className="flex justify-between rounded border p-4">
@@ -223,143 +218,149 @@ function Cockpit() {
     </div>
   )
 
-  // TODO(JJ): Maybe we want to have two components, one for the sidebar
-  // and one for the game layout. But then the sidebar would be static
-  // -> conflict with component purpose
-  const sidebar = <div>SidebarAddons</div>
-  const gameLayout = (children: React.ReactNode) => (
-    <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
-      {children}
-    </Layout>
-  )
-
   switch (currentGame?.status) {
     case 'PREPARATION':
-      return <>{gameLayout(<div>{header} Game is being prepared.</div>)}</>
+      return (
+        <GameLayout>
+          <div>{header} Game is being prepared.</div>
+        </GameLayout>
+      )
 
     case 'COMPLETED':
-      return <>{gameLayout(<div> Game is completed. </div>)}</>
+      return (
+        <GameLayout>
+          <div> Game is completed. </div>
+        </GameLayout>
+      )
 
     case 'CONSOLIDATION':
-      return <>{gameLayout(<div> Game is being consolidated. </div>)}</>
+      return (
+        <GameLayout>
+          <div> Game is being consolidated. </div>
+        </GameLayout>
+      )
 
     case 'RESULTS':
-      return <>{gameLayout(<div> RESULTS </div>)}</>
+      return (
+        <GameLayout>
+          <div> RESULTS </div>
+        </GameLayout>
+      )
 
     case 'SCHEDULED':
-      return <>{gameLayout(<div> Game is scheduled. </div>)}</>
+      return (
+        <GameLayout>
+          <div> Game is scheduled. </div>
+        </GameLayout>
+      )
 
     case 'PAUSED':
       const totalAssetsPerMonth = getTotalAssetsOfPreviousResults(
         previousResults
       ).map((s, i) => ({ total: s, month: 'month_' + String(i) }))
       return (
-        <>
-          {gameLayout(
-            <div className="flex flex-col">
-              <div>
-                {header}
-                <div className="max-w-2xl">
-                  <Table
-                    columns={columns_segment_results}
-                    data={data_segment_results}
-                    caption=""
-                  />
-                </div>
-                <div className="flex justify-center">Total over time chart</div>
-                <ResponsiveContainer width="100%" height="50%">
-                  <ChartContainer
-                    config={{
-                      desktop: {
-                        label: 'Desktop',
-                      },
-                    }}
-                  >
-                    <LineChart data={totalAssetsPerMonth}>
-                      <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent hideLabel />}
-                      />
-                      <Line
-                        type="natural"
-                        dataKey="total"
-                        stroke="#8884d8"
-                        dot={false}
-                        strokeWidth={2}
-                      />
-                      <CartesianGrid vertical={false} />
-                      <XAxis
-                        dataKey="month"
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={8}
-                      />
-                      <YAxis />
-                      <Tooltip />
-                    </LineChart>
-                  </ChartContainer>
-                </ResponsiveContainer>
+        <GameLayout>
+          <div className="flex flex-col">
+            <div>
+              {header}
+              <div className="max-w-2xl">
+                <Table
+                  columns={columns_segment_results}
+                  data={data_segment_results}
+                  caption=""
+                />
               </div>
+              <div className="flex justify-center">Total over time chart</div>
+              <ResponsiveContainer width="100%" height="50%">
+                <ChartContainer
+                  config={{
+                    desktop: {
+                      label: 'Desktop',
+                    },
+                  }}
+                >
+                  <LineChart data={totalAssetsPerMonth}>
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Line
+                      type="natural"
+                      dataKey="total"
+                      stroke="#8884d8"
+                      dot={false}
+                      strokeWidth={2}
+                    />
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="month"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                    />
+                    <YAxis />
+                    <Tooltip />
+                  </LineChart>
+                </ChartContainer>
+              </ResponsiveContainer>
             </div>
-          )}
-        </>
+          </div>
+        </GameLayout>
       )
 
     case 'RUNNING':
       return (
-        <>
-          {gameLayout(
-            <div className="flex w-full flex-col">
-              {header}
-              <div className="max-w-md">
-                <Table
-                  columns={columns_portfolio}
-                  data={data_portfolio}
-                  caption=""
-                />
-              </div>
+        <GameLayout>
+          <div className="flex w-full flex-col">
+            {header}
+            <div className="max-w-md">
+              <Table
+                columns={columns_portfolio}
+                data={data_portfolio}
+                caption=""
+              />
+            </div>
 
-              <div className="rounded border p-4">
-                {decisions.map(function (decision, i) {
-                  return (
-                    <div className="p-1" key={decision.name}>
-                      <Switch
-                        label={decision.label(
-                          decision.state
-                            ? 1 /
-                                (+resultFactsDecisions.bank +
-                                  +resultFactsDecisions.bonds +
-                                  +resultFactsDecisions.stocks)
-                            : 0,
-                          assets.totalAssets
-                        )}
-                        checked={decision.state}
-                        id="switch"
-                        onCheckedChange={async (checked) => {
-                          // TODO(JJ): Discuss with @RS if we should rename
-                          // payload -> facts
-                          await performAction({
-                            variables: {
-                              type: decision.action,
-                              payload: JSON.stringify({
-                                decision: checked,
-                              }),
-                            },
-                            refetchQueries: [ResultDocument],
-                          })
-                        }}
-                      />
-                    </div>
-                  )
-                })}
-              </div>
+            <div className="rounded border p-4">
+              {decisions.map(function (decision, i) {
+                return (
+                  <div className="p-1" key={decision.name}>
+                    <Switch
+                      label={decision.label(
+                        decision.state
+                          ? 1 /
+                              (+resultFactsDecisions.bank +
+                                +resultFactsDecisions.bonds +
+                                +resultFactsDecisions.stocks)
+                          : 0,
+                        assets.totalAssets
+                      )}
+                      checked={decision.state}
+                      id="switch"
+                      onCheckedChange={async (checked) => {
+                        await performAction({
+                          variables: {
+                            type: decision.action,
+                            payload: JSON.stringify({
+                              decision: checked,
+                            }),
+                          },
+                          refetchQueries: [ResultDocument],
+                        })
+                      }}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+            <div className="my-2 flex gap-2">
               <TransactionsDisplayCompact
                 transactions={data.result.transactions}
               />
               <TransactionsDisplay transactions={data.result.transactions} />
             </div>
-          )}
-        </>
+          </div>
+        </GameLayout>
       )
     default:
       return <div> Game has not been created yet. </div>
