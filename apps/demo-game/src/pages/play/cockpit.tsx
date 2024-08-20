@@ -25,8 +25,16 @@ import {
 } from 'src/graphql/generated/ops'
 import { ActionTypes } from 'src/services/ActionsReducer'
 
+function GameHeader({ currentGame }) {
+  return (
+    <div className="flex justify-between rounded border p-4">
+      <div className="font-bold">Game {currentGame.id}</div>
+      <div className="">Current status: {currentGame.status}</div>
+    </div>
+  )
+}
+
 function GameLayout({ children }: { children: React.ReactNode }) {
-  // TODO(JJ): Try cache-only
   const { data } = useQuery(ResultDocument, {
     fetchPolicy: 'cache-only',
   })
@@ -211,18 +219,14 @@ function Cockpit() {
 
   // console.log(data.result.transactions)
 
-  const header = (
-    <div className="flex justify-between rounded border p-4">
-      <div className="font-bold">Game {currentGame.id}</div>
-      <div className="">Current status: {currentGame.status}</div>
-    </div>
-  )
-
   switch (currentGame?.status) {
     case 'PREPARATION':
       return (
         <GameLayout>
-          <div>{header} Game is being prepared.</div>
+          <div>
+            <GameHeader currentGame={currentGame} />
+            <div>Game is being prepared.</div>
+          </div>
         </GameLayout>
       )
 
@@ -262,7 +266,7 @@ function Cockpit() {
         <GameLayout>
           <div className="flex flex-col">
             <div>
-              {header}
+              <GameHeader currentGame={currentGame} />
               <div className="max-w-2xl">
                 <Table
                   columns={columns_segment_results}
@@ -312,7 +316,7 @@ function Cockpit() {
       return (
         <GameLayout>
           <div className="flex w-full flex-col">
-            {header}
+            <GameHeader currentGame={currentGame} />
             <div className="max-w-md">
               <Table
                 columns={columns_portfolio}
