@@ -16,6 +16,10 @@ import {
   YAxis,
 } from 'recharts'
 import {
+  TransactionsDisplay,
+  TransactionsDisplayCompact,
+} from 'src/components/TransactionsDisplay'
+import {
   PerformActionDocument,
   ResultDocument,
 } from 'src/graphql/generated/ops'
@@ -35,6 +39,11 @@ function getTotalAssetsOfPreviousResults(previousResults: any[]) {
     .flat()
     .map((e) => e.totalAssets)
 }
+
+const tabs = [
+  { name: 'Welcome', href: '/play/welcome' },
+  { name: 'Cockpit', href: '/play/cockpit' },
+]
 
 function Cockpit() {
   const { loading, error, data } = useQuery(ResultDocument, {
@@ -183,11 +192,6 @@ function Cockpit() {
   // - Do onclick logic
   // - PlayerDisplay is not ideal/nice yet
 
-  const tabs = [
-    { name: 'Welcome', href: '/play/welcome' },
-    { name: 'Cockpit', href: '/play/cockpit' },
-  ]
-
   const playerInfo = {
     name: data.self.name,
     color: data.self.facts.color,
@@ -207,37 +211,10 @@ function Cockpit() {
   // TODO(JJ): Integrate into the layout
   // The following is only temporary
   // - Should only display final transactions, or really every decision?
+
+  // TODO(JJ): IMPORTANT: There are no transactions if the user does not
+  // toggle anything.
   console.log(data.result.transactions)
-  const transactions = (
-    <div className="m-4">
-      <h1 className="border-b-2 text-xl font-bold">Transaction history</h1>
-      {data.result.transactions
-        .slice(0)
-        .reverse()
-        .map(
-          (transaction: {
-            periodIx: number
-            segmentIx: number
-            type: string
-            facts: { decision: boolean }
-          }) => {
-            const key = `transaction-${transaction.periodIx}-${transaction.segmentIx}`
-            return (
-              <div className="flex flex-col border-b-2 py-2" key={key}>
-                <div className="flex">
-                  <div>P {transaction.periodIx}</div>
-                  <div>Q {transaction.segmentIx}</div>
-                </div>
-                <div className="flex justify-between">
-                  <div>Decision: {transaction.type}</div>
-                  <div> {transaction.facts.decision ? 'On' : 'Off'} </div>
-                </div>
-              </div>
-            )
-          }
-        )}
-    </div>
-  )
 
   const header = (
     <div className="flex justify-between rounded border p-4">
@@ -376,7 +353,10 @@ function Cockpit() {
                   )
                 })}
               </div>
-              {transactions}
+              <TransactionsDisplayCompact
+                transactions={data.result.transactions}
+              />
+              <TransactionsDisplay transactions={data.result.transactions} />
             </div>
           )}
         </>
