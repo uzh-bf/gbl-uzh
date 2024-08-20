@@ -81,7 +81,7 @@ function TransactionDisplay({
 function TransactionsDisplay({ transactions }: TransactionsDisplayProps) {
   return (
     <>
-      <Card className="min-w-[200px]">
+      <Card className="w-full min-w-[200px] max-w-[320px]">
         <CardHeader>
           <CardTitle>Transaction history</CardTitle>
           <CardDescription>
@@ -134,7 +134,7 @@ function TransactionsDisplayCompact({
   }, {})
   return (
     <>
-      <Card className="min-w-[200px]">
+      <Card className="w-full min-w-[200px] max-w-[320px]">
         <CardHeader>
           <CardTitle>Final decision history</CardTitle>
           <CardDescription>
