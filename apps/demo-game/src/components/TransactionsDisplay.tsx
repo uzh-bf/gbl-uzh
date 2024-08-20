@@ -49,36 +49,22 @@ function TransactionsDisplay({ transactions }: TransactionsDisplayProps) {
 function TransactionsDisplayCompact({
   transactions,
 }: TransactionsDisplayProps) {
-  // let transactionsReduced = {}
-  // for (let index = 0; index < transactions.length; index++) {
-  //   const transaction = transactions[index]
-  //   const key = `transaction-${transaction.periodIx}-${transaction.segmentIx}`
-  //   // if (!transactionsReduced.hasOwnProperty(key)) {
-  //   //   transactionsReduced[key] = {
-  //   //     periodIx: transaction.periodIx,
-  //   //     segmentIx: transaction.segmentIx,
-  //   //     transactions: {},
-  //   //   }
-  //   // }
-  //   transactionsReduced[key] = {
-  //     periodIx: transaction.periodIx,
-  //     segmentIx: transaction.segmentIx,
-  //     transactions: transactionsReduced[key]
-  //       ? transactionsReduced[key].transactions
-  //       : {},
-  //   }
-  //   transactionsReduced[key].transactions[transaction.type] =
-  //     transaction.facts.decision
-  // }
-
   const transactionsReduced = transactions.reduce((acc, transaction) => {
     const key = `transaction-${transaction.periodIx}-${transaction.segmentIx}`
-    acc[key] = {
-      periodIx: transaction.periodIx,
-      segmentIx: transaction.segmentIx,
-      transactions: acc[key] ? acc[key].transactions ?? {} : {},
+    // TODO(JJ): Not sure if this way or the other (directly adding to
+    // the object) is better -> @RS please review
+    if (!acc.hasOwnProperty(key)) {
+      acc[key] = {
+        periodIx: transaction.periodIx,
+        segmentIx: transaction.segmentIx,
+        transactions: {
+          [transaction.type]: transaction.facts.decision,
+        },
+      }
+    } else {
+      acc[key].transactions[transaction.type] = transaction.facts.decision
     }
-    acc[key].transactions[transaction.type] = transaction.facts.decision
+
     return acc
   }, {})
   return (
