@@ -353,7 +353,7 @@ function Cockpit() {
                 )
               })}
             </div>
-            <div className="my-2 flex gap-2">
+            <div className="my-2 flex flex-wrap gap-2">
               <TransactionsDisplayCompact
                 transactions={data.result.transactions}
               />

@@ -81,7 +81,7 @@ function TransactionDisplay({
 function TransactionsDisplay({ transactions }: TransactionsDisplayProps) {
   return (
     <>
-      <Card className="w-[350px]">
+      <Card className="min-w-[200px]">
         <CardHeader>
           <CardTitle>Transaction history</CardTitle>
           <CardDescription>
@@ -134,7 +134,7 @@ function TransactionsDisplayCompact({
   }, {})
   return (
     <>
-      <Card className="w-min-[350px]">
+      <Card className="min-w-[200px]">
         <CardHeader>
           <CardTitle>Final decision history</CardTitle>
           <CardDescription>
@@ -171,18 +171,17 @@ function TransactionsDisplayCompact({
                               .sort()
                               .map((type) => {
                                 return (
-                                  <TransactionLayout
+                                  <div
                                     key={type}
-                                    actionTitle={type.substring(
-                                      'DECIDE_'.length
-                                    )}
-                                    icon={
-                                      <OnOffIcon
-                                        on={transaction.transactions[type]}
-                                      />
-                                    }
-                                    separator={false}
-                                  />
+                                    className="flex justify-between"
+                                  >
+                                    <div>
+                                      {type.substring('DECIDE_'.length)}
+                                    </div>
+                                    <OnOffIcon
+                                      on={transaction.transactions[type]}
+                                    />
+                                  </div>
                                 )
                               })}
                           </div>
