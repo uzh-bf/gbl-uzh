@@ -202,7 +202,7 @@ interface GetPlayerResultArgs {
 }
 
 export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
-  let currentGame = await ctx.prisma.game.findUnique({
+  const currentGame = await ctx.prisma.game.findUnique({
     where: {
       id: args.gameId,
     },
@@ -236,34 +236,37 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
     },
   })
 
-  if (!currentGame?.activePeriod) return null
+  const currentGameModified = Object.assign({}, currentGame)
+
+  if (!currentGameModified?.activePeriod) return null
 
   // The segementCount for active period is currently not needed
-  currentGame.periods = currentGame.periods.map((period) => ({
+  currentGameModified.periods = currentGameModified.periods.map((period) => ({
     ...period,
     segmentCount: period.segments.length,
   }))
 
   // We filter up to the active period (and active segemnt) - future periods
   // should not be visible to the user
-  const activePeriodIx = currentGame.activePeriodIx
-  currentGame.periods = currentGame.periods.filter(
+  const activePeriodIx = currentGameModified.activePeriodIx
+  currentGameModified.periods = currentGameModified.periods.filter(
     (_, ix) => ix <= activePeriodIx
   )
-  const activeSegmentIx = currentGame.activePeriod.activeSegmentIx
+  const activeSegmentIx = currentGameModified.activePeriod.activeSegmentIx
 
-  currentGame.activePeriod.segments = currentGame.activePeriod.segments.filter(
-    (_, ix) => ix <= activeSegmentIx
-  )
+  currentGameModified.activePeriod.segments =
+    currentGameModified.activePeriod.segments.filter(
+      (_, ix) => ix <= activeSegmentIx
+    )
 
-  currentGame.periods[activePeriodIx]!.segments =
-    currentGame.activePeriod.segments
+  currentGameModified.periods[activePeriodIx]!.segments =
+    currentGameModified.activePeriod.segments
 
   const previousResults = ctx.prisma.playerResult.findMany({
     where: {
       playerId: args.playerId,
       periodIx: {
-        lte: currentGame.activePeriod.index,
+        lte: currentGameModified.activePeriod.index,
       },
     },
     include: {
@@ -275,8 +278,8 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
   const playerResult = await ctx.prisma.playerResult.findUnique({
     where: {
       periodIx_segmentIx_playerId_type: {
-        periodIx: currentGame.activePeriodIx,
-        segmentIx: currentGame.activePeriod.activeSegmentIx,
+        periodIx: currentGameModified.activePeriodIx,
+        segmentIx: currentGameModified.activePeriod.activeSegmentIx,
         playerId: args.playerId,
         type: DB.PlayerResultType.SEGMENT_END,
       },
@@ -304,7 +307,7 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
   })
 
   return {
-    currentGame,
+    currentGameModified,
     playerResult,
     previousResults,
     transactions,
