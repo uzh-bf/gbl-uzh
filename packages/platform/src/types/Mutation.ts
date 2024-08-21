@@ -29,7 +29,11 @@ interface GenerateBaseMutationsArgs {
   roleAssigner?: (ix: number) => any
 }
 
-export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
+export function generateBaseMutations<
+  PeriodFacts,
+  PeriodSegmentFacts,
+  PlayerFacts
+>({
   services = defaultServices,
   roleAssigner,
   schemas = defaultSchemas,
@@ -199,7 +203,11 @@ export function generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
         },
         async resolve(_, args, ctx) {
           const facts = args.facts ? JSON.parse(args.facts) : {}
-          return GameService.updatePlayerData({ ...args, facts }, ctx)
+          return GameService.updatePlayerData<PlayerFacts>(
+            { ...args, facts },
+            ctx,
+            { schema: schemas.PlayerFactsSchema }
+          )
         },
       })
 

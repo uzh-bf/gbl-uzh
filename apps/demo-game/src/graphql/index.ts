@@ -10,16 +10,23 @@ import {
   PeriodFactsSchema,
   PeriodSegmentFactsInput,
   PeriodSegmentFactsSchema,
+  PlayerFacts,
+  PlayerFactsSchema,
 } from '../types'
 export * from '@gbl-uzh/platform/dist/nexus'
 export * from '../types'
 
 export const Query = generateBaseQueries()
-export const Mutation = generateBaseMutations<PeriodFacts, PeriodSegmentFacts>({
+export const Mutation = generateBaseMutations<
+  PeriodFacts,
+  PeriodSegmentFacts,
+  PlayerFacts
+>({
   services,
   schemas: {
     PeriodFactsSchema,
     PeriodSegmentFactsSchema,
+    PlayerFactsSchema,
   },
   inputTypes: {
     PeriodFactsInput,

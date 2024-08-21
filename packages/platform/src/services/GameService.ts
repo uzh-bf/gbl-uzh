@@ -4,7 +4,12 @@ import { nanoid } from 'nanoid'
 import { none, repeat } from 'ramda'
 import * as yup from 'yup'
 import log from '../lib/logger.js'
-import { CtxWithFacts, CtxWithFactsAndSchema, CtxWithPrisma } from '../types.js'
+import {
+  CtxWithFacts,
+  CtxWithFactsAndSchema,
+  CtxWithPrisma,
+  UpdatePlayerDataArgs,
+} from '../types.js'
 import * as EventService from './EventService.js'
 
 type Context = CtxWithPrisma<PrismaClient>
@@ -868,22 +873,10 @@ export async function activateNextSegment(
   }
 }
 
-const PlayerFactsSchema = yup.object({
-  location: yup.string().default('ZH'),
-  color: yup.string().default('White'),
-  avatar: yup.string().default(''),
-})
-
-export interface PlayerFacts extends yup.InferType<typeof PlayerFactsSchema> {}
-
-interface UpdatePlayerDataArgs {
-  name?: string
-  facts: PlayerFacts
-}
-
-export async function updatePlayerData(
-  { name, facts }: UpdatePlayerDataArgs,
-  ctx: Context
+export async function updatePlayerData<PlayerFactsType>(
+  { name, facts }: UpdatePlayerDataArgs<PlayerFactsType>,
+  ctx: Context,
+  { schema }: { schema: yup.Schema<PlayerFactsType> }
 ) {
   // if none of the arguments have been provided, no update is performed
   if (none(Boolean, [name, facts])) {
@@ -896,7 +889,7 @@ export async function updatePlayerData(
   }
 
   if (facts) {
-    data['facts'] = PlayerFactsSchema.validateSync(facts, {
+    data['facts'] = schema.validateSync(facts, {
       stripUnknown: true,
     })
   }
