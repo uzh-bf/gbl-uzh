@@ -148,12 +148,6 @@ function ManageGame() {
 
   const game: Game = data.game
 
-  // TODO(JJ): Since it is not refreshing nicely after a new status update of
-  // period or one of the segments, I am wondering if we should precompute
-  // the periodsSorted.map and their segments into new arrays -> check with RS
-  // -> appearantly the pollIntervall can increase the refresh rate
-  // there is also refetching which refreshes in response to a user action
-
   return (
     <div className="p-4">
       <div>
