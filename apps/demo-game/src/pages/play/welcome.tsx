@@ -36,6 +36,7 @@ const Schema = Yup.object().shape({
 // props:
 // - descriptions
 // - avatar info, color, location, onSubmit, no player.role
+// - add banks, like colors
 function Welcome() {
   const router = useRouter()
 
@@ -52,7 +53,7 @@ function Welcome() {
     <div className="m-auto w-full max-w-4xl p-8">
       <Formik
         initialValues={{
-          name: 'Your Name',
+          name: 'Sparfuchs Bank AG',
           // name: player.name,
           color: Object.keys(COLORS)[0],
           location: LOCATIONS.Trader[0],
@@ -182,7 +183,7 @@ function Welcome() {
                     <div className="flex flex-col">
                       <div className="flex-initial space-y-1.5">
                         <NewFormikTextField
-                          label="Name"
+                          label="Name of bank"
                           name="name"
                           className={{ label: 'pb-2 font-normal' }}
                         />
