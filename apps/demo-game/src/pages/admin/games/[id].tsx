@@ -97,7 +97,7 @@ function ManageGame() {
 
     const isScheduled = game.status === GameStatus.Scheduled
     const isResultState = game.status === GameStatus.Results
-    const isPrepared = game.status === GameStatus.Preparation
+
     if (!activePeriod) {
       return <Button onClick={nextPeriod}>Start Period</Button>
     }
@@ -109,10 +109,12 @@ function ManageGame() {
     }
 
     const atLastSegment = activeSegmentIx >= segments.length - 1
-    if (!atLastSegment || isPrepared) {
+    if (!atLastSegment) {
+      const isPaused = game.status === GameStatus.Paused
+      const isPrepared = game.status === GameStatus.Preparation
       return (
         <Button disabled={nextSegmentLoading} onClick={nextSegment}>
-          Next Segment
+          {isPaused || isPrepared ? 'Next Segment' : 'Segment Results'}
         </Button>
       )
     }
