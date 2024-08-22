@@ -97,12 +97,19 @@ function ManageGame() {
 
     const isScheduled = game.status === GameStatus.Scheduled
     const isResultState = game.status === GameStatus.Results
-    if (!activePeriod || isScheduled || isResultState) {
+    const isPrepared = game.status === GameStatus.Preparation
+    if (!activePeriod) {
+      return <Button onClick={nextPeriod}>Start Period</Button>
+    }
+    if (isResultState) {
       return <Button onClick={nextPeriod}>Next Period</Button>
+    }
+    if (isScheduled) {
+      return <Button onClick={nextPeriod}>Start Segment</Button>
     }
 
     const atLastSegment = activeSegmentIx >= segments.length - 1
-    if (!atLastSegment) {
+    if (!atLastSegment || isPrepared) {
       return (
         <Button disabled={nextSegmentLoading} onClick={nextSegment}>
           Next Segment
@@ -118,7 +125,7 @@ function ManageGame() {
     if (game.status === GameStatus.Consolidation) {
       return (
         <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
-          Consolidate
+          Period Results
         </Button>
       )
     }
@@ -133,7 +140,7 @@ function ManageGame() {
 
     return (
       <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
-        Period Results
+        Consolidate
       </Button>
     )
   }, [data?.game])
