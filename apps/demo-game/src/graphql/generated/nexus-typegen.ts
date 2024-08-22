@@ -94,9 +94,11 @@ export interface NexusGenObjects {
   Game: { // root type
     activePeriod?: NexusGenRootTypes['Period'] | null; // Period
     activePeriodIx?: number | null; // Int
+    activeSegmentIx?: number | null; // Int
     id: string; // ID!
     name: string; // String!
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
+    playerCount?: number | null; // Int
     players: NexusGenRootTypes['Player'][]; // [Player!]!
     status: NexusGenEnums['GameStatus']; // GameStatus!
   }
@@ -136,6 +138,7 @@ export interface NexusGenObjects {
     id: string; // ID!
     index: number; // Int!
     results: NexusGenRootTypes['PlayerResult'][]; // [PlayerResult!]!
+    segmentCount?: number | null; // Int
     segments: NexusGenRootTypes['PeriodSegment'][]; // [PeriodSegment!]!
   }
   PeriodSegment: { // root type
@@ -153,8 +156,6 @@ export interface NexusGenObjects {
     achievementIds: string[]; // [String!]!
     achievementKeys: string[]; // [String!]!
     achievements: NexusGenRootTypes['AchievementInstance'][]; // [AchievementInstance!]!
-    avatar: string; // String!
-    color: string; // String!
     completedLearningElementIds: string[]; // [String!]!
     completedLearningElements: NexusGenRootTypes['LearningElement'][]; // [LearningElement!]!
     experience: number; // Int!
@@ -164,7 +165,6 @@ export interface NexusGenObjects {
     isReady: boolean; // Boolean!
     level: NexusGenRootTypes['PlayerLevel']; // PlayerLevel!
     levelIx: number; // Int!
-    location: string; // String!
     name: string; // String!
     number: number; // Int!
     role?: string | null; // String
@@ -253,9 +253,11 @@ export interface NexusGenFieldTypes {
   Game: { // field return type
     activePeriod: NexusGenRootTypes['Period'] | null; // Period
     activePeriodIx: number | null; // Int
+    activeSegmentIx: number | null; // Int
     id: string; // ID!
     name: string; // String!
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
+    playerCount: number | null; // Int
     players: NexusGenRootTypes['Player'][]; // [Player!]!
     status: NexusGenEnums['GameStatus']; // GameStatus!
   }
@@ -310,6 +312,7 @@ export interface NexusGenFieldTypes {
     id: string; // ID!
     index: number; // Int!
     results: NexusGenRootTypes['PlayerResult'][]; // [PlayerResult!]!
+    segmentCount: number | null; // Int
     segments: NexusGenRootTypes['PeriodSegment'][]; // [PeriodSegment!]!
   }
   PeriodSegment: { // field return type
@@ -327,8 +330,6 @@ export interface NexusGenFieldTypes {
     achievementIds: string[]; // [String!]!
     achievementKeys: string[]; // [String!]!
     achievements: NexusGenRootTypes['AchievementInstance'][]; // [AchievementInstance!]!
-    avatar: string; // String!
-    color: string; // String!
     completedLearningElementIds: string[]; // [String!]!
     completedLearningElements: NexusGenRootTypes['LearningElement'][]; // [LearningElement!]!
     experience: number; // Int!
@@ -338,7 +339,6 @@ export interface NexusGenFieldTypes {
     isReady: boolean; // Boolean!
     level: NexusGenRootTypes['PlayerLevel']; // PlayerLevel!
     levelIx: number; // Int!
-    location: string; // String!
     name: string; // String!
     number: number; // Int!
     role: string | null; // String
@@ -429,9 +429,11 @@ export interface NexusGenFieldTypeNames {
   Game: { // field return type name
     activePeriod: 'Period'
     activePeriodIx: 'Int'
+    activeSegmentIx: 'Int'
     id: 'ID'
     name: 'String'
     periods: 'Period'
+    playerCount: 'Int'
     players: 'Player'
     status: 'GameStatus'
   }
@@ -486,6 +488,7 @@ export interface NexusGenFieldTypeNames {
     id: 'ID'
     index: 'Int'
     results: 'PlayerResult'
+    segmentCount: 'Int'
     segments: 'PeriodSegment'
   }
   PeriodSegment: { // field return type name
@@ -503,8 +506,6 @@ export interface NexusGenFieldTypeNames {
     achievementIds: 'String'
     achievementKeys: 'String'
     achievements: 'AchievementInstance'
-    avatar: 'String'
-    color: 'String'
     completedLearningElementIds: 'String'
     completedLearningElements: 'LearningElement'
     experience: 'Int'
@@ -514,7 +515,6 @@ export interface NexusGenFieldTypeNames {
     isReady: 'Boolean'
     level: 'PlayerLevel'
     levelIx: 'Int'
-    location: 'String'
     name: 'String'
     number: 'Int'
     role: 'String'
@@ -630,8 +630,6 @@ export interface NexusGenArgTypes {
       payload: string; // String!
     }
     updatePlayerData: { // args
-      avatar?: string | null; // String
-      color?: string | null; // String
       facts?: string | null; // String
       name?: string | null; // String
     }

@@ -21,6 +21,7 @@ query Result {
       status
       periods {
         ...PeriodData
+        segmentCount
       }
       activePeriod {
         ...PeriodData

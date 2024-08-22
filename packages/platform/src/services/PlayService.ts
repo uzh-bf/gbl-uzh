@@ -238,6 +238,27 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
 
   if (!currentGame?.activePeriod) return null
 
+  // The segementCount for active period is currently not needed
+  currentGame.periods = currentGame.periods.map((period) => ({
+    ...period,
+    segmentCount: period.segments.length,
+  }))
+
+  // We filter up to the active period (and active segemnt) - future periods
+  // should not be visible to the user
+  const activePeriodIx = currentGame.activePeriodIx
+  currentGame.periods = currentGame.periods.filter(
+    (_, ix) => ix <= activePeriodIx
+  )
+  const activeSegmentIx = currentGame.activePeriod.activeSegmentIx
+
+  currentGame.activePeriod.segments = currentGame.activePeriod.segments.filter(
+    (_, ix) => ix <= activeSegmentIx
+  )
+
+  currentGame.periods[activePeriodIx]!.segments =
+    currentGame.activePeriod.segments
+
   const previousResults = ctx.prisma.playerResult.findMany({
     where: {
       playerId: args.playerId,

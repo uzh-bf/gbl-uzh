@@ -4,7 +4,12 @@ import { nanoid } from 'nanoid'
 import { none, repeat } from 'ramda'
 import * as yup from 'yup'
 import log from '../lib/logger.js'
-import { CtxWithFacts, CtxWithFactsAndSchema, CtxWithPrisma } from '../types.js'
+import {
+  CtxWithFacts,
+  CtxWithFactsAndSchema,
+  CtxWithPrisma,
+  UpdatePlayerDataArgs,
+} from '../types.js'
 import * as EventService from './EventService.js'
 
 type Context = CtxWithPrisma<PrismaClient>
@@ -868,25 +873,13 @@ export async function activateNextSegment(
   }
 }
 
-const PlayerFactsSchema = yup.object({
-  location: yup.string().default('Zurich'),
-})
-
-export interface PlayerFacts extends yup.InferType<typeof PlayerFactsSchema> {}
-
-interface UpdatePlayerDataArgs {
-  name?: string
-  avatar?: string
-  color?: string
-  facts: PlayerFacts
-}
-
-export async function updatePlayerData(
-  { name, avatar, color, facts }: UpdatePlayerDataArgs,
-  ctx: Context
+export async function updatePlayerData<PlayerFactsType>(
+  { name, facts }: UpdatePlayerDataArgs<PlayerFactsType>,
+  ctx: Context,
+  { schema }: { schema: yup.Schema<PlayerFactsType> }
 ) {
   // if none of the arguments have been provided, no update is performed
-  if (none(Boolean, [name, avatar, color, facts])) {
+  if (none(Boolean, [name, facts])) {
     return null
   }
 
@@ -894,14 +887,9 @@ export async function updatePlayerData(
   if (name) {
     data['name'] = name
   }
-  if (avatar) {
-    data['avatar'] = avatar
-  }
-  if (color) {
-    data['color'] = color
-  }
+
   if (facts) {
-    data['facts'] = PlayerFactsSchema.validateSync(facts, {
+    data['facts'] = schema.validateSync(facts, {
       stripUnknown: true,
     })
   }
@@ -925,7 +913,22 @@ export async function updatePlayerData(
 }
 
 export async function getGames(args, ctx: Context) {
-  return ctx.prisma.game.findMany()
+  const result = await ctx.prisma.game.findMany({
+    orderBy: {
+      id: 'desc',
+    },
+    include: {
+      _count: {
+        select: { players: true },
+      },
+      activePeriod: true,
+    },
+  })
+  return result.map((game) => ({
+    ...game,
+    playerCount: game._count.players,
+    activeSegmentIx: game.activePeriod?.activeSegmentIx,
+  }))
 }
 
 export async function getGame(args, ctx: Context) {

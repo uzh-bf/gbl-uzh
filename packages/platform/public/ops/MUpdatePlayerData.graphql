@@ -2,11 +2,9 @@
 
 mutation UpdatePlayerData(
   $name: String
-  $avatar: String
-  $color: String
   $facts: String
 ) {
-  updatePlayerData(name: $name, avatar: $avatar, color: $color, facts: $facts) {
+  updatePlayerData(name: $name, facts: $facts) {
     ...PlayerData
   }
 }

@@ -6,6 +6,11 @@ export enum UserRole {
   ADMIN = 'ADMIN',
 }
 
+export type UpdatePlayerDataArgs<PlayerFactsType> = {
+  name?: string
+  facts: PlayerFactsType
+}
+
 export enum LearningElementState {
   NEW = 'NEW',
   ATTEMPTED = 'ATTEMPTED',

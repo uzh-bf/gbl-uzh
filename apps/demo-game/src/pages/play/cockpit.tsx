@@ -1,12 +1,67 @@
 import { useMutation, useQuery } from '@apollo/client'
+import { Layout } from '@gbl-uzh/ui'
 import { Switch, Table } from '@uzh-bf/design-system'
-import { useEffect, useState } from 'react'
-import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@uzh-bf/design-system/dist/future'
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import {
+  TransactionsDisplay,
+  TransactionsDisplayCompact,
+} from 'src/components/TransactionsDisplay'
 import {
   PerformActionDocument,
   ResultDocument,
 } from 'src/graphql/generated/ops'
 import { ActionTypes } from 'src/services/ActionsReducer'
+
+function GameHeader({ currentGame }) {
+  return (
+    <div className="flex justify-between rounded border p-4">
+      <div className="font-bold">Game {currentGame.id}</div>
+      <div className="">Current status: {currentGame.status}</div>
+    </div>
+  )
+}
+
+function GameLayout({ children }: { children: React.ReactNode }) {
+  const { data } = useQuery(ResultDocument, {
+    fetchPolicy: 'cache-only',
+  })
+
+  const playerInfo = {
+    name: data.self.name,
+    color: data.self.facts.color,
+    location: data.self.facts.location,
+    level: data.self.level.index,
+    xp: data.self.experience,
+    xpMax: data.self.experienceToNext,
+    achievements: data.self.achievements,
+    imgPathAvatar: data.self.facts.avatar,
+    imgPathLocation: `/locations/${data.self.facts.location}.svg`,
+    onClick: () => {
+      // router.replace('/play/welcome')
+    },
+  }
+
+  const sidebar = <div>SidebarAddons</div>
+
+  return (
+    <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
+      {children}
+    </Layout>
+  )
+}
 
 function getTotalAssetsOfPreviousResults(previousResults: any[]) {
   const filtered = previousResults.filter((o) => o.type == 'SEGMENT_END')
@@ -23,23 +78,15 @@ function getTotalAssetsOfPreviousResults(previousResults: any[]) {
     .map((e) => e.totalAssets)
 }
 
-function Cockpit() {
-  const playerState = useQuery(ResultDocument, { fetchPolicy: 'cache-first' })
-  const [bankDecisionState, setBankDecisionState] = useState(false)
-  const [bondsDecisionState, setBondsDecisionState] = useState(false)
-  const [stockDecisionState, setStockDecisionState] = useState(false)
+const tabs = [
+  { name: 'Welcome', href: '/play/welcome' },
+  { name: 'Cockpit', href: '/play/cockpit' },
+]
 
-  useEffect(() => {
-    setBankDecisionState(
-      playerState?.data?.result?.playerResult?.facts.decisions.bank
-    )
-    setBondsDecisionState(
-      playerState?.data?.result?.playerResult?.facts.decisions.bonds
-    )
-    setStockDecisionState(
-      playerState?.data?.result?.playerResult?.facts.decisions.stocks
-    )
-  }, [playerState])
+function Cockpit() {
+  const { loading, error, data } = useQuery(ResultDocument, {
+    fetchPolicy: 'cache-first',
+  })
 
   const [performAction, updatedPlayerResult] = useMutation(
     PerformActionDocument,
@@ -48,15 +95,12 @@ function Cockpit() {
     }
   )
 
-  const playerData = playerState.data
-  const playerDataResult = playerData?.result
-  const currentGame = playerDataResult?.currentGame
+  if (loading) return null
+  if (error) return `Error! ${error}`
 
-  // TODO(JJ):
-  // - Make it visually more appealing
-  // - Add title to every gamge state
-  // - Add a color to the info
-  // console.log(playerState)
+  const playerDataResult = data.result
+  const currentGame = playerDataResult.currentGame
+
   if (!currentGame) {
     return (
       <div>
@@ -65,9 +109,14 @@ function Cockpit() {
       </div>
     )
   }
-  const resultFacts = playerDataResult?.playerResult?.facts
-  const previousResults = playerDataResult?.previousResults
-  const self = playerState?.data?.self
+  if (!playerDataResult.playerResult) {
+    return <div>No player results. </div>
+  }
+
+  const resultFacts = playerDataResult.playerResult.facts
+  const previousResults = playerDataResult.previousResults
+  const resultFactsDecisions = resultFacts.decisions
+  const assets = resultFacts.assets
 
   const decisions = [
     {
@@ -76,8 +125,7 @@ function Cockpit() {
         `Invest ${(percentage * 100).toFixed()}% (CHF ${(
           totalAssets * percentage
         ).toFixed(2)}) into bank.`,
-      effect: setBankDecisionState,
-      state: bankDecisionState,
+      state: resultFactsDecisions.bank,
       action: ActionTypes.DECIDE_BANK,
     },
     {
@@ -86,8 +134,7 @@ function Cockpit() {
         `Invest ${(percentage * 100).toFixed()}% (CHF ${(
           totalAssets * percentage
         ).toFixed(2)}) into bonds.`,
-      effect: setBondsDecisionState,
-      state: bondsDecisionState,
+      state: resultFactsDecisions.bonds,
       action: ActionTypes.DECIDE_BONDS,
     },
     {
@@ -96,14 +143,10 @@ function Cockpit() {
         `Invest ${(percentage * 100).toFixed()}% (CHF ${(
           totalAssets * percentage
         ).toFixed(2)}) into stocks.`,
-      effect: setStockDecisionState,
-      state: stockDecisionState,
+      state: resultFactsDecisions.stocks,
       action: ActionTypes.DECIDE_STOCK,
     },
   ]
-
-  const transformer = ({ row, ix }: { row: any; ix?: number }) =>
-    typeof row[ix ?? 0] === 'number' && `CHF ${row[ix ?? 0].toFixed(2)}`
 
   const columns_segment_results = [
     { label: '', accessor: 'cat', sortable: false },
@@ -111,7 +154,8 @@ function Cockpit() {
       label: 'Initial',
       accessor: '0',
       sortable: false,
-      transformer: transformer,
+      transformer: ({ row }: { row: any }) =>
+        typeof row['0'] === 'number' && `CHF ${row['0'].toFixed(2)}`,
     },
   ]
 
@@ -121,7 +165,8 @@ function Cockpit() {
       label: 'Month ' + strNum,
       accessor: strNum,
       sortable: false,
-      transformer: transformer,
+      transformer: ({ row }: { row: any }) =>
+        typeof row[strNum] === 'number' && `CHF ${row[strNum].toFixed(2)}`,
     })
   }
 
@@ -129,10 +174,6 @@ function Cockpit() {
     { label: 'Category', accessor: 'cat', sortable: false },
     { label: 'Value', accessor: 'val', sortable: false },
   ]
-
-  const assetsWithReturnsArr = Object.values(
-    resultFacts?.assetsWithReturns ?? {}
-  )
 
   const reduceFn = (type: string) => {
     return (acc, value) => {
@@ -144,13 +185,12 @@ function Cockpit() {
       } else if (type == 'total') {
         val = value.totalAssets
       }
-      return {
-        ...acc,
-        [value.ix]: val,
-      }
+      acc[value.ix] = val
+      return acc
     }
   }
 
+  const assetsWithReturnsArr = resultFacts.assetsWithReturns
   const data_segment_results = [
     assetsWithReturnsArr.reduce(reduceFn('bank'), { cat: 'Savings' }),
     assetsWithReturnsArr.reduce(reduceFn('bonds'), { cat: 'Bonds' }),
@@ -161,124 +201,173 @@ function Cockpit() {
   const data_portfolio = [
     {
       cat: 'Savings',
-      val: `CHF ${resultFacts?.assets.bank.toFixed(2)}`,
+      val: `CHF ${assets.bank.toFixed(2)}`,
     },
     {
       cat: 'Bonds',
-      val: `CHF ${resultFacts?.assets.bonds.toFixed(2)}`,
+      val: `CHF ${assets.bonds.toFixed(2)}`,
     },
     {
       cat: 'Stocks',
-      val: `CHF ${resultFacts?.assets.stocks.toFixed(2)}`,
+      val: `CHF ${assets.stocks.toFixed(2)}`,
     },
     {
       cat: 'Total',
-      val: `CHF ${resultFacts?.assets.totalAssets.toFixed(2)}`,
+      val: `CHF ${assets.totalAssets.toFixed(2)}`,
     },
   ]
 
-  const header = (
-    <div className="rounded border p-4">
-      <div className="font-bold">
-        Playing as {self?.name} in game {currentGame.id}
-      </div>
-
-      <div className="">Current status: {currentGame.status}</div>
-    </div>
-  )
+  // console.log(data.result.transactions)
 
   switch (currentGame?.status) {
     case 'PREPARATION':
-      return <div>{header} Game is begin prepared.</div>
+      return (
+        <GameLayout>
+          <div>
+            <GameHeader currentGame={currentGame} />
+            <div>Game is being prepared.</div>
+          </div>
+        </GameLayout>
+      )
 
     case 'COMPLETED':
-      return <div> Game is completed. </div>
+      return (
+        <GameLayout>
+          <div> Game is completed. </div>
+        </GameLayout>
+      )
 
     case 'CONSOLIDATION':
-      return <div> Game is being consolidated. </div>
-
-    case 'PREPARATION':
-      return <div> Game is being prepared. </div>
+      return (
+        <GameLayout>
+          <div> Game is being consolidated. </div>
+        </GameLayout>
+      )
 
     case 'RESULTS':
-      return <div> RESULTS </div>
+      return (
+        <GameLayout>
+          <div> RESULTS </div>
+        </GameLayout>
+      )
 
     case 'SCHEDULED':
-      return <div> Game is scheduled. </div>
+      return (
+        <GameLayout>
+          <div> Game is scheduled. </div>
+        </GameLayout>
+      )
 
     case 'PAUSED':
       const totalAssetsPerMonth = getTotalAssetsOfPreviousResults(
         previousResults
       ).map((s, i) => ({ total: s, month: 'month_' + String(i) }))
       return (
-        <div>
-          {header}
-          <div className="max-w-2xl">
-            <Table
-              columns={columns_segment_results}
-              data={data_segment_results}
-              caption=""
-            />
+        <GameLayout>
+          <div className="flex flex-col">
+            <div>
+              <GameHeader currentGame={currentGame} />
+              <div className="max-w-2xl">
+                <Table
+                  columns={columns_segment_results}
+                  data={data_segment_results}
+                  caption=""
+                />
+              </div>
+              <div className="flex justify-center">Total over time chart</div>
+              <ResponsiveContainer width="100%" height="50%">
+                <ChartContainer
+                  config={{
+                    desktop: {
+                      label: 'Desktop',
+                    },
+                  }}
+                >
+                  <LineChart data={totalAssetsPerMonth}>
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Line
+                      type="natural"
+                      dataKey="total"
+                      stroke="#8884d8"
+                      dot={false}
+                      strokeWidth={2}
+                    />
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="month"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                    />
+                    <YAxis />
+                    <Tooltip />
+                  </LineChart>
+                </ChartContainer>
+              </ResponsiveContainer>
+            </div>
           </div>
-          <div className="max-w-2xl">
-            <div className="flex justify-center">Total over time chart</div>
-            <LineChart width={600} height={400} data={totalAssetsPerMonth}>
-              <Line type="monotone" dataKey="total" stroke="#8884d8" />
-              <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-            </LineChart>
-          </div>
-        </div>
+        </GameLayout>
       )
 
     case 'RUNNING':
       return (
-        <div>
-          {header}
-          <div className="max-w-md">
-            <Table
-              columns={columns_portfolio}
-              data={data_portfolio}
-              caption=""
-            />
-          </div>
+        <GameLayout>
+          <div className="flex w-full flex-col">
+            <GameHeader currentGame={currentGame} />
+            <div className="max-w-md">
+              <Table
+                columns={columns_portfolio}
+                data={data_portfolio}
+                caption=""
+              />
+            </div>
 
-          <div className="rounded border p-4">
-            {decisions.map(function (decision, i) {
-              return (
-                <div className="p-1" key={decision.name}>
-                  <Switch
-                    label={decision.label(
-                      decision.state
-                        ? 1 /
-                            (+bankDecisionState +
-                              +bondsDecisionState +
-                              +stockDecisionState)
-                        : 0,
-                      resultFacts.assets.totalAssets
-                    )}
-                    checked={decision.state}
-                    id="switch"
-                    onCheckedChange={async (checked) => {
-                      decision.effect(checked)
-                      await performAction({
-                        variables: {
-                          type: decision.action,
-                          payload: JSON.stringify({
-                            decision: checked,
-                          }),
-                        },
-                      })
-                    }}
-                  />
-                </div>
-              )
-            })}
+            <div className="rounded border p-4">
+              {decisions.map(function (decision, i) {
+                return (
+                  <div className="p-1" key={decision.name}>
+                    <Switch
+                      label={decision.label(
+                        decision.state
+                          ? 1 /
+                              (+resultFactsDecisions.bank +
+                                +resultFactsDecisions.bonds +
+                                +resultFactsDecisions.stocks)
+                          : 0,
+                        assets.totalAssets
+                      )}
+                      checked={decision.state}
+                      id="switch"
+                      onCheckedChange={async (checked) => {
+                        await performAction({
+                          variables: {
+                            type: decision.action,
+                            payload: JSON.stringify({
+                              decision: checked,
+                            }),
+                          },
+                          refetchQueries: [ResultDocument],
+                        })
+                      }}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+            <div className="my-2 flex flex-wrap gap-2">
+              <TransactionsDisplayCompact
+                transactions={data.result.transactions}
+              />
+              <TransactionsDisplay transactions={data.result.transactions} />
+            </div>
           </div>
-        </div>
+        </GameLayout>
       )
+    default:
+      return <div> Game has not been created yet. </div>
   }
 }
 

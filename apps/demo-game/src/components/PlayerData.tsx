@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { Achievement, Player } from 'src/graphql/generated/ops'
+import { Player } from 'src/graphql/generated/ops'
 
 function Achievement({
   name,

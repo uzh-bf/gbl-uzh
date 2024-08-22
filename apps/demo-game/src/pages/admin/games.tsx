@@ -62,14 +62,13 @@ function Games() {
           Logout
         </Button>
       )}
-
       <Formik
         initialValues={{
           name: '',
           playerCount: 1,
         }}
         onSubmit={async (variables, { resetForm }) => {
-          await createGame({ variables })
+          await createGame({ variables, refetchQueries: [GamesDocument] })
           resetForm()
         }}
       >
@@ -93,15 +92,37 @@ function Games() {
           </Form>
         )}
       </Formik>
-
-      <div className="mt-4 grid grid-cols-10 gap-1">
-        {data.games.map((game) => (
-          <div className="border p-2" key={game?.id}>
-            <Link href={`/admin/games/${game?.id}`}>
-              {game?.name} {game?.activePeriodIx}
+      <div className="mt-4 flex flex-col gap-1">
+        {[...data.games].map((game, index, array) => {
+          return (
+            <Link
+              className="w-96"
+              href={`/admin/games/${game?.id}`}
+              key={game?.id}
+            >
+              <Button
+                className={{
+                  root: 'flex w-full flex-col items-start justify-around',
+                }}
+              >
+                <div className="flex w-full justify-between p-2">
+                  <div>{game?.name}</div>
+                  <div className="flex w-10">Id: {game?.id}</div>
+                </div>
+                <div className="flex w-full items-end justify-between p-2 text-sm">
+                  <div className="flex flex-col justify-between gap-y-1 text-left">
+                    <div>Player count: {game?.playerCount}</div>
+                    <div>
+                      Active Period/Segment: {game?.activePeriodIx}/
+                      {game?.activeSegmentIx}
+                    </div>
+                  </div>
+                  <div className="text-right">Status: {game?.status}</div>
+                </div>
+              </Button>
             </Link>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
