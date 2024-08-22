@@ -236,37 +236,34 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
     },
   })
 
-  const currentGameModified = Object.assign({}, currentGame)
-
-  if (!currentGameModified?.activePeriod) return null
+  if (!currentGame?.activePeriod) return null
 
   // The segementCount for active period is currently not needed
-  currentGameModified.periods = currentGameModified.periods.map((period) => ({
+  currentGame.periods = currentGame.periods.map((period) => ({
     ...period,
     segmentCount: period.segments.length,
   }))
 
   // We filter up to the active period (and active segemnt) - future periods
   // should not be visible to the user
-  const activePeriodIx = currentGameModified.activePeriodIx
-  currentGameModified.periods = currentGameModified.periods.filter(
+  const activePeriodIx = currentGame.activePeriodIx
+  currentGame.periods = currentGame.periods.filter(
     (_, ix) => ix <= activePeriodIx
   )
-  const activeSegmentIx = currentGameModified.activePeriod.activeSegmentIx
+  const activeSegmentIx = currentGame.activePeriod.activeSegmentIx
 
-  currentGameModified.activePeriod.segments =
-    currentGameModified.activePeriod.segments.filter(
-      (_, ix) => ix <= activeSegmentIx
-    )
+  currentGame.activePeriod.segments = currentGame.activePeriod.segments.filter(
+    (_, ix) => ix <= activeSegmentIx
+  )
 
-  currentGameModified.periods[activePeriodIx]!.segments =
-    currentGameModified.activePeriod.segments
+  currentGame.periods[activePeriodIx]!.segments =
+    currentGame.activePeriod.segments
 
   const previousResults = ctx.prisma.playerResult.findMany({
     where: {
       playerId: args.playerId,
       periodIx: {
-        lte: currentGameModified.activePeriod.index,
+        lte: currentGame.activePeriod.index,
       },
     },
     include: {
@@ -278,8 +275,8 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
   const playerResult = await ctx.prisma.playerResult.findUnique({
     where: {
       periodIx_segmentIx_playerId_type: {
-        periodIx: currentGameModified.activePeriodIx,
-        segmentIx: currentGameModified.activePeriod.activeSegmentIx,
+        periodIx: currentGame.activePeriodIx,
+        segmentIx: currentGame.activePeriod.activeSegmentIx,
         playerId: args.playerId,
         type: DB.PlayerResultType.SEGMENT_END,
       },
@@ -307,7 +304,7 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
   })
 
   return {
-    currentGameModified,
+    currentGame,
     playerResult,
     previousResults,
     transactions,
