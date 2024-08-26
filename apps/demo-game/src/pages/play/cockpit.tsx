@@ -1,11 +1,15 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { Layout } from '@gbl-uzh/ui'
-import { Switch, Table } from '@uzh-bf/design-system'
+import { Countdown, Switch, Table } from '@uzh-bf/design-system'
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@uzh-bf/design-system/dist/future'
+import { toast } from 'react-hot-toast'
+
+import { differenceInSeconds } from 'date-fns'
+import { useEffect, useState } from 'react'
 import {
   CartesianGrid,
   Line,
@@ -22,6 +26,7 @@ import {
 import {
   PerformActionDocument,
   ResultDocument,
+  UpdateReadyStateDocument,
 } from 'src/graphql/generated/ops'
 import { ActionTypes } from 'src/services/ActionsReducer'
 
@@ -39,6 +44,46 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     fetchPolicy: 'cache-only',
   })
 
+  const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument)
+
+  const [countdownDuration, setCountdownDuration] = useState<number | null>(
+    null
+  )
+  const [countdownNotifications, setCountdownNotifications] = useState({
+    '0': false,
+    '60': false,
+    '180': false,
+  })
+
+  let expiresAt = new Date(
+    data?.result?.currentGame?.activePeriod?.activeSegment?.countdownExpiresAt
+  )
+  useEffect(() => {
+    const localCountdownExpiry =
+      data?.result?.currentGame?.activePeriod?.activeSegment?.countdownExpiresAt
+    if (!localCountdownExpiry) {
+      setCountdownDuration(null)
+      return
+    }
+
+    expiresAt = new Date(localCountdownExpiry)
+    const secondsRemaining = differenceInSeconds(expiresAt, new Date())
+
+    setCountdownDuration(secondsRemaining)
+
+    if (secondsRemaining > 0) {
+      toast(
+        `Countdown set: ${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
+        {
+          className: '!bg-orange-200',
+          icon: '⏰',
+        }
+      )
+    }
+  }, [
+    data?.result?.currentGame?.activePeriod?.activeSegment?.countdownExpiresAt,
+  ])
+
   const playerInfo = {
     name: data.self.name,
     color: data.self.facts.color,
@@ -54,7 +99,75 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     },
   }
 
-  const sidebar = <div>SidebarAddons</div>
+  const sidebar = (
+    <div>
+      <Switch
+        className={{ root: 'text-xs font-bold text-gray-600' }}
+        disabled={!data.self || loading}
+        id="isReady"
+        checked={data.self.isReady}
+        label="Ready?"
+        onCheckedChange={() => {
+          updateReadyState({
+            variables: {
+              isReady: !data.self.isReady,
+            },
+          })
+        }}
+      />
+      <div>
+        {typeof countdownDuration === 'number' && (
+          <div>
+            <Countdown
+              className={{ root: 'text-xs font-bold text-gray-600' }}
+              expiresAt={expiresAt}
+              formatter={(value) => `${value}s`}
+              onExpire={() => {
+                return
+                toast('Time is up! The period will be closed soon.', {
+                  className: '!bg-red-300',
+                  icon: '⏰',
+                })
+                setCountdownNotifications({
+                  ...countdownNotifications,
+                  '0': true,
+                })
+              }}
+              onUpdate={(secondsRemaining) => {
+                if (secondsRemaining <= 60) {
+                  if (countdownNotifications['60']) return
+                  toast(
+                    `Less than a minute remaining! Please press ready once you are done.`,
+                    {
+                      className: '!bg-orange-300',
+                      icon: '⏰',
+                    }
+                  )
+                  setCountdownNotifications({
+                    ...countdownNotifications,
+                    '60': true,
+                  })
+                } else if (secondsRemaining <= 180) {
+                  if (countdownNotifications['180']) return
+                  toast(
+                    `Less than three minutes remaining! Please press ready once you are done.`,
+                    {
+                      className: '!bg-yellow-300',
+                      icon: '⏰',
+                    }
+                  )
+                  setCountdownNotifications({
+                    ...countdownNotifications,
+                    '180': true,
+                  })
+                }
+              }}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  )
 
   return (
     <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>

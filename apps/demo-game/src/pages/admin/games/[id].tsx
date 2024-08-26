@@ -29,6 +29,7 @@ import { useCallback, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
+  AddCountdownDocument,
   AddGamePeriodDocument,
   AddPeriodSegmentDocument,
   Game,
@@ -77,6 +78,8 @@ function ManageGame() {
       refetchQueries: 'active',
     }
   )
+
+  const [addCountdown] = useMutation(AddCountdownDocument)
 
   const nextPeriod = () =>
     activateNextPeriod({
@@ -528,6 +531,30 @@ function ManageGame() {
             </div>
           ))}
         </div>
+      </div>
+      <div className="mt-4">
+        <Formik
+          initialValues={{ countdownSeconds: 300 }}
+          onSubmit={(values) =>
+            addCountdown({
+              variables: {
+                gameId: Number(router.query.id),
+                seconds: Number(values.countdownSeconds),
+              },
+            })
+          }
+        >
+          {(countdownForm) => (
+            <div className="flex flex-row gap-2">
+              <FormikNumberField name="countdownSeconds" precision={0} />
+              <Button onClick={() => countdownForm.handleSubmit()}>
+                Set Countdown
+              </Button>
+            </div>
+          )}
+        </Formik>
+
+        {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
       </div>
     </div>
   )
