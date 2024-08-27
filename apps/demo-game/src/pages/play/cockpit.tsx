@@ -54,8 +54,8 @@ function GameLayout({ children }: { children: React.ReactNode }) {
 
   const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
     ?.countdownExpiresAt as string | null
-  const countdownDurationSec = (data?.result?.currentGame?.activePeriod
-    ?.activeSegment?.countdownDurationMs / 1000) as number | null
+  const countdownDurationMs = data?.result?.currentGame?.activePeriod
+    ?.activeSegment?.countdownDurationMs as number | null
 
   useEffect(() => {
     const dateExpiresAt = new Date(strExpiresAt)
@@ -106,14 +106,14 @@ function GameLayout({ children }: { children: React.ReactNode }) {
         }}
       />
 
-      {countdownDurationSec !== null && (
+      {countdownDurationMs !== null && (
         <CycleCountdown
           className={{
             root: '',
             countdownWrapper: '',
             countdown: 'text-xs font-bold text-gray-600',
           }}
-          totalDuration={countdownDurationSec}
+          totalDuration={countdownDurationMs / 1000}
           expiresAt={new Date(strExpiresAt)}
           formatter={(value) => `${value}s`}
           onExpire={() =>
