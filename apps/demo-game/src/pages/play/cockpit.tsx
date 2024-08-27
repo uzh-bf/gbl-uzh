@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { Layout } from '@gbl-uzh/ui'
-import { Countdown, Switch, Table } from '@uzh-bf/design-system'
+import { CycleCountdown, Switch, Table } from '@uzh-bf/design-system'
 import {
   ChartContainer,
   ChartTooltip,
@@ -54,17 +54,24 @@ function GameLayout({ children }: { children: React.ReactNode }) {
 
   const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
     ?.countdownExpiresAt as string | null
-  const [dateExpiresAt, setDateExpiresAt] = useState<Date | null>(null)
+  const [countdownDuration, setCountdownDuration] = useState<number | null>(
+    null
+  )
 
   useEffect(() => {
     if (!strExpiresAt) {
-      setDateExpiresAt(null)
+      setCountdownDuration(null)
       return
     }
 
-    const expiresAt = new Date(strExpiresAt)
-    const secondsRemaining = differenceInSeconds(expiresAt, new Date())
-    setDateExpiresAt(expiresAt)
+    // TODO(JJ): Currently, we don't have the countduration from the backend.
+    // So when we refresh the page, the progress bar is full again.
+    // const secondsRemaining = differenceInSeconds(dateExpiresAt, new Date(dateExpiresAt.getTime() - 70000))
+    const dateExpiresAt = new Date(strExpiresAt)
+    const secondsRemaining = differenceInSeconds(dateExpiresAt, new Date())
+
+    setCountdownDuration(secondsRemaining)
+
     if (secondsRemaining > 0) {
       toast(
         `Countdown set: ${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
@@ -94,7 +101,9 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   const sidebar = (
     <div className="flex items-center justify-between">
       <Switch
-        className={{ root: 'text-xs font-bold text-gray-600' }}
+        className={{
+          root: 'text-xs font-bold text-gray-600',
+        }}
         disabled={!data.self || loading}
         id="isReady"
         checked={data.self.isReady}
@@ -108,10 +117,15 @@ function GameLayout({ children }: { children: React.ReactNode }) {
         }}
       />
 
-      {dateExpiresAt !== null && (
-        <Countdown
-          className={{ root: 'text-xs font-bold text-gray-600' }}
-          expiresAt={dateExpiresAt}
+      {countdownDuration !== null && (
+        <CycleCountdown
+          className={{
+            root: '',
+            countdownWrapper: '',
+            countdown: 'text-xs font-bold text-gray-600',
+          }}
+          totalDuration={countdownDuration}
+          expiresAt={new Date(strExpiresAt)}
           formatter={(value) => `${value}s`}
           onExpire={() =>
             toast('Time is up! The period will be closed soon.', {
