@@ -6,7 +6,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@uzh-bf/design-system/dist/future'
-import { toast } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 
 import { differenceInSeconds } from 'date-fns'
 import { useEffect, useState } from 'react'
@@ -41,36 +41,30 @@ function GameHeader({ currentGame }) {
 
 function GameLayout({ children }: { children: React.ReactNode }) {
   const { data } = useQuery(ResultDocument, {
-    fetchPolicy: 'cache-only',
+    fetchPolicy: 'cache-first',
+    pollInterval: 10000,
   })
 
   const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument)
 
-  const [countdownDuration, setCountdownDuration] = useState<number | null>(
-    null
-  )
   const [countdownNotifications, setCountdownNotifications] = useState({
-    '0': false,
     '60': false,
     '180': false,
   })
 
-  let expiresAt = new Date(
-    data?.result?.currentGame?.activePeriod?.activeSegment?.countdownExpiresAt
-  )
+  const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
+    ?.countdownExpiresAt as string | null
+  const [dateExpiresAt, setDateExpiresAt] = useState<Date | null>(null)
+
   useEffect(() => {
-    const localCountdownExpiry =
-      data?.result?.currentGame?.activePeriod?.activeSegment?.countdownExpiresAt
-    if (!localCountdownExpiry) {
-      setCountdownDuration(null)
+    if (!strExpiresAt) {
+      setDateExpiresAt(null)
       return
     }
 
-    expiresAt = new Date(localCountdownExpiry)
+    const expiresAt = new Date(strExpiresAt)
     const secondsRemaining = differenceInSeconds(expiresAt, new Date())
-
-    setCountdownDuration(secondsRemaining)
-
+    setDateExpiresAt(expiresAt)
     if (secondsRemaining > 0) {
       toast(
         `Countdown set: ${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
@@ -80,9 +74,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
         }
       )
     }
-  }, [
-    data?.result?.currentGame?.activePeriod?.activeSegment?.countdownExpiresAt,
-  ])
+  }, [strExpiresAt])
 
   const playerInfo = {
     name: data.self.name,
@@ -100,72 +92,64 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   }
 
   const sidebar = (
-    <div>
+    <div className="flex items-center justify-between">
       <Switch
         className={{ root: 'text-xs font-bold text-gray-600' }}
         disabled={!data.self || loading}
         id="isReady"
         checked={data.self.isReady}
         label="Ready?"
-        onCheckedChange={() => {
-          updateReadyState({
+        onCheckedChange={async () => {
+          await updateReadyState({
             variables: {
               isReady: !data.self.isReady,
             },
           })
         }}
       />
-      <div>
-        {typeof countdownDuration === 'number' && (
-          <div>
-            <Countdown
-              className={{ root: 'text-xs font-bold text-gray-600' }}
-              expiresAt={expiresAt}
-              formatter={(value) => `${value}s`}
-              onExpire={() => {
-                return
-                toast('Time is up! The period will be closed soon.', {
-                  className: '!bg-red-300',
+
+      {dateExpiresAt !== null && (
+        <Countdown
+          className={{ root: 'text-xs font-bold text-gray-600' }}
+          expiresAt={dateExpiresAt}
+          formatter={(value) => `${value}s`}
+          onExpire={() =>
+            toast('Time is up! The period will be closed soon.', {
+              className: '!bg-red-300',
+              icon: '⏰',
+            })
+          }
+          onUpdate={(secondsRemaining) => {
+            if (secondsRemaining <= 60) {
+              if (countdownNotifications['60']) return
+              toast(
+                'Less than a minute remaining! Please press ready once you are done.',
+                {
+                  className: '!bg-orange-300',
                   icon: '⏰',
-                })
-                setCountdownNotifications({
-                  ...countdownNotifications,
-                  '0': true,
-                })
-              }}
-              onUpdate={(secondsRemaining) => {
-                if (secondsRemaining <= 60) {
-                  if (countdownNotifications['60']) return
-                  toast(
-                    `Less than a minute remaining! Please press ready once you are done.`,
-                    {
-                      className: '!bg-orange-300',
-                      icon: '⏰',
-                    }
-                  )
-                  setCountdownNotifications({
-                    ...countdownNotifications,
-                    '60': true,
-                  })
-                } else if (secondsRemaining <= 180) {
-                  if (countdownNotifications['180']) return
-                  toast(
-                    `Less than three minutes remaining! Please press ready once you are done.`,
-                    {
-                      className: '!bg-yellow-300',
-                      icon: '⏰',
-                    }
-                  )
-                  setCountdownNotifications({
-                    ...countdownNotifications,
-                    '180': true,
-                  })
                 }
-              }}
-            />
-          </div>
-        )}
-      </div>
+              )
+              setCountdownNotifications({
+                ...countdownNotifications,
+                '60': true,
+              })
+            } else if (secondsRemaining <= 180) {
+              if (countdownNotifications['180']) return
+              toast(
+                'Less than three minutes remaining! Please press ready once you are done.',
+                {
+                  className: '!bg-yellow-300',
+                  icon: '⏰',
+                }
+              )
+              setCountdownNotifications({
+                ...countdownNotifications,
+                '180': true,
+              })
+            }
+          }}
+        />
+      )}
     </div>
   )
 
