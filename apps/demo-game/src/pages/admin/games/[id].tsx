@@ -99,6 +99,7 @@ function ManageGame() {
 
   const getButton = useCallback(() => {
     const game = data.game
+    const disabled = game.periods.length === 0
     const activePeriod = game?.activePeriod
     const segments = activePeriod?.segments
     const activeSegmentIx = activePeriod?.activeSegmentIx
