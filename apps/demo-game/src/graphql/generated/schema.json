@@ -1694,6 +1694,18 @@
             "deprecationReason": null
           },
           {
+            "name": "countdownDurationMs",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "countdownExpiresAt",
             "description": null,
             "args": [],

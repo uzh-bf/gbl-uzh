@@ -609,12 +609,14 @@ export async function addCountdown(args, ctx: Context) {
 
   if (!currentGame?.activePeriod?.activeSegment) return null
 
+  const countdownDurationMs = args.seconds * 1000
   await ctx.prisma.periodSegment.update({
     where: {
       id: currentGame.activePeriod.activeSegment.id,
     },
     data: {
-      countdownExpiresAt: new Date(Date.now() + args.seconds * 1000),
+      countdownExpiresAt: new Date(Date.now() + countdownDurationMs),
+      countdownDurationMs: countdownDurationMs,
     },
   })
 

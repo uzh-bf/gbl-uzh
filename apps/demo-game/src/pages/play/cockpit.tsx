@@ -54,23 +54,12 @@ function GameLayout({ children }: { children: React.ReactNode }) {
 
   const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
     ?.countdownExpiresAt as string | null
-  const [countdownDuration, setCountdownDuration] = useState<number | null>(
-    null
-  )
+  const countdownDurationSec = (data?.result?.currentGame?.activePeriod
+    ?.activeSegment?.countdownDurationMs / 1000) as number | null
 
   useEffect(() => {
-    if (!strExpiresAt) {
-      setCountdownDuration(null)
-      return
-    }
-
-    // TODO(JJ): Currently, we don't have the countduration from the backend.
-    // So when we refresh the page, the progress bar is full again.
-    // const secondsRemaining = differenceInSeconds(dateExpiresAt, new Date(dateExpiresAt.getTime() - 70000))
     const dateExpiresAt = new Date(strExpiresAt)
     const secondsRemaining = differenceInSeconds(dateExpiresAt, new Date())
-
-    setCountdownDuration(secondsRemaining)
 
     if (secondsRemaining > 0) {
       toast(
@@ -117,14 +106,14 @@ function GameLayout({ children }: { children: React.ReactNode }) {
         }}
       />
 
-      {countdownDuration !== null && (
+      {countdownDurationSec !== null && (
         <CycleCountdown
           className={{
             root: '',
             countdownWrapper: '',
             countdown: 'text-xs font-bold text-gray-600',
           }}
-          totalDuration={countdownDuration}
+          totalDuration={countdownDurationSec}
           expiresAt={new Date(strExpiresAt)}
           formatter={(value) => `${value}s`}
           onExpire={() =>

@@ -134,6 +134,7 @@ input PeriodFactsScenarioInput {
 
 type PeriodSegment {
   actions: [PlayerAction!]!
+  countdownDurationMs: Int
   countdownExpiresAt: DateTime
   facts: JSONObject!
   id: ID!
