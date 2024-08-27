@@ -101,121 +101,8 @@ function Cockpit() {
   const playerDataResult = data.result
   const currentGame = playerDataResult.currentGame
 
-  if (!currentGame) {
-    return (
-      <div>
-        <h1> Demo Game </h1>
-        <p>The game has not started yet.</p>
-      </div>
-    )
-  }
-  if (!playerDataResult.playerResult) {
-    return <div>No player results. </div>
-  }
-
-  const resultFacts = playerDataResult.playerResult.facts
-  const previousResults = playerDataResult.previousResults
-  const resultFactsDecisions = resultFacts.decisions
-  const assets = resultFacts.assets
-
-  const decisions = [
-    {
-      name: 'Bank',
-      label: (percentage: number, totalAssets: number) =>
-        `Invest ${(percentage * 100).toFixed()}% (CHF ${(
-          totalAssets * percentage
-        ).toFixed(2)}) into bank.`,
-      state: resultFactsDecisions.bank,
-      action: ActionTypes.DECIDE_BANK,
-    },
-    {
-      name: 'Bonds',
-      label: (percentage: number, totalAssets: number) =>
-        `Invest ${(percentage * 100).toFixed()}% (CHF ${(
-          totalAssets * percentage
-        ).toFixed(2)}) into bonds.`,
-      state: resultFactsDecisions.bonds,
-      action: ActionTypes.DECIDE_BONDS,
-    },
-    {
-      name: 'Stocks',
-      label: (percentage: number, totalAssets: number) =>
-        `Invest ${(percentage * 100).toFixed()}% (CHF ${(
-          totalAssets * percentage
-        ).toFixed(2)}) into stocks.`,
-      state: resultFactsDecisions.stocks,
-      action: ActionTypes.DECIDE_STOCK,
-    },
-  ]
-
-  const columns_segment_results = [
-    { label: '', accessor: 'cat', sortable: false },
-    {
-      label: 'Initial',
-      accessor: '0',
-      sortable: false,
-      transformer: ({ row }: { row: any }) =>
-        typeof row['0'] === 'number' && `CHF ${row['0'].toFixed(2)}`,
-    },
-  ]
-
-  for (let i = 1; i < 4; i++) {
-    const strNum = String(i)
-    columns_segment_results.push({
-      label: 'Month ' + strNum,
-      accessor: strNum,
-      sortable: false,
-      transformer: ({ row }: { row: any }) =>
-        typeof row[strNum] === 'number' && `CHF ${row[strNum].toFixed(2)}`,
-    })
-  }
-
-  const columns_portfolio = [
-    { label: 'Category', accessor: 'cat', sortable: false },
-    { label: 'Value', accessor: 'val', sortable: false },
-  ]
-
-  const reduceFn = (type: string) => {
-    return (acc, value) => {
-      let val = value.bank
-      if (type == 'bonds') {
-        val = value.bonds
-      } else if (type == 'stocks') {
-        val = value.stocks
-      } else if (type == 'total') {
-        val = value.totalAssets
-      }
-      acc[value.ix] = val
-      return acc
-    }
-  }
-
-  const assetsWithReturnsArr = resultFacts.assetsWithReturns
-  const data_segment_results = [
-    assetsWithReturnsArr.reduce(reduceFn('bank'), { cat: 'Savings' }),
-    assetsWithReturnsArr.reduce(reduceFn('bonds'), { cat: 'Bonds' }),
-    assetsWithReturnsArr.reduce(reduceFn('stocks'), { cat: 'Stocks' }),
-    assetsWithReturnsArr.reduce(reduceFn('total'), { cat: 'Total' }),
-  ]
-
-  const data_portfolio = [
-    {
-      cat: 'Savings',
-      val: `CHF ${assets.bank.toFixed(2)}`,
-    },
-    {
-      cat: 'Bonds',
-      val: `CHF ${assets.bonds.toFixed(2)}`,
-    },
-    {
-      cat: 'Stocks',
-      val: `CHF ${assets.stocks.toFixed(2)}`,
-    },
-    {
-      cat: 'Total',
-      val: `CHF ${assets.totalAssets.toFixed(2)}`,
-    },
-  ]
+  // TODO(JJ): The results should only be computed for certain states.
+  // - Create different components, which compute the things internally.
 
   // console.log(data.result.transactions)
 
@@ -258,10 +145,57 @@ function Cockpit() {
         </GameLayout>
       )
 
-    case 'PAUSED':
+    case 'PAUSED': {
+      const previousResults = playerDataResult.previousResults
+
       const totalAssetsPerMonth = getTotalAssetsOfPreviousResults(
         previousResults
       ).map((s, i) => ({ total: s, month: 'month_' + String(i) }))
+
+      const columns_segment_results = [
+        { label: '', accessor: 'cat', sortable: false },
+        {
+          label: 'Initial',
+          accessor: '0',
+          sortable: false,
+          transformer: ({ row }: { row: any }) =>
+            typeof row['0'] === 'number' && `CHF ${row['0'].toFixed(2)}`,
+        },
+      ]
+      for (let i = 1; i < 4; i++) {
+        const strNum = String(i)
+        columns_segment_results.push({
+          label: 'Month ' + strNum,
+          accessor: strNum,
+          sortable: false,
+          transformer: ({ row }: { row: any }) =>
+            typeof row[strNum] === 'number' && `CHF ${row[strNum].toFixed(2)}`,
+        })
+      }
+
+      const reduceFn = (type: string) => {
+        return (acc, value) => {
+          let val = value.bank
+          if (type == 'bonds') {
+            val = value.bonds
+          } else if (type == 'stocks') {
+            val = value.stocks
+          } else if (type == 'total') {
+            val = value.totalAssets
+          }
+          acc[value.ix] = val
+          return acc
+        }
+      }
+
+      const resultFacts = playerDataResult.playerResult.facts
+      const assetsWithReturnsArr = resultFacts.assetsWithReturns ?? []
+      const data_segment_results = [
+        assetsWithReturnsArr.reduce(reduceFn('bank'), { cat: 'Savings' }),
+        assetsWithReturnsArr.reduce(reduceFn('bonds'), { cat: 'Bonds' }),
+        assetsWithReturnsArr.reduce(reduceFn('stocks'), { cat: 'Stocks' }),
+        assetsWithReturnsArr.reduce(reduceFn('total'), { cat: 'Total' }),
+      ]
       return (
         <GameLayout>
           <div className="flex flex-col">
@@ -311,8 +245,65 @@ function Cockpit() {
           </div>
         </GameLayout>
       )
+    }
+    case 'RUNNING': {
+      const resultFacts = playerDataResult.playerResult.facts
+      const assets = resultFacts.assets
+      const resultFactsDecisions = resultFacts.decisions
 
-    case 'RUNNING':
+      const columns_portfolio = [
+        { label: 'Category', accessor: 'cat', sortable: false },
+        { label: 'Value', accessor: 'val', sortable: false },
+      ]
+
+      const data_portfolio = [
+        {
+          cat: 'Savings',
+          val: `CHF ${assets.bank.toFixed(2)}`,
+        },
+        {
+          cat: 'Bonds',
+          val: `CHF ${assets.bonds.toFixed(2)}`,
+        },
+        {
+          cat: 'Stocks',
+          val: `CHF ${assets.stocks.toFixed(2)}`,
+        },
+        {
+          cat: 'Total',
+          val: `CHF ${assets.totalAssets.toFixed(2)}`,
+        },
+      ]
+
+      const decisions = [
+        {
+          name: 'Bank',
+          label: (percentage: number, totalAssets: number) =>
+            `Invest ${(percentage * 100).toFixed()}% (CHF ${(
+              totalAssets * percentage
+            ).toFixed(2)}) into bank.`,
+          state: resultFactsDecisions.bank,
+          action: ActionTypes.DECIDE_BANK,
+        },
+        {
+          name: 'Bonds',
+          label: (percentage: number, totalAssets: number) =>
+            `Invest ${(percentage * 100).toFixed()}% (CHF ${(
+              totalAssets * percentage
+            ).toFixed(2)}) into bonds.`,
+          state: resultFactsDecisions.bonds,
+          action: ActionTypes.DECIDE_BONDS,
+        },
+        {
+          name: 'Stocks',
+          label: (percentage: number, totalAssets: number) =>
+            `Invest ${(percentage * 100).toFixed()}% (CHF ${(
+              totalAssets * percentage
+            ).toFixed(2)}) into stocks.`,
+          state: resultFactsDecisions.stocks,
+          action: ActionTypes.DECIDE_STOCK,
+        },
+      ]
       return (
         <GameLayout>
           <div className="flex w-full flex-col">
@@ -366,6 +357,8 @@ function Cockpit() {
           </div>
         </GameLayout>
       )
+    }
+
     default:
       return <div> Game has not been created yet. </div>
   }
