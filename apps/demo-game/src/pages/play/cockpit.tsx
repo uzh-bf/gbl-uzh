@@ -206,6 +206,8 @@ const months = [
   'Nov',
   'Dec',
 ]
+const numMonths = months.length
+const numMonthsPerSegment = 4
 
 function Cockpit() {
   const { loading, error, data } = useQuery(ResultDocument, {
@@ -276,55 +278,42 @@ function Cockpit() {
         previousResults
       ).map((s, i) => ({
         total: s,
-        month: months[i % months.length],
-        period: Math.floor(i / months.length),
+        month: months[i % numMonths],
+        period: ~~(i / numMonths) + 1, // integer division
       }))
-      console.log(totalAssetsPerMonth)
 
-      const filtered = previousResults.filter((o) => o.type == 'SEGMENT_END')
-
-      filtered.sort((a, b) =>
-        a.period.index > b.period.index && a.segment.index > b.segment.index
-          ? -1
-          : 1
-      )
       const newTotalAssetsPerMonths = totalAssetsPerMonth.reduce(
         (acc, val, ix) => {
           const key = 'period_' + val.period
-          const numMonths = months.length
           const index = ix % numMonths
           acc[index] = acc[index] || { month: val.month }
-          // acc[index][key] = {
-          //   index: val.period,
-          //   total: val.total,
-          // }
           acc[index][key] = val.total
           return acc
         },
         []
       )
-      console.log('newTotalAssetsPerMonths', newTotalAssetsPerMonths)
 
-      const config = newTotalAssetsPerMonths.reduce((acc, val, ix) => {
-        Object.keys(val).forEach((key) => {
+      const config = Object.keys(newTotalAssetsPerMonths[0]).reduce(
+        (acc, key, ix) => {
           if (key.startsWith('period_')) {
             acc[key] = {
               label: key,
-              color: 'hsl(var(--chart-1))',
+              color: `hsl(var(--chart-${ix}))`,
             }
           }
-        })
-        return acc
-      }, {})
+          return acc
+        },
+        {}
+      )
 
       const columns_segment_results = [
         { label: '', accessor: 'cat', sortable: false, transformer: null },
       ]
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < numMonthsPerSegment; i++) {
         const strNum = String(i)
-        const numMonths = months.length
+
         const numDataPoints = totalAssetsPerMonth.length
-        const index = (numDataPoints - 4 + i) % numMonths
+        const index = (numDataPoints - numMonthsPerSegment + i) % numMonths
         const periodIx = ~~(numDataPoints / numMonths) + 1
 
         columns_segment_results.push({
