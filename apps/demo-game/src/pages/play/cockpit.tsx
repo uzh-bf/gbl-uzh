@@ -2,6 +2,11 @@ import { useMutation, useQuery } from '@apollo/client'
 import { Layout } from '@gbl-uzh/ui'
 import { CycleCountdown, Switch, Table } from '@uzh-bf/design-system'
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
@@ -11,14 +16,7 @@ import {
 
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
 import LearningElements from 'src/components/LearningElements'
 import {
   TransactionsDisplay,
@@ -297,7 +295,7 @@ function Cockpit() {
         (acc, key, ix) => {
           if (key.startsWith('period_')) {
             acc[key] = {
-              label: key,
+              label: 'Period ' + ix,
               color: `hsl(var(--chart-${ix}))`,
             }
           }
@@ -317,7 +315,7 @@ function Cockpit() {
         const periodIx = ~~(numDataPoints / numMonths) + 1
 
         columns_segment_results.push({
-          label: months[index] + ' Period ' + String(periodIx),
+          label: months[index] + ' Period ' + periodIx,
           accessor: strNum,
           sortable: false,
           transformer: ({ row }: { row: any }) =>
@@ -360,40 +358,46 @@ function Cockpit() {
                   caption=""
                 />
               </div>
-              <div className="flex justify-center">
-                Total assets over time chart
-              </div>
-              <ResponsiveContainer width="100%" height="50%">
-                <ChartContainer config={config}>
-                  <LineChart data={newTotalAssetsPerMonths}>
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent />}
-                    />
-                    {Object.keys(config).map((key) => {
-                      return (
-                        <Line
-                          key={key}
-                          type="natural"
-                          dataKey={key}
-                          stroke={config[key].color}
-                          dot={false}
-                          strokeWidth={2}
-                        />
-                      )
-                    })}
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                      dataKey="month"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                    />
-                    <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                    <ChartLegend content={<ChartLegendContent />} />
-                  </LineChart>
-                </ChartContainer>
-              </ResponsiveContainer>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Total assets</CardTitle>
+                  <CardDescription>
+                    Total assets over time (per period).
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={config}>
+                    <LineChart data={newTotalAssetsPerMonths}>
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent />}
+                      />
+                      {Object.keys(config).map((key) => {
+                        return (
+                          <Line
+                            key={key}
+                            type="natural"
+                            dataKey={key}
+                            stroke={config[key].color}
+                            dot={false}
+                            strokeWidth={2}
+                          />
+                        )
+                      })}
+                      <CartesianGrid vertical={false} />
+                      <XAxis
+                        dataKey="month"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                      />
+                      <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                      <ChartLegend content={<ChartLegendContent />} />
+                    </LineChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </GameLayout>
