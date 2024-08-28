@@ -16,15 +16,7 @@ import {
 
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
 import LearningElements from 'src/components/LearningElements'
 import {
   TransactionsDisplay,
@@ -281,63 +273,174 @@ function Cockpit() {
       const previousResults = playerDataResult.previousResults
 
       // TODO(JJ): Move computation helpers to lib.
-      const totalAssetsPerMonth = getTotalAssetsOfPreviousResults(
-        previousResults
-      ).map((s, i) => ({
-        total: s,
-        month: months[i % numMonths],
-        period: ~~(i / numMonths) + 1, // integer division
-      }))
-
-      const newTotalAssetsPerMonths = totalAssetsPerMonth.reduce(
-        (acc, val, ix) => {
-          const key = 'period_' + val.period
-          const index = ix % numMonths
-          acc[index] = acc[index] || { month: val.month }
-          acc[index][key] = val.total
-          return acc
-        },
-        []
-      )
-      const filtered = previousResults.filter((o) => o.type == 'SEGMENT_END')
-
-      const assetsWithReturns = filtered
+      const filtered = previousResults
+        .filter((o) => o.type == 'SEGMENT_END')
         .sort((a, b) =>
           a.period.index > b.period.index && a.segment.index > b.segment.index
             ? -1
             : 1
         )
-        .map((e) => e.facts.assetsWithReturns)
+      const assetsWithReturns = filtered.map((e) => e.facts.assetsWithReturns)
+      const assetsWithReturnsFlat = assetsWithReturns.flat()
+      const initialCapital = assetsWithReturnsFlat[0].totalAssets
+      console.log('assetsWithReturnsFlat', assetsWithReturnsFlat)
 
-      const initialCapital = assetsWithReturns[0][0].bank
-      const returnsPerCent = newTotalAssetsPerMonths.map((e, ix) => {
-        let r = {
-          ...e,
+      const assetsPerMonthPrep = assetsWithReturnsFlat.map((e, ix) => {
+        return {
+          total: e.totalAssets,
+          // totalReturns: e.totalAssetsReturn ?? 0,
+          bankReturn: e.bankReturn ?? 0,
+          bondsReturn: e.bondsReturn ?? 0,
+          stocksReturn: e.stocksReturn ?? 0,
+          month: months[ix % numMonths],
+          period: ~~(ix / numMonths) + 1, // integer division
         }
-        Object.keys(r).forEach((key) => {
-          if (key.startsWith('period_')) {
-            r[key] = e[key] / initialCapital - 1
-          }
-        })
-        return r
       })
-      console.log(returnsPerCent)
+      console.log('assetsPerMonthPrep', assetsPerMonthPrep)
 
-      console.log(assetsWithReturns)
-      console.log(newTotalAssetsPerMonths)
+      const assetsPerMonth = assetsPerMonthPrep.reduce((acc, val, ix) => {
+        const key_prefix = 'period_' + val.period
+        const key_total = key_prefix + '_total'
+        const key_bankReturn = key_prefix + '_bankReturn'
+        const key_bondsReturn = key_prefix + '_bondsReturn'
+        const key_stocksReturn = key_prefix + '_stocksReturn'
+        // const key_totalReturns = key_prefix + '_totalReturns'
 
-      const config = Object.keys(newTotalAssetsPerMonths[0]).reduce(
-        (acc, key, ix) => {
-          if (key.startsWith('period_')) {
-            acc[key] = {
-              label: 'Period ' + ix,
-              color: `hsl(var(--chart-${ix}))`,
-            }
+        const index = ix % numMonths
+        acc[index] = acc[index] || { month: val.month }
+        acc[index][key_total] = val.total
+        acc[index][key_bankReturn] = val.bankReturn
+        acc[index][key_bondsReturn] = val.bondsReturn
+        acc[index][key_stocksReturn] = val.stocksReturn
+        // acc[index][key_totalReturns] = val.totalReturns
+        return acc
+      }, [])
+
+      const benchmarksPrep = assetsPerMonthPrep.reduce((acc, val, ix) => {
+        acc[ix] = {
+          month: val.month,
+          bank: initialCapital,
+          bankReturn: 0,
+          bonds: initialCapital,
+          bondsReturn: 0,
+          stocks: initialCapital,
+          stocksReturn: 0,
+          period: val.period,
+        }
+        if (ix > 0) {
+          acc[ix].bank = acc[ix - 1].bank * (val.bankReturn + 1)
+          acc[ix].bonds = acc[ix - 1].bonds * (val.bondsReturn + 1)
+          acc[ix].stocks = acc[ix - 1].stocks * (val.stocksReturn + 1)
+          acc[ix].bankReturn = acc[ix].bank / initialCapital - 1
+          acc[ix].bondsReturn = acc[ix].bonds / initialCapital - 1
+          acc[ix].stocksReturn = acc[ix].stocks / initialCapital - 1
+        }
+        return acc
+      }, [])
+      console.log('benchmarksPrep', benchmarksPrep)
+
+      const benchmarks = benchmarksPrep.reduce((acc, val, ix) => {
+        const key_prefix = 'period_' + val.period
+        const key_bank = key_prefix + '_bank'
+        const key_bonds = key_prefix + '_bonds'
+        const key_stocks = key_prefix + '_stocks'
+        const key_bankReturn = key_prefix + '_bankReturn'
+        const key_bondsReturn = key_prefix + '_bondsReturn'
+        const key_stocksReturn = key_prefix + '_stocksReturn'
+
+        const index = ix % numMonths
+        acc[index] = acc[index] || { month: val.month }
+        acc[index][key_bank] = val.bank
+        acc[index][key_bonds] = val.bonds
+        acc[index][key_stocks] = val.stocks
+        acc[index][key_bankReturn] = val.bankReturn
+        acc[index][key_bondsReturn] = val.bondsReturn
+        acc[index][key_stocksReturn] = val.stocksReturn
+        return acc
+      }, [])
+      console.log('benchmarks', benchmarks)
+
+      const totalAssetsPerMonth = assetsPerMonth.map((e, ix) => {
+        const totalEntries = Object.keys(e).reduce((acc, key, index) => {
+          if (key.endsWith('total')) {
+            acc[key] = e[key]
           }
           return acc
-        },
-        {}
-      )
+        }, {})
+
+        return {
+          month: e.month,
+          ...totalEntries,
+        }
+      })
+
+      const accReturnsTotalPerCent = totalAssetsPerMonth.map((e, ix) => {
+        const totalEntries = Object.keys(e).reduce((acc, key, index) => {
+          if (key.endsWith('total')) {
+            acc[key] = e[key] / initialCapital - 1
+          }
+          return acc
+        }, {})
+
+        return {
+          month: e.month,
+          ...totalEntries,
+        }
+      })
+
+      const accReturnsPerCent = assetsPerMonth.map((e, ix) => {
+        const totalEntries = Object.keys(e).reduce((acc, key, index) => {
+          if (key.endsWith('total')) {
+            acc[key] = e[key] / initialCapital - 1
+          } else if (key.endsWith('bank')) {
+            acc[key] = e[key] / initialCapital - 1
+          } else {
+            acc[key] = e[key]
+          }
+          return acc
+        }, {})
+
+        return {
+          month: e.month,
+          ...totalEntries,
+        }
+      })
+
+      console.log('accReturnsTotalPerCent', accReturnsTotalPerCent)
+      console.log('accReturnsPerCent', accReturnsPerCent)
+      console.log('assetsPerMonth', assetsPerMonth)
+      console.log('totalAssetsPerMonth', totalAssetsPerMonth)
+
+      const config = Object.keys(assetsPerMonth[0]).reduce((acc, key) => {
+        const strName = 'period_'
+        const periodNameIx = strName.length
+        if (key.startsWith(strName)) {
+          const periodIx = key.substring(periodNameIx, periodNameIx + 1)
+          acc[key] = {
+            label:
+              'P' + periodIx + ' (' + key.substring(periodNameIx + 2) + ')',
+            color: `hsl(var(--chart-${periodIx}))`,
+          }
+        }
+        return acc
+      }, {})
+
+      const configTotal = Object.keys(config).reduce((acc, key) => {
+        if (key.endsWith('_total')) {
+          acc[key] = config[key]
+        }
+        return acc
+      }, {})
+
+      // const configTotalReturns = Object.keys(config).reduce((acc, key) => {
+      //   if (key.endsWith('_Returns')) {
+      //     acc[key] = config[key]
+      //   }
+      //   return acc
+      // }, {})
+
+      console.log('config', config)
+      console.log('configTotal', configTotal)
 
       const columns_segment_results = [
         { label: '', accessor: 'cat', sortable: false, transformer: null },
@@ -345,7 +448,7 @@ function Cockpit() {
       for (let i = 0; i < numMonthsPerSegment; i++) {
         const strNum = String(i)
 
-        const numDataPoints = totalAssetsPerMonth.length
+        const numDataPoints = assetsWithReturnsFlat.length
         const index = (numDataPoints - numMonthsPerSegment + i) % numMonths
         const periodIx = ~~(numDataPoints / numMonths) + 1
 
@@ -393,7 +496,7 @@ function Cockpit() {
                   caption=""
                 />
               </div>
-              <div className="flex flex-wrap gap-2 xl:flex-nowrap">
+              <div className="flex flex-col gap-2">
                 <Card>
                   <CardHeader>
                     <CardTitle>Total Assets</CardTitle>
@@ -402,22 +505,19 @@ function Cockpit() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ChartContainer config={config}>
-                      <LineChart
-                        data={newTotalAssetsPerMonths}
-                        accessibilityLayer
-                      >
+                    <ChartContainer config={configTotal}>
+                      <LineChart data={totalAssetsPerMonth} accessibilityLayer>
                         <ChartTooltip
                           cursor={false}
                           content={<ChartTooltipContent />}
                         />
-                        {Object.keys(config).map((key) => {
+                        {Object.keys(configTotal).map((key) => {
                           return (
                             <Line
                               key={key}
                               type="natural"
                               dataKey={key}
-                              stroke={config[key].color}
+                              stroke={configTotal[key].color}
                               dot={false}
                               strokeWidth={2}
                             />
@@ -440,16 +540,208 @@ function Cockpit() {
                     </ChartContainer>
                   </CardContent>
                 </Card>
+                {/* <Card>
+                  <CardHeader>
+                    <CardTitle>Total Accumulated Returns</CardTitle>
+                    <CardDescription>
+                      Total accumulated returns in percent over time (per
+                      period).
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={configTotal}>
+                      <BarChart
+                        data={accReturnsTotalPerCent}
+                        accessibilityLayer
+                      >
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent />}
+                        />
+                        {Object.keys(configTotal).map((key) => {
+                          return (
+                            <Bar
+                              key={key}
+                              stackId="1"
+                              dataKey={key}
+                              fill={configTotal[key].color}
+                              radius={4}
+                            />
+                          )
+                        })}
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="month"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tickFormatter={(v) => `${v.toFixed(2) * 100}%`}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
+                      </BarChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card> */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Total Returns</CardTitle>
+                    <CardTitle>Total Accumulated Returns Benchmark</CardTitle>
                     <CardDescription>
-                      Total returns in percent over time (per period).
+                      Total accumulated returns in percent over time (per
+                      period).
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer
+                      config={{
+                        period_1_bank: { color: '#007bff', label: 'Bank P1' },
+                        period_2_bank: { color: '#34f4ff', label: 'Bank P2' },
+                        period_1_bonds: { color: '#0000ff', label: 'Bonds P1' },
+                        period_2_bonds: { color: '#3400ff', label: 'Bonds P2' },
+                        period_1_stocks: {
+                          color: '#887b88',
+                          label: 'Stocks P1',
+                        },
+                        period_2_stocks: {
+                          color: '#123456',
+                          label: 'Stocks P2',
+                        },
+                      }}
+                    >
+                      <LineChart data={benchmarks} accessibilityLayer>
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent />}
+                        />
+
+                        <Line
+                          // key={key}
+                          type="natural"
+                          dataKey="period_1_bank"
+                          stroke={'#007bff'}
+                          dot={false}
+                          strokeWidth={2}
+                        />
+                        <Line
+                          // key={key}
+                          type="natural"
+                          dataKey="period_2_bank"
+                          stroke={'#34f4ff'}
+                          dot={false}
+                          strokeWidth={2}
+                        />
+                        <Line
+                          // key={key}
+                          type="natural"
+                          dataKey="period_1_bonds"
+                          stroke={'#0000ff'}
+                          dot={false}
+                          strokeWidth={2}
+                        />
+                        <Line
+                          // key={key}
+                          type="natural"
+                          dataKey="period_2_bonds"
+                          stroke={'#3400ff'}
+                          dot={false}
+                          strokeWidth={2}
+                        />
+                        <Line
+                          // key={key}
+                          type="natural"
+                          dataKey="period_1_stocks"
+                          stroke={'#887b88'}
+                          dot={false}
+                          strokeWidth={2}
+                        />
+                        <Line
+                          // key={key}
+                          type="natural"
+                          dataKey="period_2_stocks"
+                          stroke={'#123456'}
+                          dot={false}
+                          strokeWidth={2}
+                        />
+
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="month"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
+                      </LineChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Total Accumulated Returns</CardTitle>
+                    <CardDescription>
+                      Total accumulated returns in percent over time (per
+                      period).
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={configTotal}>
+                      <LineChart
+                        data={accReturnsTotalPerCent}
+                        accessibilityLayer
+                      >
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent />}
+                        />
+                        {Object.keys(configTotal).map((key) => {
+                          return (
+                            <Line
+                              key={key}
+                              type="natural"
+                              dataKey={key}
+                              stroke={configTotal[key].color}
+                              dot={false}
+                              strokeWidth={2}
+                            />
+                          )
+                        })}
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="month"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tickFormatter={(v) => `${v.toFixed(2) * 100}%`}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
+                      </LineChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+                {/* <Card>
+                  <CardHeader>
+                    <CardTitle>Returns</CardTitle>
+                    <CardDescription>
+                      Returns in percent over time (per period).
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ChartContainer config={config}>
-                      <BarChart data={returnsPerCent} accessibilityLayer>
+                      <BarChart data={accReturnsPerCent} accessibilityLayer>
                         <ChartTooltip
                           cursor={false}
                           content={<ChartTooltipContent />}
@@ -482,7 +774,7 @@ function Cockpit() {
                       </BarChart>
                     </ChartContainer>
                   </CardContent>
-                </Card>
+                </Card> */}
               </div>
             </div>
           </div>
