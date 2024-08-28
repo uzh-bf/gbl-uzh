@@ -3,6 +3,8 @@ import { Layout } from '@gbl-uzh/ui'
 import { CycleCountdown, Switch, Table } from '@uzh-bf/design-system'
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from '@uzh-bf/design-system/dist/future'
@@ -14,7 +16,6 @@ import {
   Line,
   LineChart,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from 'recharts'
@@ -191,6 +192,21 @@ const tabs = [
   { name: 'Cockpit', href: '/play/cockpit' },
 ]
 
+const months = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
+
 function Cockpit() {
   const { loading, error, data } = useQuery(ResultDocument, {
     fetchPolicy: 'cache-first',
@@ -258,22 +274,61 @@ function Cockpit() {
 
       const totalAssetsPerMonth = getTotalAssetsOfPreviousResults(
         previousResults
-      ).map((s, i) => ({ total: s, month: 'month_' + String(i) }))
+      ).map((s, i) => ({
+        total: s,
+        month: months[i % months.length],
+        period: Math.floor(i / months.length),
+      }))
+      console.log(totalAssetsPerMonth)
+
+      const filtered = previousResults.filter((o) => o.type == 'SEGMENT_END')
+
+      filtered.sort((a, b) =>
+        a.period.index > b.period.index && a.segment.index > b.segment.index
+          ? -1
+          : 1
+      )
+      const newTotalAssetsPerMonths = totalAssetsPerMonth.reduce(
+        (acc, val, ix) => {
+          const key = 'period_' + val.period
+          const numMonths = months.length
+          const index = ix % numMonths
+          acc[index] = acc[index] || { month: val.month }
+          // acc[index][key] = {
+          //   index: val.period,
+          //   total: val.total,
+          // }
+          acc[index][key] = val.total
+          return acc
+        },
+        []
+      )
+      console.log('newTotalAssetsPerMonths', newTotalAssetsPerMonths)
+
+      const config = newTotalAssetsPerMonths.reduce((acc, val, ix) => {
+        Object.keys(val).forEach((key) => {
+          if (key.startsWith('period_')) {
+            acc[key] = {
+              label: key,
+              color: 'hsl(var(--chart-1))',
+            }
+          }
+        })
+        return acc
+      }, {})
 
       const columns_segment_results = [
-        { label: '', accessor: 'cat', sortable: false },
-        {
-          label: 'Initial',
-          accessor: '0',
-          sortable: false,
-          transformer: ({ row }: { row: any }) =>
-            typeof row['0'] === 'number' && `CHF ${row['0'].toFixed(2)}`,
-        },
+        { label: '', accessor: 'cat', sortable: false, transformer: null },
       ]
-      for (let i = 1; i < 4; i++) {
+      for (let i = 0; i < 4; i++) {
         const strNum = String(i)
+        const numMonths = months.length
+        const numDataPoints = totalAssetsPerMonth.length
+        const index = (numDataPoints - 4 + i) % numMonths
+        const periodIx = ~~(numDataPoints / numMonths) + 1
+
         columns_segment_results.push({
-          label: 'Month ' + strNum,
+          label: months[index] + ' Period ' + String(periodIx),
           accessor: strNum,
           sortable: false,
           transformer: ({ row }: { row: any }) =>
@@ -316,27 +371,28 @@ function Cockpit() {
                   caption=""
                 />
               </div>
-              <div className="flex justify-center">Total over time chart</div>
+              <div className="flex justify-center">
+                Total assets over time chart
+              </div>
               <ResponsiveContainer width="100%" height="50%">
-                <ChartContainer
-                  config={{
-                    desktop: {
-                      label: 'Desktop',
-                    },
-                  }}
-                >
-                  <LineChart data={totalAssetsPerMonth}>
+                <ChartContainer config={config}>
+                  <LineChart data={newTotalAssetsPerMonths}>
                     <ChartTooltip
                       cursor={false}
-                      content={<ChartTooltipContent hideLabel />}
+                      content={<ChartTooltipContent />}
                     />
-                    <Line
-                      type="natural"
-                      dataKey="total"
-                      stroke="#8884d8"
-                      dot={false}
-                      strokeWidth={2}
-                    />
+                    {Object.keys(config).map((key) => {
+                      return (
+                        <Line
+                          key={key}
+                          type="natural"
+                          dataKey={key}
+                          stroke={config[key].color}
+                          dot={false}
+                          strokeWidth={2}
+                        />
+                      )
+                    })}
                     <CartesianGrid vertical={false} />
                     <XAxis
                       dataKey="month"
@@ -344,8 +400,8 @@ function Cockpit() {
                       axisLine={false}
                       tickMargin={8}
                     />
-                    <YAxis />
-                    <Tooltip />
+                    <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                    <ChartLegend content={<ChartLegendContent />} />
                   </LineChart>
                 </ChartContainer>
               </ResponsiveContainer>
