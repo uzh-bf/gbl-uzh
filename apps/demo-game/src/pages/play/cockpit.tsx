@@ -16,7 +16,15 @@ import {
 
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
+} from 'recharts'
 import LearningElements from 'src/components/LearningElements'
 import {
   TransactionsDisplay,
@@ -272,6 +280,7 @@ function Cockpit() {
     case 'PAUSED': {
       const previousResults = playerDataResult.previousResults
 
+      // TODO(JJ): Move computation helpers to lib.
       const totalAssetsPerMonth = getTotalAssetsOfPreviousResults(
         previousResults
       ).map((s, i) => ({
@@ -290,6 +299,32 @@ function Cockpit() {
         },
         []
       )
+      const filtered = previousResults.filter((o) => o.type == 'SEGMENT_END')
+
+      const assetsWithReturns = filtered
+        .sort((a, b) =>
+          a.period.index > b.period.index && a.segment.index > b.segment.index
+            ? -1
+            : 1
+        )
+        .map((e) => e.facts.assetsWithReturns)
+
+      const initialCapital = assetsWithReturns[0][0].bank
+      const returnsPerCent = newTotalAssetsPerMonths.map((e, ix) => {
+        let r = {
+          ...e,
+        }
+        Object.keys(r).forEach((key) => {
+          if (key.startsWith('period_')) {
+            r[key] = e[key] / initialCapital - 1
+          }
+        })
+        return r
+      })
+      console.log(returnsPerCent)
+
+      console.log(assetsWithReturns)
+      console.log(newTotalAssetsPerMonths)
 
       const config = Object.keys(newTotalAssetsPerMonths[0]).reduce(
         (acc, key, ix) => {
@@ -351,53 +386,104 @@ function Cockpit() {
           <div className="flex flex-col">
             <div>
               <GameHeader currentGame={currentGame} />
-              <div className="max-w-2xl">
+              <div>
                 <Table
                   columns={columns_segment_results}
                   data={data_segment_results}
                   caption=""
                 />
               </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Total assets</CardTitle>
-                  <CardDescription>
-                    Total assets over time (per period).
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={config}>
-                    <LineChart data={newTotalAssetsPerMonths}>
-                      <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent />}
-                      />
-                      {Object.keys(config).map((key) => {
-                        return (
-                          <Line
-                            key={key}
-                            type="natural"
-                            dataKey={key}
-                            stroke={config[key].color}
-                            dot={false}
-                            strokeWidth={2}
-                          />
-                        )
-                      })}
-                      <CartesianGrid vertical={false} />
-                      <XAxis
-                        dataKey="month"
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={8}
-                      />
-                      <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                      <ChartLegend content={<ChartLegendContent />} />
-                    </LineChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
+              <div className="flex flex-wrap gap-2 xl:flex-nowrap">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Total Assets</CardTitle>
+                    <CardDescription>
+                      Total assets over time (per period).
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={config}>
+                      <LineChart
+                        data={newTotalAssetsPerMonths}
+                        accessibilityLayer
+                      >
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent />}
+                        />
+                        {Object.keys(config).map((key) => {
+                          return (
+                            <Line
+                              key={key}
+                              type="natural"
+                              dataKey={key}
+                              stroke={config[key].color}
+                              dot={false}
+                              strokeWidth={2}
+                            />
+                          )
+                        })}
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="month"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
+                      </LineChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Total Returns</CardTitle>
+                    <CardDescription>
+                      Total returns in percent over time (per period).
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={config}>
+                      <BarChart data={returnsPerCent} accessibilityLayer>
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent />}
+                        />
+                        {Object.keys(config).map((key) => {
+                          return (
+                            <Bar
+                              key={key}
+                              stackId="1"
+                              dataKey={key}
+                              fill={config[key].color}
+                              radius={4}
+                            />
+                          )
+                        })}
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="month"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tickFormatter={(v) => `${v.toFixed(2) * 100}%`}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
+                      </BarChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </GameLayout>
