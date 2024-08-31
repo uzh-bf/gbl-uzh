@@ -104,7 +104,8 @@ function ManageGame() {
     const isResultState = game.status === GameStatus.Results
 
     if (!activePeriod) {
-      const disabled = game.periods.length === 0
+      const disabled =
+        game.periods.length === 0 || game.periods[0].segments.length === 0
       return (
         <Button disabled={disabled} onClick={nextPeriod}>
           Start Period
