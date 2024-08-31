@@ -6,7 +6,12 @@ import {
   faSync,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Button, FormikTextField, Modal } from '@uzh-bf/design-system'
+import {
+  Button,
+  Modal,
+  NewFormikTextField,
+  NewFromikNumberField,
+} from '@uzh-bf/design-system'
 import { Formik } from 'formik'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
@@ -95,56 +100,98 @@ function ManageGame() {
     const segments = activePeriod?.segments
     const activeSegmentIx = activePeriod?.activeSegmentIx
 
-    const isScheduled = game.status === GameStatus.Scheduled
-    const isResultState = game.status === GameStatus.Results
+    switch (game.status) {
+      case GameStatus.Preparation: {
+        const atLastSegment = activeSegmentIx >= segments.length - 1
+        if (!atLastSegment) {
+          return (
+            <Button disabled={nextSegmentLoading} onClick={nextSegment}>
+              Next Segment
+            </Button>
+          )
+        }
+        const disabled =
+          game.periods.length === 0 || activePeriod.segments.length === 0
+        return (
+          <Button disabled={disabled} onClick={nextPeriod}>
+            Start Period
+          </Button>
+        )
+      }
+      case GameStatus.Scheduled:
+        if (!activePeriod) {
+          const disabled =
+            game.periods.length === 0 || game.periods[0].segments.length === 0
+          return (
+            <Button disabled={disabled} onClick={nextPeriod}>
+              Start Period
+            </Button>
+          )
+        }
+        return <Button onClick={nextPeriod}>Start Segment</Button>
+      case GameStatus.Running: {
+        const atLastSegment =
+          activeSegmentIx >= segments.length - 1 &&
+          activePeriod.segmentCount === segments.length
+        console.log('atLastSegment', atLastSegment)
+        if (atLastSegment) {
+          return (
+            <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+              Consolidate
+            </Button>
+          )
+        }
+        // Currently we need to disable the button if the next segment is not
+        // available
+        const disabled = activePeriod.activeSegmentIx === segments.length - 1
+        return (
+          <Button
+            disabled={nextSegmentLoading || disabled}
+            onClick={nextSegment}
+          >
+            Segment Results
+          </Button>
+        )
+      }
+      case GameStatus.Paused: {
+        const atLastSegment = activeSegmentIx >= segments.length - 1
+        return (
+          <Button
+            disabled={nextSegmentLoading || atLastSegment}
+            onClick={nextSegment}
+          >
+            Next Segment
+          </Button>
+        )
+      }
 
-    if (!activePeriod) {
-      return <Button onClick={nextPeriod}>Start Period</Button>
-    }
-    if (isResultState) {
-      return <Button onClick={nextPeriod}>Next Period</Button>
-    }
-    if (isScheduled) {
-      return <Button onClick={nextPeriod}>Start Segment</Button>
-    }
+      // TODO(JJ):
+      // - Fix consolidation for the last period
+      // - const periods = game?.periods
+      //   const activePeriodIx = game?.activePeriodIx
+      //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
+      case GameStatus.Consolidation:
+        return (
+          <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+            Period Results
+          </Button>
+        )
+      case GameStatus.Results: {
+        const anotherPeriod = game.activePeriodIx > game.periods.length - 1
+        return (
+          <Button disabled={anotherPeriod} onClick={nextPeriod}>
+            Next Period
+          </Button>
+        )
+      }
 
-    const atLastSegment = activeSegmentIx >= segments.length - 1
-    if (!atLastSegment) {
-      const isPaused = game.status === GameStatus.Paused
-      const isPrepared = game.status === GameStatus.Preparation
-      return (
-        <Button disabled={nextSegmentLoading} onClick={nextSegment}>
-          {isPaused || isPrepared ? 'Next Segment' : 'Segment Results'}
-        </Button>
-      )
+      case GameStatus.Completed:
+        return (
+          <Button disabled onClick={() => null}>
+            Completed
+          </Button>
+        )
     }
-
-    // TODO(JJ):
-    // - Fix consolidation for the last period
-    // - const periods = game?.periods
-    //   const activePeriodIx = game?.activePeriodIx
-    //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
-    if (game.status === GameStatus.Consolidation) {
-      return (
-        <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
-          Period Results
-        </Button>
-      )
-    }
-
-    if (game.status === GameStatus.Completed) {
-      return (
-        <Button disabled onClick={() => null}>
-          Completed
-        </Button>
-      )
-    }
-
-    return (
-      <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
-        Consolidate
-      </Button>
-    )
   }, [data?.game])
 
   if (loading || !data?.game) {
@@ -219,55 +266,60 @@ function ManageGame() {
                   </div>
 
                   <div className="mt-1 flex flex-row gap-1">
-                    {period.segments.map((segment, ix) => {
-                      const segmentStatus = computeSegmentStatus(
-                        game,
-                        period as Period,
-                        ix
-                      )
+                    {Array.apply(null, Array(period.segmentCount)).map(
+                      (_, ix) => {
+                        const segment = period.segments[ix]
+                        const segmentStatus = computeSegmentStatus(
+                          game,
+                          period as Period,
+                          ix
+                        )
 
-                      const isSegmentActive =
-                        periodStatus === STATUS.ACTIVE &&
-                        segmentStatus === STATUS.ACTIVE
-                      const isSegmentCompleted =
-                        periodStatus === STATUS.COMPLETED ||
-                        segmentStatus === STATUS.COMPLETED
+                        const isSegmentActive =
+                          periodStatus === STATUS.ACTIVE &&
+                          segmentStatus === STATUS.ACTIVE
+                        const isSegmentCompleted =
+                          periodStatus === STATUS.COMPLETED ||
+                          segmentStatus === STATUS.COMPLETED
 
-                      return (
-                        <div
-                          className={twMerge(
-                            'flex-initial rounded border p-2 text-center',
-                            isSegmentActive && 'border-green-600 bg-green-100',
-                            isSegmentCompleted && ' text-gray-400'
-                          )}
-                          key={segment.id}
-                        >
-                          <div className="flex flex-row gap-2">
-                            <div>
-                              {!isSegmentActive && !isSegmentCompleted && (
-                                <FontAwesomeIcon icon={faCalendar} />
-                              )}
-                              {isSegmentActive && (
-                                <FontAwesomeIcon icon={faSync} />
-                              )}
-                              {isSegmentCompleted && (
-                                <FontAwesomeIcon icon={faCheck} />
-                              )}
-                            </div>
-                            <div className="whitespace-nowrap text-right">
-                              <div className="flex flex-row gap-2">
-                                <div className="text-sm">
-                                  Story: {segment.storyElements.length}
-                                </div>
-                                <div className="text-sm">
-                                  Learn: {segment.learningElements.length}
+                        return (
+                          <div
+                            className={twMerge(
+                              'flex-initial rounded border p-2 text-center',
+                              (!segment || isSegmentCompleted) &&
+                                'bg-gray-100 text-gray-400',
+                              isSegmentActive && 'border-green-600 bg-green-100'
+                            )}
+                            key={ix}
+                          >
+                            <div className="flex flex-row gap-2">
+                              <div>
+                                {!isSegmentActive && !isSegmentCompleted && (
+                                  <FontAwesomeIcon icon={faCalendar} />
+                                )}
+                                {isSegmentActive && (
+                                  <FontAwesomeIcon icon={faSync} />
+                                )}
+                                {isSegmentCompleted && (
+                                  <FontAwesomeIcon icon={faCheck} />
+                                )}
+                              </div>
+                              <div className="whitespace-nowrap text-right">
+                                <div className="flex flex-row gap-2">
+                                  <div className="text-sm">
+                                    Story: {segment?.storyElements.length ?? 0}
+                                  </div>
+                                  <div className="text-sm">
+                                    Learn:{' '}
+                                    {segment?.learningElements.length ?? 0}
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )
-                    })}
+                        )
+                      }
+                    )}
                     {!isPeriodCompleted && game.periods.length - 1 === ix && (
                       <Formik
                         initialValues={{
@@ -298,6 +350,9 @@ function ManageGame() {
                             onClose={() => setIsSegmentModalOpen(false)}
                             trigger={
                               <Button
+                                disabled={
+                                  period.segmentCount === period.segments.length
+                                }
                                 className={{
                                   root: 'h-full w-12 font-bold text-gray-500',
                                 }}
@@ -333,16 +388,20 @@ function ManageGame() {
                               </Button>
                             }
                           >
-                            <FormikTextField
-                              name="storyElements"
-                              label="Story Elements"
-                              data={{ cy: 'story-elements' }}
-                            />
-                            <FormikTextField
-                              name="learningElements"
-                              label="Learning Elements"
-                              data={{ cy: 'learning-elements' }}
-                            />
+                            <div className="flex w-1/2 flex-col gap-2">
+                              <NewFormikTextField
+                                name="storyElements"
+                                label="Story Elements"
+                                data={{ cy: 'story-elements' }}
+                                className={{ label: 'pb-2 font-normal' }}
+                              />
+                              <NewFormikTextField
+                                name="learningElements"
+                                label="Learning Elements"
+                                data={{ cy: 'learning-elements' }}
+                                className={{ label: 'pb-2 font-normal' }}
+                              />
+                            </div>
                           </Modal>
                         )}
                       </Formik>
@@ -365,67 +424,96 @@ function ManageGame() {
           <Formik
             initialValues={{
               periodName: 'Game Period',
+              segmentCount: 4,
             }}
             onSubmit={async (variables, { resetForm }) => {
               await addGamePeriod({
                 variables: {
                   gameId: Number(router.query.id),
+                  // TODO(JJ): Add dice simulation
                   facts: pick(
                     ['stockTrend', 'stockVariance', 'stockGap'],
                     variables
                   ),
+                  segmentCount: variables.segmentCount,
                 },
               })
               resetForm()
             }}
           >
-            {(newPeriodForm) => (
-              <Modal
-                open={isPeriodModalOpen}
-                onClose={() => setIsPeriodModalOpen(false)}
-                trigger={
-                  <Button
-                    className={{ root: 'font-bold text-gray-500 md:w-48' }}
-                    onClick={() => setIsPeriodModalOpen(true)}
-                    data={{ cy: 'add-period' }}
-                  >
-                    <FontAwesomeIcon icon={faPlus} />
-                  </Button>
-                }
-                title="Add Period"
-                onSecondaryAction={
-                  <Button
-                    onClick={() => {
-                      newPeriodForm.resetForm()
-                      setIsPeriodModalOpen(false)
-                    }}
-                  >
-                    Discard
-                  </Button>
-                }
-                onPrimaryAction={
-                  <Button
-                    onClick={async () => {
-                      await newPeriodForm.setFieldValue(
-                        'newPeriodIx',
-                        game.periods.length
-                      )
-                      newPeriodForm.handleSubmit()
-                      setIsPeriodModalOpen(false)
-                    }}
-                  >
-                    Submit
-                  </Button>
-                }
-              >
-                <FormikTextField
-                  type="string"
-                  name="periodName"
-                  label="Period Name"
-                  data={{ cy: 'period-name' }}
-                />
-              </Modal>
-            )}
+            {(newPeriodForm) => {
+              const lastPeriod = game.periods[game.periods.length - 1]
+              const disabled =
+                lastPeriod &&
+                lastPeriod.segmentCount !== lastPeriod.segments.length
+
+              return (
+                <Modal
+                  open={isPeriodModalOpen}
+                  onClose={() => setIsPeriodModalOpen(false)}
+                  trigger={
+                    <Button
+                      disabled={disabled}
+                      className={{ root: 'font-bold text-gray-500 md:w-48' }}
+                      onClick={() => setIsPeriodModalOpen(true)}
+                      data={{ cy: 'add-period' }}
+                    >
+                      <FontAwesomeIcon icon={faPlus} />
+                    </Button>
+                  }
+                  title="Add Period"
+                  onSecondaryAction={
+                    <Button
+                      onClick={() => {
+                        newPeriodForm.resetForm()
+                        setIsPeriodModalOpen(false)
+                      }}
+                    >
+                      Discard
+                    </Button>
+                  }
+                  onPrimaryAction={
+                    <Button
+                      onClick={async () => {
+                        await newPeriodForm.setFieldValue(
+                          'newPeriodIx',
+                          game.periods.length
+                        )
+                        newPeriodForm.handleSubmit()
+                        setIsPeriodModalOpen(false)
+                      }}
+                    >
+                      Submit
+                    </Button>
+                  }
+                >
+                  <div className="flex w-1/2 flex-col gap-2">
+                    <NewFormikTextField
+                      type="string"
+                      name="periodName"
+                      label="Period Name"
+                      data={{ cy: 'period-name' }}
+                      className={{ label: 'pb-2 font-normal' }}
+                    />
+                    <NewFromikNumberField
+                      placeholder="4"
+                      label="Number of segments"
+                      name="segmentCount"
+                      tooltip={
+                        <p>
+                          One period corresponds to one year. The number of
+                          segments <br />
+                          is used to compute the number of months in the period.
+                        </p>
+                      }
+                      required
+                      data={{ cy: 'segment-count' }}
+                      className={{ label: 'pb-2 font-normal' }}
+                    />
+                  </div>
+                </Modal>
+              )
+            }}
           </Formik>
         </div>
       </div>

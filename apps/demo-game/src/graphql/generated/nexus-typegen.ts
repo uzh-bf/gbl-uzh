@@ -600,6 +600,7 @@ export interface NexusGenArgTypes {
     addGamePeriod: { // args
       facts: NexusGenInputs['PeriodFactsInput']; // PeriodFactsInput!
       gameId: number; // Int!
+      segmentCount: number; // Int!
     }
     addPeriodSegment: { // args
       facts: NexusGenInputs['PeriodSegmentFactsInput']; // PeriodSegmentFactsInput!

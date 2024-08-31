@@ -93,7 +93,7 @@ type Mutation {
   activateNextPeriod(gameId: Int!): Game
   activateNextSegment(gameId: Int!): Game
   addCountdown(gameId: Int!, seconds: Int!): Boolean
-  addGamePeriod(facts: PeriodFactsInput!, gameId: Int!): Period
+  addGamePeriod(facts: PeriodFactsInput!, gameId: Int!, segmentCount: Int!): Period
   addPeriodSegment(facts: PeriodSegmentFactsInput!, gameId: Int!, learningElements: [String], periodIx: Int!, storyElements: [String]): PeriodSegment
   attemptLearningElement(elementId: ID!, selection: String!): LearningElementAttempt
   createGame(name: String!, playerCount: Int!): Game

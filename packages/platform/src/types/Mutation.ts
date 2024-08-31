@@ -88,6 +88,7 @@ export function generateBaseMutations<
           facts: arg({
             type: nonNull(inputTypes.PeriodFactsInput),
           }),
+          segmentCount: nonNull(intArg()),
         },
         async resolve(_, args, ctx) {
           return GameService.addGamePeriod<PeriodFacts>(args, ctx, {

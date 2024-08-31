@@ -59,10 +59,11 @@ export async function createGame(
 interface AddGamePeriodArgs<T> {
   gameId: number
   facts: T
+  segmentCount: number
 }
 
 export async function addGamePeriod<TFacts>(
-  { gameId, facts }: AddGamePeriodArgs<TFacts>,
+  { gameId, facts, segmentCount }: AddGamePeriodArgs<TFacts>,
   ctx: Context,
   { schema, services }: CtxWithFactsAndSchema<TFacts, PrismaClient>
 ) {
@@ -132,6 +133,7 @@ export async function addGamePeriod<TFacts>(
           id: gameId,
         },
       },
+      segmentCount,
       previousPeriod: {
         connect:
           index > 0
@@ -206,8 +208,7 @@ export async function addPeriodSegment<TFacts>(
       periodFacts: period.facts,
       previousSegmentFacts: period.segments[0]?.facts,
       segmentIx: index,
-      // TODO(JJ): Remove hardcode, use from form input for Derivative Game
-      segmentCount: 4,
+      segmentCount: period.segmentCount,
       periodIx,
     }
   )
