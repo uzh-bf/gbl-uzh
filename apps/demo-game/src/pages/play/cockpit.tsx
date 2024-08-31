@@ -27,6 +27,7 @@ import {
   ResultDocument,
   UpdateReadyStateDocument,
 } from 'src/graphql/generated/ops'
+import { getSegmentEndResults } from 'src/lib/analysis'
 import { ActionTypes } from 'src/services/ActionsReducer'
 // TODO(JJ): This will be replaced by the design system
 import StoryElements from '~/components/StoryElements'
@@ -270,17 +271,13 @@ function Cockpit() {
       )
 
     case 'PAUSED': {
-      const previousResults = playerDataResult.previousResults
-
       // TODO(JJ): Move computation helpers to lib.
-      const filtered = previousResults
-        .filter((o) => o.type == 'SEGMENT_END')
-        .sort((a, b) =>
-          a.period.index > b.period.index && a.segment.index > b.segment.index
-            ? -1
-            : 1
-        )
-      const assetsWithReturns = filtered.map((e) => e.facts.assetsWithReturns)
+      const previousResults = playerDataResult.previousResults
+      const previousSegmentResults = getSegmentEndResults(previousResults)
+
+      const assetsWithReturns = previousSegmentResults.map(
+        (e) => e.facts.assetsWithReturns
+      )
       const assetsWithReturnsFlat = assetsWithReturns.flat()
       const initialCapital = assetsWithReturnsFlat[0].totalAssets
       console.log('assetsWithReturnsFlat', assetsWithReturnsFlat)
