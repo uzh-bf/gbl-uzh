@@ -12,6 +12,7 @@ query Game($id: Int) {
         id
         countdownExpiresAt
       }
+      segmentCount
       segments {
         id
       }

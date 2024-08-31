@@ -100,62 +100,98 @@ function ManageGame() {
     const segments = activePeriod?.segments
     const activeSegmentIx = activePeriod?.activeSegmentIx
 
-    const isScheduled = game.status === GameStatus.Scheduled
-    const isResultState = game.status === GameStatus.Results
+    switch (game.status) {
+      case GameStatus.Preparation: {
+        const atLastSegment = activeSegmentIx >= segments.length - 1
+        if (!atLastSegment) {
+          return (
+            <Button disabled={nextSegmentLoading} onClick={nextSegment}>
+              Next Segment
+            </Button>
+          )
+        }
+        const disabled =
+          game.periods.length === 0 || activePeriod.segments.length === 0
+        return (
+          <Button disabled={disabled} onClick={nextPeriod}>
+            Start Period
+          </Button>
+        )
+      }
+      case GameStatus.Scheduled:
+        if (!activePeriod) {
+          const disabled =
+            game.periods.length === 0 || game.periods[0].segments.length === 0
+          return (
+            <Button disabled={disabled} onClick={nextPeriod}>
+              Start Period
+            </Button>
+          )
+        }
+        return <Button onClick={nextPeriod}>Start Segment</Button>
+      case GameStatus.Running: {
+        const atLastSegment =
+          activeSegmentIx >= segments.length - 1 &&
+          activePeriod.segmentCount === segments.length
+        console.log('atLastSegment', atLastSegment)
+        if (atLastSegment) {
+          return (
+            <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+              Consolidate
+            </Button>
+          )
+        }
+        // Currently we need to disable the button if the next segment is not
+        // available
+        const disabled = activePeriod.activeSegmentIx === segments.length - 1
+        return (
+          <Button
+            disabled={nextSegmentLoading || disabled}
+            onClick={nextSegment}
+          >
+            Segment Results
+          </Button>
+        )
+      }
+      case GameStatus.Paused: {
+        const atLastSegment = activeSegmentIx >= segments.length - 1
+        return (
+          <Button
+            disabled={nextSegmentLoading || atLastSegment}
+            onClick={nextSegment}
+          >
+            Next Segment
+          </Button>
+        )
+      }
 
-    if (!activePeriod) {
-      const disabled =
-        game.periods.length === 0 || game.periods[0].segments.length === 0
-      return (
-        <Button disabled={disabled} onClick={nextPeriod}>
-          Start Period
-        </Button>
-      )
-    }
-    if (isResultState) {
-      return <Button onClick={nextPeriod}>Next Period</Button>
-    }
-    if (isScheduled) {
-      return <Button onClick={nextPeriod}>Start Segment</Button>
-    }
+      // TODO(JJ):
+      // - Fix consolidation for the last period
+      // - const periods = game?.periods
+      //   const activePeriodIx = game?.activePeriodIx
+      //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
+      case GameStatus.Consolidation:
+        return (
+          <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+            Period Results
+          </Button>
+        )
+      case GameStatus.Results: {
+        const anotherPeriod = game.activePeriodIx > game.periods.length - 1
+        return (
+          <Button disabled={anotherPeriod} onClick={nextPeriod}>
+            Next Period
+          </Button>
+        )
+      }
 
-    const atLastSegment = activeSegmentIx >= segments.length - 1
-    if (!atLastSegment) {
-      const isPaused = game.status === GameStatus.Paused
-      const isPrepared = game.status === GameStatus.Preparation
-      return (
-        <Button disabled={nextSegmentLoading} onClick={nextSegment}>
-          {isPaused || isPrepared ? 'Next Segment' : 'Segment Results'}
-        </Button>
-      )
+      case GameStatus.Completed:
+        return (
+          <Button disabled onClick={() => null}>
+            Completed
+          </Button>
+        )
     }
-
-    // TODO(JJ):
-    // - Fix consolidation for the last period
-    // - const periods = game?.periods
-    //   const activePeriodIx = game?.activePeriodIx
-    //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
-    if (game.status === GameStatus.Consolidation) {
-      return (
-        <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
-          Period Results
-        </Button>
-      )
-    }
-
-    if (game.status === GameStatus.Completed) {
-      return (
-        <Button disabled onClick={() => null}>
-          Completed
-        </Button>
-      )
-    }
-
-    return (
-      <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
-        Consolidate
-      </Button>
-    )
   }, [data?.game])
 
   if (loading || !data?.game) {
