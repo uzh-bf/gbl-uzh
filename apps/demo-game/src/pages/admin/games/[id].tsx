@@ -230,55 +230,60 @@ function ManageGame() {
                   </div>
 
                   <div className="mt-1 flex flex-row gap-1">
-                    {period.segments.map((segment, ix) => {
-                      const segmentStatus = computeSegmentStatus(
-                        game,
-                        period as Period,
-                        ix
-                      )
+                    {Array.apply(null, Array(period.segmentCount)).map(
+                      (_, ix) => {
+                        const segment = period.segments[ix]
+                        const segmentStatus = computeSegmentStatus(
+                          game,
+                          period as Period,
+                          ix
+                        )
 
-                      const isSegmentActive =
-                        periodStatus === STATUS.ACTIVE &&
-                        segmentStatus === STATUS.ACTIVE
-                      const isSegmentCompleted =
-                        periodStatus === STATUS.COMPLETED ||
-                        segmentStatus === STATUS.COMPLETED
+                        const isSegmentActive =
+                          periodStatus === STATUS.ACTIVE &&
+                          segmentStatus === STATUS.ACTIVE
+                        const isSegmentCompleted =
+                          periodStatus === STATUS.COMPLETED ||
+                          segmentStatus === STATUS.COMPLETED
 
-                      return (
-                        <div
-                          className={twMerge(
-                            'flex-initial rounded border p-2 text-center',
-                            isSegmentActive && 'border-green-600 bg-green-100',
-                            isSegmentCompleted && ' text-gray-400'
-                          )}
-                          key={segment.id}
-                        >
-                          <div className="flex flex-row gap-2">
-                            <div>
-                              {!isSegmentActive && !isSegmentCompleted && (
-                                <FontAwesomeIcon icon={faCalendar} />
-                              )}
-                              {isSegmentActive && (
-                                <FontAwesomeIcon icon={faSync} />
-                              )}
-                              {isSegmentCompleted && (
-                                <FontAwesomeIcon icon={faCheck} />
-                              )}
-                            </div>
-                            <div className="whitespace-nowrap text-right">
-                              <div className="flex flex-row gap-2">
-                                <div className="text-sm">
-                                  Story: {segment.storyElements.length}
-                                </div>
-                                <div className="text-sm">
-                                  Learn: {segment.learningElements.length}
+                        return (
+                          <div
+                            className={twMerge(
+                              'flex-initial rounded border p-2 text-center',
+                              (!segment || isSegmentCompleted) &&
+                                'bg-gray-100 text-gray-400',
+                              isSegmentActive && 'border-green-600 bg-green-100'
+                            )}
+                            key={ix}
+                          >
+                            <div className="flex flex-row gap-2">
+                              <div>
+                                {!isSegmentActive && !isSegmentCompleted && (
+                                  <FontAwesomeIcon icon={faCalendar} />
+                                )}
+                                {isSegmentActive && (
+                                  <FontAwesomeIcon icon={faSync} />
+                                )}
+                                {isSegmentCompleted && (
+                                  <FontAwesomeIcon icon={faCheck} />
+                                )}
+                              </div>
+                              <div className="whitespace-nowrap text-right">
+                                <div className="flex flex-row gap-2">
+                                  <div className="text-sm">
+                                    Story: {segment?.storyElements.length ?? 0}
+                                  </div>
+                                  <div className="text-sm">
+                                    Learn:{' '}
+                                    {segment?.learningElements.length ?? 0}
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )
-                    })}
+                        )
+                      }
+                    )}
                     {!isPeriodCompleted && game.periods.length - 1 === ix && (
                       <Formik
                         initialValues={{
@@ -309,6 +314,9 @@ function ManageGame() {
                             onClose={() => setIsSegmentModalOpen(false)}
                             trigger={
                               <Button
+                                disabled={
+                                  period.segmentCount === period.segments.length
+                                }
                                 className={{
                                   root: 'h-full w-12 font-bold text-gray-500',
                                 }}
@@ -344,16 +352,20 @@ function ManageGame() {
                               </Button>
                             }
                           >
-                            <NewFormikTextField
-                              name="storyElements"
-                              label="Story Elements"
-                              data={{ cy: 'story-elements' }}
-                            />
-                            <NewFormikTextField
-                              name="learningElements"
-                              label="Learning Elements"
-                              data={{ cy: 'learning-elements' }}
-                            />
+                            <div className="flex w-1/2 flex-col gap-2">
+                              <NewFormikTextField
+                                name="storyElements"
+                                label="Story Elements"
+                                data={{ cy: 'story-elements' }}
+                                className={{ label: 'pb-2 font-normal' }}
+                              />
+                              <NewFormikTextField
+                                name="learningElements"
+                                label="Learning Elements"
+                                data={{ cy: 'learning-elements' }}
+                                className={{ label: 'pb-2 font-normal' }}
+                              />
+                            </div>
                           </Modal>
                         )}
                       </Formik>

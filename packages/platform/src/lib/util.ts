@@ -90,7 +90,7 @@ export function computeSegmentStatus(
   )
     return STATUS.ACTIVE
 
-  if (period.activeSegmentIx > -1 && period.activeSegmentIx < segmentIndex)
+  if (period.activeSegmentIx > -2 && period.activeSegmentIx < segmentIndex)
     return STATUS.SCHEDULED
 
   return STATUS.COMPLETED
