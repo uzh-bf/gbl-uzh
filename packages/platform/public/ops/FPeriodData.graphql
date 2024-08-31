@@ -11,4 +11,5 @@ fragment PeriodData on Period {
   segments {
     ...SegmentData
   }
+  segmentCount
 }

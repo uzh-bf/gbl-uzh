@@ -119,6 +119,7 @@ model Period {
   facts Json
 
   segments PeriodSegment[]
+  segmentCount Int
 
   activeSegmentIx Int            @default(-1)
   activeSegmentId Int?

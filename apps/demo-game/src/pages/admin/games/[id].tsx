@@ -6,7 +6,12 @@ import {
   faSync,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Button, FormikTextField, Modal } from '@uzh-bf/design-system'
+import {
+  Button,
+  Modal,
+  NewFormikTextField,
+  NewFromikNumberField,
+} from '@uzh-bf/design-system'
 import { Formik } from 'formik'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
@@ -338,12 +343,12 @@ function ManageGame() {
                               </Button>
                             }
                           >
-                            <FormikTextField
+                            <NewFormikTextField
                               name="storyElements"
                               label="Story Elements"
                               data={{ cy: 'story-elements' }}
                             />
-                            <FormikTextField
+                            <NewFormikTextField
                               name="learningElements"
                               label="Learning Elements"
                               data={{ cy: 'learning-elements' }}
@@ -370,15 +375,18 @@ function ManageGame() {
           <Formik
             initialValues={{
               periodName: 'Game Period',
+              segmentCount: 4,
             }}
             onSubmit={async (variables, { resetForm }) => {
               await addGamePeriod({
                 variables: {
                   gameId: Number(router.query.id),
+                  // TODO(JJ): Add dice simulation
                   facts: pick(
                     ['stockTrend', 'stockVariance', 'stockGap'],
                     variables
                   ),
+                  segmentCount: variables.segmentCount,
                 },
               })
               resetForm()
@@ -423,12 +431,30 @@ function ManageGame() {
                   </Button>
                 }
               >
-                <FormikTextField
-                  type="string"
-                  name="periodName"
-                  label="Period Name"
-                  data={{ cy: 'period-name' }}
-                />
+                <div className="flex w-1/2 flex-col gap-2">
+                  <NewFormikTextField
+                    type="string"
+                    name="periodName"
+                    label="Period Name"
+                    data={{ cy: 'period-name' }}
+                    className={{ label: 'pb-2 font-normal' }}
+                  />
+                  <NewFromikNumberField
+                    placeholder="4"
+                    label="Number of segments"
+                    name="segmentCount"
+                    tooltip={
+                      <p>
+                        One period corresponds to one year. The number of
+                        segments <br />
+                        is used to compute the number of months in the period.
+                      </p>
+                    }
+                    required
+                    data={{ cy: 'segment-count' }}
+                    className={{ label: 'pb-2 font-normal' }}
+                  />
+                </div>
               </Modal>
             )}
           </Formik>
