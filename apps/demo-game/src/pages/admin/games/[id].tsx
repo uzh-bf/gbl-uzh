@@ -392,71 +392,79 @@ function ManageGame() {
               resetForm()
             }}
           >
-            {(newPeriodForm) => (
-              <Modal
-                open={isPeriodModalOpen}
-                onClose={() => setIsPeriodModalOpen(false)}
-                trigger={
-                  <Button
-                    className={{ root: 'font-bold text-gray-500 md:w-48' }}
-                    onClick={() => setIsPeriodModalOpen(true)}
-                    data={{ cy: 'add-period' }}
-                  >
-                    <FontAwesomeIcon icon={faPlus} />
-                  </Button>
-                }
-                title="Add Period"
-                onSecondaryAction={
-                  <Button
-                    onClick={() => {
-                      newPeriodForm.resetForm()
-                      setIsPeriodModalOpen(false)
-                    }}
-                  >
-                    Discard
-                  </Button>
-                }
-                onPrimaryAction={
-                  <Button
-                    onClick={async () => {
-                      await newPeriodForm.setFieldValue(
-                        'newPeriodIx',
-                        game.periods.length
-                      )
-                      newPeriodForm.handleSubmit()
-                      setIsPeriodModalOpen(false)
-                    }}
-                  >
-                    Submit
-                  </Button>
-                }
-              >
-                <div className="flex w-1/2 flex-col gap-2">
-                  <NewFormikTextField
-                    type="string"
-                    name="periodName"
-                    label="Period Name"
-                    data={{ cy: 'period-name' }}
-                    className={{ label: 'pb-2 font-normal' }}
-                  />
-                  <NewFromikNumberField
-                    placeholder="4"
-                    label="Number of segments"
-                    name="segmentCount"
-                    tooltip={
-                      <p>
-                        One period corresponds to one year. The number of
-                        segments <br />
-                        is used to compute the number of months in the period.
-                      </p>
-                    }
-                    required
-                    data={{ cy: 'segment-count' }}
-                    className={{ label: 'pb-2 font-normal' }}
-                  />
-                </div>
-              </Modal>
-            )}
+            {(newPeriodForm) => {
+              const lastPeriod = game.periods[game.periods.length - 1]
+              const disabled =
+                lastPeriod &&
+                lastPeriod.segmentCount !== lastPeriod.segments.length
+
+              return (
+                <Modal
+                  open={isPeriodModalOpen}
+                  onClose={() => setIsPeriodModalOpen(false)}
+                  trigger={
+                    <Button
+                      disabled={disabled}
+                      className={{ root: 'font-bold text-gray-500 md:w-48' }}
+                      onClick={() => setIsPeriodModalOpen(true)}
+                      data={{ cy: 'add-period' }}
+                    >
+                      <FontAwesomeIcon icon={faPlus} />
+                    </Button>
+                  }
+                  title="Add Period"
+                  onSecondaryAction={
+                    <Button
+                      onClick={() => {
+                        newPeriodForm.resetForm()
+                        setIsPeriodModalOpen(false)
+                      }}
+                    >
+                      Discard
+                    </Button>
+                  }
+                  onPrimaryAction={
+                    <Button
+                      onClick={async () => {
+                        await newPeriodForm.setFieldValue(
+                          'newPeriodIx',
+                          game.periods.length
+                        )
+                        newPeriodForm.handleSubmit()
+                        setIsPeriodModalOpen(false)
+                      }}
+                    >
+                      Submit
+                    </Button>
+                  }
+                >
+                  <div className="flex w-1/2 flex-col gap-2">
+                    <NewFormikTextField
+                      type="string"
+                      name="periodName"
+                      label="Period Name"
+                      data={{ cy: 'period-name' }}
+                      className={{ label: 'pb-2 font-normal' }}
+                    />
+                    <NewFromikNumberField
+                      placeholder="4"
+                      label="Number of segments"
+                      name="segmentCount"
+                      tooltip={
+                        <p>
+                          One period corresponds to one year. The number of
+                          segments <br />
+                          is used to compute the number of months in the period.
+                        </p>
+                      }
+                      required
+                      data={{ cy: 'segment-count' }}
+                      className={{ label: 'pb-2 font-normal' }}
+                    />
+                  </div>
+                </Modal>
+              )
+            }}
           </Formik>
         </div>
       </div>
