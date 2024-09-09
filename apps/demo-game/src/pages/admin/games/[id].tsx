@@ -547,7 +547,7 @@ function ManageGame() {
         >
           {(countdownForm) => (
             <div className="flex flex-row gap-2">
-              <FormikNumberField name="countdownSeconds" precision={0} />
+              <NewFromikNumberField name="countdownSeconds" precision={0} />
               <Button onClick={() => countdownForm.handleSubmit()}>
                 Set Countdown
               </Button>
