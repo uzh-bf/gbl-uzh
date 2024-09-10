@@ -39,6 +39,15 @@ import {
   Player,
 } from 'src/graphql/generated/ops'
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@uzh-bf/design-system/dist/future'
+
 function ManageGame() {
   const router = useRouter()
 
@@ -545,17 +554,27 @@ function ManageGame() {
             })
           }
         >
-          {(countdownForm) => (
-            <div className="flex flex-row gap-2">
-              <NewFromikNumberField name="countdownSeconds" precision={0} />
-              <Button onClick={() => countdownForm.handleSubmit()}>
-                Set Countdown
-              </Button>
-            </div>
-          )}
+          <Card className="flex w-96 flex-col">
+            <CardHeader>
+              <CardTitle>Countdown</CardTitle>
+              <CardDescription>
+                Set a countdown for the segment.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <NewFromikNumberField
+                name="countdownSeconds"
+                precision={0}
+                label="Countdown in seconds"
+                className={{ label: 'pb-2 font-normal' }}
+              />
+              {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
+            </CardContent>
+            <CardFooter>
+              <Button type="submit">Set Countdown</Button>
+            </CardFooter>
+          </Card>
         </Formik>
-
-        {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
       </div>
     </div>
   )
