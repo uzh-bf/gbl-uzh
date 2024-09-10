@@ -46,8 +46,8 @@ const QUESTS = {
 
 function Quests({}) {
   // TODO(JJ): Decide which one is more suitable - query here or take as input
-  const { loading, error, data } = useQuery(ResultDocument, {
-    fetchPolicy: 'cache-first',
+  const { data } = useQuery(ResultDocument, {
+    fetchPolicy: 'cache-only',
   })
 
   const player = data?.self
@@ -107,9 +107,6 @@ function Quests({}) {
   const openElements = sortedElements.filter(
     (elem) => !completedLearningElementIds.includes(elem.id)
   )
-
-  if (loading) return null
-  if (error) return `Error! ${error}`
 
   return (
     <div className="flex flex-col gap-1 text-xs">

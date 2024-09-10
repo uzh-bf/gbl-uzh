@@ -88,6 +88,8 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     },
   }
 
+  // TODO(JJ): We fetch the data already, maybe just forward the data to the
+  // component
   const sidebar = (
     <div>
       <div className="flex items-center justify-between">
