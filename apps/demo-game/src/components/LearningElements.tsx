@@ -1,8 +1,4 @@
-import {
-  faLightbulb as faLightbulbRegular,
-  faSquare,
-  faSquareCheck,
-} from '@fortawesome/free-regular-svg-icons'
+import { faLightbulb as faLightbulbRegular } from '@fortawesome/free-regular-svg-icons'
 import { faLightbulb as faLightbuldSolid } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { H3 } from '@uzh-bf/design-system'
@@ -13,73 +9,10 @@ import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { ResultDocument } from 'src/graphql/generated/ops'
 
-// TODO(JJ): These are quests, not learning elements -> rename
-const QUESTS = {
-  BONDS: {
-    title: 'Bonds',
-    xp: 50,
-  },
-  BONDS_MARKET: {
-    title: 'Bonds Market',
-    xp: 50,
-  },
-  STOCKS: {
-    title: 'Stocks',
-    xp: 50,
-  },
-  STOCKS_MARKET: {
-    title: 'Stocks Market',
-    xp: 50,
-  },
-  INVESTMENT_RISKS: {
-    title: 'Investment Risks',
-    xp: 50,
-  },
-  TIME_VALUE_OF_MONEY: {
-    title: 'Time Value of Money',
-    xp: 50,
-  },
-  INTEREST: {
-    title: 'Interest',
-    xp: 50,
-  },
-}
-
-// TODO(JJ): Separate Quests from LearningElements
-function Quests({}) {
-  // TODO(JJ): Decide which one is more suitable - query here or take as input
+function LearningElements({}) {
   const { data } = useQuery(ResultDocument, {
     fetchPolicy: 'cache-only',
   })
-
-  const player = data?.self
-  const achievements = player?.achievement
-  const achievementKeys = player?.achievementKeys
-
-  // TODO: move quests logic to flexible solution with prisma and backend
-  const [openQuests, completedQuests] = useMemo(() => {
-    if (!achievements) return [[], []]
-    const { open, closed } = Object.entries(QUESTS).reduce(
-      (acc, [achievementKey, details]) => {
-        if (achievementKeys.includes(achievementKey)) {
-          return {
-            ...acc,
-            closed: [...acc.closed, details],
-          }
-        } else {
-          return {
-            ...acc,
-            open: [...acc.open, details],
-          }
-        }
-      },
-      {
-        open: [],
-        closed: [],
-      }
-    )
-    return [open, closed]
-  }, [achievementKeys, achievements])
 
   const playerDataResult = data?.result
   const currentGame = playerDataResult?.currentGame
@@ -105,6 +38,7 @@ function Quests({}) {
       )
     return completedLearningElementIds.map((id) => allLearningElements[id])
   }, [periods, completedLearningElementIds])
+
   const sortedElements = sortBy((elem) => elem.title, learningElements)
   const openElements = sortedElements.filter(
     (elem) => !completedLearningElementIds.includes(elem.id)
@@ -112,30 +46,6 @@ function Quests({}) {
 
   return (
     <div className="flex flex-col gap-1 text-xs">
-      <H3>Quests</H3>
-      <ul className="flex max-h-36 flex-col gap-1 overflow-auto">
-        {openQuests?.length + completedQuests?.length === 0 && (
-          <li>No open assignments</li>
-        )}
-        {openQuests?.length > 0 &&
-          sortBy((elem) => elem.title, openQuests)
-            .filter((elem) => {
-              return !elem.market
-            })
-            .map((elem) => (
-              <li key={elem.id}>
-                <FontAwesomeIcon icon={faSquare} />
-                <span className="ml-1">{elem.title}</span>
-              </li>
-            ))}
-        {completedQuests?.length > 0 &&
-          sortBy((elem) => elem.title, completedQuests).map((elem) => (
-            <li key={elem.id}>
-              <FontAwesomeIcon icon={faSquareCheck} />
-              <span className="ml-1">{elem.title}</span>
-            </li>
-          ))}
-      </ul>
       <H3 className={{ root: 'mt-4' }}>Learning Activities</H3>
       <ul className="flex max-h-36 flex-col gap-1 overflow-auto">
         {openElements?.length + completedLearningElements?.length === 0 && (
@@ -162,4 +72,4 @@ function Quests({}) {
   )
 }
 
-export default Quests
+export default LearningElements

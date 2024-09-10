@@ -18,7 +18,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import Quests from 'src/components/Quests'
+import LearningElements from 'src/components/LearningElements'
 import {
   TransactionsDisplay,
   TransactionsDisplayCompact,
@@ -42,6 +42,7 @@ function GameHeader({ currentGame }) {
 }
 
 function GameLayout({ children }: { children: React.ReactNode }) {
+  // TODO(JJ): Fetch data in Layout
   const { data } = useQuery(ResultDocument, {
     fetchPolicy: 'cache-first',
     pollInterval: 10000,
@@ -88,8 +89,6 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     },
   }
 
-  // TODO(JJ): We fetch the data already, maybe just forward the data to the
-  // component
   const sidebar = (
     <div>
       <div className="flex items-center justify-between">
@@ -155,7 +154,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
           />
         )}
       </div>
-      <Quests />
+      <LearningElements />
     </div>
   )
 
