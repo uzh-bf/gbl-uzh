@@ -7,10 +7,7 @@ import {
   ChartTooltipContent,
 } from '@uzh-bf/design-system/dist/future'
 
-// TODO(JJ): This will be replaced by the design system
-import { useToast } from '../../components/ui/use-toast'
-
-import { differenceInSeconds } from 'date-fns'
+import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import {
   CartesianGrid,
@@ -31,6 +28,8 @@ import {
   UpdateReadyStateDocument,
 } from 'src/graphql/generated/ops'
 import { ActionTypes } from 'src/services/ActionsReducer'
+// TODO(JJ): This will be replaced by the design system
+import { useToast } from '../../components/ui/use-toast'
 
 function GameHeader({ currentGame }) {
   return (
@@ -62,8 +61,8 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     ?.activeSegment?.countdownDurationMs as number | null
 
   useEffect(() => {
-    const dateExpiresAt = new Date(strExpiresAt)
-    const secondsRemaining = differenceInSeconds(dateExpiresAt, new Date())
+    const dateExpiresAt = dayjs(strExpiresAt)
+    const secondsRemaining = dateExpiresAt.diff(dayjs(), 's')
 
     if (secondsRemaining > 0) {
       toast({
@@ -115,7 +114,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
             countdown: 'text-xs font-bold text-gray-600',
           }}
           totalDuration={countdownDurationMs / 1000}
-          expiresAt={new Date(strExpiresAt)}
+          expiresAt={dayjs(strExpiresAt).toDate()}
           formatter={(value) => `${value}s`}
           onExpire={() =>
             toast({

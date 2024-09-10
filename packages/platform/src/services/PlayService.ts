@@ -5,6 +5,7 @@ import {
   BaseUserNotificationType as UserNotificationType,
 } from '../types.js'
 import * as EventService from './EventService.js'
+import dayjs from 'dayjs'
 
 type Context = CtxWithPrisma<DB.PrismaClient>
 
@@ -615,8 +616,8 @@ export async function addCountdown(args, ctx: Context) {
       id: currentGame.activePeriod.activeSegment.id,
     },
     data: {
-      countdownExpiresAt: new Date(Date.now() + countdownDurationMs),
-      countdownDurationMs: countdownDurationMs,
+      countdownExpiresAt: dayjs().add(countdownDurationMs, 'ms').toDate(),
+      countdownDurationMs,
     },
   })
 

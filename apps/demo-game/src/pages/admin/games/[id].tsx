@@ -552,6 +552,7 @@ function ManageGame() {
                 gameId: Number(router.query.id),
                 seconds: Number(values.countdownSeconds),
               },
+              refetchQueries: [GameDocument],
             })
           }
         >
@@ -570,6 +571,9 @@ function ManageGame() {
                   label="Countdown in seconds"
                   className={{ label: 'pb-2 font-normal' }}
                 />
+                {/* TODO(JJ): @RS Do we want to show the following? If no we
+                  we can remove the refetchQueries.
+                */}
                 {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
               </CardContent>
               <CardFooter>
