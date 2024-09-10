@@ -12,7 +12,7 @@ import {
   NewFormikTextField,
   NewFromikNumberField,
 } from '@uzh-bf/design-system'
-import { Formik } from 'formik'
+import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
 
@@ -555,26 +555,28 @@ function ManageGame() {
             })
           }
         >
-          <Card className="flex flex-col">
-            <CardHeader>
-              <CardTitle>Countdown</CardTitle>
-              <CardDescription>
-                Set a countdown for the segment.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <NewFromikNumberField
-                name="countdownSeconds"
-                precision={0}
-                label="Countdown in seconds"
-                className={{ label: 'pb-2 font-normal' }}
-              />
-              {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
-            </CardContent>
-            <CardFooter>
-              <Button type="submit">Set Countdown</Button>
-            </CardFooter>
-          </Card>
+          <Form>
+            <Card className="flex flex-col">
+              <CardHeader>
+                <CardTitle>Countdown</CardTitle>
+                <CardDescription>
+                  Set a countdown for the segment.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <NewFromikNumberField
+                  name="countdownSeconds"
+                  precision={0}
+                  label="Countdown in seconds"
+                  className={{ label: 'pb-2 font-normal' }}
+                />
+                {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
+              </CardContent>
+              <CardFooter>
+                <Button type="submit">Set Countdown</Button>
+              </CardFooter>
+            </Card>
+          </Form>
         </Formik>
       </div>
     </div>
