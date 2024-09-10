@@ -282,6 +282,25 @@ function Cockpit() {
       const initialCapital = assetsWithReturnsFlat[0].totalAssets
       console.log('assetsWithReturnsFlat', assetsWithReturnsFlat)
 
+      const bankBenchmark = assetsWithReturnsFlat.map((e, ix) => {
+        return {
+          bankReturn: e.bankReturn ?? 0,
+          month: months[ix % numMonths],
+          period: ~~(ix / numMonths) + 1, // integer division
+        }
+      })
+      console.log('bankBenchmark', bankBenchmark)
+
+      const bankBenchmarkRed = assetsWithReturnsFlat.reduce((acc, val, ix) => {
+        const period = ~~(ix / numMonths) + 1
+        acc[period] = [
+          ...(acc[period] || []),
+          { bankReturn: val.bankReturn ?? 0, month: months[ix % numMonths] },
+        ]
+        return acc
+      }, {})
+      console.log('bankBenchmarkRed', bankBenchmarkRed)
+
       const assetsPerMonthPrep = assetsWithReturnsFlat.map((e, ix) => {
         return {
           total: e.totalAssets,

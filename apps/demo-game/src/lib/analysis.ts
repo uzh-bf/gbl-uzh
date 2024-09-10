@@ -9,3 +9,19 @@ export const getSegmentEndResults = (results: PlayerResult[]) => {
         : 1
     )
 }
+
+export const getBenchmarkBank = (assetsWithReturnsFlat: any[]) => {
+  const numMonths = 12
+  const bankBenchmarkRed = assetsWithReturnsFlat.reduce((acc, val, ix) => {
+    const period = ~~(ix / numMonths) + 1
+    acc[period] = [
+      ...(acc[period] || []),
+      {
+        bankReturn: val.bankReturn ?? 0,
+        // month: months[ix % numMonths],
+      },
+    ]
+    return acc
+  }, {})
+  return bankBenchmarkRed
+}
