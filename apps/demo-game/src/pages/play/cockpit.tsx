@@ -18,6 +18,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import Quests from 'src/components/Quests'
 import {
   TransactionsDisplay,
   TransactionsDisplayCompact,
@@ -88,68 +89,71 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   }
 
   const sidebar = (
-    <div className="flex items-center justify-between">
-      <Switch
-        className={{
-          root: 'text-xs font-bold text-gray-600',
-        }}
-        disabled={!data.self || loading}
-        id="isReady"
-        checked={data.self.isReady}
-        label="Ready?"
-        onCheckedChange={async () => {
-          await updateReadyState({
-            variables: {
-              isReady: !data.self.isReady,
-            },
-          })
-        }}
-      />
-
-      {countdownDurationMs !== null && (
-        <CycleCountdown
+    <div>
+      <div className="flex items-center justify-between">
+        <Switch
           className={{
-            root: '',
-            countdownWrapper: '',
-            countdown: 'text-xs font-bold text-gray-600',
+            root: 'text-xs font-bold text-gray-600',
           }}
-          totalDuration={countdownDurationMs / 1000}
-          expiresAt={dayjs(strExpiresAt).toDate()}
-          formatter={(value) => `${value}s`}
-          onExpire={() =>
-            toast({
-              title: 'Countdown expired',
-              description: 'Time is up! The period will be closed soon.',
-              variant: 'destructive',
+          disabled={!data.self || loading}
+          id="isReady"
+          checked={data.self.isReady}
+          label="Ready?"
+          onCheckedChange={async () => {
+            await updateReadyState({
+              variables: {
+                isReady: !data.self.isReady,
+              },
             })
-          }
-          onUpdate={(secondsRemaining) => {
-            if (secondsRemaining <= 60) {
-              if (countdownNotifications['60']) return
-              toast({
-                title: 'Countdown update',
-                description:
-                  'Less than a minute remaining! Please press ready once you are done.',
-              })
-              setCountdownNotifications({
-                ...countdownNotifications,
-                '60': true,
-              })
-            } else if (secondsRemaining <= 180) {
-              if (countdownNotifications['180']) return
-              toast({
-                title: 'Countdown update',
-                description:
-                  'Less than three minutes remaining! Please press ready once you are done.',
-              })
-              setCountdownNotifications({
-                ...countdownNotifications,
-                '180': true,
-              })
-            }
           }}
         />
-      )}
+
+        {countdownDurationMs !== null && (
+          <CycleCountdown
+            className={{
+              root: '',
+              countdownWrapper: '',
+              countdown: 'text-xs font-bold text-gray-600',
+            }}
+            totalDuration={countdownDurationMs / 1000}
+            expiresAt={dayjs(strExpiresAt).toDate()}
+            formatter={(value) => `${value}s`}
+            onExpire={() =>
+              toast({
+                title: 'Countdown expired',
+                description: 'Time is up! The period will be closed soon.',
+                variant: 'destructive',
+              })
+            }
+            onUpdate={(secondsRemaining) => {
+              if (secondsRemaining <= 60) {
+                if (countdownNotifications['60']) return
+                toast({
+                  title: 'Countdown update',
+                  description:
+                    'Less than a minute remaining! Please press ready once you are done.',
+                })
+                setCountdownNotifications({
+                  ...countdownNotifications,
+                  '60': true,
+                })
+              } else if (secondsRemaining <= 180) {
+                if (countdownNotifications['180']) return
+                toast({
+                  title: 'Countdown update',
+                  description:
+                    'Less than three minutes remaining! Please press ready once you are done.',
+                })
+                setCountdownNotifications({
+                  ...countdownNotifications,
+                  '180': true,
+                })
+              }
+            }}
+          />
+        )}
+      </div>
+      <Quests />
     </div>
   )
 
