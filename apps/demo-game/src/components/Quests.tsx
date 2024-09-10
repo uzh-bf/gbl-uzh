@@ -13,6 +13,7 @@ import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { ResultDocument } from 'src/graphql/generated/ops'
 
+// TODO(JJ): These are quests, not learning elements -> rename
 const QUESTS = {
   BONDS: {
     title: 'Bonds',
@@ -44,6 +45,7 @@ const QUESTS = {
   },
 }
 
+// TODO(JJ): Separate Quests from LearningElements
 function Quests({}) {
   // TODO(JJ): Decide which one is more suitable - query here or take as input
   const { data } = useQuery(ResultDocument, {
