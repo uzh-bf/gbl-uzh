@@ -6,7 +6,9 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@uzh-bf/design-system/dist/future'
-import toast from 'react-hot-toast'
+
+// TODO(JJ): This will be replaced by the design system
+import { useToast } from '../../components/ui/use-toast'
 
 import { differenceInSeconds } from 'date-fns'
 import { useEffect, useState } from 'react'
@@ -52,6 +54,8 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     '180': false,
   })
 
+  const { toast } = useToast()
+
   const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
     ?.countdownExpiresAt as string | null
   const countdownDurationMs = data?.result?.currentGame?.activePeriod
@@ -62,13 +66,10 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     const secondsRemaining = differenceInSeconds(dateExpiresAt, new Date())
 
     if (secondsRemaining > 0) {
-      toast(
-        `Countdown set: ${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
-        {
-          className: '!bg-orange-200',
-          icon: '⏰',
-        }
-      )
+      toast({
+        title: 'Countdown set',
+        description: `${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
+      })
     }
   }, [strExpiresAt])
 
@@ -117,34 +118,31 @@ function GameLayout({ children }: { children: React.ReactNode }) {
           expiresAt={new Date(strExpiresAt)}
           formatter={(value) => `${value}s`}
           onExpire={() =>
-            toast('Time is up! The period will be closed soon.', {
-              className: '!bg-red-300',
-              icon: '⏰',
+            toast({
+              title: 'Countdown expired',
+              description: 'Time is up! The period will be closed soon.',
+              variant: 'destructive',
             })
           }
           onUpdate={(secondsRemaining) => {
             if (secondsRemaining <= 60) {
               if (countdownNotifications['60']) return
-              toast(
-                'Less than a minute remaining! Please press ready once you are done.',
-                {
-                  className: '!bg-orange-300',
-                  icon: '⏰',
-                }
-              )
+              toast({
+                title: 'Countdown update',
+                description:
+                  'Less than a minute remaining! Please press ready once you are done.',
+              })
               setCountdownNotifications({
                 ...countdownNotifications,
                 '60': true,
               })
             } else if (secondsRemaining <= 180) {
               if (countdownNotifications['180']) return
-              toast(
-                'Less than three minutes remaining! Please press ready once you are done.',
-                {
-                  className: '!bg-yellow-300',
-                  icon: '⏰',
-                }
-              )
+              toast({
+                title: 'Countdown update',
+                description:
+                  'Less than three minutes remaining! Please press ready once you are done.',
+              })
               setCountdownNotifications({
                 ...countdownNotifications,
                 '180': true,
