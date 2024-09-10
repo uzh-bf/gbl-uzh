@@ -532,17 +532,18 @@ function ManageGame() {
       </div>
       <div className="mt-2 flex flex-row gap-2">{getButton()}</div>
 
-      <div className="mt-4 max-w-sm">
-        <div className="font-bold">Players</div>
-        <div className="mt-2 flex flex-col gap-4">
-          {game.players.map((player, ix) => (
-            <div key={player.id} data-cy={`player-${ix}`}>
-              <PlayerCompact player={player as Player} />
-            </div>
-          ))}
+      <div className="mt-4 flex w-full flex-row justify-between">
+        <div className="w-1/2">
+          <div className="font-bold">Players</div>
+          <div className="mt-2 flex flex-col gap-4">
+            {game.players.map((player, ix) => (
+              <div key={player.id} data-cy={`player-${ix}`}>
+                <PlayerCompact player={player as Player} />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-      <div className="mt-4">
+
         <Formik
           initialValues={{ countdownSeconds: 300 }}
           onSubmit={(values) =>
@@ -554,7 +555,7 @@ function ManageGame() {
             })
           }
         >
-          <Card className="flex w-96 flex-col">
+          <Card className="flex flex-col">
             <CardHeader>
               <CardTitle>Countdown</CardTitle>
               <CardDescription>
