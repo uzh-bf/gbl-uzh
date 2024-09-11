@@ -143,6 +143,7 @@ export interface NexusGenObjects {
   }
   PeriodSegment: { // root type
     actions: NexusGenRootTypes['PlayerAction'][]; // [PlayerAction!]!
+    countdownDurationMs?: number | null; // Int
     countdownExpiresAt?: NexusGenScalars['DateTime'] | null; // DateTime
     facts: NexusGenScalars['JSONObject']; // JSONObject!
     id: string; // ID!
@@ -317,6 +318,7 @@ export interface NexusGenFieldTypes {
   }
   PeriodSegment: { // field return type
     actions: NexusGenRootTypes['PlayerAction'][]; // [PlayerAction!]!
+    countdownDurationMs: number | null; // Int
     countdownExpiresAt: NexusGenScalars['DateTime'] | null; // DateTime
     facts: NexusGenScalars['JSONObject']; // JSONObject!
     id: string; // ID!
@@ -493,6 +495,7 @@ export interface NexusGenFieldTypeNames {
   }
   PeriodSegment: { // field return type name
     actions: 'PlayerAction'
+    countdownDurationMs: 'Int'
     countdownExpiresAt: 'DateTime'
     facts: 'JSONObject'
     id: 'ID'

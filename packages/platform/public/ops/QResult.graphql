@@ -30,6 +30,7 @@ query Result {
           index
           facts
           countdownExpiresAt
+          countdownDurationMs
           learningElements {
             id
             title

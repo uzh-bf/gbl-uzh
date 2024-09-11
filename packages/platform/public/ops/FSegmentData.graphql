@@ -4,6 +4,7 @@ fragment SegmentData on PeriodSegment {
   index
 
   countdownExpiresAt
+  countdownDurationMs
 
   facts
 

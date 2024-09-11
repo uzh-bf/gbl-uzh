@@ -11,6 +11,7 @@ query Game($id: Int) {
       activeSegment {
         id
         countdownExpiresAt
+        countdownDurationMs
       }
       segmentCount
       segments {

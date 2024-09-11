@@ -153,6 +153,7 @@ model PeriodSegment {
   facts Json
 
   countdownExpiresAt DateTime?
+  countdownDurationMs Int?
 
   actions PlayerAction[]
   results PlayerResult[]

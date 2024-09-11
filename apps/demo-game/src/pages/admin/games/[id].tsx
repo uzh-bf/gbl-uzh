@@ -12,7 +12,7 @@ import {
   NewFormikTextField,
   NewFromikNumberField,
 } from '@uzh-bf/design-system'
-import { Formik } from 'formik'
+import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
 
@@ -29,6 +29,7 @@ import { useCallback, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
+  AddCountdownDocument,
   AddGamePeriodDocument,
   AddPeriodSegmentDocument,
   Game,
@@ -37,6 +38,15 @@ import {
   Period,
   Player,
 } from 'src/graphql/generated/ops'
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@uzh-bf/design-system/dist/future'
 
 function ManageGame() {
   const router = useRouter()
@@ -78,6 +88,8 @@ function ManageGame() {
     }
   )
 
+  const [addCountdown] = useMutation(AddCountdownDocument)
+
   const nextPeriod = () =>
     activateNextPeriod({
       variables: {
@@ -96,6 +108,7 @@ function ManageGame() {
 
   const getButton = useCallback(() => {
     const game = data.game
+    const disabled = game.periods.length === 0
     const activePeriod = game?.activePeriod
     const segments = activePeriod?.segments
     const activeSegmentIx = activePeriod?.activeSegmentIx
@@ -519,15 +532,56 @@ function ManageGame() {
       </div>
       <div className="mt-2 flex flex-row gap-2">{getButton()}</div>
 
-      <div className="mt-4 max-w-sm">
-        <div className="font-bold">Players</div>
-        <div className="mt-2 flex flex-col gap-4">
-          {game.players.map((player, ix) => (
-            <div key={player.id} data-cy={`player-${ix}`}>
-              <PlayerCompact player={player as Player} />
-            </div>
-          ))}
+      <div className="mt-4 flex w-full flex-row justify-between">
+        <div className="w-1/2">
+          <div className="font-bold">Players</div>
+          <div className="mt-2 flex flex-col gap-4">
+            {game.players.map((player, ix) => (
+              <div key={player.id} data-cy={`player-${ix}`}>
+                <PlayerCompact player={player as Player} />
+              </div>
+            ))}
+          </div>
         </div>
+
+        <Formik
+          initialValues={{ countdownSeconds: 300 }}
+          onSubmit={(values) =>
+            addCountdown({
+              variables: {
+                gameId: Number(router.query.id),
+                seconds: Number(values.countdownSeconds),
+              },
+              refetchQueries: [GameDocument],
+            })
+          }
+        >
+          <Form>
+            <Card className="flex flex-col">
+              <CardHeader>
+                <CardTitle>Countdown</CardTitle>
+                <CardDescription>
+                  Set a countdown for the segment.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <NewFromikNumberField
+                  name="countdownSeconds"
+                  precision={0}
+                  label="Countdown in seconds"
+                  className={{ label: 'pb-2 font-normal' }}
+                />
+                {/* TODO(JJ): @RS Do we want to show the following? If no we
+                  we can remove the refetchQueries.
+                */}
+                {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
+              </CardContent>
+              <CardFooter>
+                <Button type="submit">Set Countdown</Button>
+              </CardFooter>
+            </Card>
+          </Form>
+        </Formik>
       </div>
     </div>
   )

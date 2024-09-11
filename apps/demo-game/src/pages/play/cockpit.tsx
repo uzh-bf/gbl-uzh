@@ -1,11 +1,14 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { Layout } from '@gbl-uzh/ui'
-import { Switch, Table } from '@uzh-bf/design-system'
+import { CycleCountdown, Switch, Table } from '@uzh-bf/design-system'
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@uzh-bf/design-system/dist/future'
+
+import dayjs from 'dayjs'
+import { useEffect, useState } from 'react'
 import {
   CartesianGrid,
   Line,
@@ -22,8 +25,11 @@ import {
 import {
   PerformActionDocument,
   ResultDocument,
+  UpdateReadyStateDocument,
 } from 'src/graphql/generated/ops'
 import { ActionTypes } from 'src/services/ActionsReducer'
+// TODO(JJ): This will be replaced by the design system
+import { useToast } from '../../components/ui/use-toast'
 
 function GameHeader({ currentGame }) {
   return (
@@ -36,8 +42,35 @@ function GameHeader({ currentGame }) {
 
 function GameLayout({ children }: { children: React.ReactNode }) {
   const { data } = useQuery(ResultDocument, {
-    fetchPolicy: 'cache-only',
+    fetchPolicy: 'cache-first',
+    pollInterval: 10000,
   })
+
+  const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument)
+
+  const [countdownNotifications, setCountdownNotifications] = useState({
+    '60': false,
+    '180': false,
+  })
+
+  const { toast } = useToast()
+
+  const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
+    ?.countdownExpiresAt as string | null
+  const countdownDurationMs = data?.result?.currentGame?.activePeriod
+    ?.activeSegment?.countdownDurationMs as number | null
+
+  useEffect(() => {
+    const dateExpiresAt = dayjs(strExpiresAt)
+    const secondsRemaining = dateExpiresAt.diff(dayjs(), 's')
+
+    if (secondsRemaining > 0) {
+      toast({
+        title: 'Countdown set',
+        description: `${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
+      })
+    }
+  }, [strExpiresAt])
 
   const playerInfo = {
     name: data.self.name,
@@ -54,7 +87,71 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     },
   }
 
-  const sidebar = <div>SidebarAddons</div>
+  const sidebar = (
+    <div className="flex items-center justify-between">
+      <Switch
+        className={{
+          root: 'text-xs font-bold text-gray-600',
+        }}
+        disabled={!data.self || loading}
+        id="isReady"
+        checked={data.self.isReady}
+        label="Ready?"
+        onCheckedChange={async () => {
+          await updateReadyState({
+            variables: {
+              isReady: !data.self.isReady,
+            },
+          })
+        }}
+      />
+
+      {countdownDurationMs !== null && (
+        <CycleCountdown
+          className={{
+            root: '',
+            countdownWrapper: '',
+            countdown: 'text-xs font-bold text-gray-600',
+          }}
+          totalDuration={countdownDurationMs / 1000}
+          expiresAt={dayjs(strExpiresAt).toDate()}
+          formatter={(value) => `${value}s`}
+          onExpire={() =>
+            toast({
+              title: 'Countdown expired',
+              description: 'Time is up! The period will be closed soon.',
+              variant: 'destructive',
+            })
+          }
+          onUpdate={(secondsRemaining) => {
+            if (secondsRemaining <= 60) {
+              if (countdownNotifications['60']) return
+              toast({
+                title: 'Countdown update',
+                description:
+                  'Less than a minute remaining! Please press ready once you are done.',
+              })
+              setCountdownNotifications({
+                ...countdownNotifications,
+                '60': true,
+              })
+            } else if (secondsRemaining <= 180) {
+              if (countdownNotifications['180']) return
+              toast({
+                title: 'Countdown update',
+                description:
+                  'Less than three minutes remaining! Please press ready once you are done.',
+              })
+              setCountdownNotifications({
+                ...countdownNotifications,
+                '180': true,
+              })
+            }
+          }}
+        />
+      )}
+    </div>
+  )
 
   return (
     <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
