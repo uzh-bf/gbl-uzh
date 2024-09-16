@@ -9,10 +9,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Button,
   Modal,
+  NewFormikSelectField,
   NewFormikTextField,
   NewFromikNumberField,
 } from '@uzh-bf/design-system'
-import { Form, Formik } from 'formik'
+import { Field, Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
 
@@ -35,6 +36,7 @@ import {
   Game,
   GameDocument,
   GameStatus,
+  LearningElementsDocument,
   Period,
   Player,
 } from 'src/graphql/generated/ops'
@@ -48,6 +50,8 @@ import {
   CardTitle,
 } from '@uzh-bf/design-system/dist/future'
 
+import { MultiSelect } from '~/components/MultiSelect'
+
 function ManageGame() {
   const router = useRouter()
 
@@ -59,6 +63,8 @@ function ManageGame() {
     pollInterval: 15000,
     skip: !router.query.id,
   })
+
+  const { data: learningElementsData } = useQuery(LearningElementsDocument)
 
   const [activateNextPeriod, { loading: nextPeriodLoading }] = useMutation(
     ActivateNextPeriodDocument,
@@ -217,6 +223,14 @@ function ManageGame() {
 
   const game: Game = data.game
 
+  const learningElementsAll = learningElementsData.learningElements.map(
+    (e) => ({
+      label: e.id ?? '',
+      value: e.id ?? '',
+    })
+  )
+  learningElementsAll.push({ label: 'None', value: '' })
+
   return (
     <div className="p-4">
       <div>
@@ -338,9 +352,10 @@ function ManageGame() {
                         initialValues={{
                           periodIx: -1,
                           storyElements: '',
-                          learningElements: '',
+                          learningElements: [''],
                         }}
                         onSubmit={async (variables, { resetForm }) => {
+                          console.log('variables', variables)
                           await addPeriodSegment({
                             variables: {
                               gameId: Number(router.query.id),
@@ -349,9 +364,9 @@ function ManageGame() {
                               storyElements: variables.storyElements
                                 ? variables.storyElements.split(',')
                                 : [],
-                              learningElements: variables.learningElements
-                                ? variables.learningElements.split(',')
-                                : [],
+                              learningElements: variables.learningElements,
+                              // ? variables.learningElements.split(',')
+                              // : [],
                             },
                           })
                           resetForm()
@@ -408,11 +423,32 @@ function ManageGame() {
                                 data={{ cy: 'story-elements' }}
                                 className={{ label: 'pb-2 font-normal' }}
                               />
-                              <NewFormikTextField
+                              {/* <NewFormikTextField
                                 name="learningElements"
                                 label="Learning Elements"
                                 data={{ cy: 'learning-elements' }}
                                 className={{ label: 'pb-2 font-normal' }}
+                              /> */}
+                              <NewFormikSelectField
+                                name="learningElements"
+                                items={learningElementsAll}
+                                label="Learning Elements"
+                                data={{ cy: 'learning-elements' }}
+                                className={{
+                                  label: 'pb-2 font-normal',
+                                }}
+                              />
+                              <Field
+                                name="learningElements"
+                                component={MultiSelect}
+                                options={learningElementsAll}
+                                value={newSegmentForm.values.learningElements}
+                                onChange={(value) =>
+                                  newSegmentForm.setFieldValue(
+                                    'learningElements',
+                                    value
+                                  )
+                                }
                               />
                             </div>
                           </Modal>
