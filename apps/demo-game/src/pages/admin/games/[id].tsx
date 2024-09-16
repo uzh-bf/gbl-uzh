@@ -9,7 +9,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Button,
   Modal,
-  NewFormikSelectField,
   NewFormikTextField,
   NewFromikNumberField,
 } from '@uzh-bf/design-system'
@@ -225,11 +224,10 @@ function ManageGame() {
 
   const learningElementsAll = learningElementsData.learningElements.map(
     (e) => ({
-      label: e.id ?? '',
-      value: e.id ?? '',
+      label: e.id,
+      value: e.id,
     })
   )
-  learningElementsAll.push({ label: 'None', value: '' })
 
   return (
     <div className="p-4">
@@ -352,7 +350,7 @@ function ManageGame() {
                         initialValues={{
                           periodIx: -1,
                           storyElements: '',
-                          learningElements: [''],
+                          learningElements: [],
                         }}
                         onSubmit={async (variables, { resetForm }) => {
                           console.log('variables', variables)
@@ -423,32 +421,21 @@ function ManageGame() {
                                 data={{ cy: 'story-elements' }}
                                 className={{ label: 'pb-2 font-normal' }}
                               />
-                              {/* <NewFormikTextField
-                                name="learningElements"
-                                label="Learning Elements"
-                                data={{ cy: 'learning-elements' }}
-                                className={{ label: 'pb-2 font-normal' }}
-                              /> */}
-                              <NewFormikSelectField
-                                name="learningElements"
-                                items={learningElementsAll}
-                                label="Learning Elements"
-                                data={{ cy: 'learning-elements' }}
-                                className={{
-                                  label: 'pb-2 font-normal',
-                                }}
-                              />
+                              <span className="text-sm font-normal text-gray-700">
+                                Learning Elements
+                              </span>
                               <Field
                                 name="learningElements"
                                 component={MultiSelect}
                                 options={learningElementsAll}
                                 value={newSegmentForm.values.learningElements}
-                                onChange={(value) =>
+                                placeholderCmdSearch="Search learning elements..."
+                                onChange={(value) => {
                                   newSegmentForm.setFieldValue(
                                     'learningElements',
                                     value
                                   )
-                                }
+                                }}
                               />
                             </div>
                           </Modal>
