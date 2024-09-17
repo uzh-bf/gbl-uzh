@@ -1,0 +1,7 @@
+#import "./FStoryElementData.graphql"
+
+query StoryElements {
+  storyElements {
+    ...StoryElementData
+  }
+}

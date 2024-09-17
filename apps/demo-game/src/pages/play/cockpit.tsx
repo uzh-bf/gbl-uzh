@@ -30,6 +30,7 @@ import {
 } from 'src/graphql/generated/ops'
 import { ActionTypes } from 'src/services/ActionsReducer'
 // TODO(JJ): This will be replaced by the design system
+import StoryElements from '~/components/StoryElements'
 import { useToast } from '../../components/ui/use-toast'
 
 function GameHeader({ currentGame }) {
@@ -87,6 +88,12 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     onClick: () => {
       // router.replace('/play/welcome')
     },
+  }
+  const playerState = {
+    data,
+  }
+  const player = {
+    role: data.self.role,
   }
 
   const sidebar = (
@@ -155,9 +162,12 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   )
 
   return (
-    <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
-      {children}
-    </Layout>
+    <>
+      <StoryElements playerState={playerState} player={player} />
+      <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
+        {children}
+      </Layout>
+    </>
   )
 }
 

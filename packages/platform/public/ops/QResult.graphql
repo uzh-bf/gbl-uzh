@@ -1,5 +1,6 @@
 #import "./FResultData.graphql"
 #import "./FPeriodData.graphql"
+#import "./FStoryElementData.graphql"
 #import "./FPlayerData.graphql"
 #import "./FPlayerActionData.graphql"
 
@@ -36,11 +37,7 @@ query Result {
             title
           }
           storyElements {
-            id
-            type
-            title
-            content
-            contentRole
+            ...StoryElementData
           }
         }
       }
