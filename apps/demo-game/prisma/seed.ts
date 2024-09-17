@@ -104,7 +104,7 @@ const LEARNING_ELEMENTS = [
     ],
     feedback: `Sowohl Finanzierungs- als auch Investitionsentscheidungen beinhalten Ein- und Auszahlungen, die über die Zeit verteilt sind. Entscheidungsträger in Haushalten, Unternehmungen und Regierungen müssen evaluieren, ob heutige Mittelabflüsse durch die erwarteten Rückflüsse in der Zukunft gerechtfertigt sind. Sie müssen demnach den Wert von Geldbeträgen, welche zu unterschiedlichen Zeitpunkten anfallen, miteinander vergleichen können. Deshalb werden alle zukünftigen Geldbeträge auf einen Zeitpunkt (z.B. heute oder in drei Jahren) hin bewertet.
 Dies zu tun erfordert ein grundlegendes Verständnis für den Zeitwert des Geldes (Time Value of Money), respektive die Kenntnis der zugrundeliegenden Konzepte und Techniken. Der "Time Value of Money“ beschreibt die Tatsache, dass Geld heute mehr Wert ist als Geld, das man erst morgen erhält:
--	Man kann das Geld heute anlegen oder investieren und damit Zinsen oder einen an-deren Ertrag (Dividenden, Kurssteigerungen, Mietzins etc.) erzielen. Deshalb wird man in Zukunft mehr Geld zur Verfügung haben.
+-	Man kann das Geld heute anlegen oder investieren und damit Zinsen oder einen anderen Ertrag (Dividenden, Kurssteigerungen, Mietzins etc.) erzielen. Deshalb wird man in Zukunft mehr Geld zur Verfügung haben.
 -	In Zukunft erwartete Geldflüsse sind in der Regel mit Unsicherheit behaftet, d.h. eine Zahlung kann höher oder tiefer als erwartet ausfallen oder im schlimmsten Fall gar nicht erfolgen.
 -	Die Inflation kann die Kaufkraft des Geldes über die Zeit mindern. `,
     motivation: 'TBD',

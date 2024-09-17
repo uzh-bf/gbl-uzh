@@ -69,11 +69,9 @@ function Learning() {
     }
   )
 
-  if (
-    !learningElement.data ||
-    learningElement.loading ||
-    elementState == null
-  ) {
+  if (loading) return <div>Loading...</div>
+
+  if (!learningElement.data || elementState == null) {
     return null
   }
 

@@ -92,22 +92,24 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   const sidebar = (
     <div>
       <div className="flex items-center justify-between">
-        <Switch
-          className={{
-            root: 'text-xs font-bold text-gray-600',
-          }}
-          disabled={!data.self || loading}
-          id="isReady"
-          checked={data.self.isReady}
-          label="Ready?"
-          onCheckedChange={async () => {
-            await updateReadyState({
-              variables: {
-                isReady: !data.self.isReady,
-              },
-            })
-          }}
-        />
+        {data && data.self && (
+          <Switch
+            className={{
+              root: 'text-xs font-bold text-gray-600',
+            }}
+            disabled={!data.self || loading}
+            id="isReady"
+            checked={data.self.isReady}
+            label="Ready?"
+            onCheckedChange={async () => {
+              await updateReadyState({
+                variables: {
+                  isReady: !data.self.isReady,
+                },
+              })
+            }}
+          />
+        )}
 
         {countdownDurationMs !== null && (
           <CycleCountdown
