@@ -12,18 +12,12 @@ import { useRouter } from 'next/router'
 import { without } from 'ramda'
 import { useEffect, useState } from 'react'
 // import toast from 'react-hot-toast'
-// import Markdown from 'react-markdown'
+import Markdown from 'react-markdown'
 import {
   AttemptLearningElementDocument,
   LearningElementDocument,
 } from 'src/graphql/generated/ops'
 import { twMerge } from 'tailwind-merge'
-
-// TODO(JJ):
-// - How does the Learning element and stories work?
-// -> what is the input? Better drop down?
-// - Where are the questions stored?
-// - How do we make the generic, i.e. for every game?
 
 function Learning() {
   const router = useRouter()
@@ -96,9 +90,9 @@ function Learning() {
           <h1 className="mb-1 text-lg font-bold">
             {learningElement.data.learningElement.element.title}
           </h1>
-          {/* <Markdown className="prose prose-lg max-w-full"> */}
-          {learningElement.data.learningElement.element.question}
-          {/* </Markdown> */}
+          <Markdown className="prose prose-lg max-w-full">
+            {learningElement.data.learningElement.element.question}
+          </Markdown>
         </div>
         <div className="flex flex-initial flex-col items-end gap-2">
           <FontAwesomeIcon
@@ -127,9 +121,9 @@ function Learning() {
                   />
                   <div>
                     <div className="mb-1 font-bold">Explanation</div>
-                    {/* <Markdown className="prose prose-sm"> */}
-                    {learningElement.data.learningElement.element.feedback}
-                    {/* </Markdown> */}
+                    <Markdown className="prose prose-sm">
+                      {learningElement.data.learningElement.element.feedback}
+                    </Markdown>
                   </div>
                 </div>
               )}
@@ -145,9 +139,9 @@ function Learning() {
                 />
                 <div>
                   <div className="mb-1 font-bold">Why is it relevant?</div>
-                  {/* <Markdown className="prose prose-sm"> */}
-                  {learningElement.data.learningElement.element.motivation}
-                  {/* </Markdown> */}
+                  <Markdown className="prose prose-sm">
+                    {learningElement.data.learningElement.element.motivation}
+                  </Markdown>
                 </div>
               </div>
             )}
@@ -188,7 +182,7 @@ function Learning() {
                   })
                 }
               >
-                {/* <Markdown className="prose prose-sm">{option.content}</Markdown> */}
+                <Markdown className="prose prose-sm">{option.content}</Markdown>
               </Button>
             )
           )}
@@ -217,10 +211,5 @@ function Learning() {
     </div>
   )
 }
-
-// TODO(JJ): Make sure that the layout is correct
-// Learning.getLayout = (page) => {
-//   return <GameLayout>{page}</GameLayout>
-// }
 
 export default Learning

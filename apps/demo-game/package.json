@@ -41,6 +41,7 @@
     "react-dice-complete": "2.2.0",
     "react-dom": "18.3.1",
     "react-i18next": "12.3.1",
+    "react-markdown": "8.0.7",
     "recharts": "2.8.0",
     "tailwind-merge": "2.4.0",
     "ts-pattern": "5.0.5",
