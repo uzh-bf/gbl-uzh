@@ -36,7 +36,7 @@ export function MultiSelect({
         variant="outline"
         role="combobox"
         aria-expanded={open}
-        className="w-[240px] justify-between"
+        className="justify-between"
         onClick={() => setOpen(!open)}
       >
         <div className="flex justify-start gap-2">
@@ -54,9 +54,9 @@ export function MultiSelect({
         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
       {/* </PopoverTrigger> */}
-      {/* <PopoverContent className="w-[240px] p-0"> */}
+      {/* <PopoverContent className="p-0"> */}
       {open && (
-        <Command>
+        <Command className="border">
           <CommandInput placeholder={placeholderCmdSearch} />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
