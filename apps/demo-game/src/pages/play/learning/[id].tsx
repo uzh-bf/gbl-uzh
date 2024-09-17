@@ -46,6 +46,7 @@ function Learning() {
     },
   })
 
+  // TODO(JJ): Experience points are not updated...
   const [attemptLearningElement, { loading }] = useMutation(
     AttemptLearningElementDocument,
     {
