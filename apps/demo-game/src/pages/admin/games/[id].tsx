@@ -12,7 +12,7 @@ import {
   NewFormikTextField,
   NewFromikNumberField,
 } from '@uzh-bf/design-system'
-import { Field, Form, Formik } from 'formik'
+import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
 
@@ -49,7 +49,7 @@ import {
   CardTitle,
 } from '@uzh-bf/design-system/dist/future'
 
-import { MultiSelect } from '~/components/MultiSelect'
+import { FormikMultiSelectField } from '~/components/fields/FormikMultiSelectField'
 
 function ManageGame() {
   const router = useRouter()
@@ -438,21 +438,12 @@ function ManageGame() {
                                   data={{ cy: 'story-elements' }}
                                   className={{ label: 'pb-2 font-normal' }}
                                 />
-                                <span className="text-sm font-normal text-gray-700">
-                                  Learning Elements
-                                </span>
-                                <Field
+
+                                <FormikMultiSelectField
                                   name="learningElements"
-                                  component={MultiSelect}
+                                  label="Learning Elements"
                                   options={learningElementsAll}
-                                  value={newSegmentForm.values.learningElements}
                                   placeholderCmdSearch="Search learning elements..."
-                                  onChange={(value) => {
-                                    newSegmentForm.setFieldValue(
-                                      'learningElements',
-                                      value
-                                    )
-                                  }}
                                 />
                               </div>
                             </Modal>
