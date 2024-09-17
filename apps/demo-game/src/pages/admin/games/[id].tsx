@@ -225,12 +225,12 @@ function ManageGame() {
 
   const game: Game = data.game
 
-  const learningElementsAll = (learningElementsData.learningElements || []).map(
-    (e) => ({
-      label: e.id,
-      value: e.id,
-    })
-  )
+  const learningElementsAll = (
+    learningElementsData?.learningElements || []
+  ).map((e) => ({
+    label: e.id,
+    value: e.id,
+  }))
 
   return (
     <div className="p-4">
