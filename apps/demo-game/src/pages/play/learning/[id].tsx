@@ -174,9 +174,9 @@ function Learning() {
                 }}
                 active={activeElements?.includes(ix)}
                 onClick={() =>
-                  setActiveElements((prev) => {
-                    if (activeElements.includes(ix)) {
-                      return without([ix], activeElements)
+                  setActiveElements((prevState) => {
+                    if (prevState.includes(ix)) {
+                      return without([ix], prevState)
                     }
                     // FIXME: multiple choice logic
                     // return [...activeElements, ix]

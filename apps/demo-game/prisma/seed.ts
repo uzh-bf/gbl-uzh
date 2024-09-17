@@ -37,7 +37,7 @@ const LEARNING_ELEMENTS = [
       },
       {
         content:
-          'Aktien haben eine begrenzte Laufzeit und werden danach danach dem Emittent zurückgegeben.',
+          'Aktien haben eine begrenzte Laufzeit und werden danach dem Emittent zurückgegeben.',
         correct: false,
       },
       {
