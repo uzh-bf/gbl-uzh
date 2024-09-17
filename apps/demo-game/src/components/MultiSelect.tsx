@@ -60,7 +60,7 @@ export function MultiSelect({
           {value?.length
             ? value.map((val, i) => (
                 <div
-                  key={i}
+                  key={val}
                   className="rounded-xl border bg-slate-200 px-2 py-1 text-xs font-medium"
                 >
                   {options.find((option) => option.value === val)?.label}

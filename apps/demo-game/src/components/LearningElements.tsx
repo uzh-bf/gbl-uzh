@@ -1,5 +1,5 @@
 import { faLightbulb as faLightbulbRegular } from '@fortawesome/free-regular-svg-icons'
-import { faLightbulb as faLightbuldSolid } from '@fortawesome/free-solid-svg-icons'
+import { faLightbulb as faLightbulbSolid } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { H3 } from '@uzh-bf/design-system'
 import Link from 'next/link'
@@ -63,7 +63,7 @@ function LearningElements({}) {
         {sortBy((elem) => elem.title, completedLearningElements).map((elem) => (
           <li key={elem.id} className="hover:text-orange-700">
             <Link href={`/play/learning/${elem.id}`} passHref>
-              <FontAwesomeIcon icon={faLightbuldSolid} />
+              <FontAwesomeIcon icon={faLightbulbSolid} />
               <span className="ml-1">{elem.title}</span>
             </Link>
           </li>

@@ -63,7 +63,11 @@ function ManageGame() {
     skip: !router.query.id,
   })
 
-  const { data: learningElementsData } = useQuery(LearningElementsDocument)
+  const {
+    data: learningElementsData,
+    loading: learningElementsLoading,
+    error: learningElementsError,
+  } = useQuery(LearningElementsDocument)
 
   const [activateNextPeriod, { loading: nextPeriodLoading }] = useMutation(
     ActivateNextPeriodDocument,
@@ -222,7 +226,7 @@ function ManageGame() {
 
   const game: Game = data.game
 
-  const learningElementsAll = learningElementsData.learningElements.map(
+  const learningElementsAll = (learningElementsData.learningElements || []).map(
     (e) => ({
       label: e.id,
       value: e.id,
@@ -370,76 +374,90 @@ function ManageGame() {
                           resetForm()
                         }}
                       >
-                        {(newSegmentForm) => (
-                          <Modal
-                            open={isSegmentModalOpen}
-                            onClose={() => setIsSegmentModalOpen(false)}
-                            trigger={
-                              <Button
-                                disabled={
-                                  period.segmentCount === period.segments.length
-                                }
-                                className={{
-                                  root: 'h-full w-12 font-bold text-gray-500',
-                                }}
-                                onClick={() => setIsSegmentModalOpen(true)}
-                                data={{ cy: 'add-segment' }}
-                              >
-                                <FontAwesomeIcon icon={faPlus} />
-                              </Button>
-                            }
-                            title="Add Segment"
-                            onSecondaryAction={
-                              <Button
-                                onClick={() => {
-                                  newSegmentForm.resetForm()
-                                  setIsSegmentModalOpen(false)
-                                }}
-                              >
-                                Discard
-                              </Button>
-                            }
-                            onPrimaryAction={
-                              <Button
-                                onClick={async () => {
-                                  await newSegmentForm.setFieldValue(
-                                    'periodIx',
-                                    period.index
-                                  )
-                                  newSegmentForm.handleSubmit()
-                                  setIsSegmentModalOpen(false)
-                                }}
-                              >
-                                Submit
-                              </Button>
-                            }
-                          >
-                            <div className="flex w-1/2 flex-col gap-2">
-                              <NewFormikTextField
-                                name="storyElements"
-                                label="Story Elements"
-                                data={{ cy: 'story-elements' }}
-                                className={{ label: 'pb-2 font-normal' }}
-                              />
-                              <span className="text-sm font-normal text-gray-700">
-                                Learning Elements
-                              </span>
-                              <Field
-                                name="learningElements"
-                                component={MultiSelect}
-                                options={learningElementsAll}
-                                value={newSegmentForm.values.learningElements}
-                                placeholderCmdSearch="Search learning elements..."
-                                onChange={(value) => {
-                                  newSegmentForm.setFieldValue(
-                                    'learningElements',
-                                    value
-                                  )
-                                }}
-                              />
-                            </div>
-                          </Modal>
-                        )}
+                        {(newSegmentForm) => {
+                          if (learningElementsLoading) {
+                            return <div>Loading learning elements...</div>
+                          }
+                          if (learningElementsError) {
+                            return (
+                              <div>
+                                Error loading learning elements:{' '}
+                                {learningElementsError.message}
+                              </div>
+                            )
+                          }
+                          return (
+                            <Modal
+                              open={isSegmentModalOpen}
+                              onClose={() => setIsSegmentModalOpen(false)}
+                              trigger={
+                                <Button
+                                  disabled={
+                                    period.segmentCount ===
+                                    period.segments.length
+                                  }
+                                  className={{
+                                    root: 'h-full w-12 font-bold text-gray-500',
+                                  }}
+                                  onClick={() => setIsSegmentModalOpen(true)}
+                                  data={{ cy: 'add-segment' }}
+                                >
+                                  <FontAwesomeIcon icon={faPlus} />
+                                </Button>
+                              }
+                              title="Add Segment"
+                              onSecondaryAction={
+                                <Button
+                                  onClick={() => {
+                                    newSegmentForm.resetForm()
+                                    setIsSegmentModalOpen(false)
+                                  }}
+                                >
+                                  Discard
+                                </Button>
+                              }
+                              onPrimaryAction={
+                                <Button
+                                  onClick={async () => {
+                                    await newSegmentForm.setFieldValue(
+                                      'periodIx',
+                                      period.index
+                                    )
+                                    newSegmentForm.handleSubmit()
+                                    setIsSegmentModalOpen(false)
+                                  }}
+                                >
+                                  Submit
+                                </Button>
+                              }
+                            >
+                              <div className="flex w-1/2 flex-col gap-2">
+                                <NewFormikTextField
+                                  name="storyElements"
+                                  label="Story Elements"
+                                  data={{ cy: 'story-elements' }}
+                                  className={{ label: 'pb-2 font-normal' }}
+                                />
+                                <span className="text-sm font-normal text-gray-700">
+                                  Learning Elements
+                                </span>
+                                <Field
+                                  name="learningElements"
+                                  component={MultiSelect}
+                                  options={learningElementsAll}
+                                  value={newSegmentForm.values.learningElements}
+                                  placeholderCmdSearch="Search learning elements..."
+                                  onChange={(value) => {
+                                    newSegmentForm.setFieldValue(
+                                      'learningElements',
+                                      value
+                                    )
+                                  }}
+                                />
+                              </div>
+                            </Modal>
+                          )
+                        }}
                       </Formik>
                     )}
                   </div>
