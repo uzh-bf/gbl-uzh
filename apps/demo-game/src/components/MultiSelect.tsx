@@ -13,7 +13,7 @@ import {
 import { Check, ChevronsUpDown } from 'lucide-react'
 
 interface MultiSelectProps {
-  options: any[]
+  options: { value: string; label: string }[]
   value: any[]
   onChange: (value: any[]) => void
   placeholderCmdSearch: string

@@ -4,7 +4,7 @@ import { MultiSelect } from '~/components/MultiSelect'
 interface MultiSelectFieldProps {
   name: string
   label: string
-  options: any[]
+  options: { value: string; label: string }[]
   placeholderCmdSearch: string
 }
 
@@ -26,6 +26,9 @@ export const FormikMultiSelectField = ({
           helpers.setValue(value)
         }}
       />
+      {meta.touched && meta.error ? (
+        <div className="text-sm text-red-600">{meta.error}</div>
+      ) : null}
     </div>
   )
 }

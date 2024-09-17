@@ -92,7 +92,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   const sidebar = (
     <div>
       <div className="flex items-center justify-between">
-        {data && data.self && (
+        {data?.self && (
           <Switch
             className={{
               root: 'text-xs font-bold text-gray-600',
@@ -129,29 +129,23 @@ function GameLayout({ children }: { children: React.ReactNode }) {
               })
             }
             onUpdate={(secondsRemaining) => {
-              if (secondsRemaining <= 60) {
-                if (countdownNotifications['60']) return
-                toast({
-                  title: 'Countdown update',
-                  description:
-                    'Less than a minute remaining! Please press ready once you are done.',
-                })
-                setCountdownNotifications((prevState) => ({
-                  ...prevState,
-                  '60': true,
-                }))
-              } else if (secondsRemaining <= 180) {
-                if (countdownNotifications['180']) return
-                toast({
-                  title: 'Countdown update',
-                  description:
-                    'Less than three minutes remaining! Please press ready once you are done.',
-                })
-                setCountdownNotifications((prevState) => ({
-                  ...prevState,
-                  '180': true,
-                }))
-              }
+              const minutesRemainingThreshold = [1, 3]
+              minutesRemainingThreshold.forEach((minute) => {
+                const seconds = minute * 60
+                if (secondsRemaining <= seconds) {
+                  const secondsStr = String(seconds)
+                  if (countdownNotifications[secondsStr]) return
+                  const minutesRemaining = Math.ceil(secondsRemaining / 60)
+                  toast({
+                    title: 'Countdown update',
+                    description: `Less than ${minutesRemaining} min remaining! Please press ready once you are done.`,
+                  })
+                  setCountdownNotifications((prevState) => ({
+                    ...prevState,
+                    [secondsStr]: true,
+                  }))
+                }
+              })
             }}
           />
         )}
