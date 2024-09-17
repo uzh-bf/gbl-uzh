@@ -155,7 +155,6 @@ function ManageGame() {
         const atLastSegment =
           activeSegmentIx >= segments.length - 1 &&
           activePeriod.segmentCount === segments.length
-        console.log('atLastSegment', atLastSegment)
         if (atLastSegment) {
           return (
             <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
@@ -357,7 +356,6 @@ function ManageGame() {
                           learningElements: [],
                         }}
                         onSubmit={async (variables, { resetForm }) => {
-                          console.log('variables', variables)
                           await addPeriodSegment({
                             variables: {
                               gameId: Number(router.query.id),
