@@ -19,8 +19,9 @@ export function MultiSelect({
   placeholderCmdSearch,
 }) {
   const [open, setOpen] = React.useState(false)
+  const containerRef = React.useRef(null)
+
   const handleValueChange = (val) => {
-    console.log('handleValueChange', val)
     if (value.includes(val)) {
       onChange(value.filter((v) => v !== val))
     } else {
@@ -28,18 +29,34 @@ export function MultiSelect({
     }
   }
 
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
   return (
-    <div>
+    <div ref={containerRef} className="relative w-full">
       {/* <Popover open={open} onOpenChange={setOpen}> */}
       {/* <PopoverTrigger asChild> */}
       <Button
         variant="outline"
         role="combobox"
         aria-expanded={open}
-        className="justify-between"
+        className="relative h-fit min-w-full justify-between"
         onClick={() => setOpen(!open)}
       >
-        <div className="flex justify-start gap-2">
+        <div className="flex flex-wrap justify-start gap-2">
           {value?.length
             ? value.map((val, i) => (
                 <div
@@ -49,14 +66,14 @@ export function MultiSelect({
                   {options.find((option) => option.value === val)?.label}
                 </div>
               ))
-            : 'Select option...'}
+            : 'Select options...'}
         </div>
         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
       {/* </PopoverTrigger> */}
       {/* <PopoverContent className="p-0"> */}
       {open && (
-        <Command className="border">
+        <Command className="absolute mt-1 h-fit border">
           <CommandInput placeholder={placeholderCmdSearch} />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
