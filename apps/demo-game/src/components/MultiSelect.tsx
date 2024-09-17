@@ -12,12 +12,19 @@ import {
 
 import { Check, ChevronsUpDown } from 'lucide-react'
 
+interface MultiSelectProps {
+  options: any[]
+  value: any[]
+  onChange: (value: any[]) => void
+  placeholderCmdSearch: string
+}
+
 export function MultiSelect({
   options,
   value,
   onChange,
   placeholderCmdSearch,
-}) {
+}: MultiSelectProps) {
   const [open, setOpen] = React.useState(false)
   const containerRef = React.useRef(null)
 
