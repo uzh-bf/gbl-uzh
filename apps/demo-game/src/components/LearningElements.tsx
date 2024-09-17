@@ -9,7 +9,7 @@ import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { ResultDocument } from 'src/graphql/generated/ops'
 
-function LearningElements({}) {
+function LearningElements() {
   const { data } = useQuery(ResultDocument, {
     fetchPolicy: 'cache-only',
   })
@@ -22,21 +22,18 @@ function LearningElements({}) {
   if (!learningElements) return null
 
   const completedLearningElementIds =
-    playerDataResult?.playerResult?.player?.completedLearningElementIds
+    playerDataResult?.playerResult?.player?.completedLearningElementIds ?? []
 
   const completedLearningElements = useMemo(() => {
-    if (!completedLearningElementIds) return []
+    if (completedLearningElementIds.length === 0 || !periods) return []
     const allLearningElements = periods
       .flatMap((period) =>
         period.segments.flatMap((segment) => segment.learningElements)
       )
-      .reduce(
-        (acc, elem) => ({
-          ...acc,
-          [elem.id]: elem,
-        }),
-        {}
-      )
+      .reduce((acc, elem) => {
+        acc[elem.id] = elem
+        return acc
+      }, {})
     return completedLearningElementIds.map((id) => allLearningElements[id])
   }, [periods, completedLearningElementIds])
 
@@ -49,7 +46,7 @@ function LearningElements({}) {
     <div className="flex flex-col gap-1 text-xs">
       <H3 className={{ root: 'mt-4' }}>Learning Activities</H3>
       <ul className="flex max-h-36 flex-col gap-1 overflow-auto">
-        {openElements?.length + completedLearningElements?.length === 0 && (
+        {openElements?.length + completedLearningElements.length === 0 && (
           <li>No open learning activities</li>
         )}
         {openElements.map((elem) => (
