@@ -19,6 +19,7 @@ function LearningElements({}) {
   const periods = currentGame?.periods
   const learningElements =
     currentGame?.activePeriod?.activeSegment?.learningElements
+  if (!learningElements) return null
 
   const completedLearningElementIds =
     playerDataResult?.playerResult?.player?.completedLearningElementIds
