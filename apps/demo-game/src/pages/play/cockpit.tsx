@@ -134,10 +134,10 @@ function GameLayout({ children }: { children: React.ReactNode }) {
                   description:
                     'Less than a minute remaining! Please press ready once you are done.',
                 })
-                setCountdownNotifications({
-                  ...countdownNotifications,
+                setCountdownNotifications((prevState) => ({
+                  ...prevState,
                   '60': true,
-                })
+                }))
               } else if (secondsRemaining <= 180) {
                 if (countdownNotifications['180']) return
                 toast({
@@ -145,10 +145,10 @@ function GameLayout({ children }: { children: React.ReactNode }) {
                   description:
                     'Less than three minutes remaining! Please press ready once you are done.',
                 })
-                setCountdownNotifications({
-                  ...countdownNotifications,
+                setCountdownNotifications((prevState) => ({
+                  ...prevState,
                   '180': true,
-                })
+                }))
               }
             }}
           />
