@@ -11,13 +11,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { without } from 'ramda'
 import { useEffect, useState } from 'react'
-// import toast from 'react-hot-toast'
 import Markdown from 'react-markdown'
 import {
   AttemptLearningElementDocument,
   LearningElementDocument,
 } from 'src/graphql/generated/ops'
 import { twMerge } from 'tailwind-merge'
+import { useToast } from '../../../components/ui/use-toast'
 
 function Learning() {
   const router = useRouter()
@@ -29,6 +29,8 @@ function Learning() {
   useEffect(() => {
     setActiveElements([])
   }, [router.query.id])
+
+  const { toast } = useToast()
 
   const learningElement = useQuery(LearningElementDocument, {
     variables: {
@@ -56,9 +58,10 @@ function Learning() {
           setElementState(LearningElementState.SOLVED)
         } else {
           setElementState(LearningElementState.ATTEMPTED)
-          // toast('Try again!', {
-          //   className: '!bg-orange-300',
-          // })
+          toast({
+            title: 'Wrong answer',
+            description: 'Try again!',
+          })
         }
       },
       refetchQueries: 'all',
