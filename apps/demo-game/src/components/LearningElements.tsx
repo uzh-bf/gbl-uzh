@@ -8,7 +8,11 @@ import { sortBy } from 'ramda'
 import { useQuery } from '@apollo/client'
 import { Button, Modal } from '@uzh-bf/design-system'
 import { useMemo, useState } from 'react'
-import { ResultDocument } from 'src/graphql/generated/ops'
+import {
+  LearningElement as LearningElementType,
+  Period,
+  ResultDocument,
+} from 'src/graphql/generated/ops'
 
 import LearningElement from './LearningElement'
 
@@ -21,8 +25,8 @@ function LearningElements() {
 
   const playerDataResult = data?.result
   const currentGame = playerDataResult?.currentGame
-  const periods = currentGame?.periods
-  const learningElements =
+  const periods: Period[] = currentGame?.periods
+  const learningElements: LearningElementType[] =
     currentGame?.activePeriod?.activeSegment?.learningElements
 
   const completedLearningElementIds =
@@ -38,7 +42,9 @@ function LearningElements() {
         acc[elem.id] = elem
         return acc
       }, {})
-    return completedLearningElementIds.map((id) => allLearningElements[id])
+    return completedLearningElementIds.map(
+      (id) => allLearningElements[id]
+    ) as LearningElementType[]
   }, [periods, completedLearningElementIds])
 
   if (!learningElements) return null
