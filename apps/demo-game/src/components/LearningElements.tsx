@@ -2,7 +2,6 @@ import { faLightbulb as faLightbulbRegular } from '@fortawesome/free-regular-svg
 import { faLightbulb as faLightbulbSolid } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { H3 } from '@uzh-bf/design-system'
-import Link from 'next/link'
 import { sortBy } from 'ramda'
 
 import { useQuery } from '@apollo/client'
@@ -62,23 +61,35 @@ function LearningElements() {
           <li>No open learning activities</li>
         )}
         {openElements.map((elem) => (
-          <li key={elem.id} className="hover:text-orange-700">
-            <Link href={`/play/learning/${elem.id}`} passHref>
-              <FontAwesomeIcon icon={faLightbulbRegular} />
-              <span className="ml-1">{elem.title}</span>
-            </Link>
-          </li>
-        ))}
-        {sortBy((elem) => elem.title, completedLearningElements).map((elem) => (
-          <li key={elem.id} className="hover:text-orange-700">
-            <Link href={`/play/learning/${elem.id}`} passHref>
-              <FontAwesomeIcon icon={faLightbulbSolid} />
-              <span className="ml-1">{elem.title}</span>
-            </Link>
+          <li key={elem.id}>
             <Button
               onClick={() => {
                 setIsModalOpen(true)
               }}
+              className={{ root: 'w-full' }}
+            >
+              <FontAwesomeIcon icon={faLightbulbRegular} />
+              <span className="ml-1">{elem.title}</span>
+            </Button>
+            <Modal
+              className={{ content: 'max-w-4xl overflow-y-auto' }}
+              open={isModalOpen}
+              onClose={() => {
+                setIsModalOpen(false)
+              }}
+              title="Learning Activity"
+            >
+              <LearningElement elementId={elem.id} />
+            </Modal>
+          </li>
+        ))}
+        {sortBy((elem) => elem.title, completedLearningElements).map((elem) => (
+          <li key={elem.id}>
+            <Button
+              onClick={() => {
+                setIsModalOpen(true)
+              }}
+              className={{ root: 'w-full' }}
             >
               <FontAwesomeIcon icon={faLightbulbSolid} />
               <span className="ml-1">{elem.title}</span>
