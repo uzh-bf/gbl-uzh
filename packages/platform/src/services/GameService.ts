@@ -1002,6 +1002,10 @@ export async function getLearningElements(args, ctx: Context) {
   })
 }
 
+export async function getStoryElements(args, ctx: Context) {
+  return ctx.prisma.storyElement.findMany()
+}
+
 function mapAction({ ctx, gameId, activePeriodIx, playerId }) {
   return (action) =>
     ctx.prisma.playerAction.create({

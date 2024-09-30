@@ -80,7 +80,7 @@ export function MultiSelect({
       {/* </PopoverTrigger> */}
       {/* <PopoverContent className="p-0"> */}
       {open && (
-        <Command className="absolute mt-1 h-fit border">
+        <Command className="absolute z-10 mt-1 h-fit border">
           <CommandInput placeholder={placeholderCmdSearch} />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>

@@ -38,6 +38,7 @@ import {
   LearningElementsDocument,
   Period,
   Player,
+  StoryElementsDocument,
 } from 'src/graphql/generated/ops'
 
 import {
@@ -68,6 +69,12 @@ function ManageGame() {
     loading: learningElementsLoading,
     error: learningElementsError,
   } = useQuery(LearningElementsDocument)
+
+  const {
+    data: storyElementsData,
+    loading: storyElementsLoading,
+    error: storyElementsError,
+  } = useQuery(StoryElementsDocument)
 
   const [activateNextPeriod, { loading: nextPeriodLoading }] = useMutation(
     ActivateNextPeriodDocument,
@@ -225,7 +232,14 @@ function ManageGame() {
 
   const game: Game = data.game
 
-  const learningElementsAll = (learningElementsData.learningElements || []).map(
+  const learningElementsAll = (
+    learningElementsData?.learningElements || []
+  ).map((e) => ({
+    label: e.id,
+    value: e.id,
+  }))
+
+  const storyElementsAll = (storyElementsData?.storyElements || []).map(
     (e) => ({
       label: e.id,
       value: e.id,
@@ -352,7 +366,7 @@ function ManageGame() {
                       <Formik
                         initialValues={{
                           periodIx: -1,
-                          storyElements: '',
+                          storyElements: [],
                           learningElements: [],
                         }}
                         onSubmit={async (variables, { resetForm }) => {
@@ -361,18 +375,26 @@ function ManageGame() {
                               gameId: Number(router.query.id),
                               periodIx: variables.periodIx,
                               facts: {},
-                              storyElements: variables.storyElements
-                                ? variables.storyElements.split(',')
-                                : [],
+                              storyElements: variables.storyElements,
                               learningElements: variables.learningElements,
-                              // ? variables.learningElements.split(',')
-                              // : [],
                             },
                           })
                           resetForm()
                         }}
                       >
                         {(newSegmentForm) => {
+                          if (storyElementsLoading) {
+                            return <div>Loading story elements...</div>
+                          }
+                          if (storyElementsError) {
+                            return (
+                              <div>
+                                Error loading story elements:{' '}
+                                {storyElementsError.message}
+                              </div>
+                            )
+                          }
+
                           if (learningElementsLoading) {
                             return <div>Loading learning elements...</div>
                           }
@@ -384,6 +406,7 @@ function ManageGame() {
                               </div>
                             )
                           }
+
                           return (
                             <Modal
                               open={isSegmentModalOpen}
@@ -430,13 +453,12 @@ function ManageGame() {
                               }
                             >
                               <div className="flex w-1/2 flex-col gap-2">
-                                <NewFormikTextField
+                                <FormikMultiSelectField
                                   name="storyElements"
                                   label="Story Elements"
-                                  data={{ cy: 'story-elements' }}
-                                  className={{ label: 'pb-2 font-normal' }}
+                                  options={storyElementsAll}
+                                  placeholderCmdSearch="Search story elements..."
                                 />
-
                                 <FormikMultiSelectField
                                   name="learningElements"
                                   label="Learning Elements"

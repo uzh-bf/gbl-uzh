@@ -1,9 +1,32 @@
 import { PrismaClient } from '@prisma/client'
 
+// TODO(JJ): Maybe add images
+// const IMG_BASE_PATH = '/assets/'
+
+const STORY_ELEMENTS = [
+  {
+    id: 'bank_account',
+    title: 'A. About the Bank Account',
+    content: `Your money is safe in the bank account, which means you can't lose anything and you also receive a small interest regularly.`,
+  },
+
+  {
+    id: 'bonds',
+    title: 'B. Bonds',
+    content: `By investing in bonds, you take on the role of the creditor, i.e. you lend money to a state or a company and receive interest as compensation. The interest is higher than on a bank account because you are also taking on a higher risk. If a company or a state stops paying the interest or cannot repay the loan, you suffer a loss. The value of bonds fluctuates, unlike a savings account, and is primarily dependent on changes in the general interest rate level. However, the price fluctuations are less than with an investment in shares. The simulation shows you the total return - consisting of interest payments and price changes.`,
+  },
+
+  {
+    id: 'stocks',
+    title: 'C. Stocks',
+    content: `By purchasing shares, you become a co-owner of a company as an investor. The risk of investing in shares is higher than that of investing in bonds, as you bear most of the entrepreneurial risks. If the company's business performance is poor, your investment will lose value. You will be compensated for the risk you have taken with dividends, which are usually paid out to investors in the form of money. You also hope that the value of the shares will increase. The simulation shows you the total return - consisting of dividend payments and price changes.`,
+  },
+]
+
 const LEARNING_ELEMENTS = [
   {
-    id: 'anleihen_intro',
-    title: 'Obligationen',
+    id: 'bonds_intro',
+    title: 'Bonds',
     question: 'Welche Aussage zum Thema Anleihen (Obligationen) ist korrekt?',
     options: [
       {
@@ -26,8 +49,8 @@ const LEARNING_ELEMENTS = [
     motivation: 'TBD',
   },
   {
-    id: 'aktien_intro',
-    title: 'Aktien',
+    id: 'stocks_intro',
+    title: 'Stocks',
     question: 'Welche Aussage zum Thema Aktien ist korrekt?',
     options: [
       {
@@ -51,8 +74,8 @@ const LEARNING_ELEMENTS = [
     motivation: 'TBD',
   },
   {
-    id: 'investitions_risiken',
-    title: 'Investitionsrisiken',
+    id: 'investments_risks',
+    title: 'Investment Risks',
     question:
       'Welche Aussage zum Thema Investitionsrisiken bei Finanzanlagen ist korrekt?',
     options: [
@@ -153,6 +176,16 @@ async function main(prisma: PrismaClient) {
         where: {
           index: level.index,
         },
+      })
+    )
+  )
+
+  await Promise.all(
+    STORY_ELEMENTS.map((data) =>
+      prisma.storyElement.upsert({
+        create: data,
+        update: data,
+        where: { id: data.id },
       })
     )
   )

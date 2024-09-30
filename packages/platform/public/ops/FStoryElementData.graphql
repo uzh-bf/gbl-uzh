@@ -1,0 +1,7 @@
+fragment StoryElementData on StoryElement {
+  id
+  type
+  title
+  content
+  contentRole
+}

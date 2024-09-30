@@ -4,6 +4,7 @@ import * as PlayService from '../services/PlayService.js'
 import { Game } from './Game.js'
 import { LearningElement, LearningElementState } from './LearningElement.js'
 import { Player, PlayerResult, PlayerState } from './Player.js'
+import { StoryElement } from './StoryElement.js'
 
 export function generateBaseQueries() {
   return objectType({
@@ -72,6 +73,13 @@ export function generateBaseQueries() {
         type: PlayerResult,
         async resolve(_, args, ctx) {
           return PlayService.getPastResults(args, ctx)
+        },
+      })
+
+      t.list.nonNull.field('storyElements', {
+        type: StoryElement,
+        async resolve(_, args, ctx) {
+          return GameService.getStoryElements(args, ctx)
         },
       })
     },
