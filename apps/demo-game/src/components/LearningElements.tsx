@@ -20,7 +20,7 @@ function LearningElements() {
     fetchPolicy: 'cache-only',
   })
 
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [activeId, setActiveId] = useState<string | null>(null)
 
   const playerDataResult = data?.result
   const currentGame = playerDataResult?.currentGame
@@ -60,53 +60,39 @@ function LearningElements() {
         {openElements?.length + completedLearningElements.length === 0 && (
           <li>No open learning activities</li>
         )}
-        {openElements.map((elem) => (
-          <li key={elem.id}>
-            <Button
-              onClick={() => {
-                setIsModalOpen(true)
-              }}
-              className={{ root: 'w-full' }}
-            >
-              <FontAwesomeIcon icon={faLightbulbRegular} />
-              <span className="ml-1">{elem.title}</span>
-            </Button>
-            <Modal
-              className={{ content: 'max-w-4xl overflow-y-auto' }}
-              open={isModalOpen}
-              onClose={() => {
-                setIsModalOpen(false)
-              }}
-              title="Learning Activity"
-            >
-              <LearningElement elementId={elem.id} />
-            </Modal>
-          </li>
-        ))}
+        {openElements.map((elem) => {
+          return (
+            <li key={elem.id}>
+              <Button
+                onClick={() => setActiveId(elem.id)}
+                className={{ root: 'w-full' }}
+              >
+                <FontAwesomeIcon icon={faLightbulbRegular} />
+                <span className="ml-1">{elem.title}</span>
+              </Button>
+            </li>
+          )
+        })}
         {sortBy((elem) => elem.title, completedLearningElements).map((elem) => (
           <li key={elem.id}>
             <Button
-              onClick={() => {
-                setIsModalOpen(true)
-              }}
+              onClick={() => setActiveId(elem.id)}
               className={{ root: 'w-full' }}
             >
               <FontAwesomeIcon icon={faLightbulbSolid} />
               <span className="ml-1">{elem.title}</span>
             </Button>
-            <Modal
-              className={{ content: 'max-w-4xl overflow-y-auto' }}
-              open={isModalOpen}
-              onClose={() => {
-                setIsModalOpen(false)
-              }}
-              title="Learning Activity"
-            >
-              <LearningElement elementId={elem.id} />
-            </Modal>
           </li>
         ))}
       </ul>
+      <Modal
+        className={{ content: 'max-w-4xl overflow-y-auto' }}
+        open={activeId ? true : false}
+        onClose={() => setActiveId(null)}
+        title="Learning Activity"
+      >
+        <LearningElement elementId={activeId} />
+      </Modal>
     </div>
   )
 }

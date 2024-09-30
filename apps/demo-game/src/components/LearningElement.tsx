@@ -18,6 +18,7 @@ import { twMerge } from 'tailwind-merge'
 import { useToast } from './ui/use-toast'
 
 function LearningElement({ elementId }: { elementId: string }) {
+  console.log('LearningElement', elementId)
   const [activeElements, setActiveElements] = useState([])
 
   const [elementState, setElementState] = useState(null)
