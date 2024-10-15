@@ -7,8 +7,6 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { LearningElementState } from '@gbl-uzh/platform'
 import { Button } from '@uzh-bf/design-system'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { without } from 'ramda'
 import { useEffect, useState } from 'react'
 import Markdown from 'react-markdown'
@@ -17,24 +15,22 @@ import {
   LearningElementDocument,
 } from 'src/graphql/generated/ops'
 import { twMerge } from 'tailwind-merge'
-import { useToast } from '../../../components/ui/use-toast'
+import { useToast } from './ui/use-toast'
 
-function Learning() {
-  const router = useRouter()
-
+function LearningElement({ elementId }: { elementId: string }) {
   const [activeElements, setActiveElements] = useState([])
 
   const [elementState, setElementState] = useState(null)
 
   useEffect(() => {
     setActiveElements([])
-  }, [router.query.id])
+  }, [elementId])
 
   const { toast } = useToast()
 
   const learningElement = useQuery(LearningElementDocument, {
     variables: {
-      id: router.query.id,
+      id: elementId,
     },
     onCompleted({ learningElement }) {
       setElementState(learningElement.state as any)
@@ -51,7 +47,7 @@ function Learning() {
     AttemptLearningElementDocument,
     {
       variables: {
-        elementId: router.query.id as string,
+        elementId: elementId,
         selection: JSON.stringify(activeElements),
       },
       onCompleted({ attemptLearningElement: result }) {
@@ -190,28 +186,20 @@ function Learning() {
           )}
         </div>
       </div>
-      <div className="flex flex-row items-center justify-between border-t p-8">
-        {/* <div>45s</div> */}
-        <div>
-          <Link href="/play/cockpit" passHref legacyBehavior>
-            <Button>Return To Cockpit</Button>
-          </Link>
-        </div>
-        <div>
-          {elementState !== LearningElementState.SOLVED && (
-            <Button
-              disabled={activeElements.length === 0}
-              onClick={() => attemptLearningElement()}
-            >
-              {elementState === LearningElementState.ATTEMPTED
-                ? 'Try Again'
-                : 'Submit'}
-            </Button>
-          )}
-        </div>
+      <div className="flex flex-row items-center justify-end border-t p-8">
+        {elementState !== LearningElementState.SOLVED && (
+          <Button
+            disabled={activeElements.length === 0}
+            onClick={() => attemptLearningElement()}
+          >
+            {elementState === LearningElementState.ATTEMPTED
+              ? 'Try Again'
+              : 'Submit'}
+          </Button>
+        )}
       </div>
     </div>
   )
 }
 
-export default Learning
+export default LearningElement

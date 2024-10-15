@@ -37,6 +37,20 @@ function StoryElements({ playerState, player }: Props) {
 
   const [markStoryElement, { loading }] = useMutation(MarkStoryElementDocument)
 
+  const content: string = (() => {
+    if (unseenStoryElements.length === 0) return ''
+
+    const firstElement = unseenStoryElements[0]
+    switch (firstElement?.type) {
+      case 'GENERIC':
+        return firstElement.content
+      case 'ROLE_BASED':
+        return firstElement.contentRole?.[player.role] ?? ''
+      default:
+        return ''
+    }
+  })()
+
   return (
     <Modal
       className={{ content: 'max-w-4xl overflow-y-auto' }}
@@ -76,12 +90,7 @@ function StoryElements({ playerState, player }: Props) {
       </div>
 
       <div className="prose prose-img:max-w-xs prose-img:rounded mt-4 max-w-none">
-        <Markdown>
-          {(unseenStoryElements[0]?.type === 'GENERIC' &&
-            unseenStoryElements[0]?.content) ||
-            (unseenStoryElements[0]?.type === 'ROLE_BASED' &&
-              unseenStoryElements[0]?.contentRole?.[player.role])}
-        </Markdown>
+        <Markdown children={content} />
       </div>
     </Modal>
   )

@@ -2,24 +2,31 @@ import { faLightbulb as faLightbulbRegular } from '@fortawesome/free-regular-svg
 import { faLightbulb as faLightbulbSolid } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { H3 } from '@uzh-bf/design-system'
-import Link from 'next/link'
 import { sortBy } from 'ramda'
-import { useMemo } from 'react'
 
 import { useQuery } from '@apollo/client'
-import { ResultDocument } from 'src/graphql/generated/ops'
+import { Button, Modal } from '@uzh-bf/design-system'
+import { useMemo, useState } from 'react'
+import {
+  LearningElement as LearningElementType,
+  Period,
+  ResultDocument,
+} from 'src/graphql/generated/ops'
+
+import LearningElement from './LearningElement'
 
 function LearningElements() {
   const { data } = useQuery(ResultDocument, {
     fetchPolicy: 'cache-only',
   })
 
+  const [activeId, setActiveId] = useState<string | null>(null)
+
   const playerDataResult = data?.result
   const currentGame = playerDataResult?.currentGame
-  const periods = currentGame?.periods
-  const learningElements =
+  const periods: Period[] = currentGame?.periods
+  const learningElements: LearningElementType[] =
     currentGame?.activePeriod?.activeSegment?.learningElements
-  if (!learningElements) return null
 
   const completedLearningElementIds =
     playerDataResult?.playerResult?.player?.completedLearningElementIds ?? []
@@ -34,8 +41,12 @@ function LearningElements() {
         acc[elem.id] = elem
         return acc
       }, {})
-    return completedLearningElementIds.map((id) => allLearningElements[id])
+    return completedLearningElementIds.map(
+      (id) => allLearningElements[id]
+    ) as LearningElementType[]
   }, [periods, completedLearningElementIds])
+
+  if (!learningElements) return null
 
   const sortedElements = sortBy((elem) => elem.title, learningElements)
   const openElements = sortedElements.filter(
@@ -49,23 +60,39 @@ function LearningElements() {
         {openElements?.length + completedLearningElements.length === 0 && (
           <li>No open learning activities</li>
         )}
-        {openElements.map((elem) => (
-          <li key={elem.id} className="hover:text-orange-700">
-            <Link href={`/play/learning/${elem.id}`} passHref>
-              <FontAwesomeIcon icon={faLightbulbRegular} />
-              <span className="ml-1">{elem.title}</span>
-            </Link>
-          </li>
-        ))}
+        {openElements.map((elem) => {
+          return (
+            <li key={elem.id}>
+              <Button
+                onClick={() => setActiveId(elem.id)}
+                className={{ root: 'w-full' }}
+              >
+                <FontAwesomeIcon icon={faLightbulbRegular} />
+                <span className="ml-1">{elem.title}</span>
+              </Button>
+            </li>
+          )
+        })}
         {sortBy((elem) => elem.title, completedLearningElements).map((elem) => (
-          <li key={elem.id} className="hover:text-orange-700">
-            <Link href={`/play/learning/${elem.id}`} passHref>
+          <li key={elem.id}>
+            <Button
+              onClick={() => setActiveId(elem.id)}
+              className={{ root: 'w-full' }}
+            >
               <FontAwesomeIcon icon={faLightbulbSolid} />
               <span className="ml-1">{elem.title}</span>
-            </Link>
+            </Button>
           </li>
         ))}
       </ul>
+      <Modal
+        className={{ content: 'max-w-4xl overflow-y-auto' }}
+        open={activeId ? true : false}
+        onClose={() => setActiveId(null)}
+        title="Learning Activity"
+      >
+        <LearningElement elementId={activeId} />
+      </Modal>
     </div>
   )
 }
