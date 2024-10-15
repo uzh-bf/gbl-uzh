@@ -489,9 +489,10 @@ function ManageGame() {
           <Formik
             initialValues={{
               periodName: 'Game Period',
-              segmentCount: 4,
+              segmentCount: '4',
             }}
             onSubmit={async (variables, { resetForm }) => {
+              const segmentCount: number = parseInt(variables.segmentCount)
               await addGamePeriod({
                 variables: {
                   gameId: Number(router.query.id),
@@ -500,7 +501,7 @@ function ManageGame() {
                     ['stockTrend', 'stockVariance', 'stockGap'],
                     variables
                   ),
-                  segmentCount: variables.segmentCount,
+                  segmentCount: segmentCount,
                 },
               })
               resetForm()
