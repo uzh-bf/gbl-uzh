@@ -25,6 +25,7 @@ export function initialize(
   const baseFacts: OutputPeriodResultFactsInit = {
     resultFacts: {
       ...facts,
+      initialCapital: INITIAL_CAPITAL,
       decisions: { bank: false, bonds: false, stocks: false },
       assets: {
         bank: 0,
@@ -59,6 +60,7 @@ export function initialize(
         bonds: INITIAL_CAPITAL,
         stocks: INITIAL_CAPITAL,
       }
+      draft.resultFacts.initialCapital = INITIAL_CAPITAL
     }
   )
 

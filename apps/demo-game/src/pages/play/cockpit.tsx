@@ -16,8 +16,16 @@ import {
 
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
-import LearningElements from 'src/components/LearningElements'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
+} from 'recharts'
+
 import {
   TransactionsDisplay,
   TransactionsDisplayCompact,
@@ -29,8 +37,9 @@ import {
 } from 'src/graphql/generated/ops'
 import { getSegmentEndResults } from 'src/lib/analysis'
 import { ActionTypes } from 'src/services/ActionsReducer'
-// TODO(JJ): This will be replaced by the design system
+import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
+// TODO(JJ): This will be replaced by the design system
 import { useToast } from '../../components/ui/use-toast'
 
 function GameHeader({ currentGame }) {
@@ -455,6 +464,25 @@ function Cockpit() {
         totalAssets: { label: 'Total Assets', color: 'hsl(var(--chart-4))' },
       }
 
+      const configAccReturn = {
+        accBankBenchmarkReturn: {
+          label: 'Bank Benchmark',
+          color: 'hsl(var(--chart-1))',
+        },
+        accBondsBenchmarkReturn: {
+          label: 'Bonds Benchmark',
+          color: 'hsl(var(--chart-2))',
+        },
+        accStocksBenchmarkReturn: {
+          label: 'Stocks Benchmark',
+          color: 'hsl(var(--chart-3))',
+        },
+        accTotalAssetsReturn: {
+          label: 'Total Assets',
+          color: 'hsl(var(--chart-4))',
+        },
+      }
+
       const columns_segment_results = [
         { label: '', accessor: 'cat', sortable: false, transformer: null },
       ]
@@ -508,6 +536,13 @@ function Cockpit() {
           bankBenchmark: assetsWithReturnsFlat[0].bankBenchmark,
           bondsBenchmark: assetsWithReturnsFlat[0].bondsBenchmark,
           stocksBenchmark: assetsWithReturnsFlat[0].stocksBenchmark,
+          accBankBenchmarkReturn:
+            assetsWithReturnsFlat[0].accBankBenchmarkReturn,
+          accBondsBenchmarkReturn:
+            assetsWithReturnsFlat[0].accBondsBenchmarkReturn,
+          accStocksBenchmarkReturn:
+            assetsWithReturnsFlat[0].accStocksBenchmarkReturn,
+          accTotalAssetsReturn: assetsWithReturnsFlat[0].accTotalAssetsReturn,
           totalAssets: assetsWithReturnsFlat[0].totalAssets,
           month: months[0] + '_P' + 1,
         },
@@ -584,7 +619,7 @@ function Cockpit() {
                     </ChartContainer>
                   </CardContent>
                 </Card>
-                {/* <Card>
+                <Card>
                   <CardHeader>
                     <CardTitle>Total Accumulated Returns</CardTitle>
                     <CardDescription>
@@ -593,21 +628,19 @@ function Cockpit() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ChartContainer config={configTotal}>
-                      <BarChart
-                        data={accReturnsTotalPerCent}
-                      >
+                    <ChartContainer config={configAccReturn}>
+                      <BarChart data={test}>
                         <ChartTooltip
                           cursor={false}
                           content={<ChartTooltipContent />}
                         />
-                        {Object.keys(configTotal).map((key) => {
+                        {Object.keys(configAccReturn).map((key) => {
                           return (
                             <Bar
                               key={key}
-                              stackId="1"
+                              // stackId="1"
                               dataKey={key}
-                              fill={configTotal[key].color}
+                              fill={configAccReturn[key].color}
                               radius={4}
                             />
                           )
@@ -629,7 +662,7 @@ function Cockpit() {
                       </BarChart>
                     </ChartContainer>
                   </CardContent>
-                </Card> */}
+                </Card>
                 {/* <Card>
                   <CardHeader>
                     <CardTitle>Total Accumulated Returns Benchmark</CardTitle>

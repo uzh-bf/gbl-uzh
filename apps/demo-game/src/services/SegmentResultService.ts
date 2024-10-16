@@ -92,6 +92,8 @@ export function end(
         stocks: facts.benchmarks.stocks,
       }
 
+      const initialCapital = facts.initialCapital
+
       const assetsWithReturns = segmentFacts.returns.reduce(
         (acc, returns, ix) => {
           const last = acc[acc.length - 1]
@@ -123,6 +125,24 @@ export function end(
             returns.stocks
           )
 
+          const accBankBenchmarkReturn = computePercentChange(
+            bankBenchmark,
+            initialCapital
+          )
+          const accBondsBenchmarkReturn = computePercentChange(
+            bondsBenchmark,
+            initialCapital
+          )
+          const accStocksBenchmarkReturn = computePercentChange(
+            stocksBenchmark,
+            initialCapital
+          )
+
+          const accTotalAssetsReturn = computePercentChange(
+            totalAssetsWithReturn,
+            initialCapital
+          )
+
           return [
             ...acc,
             {
@@ -130,14 +150,18 @@ export function end(
               bank: bankWithReturn,
               bankReturn: returns.bank,
               bankBenchmark,
+              accBankBenchmarkReturn,
               bonds: bondsWithReturn,
               bondsReturn: returns.bonds,
               bondsBenchmark,
+              accBondsBenchmarkReturn,
               stocks: stocksWithReturn,
               stocksReturn: returns.stocks,
               stocksBenchmark,
+              accStocksBenchmarkReturn,
               totalAssets: totalAssetsWithReturn,
               totalAssetsReturn,
+              accTotalAssetsReturn,
             },
           ]
         },
@@ -163,12 +187,13 @@ export function end(
         ...R.pick(['bank', 'bonds', 'stocks', 'totalAssets'], finalAssets),
       }
       draft.resultFacts.returns = {
+        // TODO(JJ): Not sure about these either..., rather facts.assets.bank, etc.
         bank: computePercentChange(finalAssets.bank, targetAssets.bank),
         bonds: computePercentChange(finalAssets.bonds, targetAssets.bonds),
         stocks: computePercentChange(finalAssets.stocks, targetAssets.stocks),
         totalAssets: computePercentChange(
           finalAssets.totalAssets,
-          facts.assets.bank
+          facts.assets.bank // TODO(JJ): I don't think this is correct... -> totalAssets
         ),
       }
       draft.resultFacts.benchmarks = {

@@ -28,6 +28,7 @@ export type ResultFactsInit = {
   decisions: Decisions
   assets: Assets
   benchmarks: AssetsBenchmark
+  initialCapital: number
 }
 
 export type ResultFacts = ResultFactsInit & {
