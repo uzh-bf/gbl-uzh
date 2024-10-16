@@ -30,10 +30,12 @@ export function initialize(
         bank: 0,
         bonds: 0,
         stocks: 0,
-        bankBenchmark: 0,
-        bondsBenchmark: 0,
-        stocksBenchmark: 0,
         totalAssets: 0,
+      },
+      benchmarks: {
+        bank: 0,
+        bonds: 0,
+        stocks: 0,
       },
     },
   }
@@ -50,10 +52,12 @@ export function initialize(
         bank: INITIAL_CAPITAL,
         bonds: 0,
         stocks: 0,
-        bankBenchmark: INITIAL_CAPITAL,
-        bondsBenchmark: INITIAL_CAPITAL,
-        stocksBenchmark: INITIAL_CAPITAL,
         totalAssets: INITIAL_CAPITAL,
+      }
+      draft.resultFacts.benchmarks = {
+        bank: INITIAL_CAPITAL,
+        bonds: INITIAL_CAPITAL,
+        stocks: INITIAL_CAPITAL,
       }
     }
   )

@@ -85,9 +85,11 @@ export function end(
         bank: facts.decisions.bank ? targetAsset : 0,
         bonds: facts.decisions.bonds ? targetAsset : 0,
         stocks: facts.decisions.stocks ? targetAsset : 0,
-        bankBenchmark: facts.assets.bankBenchmark,
-        bondsBenchmark: facts.assets.bondsBenchmark,
-        stocksBenchmark: facts.assets.stocksBenchmark,
+      }
+      const benchmarks = {
+        bank: facts.benchmarks.bank,
+        bonds: facts.benchmarks.bonds,
+        stocks: facts.benchmarks.stocks,
       }
 
       const assetsWithReturns = segmentFacts.returns.reduce(
@@ -143,6 +145,9 @@ export function end(
           {
             ix: 0,
             ...targetAssets,
+            bankBenchmark: benchmarks.bank,
+            bondsBenchmark: benchmarks.bonds,
+            stocksBenchmark: benchmarks.stocks,
             totalAssets,
           },
         ]
@@ -165,6 +170,11 @@ export function end(
           finalAssets.totalAssets,
           facts.assets.bank
         ),
+      }
+      draft.resultFacts.benchmarks = {
+        bank: finalAssets.bankBenchmark,
+        bonds: finalAssets.bondsBenchmark,
+        stocks: finalAssets.stocksBenchmark,
       }
     }
   )
