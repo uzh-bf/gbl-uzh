@@ -8,6 +8,8 @@ import {
   CardHeader,
   CardTitle,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from '@uzh-bf/design-system/dist/future'
@@ -437,27 +439,6 @@ function Cockpit() {
       console.log('assetsPerMonth', assetsPerMonth)
       console.log('totalAssetsPerMonth', totalAssetsPerMonth)
 
-      const config = Object.keys(assetsPerMonth[0]).reduce((acc, key) => {
-        const strName = 'period_'
-        const periodNameIx = strName.length
-        if (key.startsWith(strName)) {
-          const periodIx = key.substring(periodNameIx, periodNameIx + 1)
-          acc[key] = {
-            label:
-              'P' + periodIx + ' (' + key.substring(periodNameIx + 2) + ')',
-            color: `hsl(var(--chart-${periodIx}))`,
-          }
-        }
-        return acc
-      }, {})
-
-      const configTotal = Object.keys(config).reduce((acc, key) => {
-        if (key.endsWith('_total')) {
-          acc[key] = config[key]
-        }
-        return acc
-      }, {})
-
       const configTest = {
         bankBenchmark: {
           label: 'Bank Benchmark',
@@ -473,16 +454,6 @@ function Cockpit() {
         },
         totalAssets: { label: 'Total Assets', color: 'hsl(var(--chart-4))' },
       }
-
-      // const configTotalReturns = Object.keys(config).reduce((acc, key) => {
-      //   if (key.endsWith('_Returns')) {
-      //     acc[key] = config[key]
-      //   }
-      //   return acc
-      // }, {})
-
-      console.log('config', config)
-      console.log('configTotal', configTotal)
 
       const columns_segment_results = [
         { label: '', accessor: 'cat', sortable: false, transformer: null },
@@ -570,12 +541,10 @@ function Cockpit() {
               <div className="flex flex-col gap-2">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Total Assets</CardTitle>
-                    <CardDescription>
-                      Total assets over time (per period).
-                    </CardDescription>
+                    <CardTitle>Absolute performance</CardTitle>
+                    <CardDescription>Assets over time.</CardDescription>
                   </CardHeader>
-                  <CardContent className="w-[600px] overflow-x-scroll">
+                  <CardContent className="max-w-[600px] overflow-x-scroll">
                     <ChartContainer
                       config={configTest}
                       className="h-[300px] w-screen"
@@ -610,44 +579,10 @@ function Cockpit() {
                           axisLine={false}
                           tickMargin={8}
                         />
-                      </LineChart>
-                    </ChartContainer>
-                  </CardContent>
-                  {/* <CardContent>
-                    <ChartContainer config={configTotal}>
-                      <LineChart data={totalAssetsPerMonth} accessibilityLayer>
-                        <ChartTooltip
-                          cursor={false}
-                          content={<ChartTooltipContent />}
-                        />
-                        {Object.keys(configTotal).map((key) => {
-                          return (
-                            <Line
-                              key={key}
-                              type="natural"
-                              dataKey={key}
-                              stroke={configTotal[key].color}
-                              dot={false}
-                              strokeWidth={2}
-                            />
-                          )
-                        })}
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                          dataKey="month"
-                          tickLine={false}
-                          axisLine={false}
-                          tickMargin={8}
-                        />
-                        <YAxis
-                          tickLine={false}
-                          axisLine={false}
-                          tickMargin={8}
-                        />
                         <ChartLegend content={<ChartLegendContent />} />
                       </LineChart>
                     </ChartContainer>
-                  </CardContent> */}
+                  </CardContent>
                 </Card>
                 {/* <Card>
                   <CardHeader>
