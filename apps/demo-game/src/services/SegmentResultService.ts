@@ -85,6 +85,9 @@ export function end(
         bank: facts.decisions.bank ? targetAsset : 0,
         bonds: facts.decisions.bonds ? targetAsset : 0,
         stocks: facts.decisions.stocks ? targetAsset : 0,
+        bankBenchmark: facts.assets.bankBenchmark,
+        bondsBenchmark: facts.assets.bondsBenchmark,
+        stocksBenchmark: facts.assets.stocksBenchmark,
       }
 
       const assetsWithReturns = segmentFacts.returns.reduce(
@@ -105,16 +108,32 @@ export function end(
             last.totalAssets
           )
 
+          const bankBenchmark = withPercentChange(
+            last.bankBenchmark,
+            returns.bank
+          )
+          const bondsBenchmark = withPercentChange(
+            last.bondsBenchmark,
+            returns.bonds
+          )
+          const stocksBenchmark = withPercentChange(
+            last.stocksBenchmark,
+            returns.stocks
+          )
+
           return [
             ...acc,
             {
               ix: ix + 1,
               bank: bankWithReturn,
               bankReturn: returns.bank,
+              bankBenchmark,
               bonds: bondsWithReturn,
               bondsReturn: returns.bonds,
+              bondsBenchmark,
               stocks: stocksWithReturn,
               stocksReturn: returns.stocks,
+              stocksBenchmark,
               totalAssets: totalAssetsWithReturn,
               totalAssetsReturn,
             },

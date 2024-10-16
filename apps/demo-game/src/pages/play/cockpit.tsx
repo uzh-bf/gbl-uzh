@@ -534,6 +534,9 @@ function Cockpit() {
           bank: assetsWithReturnsFlat[0].bank,
           bonds: assetsWithReturnsFlat[0].bonds,
           stocks: assetsWithReturnsFlat[0].stocks,
+          bankBenchmark: assetsWithReturnsFlat[0].bankBenchmark,
+          bondsBenchmark: assetsWithReturnsFlat[0].bondsBenchmark,
+          stocksBenchmark: assetsWithReturnsFlat[0].stocksBenchmark,
           totalAssets: assetsWithReturnsFlat[0].totalAssets,
           month: months[0] + '_P' + 1,
         },
@@ -551,31 +554,6 @@ function Cockpit() {
         j++
       }
       console.log('test', test)
-
-      const testWithBenchmarks = [
-        {
-          totalAssets: initialCapital,
-          bankBenchmark: initialCapital,
-          bondsBenchmark: initialCapital,
-          stocksBenchmark: initialCapital,
-          month: test[0].month,
-        },
-      ]
-      for (let i = 1; i < test.length; i++) {
-        const value = test[i]
-        testWithBenchmarks[i] = {
-          totalAssets: value.totalAssets,
-          bankBenchmark:
-            testWithBenchmarks[i - 1].bankBenchmark * (value.bankReturn + 1),
-          bondsBenchmark:
-            testWithBenchmarks[i - 1].bondsBenchmark * (value.bondsReturn + 1),
-          stocksBenchmark:
-            testWithBenchmarks[i - 1].stocksBenchmark *
-            (value.stocksReturn + 1),
-          month: value.month,
-        }
-      }
-      console.log('testWithBenchmarks', testWithBenchmarks)
 
       return (
         <GameLayout>
@@ -602,7 +580,7 @@ function Cockpit() {
                       config={configTest}
                       className="h-[300px] w-screen"
                     >
-                      <LineChart data={testWithBenchmarks} accessibilityLayer>
+                      <LineChart data={test} accessibilityLayer>
                         <ChartTooltip
                           cursor={false}
                           content={<ChartTooltipContent />}

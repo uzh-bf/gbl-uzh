@@ -26,7 +26,15 @@ export function initialize(
     resultFacts: {
       ...facts,
       decisions: { bank: false, bonds: false, stocks: false },
-      assets: { bank: 0, bonds: 0, stocks: 0, totalAssets: 0 },
+      assets: {
+        bank: 0,
+        bonds: 0,
+        stocks: 0,
+        bankBenchmark: 0,
+        bondsBenchmark: 0,
+        stocksBenchmark: 0,
+        totalAssets: 0,
+      },
     },
   }
 
@@ -42,6 +50,9 @@ export function initialize(
         bank: INITIAL_CAPITAL,
         bonds: 0,
         stocks: 0,
+        bankBenchmark: INITIAL_CAPITAL,
+        bondsBenchmark: INITIAL_CAPITAL,
+        stocksBenchmark: INITIAL_CAPITAL,
         totalAssets: INITIAL_CAPITAL,
       }
     }

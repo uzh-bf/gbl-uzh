@@ -4,6 +4,9 @@ export type Assets = {
   bank: number
   bonds: number
   stocks: number
+  bankBenchmark: number
+  bondsBenchmark: number
+  stocksBenchmark: number
   totalAssets: number
 }
 
