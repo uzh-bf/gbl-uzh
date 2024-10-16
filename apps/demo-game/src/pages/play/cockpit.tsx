@@ -8,8 +8,6 @@ import {
   CardHeader,
   CardTitle,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from '@uzh-bf/design-system/dist/future'
@@ -224,6 +222,7 @@ function Cockpit() {
   if (error) return `Error! ${error}`
 
   const playerDataResult = data.result
+  if (!playerDataResult) return null
   const currentGame = playerDataResult.currentGame
 
   // TODO(JJ): The results should only be computed for certain states.
@@ -272,6 +271,7 @@ function Cockpit() {
 
     case 'PAUSED': {
       // TODO(JJ): Move computation helpers to lib.
+      const numPeriods = currentGame.periods.length
       const previousResults = playerDataResult.previousResults
       const previousSegmentResults = getSegmentEndResults(previousResults)
 
@@ -282,10 +282,17 @@ function Cockpit() {
       const initialCapital = assetsWithReturnsFlat[0].totalAssets
       console.log('assetsWithReturnsFlat', assetsWithReturnsFlat)
 
+      const allData = Array.from(Array(numPeriods).keys()).map((ix) => {
+        const from = ix * numMonths
+        const to = from + numMonths
+        return assetsWithReturnsFlat.slice(from, to)
+      })
+      console.log('allData', allData)
+
       const bankBenchmark = assetsWithReturnsFlat.map((e, ix) => {
         return {
           bankReturn: e.bankReturn ?? 0,
-          month: months[ix % numMonths],
+          // month: months[ix % numMonths],
           period: ~~(ix / numMonths) + 1, // integer division
         }
       })
@@ -295,7 +302,10 @@ function Cockpit() {
         const period = ~~(ix / numMonths) + 1
         acc[period] = [
           ...(acc[period] || []),
-          { bankReturn: val.bankReturn ?? 0, month: months[ix % numMonths] },
+          {
+            bankReturn: val.bankReturn ?? 0,
+            // month: months[ix % numMonths]
+          },
         ]
         return acc
       }, {})
@@ -448,6 +458,22 @@ function Cockpit() {
         return acc
       }, {})
 
+      const configTest = {
+        bankBenchmark: {
+          label: 'Bank Benchmark',
+          color: 'hsl(var(--chart-1))',
+        },
+        bondsBenchmark: {
+          label: 'Bonds Benchmark',
+          color: 'hsl(var(--chart-2))',
+        },
+        stocksBenchmark: {
+          label: 'Stocks Benchmark',
+          color: 'hsl(var(--chart-3))',
+        },
+        totalAssets: { label: 'Total Assets', color: 'hsl(var(--chart-4))' },
+      }
+
       // const configTotalReturns = Object.keys(config).reduce((acc, key) => {
       //   if (key.endsWith('_Returns')) {
       //     acc[key] = config[key]
@@ -468,6 +494,7 @@ function Cockpit() {
         const index = (numDataPoints - numMonthsPerSegment + i) % numMonths
         const periodIx = ~~(numDataPoints / numMonths) + 1
 
+        // TODO(JJ): Double-check if the month is correct
         columns_segment_results.push({
           label: months[index] + ' Period ' + periodIx,
           accessor: strNum,
@@ -476,6 +503,7 @@ function Cockpit() {
             typeof row[strNum] === 'number' && `CHF ${row[strNum].toFixed(2)}`,
         })
       }
+      console.log('columns_segment_results', columns_segment_results)
 
       const reduceFn = (type: string) => {
         return (acc, value) => {
@@ -500,6 +528,55 @@ function Cockpit() {
         assetsWithReturnsArr.reduce(reduceFn('stocks'), { cat: 'Stocks' }),
         assetsWithReturnsArr.reduce(reduceFn('total'), { cat: 'Total' }),
       ]
+
+      const test = [
+        {
+          bank: assetsWithReturnsFlat[0].bank,
+          bonds: assetsWithReturnsFlat[0].bonds,
+          stocks: assetsWithReturnsFlat[0].stocks,
+          totalAssets: assetsWithReturnsFlat[0].totalAssets,
+          month: months[0] + '_P' + 1,
+        },
+      ]
+      for (let i = 1, j = 1; i < assetsWithReturnsFlat.length; i++) {
+        const { ix, ...val } = assetsWithReturnsFlat[i]
+        if (ix == 0) continue
+
+        const index = j % numMonths
+        const periodIx = ~~(j / numMonths) + 1
+        test.push({
+          ...val,
+          month: months[index] + '_P' + periodIx,
+        })
+        j++
+      }
+      console.log('test', test)
+
+      const testWithBenchmarks = [
+        {
+          totalAssets: initialCapital,
+          bankBenchmark: initialCapital,
+          bondsBenchmark: initialCapital,
+          stocksBenchmark: initialCapital,
+          month: test[0].month,
+        },
+      ]
+      for (let i = 1; i < test.length; i++) {
+        const value = test[i]
+        testWithBenchmarks[i] = {
+          totalAssets: value.totalAssets,
+          bankBenchmark:
+            testWithBenchmarks[i - 1].bankBenchmark * (value.bankReturn + 1),
+          bondsBenchmark:
+            testWithBenchmarks[i - 1].bondsBenchmark * (value.bondsReturn + 1),
+          stocksBenchmark:
+            testWithBenchmarks[i - 1].stocksBenchmark *
+            (value.stocksReturn + 1),
+          month: value.month,
+        }
+      }
+      console.log('testWithBenchmarks', testWithBenchmarks)
+
       return (
         <GameLayout>
           <div className="flex flex-col">
@@ -520,7 +597,45 @@ function Cockpit() {
                       Total assets over time (per period).
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="w-[600px] overflow-x-scroll">
+                    <ChartContainer
+                      config={configTest}
+                      className="h-[300px] w-screen"
+                    >
+                      <LineChart data={testWithBenchmarks} accessibilityLayer>
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent />}
+                        />
+                        {Object.keys(configTest).map((key) => {
+                          return (
+                            <Line
+                              key={key}
+                              type="natural"
+                              dataKey={key}
+                              stroke={configTest[key].color}
+                              dot={false}
+                              strokeWidth={2}
+                            />
+                          )
+                        })}
+
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="month"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                      </LineChart>
+                    </ChartContainer>
+                  </CardContent>
+                  {/* <CardContent>
                     <ChartContainer config={configTotal}>
                       <LineChart data={totalAssetsPerMonth} accessibilityLayer>
                         <ChartTooltip
@@ -554,7 +669,7 @@ function Cockpit() {
                         <ChartLegend content={<ChartLegendContent />} />
                       </LineChart>
                     </ChartContainer>
-                  </CardContent>
+                  </CardContent> */}
                 </Card>
                 {/* <Card>
                   <CardHeader>
@@ -568,7 +683,6 @@ function Cockpit() {
                     <ChartContainer config={configTotal}>
                       <BarChart
                         data={accReturnsTotalPerCent}
-                        accessibilityLayer
                       >
                         <ChartTooltip
                           cursor={false}
@@ -603,7 +717,7 @@ function Cockpit() {
                     </ChartContainer>
                   </CardContent>
                 </Card> */}
-                <Card>
+                {/* <Card>
                   <CardHeader>
                     <CardTitle>Total Accumulated Returns Benchmark</CardTitle>
                     <CardDescription>
@@ -747,7 +861,7 @@ function Cockpit() {
                       </LineChart>
                     </ChartContainer>
                   </CardContent>
-                </Card>
+                </Card> */}
                 {/* <Card>
                   <CardHeader>
                     <CardTitle>Returns</CardTitle>
