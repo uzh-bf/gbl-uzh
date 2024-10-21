@@ -12,6 +12,11 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@uzh-bf/design-system/dist/future'
 
 import dayjs from 'dayjs'
@@ -180,21 +185,6 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   )
 }
 
-function getTotalAssetsOfPreviousResults(previousResults: any[]) {
-  const filtered = previousResults.filter((o) => o.type == 'SEGMENT_END')
-
-  filtered.sort((a, b) =>
-    a.period.index > b.period.index && a.segment.index > b.segment.index
-      ? -1
-      : 1
-  )
-
-  return filtered
-    .map((e) => e.facts.assetsWithReturns)
-    .flat()
-    .map((e) => e.totalAssets)
-}
-
 const tabs = [
   { name: 'Welcome', href: '/play/welcome' },
   { name: 'Cockpit', href: '/play/cockpit' },
@@ -218,6 +208,8 @@ const numMonths = months.length
 const numMonthsPerSegment = 4
 
 function Cockpit() {
+  const [period, setPeriod] = useState<number>(null)
+
   const { loading, error, data } = useQuery(ResultDocument, {
     fetchPolicy: 'cache-first',
   })
@@ -228,6 +220,12 @@ function Cockpit() {
       refetchQueries: 'active',
     }
   )
+
+  useEffect(() => {
+    if (period === null && data?.result?.currentGame?.periods?.length) {
+      setPeriod(data.result.currentGame.periods.length - 1)
+    }
+  })
 
   if (loading) return null
   if (error) return `Error! ${error}`
@@ -289,198 +287,78 @@ function Cockpit() {
       const assetsWithReturns = previousSegmentResults.map(
         (e) => e.facts.assetsWithReturns
       )
+      console.log('assetsWithReturns', assetsWithReturns)
       const assetsWithReturnsFlat = assetsWithReturns.flat()
-      const initialCapital = assetsWithReturnsFlat[0].totalAssets
       console.log('assetsWithReturnsFlat', assetsWithReturnsFlat)
 
-      const allData = Array.from(Array(numPeriods).keys()).map((ix) => {
-        const from = ix * numMonths
-        const to = from + numMonths
-        return assetsWithReturnsFlat.slice(from, to)
-      })
-      console.log('allData', allData)
+      const assetsWithReturnsFlatClean = [
+        {
+          bank: assetsWithReturnsFlat[0].bank,
+          bonds: assetsWithReturnsFlat[0].bonds,
+          stocks: assetsWithReturnsFlat[0].stocks,
+          bankBenchmark: assetsWithReturnsFlat[0].bankBenchmark,
+          bondsBenchmark: assetsWithReturnsFlat[0].bondsBenchmark,
+          stocksBenchmark: assetsWithReturnsFlat[0].stocksBenchmark,
+          accBankBenchmarkReturn:
+            assetsWithReturnsFlat[0].accBankBenchmarkReturn,
+          accBondsBenchmarkReturn:
+            assetsWithReturnsFlat[0].accBondsBenchmarkReturn,
+          accStocksBenchmarkReturn:
+            assetsWithReturnsFlat[0].accStocksBenchmarkReturn,
+          accTotalAssetsReturn: assetsWithReturnsFlat[0].accTotalAssetsReturn,
+          totalAssets: assetsWithReturnsFlat[0].totalAssets,
+          month: months[0],
+        },
+      ]
+      for (let i = 1, j = 1; i < assetsWithReturnsFlat.length; i++) {
+        const { ix, ...val } = assetsWithReturnsFlat[i]
+        if (ix == 0) continue
 
-      const bankBenchmark = assetsWithReturnsFlat.map((e, ix) => {
-        return {
-          bankReturn: e.bankReturn ?? 0,
-          // month: months[ix % numMonths],
-          period: ~~(ix / numMonths) + 1, // integer division
+        const index = j % numMonths
+        assetsWithReturnsFlatClean.push({
+          ...val,
+          month: months[index],
+        })
+        j++
+      }
+
+      console.log('assetsWithReturnsFlatClean', assetsWithReturnsFlatClean)
+
+      const allDataPerPeriod = Array.from(Array(numPeriods).keys()).map(
+        (ix) => {
+          const from = ix * numMonths
+          const to = from + numMonths
+          return assetsWithReturnsFlatClean.slice(from, to)
         }
-      })
-      console.log('bankBenchmark', bankBenchmark)
+      )
 
-      const bankBenchmarkRed = assetsWithReturnsFlat.reduce((acc, val, ix) => {
-        const period = ~~(ix / numMonths) + 1
-        acc[period] = [
-          ...(acc[period] || []),
-          {
-            bankReturn: val.bankReturn ?? 0,
-            // month: months[ix % numMonths]
-          },
-        ]
-        return acc
-      }, {})
-      console.log('bankBenchmarkRed', bankBenchmarkRed)
+      console.log('allDataPerPeriod', allDataPerPeriod)
 
-      const assetsPerMonthPrep = assetsWithReturnsFlat.map((e, ix) => {
-        return {
-          total: e.totalAssets,
-          // totalReturns: e.totalAssetsReturn ?? 0,
-          bankReturn: e.bankReturn ?? 0,
-          bondsReturn: e.bondsReturn ?? 0,
-          stocksReturn: e.stocksReturn ?? 0,
-          month: months[ix % numMonths],
-          period: ~~(ix / numMonths) + 1, // integer division
-        }
-      })
-      console.log('assetsPerMonthPrep', assetsPerMonthPrep)
-
-      const assetsPerMonth = assetsPerMonthPrep.reduce((acc, val, ix) => {
-        const key_prefix = 'period_' + val.period
-        const key_total = key_prefix + '_total'
-        const key_bankReturn = key_prefix + '_bankReturn'
-        const key_bondsReturn = key_prefix + '_bondsReturn'
-        const key_stocksReturn = key_prefix + '_stocksReturn'
-        // const key_totalReturns = key_prefix + '_totalReturns'
-
-        const index = ix % numMonths
-        acc[index] = acc[index] || { month: val.month }
-        acc[index][key_total] = val.total
-        acc[index][key_bankReturn] = val.bankReturn
-        acc[index][key_bondsReturn] = val.bondsReturn
-        acc[index][key_stocksReturn] = val.stocksReturn
-        // acc[index][key_totalReturns] = val.totalReturns
-        return acc
-      }, [])
-
-      const benchmarksPrep = assetsPerMonthPrep.reduce((acc, val, ix) => {
-        acc[ix] = {
-          month: val.month,
-          bank: initialCapital,
-          bankReturn: 0,
-          bonds: initialCapital,
-          bondsReturn: 0,
-          stocks: initialCapital,
-          stocksReturn: 0,
-          period: val.period,
-        }
-        if (ix > 0) {
-          acc[ix].bank = acc[ix - 1].bank * (val.bankReturn + 1)
-          acc[ix].bonds = acc[ix - 1].bonds * (val.bondsReturn + 1)
-          acc[ix].stocks = acc[ix - 1].stocks * (val.stocksReturn + 1)
-          acc[ix].bankReturn = acc[ix].bank / initialCapital - 1
-          acc[ix].bondsReturn = acc[ix].bonds / initialCapital - 1
-          acc[ix].stocksReturn = acc[ix].stocks / initialCapital - 1
-        }
-        return acc
-      }, [])
-      console.log('benchmarksPrep', benchmarksPrep)
-
-      const benchmarks = benchmarksPrep.reduce((acc, val, ix) => {
-        const key_prefix = 'period_' + val.period
-        const key_bank = key_prefix + '_bank'
-        const key_bonds = key_prefix + '_bonds'
-        const key_stocks = key_prefix + '_stocks'
-        const key_bankReturn = key_prefix + '_bankReturn'
-        const key_bondsReturn = key_prefix + '_bondsReturn'
-        const key_stocksReturn = key_prefix + '_stocksReturn'
-
-        const index = ix % numMonths
-        acc[index] = acc[index] || { month: val.month }
-        acc[index][key_bank] = val.bank
-        acc[index][key_bonds] = val.bonds
-        acc[index][key_stocks] = val.stocks
-        acc[index][key_bankReturn] = val.bankReturn
-        acc[index][key_bondsReturn] = val.bondsReturn
-        acc[index][key_stocksReturn] = val.stocksReturn
-        return acc
-      }, [])
-      console.log('benchmarks', benchmarks)
-
-      const totalAssetsPerMonth = assetsPerMonth.map((e, ix) => {
-        const totalEntries = Object.keys(e).reduce((acc, key, index) => {
-          if (key.endsWith('total')) {
-            acc[key] = e[key]
-          }
-          return acc
-        }, {})
-
-        return {
-          month: e.month,
-          ...totalEntries,
-        }
-      })
-
-      const accReturnsTotalPerCent = totalAssetsPerMonth.map((e, ix) => {
-        const totalEntries = Object.keys(e).reduce((acc, key, index) => {
-          if (key.endsWith('total')) {
-            acc[key] = e[key] / initialCapital - 1
-          }
-          return acc
-        }, {})
-
-        return {
-          month: e.month,
-          ...totalEntries,
-        }
-      })
-
-      const accReturnsPerCent = assetsPerMonth.map((e, ix) => {
-        const totalEntries = Object.keys(e).reduce((acc, key, index) => {
-          if (key.endsWith('total')) {
-            acc[key] = e[key] / initialCapital - 1
-          } else if (key.endsWith('bank')) {
-            acc[key] = e[key] / initialCapital - 1
-          } else {
-            acc[key] = e[key]
-          }
-          return acc
-        }, {})
-
-        return {
-          month: e.month,
-          ...totalEntries,
-        }
-      })
-
-      console.log('accReturnsTotalPerCent', accReturnsTotalPerCent)
-      console.log('accReturnsPerCent', accReturnsPerCent)
-      console.log('assetsPerMonth', assetsPerMonth)
-      console.log('totalAssetsPerMonth', totalAssetsPerMonth)
+      const labels = [
+        'Bank Benchmark',
+        'Bonds Benchmark',
+        'Stocks Benchmark',
+        'Total Assets',
+      ]
+      const colors = [
+        'hsl(var(--chart-1))',
+        'hsl(var(--chart-2))',
+        'hsl(var(--chart-3))',
+        'hsl(var(--chart-4))',
+      ]
 
       const configTest = {
-        bankBenchmark: {
-          label: 'Bank Benchmark',
-          color: 'hsl(var(--chart-1))',
-        },
-        bondsBenchmark: {
-          label: 'Bonds Benchmark',
-          color: 'hsl(var(--chart-2))',
-        },
-        stocksBenchmark: {
-          label: 'Stocks Benchmark',
-          color: 'hsl(var(--chart-3))',
-        },
-        totalAssets: { label: 'Total Assets', color: 'hsl(var(--chart-4))' },
+        bankBenchmark: { label: labels[0], color: colors[0] },
+        bondsBenchmark: { label: labels[1], color: colors[1] },
+        stocksBenchmark: { label: labels[2], color: colors[2] },
+        totalAssets: { label: labels[3], color: labels[3] },
       }
 
       const configAccReturn = {
-        accBankBenchmarkReturn: {
-          label: 'Bank Benchmark',
-          color: 'hsl(var(--chart-1))',
-        },
-        accBondsBenchmarkReturn: {
-          label: 'Bonds Benchmark',
-          color: 'hsl(var(--chart-2))',
-        },
-        accStocksBenchmarkReturn: {
-          label: 'Stocks Benchmark',
-          color: 'hsl(var(--chart-3))',
-        },
-        accTotalAssetsReturn: {
-          label: 'Total Assets',
-          color: 'hsl(var(--chart-4))',
-        },
+        accBankBenchmarkReturn: { label: labels[0], color: colors[0] },
+        accBondsBenchmarkReturn: { label: labels[1], color: colors[1] },
+        accStocksBenchmarkReturn: { label: labels[2], color: colors[2] },
+        accTotalAssetsReturn: { label: labels[3], color: colors[3] },
       }
 
       const columns_segment_results = [
@@ -528,37 +406,14 @@ function Cockpit() {
         assetsWithReturnsArr.reduce(reduceFn('total'), { cat: 'Total' }),
       ]
 
-      const test = [
-        {
-          bank: assetsWithReturnsFlat[0].bank,
-          bonds: assetsWithReturnsFlat[0].bonds,
-          stocks: assetsWithReturnsFlat[0].stocks,
-          bankBenchmark: assetsWithReturnsFlat[0].bankBenchmark,
-          bondsBenchmark: assetsWithReturnsFlat[0].bondsBenchmark,
-          stocksBenchmark: assetsWithReturnsFlat[0].stocksBenchmark,
-          accBankBenchmarkReturn:
-            assetsWithReturnsFlat[0].accBankBenchmarkReturn,
-          accBondsBenchmarkReturn:
-            assetsWithReturnsFlat[0].accBondsBenchmarkReturn,
-          accStocksBenchmarkReturn:
-            assetsWithReturnsFlat[0].accStocksBenchmarkReturn,
-          accTotalAssetsReturn: assetsWithReturnsFlat[0].accTotalAssetsReturn,
-          totalAssets: assetsWithReturnsFlat[0].totalAssets,
-          month: months[0] + '_P' + 1,
-        },
-      ]
-      for (let i = 1, j = 1; i < assetsWithReturnsFlat.length; i++) {
-        const { ix, ...val } = assetsWithReturnsFlat[i]
-        if (ix == 0) continue
+      const test = assetsWithReturnsFlatClean.map((e, ix) => {
+        const index = ix % numMonths
+        return {
+          ...e,
+          month: months[index] + '_P' + (~~(ix / numMonths) + 1),
+        }
+      })
 
-        const index = j % numMonths
-        const periodIx = ~~(j / numMonths) + 1
-        test.push({
-          ...val,
-          month: months[index] + '_P' + periodIx,
-        })
-        j++
-      }
       console.log('test', test)
 
       return (
@@ -621,10 +476,10 @@ function Cockpit() {
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Total Accumulated Returns</CardTitle>
+                    <CardTitle>Total accumulated returns</CardTitle>
                     <CardDescription>
-                      Total accumulated returns in percent over time (per
-                      period).
+                      Total accumulated returns with respect to initial capital
+                      over time (per period).
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -663,85 +518,53 @@ function Cockpit() {
                     </ChartContainer>
                   </CardContent>
                 </Card>
-                {/* <Card>
-                  <CardHeader>
-                    <CardTitle>Total Accumulated Returns Benchmark</CardTitle>
-                    <CardDescription>
-                      Total accumulated returns in percent over time (per
-                      period).
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ChartContainer
-                      config={{
-                        period_1_bank: { color: '#007bff', label: 'Bank P1' },
-                        period_2_bank: { color: '#34f4ff', label: 'Bank P2' },
-                        period_1_bonds: { color: '#0000ff', label: 'Bonds P1' },
-                        period_2_bonds: { color: '#3400ff', label: 'Bonds P2' },
-                        period_1_stocks: {
-                          color: '#887b88',
-                          label: 'Stocks P1',
-                        },
-                        period_2_stocks: {
-                          color: '#123456',
-                          label: 'Stocks P2',
-                        },
+                <Card>
+                  <CardHeader className="flex flex-row justify-between">
+                    <div>
+                      <CardTitle>Absolute performance</CardTitle>
+                      <CardDescription>Assets over time.</CardDescription>
+                    </div>
+                    <Select
+                      defaultValue={(period + 1).toString()}
+                      onValueChange={(value) => {
+                        setPeriod((prev) => parseInt(value))
                       }}
                     >
-                      <LineChart data={benchmarks} accessibilityLayer>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Period" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allDataPerPeriod.map((_, index) => (
+                          <SelectItem key={index} value={index.toString()}>
+                            Period {index + 1}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </CardHeader>
+                  <CardContent className="max-w-full">
+                    <ChartContainer config={configTest} className="h-[300px]">
+                      <LineChart
+                        data={allDataPerPeriod[period]}
+                        accessibilityLayer
+                      >
                         <ChartTooltip
                           cursor={false}
                           content={<ChartTooltipContent />}
                         />
-
-                        <Line
-                          // key={key}
-                          type="natural"
-                          dataKey="period_1_bank"
-                          stroke={'#007bff'}
-                          dot={false}
-                          strokeWidth={2}
-                        />
-                        <Line
-                          // key={key}
-                          type="natural"
-                          dataKey="period_2_bank"
-                          stroke={'#34f4ff'}
-                          dot={false}
-                          strokeWidth={2}
-                        />
-                        <Line
-                          // key={key}
-                          type="natural"
-                          dataKey="period_1_bonds"
-                          stroke={'#0000ff'}
-                          dot={false}
-                          strokeWidth={2}
-                        />
-                        <Line
-                          // key={key}
-                          type="natural"
-                          dataKey="period_2_bonds"
-                          stroke={'#3400ff'}
-                          dot={false}
-                          strokeWidth={2}
-                        />
-                        <Line
-                          // key={key}
-                          type="natural"
-                          dataKey="period_1_stocks"
-                          stroke={'#887b88'}
-                          dot={false}
-                          strokeWidth={2}
-                        />
-                        <Line
-                          // key={key}
-                          type="natural"
-                          dataKey="period_2_stocks"
-                          stroke={'#123456'}
-                          dot={false}
-                          strokeWidth={2}
-                        />
+                        {Object.keys(configTest).map((key) => {
+                          // console.log('pe', period)
+                          return (
+                            <Line
+                              key={key}
+                              type="natural"
+                              dataKey={key}
+                              stroke={configTest[key].color}
+                              dot={false}
+                              strokeWidth={2}
+                            />
+                          )
+                        })}
 
                         <CartesianGrid vertical={false} />
                         <XAxis
@@ -762,73 +585,26 @@ function Cockpit() {
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Total Accumulated Returns</CardTitle>
+                    <CardTitle>Total accumulated returns</CardTitle>
                     <CardDescription>
-                      Total accumulated returns in percent over time (per
-                      period).
+                      Total accumulated returns with respect to initial capital
+                      over time (per period).
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ChartContainer config={configTotal}>
-                      <LineChart
-                        data={accReturnsTotalPerCent}
-                        accessibilityLayer
-                      >
+                    <ChartContainer config={configAccReturn}>
+                      <BarChart data={allDataPerPeriod[period]}>
                         <ChartTooltip
                           cursor={false}
                           content={<ChartTooltipContent />}
                         />
-                        {Object.keys(configTotal).map((key) => {
-                          return (
-                            <Line
-                              key={key}
-                              type="natural"
-                              dataKey={key}
-                              stroke={configTotal[key].color}
-                              dot={false}
-                              strokeWidth={2}
-                            />
-                          )
-                        })}
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                          dataKey="month"
-                          tickLine={false}
-                          axisLine={false}
-                          tickMargin={8}
-                        />
-                        <YAxis
-                          tickLine={false}
-                          axisLine={false}
-                          tickMargin={8}
-                          tickFormatter={(v) => `${v.toFixed(2) * 100}%`}
-                        />
-                        <ChartLegend content={<ChartLegendContent />} />
-                      </LineChart>
-                    </ChartContainer>
-                  </CardContent>
-                </Card> */}
-                {/* <Card>
-                  <CardHeader>
-                    <CardTitle>Returns</CardTitle>
-                    <CardDescription>
-                      Returns in percent over time (per period).
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ChartContainer config={config}>
-                      <BarChart data={accReturnsPerCent} accessibilityLayer>
-                        <ChartTooltip
-                          cursor={false}
-                          content={<ChartTooltipContent />}
-                        />
-                        {Object.keys(config).map((key) => {
+                        {Object.keys(configAccReturn).map((key) => {
                           return (
                             <Bar
                               key={key}
-                              stackId="1"
+                              // stackId="1"
                               dataKey={key}
-                              fill={config[key].color}
+                              fill={configAccReturn[key].color}
                               radius={4}
                             />
                           )
@@ -850,7 +626,7 @@ function Cockpit() {
                       </BarChart>
                     </ChartContainer>
                   </CardContent>
-                </Card> */}
+                </Card>
               </div>
             </div>
           </div>

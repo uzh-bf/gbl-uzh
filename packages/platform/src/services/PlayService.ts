@@ -261,6 +261,9 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
     currentGame.activePeriod.segments
 
   const previousResults = ctx.prisma.playerResult.findMany({
+    orderBy: {
+      id: 'asc',
+    },
     where: {
       playerId: args.playerId,
       periodIx: {
