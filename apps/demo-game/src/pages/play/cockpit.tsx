@@ -2,23 +2,35 @@ import { useMutation, useQuery } from '@apollo/client'
 import { Layout } from '@gbl-uzh/ui'
 import { CycleCountdown, Switch, Table } from '@uzh-bf/design-system'
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@uzh-bf/design-system/dist/future'
 
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import {
+  Bar,
+  BarChart,
   CartesianGrid,
   Line,
   LineChart,
-  ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from 'recharts'
-import LearningElements from 'src/components/LearningElements'
+
 import {
   TransactionsDisplay,
   TransactionsDisplayCompact,
@@ -28,9 +40,11 @@ import {
   ResultDocument,
   UpdateReadyStateDocument,
 } from 'src/graphql/generated/ops'
+import { getSegmentEndResults } from 'src/lib/analysis'
 import { ActionTypes } from 'src/services/ActionsReducer'
-// TODO(JJ): This will be replaced by the design system
+import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
+// TODO(JJ): This will be replaced by the design system
 import { useToast } from '../../components/ui/use-toast'
 
 function GameHeader({ currentGame }) {
@@ -171,27 +185,31 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   )
 }
 
-function getTotalAssetsOfPreviousResults(previousResults: any[]) {
-  const filtered = previousResults.filter((o) => o.type == 'SEGMENT_END')
-
-  filtered.sort((a, b) =>
-    a.period.index > b.period.index && a.segment.index > b.segment.index
-      ? -1
-      : 1
-  )
-
-  return filtered
-    .map((e) => e.facts.assetsWithReturns)
-    .flat()
-    .map((e) => e.totalAssets)
-}
-
 const tabs = [
   { name: 'Welcome', href: '/play/welcome' },
   { name: 'Cockpit', href: '/play/cockpit' },
 ]
 
+const months = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
+const numMonths = months.length
+const numMonthsPerSegment = 4
+
 function Cockpit() {
+  const [period, setPeriod] = useState<number>(null)
+
   const { loading, error, data } = useQuery(ResultDocument, {
     fetchPolicy: 'cache-first',
   })
@@ -203,10 +221,17 @@ function Cockpit() {
     }
   )
 
+  useEffect(() => {
+    if (period === null && data?.result?.currentGame?.periods?.length) {
+      setPeriod(data.result.currentGame.periods.length - 1)
+    }
+  })
+
   if (loading) return null
   if (error) return `Error! ${error}`
 
   const playerDataResult = data.result
+  if (!playerDataResult) return null
   const currentGame = playerDataResult.currentGame
 
   // TODO(JJ): The results should only be computed for certain states.
@@ -254,32 +279,102 @@ function Cockpit() {
       )
 
     case 'PAUSED': {
+      const numPeriods = currentGame.periods.length
       const previousResults = playerDataResult.previousResults
+      const previousSegmentResults = getSegmentEndResults(previousResults)
 
-      const totalAssetsPerMonth = getTotalAssetsOfPreviousResults(
-        previousResults
-      ).map((s, i) => ({ total: s, month: 'month_' + String(i) }))
+      const assetsWithReturns = previousSegmentResults.map(
+        (e) => e.facts.assetsWithReturns
+      )
+      const assetsWithReturnsFlat = assetsWithReturns.flat()
 
-      const columns_segment_results = [
-        { label: '', accessor: 'cat', sortable: false },
+      // The current data stores some values twice: once as a last value from
+      // the previous segment and once as a first value from the current
+      // segment. Therefore, we remove the first value from the current return.
+      const firstValue = assetsWithReturnsFlat[0]
+      const assetsWithReturnsFlatClean = [
         {
-          label: 'Initial',
-          accessor: '0',
-          sortable: false,
-          transformer: ({ row }: { row: any }) =>
-            typeof row['0'] === 'number' && `CHF ${row['0'].toFixed(2)}`,
+          bank: firstValue.bank,
+          bonds: firstValue.bonds,
+          stocks: firstValue.stocks,
+          bankBenchmark: firstValue.bankBenchmark,
+          bondsBenchmark: firstValue.bondsBenchmark,
+          stocksBenchmark: firstValue.stocksBenchmark,
+          accBankBenchmarkReturn: firstValue.accBankBenchmarkReturn,
+          accBondsBenchmarkReturn: firstValue.accBondsBenchmarkReturn,
+          accStocksBenchmarkReturn: firstValue.accStocksBenchmarkReturn,
+          accTotalAssetsReturn: firstValue.accTotalAssetsReturn,
+          totalAssets: firstValue.totalAssets,
+          month: months[0],
         },
       ]
-      for (let i = 1; i < 4; i++) {
+      for (let i = 1, j = 1; i < assetsWithReturnsFlat.length; i++) {
+        const { ix, ...val } = assetsWithReturnsFlat[i]
+        if (ix == 0) continue
+
+        const index = j % numMonths
+        assetsWithReturnsFlatClean.push({
+          ...val,
+          month: months[index],
+        })
+        j++
+      }
+
+      const allDataPerPeriod = Array.from(Array(numPeriods).keys()).map(
+        (ix) => {
+          const from = ix * numMonths
+          const to = from + numMonths
+          return assetsWithReturnsFlatClean.slice(from, to)
+        }
+      )
+
+      const labels = [
+        'Bank Benchmark',
+        'Bonds Benchmark',
+        'Stocks Benchmark',
+        'Total Assets',
+      ]
+      const colors = [
+        'hsl(var(--chart-1))',
+        'hsl(var(--chart-2))',
+        'hsl(var(--chart-3))',
+        'hsl(var(--chart-4))',
+      ]
+
+      const configAbsolute = {
+        bankBenchmark: { label: labels[0], color: colors[0] },
+        bondsBenchmark: { label: labels[1], color: colors[1] },
+        stocksBenchmark: { label: labels[2], color: colors[2] },
+        totalAssets: { label: labels[3], color: colors[3] },
+      }
+
+      const configAccReturn = {
+        accBankBenchmarkReturn: { label: labels[0], color: colors[0] },
+        accBondsBenchmarkReturn: { label: labels[1], color: colors[1] },
+        accStocksBenchmarkReturn: { label: labels[2], color: colors[2] },
+        accTotalAssetsReturn: { label: labels[3], color: colors[3] },
+      }
+
+      const columns_segment_results = [
+        { label: '', accessor: 'cat', sortable: false, transformer: null },
+      ]
+      for (let i = 0; i < numMonthsPerSegment; i++) {
         const strNum = String(i)
+
+        const numDataPoints = assetsWithReturnsFlat.length
+        const index = (numDataPoints - numMonthsPerSegment + i) % numMonths
+        const periodIx = ~~(numDataPoints / numMonths) + 1
+
+        // TODO(JJ): Double-check if the month is correct
         columns_segment_results.push({
-          label: 'Month ' + strNum,
+          label: months[index] + ' Period ' + periodIx,
           accessor: strNum,
           sortable: false,
           transformer: ({ row }: { row: any }) =>
             typeof row[strNum] === 'number' && `CHF ${row[strNum].toFixed(2)}`,
         })
       }
+      console.log('columns_segment_results', columns_segment_results)
 
       const reduceFn = (type: string) => {
         return (acc, value) => {
@@ -304,51 +399,132 @@ function Cockpit() {
         assetsWithReturnsArr.reduce(reduceFn('stocks'), { cat: 'Stocks' }),
         assetsWithReturnsArr.reduce(reduceFn('total'), { cat: 'Total' }),
       ]
+
       return (
         <GameLayout>
           <div className="flex flex-col">
             <div>
               <GameHeader currentGame={currentGame} />
-              <div className="max-w-2xl">
+              <div className="py-8">
                 <Table
                   columns={columns_segment_results}
                   data={data_segment_results}
                   caption=""
                 />
               </div>
-              <div className="flex justify-center">Total over time chart</div>
-              <ResponsiveContainer width="100%" height="50%">
-                <ChartContainer
-                  config={{
-                    desktop: {
-                      label: 'Desktop',
-                    },
-                  }}
-                >
-                  <LineChart data={totalAssetsPerMonth}>
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent hideLabel />}
-                    />
-                    <Line
-                      type="natural"
-                      dataKey="total"
-                      stroke="#8884d8"
-                      dot={false}
-                      strokeWidth={2}
-                    />
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                      dataKey="month"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                    />
-                    <YAxis />
-                    <Tooltip />
-                  </LineChart>
-                </ChartContainer>
-              </ResponsiveContainer>
+              <div className="flex flex-col gap-2">
+                <Card>
+                  <CardHeader className="flex flex-row justify-between">
+                    <div>
+                      <CardTitle>Absolute performance</CardTitle>
+                      <CardDescription>Assets over time.</CardDescription>
+                    </div>
+                    <Select
+                      defaultValue={(period + 1).toString()}
+                      onValueChange={(value) => {
+                        setPeriod((prev) => parseInt(value))
+                      }}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Period" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allDataPerPeriod.map((_, index) => (
+                          <SelectItem key={index} value={index.toString()}>
+                            Period {index + 1}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </CardHeader>
+                  <CardContent className="max-w-full">
+                    <ChartContainer
+                      config={configAbsolute}
+                      className="h-[300px]"
+                    >
+                      <LineChart
+                        data={allDataPerPeriod[period]}
+                        accessibilityLayer
+                      >
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent />}
+                        />
+                        {Object.keys(configAbsolute).map((key) => {
+                          return (
+                            <Line
+                              key={key}
+                              type="natural"
+                              dataKey={key}
+                              stroke={configAbsolute[key].color}
+                              dot={false}
+                              strokeWidth={2}
+                            />
+                          )
+                        })}
+
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="month"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
+                      </LineChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Total accumulated returns</CardTitle>
+                    <CardDescription>
+                      Total accumulated returns with respect to initial capital
+                      over time (per period).
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={configAccReturn}>
+                      <BarChart data={allDataPerPeriod[period]}>
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent />}
+                        />
+                        {Object.keys(configAccReturn).map((key) => {
+                          return (
+                            <Bar
+                              key={key}
+                              // stackId="1"
+                              dataKey={key}
+                              fill={configAccReturn[key].color}
+                              radius={4}
+                            />
+                          )
+                        })}
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="month"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tickFormatter={(v) => `${v.toFixed(2) * 100}%`}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
+                      </BarChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </GameLayout>

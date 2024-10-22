@@ -1,9 +1,12 @@
 import { OutputFacts } from '@gbl-uzh/platform'
 
-export type Assets = {
+export type AssetsBenchmark = {
   bank: number
   bonds: number
   stocks: number
+}
+
+export type Assets = AssetsBenchmark & {
   totalAssets: number
 }
 
@@ -24,6 +27,8 @@ export type AssetsWithReturns = Assets & {
 export type ResultFactsInit = {
   decisions: Decisions
   assets: Assets
+  benchmarks: AssetsBenchmark
+  initialCapital: number
 }
 
 export type ResultFacts = ResultFactsInit & {

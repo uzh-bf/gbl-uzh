@@ -25,8 +25,19 @@ export function initialize(
   const baseFacts: OutputPeriodResultFactsInit = {
     resultFacts: {
       ...facts,
+      initialCapital: INITIAL_CAPITAL,
       decisions: { bank: false, bonds: false, stocks: false },
-      assets: { bank: 0, bonds: 0, stocks: 0, totalAssets: 0 },
+      assets: {
+        bank: 0,
+        bonds: 0,
+        stocks: 0,
+        totalAssets: 0,
+      },
+      benchmarks: {
+        bank: 0,
+        bonds: 0,
+        stocks: 0,
+      },
     },
   }
 
@@ -44,6 +55,12 @@ export function initialize(
         stocks: 0,
         totalAssets: INITIAL_CAPITAL,
       }
+      draft.resultFacts.benchmarks = {
+        bank: INITIAL_CAPITAL,
+        bonds: INITIAL_CAPITAL,
+        stocks: INITIAL_CAPITAL,
+      }
+      draft.resultFacts.initialCapital = INITIAL_CAPITAL
     }
   )
 

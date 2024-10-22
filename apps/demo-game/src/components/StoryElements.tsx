@@ -15,7 +15,11 @@ function StoryElements({ playerState, player }: Props) {
   const [unseenStoryElements, setUnseenStoryElements] = useState([])
 
   const activeStoryElements = useMemo(() => {
-    if (!playerState?.data) return []
+    if (
+      !playerState?.data ||
+      !playerState?.data?.result.currentGame.activePeriod.activeSegment
+    )
+      return []
     return sortBy(
       (elem) => elem.title,
       playerState?.data?.result.currentGame.activePeriod.activeSegment

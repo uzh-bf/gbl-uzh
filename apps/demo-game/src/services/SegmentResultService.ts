@@ -86,6 +86,13 @@ export function end(
         bonds: facts.decisions.bonds ? targetAsset : 0,
         stocks: facts.decisions.stocks ? targetAsset : 0,
       }
+      const benchmarks = {
+        bank: facts.benchmarks.bank,
+        bonds: facts.benchmarks.bonds,
+        stocks: facts.benchmarks.stocks,
+      }
+
+      const initialCapital = facts.initialCapital
 
       const assetsWithReturns = segmentFacts.returns.reduce(
         (acc, returns, ix) => {
@@ -105,18 +112,56 @@ export function end(
             last.totalAssets
           )
 
+          const bankBenchmark = withPercentChange(
+            last.bankBenchmark,
+            returns.bank
+          )
+          const bondsBenchmark = withPercentChange(
+            last.bondsBenchmark,
+            returns.bonds
+          )
+          const stocksBenchmark = withPercentChange(
+            last.stocksBenchmark,
+            returns.stocks
+          )
+
+          const accBankBenchmarkReturn = computePercentChange(
+            bankBenchmark,
+            initialCapital
+          )
+          const accBondsBenchmarkReturn = computePercentChange(
+            bondsBenchmark,
+            initialCapital
+          )
+          const accStocksBenchmarkReturn = computePercentChange(
+            stocksBenchmark,
+            initialCapital
+          )
+
+          const accTotalAssetsReturn = computePercentChange(
+            totalAssetsWithReturn,
+            initialCapital
+          )
+
           return [
             ...acc,
             {
               ix: ix + 1,
               bank: bankWithReturn,
               bankReturn: returns.bank,
+              bankBenchmark,
+              accBankBenchmarkReturn,
               bonds: bondsWithReturn,
               bondsReturn: returns.bonds,
+              bondsBenchmark,
+              accBondsBenchmarkReturn,
               stocks: stocksWithReturn,
               stocksReturn: returns.stocks,
+              stocksBenchmark,
+              accStocksBenchmarkReturn,
               totalAssets: totalAssetsWithReturn,
               totalAssetsReturn,
+              accTotalAssetsReturn,
             },
           ]
         },
@@ -124,6 +169,9 @@ export function end(
           {
             ix: 0,
             ...targetAssets,
+            bankBenchmark: benchmarks.bank,
+            bondsBenchmark: benchmarks.bonds,
+            stocksBenchmark: benchmarks.stocks,
             totalAssets,
           },
         ]
@@ -139,13 +187,19 @@ export function end(
         ...R.pick(['bank', 'bonds', 'stocks', 'totalAssets'], finalAssets),
       }
       draft.resultFacts.returns = {
+        // TODO(JJ): Not sure about these either..., rather facts.assets.bank, etc.
         bank: computePercentChange(finalAssets.bank, targetAssets.bank),
         bonds: computePercentChange(finalAssets.bonds, targetAssets.bonds),
         stocks: computePercentChange(finalAssets.stocks, targetAssets.stocks),
         totalAssets: computePercentChange(
           finalAssets.totalAssets,
-          facts.assets.bank
+          facts.assets.bank // TODO(JJ): I don't think this is correct... -> totalAssets
         ),
+      }
+      draft.resultFacts.benchmarks = {
+        bank: finalAssets.bankBenchmark,
+        bonds: finalAssets.bondsBenchmark,
+        stocks: finalAssets.stocksBenchmark,
       }
     }
   )
