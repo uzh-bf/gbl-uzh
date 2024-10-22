@@ -279,7 +279,6 @@ function Cockpit() {
       )
 
     case 'PAUSED': {
-      // TODO(JJ): Move computation helpers to lib.
       const numPeriods = currentGame.periods.length
       const previousResults = playerDataResult.previousResults
       const previousSegmentResults = getSegmentEndResults(previousResults)
@@ -287,26 +286,25 @@ function Cockpit() {
       const assetsWithReturns = previousSegmentResults.map(
         (e) => e.facts.assetsWithReturns
       )
-      console.log('assetsWithReturns', assetsWithReturns)
       const assetsWithReturnsFlat = assetsWithReturns.flat()
-      console.log('assetsWithReturnsFlat', assetsWithReturnsFlat)
 
+      // The current data stores some values twice: once as a last value from
+      // the previous segment and once as a first value from the current
+      // segment. Therefore, we remove the first value from the current return.
+      const firstValue = assetsWithReturnsFlat[0]
       const assetsWithReturnsFlatClean = [
         {
-          bank: assetsWithReturnsFlat[0].bank,
-          bonds: assetsWithReturnsFlat[0].bonds,
-          stocks: assetsWithReturnsFlat[0].stocks,
-          bankBenchmark: assetsWithReturnsFlat[0].bankBenchmark,
-          bondsBenchmark: assetsWithReturnsFlat[0].bondsBenchmark,
-          stocksBenchmark: assetsWithReturnsFlat[0].stocksBenchmark,
-          accBankBenchmarkReturn:
-            assetsWithReturnsFlat[0].accBankBenchmarkReturn,
-          accBondsBenchmarkReturn:
-            assetsWithReturnsFlat[0].accBondsBenchmarkReturn,
-          accStocksBenchmarkReturn:
-            assetsWithReturnsFlat[0].accStocksBenchmarkReturn,
-          accTotalAssetsReturn: assetsWithReturnsFlat[0].accTotalAssetsReturn,
-          totalAssets: assetsWithReturnsFlat[0].totalAssets,
+          bank: firstValue.bank,
+          bonds: firstValue.bonds,
+          stocks: firstValue.stocks,
+          bankBenchmark: firstValue.bankBenchmark,
+          bondsBenchmark: firstValue.bondsBenchmark,
+          stocksBenchmark: firstValue.stocksBenchmark,
+          accBankBenchmarkReturn: firstValue.accBankBenchmarkReturn,
+          accBondsBenchmarkReturn: firstValue.accBondsBenchmarkReturn,
+          accStocksBenchmarkReturn: firstValue.accStocksBenchmarkReturn,
+          accTotalAssetsReturn: firstValue.accTotalAssetsReturn,
+          totalAssets: firstValue.totalAssets,
           month: months[0],
         },
       ]
@@ -322,8 +320,6 @@ function Cockpit() {
         j++
       }
 
-      console.log('assetsWithReturnsFlatClean', assetsWithReturnsFlatClean)
-
       const allDataPerPeriod = Array.from(Array(numPeriods).keys()).map(
         (ix) => {
           const from = ix * numMonths
@@ -331,8 +327,6 @@ function Cockpit() {
           return assetsWithReturnsFlatClean.slice(from, to)
         }
       )
-
-      console.log('allDataPerPeriod', allDataPerPeriod)
 
       const labels = [
         'Bank Benchmark',
@@ -347,11 +341,11 @@ function Cockpit() {
         'hsl(var(--chart-4))',
       ]
 
-      const configTest = {
+      const configAbsolute = {
         bankBenchmark: { label: labels[0], color: colors[0] },
         bondsBenchmark: { label: labels[1], color: colors[1] },
         stocksBenchmark: { label: labels[2], color: colors[2] },
-        totalAssets: { label: labels[3], color: labels[3] },
+        totalAssets: { label: labels[3], color: colors[3] },
       }
 
       const configAccReturn = {
@@ -406,6 +400,7 @@ function Cockpit() {
         assetsWithReturnsArr.reduce(reduceFn('total'), { cat: 'Total' }),
       ]
 
+      // TODO(JJ): We need to decide which approach to use
       const test = assetsWithReturnsFlatClean.map((e, ix) => {
         const index = ix % numMonths
         return {
@@ -413,8 +408,6 @@ function Cockpit() {
           month: months[index] + '_P' + (~~(ix / numMonths) + 1),
         }
       })
-
-      console.log('test', test)
 
       return (
         <GameLayout>
@@ -436,7 +429,7 @@ function Cockpit() {
                   </CardHeader>
                   <CardContent className="max-w-[600px] overflow-x-scroll">
                     <ChartContainer
-                      config={configTest}
+                      config={configAbsolute}
                       className="h-[300px] w-screen"
                     >
                       <LineChart data={test} accessibilityLayer>
@@ -444,13 +437,13 @@ function Cockpit() {
                           cursor={false}
                           content={<ChartTooltipContent />}
                         />
-                        {Object.keys(configTest).map((key) => {
+                        {Object.keys(configAbsolute).map((key) => {
                           return (
                             <Line
                               key={key}
                               type="natural"
                               dataKey={key}
-                              stroke={configTest[key].color}
+                              stroke={configAbsolute[key].color}
                               dot={false}
                               strokeWidth={2}
                             />
@@ -543,7 +536,10 @@ function Cockpit() {
                     </Select>
                   </CardHeader>
                   <CardContent className="max-w-full">
-                    <ChartContainer config={configTest} className="h-[300px]">
+                    <ChartContainer
+                      config={configAbsolute}
+                      className="h-[300px]"
+                    >
                       <LineChart
                         data={allDataPerPeriod[period]}
                         accessibilityLayer
@@ -552,14 +548,13 @@ function Cockpit() {
                           cursor={false}
                           content={<ChartTooltipContent />}
                         />
-                        {Object.keys(configTest).map((key) => {
-                          // console.log('pe', period)
+                        {Object.keys(configAbsolute).map((key) => {
                           return (
                             <Line
                               key={key}
                               type="natural"
                               dataKey={key}
-                              stroke={configTest[key].color}
+                              stroke={configAbsolute[key].color}
                               dot={false}
                               strokeWidth={2}
                             />
