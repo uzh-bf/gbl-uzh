@@ -35,16 +35,13 @@ import {
 } from 'recharts'
 
 import {
-  TransactionsDisplay,
-  TransactionsDisplayCompact,
-} from 'src/components/TransactionsDisplay'
-import {
   PerformActionDocument,
   ResultDocument,
   UpdateReadyStateDocument,
 } from 'src/graphql/generated/ops'
 import { getSegmentEndResults } from 'src/lib/analysis'
 import { ActionTypes } from 'src/services/ActionsReducer'
+import { DecisionsDisplayCompact } from '~/components/DecisionsDisplay'
 import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
 // TODO(JJ): This will be replaced by the design system
@@ -232,10 +229,15 @@ function Cockpit() {
   )
 
   useEffect(() => {
-    if (period === null && data?.result?.currentGame?.periods?.length) {
+    // TODO(JJ): This will be changed anyway
+    if (
+      data?.result?.currentGame?.status === 'PAUSE' &&
+      period === null &&
+      data?.result?.currentGame?.periods?.length
+    ) {
       setPeriod(data.result.currentGame.periods.length - 1)
     }
-  })
+  }, [data])
 
   if (loading) return null
   if (error) return `Error! ${error}`
@@ -653,6 +655,18 @@ function Cockpit() {
       const resultFacts = playerDataResult.playerResult.facts
       const assets = resultFacts.assets
       const resultFactsDecisions = resultFacts.decisions
+      const previousResults = playerDataResult.previousResults
+
+      const segmentEndResults = previousResults
+        .filter((o) => o.type == 'SEGMENT_END')
+        .map((e) => {
+          return {
+            period: e.period,
+            segment: e.segment,
+            decisions: e.facts.decisions,
+          }
+        })
+        .reverse()
 
       const columns_portfolio = [
         { label: 'Category', accessor: 'cat', sortable: false },
@@ -720,7 +734,7 @@ function Cockpit() {
             </div>
 
             <div className="rounded border p-4">
-              {decisions.map(function (decision, i) {
+              {decisions.map((decision) => {
                 return (
                   <div className="p-1" key={decision.name}>
                     <Switch
@@ -752,10 +766,7 @@ function Cockpit() {
               })}
             </div>
             <div className="my-2 flex flex-wrap gap-2">
-              <TransactionsDisplayCompact
-                transactions={data.result.transactions}
-              />
-              <TransactionsDisplay transactions={data.result.transactions} />
+              <DecisionsDisplayCompact segmentDecisions={segmentEndResults} />
             </div>
           </div>
         </GameLayout>
