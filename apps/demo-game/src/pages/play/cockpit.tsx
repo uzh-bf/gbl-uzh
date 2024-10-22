@@ -400,21 +400,12 @@ function Cockpit() {
         assetsWithReturnsArr.reduce(reduceFn('total'), { cat: 'Total' }),
       ]
 
-      // TODO(JJ): We need to decide which approach to use
-      const test = assetsWithReturnsFlatClean.map((e, ix) => {
-        const index = ix % numMonths
-        return {
-          ...e,
-          month: months[index] + '_P' + (~~(ix / numMonths) + 1),
-        }
-      })
-
       return (
         <GameLayout>
           <div className="flex flex-col">
             <div>
               <GameHeader currentGame={currentGame} />
-              <div>
+              <div className="py-8">
                 <Table
                   columns={columns_segment_results}
                   data={data_segment_results}
@@ -422,95 +413,6 @@ function Cockpit() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Absolute performance</CardTitle>
-                    <CardDescription>Assets over time.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="max-w-[600px] overflow-x-scroll">
-                    <ChartContainer
-                      config={configAbsolute}
-                      className="h-[300px] w-screen"
-                    >
-                      <LineChart data={test} accessibilityLayer>
-                        <ChartTooltip
-                          cursor={false}
-                          content={<ChartTooltipContent />}
-                        />
-                        {Object.keys(configAbsolute).map((key) => {
-                          return (
-                            <Line
-                              key={key}
-                              type="natural"
-                              dataKey={key}
-                              stroke={configAbsolute[key].color}
-                              dot={false}
-                              strokeWidth={2}
-                            />
-                          )
-                        })}
-
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                          dataKey="month"
-                          tickLine={false}
-                          axisLine={false}
-                          tickMargin={8}
-                        />
-                        <YAxis
-                          tickLine={false}
-                          axisLine={false}
-                          tickMargin={8}
-                        />
-                        <ChartLegend content={<ChartLegendContent />} />
-                      </LineChart>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Total accumulated returns</CardTitle>
-                    <CardDescription>
-                      Total accumulated returns with respect to initial capital
-                      over time (per period).
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ChartContainer config={configAccReturn}>
-                      <BarChart data={test}>
-                        <ChartTooltip
-                          cursor={false}
-                          content={<ChartTooltipContent />}
-                        />
-                        {Object.keys(configAccReturn).map((key) => {
-                          return (
-                            <Bar
-                              key={key}
-                              // stackId="1"
-                              dataKey={key}
-                              fill={configAccReturn[key].color}
-                              radius={4}
-                            />
-                          )
-                        })}
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                          dataKey="month"
-                          tickLine={false}
-                          axisLine={false}
-                          tickMargin={8}
-                        />
-                        <YAxis
-                          tickLine={false}
-                          axisLine={false}
-                          tickMargin={8}
-                          tickFormatter={(v) => `${v.toFixed(2) * 100}%`}
-                        />
-                        <ChartLegend content={<ChartLegendContent />} />
-                      </BarChart>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
                 <Card>
                   <CardHeader className="flex flex-row justify-between">
                     <div>
