@@ -22,6 +22,8 @@ import {
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -249,26 +251,13 @@ function Cockpit() {
 
   switch (currentGame?.status) {
     case 'PREPARATION':
+    case 'COMPLETED':
+    case 'CONSOLIDATION':
       return (
         <GameLayout>
           <div className="w-full">
             <GameHeader currentGame={currentGame} />
-            <div>Game is being prepared.</div>
           </div>
-        </GameLayout>
-      )
-
-    case 'COMPLETED':
-      return (
-        <GameLayout>
-          <div> Game is completed. </div>
-        </GameLayout>
-      )
-
-    case 'CONSOLIDATION':
-      return (
-        <GameLayout>
-          <div> Game is being consolidated. </div>
         </GameLayout>
       )
 
@@ -368,18 +357,19 @@ function Cockpit() {
                 </CardHeader>
                 <CardContent>
                   <ChartContainer config={configAccReturn}>
-                    <BarChart data={lastAssets}>
+                    <AreaChart data={lastAssets} accessibilityLayer>
                       <ChartTooltip
                         cursor={false}
                         content={<ChartTooltipContent />}
                       />
                       {Object.keys(configAccReturn).map((key) => {
                         return (
-                          <Bar
-                            key={key}
+                          <Area
                             dataKey={key}
                             fill={configAccReturn[key].color}
-                            radius={4}
+                            fillOpacity={0.4}
+                            stroke={configAccReturn[key].color}
+                            type="natural"
                           />
                         )
                       })}
@@ -394,10 +384,10 @@ function Cockpit() {
                         tickLine={false}
                         axisLine={false}
                         tickMargin={8}
-                        tickFormatter={(v) => `${v.toFixed(2) * 100}%`}
+                        tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
                       />
                       <ChartLegend content={<ChartLegendContent />} />
-                    </BarChart>
+                    </AreaChart>
                   </ChartContainer>
                 </CardContent>
               </Card>
@@ -646,7 +636,7 @@ function Cockpit() {
                           tickLine={false}
                           axisLine={false}
                           tickMargin={8}
-                          tickFormatter={(v) => `${v.toFixed(2) * 100}%`}
+                          tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
                         />
                         <ChartLegend content={<ChartLegendContent />} />
                       </BarChart>
