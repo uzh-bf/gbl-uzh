@@ -545,6 +545,21 @@ export async function getPlayerTransactions(
   return playerActions
 }
 
+export async function getSpecificResults(args, ctx: Context) {
+  const playerResults = await ctx.prisma.playerResult.findMany({
+    where: {
+      gameId: args.gameId,
+      type: args.type,
+    },
+    include: {
+      period: true,
+      player: true,
+    },
+  })
+
+  return playerResults
+}
+
 export async function getPlayerResults(args, ctx: Context) {
   const playerResults = await ctx.prisma.playerResult.findMany({
     where: {

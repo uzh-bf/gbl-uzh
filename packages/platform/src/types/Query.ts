@@ -1,4 +1,4 @@
-import { idArg, intArg, nonNull, objectType } from 'nexus'
+import { idArg, intArg, nonNull, objectType, stringArg } from 'nexus'
 import * as GameService from '../services/GameService.js'
 import * as PlayService from '../services/PlayService.js'
 import { Game } from './Game.js'
@@ -66,6 +66,17 @@ export function generateBaseQueries() {
         type: PlayerResult,
         async resolve(_, args, ctx) {
           return PlayService.getPlayerResults(args, ctx)
+        },
+      })
+
+      t.list.nonNull.field('specificResults', {
+        type: PlayerResult,
+        args: {
+          gameId: nonNull(intArg()),
+          type: nonNull(stringArg()),
+        },
+        async resolve(_, args, ctx) {
+          return PlayService.getSpecificResults(args, ctx)
         },
       })
 

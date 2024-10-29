@@ -394,6 +394,7 @@ export interface NexusGenFieldTypes {
     result: NexusGenRootTypes['PlayerState'] | null; // PlayerState
     results: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
     self: NexusGenRootTypes['Player'] | null; // Player
+    specificResults: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
     storyElements: NexusGenRootTypes['StoryElement'][] | null; // [StoryElement!]
   }
   StoryElement: { // field return type
@@ -571,6 +572,7 @@ export interface NexusGenFieldTypeNames {
     result: 'PlayerState'
     results: 'PlayerResult'
     self: 'Player'
+    specificResults: 'PlayerResult'
     storyElements: 'StoryElement'
   }
   StoryElement: { // field return type name
@@ -646,6 +648,10 @@ export interface NexusGenArgTypes {
     }
     learningElement: { // args
       id: string; // ID!
+    }
+    specificResults: { // args
+      gameId: number; // Int!
+      type: string; // String!
     }
   }
 }

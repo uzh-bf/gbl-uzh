@@ -236,6 +236,7 @@ type Query {
   result: PlayerState
   results: [PlayerResult!]
   self: Player
+  specificResults(gameId: Int!, type: String!): [PlayerResult!]
   storyElements: [StoryElement!]
 }
 
