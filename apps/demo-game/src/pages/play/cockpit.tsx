@@ -739,7 +739,7 @@ function Cockpit() {
               />
             </div>
 
-            <div className="rounded border p-4">
+            <div className="max-w-md rounded border p-4">
               {decisions.map((decision) => {
                 return (
                   <div className="p-1" key={decision.name}>
