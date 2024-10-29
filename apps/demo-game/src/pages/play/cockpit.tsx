@@ -409,6 +409,15 @@ function Cockpit() {
       const numPeriods = currentGame.periods.length
       const previousResults = playerDataResult.previousResults
       const previousSegmentResults = getSegmentEndResults(previousResults)
+      const segmentEndResults = previousSegmentResults
+        .map((e) => {
+          return {
+            period: e.period,
+            segment: e.segment,
+            decisions: e.facts.decisions,
+          }
+        })
+        .reverse()
 
       const assetsWithReturns = previousSegmentResults.map(
         (e) => e.facts.assetsWithReturns
@@ -532,119 +541,120 @@ function Cockpit() {
                   data={data_segment_results}
                   caption=""
                 />
+                <Select
+                  defaultValue={(period + 1).toString()}
+                  onValueChange={(value) => {
+                    setPeriod((prev) => parseInt(value))
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allDataPerPeriod.map((_, index) => (
+                      <SelectItem key={index} value={index.toString()}>
+                        Period {index + 1}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="flex flex-col gap-2">
-                <Card>
-                  <CardHeader className="flex flex-row justify-between">
-                    <div>
+              <div className="flex gap-2">
+                <div className="flex flex-1 flex-wrap gap-2">
+                  <Card className="w-full xl:w-[calc(50%-0.5rem)]">
+                    <CardHeader>
                       <CardTitle>Absolute performance</CardTitle>
                       <CardDescription>Assets over time.</CardDescription>
-                    </div>
-                    <Select
-                      defaultValue={(period + 1).toString()}
-                      onValueChange={(value) => {
-                        setPeriod((prev) => parseInt(value))
-                      }}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Period" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {allDataPerPeriod.map((_, index) => (
-                          <SelectItem key={index} value={index.toString()}>
-                            Period {index + 1}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </CardHeader>
-                  <CardContent className="max-w-full">
-                    <ChartContainer
-                      config={configAbsolute}
-                      className="h-[300px]"
-                    >
-                      <LineChart
-                        data={allDataPerPeriod[period]}
-                        accessibilityLayer
+                    </CardHeader>
+                    <CardContent>
+                      <ChartContainer
+                        config={configAbsolute}
+                        // className="h-[300px]"
                       >
-                        <ChartTooltip
-                          cursor={false}
-                          content={<ChartTooltipContent />}
-                        />
-                        {Object.keys(configAbsolute).map((key) => {
-                          return (
-                            <Line
-                              key={key}
-                              type="natural"
-                              dataKey={key}
-                              stroke={configAbsolute[key].color}
-                              dot={false}
-                              strokeWidth={2}
-                            />
-                          )
-                        })}
+                        <LineChart
+                          data={allDataPerPeriod[period]}
+                          accessibilityLayer
+                        >
+                          <ChartTooltip
+                            cursor={false}
+                            content={<ChartTooltipContent />}
+                          />
+                          {Object.keys(configAbsolute).map((key) => {
+                            return (
+                              <Line
+                                key={key}
+                                type="natural"
+                                dataKey={key}
+                                stroke={configAbsolute[key].color}
+                                dot={false}
+                                strokeWidth={2}
+                              />
+                            )
+                          })}
 
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                          dataKey="month"
-                          tickLine={false}
-                          axisLine={false}
-                          tickMargin={8}
-                        />
-                        <YAxis
-                          tickLine={false}
-                          axisLine={false}
-                          tickMargin={8}
-                        />
-                        <ChartLegend content={<ChartLegendContent />} />
-                      </LineChart>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Total accumulated returns</CardTitle>
-                    <CardDescription>
-                      Total accumulated returns with respect to initial capital
-                      over time (per period).
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ChartContainer config={configAccReturn}>
-                      <BarChart data={allDataPerPeriod[period]}>
-                        <ChartTooltip
-                          cursor={false}
-                          content={<ChartTooltipContent />}
-                        />
-                        {Object.keys(configAccReturn).map((key) => {
-                          return (
-                            <Bar
-                              key={key}
-                              // stackId="1"
-                              dataKey={key}
-                              fill={configAccReturn[key].color}
-                              radius={4}
-                            />
-                          )
-                        })}
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                          dataKey="month"
-                          tickLine={false}
-                          axisLine={false}
-                          tickMargin={8}
-                        />
-                        <YAxis
-                          tickLine={false}
-                          axisLine={false}
-                          tickMargin={8}
-                          tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
-                        />
-                        <ChartLegend content={<ChartLegendContent />} />
-                      </BarChart>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
+                          <CartesianGrid vertical={false} />
+                          <XAxis
+                            dataKey="month"
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={8}
+                          />
+                          <YAxis
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={8}
+                          />
+                          <ChartLegend content={<ChartLegendContent />} />
+                        </LineChart>
+                      </ChartContainer>
+                    </CardContent>
+                  </Card>
+                  <Card className="w-full xl:w-[calc(50%-0.5rem)]">
+                    <CardHeader>
+                      <CardTitle>Total accumulated returns</CardTitle>
+                      <CardDescription>
+                        Total accumulated returns with respect to initial
+                        capital over time (per period).
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ChartContainer config={configAccReturn}>
+                        <BarChart data={allDataPerPeriod[period]}>
+                          <ChartTooltip
+                            cursor={false}
+                            content={<ChartTooltipContent />}
+                          />
+                          {Object.keys(configAccReturn).map((key) => {
+                            return (
+                              <Bar
+                                key={key}
+                                // stackId="1"
+                                dataKey={key}
+                                fill={configAccReturn[key].color}
+                                radius={4}
+                              />
+                            )
+                          })}
+                          <CartesianGrid vertical={false} />
+                          <XAxis
+                            dataKey="month"
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={8}
+                          />
+                          <YAxis
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={8}
+                            tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
+                          />
+                          <ChartLegend content={<ChartLegendContent />} />
+                        </BarChart>
+                      </ChartContainer>
+                    </CardContent>
+                  </Card>
+                </div>
+                <DecisionsDisplayCompact segmentDecisions={segmentEndResults} />
               </div>
             </div>
           </div>

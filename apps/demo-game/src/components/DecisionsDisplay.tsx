@@ -47,7 +47,7 @@ function DecisionLayout({
     <div>
       <div className="flex justify-between">
         {title && <div>{title}</div>}
-        <div className="flex w-1/2 items-center justify-between">
+        <div className="flex min-w-36 items-center justify-between">
           {actionTitle && <div>{actionTitle}</div>}
           {activeTitle && <div>{activeTitle}</div>}
           {icon}
@@ -73,16 +73,16 @@ function OnOffIcon({ on = false }: { on?: boolean }) {
 function DecisionsDisplayCompact({ segmentDecisions }: DecisionDisplayProps) {
   return (
     <>
-      <Card className="w-full min-w-[200px] max-w-[320px]">
+      <Card className="w-80">
         <CardHeader>
-          <CardTitle>Final decision history</CardTitle>
+          <CardTitle>Decision history</CardTitle>
           <CardDescription>
             Here is an overview of the final decisions per segment that have
             been made.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-96 w-full rounded-md border p-4">
+          <ScrollArea className="h-96 rounded-md border p-4">
             <DecisionLayout
               title="Time"
               actionTitle="Decision"
@@ -101,10 +101,13 @@ function DecisionsDisplayCompact({ segmentDecisions }: DecisionDisplayProps) {
                           <div>S{e.segment.index + 1}</div>
                         </h4>
 
-                        <div className="flex w-1/2 flex-col justify-between">
+                        <div className="flex flex-col justify-between">
                           {Object.keys(e.decisions).map((type) => {
                             return (
-                              <div key={type} className="flex justify-between">
+                              <div
+                                key={type}
+                                className="flex min-w-36 items-center justify-between"
+                              >
                                 <div>{type}</div>
                                 <OnOffIcon on={e.decisions[type]} />
                               </div>
