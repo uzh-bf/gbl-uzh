@@ -38,7 +38,6 @@ type Game {
   id: ID!
   name: String!
   periods: [Period!]!
-  playerCount: Int
   players: [Player!]!
   status: GameStatus!
 }

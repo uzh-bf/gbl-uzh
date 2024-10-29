@@ -927,7 +927,6 @@ export async function getGames(args, ctx: Context) {
   })
   return result.map((game) => ({
     ...game,
-    playerCount: game._count.players,
     activeSegmentIx: game.activePeriod?.activeSegmentIx,
   }))
 }
