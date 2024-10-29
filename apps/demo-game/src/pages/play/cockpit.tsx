@@ -230,11 +230,7 @@ function Cockpit() {
 
   useEffect(() => {
     // TODO(JJ): This will be changed anyway
-    if (
-      data?.result?.currentGame?.status === 'PAUSE' &&
-      period === null &&
-      data?.result?.currentGame?.periods?.length
-    ) {
+    if (period === null && data?.result?.currentGame?.periods?.length) {
       setPeriod(data.result.currentGame.periods.length - 1)
     }
   }, [data])
