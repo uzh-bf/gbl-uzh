@@ -187,14 +187,10 @@ export function end(
         ...R.pick(['bank', 'bonds', 'stocks', 'totalAssets'], finalAssets),
       }
       draft.resultFacts.returns = {
-        // TODO(JJ): Not sure about these either..., rather facts.assets.bank, etc.
-        bank: computePercentChange(finalAssets.bank, targetAssets.bank),
-        bonds: computePercentChange(finalAssets.bonds, targetAssets.bonds),
-        stocks: computePercentChange(finalAssets.stocks, targetAssets.stocks),
-        totalAssets: computePercentChange(
-          finalAssets.totalAssets,
-          facts.assets.bank // TODO(JJ): I don't think this is correct... -> totalAssets
-        ),
+        bank: computePercentChange(finalAssets.bank, facts.assets.bank),
+        bonds: computePercentChange(finalAssets.bonds, facts.assets.bonds),
+        stocks: computePercentChange(finalAssets.stocks, facts.assets.stocks),
+        totalAssets: computePercentChange(finalAssets.totalAssets, totalAssets),
       }
       draft.resultFacts.benchmarks = {
         bank: finalAssets.bankBenchmark,
