@@ -22,6 +22,30 @@ import {
 
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from 'recharts'
 
+const colors = [
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+]
+
+const months = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
+const numMonths = months.length
+const numMonthsPerSegment = 4
+
 function ReportGame() {
   const router = useRouter()
 
@@ -57,8 +81,68 @@ function ReportGame() {
 
   const game: Game = data.game
 
-  console.log('segmentEndResults', segmentEndResults.specificResults)
+  const numPeriods = game.periods.length
+  // const numPeriodsVis = numPeriods - 1
+  const previousSegmentResults = segmentEndResults.specificResults
+  console.log('previousSegmentResults', previousSegmentResults)
+  console.log('numPeriods', numPeriods)
+  console.log('game', game)
+
+  const labels = [
+    'Bank Benchmark',
+    'Bonds Benchmark',
+    'Stocks Benchmark',
+    'Total Assets',
+  ]
+
+  const configAbsolute = {
+    bankBenchmark: { label: labels[0], color: colors[0] },
+    bondsBenchmark: { label: labels[1], color: colors[1] },
+    stocksBenchmark: { label: labels[2], color: colors[2] },
+    totalAssets: { label: labels[3], color: colors[3] },
+  }
+
+  const configAccReturn = {
+    accBankBenchmarkReturn: { label: labels[0], color: colors[0] },
+    accBondsBenchmarkReturn: { label: labels[1], color: colors[1] },
+    accStocksBenchmarkReturn: { label: labels[2], color: colors[2] },
+    accTotalAssetsReturn: { label: labels[3], color: colors[3] },
+  }
+
   let totalDecisionAvg = [0, 0, 0]
+
+  let dataPerPeriod = []
+  for (let i = 0; i < numPeriods; i++) {
+    const playerResPerPeriod = previousSegmentResults.filter(
+      (result) => result.period.index === i
+    )
+    let pp = {}
+    playerResPerPeriod.map((result) => {
+      if (!pp[result.player.id]) {
+        pp[result.player.id] = {
+          decisions: [],
+          name: result.player.name,
+          totalAssets: [],
+        }
+      }
+      const decisions = Object.keys(result.facts.decisions).reduce((a, v) => {
+        return { ...a, [v]: Number(result.facts.decisions[v]) }
+      }, {})
+      pp[result.player.id].decisions.push(decisions)
+      pp[result.player.id].totalAssets.push(
+        result.facts.assetsWithReturns
+          .filter((a, _, arr) => a.ix === arr.length - 1)
+          .map((a) => {
+            return a.totalAssets
+          })[0]
+      )
+    })
+    dataPerPeriod.push(pp)
+    console.log('playerResPerPeriod', playerResPerPeriod)
+
+    console.log('pp', pp)
+  }
+  console.log('dataPerPeriod', dataPerPeriod)
 
   const segmentResultsPerPlayer = game.players.map((player) => {
     return segmentEndResults.specificResults
@@ -104,13 +188,6 @@ function ReportGame() {
     },
   ]
 
-  const labels = ['Bank', 'Bonds', 'Stocks']
-  const colors = [
-    'hsl(var(--chart-1))',
-    'hsl(var(--chart-2))',
-    'hsl(var(--chart-3))',
-    'hsl(var(--chart-4))',
-  ]
   const config = {
     bank: { label: labels[0], color: colors[0] },
     bonds: { label: labels[1], color: colors[1] },
@@ -119,6 +196,51 @@ function ReportGame() {
 
   return (
     <div className="p-4">
+      {dataPerPeriod.map((dataPerPlayer, ix) => {
+        const bla = Object.values(dataPerPlayer).map((data, ix) => {
+          const name = data.name
+          const decisions = data.decisions.map((d) => {
+            return (
+              <div className="flex flex-col">
+                <div className="flex gap-2">
+                  <div>Bank</div>
+                  <div>Bonds</div>
+                  <div>Stocks</div>
+                </div>
+                <div className="flex border border-black">
+                  <div>{d.bank}</div>
+                  <div>{d.bonds}</div>
+                  <div>{d.stocks}</div>
+                </div>
+              </div>
+            )
+          })
+          return (
+            <div>
+              <div>{name}</div>
+              <div className="flex w-full gap-2">{decisions}</div>
+            </div>
+          )
+        })
+        return (
+          <div>
+            <div>Period {ix + 1}</div>
+            <div>
+              {bla}
+              {/* {data.map((player, ix) => {
+                return (
+                  <div>
+                    <div>{player.name}</div>
+                    <div>Decisions: {player.decisions}</div>
+                    <div>Total Assets: {player.totalAssets}</div>
+                  </div>
+                )
+              })} */}
+            </div>
+          </div>
+        )
+      })}
+
       <Card className="max-w-2xl">
         <CardHeader>
           <CardTitle>Avg Decisions</CardTitle>
