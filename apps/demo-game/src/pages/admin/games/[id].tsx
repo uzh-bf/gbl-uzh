@@ -38,7 +38,6 @@ import {
   LearningElementsDocument,
   Period,
   Player,
-  SpecificResultsDocument,
   StoryElementsDocument,
 } from 'src/graphql/generated/ops'
 
@@ -63,18 +62,6 @@ function ManageGame() {
     variables: { id: Number(router.query.id) },
     pollInterval: 15000,
     skip: !router.query.id,
-  })
-
-  const {
-    data: segmentEndResults,
-    loading: segmentEndResultsLoading,
-    error: segmentEndResultsError,
-  } = useQuery(SpecificResultsDocument, {
-    variables: {
-      gameId: Number(router.query.id),
-      type: 'SEGMENT_END',
-    },
-    fetchPolicy: 'cache-first',
   })
 
   const {
@@ -259,12 +246,25 @@ function ManageGame() {
     })
   )
 
-  console.log('game', game)
-  console.log('segmentEndResults', segmentEndResults)
-
   return (
     <div className="p-4">
       <div>
+        <Button
+          onClick={() => {
+            router.push(`/admin/reports/${game?.id}`)
+          }}
+        >
+          Report
+        </Button>
+        {/* <Link className="w-96" href={`/admin/games/${game?.id}`} key={game?.id}>
+          <Button
+            className={{
+              root: 'flex w-full flex-col items-start justify-around',
+            }}
+          >
+            Report
+          </Button>
+        </Link> */}
         <div className="flex flex-col gap-2 overflow-x-auto md:flex-row">
           {game.periods.map((period, ix) => {
             const periodStatus = computePeriodStatus(game, ix)
@@ -600,8 +600,6 @@ function ManageGame() {
         </div>
       </div>
       <div className="mt-2 flex flex-row gap-2">{getButton()}</div>
-
-      {/* TODO(JJ): Here comes the new graph */}
 
       <div className="mt-4 flex w-full flex-row justify-between">
         <div className="w-1/2">
