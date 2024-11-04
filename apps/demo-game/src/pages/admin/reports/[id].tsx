@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router'
+import { useState } from 'react'
 
 import { useQuery } from '@apollo/client'
 import {
@@ -18,6 +19,11 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Table,
   TableBody,
   TableCell,
@@ -65,6 +71,8 @@ const numMonthsPerSegment = 4
 
 function ReportGame() {
   const router = useRouter()
+
+  const [currPeriod, setCurrPeriod] = useState<number>(0)
 
   const { data, error, loading } = useQuery(GameDocument, {
     variables: { id: Number(router.query.id) },
@@ -198,17 +206,10 @@ function ReportGame() {
     return acc
   }, Array(segmentResultPerPlayerAvg[0].length).fill(0))
 
-  console.log('segmentResultsPerPlayer', segmentResultsPerPlayer)
-  console.log('segmentResultPerPlayerAvg', segmentResultPerPlayerAvg)
-  console.log('totalDecisionAvg', totalDecisionAvg)
+  // console.log('segmentResultsPerPlayer', segmentResultsPerPlayer)
+  // console.log('segmentResultPerPlayerAvg', segmentResultPerPlayerAvg)
+  // console.log('totalDecisionAvg', totalDecisionAvg)
 
-  // const dataAvg = [
-  //   {
-  //     bank: totalDecisionAvg[0],
-  //     bonds: totalDecisionAvg[1],
-  //     stocks: totalDecisionAvg[2],
-  //   },
-  // ]
   const dataAvg = [
     {
       bank: totalDecisionAvg[0],
@@ -229,14 +230,36 @@ function ReportGame() {
 
   return (
     <div className="p-4">
-      <Card className="max-w-2xl">
+      <Select
+        onValueChange={(value) => setCurrPeriod(parseInt(value) - 1)}
+        defaultValue="1"
+      >
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Period" />
+        </SelectTrigger>
+        <SelectContent>
+          {dataPerPeriod.map((_, index) => (
+            <SelectItem key={index} value={(index + 1).toString()}>
+              Period {index + 1}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Card className="my-4 max-w-2xl">
         <CardHeader>
           <CardTitle>Absolute performance</CardTitle>
           <CardDescription>Assets over time.</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={playerConfig}>
-            <LineChart data={dataTotalAssets} accessibilityLayer>
+            <LineChart
+              data={dataTotalAssets.slice(
+                currPeriod * numMonths,
+                (currPeriod + 1) * numMonths
+              )}
+              accessibilityLayer
+            >
               <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
               {Object.keys(playerConfig).map((key) => {
                 return (
@@ -270,7 +293,6 @@ function ReportGame() {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            {/* <table className=" min-w-full border border-gray-300 bg-white"> */}
             <Table>
               <TableHeader>
                 <TableRow>
