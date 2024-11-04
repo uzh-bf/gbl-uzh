@@ -84,7 +84,10 @@ function ReportGame() {
   const numPeriods = game.periods.length
   // const numPeriodsVis = numPeriods - 1
   const previousSegmentResults = segmentEndResults.specificResults
-  console.log('previousSegmentResults', previousSegmentResults)
+  console.log(
+    'previousSegmentResults',
+    JSON.stringify(previousSegmentResults, null, 4)
+  )
   console.log('numPeriods', numPeriods)
   console.log('game', game)
 
@@ -197,35 +200,35 @@ function ReportGame() {
   return (
     <div className="p-4">
       {dataPerPeriod.map((dataPerPlayer, ix) => {
-        const bla = Object.values(dataPerPlayer).map((data, ix) => {
+        const bla = Object.values(dataPerPlayer).map((data, _) => {
           const name = data.name
           const decisions = data.decisions.map((d) => {
             return (
-              <div className="flex flex-col">
-                <div className="flex gap-2">
-                  <div>Bank</div>
-                  <div>Bonds</div>
-                  <div>Stocks</div>
-                </div>
-                <div className="flex border border-black">
-                  <div>{d.bank}</div>
-                  <div>{d.bonds}</div>
-                  <div>{d.stocks}</div>
-                </div>
+              <div className="flex border border-black">
+                <div>{d.bank}</div>
+                <div>{d.bonds}</div>
+                <div>{d.stocks}</div>
               </div>
             )
           })
           return (
-            <div>
+            <div className="flex flex-col gap-2">
               <div>{name}</div>
-              <div className="flex w-full gap-2">{decisions}</div>
+              <div className="flex gap-2">
+                <div>Bank</div>
+                <div>Bonds</div>
+                <div>Stocks</div>
+              </div>
+              <div>
+                <div className="flex flex-col gap-2">{decisions}</div>
+              </div>
             </div>
           )
         })
         return (
-          <div>
+          <div className="mb-4">
             <div>Period {ix + 1}</div>
-            <div>
+            <div className="flex gap-2">
               {bla}
               {/* {data.map((player, ix) => {
                 return (
@@ -240,6 +243,98 @@ function ReportGame() {
           </div>
         )
       })}
+
+      <div className="overflow-x-auto">
+        <table className=" min-w-full border border-gray-300 bg-white">
+          <thead>
+            <tr>
+              <th className="border-b px-4 py-2">Time</th>
+              {game.players.map((player) => (
+                <th key={player.id} className="border-b px-4 py-2">
+                  {player.name}
+                </th>
+              ))}
+            </tr>
+            <tr>
+              <th className="border-b px-4 py-2"></th>
+              {game.players.map((player) => (
+                <th key={player.id} className="border px-4 py-2 text-sm">
+                  <div className="flex justify-center space-x-2">
+                    <div>Bank</div>
+                    <div>Bonds</div>
+                    <div>Stocks</div>
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {dataPerPeriod.map((dataPerPlayer, periodIndex) => {
+              return (
+                <tr key={periodIndex}>
+                  <td className="border-b border-r px-4 py-2">
+                    {Object.values(dataPerPlayer)[0]?.decisions.map(
+                      (d, segmentIx) => {
+                        return (
+                          <div key={segmentIx} className="min-w-12 ">
+                            P{periodIndex + 1} S{segmentIx + 1}
+                          </div>
+                        )
+                      }
+                    )}
+                  </td>
+                  {Object.values(dataPerPlayer).map((d) => {
+                    const decisions = d.decisions
+
+                    return (
+                      <td className="border-b border-r px-4 py-2">
+                        {decisions.map((decision, segmentIx) => {
+                          return (
+                            <div
+                              key={segmentIx}
+                              className="flex justify-around"
+                            >
+                              <div>{decision.bank}</div>
+                              <div>{decision.bonds}</div>
+                              <div>{decision.stocks}</div>
+                            </div>
+                          )
+                        })}
+                      </td>
+                    )
+                    // return (
+                    //   <td
+                    //     key={`${periodIndex}-${dataPerPlayer.name}`}
+                    //     className="border-b border-r px-4 py-2"
+                    //   >
+                    //     {/* {playerData && ( */}
+                    //     <div className="flex justify-center space-x-2">
+                    //       <span
+                    //         className={`h-4 w-4 rounded-full ${
+                    //           decision.bank ? 'bg-green-500' : 'bg-red-500'
+                    //         }`}
+                    //       ></span>
+                    //       <span
+                    //         className={`h-4 w-4 rounded-full ${
+                    //           decision.bonds ? 'bg-green-500' : 'bg-red-500'
+                    //         }`}
+                    //       ></span>
+                    //       <span
+                    //         className={`h-4 w-4 rounded-full ${
+                    //           decision.stocks ? 'bg-green-500' : 'bg-red-500'
+                    //         }`}
+                    //       ></span>
+                    //     </div>
+                    //     {/* )} */}
+                    //   </td>
+                    // )
+                  })}
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
 
       <Card className="max-w-2xl">
         <CardHeader>

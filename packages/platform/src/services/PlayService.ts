@@ -551,9 +551,12 @@ export async function getSpecificResults(args, ctx: Context) {
       gameId: args.gameId,
       type: args.type,
     },
-    orderBy: {
-      createdAt: 'asc',
-    },
+    orderBy: [
+      {
+        createdAt: 'asc',
+      },
+      { player: { name: 'asc' } },
+    ],
     include: {
       period: true,
       player: true,
