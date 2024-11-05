@@ -137,7 +137,7 @@ function ReportGame() {
       })
       const accTotalAssetsReturnTmp = result.facts.assetsWithReturns.map(
         (a) => {
-          return a.accTotalAssetsReturn ?? 0
+          return a.accTotalAssetsReturn
         }
       )
 
