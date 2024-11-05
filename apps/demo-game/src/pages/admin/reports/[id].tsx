@@ -147,17 +147,26 @@ function ReportGame() {
       const totalAssetsTmp = result.facts.assetsWithReturns.map((a) => {
         return a.totalAssets
       })
+      const accTotalAssetsReturnTmp = result.facts.assetsWithReturns.map(
+        (a) => {
+          return a.accTotalAssetsReturn ?? 0
+        }
+      )
 
       if (!dataPerPlayer[result.player.id]) {
         dataPerPlayer[result.player.id] = {
           decisions: [decisions],
           name: result.player.name,
           totalAssets: totalAssetsTmp,
+          accTotalAssetsReturn: accTotalAssetsReturnTmp,
         }
       } else {
         dataPerPlayer[result.player.id].decisions.push(decisions)
         dataPerPlayer[result.player.id].totalAssets.push(
           ...totalAssetsTmp.filter((_, ix) => ix > 0)
+        )
+        dataPerPlayer[result.player.id].accTotalAssetsReturn.push(
+          ...accTotalAssetsReturnTmp.filter((_, ix) => ix > 0)
         )
       }
     })
@@ -184,6 +193,26 @@ function ReportGame() {
     }
   })
   console.log('dataTotalAssets', dataTotalAssets)
+
+  const dataAccTotalAssetsReturn = []
+  dataPerPeriod.forEach((periodData, periodIndex) => {
+    if (Object.keys(periodData).length === 0) return
+
+    const players = Object.values(periodData)
+
+    for (let i = 0; i < numMonths; i++) {
+      const entry = {
+        period: periodIndex,
+        month: months[i % numMonths],
+      }
+
+      players.forEach((player) => {
+        entry[player.name] = player.accTotalAssetsReturn[i]
+      })
+
+      dataAccTotalAssetsReturn.push(entry)
+    }
+  })
 
   const segmentResultsPerPlayer = game.players.map((player) => {
     return segmentEndResults.specificResults
@@ -287,9 +316,48 @@ function ReportGame() {
           </ChartContainer>
         </CardContent>
       </Card>
+      <Card className="my-4 max-w-2xl">
+        <CardHeader>
+          <CardTitle>Accumulated Total Return</CardTitle>
+          {/* <CardDescription>Assets over time.</CardDescription> */}
+        </CardHeader>
+        <CardContent>
+          <ChartContainer config={playerConfig}>
+            <BarChart
+              data={dataAccTotalAssetsReturn.slice(
+                currPeriod * numMonths,
+                (currPeriod + 1) * numMonths
+              )}
+              accessibilityLayer
+            >
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              {Object.keys(playerConfig).map((key) => {
+                return (
+                  <Bar
+                    key={key}
+                    dataKey={key}
+                    fill={playerConfig[key].color}
+                    radius={4}
+                  />
+                )
+              })}
+
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
+              <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+              <ChartLegend content={<ChartLegendContent />} />
+            </BarChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
       <Card className="my-6 max-w-2xl">
         <CardHeader>
-          <CardTitle>Player Decisions and Assets Visualization</CardTitle>
+          <CardTitle>Player Decisions</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
