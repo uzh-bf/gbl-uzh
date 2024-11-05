@@ -226,7 +226,10 @@ function ReportGame() {
                   cursor={false}
                   content={<ChartTooltipContent />}
                   formatter={(value, name, item) => [
-                    <div className="flex w-full items-center justify-between gap-x-2">
+                    <div
+                      key={name}
+                      className="flex w-full items-center justify-between gap-x-2"
+                    >
                       <div className="flex items-center gap-x-1">
                         <div
                           className="h-[8px] w-[8px] rounded-sm"
@@ -316,7 +319,10 @@ function ReportGame() {
                   cursor={false}
                   content={<ChartTooltipContent />}
                   formatter={(value, name, item) => [
-                    <div className="flex w-full items-center justify-between gap-x-2">
+                    <div
+                      key={name}
+                      className="flex w-full items-center justify-between gap-x-2"
+                    >
                       <div className="flex items-center gap-x-1">
                         <div
                           className="h-[8px] w-[8px] rounded-sm"
@@ -421,15 +427,18 @@ function ReportGame() {
                             }
                           )}
                         </TableCell>
-                        {Object.values(dataPerPlayer).map((d) => {
+                        {Object.values(dataPerPlayer).map((d, dIx) => {
                           const decisions = d.decisions
 
                           return (
-                            <TableCell className="align-top font-medium">
+                            <TableCell
+                              key={'player-decisions-' + dIx}
+                              className="align-top font-medium"
+                            >
                               {decisions.map((decision, segmentIx) => {
                                 return (
                                   <div
-                                    key={segmentIx}
+                                    key={'decision-' + segmentIx}
                                     className="flex justify-around"
                                   >
                                     <div>{decision.bank}</div>
