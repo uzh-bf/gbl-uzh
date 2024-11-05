@@ -33,8 +33,8 @@ import {
 } from '@uzh-bf/design-system/dist/future'
 
 import {
-  // Area,
-  // AreaChart,
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -52,22 +52,8 @@ const colors = [
   'hsl(var(--chart-4))',
 ]
 
-const months = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-]
-const numMonths = months.length
-const numMonthsPerSegment = 4
+import { composeChartData } from '~/lib/analysis'
+import { NUM_MONTHS } from '~/lib/constants'
 
 function ReportGame() {
   const router = useRouter()
@@ -173,46 +159,12 @@ function ReportGame() {
     dataPerPeriod.push(dataPerPlayer)
   }
 
-  const dataTotalAssets = []
-  dataPerPeriod.forEach((periodData, periodIndex) => {
-    if (Object.keys(periodData).length === 0) return
-
-    const players = Object.values(periodData)
-
-    for (let i = 0; i < numMonths; i++) {
-      const entry = {
-        period: periodIndex,
-        month: months[i % numMonths],
-      }
-
-      players.forEach((player) => {
-        entry[player.name] = player.totalAssets[i]
-      })
-
-      dataTotalAssets.push(entry)
-    }
-  })
+  const dataTotalAssets = composeChartData(dataPerPeriod, 'totalAssets')
+  const dataAccTotalAssetsReturn = composeChartData(
+    dataPerPeriod,
+    'accTotalAssetsReturn'
+  )
   console.log('dataTotalAssets', dataTotalAssets)
-
-  const dataAccTotalAssetsReturn = []
-  dataPerPeriod.forEach((periodData, periodIndex) => {
-    if (Object.keys(periodData).length === 0) return
-
-    const players = Object.values(periodData)
-
-    for (let i = 0; i < numMonths; i++) {
-      const entry = {
-        period: periodIndex,
-        month: months[i % numMonths],
-      }
-
-      players.forEach((player) => {
-        entry[player.name] = player.accTotalAssetsReturn[i]
-      })
-
-      dataAccTotalAssetsReturn.push(entry)
-    }
-  })
 
   const segmentResultsPerPlayer = game.players.map((player) => {
     return segmentEndResults.specificResults
@@ -284,8 +236,8 @@ function ReportGame() {
           <ChartContainer config={playerConfig}>
             <LineChart
               data={dataTotalAssets.slice(
-                currPeriod * numMonths,
-                (currPeriod + 1) * numMonths
+                currPeriod * NUM_MONTHS,
+                (currPeriod + 1) * NUM_MONTHS
               )}
               accessibilityLayer
             >
@@ -323,21 +275,23 @@ function ReportGame() {
         </CardHeader>
         <CardContent>
           <ChartContainer config={playerConfig}>
-            <BarChart
+            <AreaChart
               data={dataAccTotalAssetsReturn.slice(
-                currPeriod * numMonths,
-                (currPeriod + 1) * numMonths
+                currPeriod * NUM_MONTHS,
+                (currPeriod + 1) * NUM_MONTHS
               )}
               accessibilityLayer
             >
               <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
               {Object.keys(playerConfig).map((key) => {
                 return (
-                  <Bar
+                  <Area
                     key={key}
                     dataKey={key}
                     fill={playerConfig[key].color}
-                    radius={4}
+                    fillOpacity={0.4}
+                    stroke={playerConfig[key].color}
+                    type="natural"
                   />
                 )
               })}
@@ -351,7 +305,7 @@ function ReportGame() {
               />
               <YAxis tickLine={false} axisLine={false} tickMargin={8} />
               <ChartLegend content={<ChartLegendContent />} />
-            </BarChart>
+            </AreaChart>
           </ChartContainer>
         </CardContent>
       </Card>

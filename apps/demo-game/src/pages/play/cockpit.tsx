@@ -363,6 +363,7 @@ function Cockpit() {
                       {Object.keys(configAccReturn).map((key) => {
                         return (
                           <Area
+                            key={key}
                             dataKey={key}
                             fill={configAccReturn[key].color}
                             fillOpacity={0.4}
