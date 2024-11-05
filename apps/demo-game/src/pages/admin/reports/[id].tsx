@@ -41,6 +41,7 @@ import {
   LabelList,
   Line,
   LineChart,
+  ReferenceLine,
   XAxis,
   YAxis,
 } from 'recharts'
@@ -95,6 +96,7 @@ function ReportGame() {
   const numPeriods = game.periods.length
   // const numPeriodsVis = numPeriods - 1
   const previousSegmentResults = segmentEndResults.specificResults
+  const initialCapital = previousSegmentResults[0].facts.initialCapital
   // console.log(
   //   'previousSegmentResults',
   //   JSON.stringify(previousSegmentResults, null, 4)
@@ -243,6 +245,16 @@ function ReportGame() {
                   )
                 })}
 
+                <ReferenceLine
+                  y={initialCapital}
+                  stroke="#666666"
+                  strokeWidth={0.2}
+                  label={{
+                    value: initialCapital.toString(),
+                    position: 'left',
+                  }}
+                />
+
                 <CartesianGrid vertical={false} />
                 <XAxis
                   dataKey="month"
@@ -302,6 +314,8 @@ function ReportGame() {
                   )
                 })}
 
+                <ReferenceLine y={0} stroke="#000000" isFront />
+
                 <CartesianGrid vertical={false} />
                 <XAxis
                   dataKey="month"
@@ -309,7 +323,28 @@ function ReportGame() {
                   axisLine={false}
                   tickMargin={8}
                 />
-                <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tick={(props) => {
+                    const { x, y, payload } = props
+                    return (
+                      <g transform={`translate(${x},${y})`}>
+                        <text
+                          x={0}
+                          y={0}
+                          dy={4}
+                          textAnchor="end"
+                          fill={payload.value === 0 ? '#ff0000' : '#666'}
+                          fontWeight={payload.value === 0 ? 'bold' : 'normal'}
+                        >
+                          {(payload.value * 100).toFixed(2)}%
+                        </text>
+                      </g>
+                    )
+                  }}
+                />
                 <ChartLegend content={<ChartLegendContent />} />
               </AreaChart>
             </ChartContainer>
