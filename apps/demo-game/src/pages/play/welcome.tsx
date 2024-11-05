@@ -85,8 +85,8 @@ function Welcome() {
               },
             })
             router.replace('/play/cockpit')
-          } catch (error) {
-            console.error('Error updating player data:', error)
+          } catch (e) {
+            console.error('Error updating player data:', e)
             setIsSubmitting(false)
           }
         }}
