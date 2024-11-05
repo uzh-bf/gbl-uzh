@@ -8,6 +8,7 @@ import {
 } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
+import { useState } from 'react'
 import {
   SelfDocument,
   UpdatePlayerDataDocument,
@@ -41,19 +42,18 @@ const Schema = Yup.object().shape({
 // - add banks, like colors
 function Welcome() {
   const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { data, loading, error } = useQuery(SelfDocument)
 
-  const {
-    data,
-    loading: loadingSelf,
-    error: errorSelf,
-  } = useQuery(SelfDocument)
+  const [updatePlayerData] = useMutation(UpdatePlayerDataDocument, {
+    optimisticResponse: true,
+    onError: (error) => {
+      console.error('Error updating player data:', error)
+      setIsSubmitting(false)
+    },
+  })
 
-  const [updatePlayerData, { loading, error }] = useMutation(
-    UpdatePlayerDataDocument
-  )
-
-  if (loading || loadingSelf) return null
-  if (errorSelf) return `Error! ${errorSelf}`
+  if (loading) return null
   if (error) return `Error! ${error}`
 
   const gameName = 'Minigame'
@@ -72,17 +72,23 @@ function Welcome() {
         }}
         validationSchema={Schema}
         onSubmit={async (values) => {
-          await updatePlayerData({
-            variables: {
-              name: values.name,
-              facts: JSON.stringify({
-                color: values.color,
-                avatar: values.imgPathAvatar,
-                location: values.location,
-              }),
-            },
-          })
-          router.replace('/play/cockpit')
+          setIsSubmitting(true)
+          try {
+            await updatePlayerData({
+              variables: {
+                name: values.name,
+                facts: JSON.stringify({
+                  color: values.color,
+                  avatar: values.imgPathAvatar,
+                  location: values.location,
+                }),
+              },
+            })
+            router.replace('/play/cockpit')
+          } catch (error) {
+            console.error('Error updating player data:', error)
+            setIsSubmitting(false)
+          }
         }}
       >
         {({ values, errors, touched }) => (
@@ -180,8 +186,12 @@ function Welcome() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button className={{ root: 'mt-4' }} type="submit">
-                      Start Game
+                    <Button
+                      className={{ root: 'mt-4' }}
+                      type="submit"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Loading...' : 'Start Game'}
                     </Button>
                   </CardFooter>
                 </Card>
