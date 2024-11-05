@@ -221,13 +221,7 @@ function ReportGame() {
           </CardHeader>
           <CardContent className="flex-grow">
             <ChartContainer config={playerConfig} className="h-[300px] w-full">
-              <LineChart
-                data={dataTotalAssets.slice(
-                  currPeriod * NUM_MONTHS,
-                  (currPeriod + 1) * NUM_MONTHS
-                )}
-                accessibilityLayer
-              >
+              <LineChart data={dataTotalAssets} accessibilityLayer>
                 <ChartTooltip
                   cursor={false}
                   content={<ChartTooltipContent />}

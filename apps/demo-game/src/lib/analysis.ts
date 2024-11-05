@@ -15,7 +15,7 @@ export const composeChartData = (dataPerPeriod: any, key: string) => {
     for (let i = 0; i < NUM_MONTHS; i++) {
       const entry = {
         period: periodIndex,
-        month: MONTHS[i % NUM_MONTHS],
+        month: MONTHS[i % NUM_MONTHS] + ' P' + (periodIndex + 1).toString(),
       }
 
       players.forEach((player) => {
