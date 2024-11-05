@@ -231,6 +231,20 @@ function ReportGame() {
                 <ChartTooltip
                   cursor={false}
                   content={<ChartTooltipContent />}
+                  formatter={(value, name, item) => [
+                    <div className="flex w-full items-center justify-between gap-x-2">
+                      <div className="flex items-center gap-x-1">
+                        <div
+                          className="h-[8px] w-[8px] rounded-sm"
+                          style={{ background: item.color }}
+                        />
+                        <span className="text-xs text-gray-600">{name}</span>
+                      </div>
+                      <span className="font-bold text-black">
+                        {value.toFixed(2)}
+                      </span>
+                    </div>,
+                  ]}
                 />
                 {Object.keys(playerConfig).map((key) => {
                   return (
@@ -300,6 +314,20 @@ function ReportGame() {
                 <ChartTooltip
                   cursor={false}
                   content={<ChartTooltipContent />}
+                  formatter={(value, name, item) => [
+                    <div className="flex w-full items-center justify-between gap-x-2">
+                      <div className="flex items-center gap-x-1">
+                        <div
+                          className="h-[8px] w-[8px] rounded-sm"
+                          style={{ background: item.color }}
+                        />
+                        <span className="text-xs text-gray-600">{name}</span>
+                      </div>
+                      <span className="font-bold text-black">
+                        {(value * 100).toFixed(2)}%
+                      </span>
+                    </div>,
+                  ]}
                 />
                 {Object.keys(playerConfig).map((key) => {
                   return (
@@ -314,7 +342,7 @@ function ReportGame() {
                   )
                 })}
 
-                <ReferenceLine y={0} stroke="#000000" isFront />
+                <ReferenceLine y={0} stroke="#000000" isFront={true} />
 
                 <CartesianGrid vertical={false} />
                 <XAxis
@@ -339,7 +367,7 @@ function ReportGame() {
                           fill={payload.value === 0 ? '#ff0000' : '#666'}
                           fontWeight={payload.value === 0 ? 'bold' : 'normal'}
                         >
-                          {(payload.value * 100).toFixed(2)}%
+                          {payload.value.toFixed(2) * 100}%
                         </text>
                       </g>
                     )
@@ -429,10 +457,26 @@ function ReportGame() {
           <CardContent className="flex-grow">
             <ChartContainer config={config} className="h-[300px] w-full">
               <BarChart data={dataAvg}>
-                <ChartTooltip
+                {/* <ChartTooltip
                   cursor={false}
                   content={<ChartTooltipContent />}
-                />
+                  formatter={(value, name, item) => {
+                    return [
+                      <div className="flex w-full items-center justify-between gap-x-1">
+                        <div className="flex items-center gap-x-1">
+                          <div
+                            className="h-[8px] w-[8px] rounded-sm"
+                            style={{ background: item.color }}
+                          />
+                          <span className="text-xs text-gray-600">{name}</span>
+                        </div>
+                        <span className="font-bold text-black">
+                          {(value * 100).toFixed(2)}%
+                        </span>
+                      </div>,
+                    ]
+                  }}
+                /> */}
                 {Object.keys(config).map((key, ix, arr) => {
                   return (
                     <Bar
