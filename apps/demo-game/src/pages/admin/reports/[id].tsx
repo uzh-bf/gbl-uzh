@@ -457,26 +457,6 @@ function ReportGame() {
           <CardContent className="flex-grow">
             <ChartContainer config={config} className="h-[300px] w-full">
               <BarChart data={dataAvg}>
-                {/* <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent />}
-                  formatter={(value, name, item) => {
-                    return [
-                      <div className="flex w-full items-center justify-between gap-x-1">
-                        <div className="flex items-center gap-x-1">
-                          <div
-                            className="h-[8px] w-[8px] rounded-sm"
-                            style={{ background: item.color }}
-                          />
-                          <span className="text-xs text-gray-600">{name}</span>
-                        </div>
-                        <span className="font-bold text-black">
-                          {(value * 100).toFixed(2)}%
-                        </span>
-                      </div>,
-                    ]
-                  }}
-                /> */}
                 {Object.keys(config).map((key, ix, arr) => {
                   return (
                     <Bar
@@ -498,29 +478,6 @@ function ReportGame() {
                     </Bar>
                   )
                 })}
-                {/* {Object.keys(config).map((key, ix, arr) => {
-                segmentResultPerPlayerAvg.map((result) => {
-                  return (
-                    <Bar
-                      key={key}
-                      stackId="1"
-                      dataKey={key}
-                      fill={config[key].color}
-                      radius={4}
-                    >
-                      {ix === arr.length - 1 && (
-                        <LabelList
-                          position="top"
-                          offset={12}
-                          className="fill-foreground"
-                          fontSize={12}
-                          formatter={(v) => `${v.toFixed(2) * 100}%`}
-                        />
-                      )}
-                    </Bar>
-                  )
-                })
-              })} */}
                 <CartesianGrid vertical={false} />
                 <XAxis
                   dataKey="period"
