@@ -210,207 +210,216 @@ function ReportGame() {
   }
 
   return (
-    <div className="p-4">
-      <Select
-        onValueChange={(value) => setCurrPeriod(parseInt(value) - 1)}
-        defaultValue="1"
-      >
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Period" />
-        </SelectTrigger>
-        <SelectContent>
-          {dataPerPeriod.map((_, index) => (
-            <SelectItem key={index} value={(index + 1).toString()}>
-              Period {index + 1}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Card className="my-4 max-w-2xl">
-        <CardHeader>
-          <CardTitle>Absolute performance</CardTitle>
-          <CardDescription>Assets over time.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={playerConfig}>
-            <LineChart
-              data={dataTotalAssets.slice(
-                currPeriod * NUM_MONTHS,
-                (currPeriod + 1) * NUM_MONTHS
-              )}
-              accessibilityLayer
-            >
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              {Object.keys(playerConfig).map((key) => {
-                return (
-                  <Line
-                    key={key}
-                    type="natural"
-                    dataKey={key}
-                    stroke={playerConfig[key].color}
-                    dot={false}
-                    strokeWidth={2}
-                  />
-                )
-              })}
-
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="month"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-              />
-              <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-              <ChartLegend content={<ChartLegendContent />} />
-            </LineChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-      <Card className="my-4 max-w-2xl">
-        <CardHeader>
-          <CardTitle>Accumulated Total Return</CardTitle>
-          {/* <CardDescription>Assets over time.</CardDescription> */}
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={playerConfig}>
-            <AreaChart
-              data={dataAccTotalAssetsReturn.slice(
-                currPeriod * NUM_MONTHS,
-                (currPeriod + 1) * NUM_MONTHS
-              )}
-              accessibilityLayer
-            >
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              {Object.keys(playerConfig).map((key) => {
-                return (
-                  <Area
-                    key={key}
-                    dataKey={key}
-                    fill={playerConfig[key].color}
-                    fillOpacity={0.4}
-                    stroke={playerConfig[key].color}
-                    type="natural"
-                  />
-                )
-              })}
-
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="month"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-              />
-              <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-              <ChartLegend content={<ChartLegendContent />} />
-            </AreaChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-      <Card className="my-6 max-w-2xl">
-        <CardHeader>
-          <CardTitle>Player Decisions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Time</TableHead>
-                  {game.players.map((player) => (
-                    <TableHead key={player.id}>{player.name}</TableHead>
-                  ))}
-                </TableRow>
-                <TableRow>
-                  <TableHead></TableHead>
-                  {game.players.map((player) => (
-                    <TableHead key={player.id}>
-                      <div className="flex justify-center gap-x-2">
-                        <div>Bank</div>
-                        <div>Bonds</div>
-                        <div>Stocks</div>
-                      </div>
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {dataPerPeriod.map((dataPerPlayer, periodIndex) => {
+    <div className="container mx-auto p-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
+        <Card className="flex h-full w-full flex-col">
+          <CardHeader>
+            <CardTitle>Absolute performance</CardTitle>
+            <CardDescription>Assets over time.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-grow">
+            <ChartContainer config={playerConfig} className="h-[300px] w-full">
+              <LineChart
+                data={dataTotalAssets.slice(
+                  currPeriod * NUM_MONTHS,
+                  (currPeriod + 1) * NUM_MONTHS
+                )}
+                accessibilityLayer
+              >
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent />}
+                />
+                {Object.keys(playerConfig).map((key) => {
                   return (
-                    <TableRow key={periodIndex}>
-                      <TableCell className="align-top font-medium">
-                        {Object.values(dataPerPlayer)[0]?.decisions.map(
-                          (d, segmentIx) => {
-                            return (
-                              <div key={segmentIx} className="min-w-12 ">
-                                P{periodIndex + 1} S{segmentIx + 1}
-                              </div>
-                            )
-                          }
-                        )}
-                      </TableCell>
-                      {Object.values(dataPerPlayer).map((d) => {
-                        const decisions = d.decisions
-
-                        return (
-                          <TableCell className="align-top font-medium">
-                            {decisions.map((decision, segmentIx) => {
-                              return (
-                                <div
-                                  key={segmentIx}
-                                  className="flex justify-around"
-                                >
-                                  <div>{decision.bank}</div>
-                                  <div>{decision.bonds}</div>
-                                  <div>{decision.stocks}</div>
-                                </div>
-                              )
-                            })}
-                          </TableCell>
-                        )
-                      })}
-                    </TableRow>
+                    <Line
+                      key={key}
+                      type="natural"
+                      dataKey={key}
+                      stroke={playerConfig[key].color}
+                      dot={false}
+                      strokeWidth={2}
+                    />
                   )
                 })}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
 
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle>Avg Decisions</CardTitle>
-          <CardDescription>Average decisions over players.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={config}>
-            <BarChart data={dataAvg}>
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              {Object.keys(config).map((key, ix, arr) => {
-                return (
-                  <Bar
-                    key={key}
-                    stackId="1"
-                    dataKey={key}
-                    fill={config[key].color}
-                    radius={4}
-                  >
-                    {ix === arr.length - 1 && (
-                      <LabelList
-                        position="top"
-                        offset={12}
-                        className="fill-foreground"
-                        fontSize={12}
-                        formatter={(v) => `${v.toFixed(2) * 100}%`}
-                      />
-                    )}
-                  </Bar>
-                )
-              })}
-              {/* {Object.keys(config).map((key, ix, arr) => {
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="month"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                />
+                <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                <ChartLegend content={<ChartLegendContent />} />
+              </LineChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+        <Card className="flex h-full w-full flex-col">
+          <CardHeader>
+            <CardTitle>Accumulated Total Return</CardTitle>
+            {/* <CardDescription>Assets over time.</CardDescription> */}
+            <Select
+              onValueChange={(value) => setCurrPeriod(parseInt(value) - 1)}
+              defaultValue="1"
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Period" />
+              </SelectTrigger>
+              <SelectContent>
+                {dataPerPeriod.map((_, index) => (
+                  <SelectItem key={index} value={(index + 1).toString()}>
+                    Period {index + 1}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardHeader>
+          <CardContent className="flex-grow">
+            <ChartContainer config={playerConfig} className="h-[300px] w-full">
+              <AreaChart
+                data={dataAccTotalAssetsReturn.slice(
+                  currPeriod * NUM_MONTHS,
+                  (currPeriod + 1) * NUM_MONTHS
+                )}
+                accessibilityLayer
+              >
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent />}
+                />
+                {Object.keys(playerConfig).map((key) => {
+                  return (
+                    <Area
+                      key={key}
+                      dataKey={key}
+                      fill={playerConfig[key].color}
+                      fillOpacity={0.4}
+                      stroke={playerConfig[key].color}
+                      type="natural"
+                    />
+                  )
+                })}
+
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="month"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                />
+                <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                <ChartLegend content={<ChartLegendContent />} />
+              </AreaChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+        <Card className="flex h-full w-full flex-col">
+          <CardHeader>
+            <CardTitle>Player Decisions</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-grow">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Time</TableHead>
+                    {game.players.map((player) => (
+                      <TableHead key={player.id}>{player.name}</TableHead>
+                    ))}
+                  </TableRow>
+                  <TableRow>
+                    <TableHead></TableHead>
+                    {game.players.map((player) => (
+                      <TableHead key={player.id}>
+                        <div className="flex justify-center gap-x-2">
+                          <div>Bank</div>
+                          <div>Bonds</div>
+                          <div>Stocks</div>
+                        </div>
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dataPerPeriod.map((dataPerPlayer, periodIndex) => {
+                    return (
+                      <TableRow key={periodIndex}>
+                        <TableCell className="align-top font-medium">
+                          {Object.values(dataPerPlayer)[0]?.decisions.map(
+                            (d, segmentIx) => {
+                              return (
+                                <div key={segmentIx} className="min-w-12 ">
+                                  P{periodIndex + 1} S{segmentIx + 1}
+                                </div>
+                              )
+                            }
+                          )}
+                        </TableCell>
+                        {Object.values(dataPerPlayer).map((d) => {
+                          const decisions = d.decisions
+
+                          return (
+                            <TableCell className="align-top font-medium">
+                              {decisions.map((decision, segmentIx) => {
+                                return (
+                                  <div
+                                    key={segmentIx}
+                                    className="flex justify-around"
+                                  >
+                                    <div>{decision.bank}</div>
+                                    <div>{decision.bonds}</div>
+                                    <div>{decision.stocks}</div>
+                                  </div>
+                                )
+                              })}
+                            </TableCell>
+                          )
+                        })}
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="flex h-full w-full flex-col">
+          <CardHeader>
+            <CardTitle>Avg Decisions</CardTitle>
+            <CardDescription>Average decisions over players.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-grow">
+            <ChartContainer config={config} className="h-[300px] w-full">
+              <BarChart data={dataAvg}>
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent />}
+                />
+                {Object.keys(config).map((key, ix, arr) => {
+                  return (
+                    <Bar
+                      key={key}
+                      stackId="1"
+                      dataKey={key}
+                      fill={config[key].color}
+                      radius={4}
+                    >
+                      {ix === arr.length - 1 && (
+                        <LabelList
+                          position="top"
+                          offset={12}
+                          className="fill-foreground"
+                          fontSize={12}
+                          formatter={(v) => `${v.toFixed(2) * 100}%`}
+                        />
+                      )}
+                    </Bar>
+                  )
+                })}
+                {/* {Object.keys(config).map((key, ix, arr) => {
                 segmentResultPerPlayerAvg.map((result) => {
                   return (
                     <Bar
@@ -433,24 +442,25 @@ function ReportGame() {
                   )
                 })
               })} */}
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="period"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                tickFormatter={(v) => `${v.toFixed(2) * 100}%`}
-              />
-              <ChartLegend content={<ChartLegendContent />} />
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="period"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tickFormatter={(v) => `${v.toFixed(2) * 100}%`}
+                />
+                <ChartLegend content={<ChartLegendContent />} />
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
