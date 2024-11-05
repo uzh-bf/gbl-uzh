@@ -281,15 +281,18 @@ function ReportGame() {
             <CardTitle>Accumulated Total Return</CardTitle>
             {/* <CardDescription>Assets over time.</CardDescription> */}
             <Select
-              onValueChange={(value) => setCurrPeriod(parseInt(value) - 1)}
-              defaultValue="1"
+              onValueChange={(value) => setCurrPeriod(parseInt(value))}
+              defaultValue="0"
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Period" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem key={0} value="0">
+                  All Periods
+                </SelectItem>
                 {dataPerPeriod.map((_, index) => (
-                  <SelectItem key={index} value={(index + 1).toString()}>
+                  <SelectItem key={index + 1} value={(index + 1).toString()}>
                     Period {index + 1}
                   </SelectItem>
                 ))}
@@ -299,10 +302,14 @@ function ReportGame() {
           <CardContent className="flex-grow">
             <ChartContainer config={playerConfig} className="h-[300px] w-full">
               <AreaChart
-                data={dataAccTotalAssetsReturn.slice(
-                  currPeriod * NUM_MONTHS,
-                  (currPeriod + 1) * NUM_MONTHS
-                )}
+                data={
+                  currPeriod === 0
+                    ? dataAccTotalAssetsReturn
+                    : dataAccTotalAssetsReturn.slice(
+                        (currPeriod - 1) * NUM_MONTHS,
+                        currPeriod * NUM_MONTHS
+                      )
+                }
                 accessibilityLayer
               >
                 <ChartTooltip
