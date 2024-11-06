@@ -545,7 +545,15 @@ export async function getPlayerTransactions(
   return playerActions
 }
 
-export async function getSpecificResults(args, ctx: Context) {
+interface SpecificResultsArgs {
+  gameId: number
+  type: DB.PlayerResultType
+}
+
+export async function getSpecificResults(
+  args: SpecificResultsArgs,
+  ctx: Context
+) {
   const playerResults = await ctx.prisma.playerResult.findMany({
     where: {
       gameId: args.gameId,

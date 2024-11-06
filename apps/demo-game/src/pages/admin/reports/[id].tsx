@@ -127,9 +127,11 @@ function ReportGame() {
     )
     let dataPerPlayer = {}
     playerResPerPeriod.map((result) => {
-      const decisions = Object.keys(result.facts.decisions).reduce((a, v) => {
-        return { ...a, [v]: Number(result.facts.decisions[v]) }
-      }, {})
+      const decisions = {}
+      Object.keys(result.facts.decisions).forEach((v) => {
+        decisions[v] = Number(result.facts.decisions[v])
+      })
+
       const totalAssetsTmp = result.facts.assetsWithReturns.map((a) => {
         return a.totalAssets
       })
