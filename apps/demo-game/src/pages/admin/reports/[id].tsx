@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useQuery } from '@apollo/client'
 import {
@@ -120,80 +120,99 @@ function ReportGame() {
     return acc
   }, {})
 
-  let dataPerPeriod = []
-  for (let i = 0; i < numPeriods; i++) {
-    const playerResPerPeriod = previousSegmentResults.filter(
-      (result) => result.period.index === i
-    )
-    let dataPerPlayer = {}
-    playerResPerPeriod.map((result) => {
-      const decisions = {}
-      Object.keys(result.facts.decisions).forEach((v) => {
-        decisions[v] = Number(result.facts.decisions[v])
-      })
-
-      const totalAssetsTmp = result.facts.assetsWithReturns.map((a) => {
-        return a.totalAssets
-      })
-      const accTotalAssetsReturnTmp = result.facts.assetsWithReturns.map(
-        (a) => {
-          return a.accTotalAssetsReturn
-        }
+  const dataPerPeriod = useMemo(() => {
+    let output = []
+    for (let i = 0; i < numPeriods; i++) {
+      const playerResPerPeriod = previousSegmentResults.filter(
+        (result) => result.period.index === i
       )
+      let dataPerPlayer = {}
+      playerResPerPeriod.map((result) => {
+        const decisions = {}
+        Object.keys(result.facts.decisions).forEach((v) => {
+          decisions[v] = Number(result.facts.decisions[v])
+        })
 
-      if (!dataPerPlayer[result.player.id]) {
-        dataPerPlayer[result.player.id] = {
-          decisions: [decisions],
-          name: result.player.name,
-          totalAssets: totalAssetsTmp,
-          accTotalAssetsReturn: accTotalAssetsReturnTmp,
+        const totalAssetsTmp = result.facts.assetsWithReturns.map((a) => {
+          return a.totalAssets
+        })
+        const accTotalAssetsReturnTmp = result.facts.assetsWithReturns.map(
+          (a) => {
+            return a.accTotalAssetsReturn
+          }
+        )
+
+        if (!dataPerPlayer[result.player.id]) {
+          dataPerPlayer[result.player.id] = {
+            decisions: [decisions],
+            name: result.player.name,
+            totalAssets: totalAssetsTmp,
+            accTotalAssetsReturn: accTotalAssetsReturnTmp,
+          }
+        } else {
+          dataPerPlayer[result.player.id].decisions.push(decisions)
+          dataPerPlayer[result.player.id].totalAssets.push(
+            ...totalAssetsTmp.filter((_, ix) => ix > 0)
+          )
+          dataPerPlayer[result.player.id].accTotalAssetsReturn.push(
+            ...accTotalAssetsReturnTmp.filter((_, ix) => ix > 0)
+          )
         }
-      } else {
-        dataPerPlayer[result.player.id].decisions.push(decisions)
-        dataPerPlayer[result.player.id].totalAssets.push(
-          ...totalAssetsTmp.filter((_, ix) => ix > 0)
-        )
-        dataPerPlayer[result.player.id].accTotalAssetsReturn.push(
-          ...accTotalAssetsReturnTmp.filter((_, ix) => ix > 0)
-        )
-      }
-    })
-    dataPerPeriod.push(dataPerPlayer)
-  }
+      })
+      output.push(dataPerPlayer)
+    }
+    return output
+  }, [previousSegmentResults])
 
-  const dataTotalAssets = composeChartData(dataPerPeriod, 'totalAssets')
-  const dataAccTotalAssetsReturn = composeChartData(
-    dataPerPeriod,
-    'accTotalAssetsReturn'
-  )
+  const { dataTotalAssets, dataAccTotalAssetsReturn } = useMemo(() => {
+    const dataTotalAssets = composeChartData(dataPerPeriod, 'totalAssets')
+    const dataAccTotalAssetsReturn = composeChartData(
+      dataPerPeriod,
+      'accTotalAssetsReturn'
+    )
+    return { dataTotalAssets, dataAccTotalAssetsReturn }
+  }, [dataPerPeriod])
   console.log('dataTotalAssets', dataTotalAssets)
 
-  const segmentResultsPerPlayer = game.players.map((player) => {
-    return segmentEndResults.specificResults
-      .filter((result) => result.player.id === player.id)
-      .map((result) => {
-        return Object.values(result.facts.decisions).map((decision, _, arr) => {
-          return Number(decision) / arr.length
-        })
-      })
-  })
+  const segmentResultsPerPlayer = useMemo(
+    () =>
+      game.players.map((player) => {
+        return previousSegmentResults
+          .filter((result) => result.player.id === player.id)
+          .map((result) => {
+            return Object.values(result.facts.decisions).map(
+              (decision, _, arr) => {
+                return Number(decision) / arr.length
+              }
+            )
+          })
+      }),
+    [game.players, previousSegmentResults]
+  )
 
-  const segmentResultPerPlayerAvg = segmentResultsPerPlayer.map((arr) => {
-    const result = Array(arr[0].length).fill(0)
-    arr.forEach((val) => {
+  const segmentResultPerPlayerAvg = useMemo(
+    () =>
+      segmentResultsPerPlayer.map((arr) => {
+        const result = Array(arr[0].length).fill(0)
+        arr.forEach((val) => {
+          val.forEach((v, i) => {
+            result[i] += v / arr.length
+          })
+        })
+        return result
+      }),
+    [segmentResultsPerPlayer]
+  )
+
+  const totalDecisionAvg = useMemo(() => {
+    const result = Array(segmentResultPerPlayerAvg[0].length).fill(0)
+    segmentResultPerPlayerAvg.forEach((val) => {
       val.forEach((v, i) => {
-        result[i] += v / arr.length
+        result[i] += v / segmentResultPerPlayerAvg.length
       })
     })
     return result
-  })
-
-  const totalDecisionAvg = Array(segmentResultPerPlayerAvg[0].length).fill(0)
-  segmentResultPerPlayerAvg.forEach((val) => {
-    val.forEach((v, i) => {
-      totalDecisionAvg[i] += v / segmentResultPerPlayerAvg.length
-    })
-  })
+  }, [segmentResultPerPlayerAvg])
 
   const dataAvg = [
     {
