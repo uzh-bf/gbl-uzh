@@ -22,6 +22,15 @@ export type AssetsWithReturns = Assets & {
   bondsReturn?: number
   stocksReturn?: number
   totalAssetsReturn?: number
+
+  bankBenchmark?: number
+  bondsBenchmark?: number
+  stocksBenchmark?: number
+
+  accTotalAssetsReturn?: number
+  accBankBenchmarkReturn?: number
+  accBondsBenchmarkReturn?: number
+  accStocksBenchmarkReturn?: number
 }
 
 export type ResultFactsInit = {
