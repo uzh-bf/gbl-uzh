@@ -120,8 +120,6 @@ function ReportGame() {
     return acc
   }, {})
 
-  let totalDecisionAvg = [0, 0, 0]
-
   let dataPerPeriod = []
   for (let i = 0; i < numPeriods; i++) {
     const playerResPerPeriod = previousSegmentResults.filter(
@@ -177,21 +175,23 @@ function ReportGame() {
         })
       })
   })
+
   const segmentResultPerPlayerAvg = segmentResultsPerPlayer.map((arr) => {
-    return arr.reduce((acc, val, ix) => {
-      val.map((v, i) => (acc[i] += v / arr.length))
-      return acc
-    }, Array(arr[0].length).fill(0))
+    const result = Array(arr[0].length).fill(0)
+    arr.forEach((val) => {
+      val.forEach((v, i) => {
+        result[i] += v / arr.length
+      })
+    })
+    return result
   })
 
-  totalDecisionAvg = segmentResultPerPlayerAvg.reduce((acc, val) => {
-    val.map((v, i) => (acc[i] += v / segmentResultPerPlayerAvg.length))
-    return acc
-  }, Array(segmentResultPerPlayerAvg[0].length).fill(0))
-
-  // console.log('segmentResultsPerPlayer', segmentResultsPerPlayer)
-  // console.log('segmentResultPerPlayerAvg', segmentResultPerPlayerAvg)
-  // console.log('totalDecisionAvg', totalDecisionAvg)
+  const totalDecisionAvg = Array(segmentResultPerPlayerAvg[0].length).fill(0)
+  segmentResultPerPlayerAvg.forEach((val) => {
+    val.forEach((v, i) => {
+      totalDecisionAvg[i] += v / segmentResultPerPlayerAvg.length
+    })
+  })
 
   const dataAvg = [
     {
