@@ -173,11 +173,10 @@ export function end(
             bondsBenchmark: benchmarks.bonds,
             stocksBenchmark: benchmarks.stocks,
             totalAssets,
-            // As rollsPerSegment is 3 (months per segment), we hardcode this
             totalAssetsReturn:
-              facts.assetsWithReturns?.[3]?.totalAssetsReturn ?? 0,
+              facts.assetsWithReturns?.slice(-1)[0]?.totalAssetsReturn ?? 0,
             accTotalAssetsReturn:
-              facts.assetsWithReturns?.[3]?.accTotalAssetsReturn ?? 0,
+              facts.assetsWithReturns?.slice(-1)[0]?.accTotalAssetsReturn ?? 0,
           },
         ]
       )
