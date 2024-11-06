@@ -35,8 +35,6 @@ export const PeriodFactsScenarioInput = inputObjectType({
   },
 })
 
-// TODO(JJ): @RS rollsPersegment determines how many months per segment we have
-// and should be determined by the number of segments: 12/numSegments
 export const PeriodFactsInput = inputObjectType({
   name: 'PeriodFactsInput',
   definition(t) {

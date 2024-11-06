@@ -173,8 +173,7 @@ export function end(
             bondsBenchmark: benchmarks.bonds,
             stocksBenchmark: benchmarks.stocks,
             totalAssets,
-            // TODO(JJ): We need to adjust the number of months per segment
-            // -> checkout rollsPerSegment
+            // As rollsPerSegment is 3 (months per segment), we hardcode this
             totalAssetsReturn:
               facts.assetsWithReturns?.[3]?.totalAssetsReturn ?? 0,
             accTotalAssetsReturn:
