@@ -8,6 +8,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Button,
+  H3,
   Modal,
   NewFormikTextField,
   NewFromikNumberField,
@@ -592,6 +593,70 @@ function ManageGame() {
                       data={{ cy: 'segment-count' }}
                       className={{ label: 'pb-2 font-normal' }}
                     />
+                  </div>
+                  <div className="mt-4">
+                    <H3>Bonds Parameters</H3>
+                    <div className="flex w-1/2 flex-col gap-2">
+                      <NewFromikNumberField
+                        placeholder="7"
+                        label="Trend"
+                        name="trendBonds"
+                        tooltip={<p>Trend is the expectation value.</p>}
+                        required
+                        data={{ cy: 'trend-bonds' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                      <NewFromikNumberField
+                        placeholder="1"
+                        label="Variance"
+                        name="varianceBonds"
+                        tooltip={<p>TODO.</p>}
+                        required
+                        data={{ cy: 'variance-bonds' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                      <NewFromikNumberField
+                        placeholder="7"
+                        label="Saving Interest"
+                        name="interestBonds"
+                        tooltip={<p>Saving interest ....</p>}
+                        required
+                        data={{ cy: 'savging-interest-bonds' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <H3>Stocks Parameters</H3>
+                    <div className="flex w-1/2 flex-col gap-2">
+                      <NewFromikNumberField
+                        placeholder="7"
+                        label="Trend"
+                        name="trendStocks"
+                        tooltip={<p>Trend is the expectation value.</p>}
+                        required
+                        data={{ cy: 'trend-stocks' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                      <NewFromikNumberField
+                        placeholder="1"
+                        label="Variance"
+                        name="varianceStocks"
+                        tooltip={<p>TODO.</p>}
+                        required
+                        data={{ cy: 'variance-stocks' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                      <NewFromikNumberField
+                        placeholder="7"
+                        label="Saving Interest"
+                        name="interestStocks"
+                        tooltip={<p>Saving interest ....</p>}
+                        required
+                        data={{ cy: 'savging-interest-stocks' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                    </div>
                   </div>
                 </Modal>
               )
