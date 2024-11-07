@@ -46,7 +46,16 @@ function Welcome() {
   const { data, loading, error } = useQuery(SelfDocument)
 
   const [updatePlayerData] = useMutation(UpdatePlayerDataDocument, {
-    optimisticResponse: true,
+    optimisticResponse: {
+      updatePlayerData: {
+        name: data?.self.name,
+        facts: JSON.stringify({
+          color: data?.self.facts.color,
+          avatar: data?.self.facts.avatar,
+          location: data?.self.facts.location,
+        }),
+      },
+    },
     onError: (error) => {
       console.error('Error updating player data:', error)
       setIsSubmitting(false)
