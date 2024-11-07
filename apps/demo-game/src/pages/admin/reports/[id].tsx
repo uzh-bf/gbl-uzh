@@ -46,6 +46,9 @@ import {
   YAxis,
 } from 'recharts'
 
+import { composeChartData } from '~/lib/analysis'
+import { NUM_MONTHS } from '~/lib/constants'
+
 const colors = [
   'hsl(var(--chart-1))',
   'hsl(var(--chart-2))',
@@ -53,8 +56,18 @@ const colors = [
   'hsl(var(--chart-4))',
 ]
 
-import { composeChartData } from '~/lib/analysis'
-import { NUM_MONTHS } from '~/lib/constants'
+const labels = [
+  'Bank Benchmark',
+  'Bonds Benchmark',
+  'Stocks Benchmark',
+  'Total Assets',
+]
+
+const config = {
+  bank: { label: labels[0], color: colors[0] },
+  bonds: { label: labels[1], color: colors[1] },
+  stocks: { label: labels[2], color: colors[2] },
+}
 
 function ReportGame() {
   const router = useRouter()
@@ -248,19 +261,6 @@ function ReportGame() {
       stocks: totalDecisionAvg[2],
     },
   ]
-
-  const labels = [
-    'Bank Benchmark',
-    'Bonds Benchmark',
-    'Stocks Benchmark',
-    'Total Assets',
-  ]
-
-  const config = {
-    bank: { label: labels[0], color: colors[0] },
-    bonds: { label: labels[1], color: colors[1] },
-    stocks: { label: labels[2], color: colors[2] },
-  }
 
   return (
     <div className="container mx-auto p-4">
