@@ -1,6 +1,7 @@
 import { inputObjectType } from 'nexus'
 import * as yup from 'yup'
 
+export const DEFAULT_SEED = 1
 export const GAP_STOCKS = 0.025
 export const GAP_BONDS = 0.005
 export const INTEREST_BANK = 0.002
@@ -26,7 +27,7 @@ export interface PeriodFacts extends yup.InferType<typeof PeriodFactsSchema> {}
 export const PeriodFactsScenarioInput = inputObjectType({
   name: 'PeriodFactsScenarioInput',
   definition(t) {
-    t.int('seed', { default: 0 })
+    t.int('seed', { default: DEFAULT_SEED })
     t.float('trendStocks', { default: TREND_STOCKS })
     t.float('trendBonds', { default: TREND_BONDS })
     t.float('gapStocks', { default: GAP_STOCKS })
@@ -42,7 +43,7 @@ export const PeriodFactsInput = inputObjectType({
     t.field('scenario', {
       type: PeriodFactsScenarioInput,
       default: {
-        seed: 0,
+        seed: DEFAULT_SEED,
         trendStocks: TREND_STOCKS,
         trendBonds: TREND_BONDS,
         gapStocks: GAP_STOCKS,

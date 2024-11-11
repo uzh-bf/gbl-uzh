@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Button,
   H3,
+  H4,
   Modal,
   NewFormikTextField,
   NewFromikNumberField,
@@ -25,7 +26,6 @@ import {
   computePeriodStatus,
   computeSegmentStatus,
 } from '@gbl-uzh/platform/dist/lib/util'
-import { pick } from 'ramda'
 import { useCallback, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
@@ -54,6 +54,7 @@ import {
 import { FormikMultiSelectField } from '~/components/fields/FormikMultiSelectField'
 
 import {
+  DEFAULT_SEED,
   GAP_BONDS,
   GAP_STOCKS,
   INTEREST_BANK,
@@ -515,30 +516,33 @@ function ManageGame() {
             initialValues={{
               periodName: 'Game Period',
               segmentCount: '4',
-              seed: 0,
-              interestBank: INTEREST_BANK,
-              trendBonds: TREND_BONDS,
-              gapBonds: GAP_BONDS,
-              trendStocks: TREND_STOCKS,
-              gapStocks: GAP_STOCKS,
+              seed: DEFAULT_SEED.toString(),
+              interestBank: INTEREST_BANK.toString(),
+              trendBonds: TREND_BONDS.toString(),
+              gapBonds: GAP_BONDS.toString(),
+              trendStocks: TREND_STOCKS.toString(),
+              gapStocks: GAP_STOCKS.toString(),
             }}
             onSubmit={async (variables, { resetForm }) => {
               const segmentCount: number = parseInt(variables.segmentCount)
+              const seed = parseInt(variables.seed)
+              const interestBank = parseFloat(variables.interestBank)
+              const trendBonds = parseFloat(variables.trendBonds)
+              const gapBonds = parseFloat(variables.gapBonds)
+              const trendStocks = parseFloat(variables.trendStocks)
+              const gapStocks = parseFloat(variables.gapStocks)
               await addGamePeriod({
                 variables: {
                   gameId: Number(router.query.id),
                   facts: {
-                    scenario: pick(
-                      [
-                        'seed',
-                        'interestBank',
-                        'trendBonds',
-                        'gapBonds',
-                        'trendStocks',
-                        'gapStocks',
-                      ],
-                      variables
-                    ),
+                    scenario: {
+                      seed,
+                      interestBank,
+                      trendBonds,
+                      gapBonds,
+                      trendStocks,
+                      gapStocks,
+                    },
                   },
                   segmentCount: segmentCount,
                 },
@@ -617,24 +621,38 @@ function ManageGame() {
                     />
                   </div>
                   <div className="mt-4">
-                    <H3>Bank Parameters</H3>
+                    <H3>Scenario Parameters</H3>
                     <div className="flex w-1/2 flex-col gap-2">
                       <NewFromikNumberField
-                        placeholder={newPeriodForm.values.interestBank.toString()}
-                        label="Saving Interest"
-                        name="interestBank"
-                        tooltip={<p>Saving interest ....</p>}
+                        placeholder={newPeriodForm.values.seed}
+                        label="Seed"
+                        name="seed"
+                        tooltip={<p>Seed ....</p>}
                         required
-                        data={{ cy: 'savging-interest-bonds' }}
+                        data={{ cy: 'seed' }}
                         className={{ label: 'pb-2 font-normal' }}
                       />
                     </div>
                   </div>
                   <div className="mt-4">
-                    <H3>Bonds Parameters</H3>
+                    <H4>Bank</H4>
+                    <div className="flex w-1/2 flex-col gap-2">
+                      <NewFromikNumberField
+                        placeholder={newPeriodForm.values.interestBank}
+                        label="Saving Interest"
+                        name="interestBank"
+                        tooltip={<p>Saving interest ....</p>}
+                        required
+                        data={{ cy: 'saving-interest' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <H4>Bonds</H4>
                     <div className="flex w-1/2 gap-2">
                       <NewFromikNumberField
-                        placeholder={newPeriodForm.values.trendBonds.toString()}
+                        placeholder={newPeriodForm.values.trendBonds}
                         label="Trend"
                         name="trendBonds"
                         tooltip={<p>Trend is the expectation value.</p>}
@@ -643,7 +661,7 @@ function ManageGame() {
                         className={{ label: 'pb-2 font-normal' }}
                       />
                       <NewFromikNumberField
-                        placeholder={newPeriodForm.values.gapBonds.toString()}
+                        placeholder={newPeriodForm.values.gapBonds}
                         label="Gap"
                         name="gapBonds"
                         tooltip={<p>TODO.</p>}
@@ -654,10 +672,10 @@ function ManageGame() {
                     </div>
                   </div>
                   <div className="mt-4">
-                    <H3>Stocks Parameters</H3>
+                    <H4>Stocks</H4>
                     <div className="flex w-1/2 gap-2">
                       <NewFromikNumberField
-                        placeholder={newPeriodForm.values.trendStocks.toString()}
+                        placeholder={newPeriodForm.values.trendStocks}
                         label="Trend"
                         name="trendStocks"
                         tooltip={<p>Trend is the expectation value.</p>}
@@ -666,7 +684,7 @@ function ManageGame() {
                         className={{ label: 'pb-2 font-normal' }}
                       />
                       <NewFromikNumberField
-                        placeholder={newPeriodForm.values.gapStocks.toString()}
+                        placeholder={newPeriodForm.values.gapStocks}
                         label="Gap"
                         name="gapStocks"
                         tooltip={<p>TODO.</p>}

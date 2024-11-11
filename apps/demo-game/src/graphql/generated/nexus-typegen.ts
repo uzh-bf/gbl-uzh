@@ -44,7 +44,7 @@ export interface NexusGenInputs {
     gapBonds: number | null; // Float
     gapStocks: number | null; // Float
     interestBank: number | null; // Float
-    seed?: number | null; // Int
+    seed: number | null; // Int
     trendBonds: number | null; // Float
     trendStocks: number | null; // Float
   }
