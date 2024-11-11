@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-game
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  tls:
+    - hosts:
+        - demo-game.dev.env.bf-app.ch
+      secretName: aidviser-tls
+  rules:
+    - host: demo-game.dev.env.bf-app.ch
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: demo-game
+                port:
+                  name: http

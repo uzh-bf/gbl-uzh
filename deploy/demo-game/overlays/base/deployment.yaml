@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-game
+  labels:
+    app: demo-game
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-game
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: demo-game
+    spec:
+      imagePullSecrets:
+        - name: gh-registry-secret
+      containers:
+        - image: ghcr.io/uzh-bf/gbl-uzh/demo-game:main
+          imagePullPolicy: Always
+          name: demo-game
+          envFrom:
+            - configMapRef:
+                name: demo-game
+            - secretRef:
+                name: demo-game
+          ports:
+            - containerPort: 3000
+              name: http
+              protocol: TCP
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '100m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
