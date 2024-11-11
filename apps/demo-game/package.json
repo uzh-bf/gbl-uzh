@@ -24,6 +24,7 @@
     "dayjs": "1.11.12",
     "formik": "2.4.6",
     "graphql": "16.9.0",
+    "graphql-scalars": "1.19.0",
     "graphql-sse": "2.2.3",
     "graphql-yoga": "4.0.4",
     "i18next": "22.5.0",
