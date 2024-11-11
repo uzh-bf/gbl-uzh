@@ -8,7 +8,7 @@ spec:
   tls:
     - hosts:
         - demo-game.dev.env.bf-app.ch
-      secretName: aidviser-tls
+      secretName: demo-game-tls
   rules:
     - host: demo-game.dev.env.bf-app.ch
       http:
