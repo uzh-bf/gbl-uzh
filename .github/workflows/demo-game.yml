@@ -43,6 +43,13 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
+
+      - name: Replace .env.production with .env.production.stg
+        shell: bash
+        run: |
+          rm apps/demo-game/.env.production
+          mv apps/demo-game/.env.production.stg apps/demo-game/.env.production
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
