@@ -46,16 +46,20 @@ export function initialize(
 
       const returns = diceRolls.map((rolls) => {
         const scenario = payload.periodFacts.scenario
+        // TODO(JJ): Compute gap from variance or provide new function for
+        // outcome
+        const gapBonds = scenario.varianceBonds
+        const gapStocks = scenario.varianceStocks
         return {
-          bank: scenario.bankReturn,
+          bank: scenario.interestBank,
           bonds: computeScenarioOutcome(
             scenario.trendBonds,
-            scenario.gapBonds,
+            gapBonds,
             rolls.bonds
           ),
           stocks: computeScenarioOutcome(
             scenario.trendStocks,
-            scenario.gapStocks,
+            gapStocks,
             rolls.stocks
           ),
         }

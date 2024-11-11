@@ -507,6 +507,7 @@ function ManageGame() {
             initialValues={{
               periodName: 'Game Period',
               segmentCount: '4',
+              seed: 0,
               interestBank: 0.002,
               trendBonds: 0.0031,
               varianceBonds: 0.0001,
@@ -518,16 +519,19 @@ function ManageGame() {
               await addGamePeriod({
                 variables: {
                   gameId: Number(router.query.id),
-                  facts: pick(
-                    [
-                      'interestBank',
-                      'trendBonds',
-                      'varianceBonds',
-                      'trendStocks',
-                      'varianceStocks',
-                    ],
-                    variables
-                  ),
+                  facts: {
+                    scenario: pick(
+                      [
+                        'seed',
+                        'interestBank',
+                        'trendBonds',
+                        'varianceBonds',
+                        'trendStocks',
+                        'varianceStocks',
+                      ],
+                      variables
+                    ),
+                  },
                   segmentCount: segmentCount,
                 },
               })

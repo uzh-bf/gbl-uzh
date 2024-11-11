@@ -41,12 +41,12 @@ export interface NexusGenInputs {
     scenario: NexusGenInputs['PeriodFactsScenarioInput'] | null; // PeriodFactsScenarioInput
   }
   PeriodFactsScenarioInput: { // input type
-    bankReturn: number | null; // Float
-    gapBonds: number | null; // Float
-    gapStocks: number | null; // Float
+    interestBank: number | null; // Float
     seed?: number | null; // Int
     trendBonds: number | null; // Float
     trendStocks: number | null; // Float
+    varianceBonds: number | null; // Float
+    varianceStocks: number | null; // Float
   }
   PeriodSegmentFactsInput: { // input type
     bankPercentage?: number | null; // Float

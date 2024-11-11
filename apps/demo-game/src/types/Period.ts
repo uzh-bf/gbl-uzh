@@ -3,9 +3,9 @@ import * as yup from 'yup'
 
 const TREND_STOCKS = 0.0065
 const TREND_BONDS = 0.0031
-const GAP_STOCKS = 0.025
-const GAP_BONDS = 0.005
-const RETURN_BANK = 0.002
+const VARIANCE_STOCKS = 0.0034
+const VARIANCE_BONDS = 0.0001
+const INTEREST_BANK = 0.002
 
 export const PeriodFactsSchema = yup.object({
   rollsPerSegment: yup.number().positive().integer().default(3),
@@ -14,9 +14,9 @@ export const PeriodFactsSchema = yup.object({
       seed: yup.number().integer().default(0),
       trendStocks: yup.number().required(),
       trendBonds: yup.number().required(),
-      gapStocks: yup.number().positive().required(),
-      gapBonds: yup.number().positive().required(),
-      bankReturn: yup.number().required(),
+      varianceStocks: yup.number().positive().required(),
+      varianceBonds: yup.number().positive().required(),
+      interestBank: yup.number().required(),
     })
     .required(),
 })
@@ -29,27 +29,27 @@ export const PeriodFactsScenarioInput = inputObjectType({
     t.int('seed', { default: 0 })
     t.float('trendStocks', { default: TREND_STOCKS })
     t.float('trendBonds', { default: TREND_BONDS })
-    t.float('gapStocks', { default: GAP_STOCKS })
-    t.float('gapBonds', { default: GAP_BONDS })
-    t.float('bankReturn', { default: RETURN_BANK })
+    t.float('varianceStocks', { default: VARIANCE_STOCKS })
+    t.float('varianceBonds', { default: VARIANCE_BONDS })
+    t.float('interestBank', { default: INTEREST_BANK })
   },
 })
 
 export const PeriodFactsInput = inputObjectType({
   name: 'PeriodFactsInput',
   definition(t) {
-    t.int('rollsPerSegment', { default: 3 }),
-      t.field('scenario', {
-        type: PeriodFactsScenarioInput,
-        default: {
-          seed: 0,
-          trendStocks: TREND_STOCKS,
-          trendBonds: TREND_BONDS,
-          gapStocks: GAP_STOCKS,
-          gapBonds: GAP_BONDS,
-          bankReturn: RETURN_BANK,
-        },
-      })
+    t.int('rollsPerSegment', { default: 3 })
+    t.field('scenario', {
+      type: PeriodFactsScenarioInput,
+      default: {
+        seed: 0,
+        trendStocks: TREND_STOCKS,
+        trendBonds: TREND_BONDS,
+        varianceStocks: VARIANCE_STOCKS,
+        varianceBonds: VARIANCE_BONDS,
+        interestBank: INTEREST_BANK,
+      },
+    })
   },
 })
 
