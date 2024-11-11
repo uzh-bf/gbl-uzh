@@ -53,6 +53,14 @@ import {
 
 import { FormikMultiSelectField } from '~/components/fields/FormikMultiSelectField'
 
+import {
+  GAP_BONDS,
+  GAP_STOCKS,
+  INTEREST_BANK,
+  TREND_BONDS,
+  TREND_STOCKS,
+} from '~/types/Period'
+
 function ManageGame() {
   const router = useRouter()
 
@@ -508,11 +516,11 @@ function ManageGame() {
               periodName: 'Game Period',
               segmentCount: '4',
               seed: 0,
-              interestBank: 0.002,
-              trendBonds: 0.0031,
-              varianceBonds: 0.0001,
-              trendStocks: 0.0065,
-              varianceStocks: 0.0034,
+              interestBank: INTEREST_BANK,
+              trendBonds: TREND_BONDS,
+              gapBonds: GAP_BONDS,
+              trendStocks: TREND_STOCKS,
+              gapStocks: GAP_STOCKS,
             }}
             onSubmit={async (variables, { resetForm }) => {
               const segmentCount: number = parseInt(variables.segmentCount)
@@ -525,9 +533,9 @@ function ManageGame() {
                         'seed',
                         'interestBank',
                         'trendBonds',
-                        'varianceBonds',
+                        'gapBonds',
                         'trendStocks',
-                        'varianceStocks',
+                        'gapStocks',
                       ],
                       variables
                     ),
@@ -635,12 +643,12 @@ function ManageGame() {
                         className={{ label: 'pb-2 font-normal' }}
                       />
                       <NewFromikNumberField
-                        placeholder={newPeriodForm.values.varianceBonds.toString()}
-                        label="Variance"
-                        name="varianceBonds"
+                        placeholder={newPeriodForm.values.gapBonds.toString()}
+                        label="Gap"
+                        name="gapBonds"
                         tooltip={<p>TODO.</p>}
                         required
-                        data={{ cy: 'variance-bonds' }}
+                        data={{ cy: 'gap-bonds' }}
                         className={{ label: 'pb-2 font-normal' }}
                       />
                     </div>
@@ -658,12 +666,12 @@ function ManageGame() {
                         className={{ label: 'pb-2 font-normal' }}
                       />
                       <NewFromikNumberField
-                        placeholder={newPeriodForm.values.varianceStocks.toString()}
-                        label="Variance"
-                        name="varianceStocks"
+                        placeholder={newPeriodForm.values.gapStocks.toString()}
+                        label="Gap"
+                        name="gapStocks"
                         tooltip={<p>TODO.</p>}
                         required
-                        data={{ cy: 'variance-stocks' }}
+                        data={{ cy: 'gap-stocks' }}
                         className={{ label: 'pb-2 font-normal' }}
                       />
                     </div>

@@ -119,16 +119,16 @@ type Period {
 
 input PeriodFactsInput {
   rollsPerSegment: Int = 3
-  scenario: PeriodFactsScenarioInput = {interestBank: 0.002, seed: 0, trendBonds: 0.0031, trendStocks: 0.0065, varianceBonds: 0.0001, varianceStocks: 0.0034}
+  scenario: PeriodFactsScenarioInput = {gapBonds: 0.005, gapStocks: 0.025, interestBank: 0.002, seed: 0, trendBonds: 0.0031, trendStocks: 0.0065}
 }
 
 input PeriodFactsScenarioInput {
+  gapBonds: Float = 0.005
+  gapStocks: Float = 0.025
   interestBank: Float = 0.002
   seed: Int = 0
   trendBonds: Float = 0.0031
   trendStocks: Float = 0.0065
-  varianceBonds: Float = 0.0001
-  varianceStocks: Float = 0.0034
 }
 
 type PeriodSegment {

@@ -218,12 +218,12 @@ export type PeriodFactsInput = {
 };
 
 export type PeriodFactsScenarioInput = {
+  gapBonds?: InputMaybe<Scalars['Float']['input']>;
+  gapStocks?: InputMaybe<Scalars['Float']['input']>;
   interestBank?: InputMaybe<Scalars['Float']['input']>;
   seed?: InputMaybe<Scalars['Int']['input']>;
   trendBonds?: InputMaybe<Scalars['Float']['input']>;
   trendStocks?: InputMaybe<Scalars['Float']['input']>;
-  varianceBonds?: InputMaybe<Scalars['Float']['input']>;
-  varianceStocks?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type PeriodSegment = {
