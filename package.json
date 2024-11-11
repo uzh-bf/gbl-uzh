@@ -26,8 +26,6 @@
     "Andrin Rehmann <andrin.rehmann@df.uzh.ch>"
   ],
   "devDependencies": {
-    "@testing-library/cypress": "9.0.0",
-    "cypress": "12.16.0",
     "standard-version": "9.5.0",
     "syncpack": "11.2.1",
     "turbo": "2.2.3"

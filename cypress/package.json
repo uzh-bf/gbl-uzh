@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "name": "@gbl-uzh/cypress",
+  "devDependencies": {
+    "@testing-library/cypress": "9.0.0",
+    "cypress": "12.16.0"
+  },
+  "scripts": {
+    "test": "cypress open",
+    "test:run": "cypress run",
+    "test:watch": "cypress open --watch"
+  },
+  "engines": {
+    "node": "=20"
+  },
+  "volta": {
+    "extends": "../package.json"
+  }
+}
