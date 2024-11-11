@@ -507,15 +507,25 @@ function ManageGame() {
             initialValues={{
               periodName: 'Game Period',
               segmentCount: '4',
+              interestBank: 0.002,
+              trendBonds: 0.0031,
+              varianceBonds: 0.0001,
+              trendStocks: 0.0065,
+              varianceStocks: 0.0034,
             }}
             onSubmit={async (variables, { resetForm }) => {
               const segmentCount: number = parseInt(variables.segmentCount)
               await addGamePeriod({
                 variables: {
                   gameId: Number(router.query.id),
-                  // TODO(JJ): Add dice simulation
                   facts: pick(
-                    ['stockTrend', 'stockVariance', 'stockGap'],
+                    [
+                      'interestBank',
+                      'trendBonds',
+                      'varianceBonds',
+                      'trendStocks',
+                      'varianceStocks',
+                    ],
                     variables
                   ),
                   segmentCount: segmentCount,
@@ -579,7 +589,7 @@ function ManageGame() {
                       className={{ label: 'pb-2 font-normal' }}
                     />
                     <NewFromikNumberField
-                      placeholder="4"
+                      placeholder={newPeriodForm.values.segmentCount}
                       label="Number of segments"
                       name="segmentCount"
                       tooltip={
@@ -595,30 +605,12 @@ function ManageGame() {
                     />
                   </div>
                   <div className="mt-4">
-                    <H3>Bonds Parameters</H3>
+                    <H3>Bank Parameters</H3>
                     <div className="flex w-1/2 flex-col gap-2">
                       <NewFromikNumberField
-                        placeholder="7"
-                        label="Trend"
-                        name="trendBonds"
-                        tooltip={<p>Trend is the expectation value.</p>}
-                        required
-                        data={{ cy: 'trend-bonds' }}
-                        className={{ label: 'pb-2 font-normal' }}
-                      />
-                      <NewFromikNumberField
-                        placeholder="1"
-                        label="Variance"
-                        name="varianceBonds"
-                        tooltip={<p>TODO.</p>}
-                        required
-                        data={{ cy: 'variance-bonds' }}
-                        className={{ label: 'pb-2 font-normal' }}
-                      />
-                      <NewFromikNumberField
-                        placeholder="7"
+                        placeholder={newPeriodForm.values.interestBank.toString()}
                         label="Saving Interest"
-                        name="interestBonds"
+                        name="interestBank"
                         tooltip={<p>Saving interest ....</p>}
                         required
                         data={{ cy: 'savging-interest-bonds' }}
@@ -627,10 +619,33 @@ function ManageGame() {
                     </div>
                   </div>
                   <div className="mt-4">
-                    <H3>Stocks Parameters</H3>
-                    <div className="flex w-1/2 flex-col gap-2">
+                    <H3>Bonds Parameters</H3>
+                    <div className="flex w-1/2 gap-2">
                       <NewFromikNumberField
-                        placeholder="7"
+                        placeholder={newPeriodForm.values.trendBonds.toString()}
+                        label="Trend"
+                        name="trendBonds"
+                        tooltip={<p>Trend is the expectation value.</p>}
+                        required
+                        data={{ cy: 'trend-bonds' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                      <NewFromikNumberField
+                        placeholder={newPeriodForm.values.varianceBonds.toString()}
+                        label="Variance"
+                        name="varianceBonds"
+                        tooltip={<p>TODO.</p>}
+                        required
+                        data={{ cy: 'variance-bonds' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <H3>Stocks Parameters</H3>
+                    <div className="flex w-1/2 gap-2">
+                      <NewFromikNumberField
+                        placeholder={newPeriodForm.values.trendStocks.toString()}
                         label="Trend"
                         name="trendStocks"
                         tooltip={<p>Trend is the expectation value.</p>}
@@ -639,21 +654,12 @@ function ManageGame() {
                         className={{ label: 'pb-2 font-normal' }}
                       />
                       <NewFromikNumberField
-                        placeholder="1"
+                        placeholder={newPeriodForm.values.varianceStocks.toString()}
                         label="Variance"
                         name="varianceStocks"
                         tooltip={<p>TODO.</p>}
                         required
                         data={{ cy: 'variance-stocks' }}
-                        className={{ label: 'pb-2 font-normal' }}
-                      />
-                      <NewFromikNumberField
-                        placeholder="7"
-                        label="Saving Interest"
-                        name="interestStocks"
-                        tooltip={<p>Saving interest ....</p>}
-                        required
-                        data={{ cy: 'savging-interest-stocks' }}
                         className={{ label: 'pb-2 font-normal' }}
                       />
                     </div>
