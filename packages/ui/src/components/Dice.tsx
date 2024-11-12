@@ -1,6 +1,6 @@
+import { Button } from '@uzh-bf/design-system'
 import { useRef } from 'react'
 import ReactDice, { ReactDiceRef } from 'react-dice-complete'
-import { Button } from '@uzh-bf/design-system'
 
 interface DiceProps {
   dice: {
@@ -27,7 +27,7 @@ function Dice({ dice }: DiceProps) {
   }
 
   return (
-    <div className="flex flex-col gap-y-4 items-center justify-center">
+    <div className="flex flex-col items-center justify-center gap-y-4">
       <div className="flex flex-row gap-4">
         {dice.map((item, ix) => (
           <div className="flex flex-col items-center justify-center" key={ix}>
@@ -40,10 +40,11 @@ function Dice({ dice }: DiceProps) {
               margin={item.margin}
               rollTime={2}
               disableIndividual
-              rollDone={(totalValue: number, values: number[]) => {
-                // console.log('individual die values array:', values)
-                // console.log('total dice value:', totalValue)
-              }}
+              rollDone={() => null}
+              // rollDone={(totalValue: number, values: number[]) => {
+              // console.log('individual die values array:', values)
+              // console.log('total dice value:', totalValue)
+              // }}
             />
             {item.label && <span className="text-sm">{item.label}</span>}
           </div>
