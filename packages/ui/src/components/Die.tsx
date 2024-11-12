@@ -1,5 +1,13 @@
+import dynamic from 'next/dynamic'
 import { useRef, forwardRef, useImperativeHandle } from 'react'
-import ReactDice, { ReactDiceRef } from 'react-dice-complete'
+import { ReactDiceRef } from 'react-dice-complete'
+
+const ReactDice = dynamic(
+  () => import('react-dice-complete').then((mod) => mod.default),
+  {
+    ssr: false,
+  }
+)
 
 interface DieProps {
   die: number

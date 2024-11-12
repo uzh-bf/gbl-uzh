@@ -1,7 +1,6 @@
 import { ApolloClient, ApolloLink, InMemoryCache, split } from '@apollo/client'
 import { HttpLink } from '@apollo/client/link/http'
 import { getMainDefinition } from '@apollo/client/utilities'
-import assert from 'node:assert'
 import { useMemo } from 'react'
 
 import SSELink from './SSELink.js'
@@ -9,14 +8,16 @@ import SSELink from './SSELink.js'
 let apolloClient
 
 function createIsomorphLink() {
-  assert(typeof process.env.NEXT_PUBLIC_API_URL === 'string')
-
   const isBrowser = typeof window !== 'undefined'
 
   let httpLink: ApolloLink = new HttpLink({
     uri: process.env.NEXT_PUBLIC_API_URL,
     credentials: 'same-origin',
   })
+
+  if (!process.env.NEXT_PUBLIC_API_URL) {
+    throw new Error('NEXT_PUBLIC_API_URL is not set')
+  }
 
   // on the client, differentiate between links for query/mutation and subscriptions
   if (isBrowser) {

@@ -1,6 +1,14 @@
 import { Button } from '@uzh-bf/design-system'
+import dynamic from 'next/dynamic'
 import { useRef } from 'react'
-import ReactDice, { ReactDiceRef } from 'react-dice-complete'
+import { ReactDiceRef } from 'react-dice-complete'
+
+const ReactDice = dynamic(
+  () => import('react-dice-complete').then((mod) => mod.default),
+  {
+    ssr: false,
+  }
+)
 
 interface DiceProps {
   dice: {

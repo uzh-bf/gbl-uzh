@@ -5,9 +5,12 @@
   "exclude": [
     "node_modules",
     "dist",
+    "src/scripts",
+    "instrumented"
   ],
   "compilerOptions": {
     "baseUrl": ".",
+    "rootDir": ".",
     /* Base Options: */
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -21,6 +24,7 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
+    "noImplicitAny": false,
     /* If transpiling with TypeScript: */
     "module": "NodeNext",
     "outDir": "dist",
@@ -28,12 +32,14 @@
     /* AND if you're building for a library: */
     "declaration": true,
     /* AND if you're building for a library in a monorepo: */
-    "composite": false,
+    "composite": true,
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
     "declarationMap": true,
     /* If your code doesn't run in the DOM: */
     "lib": [
       "es2022"
     ],
-    "noImplicitAny": false
+    "noErrorTruncation": true
+    // "preserveSymlinks": true
   }
 }

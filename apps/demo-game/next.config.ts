@@ -1,15 +1,22 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
-  swcMinify: true,
+  // experimental: {
+  //   turbo: {
+  //     resolveAlias: {
+  //       fs: { browser: './mocks/fs.js' },
+  //     },
+  //     useSwcCss: true,
+  //   },
+  // },
   typescript: {
     ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
   },
-  transpilePackages: ['@gbl-uzh/ui'],
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -21,4 +28,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+export default nextConfig
