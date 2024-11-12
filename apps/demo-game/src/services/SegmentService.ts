@@ -38,6 +38,7 @@ export function initialize(
           const seed = periodFacts.scenario.seed
           const bondsAndStocks = diceRoll([seed, segmentIx, rollIx, 0])
           return {
+            shared: bondsAndStocks,
             bonds: diceRoll([seed, segmentIx, rollIx, 1]) + bondsAndStocks,
             stocks: diceRoll([seed, segmentIx, rollIx, 2]) + bondsAndStocks,
           }

@@ -15,6 +15,7 @@ import {
   NewFromikNumberField,
 } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
 
@@ -350,6 +351,13 @@ function ManageGame() {
                           periodStatus === STATUS.COMPLETED ||
                           segmentStatus === STATUS.COMPLETED
 
+                        console.log('segment', segment)
+                        const diceBonds = segment?.facts.diceRolls.map(
+                          (dice) => dice.bonds
+                        )
+                        const diceStocks = segment?.facts.diceRolls.map(
+                          (dice) => dice.stocks
+                        )
                         return (
                           <div
                             className={twMerge(
@@ -384,6 +392,31 @@ function ManageGame() {
                                 </div>
                               </div>
                             </div>
+                            {segment && (
+                              <Link
+                                // href={`/admin/dice/${period.facts.trendE}/${period.facts.trendGap}/${diceBonds}-${diceStocks}`}
+                                href={`/admin/dice/${segment.id}`}
+                                target="_blank"
+                                className="flex flex-col rounded border border-gray-300 p-1 text-xs"
+                              >
+                                <div className="flex justify-between">
+                                  Dice Bonds:
+                                  <div className="flex flex-row gap-2">
+                                    {diceBonds?.map((dice, ix) => (
+                                      <div key={ix}>{dice}</div>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="flex justify-between">
+                                  Dice Stocks:
+                                  <div className="flex flex-row gap-2">
+                                    {diceStocks?.map((dice, ix) => (
+                                      <div key={ix}>{dice}</div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </Link>
+                            )}
                           </div>
                         )
                       }

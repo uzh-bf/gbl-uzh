@@ -1,37 +1,56 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import ReactDice, { ReactDiceRef } from 'react-dice-complete'
+import { Button } from '@uzh-bf/design-system'
 
-function Dice({ dice1, dice2 }: { dice1: number; dice2: number }) {
-  const dice = useRef<ReactDiceRef>(null)
+interface DiceProps {
+  dice: {
+    die: number
+    faceColor?: string
+    dotColor?: string
+    dieSize?: number
+    margin?: number
+    label?: string
+  }[]
+}
 
-  useEffect(() => {
-    if (dice?.current) {
-      dice.current.rollAll([dice1, dice2])
-    }
-  }, [dice, dice1, dice2])
+function Dice({ dice }: DiceProps) {
+  const diceRef = dice.map(() => useRef<ReactDiceRef>(null))
 
-  const rollDone = (totalValue: number, values: number[]) => {
-    console.log('individual die values array:', values)
-    console.log('total dice value:', totalValue)
+  const rollAll = () => {
+    diceRef.forEach((ref, ix) => {
+      if (ref.current && typeof ref.current.rollAll === 'function') {
+        ref.current.rollAll([dice[ix].die])
+      } else {
+        console.warn('rollAll method is not available')
+      }
+    })
   }
 
-  // const rollAll = () => {
-  //   dice.current?.rollAll()
-  // }
-
   return (
-    // @ts-ignore
-    <ReactDice
-      numDice={2}
-      ref={dice}
-      faceColor="#dc6027"
-      dotColor="white"
-      dieSize={250}
-      margin={100}
-      disableIndividual
-      // rollDone={() => null}
-      rollDone={rollDone}
-    />
+    <div className="flex flex-col gap-y-4 items-center justify-center">
+      <div className="flex flex-row gap-4">
+        {dice.map((item, ix) => (
+          <div className="flex flex-col items-center justify-center" key={ix}>
+            <ReactDice
+              numDice={1}
+              ref={diceRef[ix]}
+              faceColor={item.faceColor}
+              dotColor={item.dotColor}
+              dieSize={item.dieSize}
+              margin={item.margin}
+              rollTime={2}
+              disableIndividual
+              rollDone={(totalValue: number, values: number[]) => {
+                // console.log('individual die values array:', values)
+                // console.log('total dice value:', totalValue)
+              }}
+            />
+            {item.label && <span className="text-sm">{item.label}</span>}
+          </div>
+        ))}
+      </div>
+      <Button onClick={rollAll}>Roll</Button>
+    </div>
   )
 }
 
