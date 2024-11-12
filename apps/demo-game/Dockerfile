@@ -1,49 +1,60 @@
-FROM node:18-alpine AS base
+FROM node:20.18-alpine AS base
 
-# Install dependencies only when needed
-FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache git
+
+# Install pnpm and turbo
+RUN npm install -g pnpm@9.12.3 turbo@2.0.4
+
+# Set pnpm store directory
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN pnpm config set store-dir $PNPM_HOME/.pnpm-store
+
+
+FROM base as prune
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
-COPY package.json ./
-RUN npm install
-
-
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+RUN --mount=type=cache,id=pnpm,target=/pnpm/.pnpm-store \
+    pnpm install --frozen-lockfile
 
-# If using npm comment out above and use below instead
-RUN npm run build
+# Prune application with Turbo
+RUN turbo prune --scope="@gbl-uzh/demo-game" --docker
+
+
+# Install dependencies only when needed
+FROM base AS builder
+WORKDIR /app
+
+# Copy only package files needed for installation
+COPY --from=prune /app/out/json/ .
+
+# Install dependencies
+RUN --mount=type=cache,id=pnpm,target=/pnpm/.pnpm-store \
+    pnpm install --frozen-lockfile
+
+COPY --from=prune /app/out/full/ .
+
+RUN pnpm build
+
 
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
 USER nextjs
 
+# Copy only the necessary files for running the application
+COPY --from=builder --chown=nextjs:nodejs /app/apps/demo-game/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/demo-game/.next/static ./apps/demo-game/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/demo-game/public ./apps/demo-game/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/demo-game/.env.production ./apps/demo-game/.env.production
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
 EXPOSE 3000
-
-ENV PORT 3000
-
-CMD ["node", "server.js"]
+CMD ["node", "apps/demo-game/server.js"]
