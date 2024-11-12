@@ -15,9 +15,18 @@ function createIsomorphLink() {
     credentials: 'same-origin',
   })
 
-  if (!process.env.NEXT_PUBLIC_API_URL) {
+function createIsomorphLink() {
+  const isBrowser = typeof window !== 'undefined'
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL
+  if (typeof apiUrl !== 'string' || !apiUrl) {
     throw new Error('NEXT_PUBLIC_API_URL is not set')
   }
+
+  let httpLink: ApolloLink = new HttpLink({
+    uri: apiUrl,
+    credentials: 'same-origin',
+  })
 
   // on the client, differentiate between links for query/mutation and subscriptions
   if (isBrowser) {
