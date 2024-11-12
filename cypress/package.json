@@ -2,8 +2,8 @@
   "private": true,
   "name": "@gbl-uzh/cypress",
   "devDependencies": {
-    "@testing-library/cypress": "9.0.0",
-    "cypress": "12.16.0"
+    "@testing-library/cypress": "~9.0.0",
+    "cypress": "~12.16.0"
   },
   "scripts": {
     "test": "cypress open",

@@ -26,9 +26,9 @@
     "Andrin Rehmann <andrin.rehmann@df.uzh.ch>"
   ],
   "devDependencies": {
-    "standard-version": "9.5.0",
-    "syncpack": "11.2.1",
-    "turbo": "2.2.3"
+    "standard-version": "~9.5.0",
+    "syncpack": "~13.0.0",
+    "turbo": "~2.2.3"
   },
   "scripts": {
     "build": "turbo run build",

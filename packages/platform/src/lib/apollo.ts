@@ -31,7 +31,7 @@ function createIsomorphLink() {
   // on the client, differentiate between links for query/mutation and subscriptions
   if (isBrowser) {
     const sseLink = new SSELink({
-      url: process.env.NEXT_PUBLIC_API_URL,
+      url: apiUrl,
       credentials: 'same-origin',
     })
 
