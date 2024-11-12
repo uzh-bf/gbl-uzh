@@ -11,7 +11,7 @@
     "dev": {
       "cache": false,
       "outputs": ["dist/**", ".next/**", "public/**"],
-      "dependsOn": ["@gbl-uzh/platform#build"]
+      "dependsOn": ["@gbl-uzh/platform#build", "@gbl-uzh/ui#build"]
     },
     "dev-web": {
       "cache": false,

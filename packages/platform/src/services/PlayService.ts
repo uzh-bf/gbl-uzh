@@ -545,6 +545,35 @@ export async function getPlayerTransactions(
   return playerActions
 }
 
+interface SpecificResultsArgs {
+  gameId: number
+  type: DB.PlayerResultType
+}
+
+export async function getSpecificResults(
+  args: SpecificResultsArgs,
+  ctx: Context
+) {
+  const playerResults = await ctx.prisma.playerResult.findMany({
+    where: {
+      gameId: args.gameId,
+      type: args.type,
+    },
+    orderBy: [
+      {
+        createdAt: 'asc',
+      },
+      { player: { name: 'asc' } },
+    ],
+    include: {
+      period: true,
+      player: true,
+    },
+  })
+
+  return playerResults
+}
+
 export async function getPlayerResults(args, ctx: Context) {
   const playerResults = await ctx.prisma.playerResult.findMany({
     where: {

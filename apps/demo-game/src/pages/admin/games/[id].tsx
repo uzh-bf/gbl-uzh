@@ -8,11 +8,14 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Button,
+  H3,
+  H4,
   Modal,
   NewFormikTextField,
   NewFromikNumberField,
 } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
 
@@ -24,7 +27,6 @@ import {
   computePeriodStatus,
   computeSegmentStatus,
 } from '@gbl-uzh/platform/dist/lib/util'
-import { pick } from 'ramda'
 import { useCallback, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
@@ -51,6 +53,15 @@ import {
 } from '@uzh-bf/design-system/dist/future'
 
 import { FormikMultiSelectField } from '~/components/fields/FormikMultiSelectField'
+
+import {
+  DEFAULT_SEED,
+  GAP_BONDS,
+  GAP_STOCKS,
+  INTEREST_BANK,
+  TREND_BONDS,
+  TREND_STOCKS,
+} from '~/types/Period'
 
 function ManageGame() {
   const router = useRouter()
@@ -249,6 +260,22 @@ function ManageGame() {
   return (
     <div className="p-4">
       <div>
+        <Button
+          onClick={() => {
+            router.push(`/admin/reports/${game?.id}`)
+          }}
+        >
+          Report
+        </Button>
+        {/* <Link className="w-96" href={`/admin/games/${game?.id}`} key={game?.id}>
+          <Button
+            className={{
+              root: 'flex w-full flex-col items-start justify-around',
+            }}
+          >
+            Report
+          </Button>
+        </Link> */}
         <div className="flex flex-col gap-2 overflow-x-auto md:flex-row">
           {game.periods.map((period, ix) => {
             const periodStatus = computePeriodStatus(game, ix)
@@ -324,6 +351,16 @@ function ManageGame() {
                           periodStatus === STATUS.COMPLETED ||
                           segmentStatus === STATUS.COMPLETED
 
+                        console.log('segment', segment)
+                        const diceBonds = segment?.facts.diceRolls.map(
+                          (dice) => dice.bonds
+                        )
+                        const diceStocks = segment?.facts.diceRolls.map(
+                          (dice) => dice.stocks
+                        )
+                        const diceShared = segment?.facts.diceRolls.map(
+                          (dice) => dice.shared
+                        )
                         return (
                           <div
                             className={twMerge(
@@ -358,6 +395,34 @@ function ManageGame() {
                                 </div>
                               </div>
                             </div>
+                            {segment && (
+                              <Link
+                                href={`/admin/dice/${
+                                  segment.id
+                                }/${diceBonds.join('-')}-${diceShared.join(
+                                  '-'
+                                )}-${diceStocks.join('-')}`}
+                                target="_blank"
+                                className="flex flex-col rounded border border-gray-300 p-1 text-xs"
+                              >
+                                <div className="flex justify-between">
+                                  Dice Bonds:
+                                  <div className="flex flex-row gap-2">
+                                    {diceBonds?.map((dice, ix) => (
+                                      <div key={ix}>{dice}</div>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="flex justify-between">
+                                  Dice Stocks:
+                                  <div className="flex flex-row gap-2">
+                                    {diceStocks?.map((dice, ix) => (
+                                      <div key={ix}>{dice}</div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </Link>
+                            )}
                           </div>
                         )
                       }
@@ -490,17 +555,34 @@ function ManageGame() {
             initialValues={{
               periodName: 'Game Period',
               segmentCount: '4',
+              seed: DEFAULT_SEED.toString(),
+              interestBank: INTEREST_BANK.toString(),
+              trendBonds: TREND_BONDS.toString(),
+              gapBonds: GAP_BONDS.toString(),
+              trendStocks: TREND_STOCKS.toString(),
+              gapStocks: GAP_STOCKS.toString(),
             }}
             onSubmit={async (variables, { resetForm }) => {
               const segmentCount: number = parseInt(variables.segmentCount)
+              const seed = parseInt(variables.seed)
+              const interestBank = parseFloat(variables.interestBank)
+              const trendBonds = parseFloat(variables.trendBonds)
+              const gapBonds = parseFloat(variables.gapBonds)
+              const trendStocks = parseFloat(variables.trendStocks)
+              const gapStocks = parseFloat(variables.gapStocks)
               await addGamePeriod({
                 variables: {
                   gameId: Number(router.query.id),
-                  // TODO(JJ): Add dice simulation
-                  facts: pick(
-                    ['stockTrend', 'stockVariance', 'stockGap'],
-                    variables
-                  ),
+                  facts: {
+                    scenario: {
+                      seed,
+                      interestBank,
+                      trendBonds,
+                      gapBonds,
+                      trendStocks,
+                      gapStocks,
+                    },
+                  },
                   segmentCount: segmentCount,
                 },
               })
@@ -562,7 +644,7 @@ function ManageGame() {
                       className={{ label: 'pb-2 font-normal' }}
                     />
                     <NewFromikNumberField
-                      placeholder="4"
+                      placeholder={newPeriodForm.values.segmentCount}
                       label="Number of segments"
                       name="segmentCount"
                       tooltip={
@@ -576,6 +658,80 @@ function ManageGame() {
                       data={{ cy: 'segment-count' }}
                       className={{ label: 'pb-2 font-normal' }}
                     />
+                  </div>
+                  <div className="mt-4">
+                    <H3>Scenario Parameters</H3>
+                    <div className="flex w-1/2 flex-col gap-2">
+                      <NewFromikNumberField
+                        placeholder={newPeriodForm.values.seed}
+                        label="Seed"
+                        name="seed"
+                        tooltip={<p>Seed ....</p>}
+                        required
+                        data={{ cy: 'seed' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <H4>Bank</H4>
+                    <div className="flex w-1/2 flex-col gap-2">
+                      <NewFromikNumberField
+                        placeholder={newPeriodForm.values.interestBank}
+                        label="Saving Interest"
+                        name="interestBank"
+                        tooltip={<p>Saving interest ....</p>}
+                        required
+                        data={{ cy: 'saving-interest' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <H4>Bonds</H4>
+                    <div className="flex w-1/2 gap-2">
+                      <NewFromikNumberField
+                        placeholder={newPeriodForm.values.trendBonds}
+                        label="Trend"
+                        name="trendBonds"
+                        tooltip={<p>Trend is the expectation value.</p>}
+                        required
+                        data={{ cy: 'trend-bonds' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                      <NewFromikNumberField
+                        placeholder={newPeriodForm.values.gapBonds}
+                        label="Gap"
+                        name="gapBonds"
+                        tooltip={<p>TODO.</p>}
+                        required
+                        data={{ cy: 'gap-bonds' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <H4>Stocks</H4>
+                    <div className="flex w-1/2 gap-2">
+                      <NewFromikNumberField
+                        placeholder={newPeriodForm.values.trendStocks}
+                        label="Trend"
+                        name="trendStocks"
+                        tooltip={<p>Trend is the expectation value.</p>}
+                        required
+                        data={{ cy: 'trend-stocks' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                      <NewFromikNumberField
+                        placeholder={newPeriodForm.values.gapStocks}
+                        label="Gap"
+                        name="gapStocks"
+                        tooltip={<p>TODO.</p>}
+                        required
+                        data={{ cy: 'gap-stocks' }}
+                        className={{ label: 'pb-2 font-normal' }}
+                      />
+                    </div>
                   </div>
                 </Modal>
               )

@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 import { COLORS } from '@gbl-uzh/platform/src/lib/constants'
 import { Logo } from '@gbl-uzh/ui'
 import {
@@ -8,7 +8,11 @@ import {
 } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
-import { UpdatePlayerDataDocument } from 'src/graphql/generated/ops'
+import { useState } from 'react'
+import {
+  SelfDocument,
+  UpdatePlayerDataDocument,
+} from 'src/graphql/generated/ops'
 import { LOCATIONS } from 'src/lib/constants'
 import * as Yup from 'yup'
 
@@ -38,40 +42,62 @@ const Schema = Yup.object().shape({
 // - add banks, like colors
 function Welcome() {
   const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { data, loading, error } = useQuery(SelfDocument)
 
-  const [updatePlayerData, { data: _, loading, error }] = useMutation(
-    UpdatePlayerDataDocument
-  )
+  const [updatePlayerData] = useMutation(UpdatePlayerDataDocument, {
+    optimisticResponse: {
+      updatePlayerData: {
+        name: data?.self.name,
+        facts: JSON.stringify({
+          color: data?.self.facts.color,
+          avatar: data?.self.facts.avatar,
+          location: data?.self.facts.location,
+        }),
+      },
+    },
+    onError: (error) => {
+      console.error('Error updating player data:', error)
+      setIsSubmitting(false)
+    },
+  })
 
   if (loading) return null
   if (error) return `Error! ${error}`
 
   const gameName = 'Minigame'
 
+  const player = data.self
+
   return (
     <div className="m-auto w-full max-w-4xl p-8">
       <Formik
         initialValues={{
-          name: 'Sparfuchs Bank AG',
-          // name: player.name,
-          color: Object.keys(COLORS)[0],
-          location: LOCATIONS.Trader[0],
-          imgPathAvatar: '/avatars/avatar_placeholder.png',
-          // avatar: AVATARS[player.role][0]['key'],
+          name: player.name,
+          color: player.facts.color ?? Object.keys(COLORS)[0],
+          location: player.facts.location ?? LOCATIONS.Trader[0],
+          imgPathAvatar:
+            player.facts.avatar ?? '/avatars/avatar_placeholder.png',
         }}
         validationSchema={Schema}
         onSubmit={async (values) => {
-          await updatePlayerData({
-            variables: {
-              name: values.name,
-              facts: JSON.stringify({
-                color: values.color,
-                avatar: values.imgPathAvatar,
-                location: values.location,
-              }),
-            },
-          })
-          router.replace('/play/cockpit')
+          setIsSubmitting(true)
+          try {
+            await updatePlayerData({
+              variables: {
+                name: values.name,
+                facts: JSON.stringify({
+                  color: values.color,
+                  avatar: values.imgPathAvatar,
+                  location: values.location,
+                }),
+              },
+            })
+            router.replace('/play/cockpit')
+          } catch (e) {
+            console.error('Error updating player data:', e)
+            setIsSubmitting(false)
+          }
         }}
       >
         {({ values, errors, touched }) => (
@@ -169,8 +195,12 @@ function Welcome() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button className={{ root: 'mt-4' }} type="submit">
-                      Start Game
+                    <Button
+                      className={{ root: 'mt-4' }}
+                      type="submit"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Loading...' : 'Start Game'}
                     </Button>
                   </CardFooter>
                 </Card>

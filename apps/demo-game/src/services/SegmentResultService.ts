@@ -173,6 +173,10 @@ export function end(
             bondsBenchmark: benchmarks.bonds,
             stocksBenchmark: benchmarks.stocks,
             totalAssets,
+            totalAssetsReturn:
+              facts.assetsWithReturns?.slice(-1)[0]?.totalAssetsReturn ?? 0,
+            accTotalAssetsReturn:
+              facts.assetsWithReturns?.slice(-1)[0]?.accTotalAssetsReturn ?? 0,
           },
         ]
       )

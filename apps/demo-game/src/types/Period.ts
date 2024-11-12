@@ -1,22 +1,24 @@
 import { inputObjectType } from 'nexus'
 import * as yup from 'yup'
 
-const TREND_STOCKS = 0.0065
-const TREND_BONDS = 0.0031
-const GAP_STOCKS = 0.025
-const GAP_BONDS = 0.005
-const RETURN_BANK = 0.002
+export const ROLLS_PER_SEGMENT = 3
+export const DEFAULT_SEED = 1
+export const GAP_STOCKS = 0.025
+export const GAP_BONDS = 0.005
+export const INTEREST_BANK = 0.002
+export const TREND_STOCKS = 0.0065
+export const TREND_BONDS = 0.0031
 
 export const PeriodFactsSchema = yup.object({
-  rollsPerSegment: yup.number().positive().integer().default(3),
+  rollsPerSegment: yup.number().positive().integer().default(ROLLS_PER_SEGMENT),
   scenario: yup
     .object({
-      seed: yup.number().integer().default(0),
+      seed: yup.number().integer().default(DEFAULT_SEED),
       trendStocks: yup.number().required(),
       trendBonds: yup.number().required(),
       gapStocks: yup.number().positive().required(),
       gapBonds: yup.number().positive().required(),
-      bankReturn: yup.number().required(),
+      interestBank: yup.number().required(),
     })
     .required(),
 })
@@ -26,30 +28,30 @@ export interface PeriodFacts extends yup.InferType<typeof PeriodFactsSchema> {}
 export const PeriodFactsScenarioInput = inputObjectType({
   name: 'PeriodFactsScenarioInput',
   definition(t) {
-    t.int('seed', { default: 0 })
+    t.int('seed', { default: DEFAULT_SEED })
     t.float('trendStocks', { default: TREND_STOCKS })
     t.float('trendBonds', { default: TREND_BONDS })
     t.float('gapStocks', { default: GAP_STOCKS })
     t.float('gapBonds', { default: GAP_BONDS })
-    t.float('bankReturn', { default: RETURN_BANK })
+    t.float('interestBank', { default: INTEREST_BANK })
   },
 })
 
 export const PeriodFactsInput = inputObjectType({
   name: 'PeriodFactsInput',
   definition(t) {
-    t.int('rollsPerSegment', { default: 3 }),
-      t.field('scenario', {
-        type: PeriodFactsScenarioInput,
-        default: {
-          seed: 0,
-          trendStocks: TREND_STOCKS,
-          trendBonds: TREND_BONDS,
-          gapStocks: GAP_STOCKS,
-          gapBonds: GAP_BONDS,
-          bankReturn: RETURN_BANK,
-        },
-      })
+    t.int('rollsPerSegment', { default: ROLLS_PER_SEGMENT })
+    t.field('scenario', {
+      type: PeriodFactsScenarioInput,
+      default: {
+        seed: DEFAULT_SEED,
+        trendStocks: TREND_STOCKS,
+        trendBonds: TREND_BONDS,
+        gapStocks: GAP_STOCKS,
+        gapBonds: GAP_BONDS,
+        interestBank: INTEREST_BANK,
+      },
+    })
   },
 })
 

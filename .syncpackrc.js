@@ -5,7 +5,6 @@ const config = {
   customTypes: {},
   dependencyTypes: [
     'dev',
-    'local',
     'overrides',
     'peer',
     'pnpmOverrides',
@@ -14,8 +13,32 @@ const config = {
   ],
   filter: '.',
   indent: '  ',
-  semverGroups: [],
-  semverRange: '',
+  semverGroups: [
+    {
+      range: '',
+      dependencyTypes: ['prod', 'resolutions', 'overrides', 'pnpmOverrides'],
+      dependencies: ['**'],
+      packages: ['**'],
+    },
+    {
+      range: '~',
+      dependencyTypes: ['dev'],
+      dependencies: ['!@types/**'],
+      packages: ['**'],
+    },
+    {
+      range: '^',
+      dependencyTypes: ['dev'],
+      dependencies: ['@types/**'],
+      packages: ['**'],
+    },
+    {
+      range: '^',
+      dependencyTypes: ['peer'],
+      dependencies: ['**'],
+      packages: ['**'],
+    },
+  ],
   sortAz: [
     'dependencies',
     'devDependencies',

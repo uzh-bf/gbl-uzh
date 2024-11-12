@@ -1,11 +1,19 @@
 import react from '@vitejs/plugin-react-swc'
-import dts from 'vite-plugin-dts'
 import path from 'path'
 import { defineConfig } from 'vite'
+import dts from 'vite-plugin-dts'
+import { externalizeDeps } from 'vite-plugin-externalize-deps'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), dts({ rollupTypes: true })],
+  plugins: [
+    react(),
+    dts({ rollupTypes: true }),
+    externalizeDeps({
+      deps: false,
+      peerDeps: true,
+    }) as Plugin,
+  ],
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
@@ -13,12 +21,8 @@ export default defineConfig({
       fileName: 'index',
     },
     rollupOptions: {
-      external: ['react', 'react-dom'],
-      output: {
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM',
-        },
+      watch: {
+        include: 'src/**',
       },
     },
   },

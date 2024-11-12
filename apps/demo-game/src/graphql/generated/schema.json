@@ -350,18 +350,6 @@
             "deprecationReason": null
           },
           {
-            "name": "playerCount",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "players",
             "description": null,
             "args": [],
@@ -1570,7 +1558,7 @@
               "name": "PeriodFactsScenarioInput",
               "ofType": null
             },
-            "defaultValue": "{bankReturn: 0.002, gapBonds: 0.005, gapStocks: 0.025, seed: 0, trendBonds: 0.0031, trendStocks: 0.0065}",
+            "defaultValue": "{gapBonds: 0.005, gapStocks: 0.025, interestBank: 0.002, seed: 1, trendBonds: 0.0031, trendStocks: 0.0065}",
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -1586,18 +1574,6 @@
         "isOneOf": false,
         "fields": null,
         "inputFields": [
-          {
-            "name": "bankReturn",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null
-            },
-            "defaultValue": "0.002",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
           {
             "name": "gapBonds",
             "description": null,
@@ -1623,6 +1599,18 @@
             "deprecationReason": null
           },
           {
+            "name": "interestBank",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": "0.002",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "seed",
             "description": null,
             "type": {
@@ -1630,7 +1618,7 @@
               "name": "Int",
               "ofType": null
             },
-            "defaultValue": "0",
+            "defaultValue": "1",
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2979,6 +2967,59 @@
               "kind": "OBJECT",
               "name": "Player",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "specificResults",
+            "description": null,
+            "args": [
+              {
+                "name": "gameId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "type",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PlayerResult",
+                  "ofType": null
+                }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null

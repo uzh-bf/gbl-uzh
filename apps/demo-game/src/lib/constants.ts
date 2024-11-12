@@ -9,3 +9,22 @@ export const COLORS = {
   Blue: 'bg-blue-200',
   White: 'bg-white',
 }
+
+export const MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
+
+export const NUM_MONTHS = MONTHS.length
+
+export const NUM_MONTHS_PER_SEGMENT = 4

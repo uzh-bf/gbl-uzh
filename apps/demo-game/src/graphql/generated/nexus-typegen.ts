@@ -41,10 +41,10 @@ export interface NexusGenInputs {
     scenario: NexusGenInputs['PeriodFactsScenarioInput'] | null; // PeriodFactsScenarioInput
   }
   PeriodFactsScenarioInput: { // input type
-    bankReturn: number | null; // Float
     gapBonds: number | null; // Float
     gapStocks: number | null; // Float
-    seed?: number | null; // Int
+    interestBank: number | null; // Float
+    seed: number | null; // Int
     trendBonds: number | null; // Float
     trendStocks: number | null; // Float
   }
@@ -98,7 +98,6 @@ export interface NexusGenObjects {
     id: string; // ID!
     name: string; // String!
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
-    playerCount?: number | null; // Int
     players: NexusGenRootTypes['Player'][]; // [Player!]!
     status: NexusGenEnums['GameStatus']; // GameStatus!
   }
@@ -258,7 +257,6 @@ export interface NexusGenFieldTypes {
     id: string; // ID!
     name: string; // String!
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
-    playerCount: number | null; // Int
     players: NexusGenRootTypes['Player'][]; // [Player!]!
     status: NexusGenEnums['GameStatus']; // GameStatus!
   }
@@ -396,6 +394,7 @@ export interface NexusGenFieldTypes {
     result: NexusGenRootTypes['PlayerState'] | null; // PlayerState
     results: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
     self: NexusGenRootTypes['Player'] | null; // Player
+    specificResults: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
     storyElements: NexusGenRootTypes['StoryElement'][] | null; // [StoryElement!]
   }
   StoryElement: { // field return type
@@ -436,7 +435,6 @@ export interface NexusGenFieldTypeNames {
     id: 'ID'
     name: 'String'
     periods: 'Period'
-    playerCount: 'Int'
     players: 'Player'
     status: 'GameStatus'
   }
@@ -574,6 +572,7 @@ export interface NexusGenFieldTypeNames {
     result: 'PlayerState'
     results: 'PlayerResult'
     self: 'Player'
+    specificResults: 'PlayerResult'
     storyElements: 'StoryElement'
   }
   StoryElement: { // field return type name
@@ -649,6 +648,10 @@ export interface NexusGenArgTypes {
     }
     learningElement: { // args
       id: string; // ID!
+    }
+    specificResults: { // args
+      gameId: number; // Int!
+      type: string; // String!
     }
   }
 }

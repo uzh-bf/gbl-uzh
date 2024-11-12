@@ -33,11 +33,13 @@ export function initialize(
       const periodFacts = payload.periodFacts
       const segmentIx = payload.segmentIx
 
+      // TODO(JJ): Should also take periodIx into account?
       const diceRolls = R.range(0, periodFacts.rollsPerSegment).map(
         (rollIx: number) => {
           const seed = periodFacts.scenario.seed
           const bondsAndStocks = diceRoll([seed, segmentIx, rollIx, 0])
           return {
+            shared: bondsAndStocks,
             bonds: diceRoll([seed, segmentIx, rollIx, 1]) + bondsAndStocks,
             stocks: diceRoll([seed, segmentIx, rollIx, 2]) + bondsAndStocks,
           }
@@ -47,7 +49,7 @@ export function initialize(
       const returns = diceRolls.map((rolls) => {
         const scenario = payload.periodFacts.scenario
         return {
-          bank: scenario.bankReturn,
+          bank: scenario.interestBank,
           bonds: computeScenarioOutcome(
             scenario.trendBonds,
             scenario.gapBonds,

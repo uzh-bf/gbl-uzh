@@ -1,6 +1,5 @@
 import type { PrismaClient } from '@prisma/client'
 import JWT from 'jsonwebtoken'
-import { strict as assert } from 'node:assert'
 import { destroyCookie, setCookie } from 'nookies'
 import { CtxWithPrisma, UserRole } from '../types.js'
 
@@ -16,7 +15,9 @@ export function createLoginToken({
   role,
   ...extra
 }: CreateLoginTokenArgs) {
-  assert(typeof process.env.NEXTAUTH_SECRET === 'string')
+  if (!process.env.NEXTAUTH_SECRET) {
+    throw new Error('NEXTAUTH_SECRET is not set')
+  }
 
   return JWT.sign({ sub, role, ...extra }, process.env.NEXTAUTH_SECRET, {
     expiresIn: '1 week',
