@@ -18,10 +18,17 @@ interface DiceProps {
     dieSize?: number
     margin?: number
     label?: string
+    rollDone?: (totalValue: number, values: number[]) => void
   }[]
+  withRollButton?: boolean
 }
 
-function Dice({ dice }: DiceProps) {
+const defaultRollDone = (totalValue: number, values: number[]) => {
+  console.log('individual die values array:', values)
+  console.log('total dice value:', totalValue)
+}
+
+function Dice({ dice, withRollButton }: DiceProps) {
   const diceRef = dice.map(() => useRef<ReactDiceRef>(null))
 
   const rollAll = () => {
@@ -43,22 +50,18 @@ function Dice({ dice }: DiceProps) {
               numDice={1}
               ref={diceRef[ix]}
               faceColor={item.faceColor}
-              dotColor={item.dotColor}
+              dotColor={item.dotColor ?? 'white'}
               dieSize={item.dieSize}
               margin={item.margin}
               rollTime={2}
               disableIndividual
-              rollDone={() => null}
-              // rollDone={(totalValue: number, values: number[]) => {
-              // console.log('individual die values array:', values)
-              // console.log('total dice value:', totalValue)
-              // }}
+              rollDone={item.rollDone ?? defaultRollDone}
             />
             {item.label && <span className="text-sm">{item.label}</span>}
           </div>
         ))}
       </div>
-      <Button onClick={rollAll}>Roll</Button>
+      {withRollButton && <Button onClick={rollAll}>Roll</Button>}
     </div>
   )
 }
