@@ -358,6 +358,9 @@ function ManageGame() {
                         const diceStocks = segment?.facts.diceRolls.map(
                           (dice) => dice.stocks
                         )
+                        const diceShared = segment?.facts.diceRolls.map(
+                          (dice) => dice.shared
+                        )
                         return (
                           <div
                             className={twMerge(
@@ -394,8 +397,11 @@ function ManageGame() {
                             </div>
                             {segment && (
                               <Link
-                                // href={`/admin/dice/${period.facts.trendE}/${period.facts.trendGap}/${diceBonds}-${diceStocks}`}
-                                href={`/admin/dice/${segment.id}`}
+                                href={`/admin/dice/${
+                                  segment.id
+                                }/${diceBonds.join('-')}-${diceShared.join(
+                                  '-'
+                                )}-${diceStocks.join('-')}`}
                                 target="_blank"
                                 className="flex flex-col rounded border border-gray-300 p-1 text-xs"
                               >
