@@ -33,6 +33,7 @@ export function initialize(
       const periodFacts = payload.periodFacts
       const segmentIx = payload.segmentIx
 
+      // TODO(JJ): Should also take periodIx into account?
       const diceRolls = R.range(0, periodFacts.rollsPerSegment).map(
         (rollIx: number) => {
           const seed = periodFacts.scenario.seed
