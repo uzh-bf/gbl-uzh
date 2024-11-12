@@ -51,6 +51,7 @@ USER nextjs
 COPY --from=builder --chown=nextjs:nodejs /app/apps/demo-game/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/demo-game/.next/static ./apps/demo-game/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/demo-game/public ./apps/demo-game/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/demo-game/.env.production ./apps/demo-game/.env.production
 
 ENV NODE_ENV=production
 ENV PORT=3000
