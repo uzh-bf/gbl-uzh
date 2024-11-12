@@ -10,14 +10,6 @@ let apolloClient
 function createIsomorphLink() {
   const isBrowser = typeof window !== 'undefined'
 
-  let httpLink: ApolloLink = new HttpLink({
-    uri: process.env.NEXT_PUBLIC_API_URL,
-    credentials: 'same-origin',
-  })
-
-function createIsomorphLink() {
-  const isBrowser = typeof window !== 'undefined'
-
   const apiUrl = process.env.NEXT_PUBLIC_API_URL
   if (typeof apiUrl !== 'string' || !apiUrl) {
     throw new Error('NEXT_PUBLIC_API_URL is not set')
