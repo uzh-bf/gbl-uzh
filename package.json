@@ -26,13 +26,14 @@
     "Andrin Rehmann <andrin.rehmann@df.uzh.ch>"
   ],
   "devDependencies": {
+    "nodemon": "^2.0.16",
     "standard-version": "~9.5.0",
     "syncpack": "~13.0.0",
     "turbo": "~2.2.3"
   },
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev",
+    "dev": "nodemon -w packages/platform/public --ext graphql --exec turbo run dev",
     "dev-web": "turbo run dev-web",
     "format": "turbo run format",
     "prisma:setup": "pnpm run --filter @gbl-uzh/demo-game prisma:setup",
