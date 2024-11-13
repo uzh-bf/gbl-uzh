@@ -632,12 +632,25 @@ function Cockpit() {
                             cursor={false}
                             content={
                               <ChartTooltipContent
-                                formatter={(value: number, name) =>
-                                  `${LABEL_MAP[name]}: ${(value * 100).toFixed(
-                                    2
-                                  )}%`
-                                }
-                                labelFormatter={(label) => `Month: ${label}`}
+                                formatter={(value, name, item) => [
+                                  <div
+                                    key={name}
+                                    className="flex w-full items-center justify-between gap-x-2"
+                                  >
+                                    <div className="flex items-center gap-x-1">
+                                      <div
+                                        className="h-[8px] w-[8px] rounded-sm"
+                                        style={{ background: item.color }}
+                                      />
+                                      <span className="text-xs text-gray-600">
+                                        {LABEL_MAP[name]}
+                                      </span>
+                                    </div>
+                                    <span className="font-bold text-black">
+                                      {(value * 100).toFixed(2)}%
+                                    </span>
+                                  </div>,
+                                ]}
                               />
                             }
                           />
