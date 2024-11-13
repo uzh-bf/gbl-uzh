@@ -237,7 +237,7 @@ function Cockpit() {
   )
 
   useEffect(() => {
-    if (data?.result?.currentGame?.periods?.length > 1) {
+    if (data?.result?.currentGame?.periods?.length > 0) {
       setPeriod(data.result.currentGame.periods.length - 1)
     }
   }, [data?.result?.currentGame?.periods?.length])
@@ -697,8 +697,16 @@ function Cockpit() {
 
       const columns_portfolio = [
         { label: 'Category', accessor: 'category', sortable: false },
-        { label: 'Current Value', accessor: 'currentValue', sortable: false },
-        { label: 'Future Value', accessor: 'futureValue', sortable: false },
+        {
+          label: 'Value before decisions',
+          accessor: 'currentValue',
+          sortable: false,
+        },
+        {
+          label: 'Value after decisions',
+          accessor: 'futureValue',
+          sortable: false,
+        },
       ]
 
       const data_portfolio = [

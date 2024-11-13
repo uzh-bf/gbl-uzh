@@ -104,6 +104,8 @@ function ProbabilityChart({
       trendGap,
     })
 
+    console.log(trendE, trendGap)
+
     const data = Object.entries(PROB).map(([eyes, prob]) => ({
       eyes,
       prob,
@@ -116,8 +118,8 @@ function ProbabilityChart({
   return (
     <div>
       <div className="flex flex-row gap-4 px-2 py-1 text-sm">
-        <div>Expectation: {trendE * 100}%</div>
-        <div>Trend Gap: {trendGap * 100}%</div>
+        <div>Expectation: {(trendE * 100).toFixed(2)}%</div>
+        <div>Trend Gap: {(trendGap * 100).toFixed(2)}%</div>
         <div>Volatility: {(vola * 100).toFixed(2)}%</div>
       </div>
 
