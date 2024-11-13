@@ -92,7 +92,7 @@ function Games() {
         )}
       </Formik>
       <div className="mt-4 flex flex-col gap-1">
-        {[...data.games].map((game, index, array) => {
+        {data.games.map((game, index, array) => {
           return (
             <Link
               className="w-96"

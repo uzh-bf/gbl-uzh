@@ -47,6 +47,13 @@ import StoryElements from '~/components/StoryElements'
 // TODO(JJ): This will be replaced by the design system
 import { useToast } from '../../components/ui/use-toast'
 
+const LABEL_MAP = {
+  accTotalAssetsReturn: 'Total Assets Return',
+  accBankBenchmarkReturn: 'Savings Return',
+  accBondsBenchmarkReturn: 'Bonds Return',
+  accStocksBenchmarkReturn: 'Stocks Return',
+}
+
 function GameHeader({ currentGame }) {
   return (
     <div className="flex justify-between rounded border p-4">
@@ -619,7 +626,16 @@ function Cockpit() {
                         <BarChart data={allDataPerPeriod[period]}>
                           <ChartTooltip
                             cursor={false}
-                            content={<ChartTooltipContent />}
+                            content={
+                              <ChartTooltipContent
+                                formatter={(value: number, name) =>
+                                  `${LABEL_MAP[name]}: ${(value * 100).toFixed(
+                                    2
+                                  )}%`
+                                }
+                                labelFormatter={(label) => `Month: ${label}`}
+                              />
+                            }
                           />
                           {Object.keys(configAccReturn).map((key) => {
                             return (
