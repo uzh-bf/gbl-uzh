@@ -179,7 +179,8 @@ function ReportGame() {
         .map((result) => {
           return Object.values(result.facts.decisions).map(
             (decision, _, arr) => {
-              return Number(decision) / arr.length
+              // return Number(decision) / arr.length
+              return Number(decision)
             }
           )
         })
@@ -420,11 +421,12 @@ function ReportGame() {
                           fill={payload.value === 0 ? '#ff0000' : '#666'}
                           fontWeight={payload.value === 0 ? 'bold' : 'normal'}
                         >
-                          {payload.value.toFixed(2) * 100}%
+                          {(payload.value * 100).toFixed(1)}%
                         </text>
                       </g>
                     )
                   }}
+                  domain={['auto', (dataMax) => dataMax * 1.1]}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
               </AreaChart>
@@ -442,12 +444,7 @@ function ReportGame() {
                   <TableRow>
                     <TableHead>Time</TableHead>
                     {game.players.map((player) => (
-                      <TableHead
-                        key={player.id}
-                        className="flex w-full items-center"
-                      >
-                        {player.name}
-                      </TableHead>
+                      <TableHead key={player.id}>{player.name}</TableHead>
                     ))}
                   </TableRow>
                   <TableRow>
@@ -530,10 +527,9 @@ function ReportGame() {
                       {ix === arr.length - 1 && (
                         <LabelList
                           position="top"
-                          offset={12}
                           className="fill-foreground"
                           fontSize={12}
-                          formatter={(v) => `${v.toFixed(2) * 100}%`}
+                          formatter={(v) => `${(v * 100).toFixed(1)}%`}
                         />
                       )}
                     </Bar>
@@ -550,7 +546,8 @@ function ReportGame() {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tickFormatter={(v) => `${v.toFixed(2) * 100}%`}
+                  tickFormatter={(v) => `${(v * 100).toFixed(1)}%`}
+                  domain={['auto', (dataMax) => dataMax * 1.1]}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
               </BarChart>
