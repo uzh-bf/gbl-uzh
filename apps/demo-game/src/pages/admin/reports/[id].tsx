@@ -177,12 +177,12 @@ function ReportGame() {
       return previousSegmentResults
         .filter((result) => result.player.id === player.id)
         .map((result) => {
-          return Object.values(result.facts.decisions).map(
-            (decision, _, arr) => {
-              // return Number(decision) / arr.length
-              return Number(decision)
-            }
+          const decisionsToNumbers = Object.values(result.facts.decisions).map(
+            (decision) => Number(decision)
           )
+          const weight =
+            1 / decisionsToNumbers.reduce((acc, decision) => acc + decision, 0)
+          return decisionsToNumbers.map((decision) => decision * weight)
         })
     })
 
