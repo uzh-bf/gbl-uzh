@@ -44,7 +44,7 @@
     "react-dom": "18.3.1",
     "react-i18next": "12.3.1",
     "react-markdown": "8.0.7",
-    "recharts": "2.8.0",
+    "recharts": "2.13.3",
     "tailwind-merge": "2.4.0",
     "ts-pattern": "5.0.5",
     "yup": "1.4.0"
