@@ -135,29 +135,25 @@ function ReportGame() {
             decisions[v] = Number(result.facts.decisions[v])
           })
 
-          const totalAssetsTmp = result.facts.assetsWithReturns.map((a) => {
-            return a.totalAssets
-          })
-          const accTotalAssetsReturnTmp = result.facts.assetsWithReturns.map(
-            (a) => {
-              return a.accTotalAssetsReturn
-            }
-          )
+          const totalAssetsTmp = result.facts.assetsWithReturns
+            .filter((_, ix) => ix > 0)
+            .map((a) => a.totalAssets)
+          const accTotalAssetsReturnTmp = result.facts.assetsWithReturns
+            .filter((_, ix) => ix > 0)
+            .map((a) => a.accTotalAssetsReturn)
 
           if (!dataPerPlayer[result.player.id]) {
             dataPerPlayer[result.player.id] = {
               decisions: [decisions],
               name: result.player.name,
-              totalAssets: totalAssetsTmp,
-              accTotalAssetsReturn: accTotalAssetsReturnTmp,
+              totalAssets: [...totalAssetsTmp],
+              accTotalAssetsReturn: [...accTotalAssetsReturnTmp],
             }
           } else {
             dataPerPlayer[result.player.id].decisions.push(decisions)
-            dataPerPlayer[result.player.id].totalAssets.push(
-              ...totalAssetsTmp.filter((_, ix) => ix > 0)
-            )
+            dataPerPlayer[result.player.id].totalAssets.push(...totalAssetsTmp)
             dataPerPlayer[result.player.id].accTotalAssetsReturn.push(
-              ...accTotalAssetsReturnTmp.filter((_, ix) => ix > 0)
+              ...accTotalAssetsReturnTmp
             )
           }
         })
