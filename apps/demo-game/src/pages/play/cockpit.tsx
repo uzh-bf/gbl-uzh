@@ -220,7 +220,6 @@ const months = [
   'Dec',
 ]
 const numMonths = months.length
-const numMonthsPerSegment = 4
 
 function Cockpit() {
   const [period, setPeriod] = useState<number>(null)
@@ -257,7 +256,6 @@ function Cockpit() {
   switch (currentGame?.status) {
     case 'PREPARATION':
     case 'COMPLETED':
-    case 'CONSOLIDATION':
       return (
         <GameLayout>
           <div className="w-full">
@@ -289,7 +287,7 @@ function Cockpit() {
         }
       })
 
-      const labels = ['Bank', 'Bonds', 'Stocks']
+      const labels = ['Savings', 'Bonds', 'Stocks']
 
       const config = {
         bank: { label: labels[0], color: colors[0] },
@@ -409,6 +407,7 @@ function Cockpit() {
         </GameLayout>
       )
 
+    case 'CONSOLIDATION':
     case 'PAUSED': {
       const numPeriods = currentGame.periods.length
       const previousResults = playerDataResult.previousResults
@@ -431,24 +430,9 @@ function Cockpit() {
       // The current data stores some values twice: once as a last value from
       // the previous segment and once as a first value from the current
       // segment. Therefore, we remove the first value from the current return.
-      const firstValue = assetsWithReturnsFlat[0]
-      const assetsWithReturnsFlatClean = [
-        {
-          bank: firstValue.bank,
-          bonds: firstValue.bonds,
-          stocks: firstValue.stocks,
-          bankBenchmark: firstValue.bankBenchmark,
-          bondsBenchmark: firstValue.bondsBenchmark,
-          stocksBenchmark: firstValue.stocksBenchmark,
-          accBankBenchmarkReturn: firstValue.accBankBenchmarkReturn,
-          accBondsBenchmarkReturn: firstValue.accBondsBenchmarkReturn,
-          accStocksBenchmarkReturn: firstValue.accStocksBenchmarkReturn,
-          accTotalAssetsReturn: firstValue.accTotalAssetsReturn,
-          totalAssets: firstValue.totalAssets,
-          month: months[0],
-        },
-      ]
-      for (let i = 1, j = 1; i < assetsWithReturnsFlat.length; i++) {
+
+      const assetsWithReturnsFlatClean = []
+      for (let i = 0, j = 0; i < assetsWithReturnsFlat.length; i++) {
         const { ix, ...val } = assetsWithReturnsFlat[i]
         if (ix == 0) continue
 
@@ -469,7 +453,7 @@ function Cockpit() {
       )
 
       const labels = [
-        'Bank Benchmark',
+        'Savings Benchmark',
         'Bonds Benchmark',
         'Stocks Benchmark',
         'Total Assets',
@@ -492,23 +476,26 @@ function Cockpit() {
       const columns_segment_results = [
         { label: '', accessor: 'cat', sortable: false, transformer: null },
       ]
-      for (let i = 0; i < numMonthsPerSegment; i++) {
-        const strNum = String(i)
+      const numMonthsPerSegment = currentGame.activePeriod.facts.rollsPerSegment
+      const numMonthsInTable = numMonthsPerSegment + 1
+      const periodIx = currentGame.activePeriod.index + 1
 
-        const numDataPoints = assetsWithReturnsFlat.length
-        const index = (numDataPoints - numMonthsPerSegment + i) % numMonths
-        const periodIx = ~~(numDataPoints / numMonths) + 1
+      const activeSegmentIx = currentGame.activePeriod.activeSegment.index
+      const indexArr = Array.from({ length: numMonthsInTable }, (_, i) => i - 1)
+      indexArr.map((i) => {
+        const index = (i + activeSegmentIx * numMonthsPerSegment) % numMonths
 
-        // TODO(JJ): Double-check if the month is correct
+        const strNum = String(i + 1)
+        const p = index === -1 ? periodIx - 1 : periodIx
+        const m = index === -1 ? months[numMonths + index] : months[index]
         columns_segment_results.push({
-          label: months[index] + ' Period ' + periodIx,
+          label: m + ' Period ' + p,
           accessor: strNum,
           sortable: false,
           transformer: ({ row }: { row: any }) =>
             typeof row[strNum] === 'number' && `CHF ${row[strNum].toFixed(2)}`,
         })
-      }
-      console.log('columns_segment_results', columns_segment_results)
+      })
 
       const reduceFn = (type: string) => {
         return (acc, value) => {
@@ -632,12 +619,25 @@ function Cockpit() {
                             cursor={false}
                             content={
                               <ChartTooltipContent
-                                formatter={(value: number, name) =>
-                                  `${LABEL_MAP[name]}: ${(value * 100).toFixed(
-                                    2
-                                  )}%`
-                                }
-                                labelFormatter={(label) => `Month: ${label}`}
+                                formatter={(value, name, item) => [
+                                  <div
+                                    key={name}
+                                    className="flex w-full items-center justify-between gap-x-2"
+                                  >
+                                    <div className="flex items-center gap-x-1">
+                                      <div
+                                        className="h-[8px] w-[8px] rounded-sm"
+                                        style={{ background: item.color }}
+                                      />
+                                      <span className="text-xs text-gray-600">
+                                        {LABEL_MAP[name]}
+                                      </span>
+                                    </div>
+                                    <span className="font-bold text-black">
+                                      {(value * 100).toFixed(2)}%
+                                    </span>
+                                  </div>,
+                                ]}
                               />
                             }
                           />
@@ -758,7 +758,7 @@ function Cockpit() {
 
       const decisions = [
         {
-          name: 'Bank',
+          name: 'Savings',
           label: (percentage: number) =>
             `Put ${(percentage * 100).toFixed()}% in savings.`,
           state: resultFactsDecisions.bank,
