@@ -289,7 +289,7 @@ function Cockpit() {
         }
       })
 
-      const labels = ['Bank', 'Bonds', 'Stocks']
+      const labels = ['Savings', 'Bonds', 'Stocks']
 
       const config = {
         bank: { label: labels[0], color: colors[0] },
@@ -469,7 +469,7 @@ function Cockpit() {
       )
 
       const labels = [
-        'Bank Benchmark',
+        'Savings Benchmark',
         'Bonds Benchmark',
         'Stocks Benchmark',
         'Total Assets',
@@ -758,7 +758,7 @@ function Cockpit() {
 
       const decisions = [
         {
-          name: 'Bank',
+          name: 'Savings',
           label: (percentage: number) =>
             `Put ${(percentage * 100).toFixed()}% in savings.`,
           state: resultFactsDecisions.bank,
