@@ -96,7 +96,7 @@ function ProbabilityChart({
 }: {
   trendE: number
   trendGap: number
-  totalEyes: string
+  totalEyes?: string
 }) {
   const { data, vola } = useMemo(() => {
     const { distribution, vola } = DIST_VOLATILITY({

@@ -1,10 +1,11 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { Layout } from '@gbl-uzh/ui'
+import { Layout, ProbabilityChart } from '@gbl-uzh/ui'
 import { CycleCountdown, Switch, Table } from '@uzh-bf/design-system'
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
   ChartContainer,
@@ -56,7 +57,7 @@ const LABEL_MAP = {
 
 function GameHeader({ currentGame }) {
   return (
-    <div className="flex justify-between rounded border p-4">
+    <div className="col-span-2 flex justify-between rounded border p-4">
       <div className="font-bold">Game {currentGame.id}</div>
       <div className="">Current status: {currentGame.status}</div>
     </div>
@@ -695,105 +696,180 @@ function Cockpit() {
         .reverse()
 
       const columns_portfolio = [
-        { label: 'Category', accessor: 'cat', sortable: false },
-        { label: 'Value', accessor: 'val', sortable: false },
+        { label: 'Category', accessor: 'category', sortable: false },
+        { label: 'Current Value', accessor: 'currentValue', sortable: false },
+        { label: 'Future Value', accessor: 'futureValue', sortable: false },
       ]
 
       const data_portfolio = [
         {
-          cat: 'Savings',
-          val: `CHF ${assets.bank.toFixed(2)}`,
+          category: 'Savings',
+          currentValue: `CHF ${assets.bank.toFixed(2)}`,
+          futureValue: `CHF ${(
+            assets.totalAssets *
+            (resultFactsDecisions.bank
+              ? 1 /
+                (+resultFactsDecisions.bank +
+                  +resultFactsDecisions.bonds +
+                  +resultFactsDecisions.stocks)
+              : 0)
+          ).toFixed(2)}`,
         },
         {
-          cat: 'Bonds',
-          val: `CHF ${assets.bonds.toFixed(2)}`,
+          category: 'Bonds',
+          currentValue: `CHF ${assets.bonds.toFixed(2)}`,
+          futureValue: `CHF ${(
+            assets.totalAssets *
+            (resultFactsDecisions.bonds
+              ? 1 /
+                (+resultFactsDecisions.bank +
+                  +resultFactsDecisions.bonds +
+                  +resultFactsDecisions.stocks)
+              : 0)
+          ).toFixed(2)}`,
         },
         {
-          cat: 'Stocks',
-          val: `CHF ${assets.stocks.toFixed(2)}`,
+          category: 'Stocks',
+          currentValue: `CHF ${assets.stocks.toFixed(2)}`,
+          futureValue: `CHF ${(
+            assets.totalAssets *
+            (resultFactsDecisions.stocks
+              ? 1 /
+                (+resultFactsDecisions.bank +
+                  +resultFactsDecisions.bonds +
+                  +resultFactsDecisions.stocks)
+              : 0)
+          ).toFixed(2)}`,
         },
         {
-          cat: 'Total',
-          val: `CHF ${assets.totalAssets.toFixed(2)}`,
+          category: 'Total',
+          currentValue: `CHF ${assets.totalAssets.toFixed(2)}`,
+          futureValue: `CHF ${assets.totalAssets.toFixed(2)}`,
         },
       ]
 
       const decisions = [
         {
           name: 'Bank',
-          label: (percentage: number, totalAssets: number) =>
-            `Invest ${(percentage * 100).toFixed()}% (CHF ${(
-              totalAssets * percentage
-            ).toFixed(2)}) into bank.`,
+          label: (percentage: number) =>
+            `Put ${(percentage * 100).toFixed()}% in savings.`,
           state: resultFactsDecisions.bank,
           action: ActionTypes.DECIDE_BANK,
         },
         {
           name: 'Bonds',
-          label: (percentage: number, totalAssets: number) =>
-            `Invest ${(percentage * 100).toFixed()}% (CHF ${(
-              totalAssets * percentage
-            ).toFixed(2)}) into bonds.`,
+          label: (percentage: number) =>
+            `Invest ${(percentage * 100).toFixed()}% in bonds.`,
           state: resultFactsDecisions.bonds,
           action: ActionTypes.DECIDE_BONDS,
         },
         {
           name: 'Stocks',
-          label: (percentage: number, totalAssets: number) =>
-            `Invest ${(percentage * 100).toFixed()}% (CHF ${(
-              totalAssets * percentage
-            ).toFixed(2)}) into stocks.`,
+          label: (percentage: number) =>
+            `Invest ${(percentage * 100).toFixed()}% in stocks.`,
           state: resultFactsDecisions.stocks,
           action: ActionTypes.DECIDE_STOCK,
         },
       ]
+
       return (
         <GameLayout>
-          <div className="flex w-full flex-col">
+          <div className="flex w-full grid-cols-2 flex-col gap-4 xl:grid">
             <GameHeader currentGame={currentGame} />
-            <div className="max-w-md">
-              <Table
-                columns={columns_portfolio}
-                data={data_portfolio}
-                caption=""
-              />
-            </div>
 
-            <div className="max-w-md rounded border p-4">
-              {decisions.map((decision) => {
-                return (
-                  <div className="p-1" key={decision.name}>
-                    <Switch
-                      label={decision.label(
-                        decision.state
-                          ? 1 /
-                              (+resultFactsDecisions.bank +
-                                +resultFactsDecisions.bonds +
-                                +resultFactsDecisions.stocks)
-                          : 0,
-                        assets.totalAssets
-                      )}
-                      checked={decision.state}
-                      id="switch"
-                      onCheckedChange={async (checked) => {
-                        await performAction({
-                          variables: {
-                            type: decision.action,
-                            payload: JSON.stringify({
-                              decision: checked,
-                            }),
-                          },
-                          refetchQueries: [ResultDocument],
-                        })
-                      }}
-                    />
-                  </div>
-                )
-              })}
-            </div>
-            <div className="my-2 flex flex-wrap gap-2">
-              <DecisionsDisplayCompact segmentDecisions={segmentEndResults} />
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Portfolio</CardTitle>
+                <CardDescription>The assets in your portfolio.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table
+                  columns={columns_portfolio}
+                  data={data_portfolio}
+                  caption=""
+                />
+
+                <div className="mt-8 flex flex-row gap-2">
+                  {decisions.map((decision) => {
+                    return (
+                      <div className="p-1" key={decision.name}>
+                        <Switch
+                          label={decision.label(
+                            decision.state
+                              ? 1 /
+                                  (+resultFactsDecisions.bank +
+                                    +resultFactsDecisions.bonds +
+                                    +resultFactsDecisions.stocks)
+                              : 0
+                          )}
+                          checked={decision.state}
+                          id="switch"
+                          onCheckedChange={async (checked) => {
+                            await performAction({
+                              variables: {
+                                type: decision.action,
+                                payload: JSON.stringify({
+                                  decision: checked,
+                                }),
+                              },
+                              refetchQueries: [ResultDocument],
+                            })
+                          }}
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+              </CardContent>
+              <CardFooter className="text-slate-500">
+                The assets put in savings yield a continuous return of{' '}
+                {currentGame.periods[period]?.facts.scenario.interestBank * 100}
+                % per month. The return of bonds and stocks is determined by the
+                market expectation and simulated by two dice.
+              </CardFooter>
+            </Card>
+
+            <DecisionsDisplayCompact segmentDecisions={segmentEndResults} />
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Expectation Bonds</CardTitle>
+                <CardDescription>
+                  The expected value of and possible fluctuations in the bond
+                  price.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ProbabilityChart
+                  trendE={
+                    currentGame.periods[period]?.facts.scenario.trendBonds
+                  }
+                  trendGap={
+                    currentGame.periods[period]?.facts.scenario.gapBonds
+                  }
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Expectation Stocks</CardTitle>
+                <CardDescription>
+                  The expected value of and possible fluctuations in the stock
+                  price.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ProbabilityChart
+                  trendE={
+                    currentGame.periods[period]?.facts.scenario.trendStocks
+                  }
+                  trendGap={
+                    currentGame.periods[period]?.facts.scenario.gapStocks
+                  }
+                />
+              </CardContent>
+            </Card>
           </div>
         </GameLayout>
       )
