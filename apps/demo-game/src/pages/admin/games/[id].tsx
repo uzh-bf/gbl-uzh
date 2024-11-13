@@ -260,13 +260,9 @@ function ManageGame() {
   return (
     <div className="p-4">
       <div>
-        <Button
-          onClick={() => {
-            router.push(`/admin/reports/${game?.id}`)
-          }}
-        >
-          Report
-        </Button>
+        <Link target="_blank" href={`/admin/reports/${game?.id}`}>
+          <Button>Report</Button>
+        </Link>
         {/* <Link className="w-96" href={`/admin/games/${game?.id}`} key={game?.id}>
           <Button
             className={{
