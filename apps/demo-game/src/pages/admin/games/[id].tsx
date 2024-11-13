@@ -351,7 +351,10 @@ function ManageGame() {
                           periodStatus === STATUS.COMPLETED ||
                           segmentStatus === STATUS.COMPLETED
 
-                        console.log('segment', segment)
+                        const trendBonds = period.facts.scenario.trendBonds
+                        const gapBonds = period.facts.scenario.gapBonds
+                        const trendStocks = period.facts.scenario.trendStocks
+                        const gapStocks = period.facts.scenario.gapStocks
                         const diceBonds = segment?.facts.diceRolls.map(
                           (dice) => dice.bonds
                         )
@@ -401,7 +404,9 @@ function ManageGame() {
                                   segment.id
                                 }/${diceBonds.join('-')}-${diceShared.join(
                                   '-'
-                                )}-${diceStocks.join('-')}`}
+                                )}-${diceStocks.join(
+                                  '-'
+                                )}-${trendBonds}-${gapBonds}-${trendStocks}-${gapStocks}`}
                                 target="_blank"
                                 className="flex flex-col rounded border border-gray-300 p-1 text-xs"
                               >
