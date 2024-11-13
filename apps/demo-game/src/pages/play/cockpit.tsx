@@ -236,11 +236,10 @@ function Cockpit() {
   )
 
   useEffect(() => {
-    // TODO(JJ): This will be changed anyway
-    if (period === null && data?.result?.currentGame?.periods?.length) {
+    if (data?.result?.currentGame?.periods?.length > 1) {
       setPeriod(data.result.currentGame.periods.length - 1)
     }
-  }, [data])
+  }, [data?.result?.currentGame?.periods?.length])
 
   if (loading) return null
   if (error) return `Error! ${error}`
@@ -545,27 +544,31 @@ function Cockpit() {
                   data={data_segment_results}
                   caption=""
                 />
-                <Select
-                  defaultValue={(period + 1).toString()}
-                  onValueChange={(value) => {
-                    setPeriod((prev) => parseInt(value))
-                  }}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Period" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allDataPerPeriod.map((_, index) => (
-                      <SelectItem key={index} value={index.toString()}>
-                        Period {index + 1}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="mt-8">
+                  {period !== null && (
+                    <Select
+                      defaultValue={period.toString()}
+                      onValueChange={(value) => {
+                        setPeriod((prev) => parseInt(value))
+                      }}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Period" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allDataPerPeriod.map((_, index) => (
+                          <SelectItem key={index} value={index.toString()}>
+                            Period {index + 1}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
               </div>
-              <div className="flex gap-2">
-                <div className="flex flex-1 flex-wrap gap-2">
-                  <Card className="w-full xl:w-[calc(50%-0.5rem)]">
+              <div className="flex flex-row gap-2">
+                <div className="flex flex-1 flex-col gap-2 xl:flex-row">
+                  <Card className="flex-1">
                     <CardHeader>
                       <CardTitle>Absolute performance</CardTitle>
                       <CardDescription>Assets over time.</CardDescription>
@@ -613,7 +616,7 @@ function Cockpit() {
                       </ChartContainer>
                     </CardContent>
                   </Card>
-                  <Card className="w-full xl:w-[calc(50%-0.5rem)]">
+                  <Card className="flex-1">
                     <CardHeader>
                       <CardTitle>Total accumulated returns</CardTitle>
                       <CardDescription>
