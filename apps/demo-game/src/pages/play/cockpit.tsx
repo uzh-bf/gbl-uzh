@@ -558,7 +558,7 @@ function Cockpit() {
                 <div className="flex flex-1 flex-col gap-2 xl:flex-row">
                   <Card className="flex-1">
                     <CardHeader>
-                      <CardTitle>Absolute performance</CardTitle>
+                      <CardTitle>Absolute Performance</CardTitle>
                       <CardDescription>Assets over time.</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -606,7 +606,7 @@ function Cockpit() {
                   </Card>
                   <Card className="flex-1">
                     <CardHeader>
-                      <CardTitle>Total accumulated returns</CardTitle>
+                      <CardTitle>Total Accumulated Returns</CardTitle>
                       <CardDescription>
                         Total accumulated returns with respect to initial
                         capital over time (per period).
@@ -842,7 +842,7 @@ function Cockpit() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Expectation Bonds</CardTitle>
+                <CardTitle>Expectation for Bonds</CardTitle>
                 <CardDescription>
                   The expected value of and possible fluctuations in the bond
                   price.
@@ -862,7 +862,7 @@ function Cockpit() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Expectation Stocks</CardTitle>
+                <CardTitle>Expectation for Stocks</CardTitle>
                 <CardDescription>
                   The expected value of and possible fluctuations in the stock
                   price.
@@ -885,7 +885,7 @@ function Cockpit() {
     }
 
     default:
-      return <div> Game has not been created yet. </div>
+      return <div>Game has not been created yet.</div>
   }
 }
 
