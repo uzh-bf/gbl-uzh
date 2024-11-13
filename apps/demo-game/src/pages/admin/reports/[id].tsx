@@ -56,12 +56,7 @@ const colors = [
   'hsl(var(--chart-4))',
 ]
 
-const labels = [
-  'Bank Benchmark',
-  'Bonds Benchmark',
-  'Stocks Benchmark',
-  'Total Assets',
-]
+const labels = ['Savings', 'Bonds', 'Stocks', 'Total Assets']
 
 const config = {
   bank: { label: labels[0], color: colors[0] },
@@ -140,29 +135,25 @@ function ReportGame() {
             decisions[v] = Number(result.facts.decisions[v])
           })
 
-          const totalAssetsTmp = result.facts.assetsWithReturns.map((a) => {
-            return a.totalAssets
-          })
-          const accTotalAssetsReturnTmp = result.facts.assetsWithReturns.map(
-            (a) => {
-              return a.accTotalAssetsReturn
-            }
-          )
+          const totalAssetsTmp = result.facts.assetsWithReturns
+            .filter((_, ix) => ix > 0)
+            .map((a) => a.totalAssets)
+          const accTotalAssetsReturnTmp = result.facts.assetsWithReturns
+            .filter((_, ix) => ix > 0)
+            .map((a) => a.accTotalAssetsReturn)
 
           if (!dataPerPlayer[result.player.id]) {
             dataPerPlayer[result.player.id] = {
               decisions: [decisions],
               name: result.player.name,
-              totalAssets: totalAssetsTmp,
-              accTotalAssetsReturn: accTotalAssetsReturnTmp,
+              totalAssets: [...totalAssetsTmp],
+              accTotalAssetsReturn: [...accTotalAssetsReturnTmp],
             }
           } else {
             dataPerPlayer[result.player.id].decisions.push(decisions)
-            dataPerPlayer[result.player.id].totalAssets.push(
-              ...totalAssetsTmp.filter((_, ix) => ix > 0)
-            )
+            dataPerPlayer[result.player.id].totalAssets.push(...totalAssetsTmp)
             dataPerPlayer[result.player.id].accTotalAssetsReturn.push(
-              ...accTotalAssetsReturnTmp.filter((_, ix) => ix > 0)
+              ...accTotalAssetsReturnTmp
             )
           }
         })
@@ -182,11 +173,12 @@ function ReportGame() {
       return previousSegmentResults
         .filter((result) => result.player.id === player.id)
         .map((result) => {
-          return Object.values(result.facts.decisions).map(
-            (decision, _, arr) => {
-              return Number(decision) / arr.length
-            }
+          const decisionsToNumbers = Object.values(result.facts.decisions).map(
+            (decision) => Number(decision)
           )
+          const weight =
+            1 / decisionsToNumbers.reduce((acc, decision) => acc + decision, 0)
+          return decisionsToNumbers.map((decision) => decision * weight)
         })
     })
 
@@ -425,11 +417,12 @@ function ReportGame() {
                           fill={payload.value === 0 ? '#ff0000' : '#666'}
                           fontWeight={payload.value === 0 ? 'bold' : 'normal'}
                         >
-                          {payload.value.toFixed(2) * 100}%
+                          {(payload.value * 100).toFixed(1)}%
                         </text>
                       </g>
                     )
                   }}
+                  domain={['auto', (dataMax) => dataMax * 1.1]}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
               </AreaChart>
@@ -454,8 +447,8 @@ function ReportGame() {
                     <TableHead></TableHead>
                     {game.players.map((player) => (
                       <TableHead key={player.id}>
-                        <div className="flex justify-center gap-x-2">
-                          <div>Bank</div>
+                        <div className="flex w-40 items-center justify-around">
+                          <div>Savings</div>
                           <div>Bonds</div>
                           <div>Stocks</div>
                         </div>
@@ -490,7 +483,7 @@ function ReportGame() {
                                 return (
                                   <div
                                     key={'decision-' + segmentIx}
-                                    className="flex justify-around"
+                                    className="flex w-40 items-center justify-around"
                                   >
                                     <div>{decision.bank}</div>
                                     <div>{decision.bonds}</div>
@@ -530,10 +523,9 @@ function ReportGame() {
                       {ix === arr.length - 1 && (
                         <LabelList
                           position="top"
-                          offset={12}
                           className="fill-foreground"
                           fontSize={12}
-                          formatter={(v) => `${v.toFixed(2) * 100}%`}
+                          formatter={(v) => `${(v * 100).toFixed(1)}%`}
                         />
                       )}
                     </Bar>
@@ -550,7 +542,8 @@ function ReportGame() {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tickFormatter={(v) => `${v.toFixed(2) * 100}%`}
+                  tickFormatter={(v) => `${(v * 100).toFixed(1)}%`}
+                  domain={['auto', (dataMax) => dataMax * 1.1]}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
               </BarChart>
