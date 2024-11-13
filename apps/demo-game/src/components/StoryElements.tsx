@@ -1,5 +1,6 @@
 import { useMutation } from '@apollo/client'
 import { Button, Modal, Progress } from '@uzh-bf/design-system'
+import Image from 'next/image'
 import { sortBy } from 'ramda'
 import { useEffect, useMemo, useState } from 'react'
 import Markdown from 'react-markdown'
@@ -94,7 +95,24 @@ function StoryElements({ playerState, player }: Props) {
       </div>
 
       <div className="prose prose-img:max-w-xs prose-img:rounded mt-4 max-w-none">
-        <Markdown children={content} />
+        <Markdown
+          components={{
+            img: ({ node, ...props }) => {
+              return (
+                <Image
+                  {...props}
+                  width={300}
+                  height={300}
+                  alt="Visual representation of the story element"
+                  className="mt-4 rounded-lg"
+                  style={{ maxWidth: '100%' }}
+                />
+              )
+            },
+          }}
+        >
+          {content}
+        </Markdown>
       </div>
     </Modal>
   )

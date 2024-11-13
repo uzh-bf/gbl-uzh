@@ -301,10 +301,10 @@ function Cockpit() {
 
       return (
         <GameLayout>
-          <div className="flex w-full flex-col">
+          <div className="w-full">
             <GameHeader currentGame={currentGame} />
-            <div className="flex flex-col gap-2">
-              <Card>
+            <div className="mt-4 flex w-full flex-row gap-4">
+              <Card className="flex-1">
                 <CardHeader>
                   <CardTitle>Total Assets</CardTitle>
                   <CardDescription>Assets over periods.</CardDescription>
@@ -350,9 +350,9 @@ function Cockpit() {
                   </ChartContainer>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="flex-1">
                 <CardHeader>
-                  <CardTitle>Total accumulated returns</CardTitle>
+                  <CardTitle>Total Accumulated Returns</CardTitle>
                   <CardDescription>
                     Total accumulated returns with respect to initial capital
                     over time (per period).
@@ -678,6 +678,7 @@ function Cockpit() {
         </GameLayout>
       )
     }
+
     case 'RUNNING': {
       const resultFacts = playerDataResult.playerResult.facts
       const assets = resultFacts.assets

@@ -121,8 +121,8 @@ function Welcome() {
                       <br />
                       Lucky you! You recently found out that you picked five
                       correct numbers in the lottery. You now want to invest CHF
-                      10,000 of the winnings, some of which you have already
-                      spent.
+                      10&apos;000 of the winnings, some of which you have
+                      already spent.
                     </div>
                     <div className="pt-10">
                       <span className="pb-2 text-2xl font-medium">Task</span>

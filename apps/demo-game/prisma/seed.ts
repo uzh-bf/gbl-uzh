@@ -6,20 +6,54 @@ import { PrismaClient } from '@prisma/client'
 const STORY_ELEMENTS = [
   {
     id: 'bank_account',
-    title: 'A. About the Bank Account',
-    content: `Your money is safe in the bank account, which means you can't lose anything and you also receive a small interest regularly.`,
+    title: 'A. About the Savings Account',
+    content: `
+![](/images/robot_savings.jpg)
+
+A bank account represents the safest way to store your money. Your deposits are protected by government guarantees, and you earn a predictable, though modest, interest rate. Think of it as the foundation of your financial journey - not the most exciting investment, but a reliable starting point that provides easy access to your money while keeping it secure.
+`,
   },
 
   {
     id: 'bonds',
-    title: 'B. Bonds',
-    content: `By investing in bonds, you take on the role of the creditor, i.e. you lend money to a state or a company and receive interest as compensation. The interest is higher than on a bank account because you are also taking on a higher risk. If a company or a state stops paying the interest or cannot repay the loan, you suffer a loss. The value of bonds fluctuates, unlike a savings account, and is primarily dependent on changes in the general interest rate level. However, the price fluctuations are less than with an investment in shares. The simulation shows you the total return - consisting of interest payments and price changes.`,
+    title: 'B. About Bonds',
+    content: `
+When you invest in bonds, you're essentially becoming a lender to governments or companies. It's like making a deal: you provide them with money now, and they promise to pay you regular interest payments plus return your initial investment when the bond matures. While bonds typically offer higher returns than savings accounts, they come with their own risks. Their value can fluctuate based on interest rate changes in the economy, and there's always the possibility, though rare, that the borrower might fail to meet their obligations. The simulation combines both interest payments and price changes to show you the complete picture of bond investment returns.
+
+![](/images/robot_bonds.jpg)
+`,
   },
 
   {
     id: 'stocks',
-    title: 'C. Stocks',
-    content: `By purchasing shares, you become a co-owner of a company as an investor. The risk of investing in shares is higher than that of investing in bonds, as you bear most of the entrepreneurial risks. If the company's business performance is poor, your investment will lose value. You will be compensated for the risk you have taken with dividends, which are usually paid out to investors in the form of money. You also hope that the value of the shares will increase. The simulation shows you the total return - consisting of dividend payments and price changes.`,
+    title: 'C. About Stocks',
+    content: `
+Investing in stocks means becoming a partial owner of real companies. When you buy shares, you're not just purchasing a trading instrument - you're acquiring a slice of a business's future success or failure. While stocks typically offer the highest potential returns among these three options, they also come with the most dramatic price swings. Your returns come from both company profits paid as dividends and changes in the stock's market value. The simulation combines these elements to demonstrate how stock investments perform over time, including both the thrilling ups and challenging downs of market movements.
+
+![](/images/robot_stocks.jpg)
+`,
+  },
+  {
+    id: 'diversification',
+    title: 'E. The Power of Diversification',
+    content: `
+Diversification is like not putting all your eggs in one basket. By spreading your money across different investments, you can reduce your risk without necessarily sacrificing returns. When you invest in multiple asset classes - like combining savings, bonds, and stocks - you create a balanced portfolio where the strength of one investment can help offset temporary weaknesses in others. Think of it as building a team where each player has different strengths: your savings provide stability, bonds offer steady income, and stocks give you growth potential. The simulation will show you how different combinations of these investments perform over time.
+
+![](/images/robot_diversification.jpg)
+`,
+  },
+  {
+    id: 'volatility_risk',
+    title: 'D. Understanding Volatility and Risk',
+    content: `
+Volatility represents how much and how quickly investment values change over time. Think of it like waves in the ocean - some investments have gentle ripples (low volatility), while others have large waves (high volatility). In our simulation, you'll see this clearly in how different investments behave:
+
+- Savings accounts are like a calm pond - minimal waves but also minimal growth. They offer the lowest volatility with predictable, though small, returns.
+- Bonds create moderate ripples - they move up and down more than savings accounts but less dramatically than stocks. Their movements are often tied to interest rates and economic conditions.
+- Stocks are like ocean waves - they can rise high and fall low, sometimes quite dramatically. This higher volatility comes with the potential for greater returns, but also bigger risks. When markets become more volatile, your stock investments might swing up or down by significant percentages.
+
+Remember: Higher potential returns typically come with higher volatility. This isn't necessarily bad - it creates opportunities for patient investors who understand and can tolerate these movements in pursuit of their long-term goals.
+`,
   },
 ]
 
