@@ -225,6 +225,7 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
         },
       },
       periods: {
+        orderBy: { createdAt: 'asc' },
         include: {
           segments: {
             include: {
