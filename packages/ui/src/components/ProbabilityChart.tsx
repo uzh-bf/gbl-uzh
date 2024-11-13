@@ -104,8 +104,6 @@ function ProbabilityChart({
       trendGap,
     })
 
-    console.log(trendE, trendGap)
-
     const data = Object.entries(PROB).map(([eyes, prob]) => ({
       eyes,
       prob,
