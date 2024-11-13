@@ -256,7 +256,6 @@ function Cockpit() {
   switch (currentGame?.status) {
     case 'PREPARATION':
     case 'COMPLETED':
-    case 'CONSOLIDATION':
       return (
         <GameLayout>
           <div className="w-full">
@@ -408,6 +407,7 @@ function Cockpit() {
         </GameLayout>
       )
 
+    case 'CONSOLIDATION':
     case 'PAUSED': {
       const numPeriods = currentGame.periods.length
       const previousResults = playerDataResult.previousResults
