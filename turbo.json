@@ -10,8 +10,7 @@
     },
     "dev": {
       "cache": false,
-      "outputs": ["dist/**", ".next/**", "public/**"],
-      "dependsOn": ["@gbl-uzh/platform#build", "@gbl-uzh/ui#build"]
+      "outputs": ["dist/**", ".next/**", "public/**"]
     },
     "dev-web": {
       "cache": false,

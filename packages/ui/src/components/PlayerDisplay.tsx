@@ -1,13 +1,13 @@
 import { Logo } from './Logo'
 import { Achievement } from './Achievement'
-import { XpBar } from './XpBar'
+// import { XpBar } from './XpBar'
 import { Button } from '@uzh-bf/design-system'
 
 interface PlayerDataProps {
   name?: string
   color?: string
-  xp?: number
-  xpMax: number
+  // xp?: number
+  // xpMax: number
   level: number
   location?: string
   achievements?: {
@@ -32,8 +32,8 @@ interface PlayerDataProps {
 function PlayerDisplay({
   name,
   color,
-  xp,
-  xpMax,
+  // xp,
+  // xpMax,
   level,
   location,
   achievements,
@@ -55,7 +55,7 @@ function PlayerDisplay({
           />
         </Button>
 
-        <XpBar value={xp ?? 0} max={xpMax} />
+        {/* <XpBar value={xp ?? 0} max={xpMax} /> */}
 
         <div className="flex flex-row flex-wrap flex-initial gap-2">
           {achievements?.map((achievement) => (

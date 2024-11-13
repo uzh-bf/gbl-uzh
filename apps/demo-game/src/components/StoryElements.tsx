@@ -101,8 +101,8 @@ function StoryElements({ playerState, player }: Props) {
               return (
                 <Image
                   {...props}
-                  width={300}
-                  height={300}
+                  width={250}
+                  height={250}
                   alt="Visual representation of the story element"
                   className="mt-4 rounded-lg"
                   style={{ maxWidth: '100%' }}

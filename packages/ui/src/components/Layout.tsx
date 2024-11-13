@@ -38,8 +38,8 @@ function Layout({ children, tabs, playerInfo, sidebar }: Props) {
             color={playerInfo.color}
             location={playerInfo.location}
             level={playerInfo.level}
-            xp={playerInfo.xp}
-            xpMax={playerInfo.xpMax}
+            // xp={playerInfo.xp}
+            // xpMax={playerInfo.xpMax}
             achievements={playerInfo.achievements}
             imgPathAvatar={playerInfo.imgPathAvatar}
             imgPathLocation={playerInfo.imgPathLocation}

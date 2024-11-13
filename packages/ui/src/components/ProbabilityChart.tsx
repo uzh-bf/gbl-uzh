@@ -131,7 +131,7 @@ function ProbabilityChart({
           <XAxis dataKey="eyes">
             <Label value="Dice Roll" position="bottom" offset={0} />
           </XAxis>
-          <YAxis dataKey="prob" tickFormatter={(value) => `${value * 100}%`}>
+          <YAxis dataKey="prob" tickFormatter={(value) => `${(value * 100).toFixed(1)}%`}>
             <Label value="Probability" angle={-90} position="left" offset={0} />
           </YAxis>
           <Bar dataKey="prob">

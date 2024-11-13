@@ -140,7 +140,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
           />
         )}
 
-        {countdownDurationMs !== null && (
+        {/* {countdownDurationMs !== null && (
           <CycleCountdown
             className={{
               root: '',
@@ -177,7 +177,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
               })
             }}
           />
-        )}
+        )} */}
       </div>
       <LearningElements />
     </div>
@@ -796,6 +796,9 @@ function Cockpit() {
                   columns={columns_portfolio}
                   data={data_portfolio}
                   caption=""
+                  className={{
+                    tableHeader: 'text-right pr-4', row: 'text-right'
+                  }}
                 />
 
                 <div className="mt-8 flex flex-row gap-2">

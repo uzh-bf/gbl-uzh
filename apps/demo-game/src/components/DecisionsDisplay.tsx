@@ -74,7 +74,7 @@ function DecisionsDisplayCompact({ segmentDecisions }: DecisionDisplayProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Decision history</CardTitle>
+        <CardTitle>Decision History</CardTitle>
         <CardDescription>
           Here is an overview of the final decisions per period and segment that
           have been made.
