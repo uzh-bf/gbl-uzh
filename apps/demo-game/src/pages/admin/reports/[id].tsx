@@ -56,12 +56,7 @@ const colors = [
   'hsl(var(--chart-4))',
 ]
 
-const labels = [
-  'Bank Benchmark',
-  'Bonds Benchmark',
-  'Stocks Benchmark',
-  'Total Assets',
-]
+const labels = ['Savings', 'Bonds', 'Stocks', 'Total Assets']
 
 const config = {
   bank: { label: labels[0], color: colors[0] },
@@ -447,15 +442,20 @@ function ReportGame() {
                   <TableRow>
                     <TableHead>Time</TableHead>
                     {game.players.map((player) => (
-                      <TableHead key={player.id}>{player.name}</TableHead>
+                      <TableHead
+                        key={player.id}
+                        className="flex w-full items-center"
+                      >
+                        {player.name}
+                      </TableHead>
                     ))}
                   </TableRow>
                   <TableRow>
                     <TableHead></TableHead>
                     {game.players.map((player) => (
                       <TableHead key={player.id}>
-                        <div className="flex justify-center gap-x-2">
-                          <div>Bank</div>
+                        <div className="flex w-40 items-center justify-around">
+                          <div>Savings</div>
                           <div>Bonds</div>
                           <div>Stocks</div>
                         </div>
@@ -490,7 +490,7 @@ function ReportGame() {
                                 return (
                                   <div
                                     key={'decision-' + segmentIx}
-                                    className="flex justify-around"
+                                    className="flex w-40 items-center justify-around"
                                   >
                                     <div>{decision.bank}</div>
                                     <div>{decision.bonds}</div>
