@@ -107,7 +107,11 @@ function DecisionsDisplayCompact({ segmentDecisions }: DecisionDisplayProps) {
                               key={type}
                               className="flex min-w-36 items-center justify-between"
                             >
-                              <div>{type}</div>
+                              {type === 'bank' ? (
+                                <div>savings</div>
+                              ) : (
+                                <div>{type}</div>
+                              )}
                               <OnOffIcon on={e.decisions[type]} />
                             </div>
                           )
