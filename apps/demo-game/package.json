@@ -104,6 +104,7 @@
     "prisma:push": "prisma db push",
     "prisma:reset": "prisma migrate reset",
     "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:seed:stg": "doppler run --config stg -- tsx prisma/seed.ts",
     "prisma:setup": "run-s prisma:reset prisma:push prisma:seed",
     "prisma:setup:stg": "doppler run --config stg -- run-s prisma:reset prisma:push prisma:seed",
     "prisma:setup:prd": "doppler run --config prd -- run-s prisma:reset prisma:push prisma:seed",
