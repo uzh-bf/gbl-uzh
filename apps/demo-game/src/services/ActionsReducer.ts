@@ -46,18 +46,48 @@ export function apply(state: State, action: Actions) {
       .with(
         { type: ActionTypes.DECIDE_BANK, payload: P.select() },
         (payload) => {
+          // check if any of the other two decisions is set to true
+          // otherwise, do not allow to set bank to false
+          if (
+            !payload.playerArgs.decision &&
+            !draft.result.decisions.bonds &&
+            !draft.result.decisions.stocks
+          ) {
+            return
+          }
+
           draft.result.decisions.bank = payload.playerArgs.decision
         }
       )
       .with(
         { type: ActionTypes.DECIDE_BONDS, payload: P.select() },
         (payload) => {
+          // check if any of the other two decisions is set to true
+          // otherwise, do not allow to set bank to false
+          if (
+            !payload.playerArgs.decision &&
+            !draft.result.decisions.bank &&
+            !draft.result.decisions.stocks
+          ) {
+            return
+          }
+
           draft.result.decisions.bonds = payload.playerArgs.decision
         }
       )
       .with(
         { type: ActionTypes.DECIDE_STOCK, payload: P.select() },
         (payload) => {
+          // check if any of the other two decisions is set to true
+          // otherwise, do not allow to set bank to false
+          if (
+            !payload.playerArgs.decision &&
+            !draft.result.decisions.bank &&
+            !draft.result.decisions.bonds
+          ) {
+            return
+          }
+
           draft.result.decisions.stocks = payload.playerArgs.decision
         }
       )
