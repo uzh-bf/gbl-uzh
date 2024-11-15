@@ -116,7 +116,7 @@ function Welcome() {
                     <CardTitle>Introduction</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div>
+                    <div className='pb-4'>
                       Welcome, {values.name}
                       <br />
                       Lucky you! You recently found out that you picked five
@@ -124,6 +124,7 @@ function Welcome() {
                       10&apos;000 of the winnings, some of which you have
                       already spent.
                     </div>
+                    <img src="/images/welcome.jpg" className="w-full" />
                     <div className="pt-10">
                       <span className="pb-2 text-2xl font-medium">Task</span>
                       <div>
@@ -132,6 +133,7 @@ function Welcome() {
                         want to invest in bonds and what proportion you want to
                         invest in stocks.
                       </div>
+                      
                     </div>
                   </CardContent>
                 </Card>
