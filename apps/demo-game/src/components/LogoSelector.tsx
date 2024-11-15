@@ -37,9 +37,9 @@ function LogoSelector({ color, label, className, ...props }: Props) {
                 // key === field.value && 'border-red-800',
                 // color && COLORS[color]
               )}
-              onClick={() => setValue(`/avatars/${src}`)}
+              onClick={() => setValue(src)}
             >
-              <Avatar.Image src={`/avatars/${src}`} alt={key} />
+              <Avatar.Image src={src} alt={key} />
             </Avatar.Root>
           )
         })}
