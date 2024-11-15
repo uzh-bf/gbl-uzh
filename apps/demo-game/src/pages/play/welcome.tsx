@@ -9,6 +9,7 @@ import {
 import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import LogoSelector  from '~/components/LogoSelector'
 import {
   SelfDocument,
   UpdatePlayerDataDocument,
@@ -140,11 +141,6 @@ function Welcome() {
               </div>
 
               <Form className="max-w-1/2 w-full sm:w-max">
-                {/* <LogoSelector
-                  className="w-48 flex-none"
-                  color={values.color}
-                  name="avatar"
-                /> */}
                 <Card>
                   <CardHeader>
                     <CardTitle>Avatar</CardTitle>
@@ -180,6 +176,12 @@ function Welcome() {
                             select: { root: 'w-full', trigger: 'w-full' },
                           }}
                         />
+                        <LogoSelector
+                          className="w-48 flex-none"
+                          color={values.color}
+                          name="imgPathAvatar"
+                        />
+
                         <NewFormikSelectField
                           label="Color"
                           name="color"

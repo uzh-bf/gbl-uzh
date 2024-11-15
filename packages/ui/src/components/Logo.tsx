@@ -28,7 +28,7 @@ function Logo({
       )}
     >
       {imgPathAvatar ? (
-        <img className="w-full h-auto" src={imgPathAvatar} />
+        <img className="w-[300px] h-auto" src={imgPathAvatar} />
       ) : (
         <FontAwesomeIcon className="w-full h-auto" icon={faUserSecret} />
       )}
