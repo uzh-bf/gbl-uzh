@@ -177,7 +177,8 @@ function Welcome() {
                           }}
                         />
                         <LogoSelector
-                          className="w-48 flex-none"
+                          label='Avatar'
+                          className="w-48 pb-2 text-sm text-gray-600"
                           color={values.color}
                           name="imgPathAvatar"
                         />

@@ -23,7 +23,7 @@ function LogoSelector({ color, label, className, ...props }: Props) {
   return (
     <div className={computedClassName}>
       {label && (
-        <label htmlFor="avatarSelection" className="font-bold">
+        <label htmlFor="avatarSelection">
           {label}
         </label>
       )}
