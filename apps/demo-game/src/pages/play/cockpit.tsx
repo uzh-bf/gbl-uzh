@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { Layout, ProbabilityChart } from '@gbl-uzh/ui'
+import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
 import { Switch } from '@uzh-bf/design-system'
 import {
   Card,
@@ -48,7 +48,10 @@ import {
 } from 'src/graphql/generated/ops'
 import { getSegmentEndResults } from 'src/lib/analysis'
 import { ActionTypes } from 'src/services/ActionsReducer'
-import { DecisionsDisplayCompact } from '~/components/DecisionsDisplay'
+import {
+  DecisionProps,
+  DecisionsDisplayCompact,
+} from '~/components/DecisionsDisplay'
 import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
 // TODO(JJ): This will be replaced by the design system
@@ -70,7 +73,13 @@ function GameHeader({ currentGame }) {
   )
 }
 
-function GameLayout({ children }: { children: React.ReactNode }) {
+function GameLayout({
+  children,
+  segmentEndResults,
+}: {
+  children: React.ReactNode
+  segmentEndResults?: DecisionProps[]
+}) {
   // TODO(JJ): Fetch data in Layout
   const { data } = useQuery(ResultDocument, {
     fetchPolicy: 'cache-first',
@@ -125,28 +134,45 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   }
 
   const sidebar = (
-    <div>
-      <div className="flex items-center justify-between">
-        {data?.self && (
-          <Switch
-            className={{
-              root: 'text-xs font-bold text-gray-600',
-            }}
-            disabled={!data.self || loading}
-            id="isReady"
-            checked={data.self.isReady}
-            label="Ready?"
-            onCheckedChange={async () => {
-              await updateReadyState({
-                variables: {
-                  isReady: !data.self.isReady,
-                },
-              })
-            }}
+    <div id="sidebar" className="flex flex-col justify-between">
+      <Card
+        // className="flex max-w-96 flex-col fixed bottom-4 right-4 h-[calc(100vh-5rem)]"
+        className="mb-4"
+      >
+        <CardContent>
+          <PlayerDisplay
+            name={playerInfo.name}
+            color={playerInfo.color}
+            location={playerInfo.location}
+            level={playerInfo.level}
+            // xp={playerInfo.xp}
+            // xpMax={playerInfo.xpMax}
+            achievements={playerInfo.achievements}
+            imgPathAvatar={playerInfo.imgPathAvatar}
+            imgPathLocation={playerInfo.imgPathLocation}
+            onClick={playerInfo.onClick}
           />
-        )}
+          <div className="flex items-center justify-between">
+            {data?.self && (
+              <Switch
+                className={{
+                  root: 'text-xs font-bold text-gray-600',
+                }}
+                disabled={!data.self || loading}
+                id="isReady"
+                checked={data.self.isReady}
+                label="Ready?"
+                onCheckedChange={async () => {
+                  await updateReadyState({
+                    variables: {
+                      isReady: !data.self.isReady,
+                    },
+                  })
+                }}
+              />
+            )}
 
-        {/* {countdownDurationMs !== null && (
+            {/* {countdownDurationMs !== null && (
           <CycleCountdown
             className={{
               root: '',
@@ -184,8 +210,11 @@ function GameLayout({ children }: { children: React.ReactNode }) {
             }}
           />
         )} */}
-      </div>
-      <LearningElements />
+          </div>
+          <LearningElements />
+        </CardContent>
+      </Card>
+      <DecisionsDisplayCompact segmentDecisions={segmentEndResults} />
     </div>
   )
 
@@ -528,11 +557,11 @@ function Cockpit() {
       ]
 
       return (
-        <GameLayout>
+        <GameLayout segmentEndResults={segmentEndResults}>
           <div className="flex flex-col">
             <div>
               <GameHeader currentGame={currentGame} />
-              <div className="py-8">
+              <div className="py-4">
                 <Card className="flex h-full w-full flex-col">
                   <CardHeader>
                     <CardTitle>Assets Overview</CardTitle>
@@ -551,10 +580,9 @@ function Cockpit() {
                                 key={column.accessor}
                                 className={`${
                                   ix === 1
-                                    ? 'w-24 text-right text-gray-400'
-                                    : 'w-24 text-right'
+                                    ? 'max-w-24 text-right text-gray-400'
+                                    : 'max-w-24 text-right'
                                 }`}
-                                // className="w-24 text-right"
                               >
                                 {column.label}
                               </TableHead>
@@ -579,9 +607,8 @@ function Cockpit() {
                                           key === '0' ? 'text-gray-400' : ''
                                         }`}
                                       >
-                                        <div className="ml-8 flex justify-between">
-                                          <span>CHF </span>
-                                          <span>{row[key].toFixed(2)}</span>
+                                        <div className="flex justify-end">
+                                          {row[key].toFixed(2)} CHF
                                         </div>
                                       </TableCell>
                                     )
@@ -600,147 +627,153 @@ function Cockpit() {
                     </div>
                   </CardContent>
                 </Card>
-                <div className="mt-8">
-                  {period !== null && (
-                    <Select
-                      defaultValue={period.toString()}
-                      onValueChange={(value) => {
-                        setPeriod((prev) => parseInt(value))
-                      }}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Period" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {allDataPerPeriod.map((_, index) => (
-                          <SelectItem key={index} value={index.toString()}>
-                            Period {index + 1}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
               </div>
-              <div className="flex flex-row gap-2">
-                <div className="flex flex-1 flex-col gap-2 xl:flex-row">
-                  <Card className="flex-1">
-                    <CardHeader>
-                      <CardTitle>Absolute Performance</CardTitle>
-                      <CardDescription>Assets over time.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ChartContainer
-                        config={configAbsolute}
-                        // className="h-[300px]"
-                      >
-                        <LineChart
-                          data={allDataPerPeriod[period]}
-                          accessibilityLayer
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex justify-between">
+                    <div>Graphical Overview</div>
+                    <div className="font-normal">
+                      {period !== null && (
+                        <Select
+                          defaultValue={period.toString()}
+                          onValueChange={(value) => {
+                            setPeriod((prev) => parseInt(value))
+                          }}
                         >
-                          <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent />}
-                          />
-                          {Object.keys(configAbsolute).map((key) => {
-                            return (
-                              <Line
-                                key={key}
-                                type="natural"
-                                dataKey={key}
-                                stroke={configAbsolute[key].color}
-                                dot={false}
-                                strokeWidth={2}
-                              />
-                            )
-                          })}
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Period" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {allDataPerPeriod.map((_, index) => (
+                              <SelectItem key={index} value={index.toString()}>
+                                Period {index + 1}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-1 flex-col gap-2 xl:flex-row">
+                    <Card className="flex-1">
+                      <CardHeader>
+                        <CardTitle>Absolute Performance</CardTitle>
+                        <CardDescription>Assets over time.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <ChartContainer
+                          config={configAbsolute}
+                          // className="h-[300px]"
+                        >
+                          <LineChart
+                            data={allDataPerPeriod[period]}
+                            accessibilityLayer
+                          >
+                            <ChartTooltip
+                              cursor={false}
+                              content={<ChartTooltipContent />}
+                            />
+                            {Object.keys(configAbsolute).map((key) => {
+                              return (
+                                <Line
+                                  key={key}
+                                  type="natural"
+                                  dataKey={key}
+                                  stroke={configAbsolute[key].color}
+                                  dot={false}
+                                  strokeWidth={2}
+                                />
+                              )
+                            })}
 
-                          <CartesianGrid vertical={false} />
-                          <XAxis
-                            dataKey="month"
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                          />
-                          <YAxis
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                          />
-                          <ChartLegend content={<ChartLegendContent />} />
-                        </LineChart>
-                      </ChartContainer>
-                    </CardContent>
-                  </Card>
-                  <Card className="flex-1">
-                    <CardHeader>
-                      <CardTitle>Total Accumulated Returns</CardTitle>
-                      <CardDescription>
-                        Total accumulated returns with respect to initial
-                        capital over time (per period).
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ChartContainer config={configAccReturn}>
-                        <BarChart data={allDataPerPeriod[period]}>
-                          <ChartTooltip
-                            cursor={false}
-                            content={
-                              <ChartTooltipContent
-                                formatter={(value, name, item) => [
-                                  <div
-                                    key={name}
-                                    className="flex w-full items-center justify-between gap-x-2"
-                                  >
-                                    <div className="flex items-center gap-x-1">
-                                      <div
-                                        className="h-[8px] w-[8px] rounded-sm"
-                                        style={{ background: item.color }}
-                                      />
-                                      <span className="text-xs text-gray-600">
-                                        {LABEL_MAP[name]}
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                              dataKey="month"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                            />
+                            <YAxis
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                            />
+                            <ChartLegend content={<ChartLegendContent />} />
+                          </LineChart>
+                        </ChartContainer>
+                      </CardContent>
+                    </Card>
+                    <Card className="flex-1">
+                      <CardHeader>
+                        <CardTitle>Total Accumulated Returns</CardTitle>
+                        <CardDescription>
+                          Total accumulated returns with respect to initial
+                          capital over time (per period).
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <ChartContainer config={configAccReturn}>
+                          <BarChart data={allDataPerPeriod[period]}>
+                            <ChartTooltip
+                              cursor={false}
+                              content={
+                                <ChartTooltipContent
+                                  formatter={(value, name, item) => [
+                                    <div
+                                      key={name}
+                                      className="flex w-full items-center justify-between gap-x-2"
+                                    >
+                                      <div className="flex items-center gap-x-1">
+                                        <div
+                                          className="h-[8px] w-[8px] rounded-sm"
+                                          style={{ background: item.color }}
+                                        />
+                                        <span className="text-xs text-gray-600">
+                                          {LABEL_MAP[name]}
+                                        </span>
+                                      </div>
+                                      <span className="font-bold text-black">
+                                        {(value * 100).toFixed(2)}%
                                       </span>
-                                    </div>
-                                    <span className="font-bold text-black">
-                                      {(value * 100).toFixed(2)}%
-                                    </span>
-                                  </div>,
-                                ]}
-                              />
-                            }
-                          />
-                          {Object.keys(configAccReturn).map((key) => {
-                            return (
-                              <Bar
-                                key={key}
-                                // stackId="1"
-                                dataKey={key}
-                                fill={configAccReturn[key].color}
-                                radius={4}
-                              />
-                            )
-                          })}
-                          <CartesianGrid vertical={false} />
-                          <XAxis
-                            dataKey="month"
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                          />
-                          <YAxis
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                            tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
-                          />
-                          <ChartLegend content={<ChartLegendContent />} />
-                        </BarChart>
-                      </ChartContainer>
-                    </CardContent>
-                  </Card>
-                </div>
-                <DecisionsDisplayCompact segmentDecisions={segmentEndResults} />
-              </div>
+                                    </div>,
+                                  ]}
+                                />
+                              }
+                            />
+                            {Object.keys(configAccReturn).map((key) => {
+                              return (
+                                <Bar
+                                  key={key}
+                                  // stackId="1"
+                                  dataKey={key}
+                                  fill={configAccReturn[key].color}
+                                  radius={4}
+                                />
+                              )
+                            })}
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                              dataKey="month"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                            />
+                            <YAxis
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
+                            />
+                            <ChartLegend content={<ChartLegendContent />} />
+                          </BarChart>
+                        </ChartContainer>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </GameLayout>

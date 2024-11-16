@@ -14,7 +14,7 @@ interface ObjectProps {
   index: number
 }
 
-interface DecisionProps {
+export interface DecisionProps {
   period: ObjectProps
   segment: ObjectProps
   decisions: {
@@ -78,10 +78,15 @@ function DecisionsDisplayCompact({ segmentDecisions }: DecisionDisplayProps) {
         <CardDescription>
           Here is an overview of the final decisions per period and segment that
           have been made.
+          <br />
+          P: Period
+          <br />
+          S: Segment
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-96 rounded-md border p-4">
+        {/* <ScrollArea className="h-96 rounded-md border p-4"> */}
+        <ScrollArea className="h-96">
           <DecisionLayout
             title="Time"
             actionTitle="Decision"

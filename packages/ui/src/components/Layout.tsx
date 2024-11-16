@@ -1,4 +1,3 @@
-import { PlayerDisplay } from './PlayerDisplay'
 import { NavBar } from './NavBar'
 import React from 'react'
 
@@ -32,21 +31,7 @@ function Layout({ children, tabs, playerInfo, sidebar }: Props) {
       />
       <div className="flex w-full justify-between gap-x-4 p-4">
         {children}
-        <div id="sidebar" className="flex w-60 flex-col">
-          <PlayerDisplay
-            name={playerInfo.name}
-            color={playerInfo.color}
-            location={playerInfo.location}
-            level={playerInfo.level}
-            // xp={playerInfo.xp}
-            // xpMax={playerInfo.xpMax}
-            achievements={playerInfo.achievements}
-            imgPathAvatar={playerInfo.imgPathAvatar}
-            imgPathLocation={playerInfo.imgPathLocation}
-            onClick={playerInfo.onClick}
-          />
-          {sidebar}
-        </div>
+        <div className="flex flex-col w-64">{sidebar}</div>
       </div>
     </>
   )
