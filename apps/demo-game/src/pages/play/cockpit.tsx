@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { Layout, ProbabilityChart } from '@gbl-uzh/ui'
-import { CycleCountdown, Switch } from '@uzh-bf/design-system'
+import { Switch } from '@uzh-bf/design-system'
 import {
   Card,
   CardContent,
@@ -542,51 +542,58 @@ function Cockpit() {
                   }}
                 /> */}
                 <Card className="flex h-full w-full flex-col">
-          <CardHeader>
-            <CardTitle>Assets Overview</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-grow">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {columns_segment_results.map((column) => (
-                      <TableHead key={column.accessor}>
-                        {column.label}
-                      </TableHead>
-                    ))}
-                  </TableRow>                  
-                </TableHeader>
-                <TableBody>
-                  {data_segment_results.map((row, rowIx) => {
-                      return (
-                        <TableRow key={row.cat} className={`${row.cat === 'Total' ? 'font-bold' : ''}`}>
-                          {['cat', '0', '1', '2', '3'].map((key, ix) => {
-                            if (ix > 0) {
-                              return (  
-                                <TableCell key={key}>
-                                  <div className="flex justify-between w-24">
-                                    <span>CHF </span>
-                                    <span>{row[key].toFixed(2)}</span>
-                                  </div>
-                                </TableCell>
-                              )
-                            }
-                            return (  
-                              <TableCell key={key}>
-                                <div className="flex">
-                                  {row[key]}
-                                </div>
-                              </TableCell>
+                  <CardHeader>
+                    <CardTitle>Assets Overview</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            {columns_segment_results.map((column) => (
+                              <TableHead
+                                key={column.accessor}
+                                className="w-24 text-right"
+                              >
+                                {column.label}
+                              </TableHead>
+                            ))}
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {data_segment_results.map((row, rowIx) => {
+                            return (
+                              <TableRow
+                                key={row.cat}
+                                className={`${
+                                  row.cat === 'Total' ? 'font-bold' : ''
+                                }`}
+                              >
+                                {['cat', '0', '1', '2', '3'].map((key, ix) => {
+                                  if (ix > 0) {
+                                    return (
+                                      <TableCell key={key}>
+                                        <div className="ml-8 flex justify-between">
+                                          <span>CHF </span>
+                                          <span>{row[key].toFixed(2)}</span>
+                                        </div>
+                                      </TableCell>
+                                    )
+                                  }
+                                  return (
+                                    <TableCell key={key}>
+                                      <div className="flex">{row[key]}</div>
+                                    </TableCell>
+                                  )
+                                })}
+                              </TableRow>
                             )
                           })}
-                        </TableRow>
-                      )})}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
                 <div className="mt-8">
                   {period !== null && (
                     <Select
@@ -852,7 +859,8 @@ function Cockpit() {
                   data={data_portfolio}
                   caption=""
                   className={{
-                    tableHeader: 'text-right pr-4', row: 'text-right'
+                    tableHeader: 'pr-4 text-right',
+                    row: 'text-right',
                   }}
                 />
 
