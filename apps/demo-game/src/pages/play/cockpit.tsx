@@ -531,6 +531,9 @@ function Cockpit() {
                   columns={columns_segment_results}
                   data={data_segment_results}
                   caption=""
+                  className={{
+                    tableHeader: 'text-right pr-4', row: 'text-right'
+                  }}
                 />
                 <div className="mt-8">
                   {period !== null && (
