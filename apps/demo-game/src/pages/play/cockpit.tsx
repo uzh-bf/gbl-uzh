@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { Layout, ProbabilityChart } from '@gbl-uzh/ui'
-import { CycleCountdown, Switch, Table } from '@uzh-bf/design-system'
+import { CycleCountdown, Switch } from '@uzh-bf/design-system'
 import {
   Card,
   CardContent,
@@ -18,6 +18,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@uzh-bf/design-system/dist/future'
 
 import dayjs from 'dayjs'
@@ -527,14 +533,60 @@ function Cockpit() {
             <div>
               <GameHeader currentGame={currentGame} />
               <div className="py-8">
-                <Table
+                {/* <Table
                   columns={columns_segment_results}
                   data={data_segment_results}
                   caption=""
                   className={{
                     tableHeader: 'text-right pr-4', row: 'text-right'
                   }}
-                />
+                /> */}
+                <Card className="flex h-full w-full flex-col">
+          <CardHeader>
+            <CardTitle>Assets Overview</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-grow">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {columns_segment_results.map((column) => (
+                      <TableHead key={column.accessor}>
+                        {column.label}
+                      </TableHead>
+                    ))}
+                  </TableRow>                  
+                </TableHeader>
+                <TableBody>
+                  {data_segment_results.map((row, rowIx) => {
+                      return (
+                        <TableRow key={row.cat} className={`${row.cat === 'Total' ? 'font-bold' : ''}`}>
+                          {['cat', '0', '1', '2', '3'].map((key, ix) => {
+                            if (ix > 0) {
+                              return (  
+                                <TableCell key={key}>
+                                  <div className="flex justify-between w-24">
+                                    <span>CHF </span>
+                                    <span>{row[key].toFixed(2)}</span>
+                                  </div>
+                                </TableCell>
+                              )
+                            }
+                            return (  
+                              <TableCell key={key}>
+                                <div className="flex">
+                                  {row[key]}
+                                </div>
+                              </TableCell>
+                            )
+                          })}
+                        </TableRow>
+                      )})}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
                 <div className="mt-8">
                   {period !== null && (
                     <Select
