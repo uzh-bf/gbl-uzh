@@ -533,27 +533,28 @@ function Cockpit() {
             <div>
               <GameHeader currentGame={currentGame} />
               <div className="py-8">
-                {/* <Table
-                  columns={columns_segment_results}
-                  data={data_segment_results}
-                  caption=""
-                  className={{
-                    tableHeader: 'text-right pr-4', row: 'text-right'
-                  }}
-                /> */}
                 <Card className="flex h-full w-full flex-col">
                   <CardHeader>
                     <CardTitle>Assets Overview</CardTitle>
+                    <CardDescription>
+                      Assets of the last month of the previous segment, and of
+                      the next months of the current segment.
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="flex-grow">
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            {columns_segment_results.map((column) => (
+                            {columns_segment_results.map((column, ix) => (
                               <TableHead
                                 key={column.accessor}
-                                className="w-24 text-right"
+                                className={`${
+                                  ix === 1
+                                    ? 'w-24 text-right text-gray-400'
+                                    : 'w-24 text-right'
+                                }`}
+                                // className="w-24 text-right"
                               >
                                 {column.label}
                               </TableHead>
@@ -572,7 +573,12 @@ function Cockpit() {
                                 {['cat', '0', '1', '2', '3'].map((key, ix) => {
                                   if (ix > 0) {
                                     return (
-                                      <TableCell key={key}>
+                                      <TableCell
+                                        key={key}
+                                        className={`${
+                                          key === '0' ? 'text-gray-400' : ''
+                                        }`}
+                                      >
                                         <div className="ml-8 flex justify-between">
                                           <span>CHF </span>
                                           <span>{row[key].toFixed(2)}</span>
