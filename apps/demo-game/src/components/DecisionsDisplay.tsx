@@ -6,6 +6,12 @@ import {
   CardTitle,
   ScrollArea,
   Separator,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@uzh-bf/design-system/dist/future'
 import { twMerge } from 'tailwind-merge'
 
@@ -72,58 +78,53 @@ function OnOffIcon({ on = false }: { on?: boolean }) {
 
 function DecisionsDisplayCompact({ segmentDecisions }: DecisionDisplayProps) {
   return (
-    <Card>
+    <Card className="max-w-80">
       <CardHeader>
         <CardTitle>Decision History</CardTitle>
         <CardDescription>
-          Here is an overview of the final decisions per period and segment that
-          have been made.
+          <div>
+            Chronological record of your portfolio allocation decisions across
+            savings, bonds, and stocks by time period.
+          </div>
+          <div className="mt-2">
+            <div>P: Period</div>
+            <div>S: Segment</div>
+          </div>
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-96 rounded-md border p-4">
-          <DecisionLayout
-            title="Time"
-            actionTitle="Decision"
-            activeTitle="On/Off"
-          >
-            <div className="flex flex-col justify-between">
+        {/* <ScrollArea className="h-96 rounded-md border p-4"> */}
+        <ScrollArea className="h-56">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Time</TableHead>
+                <TableHead>Savings</TableHead>
+                <TableHead>Bonds</TableHead>
+                <TableHead>Stocks</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {segmentDecisions.map((e) => {
                 return (
-                  <div
-                    className="flex flex-col justify-between py-2"
-                    key={e.segment.id}
-                  >
-                    <div className="flex justify-between">
-                      <h4 className="flex gap-2">
-                        <div>P{e.period.index + 1}</div>
-                        <div>S{e.segment.index + 1}</div>
-                      </h4>
-
-                      <div className="flex flex-col justify-between">
-                        {Object.keys(e.decisions).map((type) => {
-                          return (
-                            <div
-                              key={type}
-                              className="flex min-w-36 items-center justify-between"
-                            >
-                              {type === 'bank' ? (
-                                <div>savings</div>
-                              ) : (
-                                <div>{type}</div>
-                              )}
-                              <OnOffIcon on={e.decisions[type]} />
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                    <Separator className="my-2" />
-                  </div>
+                  <TableRow key={e.segment.id}>
+                    <TableCell className="flex text-nowrap">
+                      P{e.period.index + 1} S{e.segment.index + 1}
+                    </TableCell>
+                    <TableCell>
+                      <OnOffIcon on={e.decisions.bank} />
+                    </TableCell>
+                    <TableCell>
+                      <OnOffIcon on={e.decisions.bonds} />
+                    </TableCell>
+                    <TableCell>
+                      <OnOffIcon on={e.decisions.stocks} />
+                    </TableCell>
+                  </TableRow>
                 )
               })}
-            </div>
-          </DecisionLayout>
+            </TableBody>
+          </Table>
         </ScrollArea>
       </CardContent>
     </Card>

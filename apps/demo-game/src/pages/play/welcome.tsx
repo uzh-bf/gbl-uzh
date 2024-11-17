@@ -9,6 +9,7 @@ import {
 import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import LogoSelector  from '~/components/LogoSelector'
 import {
   SelfDocument,
   UpdatePlayerDataDocument,
@@ -116,7 +117,7 @@ function Welcome() {
                     <CardTitle>Introduction</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div>
+                    <div className='pb-4'>
                       Welcome, {values.name}
                       <br />
                       Lucky you! You recently found out that you picked five
@@ -124,6 +125,7 @@ function Welcome() {
                       10&apos;000 of the winnings, some of which you have
                       already spent.
                     </div>
+                    <img src="/images/welcome.jpg" className="w-full" />
                     <div className="pt-10">
                       <span className="pb-2 text-2xl font-medium">Task</span>
                       <div>
@@ -132,17 +134,13 @@ function Welcome() {
                         want to invest in bonds and what proportion you want to
                         invest in stocks.
                       </div>
+                      
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
               <Form className="max-w-1/2 w-full sm:w-max">
-                {/* <LogoSelector
-                  className="w-48 flex-none"
-                  color={values.color}
-                  name="avatar"
-                /> */}
                 <Card>
                   <CardHeader>
                     <CardTitle>Avatar</CardTitle>
@@ -178,6 +176,13 @@ function Welcome() {
                             select: { root: 'w-full', trigger: 'w-full' },
                           }}
                         />
+                        <LogoSelector
+                          label='Avatar'
+                          className="w-48 pb-2 text-sm text-gray-600"
+                          color={values.color}
+                          name="imgPathAvatar"
+                        />
+
                         <NewFormikSelectField
                           label="Color"
                           name="color"

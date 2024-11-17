@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { Layout, ProbabilityChart } from '@gbl-uzh/ui'
-import { CycleCountdown, Switch, Table } from '@uzh-bf/design-system'
+import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
+import { Switch } from '@uzh-bf/design-system'
 import {
   Card,
   CardContent,
@@ -18,6 +18,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@uzh-bf/design-system/dist/future'
 
 import dayjs from 'dayjs'
@@ -119,28 +125,45 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   }
 
   const sidebar = (
-    <div>
-      <div className="flex items-center justify-between">
-        {data?.self && (
-          <Switch
-            className={{
-              root: 'text-xs font-bold text-gray-600',
-            }}
-            disabled={!data.self || loading}
-            id="isReady"
-            checked={data.self.isReady}
-            label="Ready?"
-            onCheckedChange={async () => {
-              await updateReadyState({
-                variables: {
-                  isReady: !data.self.isReady,
-                },
-              })
-            }}
+    <div id="sidebar" className="flex flex-col justify-between">
+      <Card
+        // className="flex max-w-96 flex-col fixed bottom-4 right-4 h-[calc(100vh-5rem)]"
+        className="mb-4"
+      >
+        <CardContent>
+          <PlayerDisplay
+            name={playerInfo.name}
+            color={playerInfo.color}
+            location={playerInfo.location}
+            level={playerInfo.level}
+            // xp={playerInfo.xp}
+            // xpMax={playerInfo.xpMax}
+            achievements={playerInfo.achievements}
+            imgPathAvatar={playerInfo.imgPathAvatar}
+            imgPathLocation={playerInfo.imgPathLocation}
+            onClick={playerInfo.onClick}
           />
-        )}
+          <div className="flex items-center justify-between">
+            {data?.self && (
+              <Switch
+                className={{
+                  root: 'text-xs font-bold text-gray-600',
+                }}
+                disabled={!data.self || loading}
+                id="isReady"
+                checked={data.self.isReady}
+                label="Ready?"
+                onCheckedChange={async () => {
+                  await updateReadyState({
+                    variables: {
+                      isReady: !data.self.isReady,
+                    },
+                  })
+                }}
+              />
+            )}
 
-        {/* {countdownDurationMs !== null && (
+            {/* {countdownDurationMs !== null && (
           <CycleCountdown
             className={{
               root: '',
@@ -178,8 +201,10 @@ function GameLayout({ children }: { children: React.ReactNode }) {
             }}
           />
         )} */}
-      </div>
-      <LearningElements />
+          </div>
+          <LearningElements />
+        </CardContent>
+      </Card>
     </div>
   )
 
@@ -523,156 +548,229 @@ function Cockpit() {
 
       return (
         <GameLayout>
-          <div className="flex flex-col">
+          <div className="flex w-full flex-col">
             <div>
               <GameHeader currentGame={currentGame} />
-              <div className="py-8">
-                <Table
-                  columns={columns_segment_results}
-                  data={data_segment_results}
-                  caption=""
-                />
-                <div className="mt-8">
-                  {period !== null && (
-                    <Select
-                      defaultValue={period.toString()}
-                      onValueChange={(value) => {
-                        setPeriod((prev) => parseInt(value))
-                      }}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Period" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {allDataPerPeriod.map((_, index) => (
-                          <SelectItem key={index} value={index.toString()}>
-                            Period {index + 1}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="flex flex-1 flex-col gap-2 xl:flex-row">
-                  <Card className="flex-1">
-                    <CardHeader>
-                      <CardTitle>Absolute Performance</CardTitle>
-                      <CardDescription>Assets over time.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ChartContainer
-                        config={configAbsolute}
-                        // className="h-[300px]"
-                      >
-                        <LineChart
-                          data={allDataPerPeriod[period]}
-                          accessibilityLayer
-                        >
-                          <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent />}
-                          />
-                          {Object.keys(configAbsolute).map((key) => {
+              <div className="flex flex-wrap gap-4 py-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Assets Overview</CardTitle>
+                    <CardDescription>
+                      Assets of the last month of the previous segment, and of
+                      the next months of the current segment.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            {columns_segment_results.map((column, ix) => (
+                              <TableHead
+                                key={column.accessor}
+                                className={`${
+                                  ix === 1
+                                    ? 'max-w-24 text-right text-gray-400'
+                                    : 'max-w-24 text-right'
+                                }`}
+                              >
+                                {column.label}
+                              </TableHead>
+                            ))}
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {data_segment_results.map((row, rowIx) => {
                             return (
-                              <Line
-                                key={key}
-                                type="natural"
-                                dataKey={key}
-                                stroke={configAbsolute[key].color}
-                                dot={false}
-                                strokeWidth={2}
-                              />
+                              <TableRow
+                                key={row.cat}
+                                className={`${
+                                  row.cat === 'Total' ? 'font-bold' : ''
+                                }`}
+                              >
+                                {['cat', '0', '1', '2', '3'].map((key, ix) => {
+                                  if (ix > 0) {
+                                    return (
+                                      <TableCell
+                                        key={key}
+                                        className={`${
+                                          key === '0' ? 'text-gray-400' : ''
+                                        }`}
+                                      >
+                                        <div className="flex justify-end">
+                                          {row[key].toFixed(2)} CHF
+                                        </div>
+                                      </TableCell>
+                                    )
+                                  }
+                                  return (
+                                    <TableCell key={key}>
+                                      <div className="flex">{row[key]}</div>
+                                    </TableCell>
+                                  )
+                                })}
+                              </TableRow>
                             )
                           })}
-
-                          <CartesianGrid vertical={false} />
-                          <XAxis
-                            dataKey="month"
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                          />
-                          <YAxis
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                          />
-                          <ChartLegend content={<ChartLegendContent />} />
-                        </LineChart>
-                      </ChartContainer>
-                    </CardContent>
-                  </Card>
-                  <Card className="flex-1">
-                    <CardHeader>
-                      <CardTitle>Total Accumulated Returns</CardTitle>
-                      <CardDescription>
-                        Total accumulated returns with respect to initial
-                        capital over time (per period).
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ChartContainer config={configAccReturn}>
-                        <BarChart data={allDataPerPeriod[period]}>
-                          <ChartTooltip
-                            cursor={false}
-                            content={
-                              <ChartTooltipContent
-                                formatter={(value, name, item) => [
-                                  <div
-                                    key={name}
-                                    className="flex w-full items-center justify-between gap-x-2"
-                                  >
-                                    <div className="flex items-center gap-x-1">
-                                      <div
-                                        className="h-[8px] w-[8px] rounded-sm"
-                                        style={{ background: item.color }}
-                                      />
-                                      <span className="text-xs text-gray-600">
-                                        {LABEL_MAP[name]}
-                                      </span>
-                                    </div>
-                                    <span className="font-bold text-black">
-                                      {(value * 100).toFixed(2)}%
-                                    </span>
-                                  </div>,
-                                ]}
-                              />
-                            }
-                          />
-                          {Object.keys(configAccReturn).map((key) => {
-                            return (
-                              <Bar
-                                key={key}
-                                // stackId="1"
-                                dataKey={key}
-                                fill={configAccReturn[key].color}
-                                radius={4}
-                              />
-                            )
-                          })}
-                          <CartesianGrid vertical={false} />
-                          <XAxis
-                            dataKey="month"
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                          />
-                          <YAxis
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                            tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
-                          />
-                          <ChartLegend content={<ChartLegendContent />} />
-                        </BarChart>
-                      </ChartContainer>
-                    </CardContent>
-                  </Card>
-                </div>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
                 <DecisionsDisplayCompact segmentDecisions={segmentEndResults} />
               </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex justify-between">
+                    <div>Graphical Overview</div>
+                    <div className="font-normal">
+                      {period !== null && (
+                        <Select
+                          defaultValue={period.toString()}
+                          onValueChange={(value) => {
+                            setPeriod((prev) => parseInt(value))
+                          }}
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Period" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {allDataPerPeriod.map((_, index) => (
+                              <SelectItem key={index} value={index.toString()}>
+                                Period {index + 1}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* <div className="flex flex-1 flex-col gap-2 xl:flex-row"> */}
+                  <div className="flex flex-col gap-2 lg:flex-row">
+                    <Card className="flex-1">
+                      <CardHeader>
+                        <CardTitle>Absolute Performance</CardTitle>
+                        <CardDescription>
+                          Your portfolio's total value (total assets) compared
+                          to benchmarks (savings, bonds and stocks,
+                          respectively) over time.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <ChartContainer
+                          config={configAbsolute}
+                          // className="h-[300px]"
+                        >
+                          <LineChart
+                            data={allDataPerPeriod[period]}
+                            accessibilityLayer
+                          >
+                            <ChartTooltip
+                              cursor={false}
+                              content={<ChartTooltipContent />}
+                            />
+                            {Object.keys(configAbsolute).map((key) => {
+                              return (
+                                <Line
+                                  key={key}
+                                  type="natural"
+                                  dataKey={key}
+                                  stroke={configAbsolute[key].color}
+                                  dot={false}
+                                  strokeWidth={2}
+                                />
+                              )
+                            })}
+
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                              dataKey="month"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                            />
+                            <YAxis
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                            />
+                            <ChartLegend content={<ChartLegendContent />} />
+                          </LineChart>
+                        </ChartContainer>
+                      </CardContent>
+                    </Card>
+                    <Card className="flex-1">
+                      <CardHeader>
+                        <CardTitle>Total Accumulated Returns</CardTitle>
+                        <CardDescription>
+                          Total accumulated returns of your portfolio (total
+                          assets) with respect to the initial capital over time
+                          (per time period).
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <ChartContainer config={configAccReturn}>
+                          <BarChart data={allDataPerPeriod[period]}>
+                            <ChartTooltip
+                              cursor={false}
+                              content={
+                                <ChartTooltipContent
+                                  formatter={(value, name, item) => [
+                                    <div
+                                      key={name}
+                                      className="flex w-full items-center justify-between gap-x-2"
+                                    >
+                                      <div className="flex items-center gap-x-1">
+                                        <div
+                                          className="h-[8px] w-[8px] rounded-sm"
+                                          style={{ background: item.color }}
+                                        />
+                                        <span className="text-xs text-gray-600">
+                                          {LABEL_MAP[name]}
+                                        </span>
+                                      </div>
+                                      <span className="font-bold text-black">
+                                        {(value * 100).toFixed(2)}%
+                                      </span>
+                                    </div>,
+                                  ]}
+                                />
+                              }
+                            />
+                            {Object.keys(configAccReturn).map((key) => {
+                              return (
+                                <Bar
+                                  key={key}
+                                  // stackId="1"
+                                  dataKey={key}
+                                  fill={configAccReturn[key].color}
+                                  radius={4}
+                                />
+                              )
+                            })}
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                              dataKey="month"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                            />
+                            <YAxis
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
+                            />
+                            <ChartLegend content={<ChartLegendContent />} />
+                          </BarChart>
+                        </ChartContainer>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </GameLayout>
@@ -697,7 +795,7 @@ function Cockpit() {
         .reverse()
 
       const columns_portfolio = [
-        { label: 'Category', accessor: 'category', sortable: false },
+        { label: 'Assets', accessor: 'category', sortable: false },
         {
           label: 'Value before decisions',
           accessor: 'currentValue',
@@ -713,8 +811,8 @@ function Cockpit() {
       const data_portfolio = [
         {
           category: 'Savings',
-          currentValue: `CHF ${assets.bank.toFixed(2)}`,
-          futureValue: `CHF ${(
+          currentValue: `${assets.bank.toFixed(2)} CHF`,
+          futureValue: `${(
             assets.totalAssets *
             (resultFactsDecisions.bank
               ? 1 /
@@ -722,12 +820,12 @@ function Cockpit() {
                   +resultFactsDecisions.bonds +
                   +resultFactsDecisions.stocks)
               : 0)
-          ).toFixed(2)}`,
+          ).toFixed(2)} CHF`,
         },
         {
           category: 'Bonds',
-          currentValue: `CHF ${assets.bonds.toFixed(2)}`,
-          futureValue: `CHF ${(
+          currentValue: `${assets.bonds.toFixed(2)} CHF`,
+          futureValue: `${(
             assets.totalAssets *
             (resultFactsDecisions.bonds
               ? 1 /
@@ -735,12 +833,12 @@ function Cockpit() {
                   +resultFactsDecisions.bonds +
                   +resultFactsDecisions.stocks)
               : 0)
-          ).toFixed(2)}`,
+          ).toFixed(2)} CHF`,
         },
         {
           category: 'Stocks',
-          currentValue: `CHF ${assets.stocks.toFixed(2)}`,
-          futureValue: `CHF ${(
+          currentValue: `${assets.stocks.toFixed(2)} CHF`,
+          futureValue: `${(
             assets.totalAssets *
             (resultFactsDecisions.stocks
               ? 1 /
@@ -748,12 +846,12 @@ function Cockpit() {
                   +resultFactsDecisions.bonds +
                   +resultFactsDecisions.stocks)
               : 0)
-          ).toFixed(2)}`,
+          ).toFixed(2)} CHF`,
         },
         {
           category: 'Total',
-          currentValue: `CHF ${assets.totalAssets.toFixed(2)}`,
-          futureValue: `CHF ${assets.totalAssets.toFixed(2)}`,
+          currentValue: `${assets.totalAssets.toFixed(2)} CHF`,
+          futureValue: `${assets.totalAssets.toFixed(2)} CHF`,
         },
       ]
 
@@ -792,14 +890,66 @@ function Cockpit() {
                 <CardDescription>The assets in your portfolio.</CardDescription>
               </CardHeader>
               <CardContent>
-                <Table
-                  columns={columns_portfolio}
-                  data={data_portfolio}
-                  caption=""
-                  className={{
-                    tableHeader: 'text-right pr-4', row: 'text-right'
-                  }}
-                />
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Assets Overview</CardTitle>
+                    <CardDescription>
+                      Assets of the last month of the previous segment, and of
+                      the next months of the current segment.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            {columns_portfolio.map((column, ix) => (
+                              <TableHead key={column.accessor}>
+                                <div
+                                  className={`${
+                                    ix === 0 ? '' : 'max-w-36 text-right'
+                                  }`}
+                                >
+                                  {column.label}
+                                </div>
+                              </TableHead>
+                            ))}
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {data_portfolio.map((row, rowIx) => {
+                            return (
+                              <TableRow
+                                key={row.category}
+                                className={`${
+                                  row.category === 'Total' ? 'font-bold' : ''
+                                }`}
+                              >
+                                {[
+                                  'category',
+                                  'currentValue',
+                                  'futureValue',
+                                ].map((key, ix) => {
+                                  return (
+                                    <TableCell key={key}>
+                                      <div
+                                        className={`${
+                                          ix > 0 ? 'max-w-36 text-right' : ''
+                                        }`}
+                                      >
+                                        {row[key]}
+                                      </div>
+                                    </TableCell>
+                                  )
+                                })}
+                              </TableRow>
+                            )
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 <div className="mt-8 flex flex-row gap-2">
                   {decisions.map((decision) => {
