@@ -8,9 +8,8 @@ const STORY_ELEMENTS = [
     id: 'bank_account',
     title: 'A. About the Savings Account',
     content: `
-![](/images/robot_savings.jpg)
-
 A bank account represents the safest way to store your money. Your deposits are protected by government guarantees, and you earn a predictable, though modest, interest rate. Think of it as the foundation of your financial journey - not the most exciting investment, but a reliable starting point that provides easy access to your money while keeping it secure.
+![](/images/robot_savings.jpg)
 `,
   },
 
@@ -19,7 +18,6 @@ A bank account represents the safest way to store your money. Your deposits are 
     title: 'B. About Bonds',
     content: `
 When you invest in bonds, you're essentially becoming a lender to governments or companies. It's like making a deal: you provide them with money now, and they promise to pay you regular interest payments plus return your initial investment when the bond matures. While bonds typically offer higher returns than savings accounts, they come with their own risks. Their value can fluctuate based on interest rate changes in the economy, and there's always the possibility, though rare, that the borrower might fail to meet their obligations. The simulation combines both interest payments and price changes to show you the complete picture of bond investment returns.
-
 ![](/images/robot_bonds.jpg)
 `,
   },
@@ -29,7 +27,6 @@ When you invest in bonds, you're essentially becoming a lender to governments or
     title: 'C. About Stocks',
     content: `
 Investing in stocks means becoming a partial owner of real companies. When you buy shares, you're not just purchasing a trading instrument - you're acquiring a slice of a business's future success or failure. While stocks typically offer the highest potential returns among these three options, they also come with the most dramatic price swings. Your returns come from both company profits paid as dividends and changes in the stock's market value. The simulation combines these elements to demonstrate how stock investments perform over time, including both the thrilling ups and challenging downs of market movements.
-
 ![](/images/robot_stocks.jpg)
 `,
   },
@@ -38,7 +35,6 @@ Investing in stocks means becoming a partial owner of real companies. When you b
     title: 'E. The Power of Diversification',
     content: `
 Diversification is like not putting all your eggs in one basket. By spreading your money across different investments, you can reduce your risk without necessarily sacrificing returns. When you invest in multiple asset classes - like combining savings, bonds, and stocks - you create a balanced portfolio where the strength of one investment can help offset temporary weaknesses in others. Think of it as building a team where each player has different strengths: your savings provide stability, bonds offer steady income, and stocks give you growth potential. The simulation will show you how different combinations of these investments perform over time.
-
 ![](/images/robot_diversification.jpg)
 `,
   },
