@@ -547,7 +547,7 @@ function Cockpit() {
       ]
 
       return (
-        <GameLayout segmentEndResults={segmentEndResults}>
+        <GameLayout>
           <div className="flex w-full flex-col">
             <div>
               <GameHeader currentGame={currentGame} />
@@ -652,7 +652,11 @@ function Cockpit() {
                     <Card className="flex-1">
                       <CardHeader>
                         <CardTitle>Absolute Performance</CardTitle>
-                        <CardDescription>Assets over time.</CardDescription>
+                        <CardDescription>
+                          Your portfolio's total value (total assets) compared
+                          to benchmarks (savings, bonds and stocks,
+                          respectively) over time.
+                        </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <ChartContainer
@@ -701,8 +705,9 @@ function Cockpit() {
                       <CardHeader>
                         <CardTitle>Total Accumulated Returns</CardTitle>
                         <CardDescription>
-                          Total accumulated returns with respect to initial
-                          capital over time (per period).
+                          Total accumulated returns of your portfolio (total
+                          assets) with respect to the initial capital over time
+                          (per time period).
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
@@ -790,7 +795,7 @@ function Cockpit() {
         .reverse()
 
       const columns_portfolio = [
-        { label: 'Category', accessor: 'category', sortable: false },
+        { label: 'Assets', accessor: 'category', sortable: false },
         {
           label: 'Value before decisions',
           accessor: 'currentValue',
@@ -806,8 +811,8 @@ function Cockpit() {
       const data_portfolio = [
         {
           category: 'Savings',
-          currentValue: `CHF ${assets.bank.toFixed(2)}`,
-          futureValue: `CHF ${(
+          currentValue: `${assets.bank.toFixed(2)} CHF`,
+          futureValue: `${(
             assets.totalAssets *
             (resultFactsDecisions.bank
               ? 1 /
@@ -815,12 +820,12 @@ function Cockpit() {
                   +resultFactsDecisions.bonds +
                   +resultFactsDecisions.stocks)
               : 0)
-          ).toFixed(2)}`,
+          ).toFixed(2)} CHF`,
         },
         {
           category: 'Bonds',
-          currentValue: `CHF ${assets.bonds.toFixed(2)}`,
-          futureValue: `CHF ${(
+          currentValue: `${assets.bonds.toFixed(2)} CHF`,
+          futureValue: `${(
             assets.totalAssets *
             (resultFactsDecisions.bonds
               ? 1 /
@@ -828,12 +833,12 @@ function Cockpit() {
                   +resultFactsDecisions.bonds +
                   +resultFactsDecisions.stocks)
               : 0)
-          ).toFixed(2)}`,
+          ).toFixed(2)} CHF`,
         },
         {
           category: 'Stocks',
-          currentValue: `CHF ${assets.stocks.toFixed(2)}`,
-          futureValue: `CHF ${(
+          currentValue: `${assets.stocks.toFixed(2)} CHF`,
+          futureValue: `${(
             assets.totalAssets *
             (resultFactsDecisions.stocks
               ? 1 /
@@ -841,12 +846,12 @@ function Cockpit() {
                   +resultFactsDecisions.bonds +
                   +resultFactsDecisions.stocks)
               : 0)
-          ).toFixed(2)}`,
+          ).toFixed(2)} CHF`,
         },
         {
           category: 'Total',
-          currentValue: `CHF ${assets.totalAssets.toFixed(2)}`,
-          futureValue: `CHF ${assets.totalAssets.toFixed(2)}`,
+          currentValue: `${assets.totalAssets.toFixed(2)} CHF`,
+          futureValue: `${assets.totalAssets.toFixed(2)} CHF`,
         },
       ]
 
@@ -885,15 +890,66 @@ function Cockpit() {
                 <CardDescription>The assets in your portfolio.</CardDescription>
               </CardHeader>
               <CardContent>
-                <Table
-                  columns={columns_portfolio}
-                  data={data_portfolio}
-                  caption=""
-                  className={{
-                    tableHeader: 'pr-4 text-right',
-                    row: 'text-right',
-                  }}
-                />
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Assets Overview</CardTitle>
+                    <CardDescription>
+                      Assets of the last month of the previous segment, and of
+                      the next months of the current segment.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            {columns_portfolio.map((column, ix) => (
+                              <TableHead key={column.accessor}>
+                                <div
+                                  className={`${
+                                    ix === 0 ? '' : 'max-w-36 text-right'
+                                  }`}
+                                >
+                                  {column.label}
+                                </div>
+                              </TableHead>
+                            ))}
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {data_portfolio.map((row, rowIx) => {
+                            return (
+                              <TableRow
+                                key={row.category}
+                                className={`${
+                                  row.category === 'Total' ? 'font-bold' : ''
+                                }`}
+                              >
+                                {[
+                                  'category',
+                                  'currentValue',
+                                  'futureValue',
+                                ].map((key, ix) => {
+                                  return (
+                                    <TableCell key={key}>
+                                      <div
+                                        className={`${
+                                          ix > 0 ? 'max-w-36 text-right' : ''
+                                        }`}
+                                      >
+                                        {row[key]}
+                                      </div>
+                                    </TableCell>
+                                  )
+                                })}
+                              </TableRow>
+                            )
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 <div className="mt-8 flex flex-row gap-2">
                   {decisions.map((decision) => {

@@ -83,10 +83,10 @@ function DecisionsDisplayCompact({ segmentDecisions }: DecisionDisplayProps) {
         <CardTitle>Decision History</CardTitle>
         <CardDescription>
           <div>
-            Overview of the final decisions per period and segment that have
-            been made.
+            Chronological record of your portfolio allocation decisions across
+            savings, bonds, and stocks by time period.
           </div>
-          <div className="mt-2 flex justify-between">
+          <div className="mt-2">
             <div>P: Period</div>
             <div>S: Segment</div>
           </div>
