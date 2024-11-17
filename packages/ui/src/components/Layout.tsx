@@ -31,7 +31,7 @@ function Layout({ children, tabs, playerInfo, sidebar }: Props) {
       />
       <div className="flex w-full justify-between gap-x-4 p-4">
         {children}
-        <div className="flex flex-col w-64">{sidebar}</div>
+        <div>{sidebar}</div>
       </div>
     </>
   )

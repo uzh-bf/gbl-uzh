@@ -48,10 +48,7 @@ import {
 } from 'src/graphql/generated/ops'
 import { getSegmentEndResults } from 'src/lib/analysis'
 import { ActionTypes } from 'src/services/ActionsReducer'
-import {
-  DecisionProps,
-  DecisionsDisplayCompact,
-} from '~/components/DecisionsDisplay'
+import { DecisionsDisplayCompact } from '~/components/DecisionsDisplay'
 import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
 // TODO(JJ): This will be replaced by the design system
@@ -73,13 +70,7 @@ function GameHeader({ currentGame }) {
   )
 }
 
-function GameLayout({
-  children,
-  segmentEndResults,
-}: {
-  children: React.ReactNode
-  segmentEndResults?: DecisionProps[]
-}) {
+function GameLayout({ children }: { children: React.ReactNode }) {
   // TODO(JJ): Fetch data in Layout
   const { data } = useQuery(ResultDocument, {
     fetchPolicy: 'cache-first',
@@ -214,7 +205,6 @@ function GameLayout({
           <LearningElements />
         </CardContent>
       </Card>
-      <DecisionsDisplayCompact segmentDecisions={segmentEndResults} />
     </div>
   )
 
@@ -558,11 +548,11 @@ function Cockpit() {
 
       return (
         <GameLayout segmentEndResults={segmentEndResults}>
-          <div className="flex flex-col">
+          <div className="flex w-full flex-col">
             <div>
               <GameHeader currentGame={currentGame} />
-              <div className="py-4">
-                <Card className="flex h-full w-full flex-col">
+              <div className="flex flex-wrap gap-4 py-4">
+                <Card>
                   <CardHeader>
                     <CardTitle>Assets Overview</CardTitle>
                     <CardDescription>
@@ -570,8 +560,8 @@ function Cockpit() {
                       the next months of the current segment.
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="flex-grow">
-                    <div className="overflow-x-auto">
+                  <CardContent>
+                    <div>
                       <Table>
                         <TableHeader>
                           <TableRow>
@@ -627,6 +617,7 @@ function Cockpit() {
                     </div>
                   </CardContent>
                 </Card>
+                <DecisionsDisplayCompact segmentDecisions={segmentEndResults} />
               </div>
               <Card>
                 <CardHeader>
@@ -656,7 +647,8 @@ function Cockpit() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-1 flex-col gap-2 xl:flex-row">
+                  {/* <div className="flex flex-1 flex-col gap-2 xl:flex-row"> */}
+                  <div className="flex flex-col gap-2 lg:flex-row">
                     <Card className="flex-1">
                       <CardHeader>
                         <CardTitle>Absolute Performance</CardTitle>
