@@ -561,9 +561,8 @@ export async function getSpecificResults(
       type: args.type,
     },
     orderBy: [
-      {
-        createdAt: 'asc',
-      },
+      { period: { index: 'asc' } },
+      { segment: { index: 'asc' } },
       { player: { name: 'asc' } },
     ],
     include: {
