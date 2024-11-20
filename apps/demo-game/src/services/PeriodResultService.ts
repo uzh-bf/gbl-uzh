@@ -97,15 +97,11 @@ export function end(
     events: [],
   }
 
-  const { returns: totalAssetsReturnsPA, risk } = computeRiskAndReturnOfPlayer(
-    payload.segmentEndResults
-  )
-
-  // TODO(JJ): We prob. need to compute this at the beginning of the period?
-  // const sharpeRatio = (currAccReturn - bankReturnPA) / stdPA
-  // const bankReturnPA: number =
-  //   12 * payload.segmentEndResults?.[0]?.facts.assetsWithReturns[1].bankReturn
-  // const sharpeRatio = (returns - bankReturnPA) / risk
+  const {
+    returns: totalAssetsReturnsPA,
+    risk,
+    sharpeRatio,
+  } = computeRiskAndReturnOfPlayer(payload.segmentEndResults)
 
   // console.log('riskAndReturnPerPlayer', riskAndReturnPerPlayer)
   const resultFacts: OutputResultFacts = produce(
@@ -113,6 +109,7 @@ export function end(
     (draft: OutputResultFacts) => {
       draft.resultFacts.totalAssetsReturnsPA = totalAssetsReturnsPA
       draft.resultFacts.risk = risk
+      draft.resultFacts.sharpeRatio = sharpeRatio
     }
   )
 

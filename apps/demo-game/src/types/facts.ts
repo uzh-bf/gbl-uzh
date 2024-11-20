@@ -45,6 +45,7 @@ export type ResultFacts = ResultFactsInit & {
   assetsWithReturns: AssetsWithReturns[]
   totalAssetsReturnsPA: number
   risk: number
+  sharpeRatio?: number
 }
 
 export type OutputResultFacts = OutputFacts<ResultFacts, any, any>

@@ -38,6 +38,9 @@ export const computeRiskAndReturnOfPlayer = (
     return assetsWithReturns.map(({ totalAssetsReturn }) => totalAssetsReturn)
   })
 
+  const bankReturnPA: number =
+    12 * segmentEndResultsOfPlayer?.[0]?.facts.assetsWithReturns[1].bankReturn
+
   const num = totalAssetsReturns.length
 
   const numResults = segmentEndResultsOfPlayer.length
@@ -45,8 +48,13 @@ export const computeRiskAndReturnOfPlayer = (
   const assetsWithReturns = lastResult.facts?.assetsWithReturns
   const lastAccReturn = assetsWithReturns.slice(-1)[0].accTotalAssetsReturn
 
+  const risk = standardDeviation(totalAssetsReturns) * Math.sqrt(12)
+
+  const sharpeRatio =
+    risk > 0.0001 ? (lastAccReturn - bankReturnPA) / risk : undefined
   return {
     returns: Math.pow(1 + lastAccReturn, 12 / num) - 1,
-    risk: standardDeviation(totalAssetsReturns) * Math.sqrt(12),
+    risk,
+    sharpeRatio,
   }
 }
