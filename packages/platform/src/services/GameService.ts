@@ -356,68 +356,6 @@ export async function activateNextPeriod(
   //   type: GlobalNotificationType.PERIOD_ACTIVATED,
   // })
 
-  // console.log('game', game)
-  console.log('game.results', game.results)
-
-  // TODO(JJ): This is very game specific => remove from platform
-  // It should be in the PeriodResultService ...
-  const computeRiskAndReturn = (results, players) => {
-    // only for sharpe ratio
-    // const tbd_savings = 12 * Sheet1!R6 -> for all players the same...
-    // const bankReturn = ... for all the same
-    //
-    // for every player get sorted results (by periodIx, segmentIx, playerId)
-    // const lastAccReturn = ....
-    // const num = res.length
-    // const exponent = 1/(num/12) => exponent = 12/num
-    // const returnPA = Math.pow(1 + lastAccReturn, exponent) - 1
-    // const stdPA = stddev.s(returnPMArr)*Math.sqrt(12)
-    //
-    // const currAccReturn = ...
-    // TODO(JJ): The sharpe ratio compares the performance of the teams
-    // It tells for 1% risk how much return you got
-    // We usually take the bankReturn as tbd because it is constant and risk free
-    // const sharpeRatio = (currAccReturn - tbd) / stdPA
-    //
-    // risk = stdPa * 100 in percent
-    // return = returnPA * 100 in percent
-    // ret {
-    //   [playerId]: { returnPA, stdPA }
-    // }
-    return game.players.map((player) => {
-      const totalAssetsReturns: number[] = []
-      const accTotalAssetsReturns: number[] = []
-      game.results
-        .filter((result) => result.playerId === player.id)
-        .forEach((result) => {
-          const assetsWithReturns = result.facts?.assetsWithReturns.slice(1)
-          totalAssetsReturns.push(
-            ...assetsWithReturns.map((element) => element.totalAssetsReturn)
-          )
-          accTotalAssetsReturns.push(
-            ...assetsWithReturns.map((element) => element.accTotalAssetsReturn)
-          )
-        })
-      // TODO(JJ): Check if num is 0
-      const num = accTotalAssetsReturns.length
-      const lastAccReturn = accTotalAssetsReturns[num - 1]
-      const exponent = 12 / num
-      console.log('totalAssetsReturns', totalAssetsReturns)
-      console.log('accTotalAssetsReturns', accTotalAssetsReturns)
-      return {
-        playerId: player.id,
-        // TOOD(JJ): Find a better name?
-        return: Math.pow(1 + lastAccReturn, exponent) - 1,
-        risk: standardDeviation(totalAssetsReturns) * Math.sqrt(12),
-      }
-    })
-  }
-  const riskAndReturnPerPlayer = computeRiskAndReturn(
-    game.results,
-    game.players
-  )
-  console.log('riskAndReturnPerPlayer', riskAndReturnPerPlayer)
-
   switch (game.status) {
     // SCHEDULED -> PREPARATION
     // if the game is scheduled, initialize period results and move to PREPARATION
@@ -567,7 +505,9 @@ export async function activateNextPeriod(
       const { results, extras, promises } = await computePeriodEndResults(
         {
           // TODO(JJ): Additionally pass all segment results?
-          segmentResults: game.activePeriod.activeSegment.results,
+          segmentEndResults: game.results,
+          players: game.players,
+          activeSegmentResults: game.activePeriod.activeSegment.results,
           segmentFacts: game.activePeriod.activeSegment.facts,
           periodFacts: game.activePeriod.facts,
           periodDecisions: game.activePeriod.decisions,
@@ -1215,7 +1155,9 @@ export function computePeriodStartResults(
 
 export async function computePeriodEndResults(
   {
-    segmentResults,
+    segmentEndResults,
+    players,
+    activeSegmentResults,
     periodFacts,
     periodDecisions,
     segmentFacts,
@@ -1229,18 +1171,30 @@ export async function computePeriodEndResults(
   let extras: any[] = []
   let promises: Promise<any>[] = []
 
-  const results = segmentResults
+  const perPlayer = {}
+  players.forEach((player) => {
+    perPlayer[player.id] = {
+      segmentEndResults: segmentEndResults.filter(
+        (res) => res.playerId === player.id
+      ),
+      consolidationDecisions: periodDecisions.find(
+        (decision) => decision.playerId === player.id
+      ),
+    }
+  })
+
+  const results = activeSegmentResults
     .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
     .map((result, ix, allResults) => {
-      const consolidationDecisions = periodDecisions.find(
-        (decision) => decision.playerId === result.playerId
-      )
-
+      const segmentEndResults = perPlayer[result.playerId].segmentEndResults
+      const consolidationDecisions =
+        perPlayer[result.playerId].consolidationDecisions
       const {
         resultFacts: facts,
         actions,
         events,
       } = services.PeriodResult.end(result.facts, {
+        segmentEndResults,
         periodFacts,
         segmentFacts,
 

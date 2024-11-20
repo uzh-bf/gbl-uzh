@@ -74,10 +74,12 @@ export type PayloadPeriodResult<PeriodFactsType, PlayerRoleType> = {
 }
 
 export type PayloadPeriodResultEnd<
+  ResultsFactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
   PlayerRoleType
 > = {
+  segmentEndResults: ResultsFactsType
   periodFacts: PeriodFactsType
   segmentFacts: PeriodSegmentFactsType
   playerRole: PlayerRoleType
@@ -136,6 +138,7 @@ interface Period<
 
 interface PeriodResult<
   FactsType,
+  ResultFactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
   PlayerRoleType,
@@ -154,6 +157,7 @@ interface PeriodResult<
   end: (
     facts: FactsType,
     payload: PayloadPeriodResultEnd<
+      ResultFactsType,
       PeriodFactsType,
       PeriodSegmentFactsType,
       PlayerRoleType
@@ -228,7 +232,7 @@ interface Reducer<
 interface Services<PrismaType> {
   Actions: Reducer<any, any, any, any, any, PrismaType>
   Period: Period<any, any, any, any, any, PrismaType>
-  PeriodResult: PeriodResult<any, any, any, any, any, any, PrismaType>
+  PeriodResult: PeriodResult<any, any, any, any, any, any, any, PrismaType>
   Segment: Segment<any, any, any, any, any, PrismaType>
   SegmentResult: SegmentResult<any, any, any, any, any, any, PrismaType>
 }

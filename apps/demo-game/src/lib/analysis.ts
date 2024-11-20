@@ -1,3 +1,4 @@
+import { standardDeviation } from '@gbl-uzh/platform/dist/lib/util'
 import { PlayerResult } from 'src/graphql/generated/ops'
 import { MONTHS, NUM_MONTHS } from './constants'
 
@@ -27,4 +28,25 @@ export const composeChartData = (dataPerPeriod: any, key: string) => {
     }
   })
   return output
+}
+
+export const computeRiskAndReturnOfPlayer = (
+  segmentEndResultsOfPlayer: PlayerResult[]
+) => {
+  const totalAssetsReturns = segmentEndResultsOfPlayer.flatMap(({ facts }) => {
+    const assetsWithReturns = facts?.assetsWithReturns.slice(1) || []
+    return assetsWithReturns.map(({ totalAssetsReturn }) => totalAssetsReturn)
+  })
+
+  const num = totalAssetsReturns.length
+
+  const numResults = segmentEndResultsOfPlayer.length
+  const lastResult = segmentEndResultsOfPlayer[numResults - 1]
+  const assetsWithReturns = lastResult.facts?.assetsWithReturns
+  const lastAccReturn = assetsWithReturns.slice(-1)[0].accTotalAssetsReturn
+
+  return {
+    returns: Math.pow(1 + lastAccReturn, 12 / num) - 1,
+    risk: standardDeviation(totalAssetsReturns) * Math.sqrt(12),
+  }
 }
