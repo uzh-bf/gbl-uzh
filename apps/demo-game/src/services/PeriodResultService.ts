@@ -103,7 +103,6 @@ export function end(
     sharpeRatio,
   } = computeRiskAndReturnOfPlayer(payload.segmentEndResults)
 
-  // console.log('riskAndReturnPerPlayer', riskAndReturnPerPlayer)
   const resultFacts: OutputResultFacts = produce(
     baseFacts,
     (draft: OutputResultFacts) => {
