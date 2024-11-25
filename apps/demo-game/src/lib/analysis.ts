@@ -49,11 +49,11 @@ export const computeRiskAndReturnOfPlayer = (
   const lastAccReturn = assetsWithReturns.slice(-1)[0].accTotalAssetsReturn
 
   const risk = standardDeviation(totalAssetsReturns) * Math.sqrt(12)
-
+  const returns = Math.pow(1 + lastAccReturn, 12 / num) - 1
   const sharpeRatio =
-    risk > 0.0001 ? (lastAccReturn - bankReturnPA) / risk : undefined
+    risk > 0.0001 ? (returns - bankReturnPA) / risk : undefined
   return {
-    returns: Math.pow(1 + lastAccReturn, 12 / num) - 1,
+    returns,
     risk,
     sharpeRatio,
   }

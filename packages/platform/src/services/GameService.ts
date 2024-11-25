@@ -504,7 +504,6 @@ export async function activateNextPeriod(
 
       const { results, extras, promises } = await computePeriodEndResults(
         {
-          // TODO(JJ): Additionally pass all segment results?
           segmentEndResults: game.results,
           players: game.players,
           activeSegmentResults: game.activePeriod.activeSegment.results,
