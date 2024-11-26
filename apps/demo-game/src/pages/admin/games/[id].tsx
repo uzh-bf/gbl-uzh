@@ -50,6 +50,12 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@uzh-bf/design-system/dist/future'
 
 import { FormikMultiSelectField } from '~/components/fields/FormikMultiSelectField'
@@ -370,7 +376,7 @@ function ManageGame() {
                             )}
                             key={ix}
                           >
-                            <div className="flex flex-row gap-2">
+                            <div className="flex flex-row items-center gap-2">
                               <div>
                                 {!isSegmentActive && !isSegmentCompleted && (
                                   <FontAwesomeIcon icon={faCalendar} />
@@ -382,18 +388,41 @@ function ManageGame() {
                                   <FontAwesomeIcon icon={faCheck} />
                                 )}
                               </div>
-                              <div className="whitespace-nowrap text-right">
-                                <div className="flex flex-row gap-2">
-                                  <div className="text-sm">
-                                    Story: {segment?.storyElements.length ?? 0}
-                                  </div>
-                                  <div className="text-sm">
-                                    Learn:{' '}
-                                    {segment?.learningElements.length ?? 0}
-                                  </div>
+                              <div>Segment {segment.index + 1}</div>
+                            </div>
+                            <div className="mt-2">
+                              <div className="flex flex-row gap-2">
+                                <div className="text-sm">
+                                  Story: {segment?.storyElements.length ?? 0}
+                                </div>
+                                <div className="text-sm">
+                                  Learn: {segment?.learningElements.length ?? 0}
                                 </div>
                               </div>
                             </div>
+
+                            <Table className="mb-2">
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead></TableHead>
+                                  <TableHead>Trend</TableHead>
+                                  <TableHead>Gap</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell>Bonds</TableCell>
+                                  <TableCell>{trendBonds}</TableCell>
+                                  <TableCell>{gapBonds}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>Stocks</TableCell>
+                                  <TableCell>{trendStocks}</TableCell>
+                                  <TableCell>{gapStocks}</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+
                             {segment && (
                               <Link
                                 href={`/admin/dice/${
@@ -404,7 +433,7 @@ function ManageGame() {
                                   '-'
                                 )}-${trendBonds}-${gapBonds}-${trendStocks}-${gapStocks}`}
                                 target="_blank"
-                                className="flex flex-col rounded border border-gray-300 p-1 text-xs"
+                                className="flex flex-col rounded border border-gray-300 p-2"
                               >
                                 <div className="flex justify-between">
                                   Dice Bonds:
