@@ -38,6 +38,7 @@ export const computeRiskAndReturnOfPlayer = (
     return assetsWithReturns.map(({ totalAssetsReturn }) => totalAssetsReturn)
   })
 
+  // TODO(JJ): 12 should rather be num_segments * 3 (because a segment is fixed as 3)
   const bankReturnPA: number =
     12 * segmentEndResultsOfPlayer?.[0]?.facts.assetsWithReturns[1].bankReturn
 
