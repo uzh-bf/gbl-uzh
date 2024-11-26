@@ -51,6 +51,7 @@ import {
 import { composeChartData } from '~/lib/analysis'
 import { NUM_MONTHS } from '~/lib/constants'
 
+// TODO(JJ): Maybe add a random color generator, because we have unkown many teams
 const colors = [
   'hsl(var(--chart-1))',
   'hsl(var(--chart-2))',
