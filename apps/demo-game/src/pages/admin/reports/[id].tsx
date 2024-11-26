@@ -56,6 +56,10 @@ const colors = [
   'hsl(var(--chart-2))',
   'hsl(var(--chart-3))',
   'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
+  '#2b463c',
+  '#688f4f',
+  '#b1d182',
 ]
 
 const labels = ['Savings', 'Bonds', 'Stocks', 'Total Assets']
@@ -140,15 +144,15 @@ function ReportGame() {
       ...playerConfig,
       bankBenchmark: {
         label: 'Savings B',
-        color: 'Red',
+        color: colors[4],
       },
       bondsBenchmark: {
         label: 'Bonds B',
-        color: 'Blue',
+        color: colors[5],
       },
       stocksBenchmark: {
         label: 'Stocks B',
-        color: 'Green',
+        color: colors[6],
       },
     }
 
@@ -156,15 +160,15 @@ function ReportGame() {
       ...playerConfig,
       accBankBenchmarkReturn: {
         label: 'Savings B',
-        color: 'Red',
+        color: colors[4],
       },
       accBondsBenchmarkReturn: {
         label: 'Bonds B',
-        color: 'Blue',
+        color: colors[5],
       },
       accStocksBenchmarkReturn: {
         label: 'Stocks B',
-        color: 'Green',
+        color: colors[6],
       },
     }
 
@@ -593,13 +597,14 @@ function ReportGame() {
                   ]}
                 />
                 {Object.keys(accReturnConfig).map((key) => {
+                  const color = accReturnConfig[key].color
                   return (
                     <Area
                       key={key}
                       dataKey={key}
-                      fill={accReturnConfig[key].color}
+                      fill={color}
                       fillOpacity={0.4}
-                      stroke={accReturnConfig[key].color}
+                      stroke={color}
                       type="natural"
                     />
                   )
