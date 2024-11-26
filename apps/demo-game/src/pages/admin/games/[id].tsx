@@ -430,7 +430,11 @@ function ManageGame() {
                                   <FontAwesomeIcon icon={faCheck} />
                                 )}
                               </div>
-                              <div>Segment {segment.index + 1}</div>
+                              {
+                                <div>
+                                  Segment {segment?.index && segment.index + 1}
+                                </div>
+                              }
                             </div>
                             <div className="my-2">
                               <div className="flex flex-row gap-2">
