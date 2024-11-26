@@ -553,24 +553,28 @@ function ReportGame() {
                 <TableBody>
                   {dataPerPeriod.map((dataPerPlayer, periodIndex) => {
                     return (
-                      <TableRow key={periodIndex}>
+                      <TableRow key={'p-' + periodIndex}>
                         <TableCell className="align-top font-medium">
                           {Object.values(dataPerPlayer)[0]?.decisions.map(
-                            (d, segmentIx) => {
+                            (_, segmentIx) => {
                               return (
-                                <div key={segmentIx} className="min-w-12 ">
+                                <div
+                                  key={'p-s-' + segmentIx}
+                                  className="min-w-12 "
+                                >
                                   P{periodIndex + 1} S{segmentIx + 1}
                                 </div>
                               )
                             }
                           )}
                         </TableCell>
-                        {Object.values(dataPerPlayer).map((d, dIx) => {
-                          const decisions = d.decisions
+                        {game.players.map((player, playerIx) => {
+                          const decisions =
+                            dataPerPlayer?.[player.id]?.decisions ?? []
 
                           return (
                             <TableCell
-                              key={'player-decisions-' + dIx}
+                              key={'player-decisions-' + playerIx}
                               className="align-top font-medium"
                             >
                               {decisions.map((decision, segmentIx) => {
