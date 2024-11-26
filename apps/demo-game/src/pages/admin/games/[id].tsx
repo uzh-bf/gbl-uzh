@@ -288,6 +288,7 @@ function ManageGame() {
             const trendStocks = period.facts.scenario.trendStocks
             const gapStocks = period.facts.scenario.gapStocks
             const savingsInterest = period.facts.scenario.interestBank
+            const seed = period.facts.scenario.seed
 
             return (
               <div
@@ -329,9 +330,15 @@ function ManageGame() {
                       ))}
                     </div>
                     <div className="flex flex-row gap-2">
-                      <div className="flex items-end justify-between gap-4 pr-2">
-                        <div className="text-nowrap">Saving Interest</div>
-                        <div>{savingsInterest}</div>
+                      <div className="flex flex-col justify-end gap-1">
+                        <div className="flex items-end justify-between gap-4 pr-2">
+                          <div className="text-nowrap">Seed</div>
+                          <div>{seed}</div>
+                        </div>
+                        <div className="flex items-end justify-between gap-4 pr-2">
+                          <div className="text-nowrap">Saving Interest</div>
+                          <div>{savingsInterest}</div>
+                        </div>
                       </div>
                       <Table className="border-l text-base">
                         <TableHeader>
