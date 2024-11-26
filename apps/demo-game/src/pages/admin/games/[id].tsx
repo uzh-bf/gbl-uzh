@@ -283,12 +283,13 @@ function ManageGame() {
               periodStatus === STATUS.COMPLETED ||
               periodStatus === STATUS.RESULTS
 
-            const trendBonds = period.facts.scenario.trendBonds
-            const gapBonds = period.facts.scenario.gapBonds
-            const trendStocks = period.facts.scenario.trendStocks
-            const gapStocks = period.facts.scenario.gapStocks
-            const savingsInterest = period.facts.scenario.interestBank
-            const seed = period.facts.scenario.seed
+            const scenario = period.facts.scenario
+            const trendBonds = scenario.trendBonds
+            const gapBonds = scenario.gapBonds
+            const trendStocks = scenario.trendStocks
+            const gapStocks = scenario.gapStocks
+            const savingsInterest = scenario.interestBank
+            const seed = scenario.seed
 
             return (
               <div
@@ -365,30 +366,6 @@ function ManageGame() {
                       </Table>
                     </div>
                   </div>
-                  {/* <div className="flex flex-col">
-                      <div>Period Settings</div>
-                      <div className="flex justify-end gap-2">
-                        <div></div>
-                        <div>Trend</div>
-                        <div>Gap</div>
-                      </div>
-                      <div className="flex gap-2">
-                        <div>Bonds</div>
-                        <div className="flex flex-row gap-2">
-                          <div>{trendBonds}</div>
-                          <div>{gapBonds}</div>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <div>Stocks</div>
-                        <div className="flex flex-row gap-2">
-                          <div>{trendStocks}</div>
-                          <div>{gapStocks}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div> */}
-
                   <div className="mt-1 flex flex-row gap-1">
                     {Array.apply(null, Array(period.segmentCount)).map(
                       (_, ix) => {
@@ -439,7 +416,10 @@ function ManageGame() {
                               </div>
                               {
                                 <div>
-                                  Segment {segment?.index && segment.index + 1}
+                                  Segment{' '}
+                                  {segment?.index !== undefined
+                                    ? segment.index + 1
+                                    : ''}
                                 </div>
                               }
                             </div>
