@@ -266,19 +266,7 @@ function ManageGame() {
   return (
     <div className="p-4">
       <div>
-        <Link target="_blank" href={`/admin/reports/${game?.id}`}>
-          <Button>Report</Button>
-        </Link>
-        {/* <Link className="w-96" href={`/admin/games/${game?.id}`} key={game?.id}>
-          <Button
-            className={{
-              root: 'flex w-full flex-col items-start justify-around',
-            }}
-          >
-            Report
-          </Button>
-        </Link> */}
-        <div className="flex flex-col gap-2 overflow-x-auto md:flex-row">
+        <div className="mb-4 flex flex-col gap-2 overflow-x-auto md:flex-row">
           {game.periods.map((period, ix) => {
             const periodStatus = computePeriodStatus(game, ix)
 
@@ -295,6 +283,12 @@ function ManageGame() {
               periodStatus === STATUS.COMPLETED ||
               periodStatus === STATUS.RESULTS
 
+            const trendBonds = period.facts.scenario.trendBonds
+            const gapBonds = period.facts.scenario.gapBonds
+            const trendStocks = period.facts.scenario.trendStocks
+            const gapStocks = period.facts.scenario.gapStocks
+            const savingsInterest = period.facts.scenario.interestBank
+
             return (
               <div
                 className="flex flex-row gap-2"
@@ -309,7 +303,7 @@ function ManageGame() {
                     isPeriodCompleted && 'bg-gray-100 text-gray-400'
                   )}
                 >
-                  <div className="flex flex-row items-start justify-between gap-2">
+                  <div className="mb-4 flex flex-col items-start justify-between">
                     <div className="flex flex-row gap-2">
                       <div>
                         {isPeriodPlanned && (
@@ -334,7 +328,59 @@ function ManageGame() {
                         </div>
                       ))}
                     </div>
+                    <div className="flex flex-row gap-2">
+                      <div className="flex items-end justify-between gap-4 pr-2">
+                        <div className="text-nowrap">Saving Interest</div>
+                        <div>{savingsInterest}</div>
+                      </div>
+                      <Table className="border-l text-base">
+                        <TableHeader>
+                          <TableRow className="border-none py-0">
+                            <TableHead></TableHead>
+                            <TableHead className="py-0">Trend</TableHead>
+                            <TableHead className="py-0">Gap</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          <TableRow className="border-none py-0">
+                            <TableCell className="py-0">Bonds</TableCell>
+                            <TableCell className="py-0">{trendBonds}</TableCell>
+                            <TableCell className="py-0">{gapBonds}</TableCell>
+                          </TableRow>
+                          <TableRow className="border-none py-0">
+                            <TableCell className="py-0">Stocks</TableCell>
+                            <TableCell className="py-0">
+                              {trendStocks}
+                            </TableCell>
+                            <TableCell className="py-0">{gapStocks}</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
+                  {/* <div className="flex flex-col">
+                      <div>Period Settings</div>
+                      <div className="flex justify-end gap-2">
+                        <div></div>
+                        <div>Trend</div>
+                        <div>Gap</div>
+                      </div>
+                      <div className="flex gap-2">
+                        <div>Bonds</div>
+                        <div className="flex flex-row gap-2">
+                          <div>{trendBonds}</div>
+                          <div>{gapBonds}</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <div>Stocks</div>
+                        <div className="flex flex-row gap-2">
+                          <div>{trendStocks}</div>
+                          <div>{gapStocks}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div> */}
 
                   <div className="mt-1 flex flex-row gap-1">
                     {Array.apply(null, Array(period.segmentCount)).map(
@@ -353,10 +399,6 @@ function ManageGame() {
                           periodStatus === STATUS.COMPLETED ||
                           segmentStatus === STATUS.COMPLETED
 
-                        const trendBonds = period.facts.scenario.trendBonds
-                        const gapBonds = period.facts.scenario.gapBonds
-                        const trendStocks = period.facts.scenario.trendStocks
-                        const gapStocks = period.facts.scenario.gapStocks
                         const diceBonds = segment?.facts.diceRolls.map(
                           (dice) => dice.bonds
                         )
@@ -390,7 +432,7 @@ function ManageGame() {
                               </div>
                               <div>Segment {segment.index + 1}</div>
                             </div>
-                            <div className="mt-2">
+                            <div className="my-2">
                               <div className="flex flex-row gap-2">
                                 <div className="text-sm">
                                   Story: {segment?.storyElements.length ?? 0}
@@ -400,28 +442,6 @@ function ManageGame() {
                                 </div>
                               </div>
                             </div>
-
-                            <Table className="mb-2">
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead></TableHead>
-                                  <TableHead>Trend</TableHead>
-                                  <TableHead>Gap</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                <TableRow>
-                                  <TableCell>Bonds</TableCell>
-                                  <TableCell>{trendBonds}</TableCell>
-                                  <TableCell>{gapBonds}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>Stocks</TableCell>
-                                  <TableCell>{trendStocks}</TableCell>
-                                  <TableCell>{gapStocks}</TableCell>
-                                </TableRow>
-                              </TableBody>
-                            </Table>
 
                             {segment && (
                               <Link
@@ -435,7 +455,7 @@ function ManageGame() {
                                 target="_blank"
                                 className="flex flex-col rounded border border-gray-300 p-2"
                               >
-                                <div className="flex justify-between">
+                                <div className="flex justify-between text-nowrap">
                                   Dice Bonds:
                                   <div className="flex flex-row gap-2">
                                     {diceBonds?.map((dice, ix) => (
@@ -443,7 +463,7 @@ function ManageGame() {
                                     ))}
                                   </div>
                                 </div>
-                                <div className="flex justify-between">
+                                <div className="flex justify-between gap-2 text-nowrap">
                                   Dice Stocks:
                                   <div className="flex flex-row gap-2">
                                     {diceStocks?.map((dice, ix) => (
@@ -769,7 +789,12 @@ function ManageGame() {
           </Formik>
         </div>
       </div>
-      <div className="mt-2 flex flex-row gap-2">{getButton()}</div>
+      <div className="mt-2 flex flex-row gap-2">
+        {getButton()}
+        <Link target="_blank" href={`/admin/reports/${game?.id}`}>
+          <Button>Report</Button>
+        </Link>
+      </div>
 
       <div className="mt-4 flex w-full flex-row justify-between">
         <div className="w-1/2">
