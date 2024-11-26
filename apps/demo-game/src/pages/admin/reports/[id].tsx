@@ -136,6 +136,38 @@ function ReportGame() {
       return acc
     }, {})
 
+    const absolutePerformanceConfig = {
+      ...playerConfig,
+      bankBenchmark: {
+        label: 'Savings B',
+        color: 'Red',
+      },
+      bondsBenchmark: {
+        label: 'Bonds B',
+        color: 'Blue',
+      },
+      stocksBenchmark: {
+        label: 'Stocks B',
+        color: 'Green',
+      },
+    }
+
+    const accReturnConfig = {
+      ...playerConfig,
+      accBankBenchmarkReturn: {
+        label: 'Savings B',
+        color: 'Red',
+      },
+      accBondsBenchmarkReturn: {
+        label: 'Bonds B',
+        color: 'Blue',
+      },
+      accStocksBenchmarkReturn: {
+        label: 'Stocks B',
+        color: 'Green',
+      },
+    }
+
     const computeDataPerPeriod = () => {
       if (!previousSegmentResults || previousSegmentResults.length === 0)
         return []
@@ -188,12 +220,89 @@ function ReportGame() {
       return output
     }
 
+    const getBenchmarksPerPeriod = () => {
+      if (!previousSegmentResults || previousSegmentResults.length === 0)
+        return []
+      let output = []
+      // The benchmarks are saved for all results, we only need it once for each segment
+      const player = game.players[0]
+      for (let i = 0; i < numPeriods; i++) {
+        const playerResPerPeriod = previousSegmentResults.filter(
+          (result) =>
+            result.period.index === i && result.player.id === player.id
+        )
+        const dataBenchmark = {
+          bankBenchmark: [],
+          bondsBenchmark: [],
+          stocksBenchmark: [],
+          accBankBenchmarkReturn: [],
+          accBondsBenchmarkReturn: [],
+          accStocksBenchmarkReturn: [],
+        }
+
+        playerResPerPeriod.map((result) => {
+          const assetsWithReturns = result.facts.assetsWithReturns.filter(
+            (_, ix) => ix > 0
+          )
+          Object.keys(dataBenchmark).map((key) => {
+            dataBenchmark[key].push(...assetsWithReturns.map((a) => a[key]))
+          })
+        })
+        output.push(dataBenchmark)
+      }
+      return output
+    }
+
+    const benchmarksPerPeriod = getBenchmarksPerPeriod()
+    const benchmarksFlat = Object.keys(benchmarksPerPeriod[0]).reduce(
+      (acc, key) => {
+        acc[key] = benchmarksPerPeriod.flatMap((p) => p[key])
+        return acc
+      },
+      {}
+    )
+
     const dataPerPeriod = computeDataPerPeriod()
-    const dataTotalAssets = composeChartData(dataPerPeriod, 'totalAssets')
+    const dataTotalAssets = composeChartData(dataPerPeriod, 'totalAssets').map(
+      (d, ix) => {
+        return {
+          ...d,
+          ...Object.keys(benchmarksFlat)
+            .filter(
+              (key) =>
+                key === 'bankBenchmark' ||
+                key === 'bondsBenchmark' ||
+                key === 'stocksBenchmark'
+            )
+            .reduce((acc, key) => {
+              acc[key] = benchmarksFlat[key][ix]
+              return acc
+            }, {}),
+        }
+      }
+    )
+
+    console.log('dataTotalAssets', dataTotalAssets)
+
     const dataAccTotalAssetsReturn = composeChartData(
       dataPerPeriod,
       'accTotalAssetsReturn'
-    )
+    ).map((d, ix) => {
+      return {
+        ...d,
+        ...Object.keys(benchmarksFlat)
+          .filter(
+            (key) =>
+              key === 'accBankBenchmarkReturn' ||
+              key === 'accBondsBenchmarkReturn' ||
+              key === 'accStocksBenchmarkReturn'
+          )
+          .reduce((acc, key) => {
+            acc[key] = benchmarksFlat[key][ix]
+            return acc
+          }, {}),
+      }
+    })
 
     const segmentResultsPerPlayer = game.players.map((player) => {
       return previousSegmentResults
@@ -232,6 +341,8 @@ function ReportGame() {
     return {
       game,
       playerConfig,
+      absolutePerformanceConfig,
+      accReturnConfig,
       initialCapital,
       dataPerPeriod,
       dataTotalAssets,
@@ -326,6 +437,8 @@ function ReportGame() {
   const {
     game,
     playerConfig,
+    absolutePerformanceConfig,
+    accReturnConfig,
     initialCapital,
     dataPerPeriod,
     dataTotalAssets,
@@ -357,7 +470,10 @@ function ReportGame() {
             <CardDescription>Assets over time.</CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
-            <ChartContainer config={playerConfig} className="h-[300px] w-full">
+            <ChartContainer
+              config={absolutePerformanceConfig}
+              className="h-[300px] w-full"
+            >
               <LineChart data={dataTotalAssets} accessibilityLayer>
                 <ChartTooltip
                   cursor={false}
@@ -380,13 +496,13 @@ function ReportGame() {
                     </div>,
                   ]}
                 />
-                {Object.keys(playerConfig).map((key) => {
+                {Object.keys(absolutePerformanceConfig).map((key) => {
                   return (
                     <Line
                       key={key}
                       type="natural"
                       dataKey={key}
-                      stroke={playerConfig[key].color}
+                      stroke={absolutePerformanceConfig[key].color}
                       dot={false}
                       strokeWidth={2}
                     />
@@ -440,7 +556,10 @@ function ReportGame() {
             </Select>
           </CardHeader>
           <CardContent className="flex-grow">
-            <ChartContainer config={playerConfig} className="h-[300px] w-full">
+            <ChartContainer
+              config={accReturnConfig}
+              className="h-[300px] w-full"
+            >
               <AreaChart
                 data={
                   currPeriod === 0
@@ -473,14 +592,14 @@ function ReportGame() {
                     </div>,
                   ]}
                 />
-                {Object.keys(playerConfig).map((key) => {
+                {Object.keys(accReturnConfig).map((key) => {
                   return (
                     <Area
                       key={key}
                       dataKey={key}
-                      fill={playerConfig[key].color}
+                      fill={accReturnConfig[key].color}
                       fillOpacity={0.4}
-                      stroke={playerConfig[key].color}
+                      stroke={accReturnConfig[key].color}
                       type="natural"
                     />
                   )
