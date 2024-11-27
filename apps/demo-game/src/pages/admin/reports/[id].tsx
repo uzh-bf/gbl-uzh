@@ -38,7 +38,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  LabelList,
   Line,
   LineChart,
   ReferenceLine,
@@ -287,8 +286,6 @@ function ReportGame() {
       }
     )
 
-    console.log('dataTotalAssets', dataTotalAssets)
-
     const dataAccTotalAssetsReturn = composeChartData(
       dataPerPeriod,
       'accTotalAssetsReturn'
@@ -322,26 +319,19 @@ function ReportGame() {
         })
     })
 
-    const segmentResultPerPlayerAvg = segmentResultsPerPlayer.map((arr) => {
-      const result = Array(arr[0].length).fill(0)
-      arr.forEach((val) => {
-        val.forEach((v, i) => {
-          result[i] += v / arr.length
-        })
-      })
-      return result
-    })
+    const segmentResultPerSegmentAvg = segmentResultsPerPlayer[0].map(
+      (_, i) => {
+        const numSegments = segmentResultsPerPlayer[0][i].length
+        const sumPerSegment = segmentResultsPerPlayer
+          .reduce(
+            (sum, player) => sum.map((val, idx) => val + player[i][idx]),
+            Array(numSegments).fill(0)
+          )
+          .map((sum) => sum / segmentResultsPerPlayer.length)
 
-    const computeTotalDecisionAvg = () => {
-      const result = Array(segmentResultPerPlayerAvg[0].length).fill(0)
-      segmentResultPerPlayerAvg.forEach((val) => {
-        val.forEach((v, i) => {
-          result[i] += v / segmentResultPerPlayerAvg.length
-        })
-      })
-      return result
-    }
-    const totalDecisionAvg = computeTotalDecisionAvg()
+        return sumPerSegment
+      }
+    )
 
     return {
       game,
@@ -352,7 +342,7 @@ function ReportGame() {
       dataPerPeriod,
       dataTotalAssets,
       dataAccTotalAssetsReturn,
-      totalDecisionAvg,
+      segmentResultPerSegmentAvg,
     }
   }, [
     data,
@@ -448,23 +438,20 @@ function ReportGame() {
     dataPerPeriod,
     dataTotalAssets,
     dataAccTotalAssetsReturn,
-    totalDecisionAvg,
+    segmentResultPerSegmentAvg,
   } = memoizedData
 
   const { riskReturnPerPeriod, sharpeRatioPerPeriod, configSharpeRatio } =
     memoizedDataPeriod
 
-  const dataAvg = [
-    {
-      bank: totalDecisionAvg[0],
-    },
-    {
-      bonds: totalDecisionAvg[1],
-    },
-    {
-      stocks: totalDecisionAvg[2],
-    },
-  ]
+  const decisionKeys = ['bank', 'bonds', 'stocks']
+  const dataAvg = segmentResultPerSegmentAvg.map((values, segmentIx) => ({
+    segmentIndex: segmentIx + 1,
+    ...values.reduce((acc, value, decisionIx) => {
+      acc[decisionKeys[decisionIx]] = value
+      return acc
+    }, {}),
+  }))
 
   return (
     <div className="container mx-auto p-4">
@@ -728,12 +715,37 @@ function ReportGame() {
 
         <Card className="flex h-full w-full flex-col">
           <CardHeader>
-            <CardTitle>Avg Decisions</CardTitle>
-            <CardDescription>Average decisions over players.</CardDescription>
+            <CardTitle>Average Decisions</CardTitle>
+            <CardDescription>
+              Average decisions per segment over players.
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
             <ChartContainer config={config} className="h-[300px] w-full">
               <BarChart data={dataAvg}>
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent />}
+                  formatter={(value, name, item) => [
+                    <div
+                      key={name}
+                      className="flex w-full items-center justify-between gap-x-2"
+                    >
+                      <div className="flex items-center gap-x-1">
+                        <div
+                          className="h-[8px] w-[8px] rounded-sm"
+                          style={{ background: item.color }}
+                        />
+                        <span className="text-xs text-gray-600">
+                          {name === 'bank' ? 'savings' : name}
+                        </span>
+                      </div>
+                      <span className="font-bold text-black">
+                        {(value * 100).toFixed(2)}%
+                      </span>
+                    </div>,
+                  ]}
+                />
                 {Object.keys(config).map((key, ix, arr) => {
                   return (
                     <Bar
@@ -743,30 +755,31 @@ function ReportGame() {
                       fill={config[key].color}
                       radius={4}
                     >
-                      {ix === arr.length - 1 && (
+                      {/* {ix === arr.length - 1 && (
                         <LabelList
                           position="top"
                           className="fill-foreground"
-                          fontSize={12}
+                          fontSize={10}
                           formatter={(v) => `${(v * 100).toFixed(1)}%`}
                         />
-                      )}
+                      )} */}
                     </Bar>
                   )
                 })}
                 <CartesianGrid vertical={false} />
                 <XAxis
-                  dataKey="period"
+                  dataKey="segmentIndex"
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
+                  tickFormatter={(v) => 'S' + v}
                 />
                 <YAxis
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
                   tickFormatter={(v) => `${(v * 100).toFixed(1)}%`}
-                  domain={['auto', (dataMax) => dataMax * 1.1]}
+                  // domain={['auto', (dataMax) => dataMax * 1.1]}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
               </BarChart>
