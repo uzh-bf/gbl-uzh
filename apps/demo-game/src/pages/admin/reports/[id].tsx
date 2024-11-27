@@ -443,13 +443,17 @@ function ReportGame() {
     memoizedDataPeriod
 
   const decisionKeys = ['bank', 'bonds', 'stocks']
-  const dataAvg = segmentResultPerSegmentAvg.map((values, segmentIx) => ({
-    segmentIndex: segmentIx + 1,
-    ...values.reduce((acc, value, decisionIx) => {
-      acc[decisionKeys[decisionIx]] = value
-      return acc
-    }, {}),
-  }))
+  const dataAvg = segmentResultPerSegmentAvg.map((values, segmentIx) => {
+    const period = ~~(segmentIx / game.activePeriodIx) + 1
+    const segment = (segmentIx % game.activePeriodIx) + 1
+    return {
+      periodSegment: 'P' + period + ' S' + segment,
+      ...values.reduce((acc, value, decisionIx) => {
+        acc[decisionKeys[decisionIx]] = value
+        return acc
+      }, {}),
+    }
+  })
 
   return (
     <div className="container mx-auto p-4">
@@ -721,9 +725,33 @@ function ReportGame() {
           <CardContent className="flex-grow">
             <ChartContainer config={config} className="h-[300px] w-full">
               <BarChart data={dataAvg}>
+                {Object.keys(config).map((key) => {
+                  return (
+                    <Bar
+                      key={key}
+                      stackId="1"
+                      dataKey={key}
+                      fill={config[key].color}
+                      radius={4}
+                    />
+                  )
+                })}
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="periodSegment"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tickFormatter={(v) => `${(v * 100).toFixed(1)}%`}
+                />
+                <ChartLegend content={<ChartLegendContent />} />
                 <ChartTooltip
                   cursor={false}
-                  content={<ChartTooltipContent />}
                   formatter={(value, name, item) => [
                     <div
                       key={name}
@@ -744,42 +772,6 @@ function ReportGame() {
                     </div>,
                   ]}
                 />
-                {Object.keys(config).map((key, ix, arr) => {
-                  return (
-                    <Bar
-                      key={key}
-                      stackId="1"
-                      dataKey={key}
-                      fill={config[key].color}
-                      radius={4}
-                    >
-                      {/* {ix === arr.length - 1 && (
-                        <LabelList
-                          position="top"
-                          className="fill-foreground"
-                          fontSize={10}
-                          formatter={(v) => `${(v * 100).toFixed(1)}%`}
-                        />
-                      )} */}
-                    </Bar>
-                  )
-                })}
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="segmentIndex"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  tickFormatter={(v) => 'S' + v}
-                />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  tickFormatter={(v) => `${(v * 100).toFixed(1)}%`}
-                  // domain={['auto', (dataMax) => dataMax * 1.1]}
-                />
-                <ChartLegend content={<ChartLegendContent />} />
               </BarChart>
             </ChartContainer>
           </CardContent>
