@@ -335,7 +335,6 @@ function ReportGame() {
 
     return {
       game,
-      playerConfig,
       absolutePerformanceConfig,
       accReturnConfig,
       initialCapital,
@@ -431,7 +430,6 @@ function ReportGame() {
 
   const {
     game,
-    playerConfig,
     absolutePerformanceConfig,
     accReturnConfig,
     initialCapital,
