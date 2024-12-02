@@ -42,6 +42,8 @@ import {
   Line,
   LineChart,
   ReferenceLine,
+  Scatter,
+  ScatterChart,
   XAxis,
   YAxis,
 } from 'recharts'
@@ -83,6 +85,20 @@ function ReportGame() {
     variables: {
       gameId: Number(router.query.id),
       type: 'SEGMENT_END',
+    },
+    // pollInterval: 15000,
+    skip: !router.query.id,
+    fetchPolicy: 'cache-first',
+  })
+
+  const {
+    data: periodEndResults,
+    loading: periodEndResultsLoading,
+    error: periodEndResultsError,
+  } = useQuery(SpecificResultsDocument, {
+    variables: {
+      gameId: Number(router.query.id),
+      type: 'PERIOD_END',
     },
     // pollInterval: 15000,
     skip: !router.query.id,
@@ -135,10 +151,11 @@ function ReportGame() {
             decisions[v] = Number(result.facts.decisions[v])
           })
 
-          const totalAssetsTmp = result.facts.assetsWithReturns
+          const assetsWithReturns = result.facts.assetsWithReturns ?? []
+          const totalAssetsTmp = assetsWithReturns
             .filter((_, ix) => ix > 0)
             .map((a) => a.totalAssets)
-          const accTotalAssetsReturnTmp = result.facts.assetsWithReturns
+          const accTotalAssetsReturnTmp = assetsWithReturns
             .filter((_, ix) => ix > 0)
             .map((a) => a.accTotalAssetsReturn)
 
@@ -148,6 +165,8 @@ function ReportGame() {
               name: result.player.name,
               totalAssets: [...totalAssetsTmp],
               accTotalAssetsReturn: [...accTotalAssetsReturnTmp],
+              risk: result.facts.risk,
+              totalAssetsReturnsPA: result.facts.totalAssetsReturnsPA,
             }
           } else {
             dataPerPlayer[result.player.id].decisions.push(decisions)
@@ -155,6 +174,13 @@ function ReportGame() {
             dataPerPlayer[result.player.id].accTotalAssetsReturn.push(
               ...accTotalAssetsReturnTmp
             )
+            if (result.facts.risk) {
+              dataPerPlayer[result.player.id].risk = result.facts.risk
+            }
+            if (result.facts.totalAssetsReturnsPA) {
+              dataPerPlayer[result.player.id].totalAssetsReturnsPA =
+                result.facts.totalAssetsReturnsPA
+            }
           }
         })
         output.push(dataPerPlayer)
@@ -221,7 +247,69 @@ function ReportGame() {
     segmentEndResultsError,
   ])
 
-  if (loading || segmentEndResultsLoading || !memoizedData) {
+  const memoizedDataPeriod = useMemo(() => {
+    if (
+      periodEndResultsLoading ||
+      periodEndResultsError ||
+      !periodEndResults?.specificResults
+    ) {
+      return null
+    }
+
+    const previousPeriodResults = periodEndResults.specificResults
+
+    console.log('previousPeriodResults', previousPeriodResults)
+
+    const riskReturnPerPeriod = previousPeriodResults.reduce((acc, result) => {
+      if (!acc[result.period.index]) {
+        acc[result.period.index] = {
+          [result.player.id]: {
+            name: result.player.name,
+            risk: result.facts.risk,
+            totalAssetsReturnsPA: result.facts.totalAssetsReturnsPA,
+          },
+        }
+      } else {
+        acc[result.period.index][result.player.id] = {
+          name: result.player.name,
+          risk: result.facts.risk,
+          totalAssetsReturnsPA: result.facts.totalAssetsReturnsPA,
+        }
+      }
+      return acc
+    }, [])
+
+    const sharpeRatioPerPeriod = previousPeriodResults.reduce((acc, result) => {
+      acc[result.period.index] = {
+        ...acc[result.period.index],
+        period: result.period.index + 1,
+        [result.player.name + '-sharpeRatio']: result.facts.sharpeRatio,
+      }
+      return acc
+    }, [])
+
+    const configSharpeRatio = Object.keys(sharpeRatioPerPeriod[0]).reduce(
+      (acc, item) => {
+        if (item.endsWith('sharpeRatio')) {
+          acc[item] = {
+            label: item.replace('-sharpeRatio', ''),
+          }
+        }
+        return acc
+      },
+      {}
+    )
+
+    return { riskReturnPerPeriod, sharpeRatioPerPeriod, configSharpeRatio }
+  }, [periodEndResults, periodEndResultsLoading, periodEndResultsError])
+
+  if (
+    loading ||
+    segmentEndResultsLoading ||
+    periodEndResultsLoading ||
+    !memoizedDataPeriod ||
+    !memoizedData
+  ) {
     return <div>loading...</div>
   }
 
@@ -230,6 +318,9 @@ function ReportGame() {
   }
   if (segmentEndResultsError) {
     return <div>{segmentEndResultsError.message}</div>
+  }
+  if (periodEndResultsError) {
+    return <div>{periodEndResultsError.message}</div>
   }
 
   const {
@@ -241,6 +332,9 @@ function ReportGame() {
     dataAccTotalAssetsReturn,
     totalDecisionAvg,
   } = memoizedData
+
+  const { riskReturnPerPeriod, sharpeRatioPerPeriod, configSharpeRatio } =
+    memoizedDataPeriod
 
   const dataAvg = [
     {
@@ -544,6 +638,115 @@ function ReportGame() {
                   tickMargin={8}
                   tickFormatter={(v) => `${(v * 100).toFixed(1)}%`}
                   domain={['auto', (dataMax) => dataMax * 1.1]}
+                />
+                <ChartLegend content={<ChartLegendContent />} />
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="flex h-full w-full flex-col">
+          <CardHeader>
+            <CardTitle>Risk-Return </CardTitle>
+            <CardDescription>
+              Risk-Return chart of the latest completed period.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex-grow">
+            <ChartContainer config={playerConfig} className="h-[300px] w-full">
+              <ScatterChart>
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent />}
+                  formatter={(value, name, item) => [
+                    <div
+                      key={name}
+                      className="flex w-full items-center justify-between gap-x-2"
+                    >
+                      <div className="flex items-center gap-x-1">
+                        <div
+                          className="h-[8px] w-[8px] rounded-sm"
+                          style={{ background: item.color }}
+                        />
+                        <span className="text-xs text-gray-600">{name}</span>
+                      </div>
+                      <span className="font-bold text-black">
+                        {(value * 100).toFixed(2)}%
+                      </span>
+                    </div>,
+                  ]}
+                />
+                <CartesianGrid />
+                <XAxis
+                  dataKey="risk"
+                  tickLine={false}
+                  tickMargin={8}
+                  type="number"
+                  name="Risk"
+                  tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
+                />
+                <YAxis
+                  dataKey="totalAssetsReturnsPA"
+                  type="number"
+                  name="Returns p.a."
+                  tickLine={false}
+                  tickMargin={8}
+                  tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
+                />
+                {Object.values(
+                  riskReturnPerPeriod[riskReturnPerPeriod.length - 1]
+                ).map((playerData, ix) => {
+                  return (
+                    <Scatter
+                      key={playerData.name}
+                      name={playerData.name}
+                      data={[playerData]}
+                      fill={colors[ix]}
+                    />
+                  )
+                })}
+                <ChartLegend content={<ChartLegendContent />} />
+              </ScatterChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="flex h-full w-full flex-col">
+          <CardHeader>
+            <CardTitle>Sharpe Ratio</CardTitle>
+            {/* <CardDescription>Average decisions over players.</CardDescription> */}
+          </CardHeader>
+          <CardContent className="flex-grow">
+            <ChartContainer
+              config={configSharpeRatio}
+              className="h-[300px] w-full"
+            >
+              <BarChart data={sharpeRatioPerPeriod}>
+                {Object.keys(configSharpeRatio).map((key, ix) => {
+                  return (
+                    <Bar key={key} dataKey={key} fill={colors[ix]} radius={4}>
+                      <LabelList
+                        position="top"
+                        className="fill-foreground"
+                        fontSize={12}
+                        formatter={(v) => `${v.toFixed(2)}`}
+                      />
+                    </Bar>
+                  )
+                })}
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="period"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tickFormatter={(v) => `P${v}`}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tickFormatter={(v) => `${v.toFixed(2)}`}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
               </BarChart>

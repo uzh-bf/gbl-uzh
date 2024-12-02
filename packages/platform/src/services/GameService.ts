@@ -1,7 +1,8 @@
 import * as DB from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
 import { nanoid } from 'nanoid'
-import { none, repeat } from 'ramda'
+import { filter, none, repeat } from 'ramda'
+import { standardDeviation } from '../lib/util.js'
 import * as yup from 'yup'
 import log from '../lib/logger.js'
 import {
@@ -302,6 +303,12 @@ export async function activateNextPeriod(
     include: {
       players: true,
       periods: true,
+      results: {
+        where: {
+          type: 'SEGMENT_END',
+        },
+        orderBy: [{ period: { index: 'asc' } }, { segment: { index: 'asc' } }],
+      },
       activePeriod: {
         include: {
           results: {
@@ -497,7 +504,9 @@ export async function activateNextPeriod(
 
       const { results, extras, promises } = await computePeriodEndResults(
         {
-          segmentResults: game.activePeriod.activeSegment.results,
+          segmentEndResults: game.results,
+          players: game.players,
+          activeSegmentResults: game.activePeriod.activeSegment.results,
           segmentFacts: game.activePeriod.activeSegment.facts,
           periodFacts: game.activePeriod.facts,
           periodDecisions: game.activePeriod.decisions,
@@ -1145,7 +1154,9 @@ export function computePeriodStartResults(
 
 export async function computePeriodEndResults(
   {
-    segmentResults,
+    segmentEndResults,
+    players,
+    activeSegmentResults,
     periodFacts,
     periodDecisions,
     segmentFacts,
@@ -1159,18 +1170,30 @@ export async function computePeriodEndResults(
   let extras: any[] = []
   let promises: Promise<any>[] = []
 
-  const results = segmentResults
+  const perPlayer = {}
+  players.forEach((player) => {
+    perPlayer[player.id] = {
+      segmentEndResults: segmentEndResults.filter(
+        (res) => res.playerId === player.id
+      ),
+      consolidationDecisions: periodDecisions.find(
+        (decision) => decision.playerId === player.id
+      ),
+    }
+  })
+
+  const results = activeSegmentResults
     .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
     .map((result, ix, allResults) => {
-      const consolidationDecisions = periodDecisions.find(
-        (decision) => decision.playerId === result.playerId
-      )
-
+      const segmentEndResults = perPlayer[result.playerId].segmentEndResults
+      const consolidationDecisions =
+        perPlayer[result.playerId].consolidationDecisions
       const {
         resultFacts: facts,
         actions,
         events,
       } = services.PeriodResult.end(result.facts, {
+        segmentEndResults,
         periodFacts,
         segmentFacts,
 

@@ -5,6 +5,8 @@ import {
 } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
+import { PlayerResult } from 'src/graphql/generated/ops'
+import { computeRiskAndReturnOfPlayer } from '../lib/analysis'
 import { PlayerRole } from '../settings/Constants'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 import { OutputResultFacts, ResultFacts, ResultFactsInit } from '../types/facts'
@@ -83,16 +85,31 @@ export function start(
 
 export function end(
   facts: ResultFacts,
-  payload: PayloadPeriodResultEnd<PeriodFacts, PeriodSegmentFacts, PlayerRole>
+  payload: PayloadPeriodResultEnd<
+    PlayerResult[],
+    PeriodFacts,
+    PeriodSegmentFacts,
+    PlayerRole
+  >
 ): OutputResultFacts {
   const baseFacts: OutputResultFacts = {
     resultFacts: facts,
     events: [],
   }
 
+  const {
+    returns: totalAssetsReturnsPA,
+    risk,
+    sharpeRatio,
+  } = computeRiskAndReturnOfPlayer(payload.segmentEndResults)
+
   const resultFacts: OutputResultFacts = produce(
     baseFacts,
-    (draft: OutputResultFacts) => {}
+    (draft: OutputResultFacts) => {
+      draft.resultFacts.totalAssetsReturnsPA = totalAssetsReturnsPA
+      draft.resultFacts.risk = risk
+      draft.resultFacts.sharpeRatio = sharpeRatio
+    }
   )
 
   debugLog('PeriodResultEnd', facts, payload, resultFacts)

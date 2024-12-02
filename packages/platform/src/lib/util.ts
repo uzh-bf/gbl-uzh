@@ -34,6 +34,14 @@ export function computeScenarioOutcome(
   return trend + (diceRoll - 7) * gap
 }
 
+export function standardDeviation(arr: number[]) {
+  const num = arr.length
+  const mean = arr.reduce((acc, value) => acc + value, 0) / num
+  const variance =
+    arr.reduce((acc, value) => acc + Math.pow(value - mean, 2), 0) / (num - 1)
+  return Math.sqrt(variance)
+}
+
 export function computePercentChange(newValue: number, oldValue: number) {
   return (newValue - oldValue) / oldValue
 }
