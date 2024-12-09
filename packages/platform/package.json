@@ -8,7 +8,7 @@
     "dist"
   ],
   "dependencies": {
-    "nanoid": "5.0.8",
+    "nanoid": "5.0.9",
     "random-js": "2.1.0",
     "winston": "3.17.0"
   },
