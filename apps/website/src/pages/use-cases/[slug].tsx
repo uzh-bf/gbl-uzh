@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
 import TitleBackground from '../../components/common/TitleBackground'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChalkboardTeacher, faGamepad, faChartLine } from '@fortawesome/free-solid-svg-icons'
 
 import Content from '../../components/Content'
 import PageWithHeader from '../../components/PageWithHeader'
@@ -38,29 +40,45 @@ function UseCase({
 
           <Content>
             <div className="flex flex-row gap-8">
-              <div className="hidden w-80 flex-initial rounded border bg-slate-50 p-4 md:block">
+              <div className="hidden w-80 flex-initial md:block">
                 {['didactics', 'development', 'simulations'].map((type) => {
                   const useCases = sourceArr[0].filter(
                     ({ frontmatter }: any) => frontmatter.type === type
                   )
                   if (useCases.length === 0) return null
 
+                  const icon = type === 'didactics'
+                    ? faChalkboardTeacher
+                    : type === 'development'
+                    ? faGamepad
+                    : faChartLine
+
                   return (
-                    <div key={type} className="mb-4 last:mb-0">
-                      <h3 className="mb-1 font-bold capitalize">
-                        {type === 'development' ? 'Game Development' : type}
-                      </h3>
+                    <div key={type} className="mb-6 last:mb-0">
+                      <div className="mb-2 flex items-center gap-2 rounded bg-slate-100 px-3 py-2">
+                        <FontAwesomeIcon
+                          icon={icon}
+                          className="h-4 w-4 text-slate-600"
+                        />
+                        <h3 className="font-bold capitalize text-slate-700">
+                          {type === 'development' ? 'Game Development' : type}
+                        </h3>
+                      </div>
                       <ul className="text-sm">
                         {useCases.map(({ frontmatter }: any) => (
                           <Link
-                            className="block border-b py-1 last:border-b-0"
+                            className="block"
                             key={frontmatter.slug}
                             href={`/use-cases/${frontmatter.slug}`}
                           >
                             <li
                               className={twMerge(
-                                'hover:cursor-pointer hover:text-orange-600',
-                                router.query.slug === frontmatter.slug && 'font-bold'
+                                'relative border-b py-3 pl-3 transition-all duration-150',
+                                'hover:bg-slate-50',
+                                router.query.slug === frontmatter.slug && [
+                                  'font-medium text-orange-600',
+                                  'before:absolute before:left-0 before:top-0 before:h-full before:w-0.5 before:bg-orange-600'
+                                ]
                               )}
                             >
                               {frontmatter.title}
