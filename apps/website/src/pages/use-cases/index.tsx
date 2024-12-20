@@ -17,6 +17,10 @@ interface Props {
 function GBLUseCases({ sourceArr }: Props) {
   const router = useRouter()
 
+  const useCasesDidactics = sortBy(
+    ({ frontmatter }: any) => frontmatter.title,
+    sourceArr[0]
+  ).filter(({ frontmatter }) => frontmatter.type === 'didactics')
   const useCasesDevelopment = sortBy(
     ({ frontmatter }: any) => frontmatter.title,
     sourceArr[0]
@@ -37,6 +41,33 @@ function GBLUseCases({ sourceArr }: Props) {
       </TitleBackground>
 
       <Content>
+        <H2>Didactics</H2>
+        <div className="">
+          {useCasesDidactics.map(({ frontmatter }: any, ix) => (
+            <HomeSection key={frontmatter.slug}>
+              <HomeSection.Content
+                className={twMerge(ix % 2 === 0 ? 'order-1' : 'order-2')}
+                title={frontmatter.title}
+                content={frontmatter.abstract}
+              >
+                <Button
+                  className={{ root: 'mt-4' }}
+                  onClick={() => router.push(`/use-cases/${frontmatter.slug}`)}
+                >
+                  <Button.Icon>
+                    <FontAwesomeIcon icon={faArrowRight} />
+                  </Button.Icon>
+                  <Button.Label>Read more</Button.Label>
+                </Button>
+              </HomeSection.Content>
+              <HomeSection.Hero
+                className={twMerge('', ix % 2 === 0 ? 'order-2' : 'order-1')}
+                src={frontmatter.imgSrc}
+              />
+            </HomeSection>
+          ))}
+        </div>
+
         <H2>Game Development</H2>
         <div className="">
           {useCasesDevelopment.map(({ frontmatter }: any, ix) => (
