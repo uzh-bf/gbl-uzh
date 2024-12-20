@@ -30,7 +30,7 @@ function EscapeUZH() {
                 github.com/uzh-bf/escapp
               </a>
               ) developed initially at Universidad Politécnica de Madrid and
-              adapted and hosted by the Department of Banking and Finance for
+              adapted and hosted by the Department of Finance for
               the University of Zurich.
             </p>
             <p>

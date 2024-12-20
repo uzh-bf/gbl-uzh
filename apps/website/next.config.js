@@ -1,7 +1,6 @@
 module.exports = {
   output: 'export',
   trailingSlash: true,
-  swcMinify: true,
   images: {
     domains: ['www.uzh.ch'],
     // remotePatterns: [

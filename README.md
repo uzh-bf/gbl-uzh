@@ -1,6 +1,6 @@
 # Game-Based Learning @ UZH
 
-`gbl-uzh` is the code repository of the Game-Based Learning project (<https://www.gbl.uzh.ch/>) developed at the [Department of Banking and Finance](https://www.bf.uzh.ch/en.html) of the [University of Zurich](https://www.uzh.ch/en.html).
+`gbl-uzh` is the code repository of the Game-Based Learning project (<https://www.gbl.uzh.ch/>) developed at the [Department of Finance](https://www.bf.uzh.ch/en.html) of the [University of Zurich](https://www.uzh.ch/en.html).
 
 ## Project Vision
 
