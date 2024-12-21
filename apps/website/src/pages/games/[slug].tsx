@@ -261,8 +261,9 @@ function Game({ source }: Props) {
               ? previousImage
               : undefined
           }
+          title={zoomedImage.alt}
         >
-          <div className="relative h-full w-full">
+          <div className="relative h-[500px] w-full">
             <Image
               src={zoomedImage.imgSrc}
               alt="Magnified Image"
