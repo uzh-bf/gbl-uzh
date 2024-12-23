@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
-import { NewFromikNumberField, Switch } from '@uzh-bf/design-system'
+import { FormikNumberField, Switch } from '@uzh-bf/design-system'
 import {
   Card,
   CardContent,
@@ -1028,7 +1028,7 @@ function Cockpit() {
                     {(newDecisionForm) => {
                       return decisions.map((decision) => {
                         return (
-                          <NewFromikNumberField
+                          <FormikNumberField
                             key={decision.name}
                             placeholder="0 %"
                             label={decision.name}
