@@ -28,7 +28,7 @@ export function initialize(
     resultFacts: {
       ...facts,
       initialCapital: INITIAL_CAPITAL,
-      decisions: { bank: false, bonds: false, stocks: false },
+      decisions: { bank: 100, bonds: 0, stocks: 0 },
       assets: {
         bank: 0,
         bonds: 0,
@@ -47,9 +47,9 @@ export function initialize(
     baseFacts,
     (draft: OutputPeriodResultFactsInit) => {
       draft.resultFacts.decisions = {
-        bank: true,
-        bonds: false,
-        stocks: false,
+        bank: 100,
+        bonds: 0,
+        stocks: 0,
       }
       draft.resultFacts.assets = {
         bank: INITIAL_CAPITAL,

@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
-import { FormikNumberField, Switch } from '@uzh-bf/design-system'
+import { Button, FormikNumberField, Switch } from '@uzh-bf/design-system'
 import {
   Card,
   CardContent,
@@ -47,12 +47,11 @@ import {
   UpdateReadyStateDocument,
 } from 'src/graphql/generated/ops'
 import { getSegmentEndResults } from 'src/lib/analysis'
-import { ActionTypes } from 'src/services/ActionsReducer'
 import { DecisionsDisplayCompact } from '~/components/DecisionsDisplay'
 import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
 // TODO(JJ): This will be replaced by the design system
-import { Formik } from 'formik'
+import { Form, Formik } from 'formik'
 import * as yup from 'yup'
 import { useToast } from '../../components/ui/use-toast'
 
@@ -815,39 +814,21 @@ function Cockpit() {
           category: 'Savings',
           currentValue: `${assets.bank.toFixed(2)} CHF`,
           futureValue: `${(
-            assets.totalAssets *
-            (resultFactsDecisions.bank
-              ? 1 /
-                (+resultFactsDecisions.bank +
-                  +resultFactsDecisions.bonds +
-                  +resultFactsDecisions.stocks)
-              : 0)
+            assets.totalAssets * resultFactsDecisions.bank
           ).toFixed(2)} CHF`,
         },
         {
           category: 'Bonds',
           currentValue: `${assets.bonds.toFixed(2)} CHF`,
           futureValue: `${(
-            assets.totalAssets *
-            (resultFactsDecisions.bonds
-              ? 1 /
-                (+resultFactsDecisions.bank +
-                  +resultFactsDecisions.bonds +
-                  +resultFactsDecisions.stocks)
-              : 0)
+            assets.totalAssets * resultFactsDecisions.bonds
           ).toFixed(2)} CHF`,
         },
         {
           category: 'Stocks',
           currentValue: `${assets.stocks.toFixed(2)} CHF`,
           futureValue: `${(
-            assets.totalAssets *
-            (resultFactsDecisions.stocks
-              ? 1 /
-                (+resultFactsDecisions.bank +
-                  +resultFactsDecisions.bonds +
-                  +resultFactsDecisions.stocks)
-              : 0)
+            assets.totalAssets * resultFactsDecisions.stocks
           ).toFixed(2)} CHF`,
         },
         {
@@ -860,26 +841,40 @@ function Cockpit() {
       const decisions = [
         {
           name: 'Savings',
-          label: (percentage: number) =>
-            `Put ${(percentage * 100).toFixed()}% in savings.`,
-          state: resultFactsDecisions.bank,
-          action: ActionTypes.DECIDE_BANK,
         },
         {
           name: 'Bonds',
-          label: (percentage: number) =>
-            `Invest ${(percentage * 100).toFixed()}% in bonds.`,
-          state: resultFactsDecisions.bonds,
-          action: ActionTypes.DECIDE_BONDS,
         },
         {
           name: 'Stocks',
-          label: (percentage: number) =>
-            `Invest ${(percentage * 100).toFixed()}% in stocks.`,
-          state: resultFactsDecisions.stocks,
-          action: ActionTypes.DECIDE_STOCK,
         },
       ]
+
+      const schema = yup
+        .object({
+          savings: yup
+            .number()
+            .integer()
+            .min(0, 'Savings % must be greater equal than 0')
+            .max(100, 'Savings % must be smaller equal than 100')
+            .required('Savings % is required'),
+          bonds: yup
+            .number()
+            .integer()
+            .min(0, 'Bonds % must be greater equal than 0')
+            .max(100, 'Bonds % must be smaller equal than 100')
+            .required('Bonds % is required'),
+          stocks: yup
+            .number()
+            .integer()
+            .min(0, 'Stocks % must be greater equal than 0')
+            .max(100, 'Stocks % must be smaller equal than 100')
+            .required('Stocks % is required'),
+        })
+        .test('sum', 'Sum of values must be 100', function (values) {
+          const sum = values.savings + values.bonds + values.stocks
+          return sum === 100
+        })
 
       return (
         <GameLayout>
@@ -979,73 +974,65 @@ function Cockpit() {
                         /> */}
                   <Formik
                     initialValues={{
-                      // decision: decision.state,
-                      savings: 1,
-                      bonds: 0,
-                      stocks: 0,
+                      savings: resultFactsDecisions.bank,
+                      bonds: resultFactsDecisions.bonds,
+                      stocks: resultFactsDecisions.stocks,
                     }}
-                    validationSchema={yup
-                      .object({
-                        savings: yup
-                          .number()
-                          .min(0, 'Savings fraction must be greater than 0')
-                          .max(
-                            1,
-                            'Savings fraction must be smaller equal than 1'
-                          )
-                          .required('Savings fraction is required'),
-                        bonds: yup
-                          .number()
-                          .min(0, 'Bonds fraction must be greater than 0')
-                          .max(1, 'Bonds fraction must be smaller equal than 1')
-                          .required('Bonds fraction is required'),
-                        stocks: yup
-                          .number()
-                          .min(0, 'Stocks fraction must be greater than 0')
-                          .max(
-                            1,
-                            'Stocks fraction must be smaller equal than 1'
-                          )
-                          .required('Stocks fraction is required'),
-                      })
-                      .test('sum', 'Sum of fractions must be 1', (value) => {
-                        return value.savings + value.bonds + value.stocks === 1
-                      })}
-                    validateOnChange
-                    // isInitialValid
+                    validationSchema={schema}
                     onSubmit={async (values) => {
-                      await performAction({
-                        variables: {
-                          // type: decision.action,
-                          payload: JSON.stringify({
-                            // decision: values.decision,
-                          }),
-                        },
-                        refetchQueries: [ResultDocument],
-                      })
+                      const savings = parseInt(values.savings)
+                      const bonds = parseInt(values.bonds)
+                      const stocks = parseInt(values.stocks)
+                      const sum = savings + bonds + stocks
+
+                      if (sum !== 100) {
+                        throw new Error('Sum of values must be 100')
+                      } else {
+                        await performAction({
+                          variables: {
+                            type: '',
+                            payload: JSON.stringify({
+                              bank: savings,
+                              bonds,
+                              stocks,
+                            }),
+                          },
+                          refetchQueries: [ResultDocument],
+                        })
+                      }
                     }}
                   >
                     {(newDecisionForm) => {
-                      return decisions.map((decision) => {
-                        return (
-                          <FormikNumberField
-                            key={decision.name}
-                            placeholder="0 %"
-                            label={decision.name}
-                            name={decision.name.toLowerCase()}
-                            tooltip={
-                              <p>
-                                Determine how much of all assets you want to
-                                invest in the {decision.name}. The total should
-                                be equal to 100 percent.
-                              </p>
-                            }
-                            required
-                            data={{ cy: decision.name + '-cy' }}
-                            className={{ label: 'pb-2 font-normal' }}
-                          />
-                        )
-                      })
+                      return (
+                        <Form>
+                          <div className="mb-2 flex gap-2">
+                            {decisions.map((decision) => {
+                              const fieldName = decision.name.toLowerCase()
+                              return (
+                                <FormikNumberField
+                                  key={fieldName}
+                                  placeholder="0 %"
+                                  min={0}
+                                  max={100}
+                                  label={decision.name}
+                                  name={fieldName}
+                                  tooltip={
+                                    <p>
+                                      Determine how much of all assets you want
+                                      to invest in the {decision.name}. The
+                                      total should be equal to 100 percent.
+                                    </p>
+                                  }
+                                  required
+                                  data={{ cy: decision.name + '-cy' }}
+                                  className={{ label: 'pb-2 font-normal' }}
+                                />
+                              )
+                            })}
+                          </div>
+                          <Button type="submit">Submit</Button>
+                        </Form>
+                      )
                     }}
                   </Formik>
                 </div>

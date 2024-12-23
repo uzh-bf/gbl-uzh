@@ -11,9 +11,9 @@ export type Assets = AssetsBenchmark & {
 }
 
 export type Decisions = {
-  bank: boolean
-  bonds: boolean
-  stocks: boolean
+  bank: number
+  bonds: number
+  stocks: number
 }
 
 export type AssetsWithReturns = Assets & {

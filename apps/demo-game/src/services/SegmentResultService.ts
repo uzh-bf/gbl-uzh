@@ -73,18 +73,24 @@ export function end(
     basefacts,
     (draft: OutputResultFacts) => {
       const segmentFacts = payload.segmentFacts
-      const numInvestedBuckets = R.sum(
-        Object.values(facts.decisions).map(Number)
-      )
+
       const totalAssets =
         facts.assets.bank + facts.assets.bonds + facts.assets.stocks
 
-      const invNumInvestedBuckets = 1 / numInvestedBuckets
-      const targetAsset = invNumInvestedBuckets * totalAssets
+      // const numInvestedBuckets = R.sum(
+      //   Object.values(facts.decisions).map(Number)
+      // )
+      // const invNumInvestedBuckets = 1 / numInvestedBuckets
+      // const targetAsset = invNumInvestedBuckets * totalAssets
+      // const targetAssets = {
+      //   bank: facts.decisions.bank ? targetAsset : 0,
+      //   bonds: facts.decisions.bonds ? targetAsset : 0,
+      //   stocks: facts.decisions.stocks ? targetAsset : 0,
+      // }
       const targetAssets = {
-        bank: facts.decisions.bank ? targetAsset : 0,
-        bonds: facts.decisions.bonds ? targetAsset : 0,
-        stocks: facts.decisions.stocks ? targetAsset : 0,
+        bank: facts.decisions.bank * 0.01 * totalAssets,
+        bonds: facts.decisions.bonds * 0.01 * totalAssets,
+        stocks: facts.decisions.stocks * 0.01 * totalAssets,
       }
       const benchmarks = {
         bank: facts.benchmarks.bank,

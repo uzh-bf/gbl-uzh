@@ -579,9 +579,9 @@ function ReportGame() {
                                     key={'decision-' + segmentIx}
                                     className="flex w-40 items-center justify-around"
                                   >
-                                    <div>{decision.bank}</div>
-                                    <div>{decision.bonds}</div>
-                                    <div>{decision.stocks}</div>
+                                    <div>{decision.bank} %</div>
+                                    <div>{decision.bonds} %</div>
+                                    <div>{decision.stocks} %</div>
                                   </div>
                                 )
                               })}
