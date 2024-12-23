@@ -871,11 +871,14 @@ function Cockpit() {
             .max(100, 'Stocks % must be smaller equal than 100')
             .required('Stocks % is required'),
         })
-        .test('sum', 'Sum of values must be 100', function (values) {
+        .test('sum', 'Sum of values must be 100', (values, ctx) => {
           const sum = values.savings + values.bonds + values.stocks
-          return sum === 100
+          if (sum === 100) return true
+          return ctx.createError({
+            path: 'sum',
+            message: 'Sum of values must be 100',
+          })
         })
-
       return (
         <GameLayout>
           <div className="flex w-full grid-cols-2 flex-col gap-4 xl:grid">
@@ -949,29 +952,6 @@ function Cockpit() {
                 </Card>
 
                 <div className="mt-8 flex flex-row gap-2">
-                  {/* <Switch
-                          label={decision.label(
-                            decision.state
-                              ? 1 /
-                                  (+resultFactsDecisions.bank +
-                                    +resultFactsDecisions.bonds +
-                                    +resultFactsDecisions.stocks)
-                              : 0
-                          )}
-                          checked={decision.state}
-                          id="switch"
-                          onCheckedChange={async (checked) => {
-                            await performAction({
-                              variables: {
-                                type: decision.action,
-                                payload: JSON.stringify({
-                                  decision: checked,
-                                }),
-                              },
-                              refetchQueries: [ResultDocument],
-                            })
-                          }}
-                        /> */}
                   <Formik
                     initialValues={{
                       savings: resultFactsDecisions.bank,
@@ -983,23 +963,18 @@ function Cockpit() {
                       const savings = parseInt(values.savings)
                       const bonds = parseInt(values.bonds)
                       const stocks = parseInt(values.stocks)
-                      const sum = savings + bonds + stocks
 
-                      if (sum !== 100) {
-                        throw new Error('Sum of values must be 100')
-                      } else {
-                        await performAction({
-                          variables: {
-                            type: '',
-                            payload: JSON.stringify({
-                              bank: savings,
-                              bonds,
-                              stocks,
-                            }),
-                          },
-                          refetchQueries: [ResultDocument],
-                        })
-                      }
+                      await performAction({
+                        variables: {
+                          type: '',
+                          payload: JSON.stringify({
+                            bank: savings,
+                            bonds,
+                            stocks,
+                          }),
+                        },
+                        refetchQueries: [ResultDocument],
+                      })
                     }}
                   >
                     {(newDecisionForm) => {
@@ -1012,8 +987,6 @@ function Cockpit() {
                                 <FormikNumberField
                                   key={fieldName}
                                   placeholder="0 %"
-                                  min={0}
-                                  max={100}
                                   label={decision.name}
                                   name={fieldName}
                                   tooltip={
@@ -1030,7 +1003,21 @@ function Cockpit() {
                               )
                             })}
                           </div>
-                          <Button type="submit">Submit</Button>
+                          {newDecisionForm.errors.sum && (
+                            <div className="text-red-500">
+                              The sum of the input values must be{' '}
+                              <span className="font-bold">100</span>!
+                            </div>
+                          )}
+                          <Button
+                            type="submit"
+                            disabled={
+                              !newDecisionForm.isValid ||
+                              newDecisionForm.isSubmitting
+                            }
+                          >
+                            Submit
+                          </Button>
                         </Form>
                       )
                     }}
