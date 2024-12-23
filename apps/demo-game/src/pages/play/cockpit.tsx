@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
-import { Switch } from '@uzh-bf/design-system'
+import { NewFromikNumberField, Switch } from '@uzh-bf/design-system'
 import {
   Card,
   CardContent,
@@ -52,6 +52,8 @@ import { DecisionsDisplayCompact } from '~/components/DecisionsDisplay'
 import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
 // TODO(JJ): This will be replaced by the design system
+import { Formik } from 'formik'
+import * as yup from 'yup'
 import { useToast } from '../../components/ui/use-toast'
 
 const LABEL_MAP = {
@@ -952,10 +954,7 @@ function Cockpit() {
                 </Card>
 
                 <div className="mt-8 flex flex-row gap-2">
-                  {decisions.map((decision) => {
-                    return (
-                      <div className="p-1" key={decision.name}>
-                        <Switch
+                  {/* <Switch
                           label={decision.label(
                             decision.state
                               ? 1 /
@@ -977,10 +976,78 @@ function Cockpit() {
                               refetchQueries: [ResultDocument],
                             })
                           }}
-                        />
-                      </div>
-                    )
-                  })}
+                        /> */}
+                  <Formik
+                    initialValues={{
+                      // decision: decision.state,
+                      savings: 1,
+                      bonds: 0,
+                      stocks: 0,
+                    }}
+                    validationSchema={yup
+                      .object({
+                        savings: yup
+                          .number()
+                          .min(0, 'Savings fraction must be greater than 0')
+                          .max(
+                            1,
+                            'Savings fraction must be smaller equal than 1'
+                          )
+                          .required('Savings fraction is required'),
+                        bonds: yup
+                          .number()
+                          .min(0, 'Bonds fraction must be greater than 0')
+                          .max(1, 'Bonds fraction must be smaller equal than 1')
+                          .required('Bonds fraction is required'),
+                        stocks: yup
+                          .number()
+                          .min(0, 'Stocks fraction must be greater than 0')
+                          .max(
+                            1,
+                            'Stocks fraction must be smaller equal than 1'
+                          )
+                          .required('Stocks fraction is required'),
+                      })
+                      .test('sum', 'Sum of fractions must be 1', (value) => {
+                        return value.savings + value.bonds + value.stocks === 1
+                      })}
+                    validateOnChange
+                    // isInitialValid
+                    onSubmit={async (values) => {
+                      await performAction({
+                        variables: {
+                          // type: decision.action,
+                          payload: JSON.stringify({
+                            // decision: values.decision,
+                          }),
+                        },
+                        refetchQueries: [ResultDocument],
+                      })
+                    }}
+                  >
+                    {(newDecisionForm) => {
+                      return decisions.map((decision) => {
+                        return (
+                          <NewFromikNumberField
+                            key={decision.name}
+                            placeholder="0 %"
+                            label={decision.name}
+                            name={decision.name.toLowerCase()}
+                            tooltip={
+                              <p>
+                                Determine how much of all assets you want to
+                                invest in the {decision.name}. The total should
+                                be equal to 100 percent.
+                              </p>
+                            }
+                            required
+                            data={{ cy: decision.name + '-cy' }}
+                            className={{ label: 'pb-2 font-normal' }}
+                          />
+                        )
+                      })
+                    }}
+                  </Formik>
                 </div>
               </CardContent>
               <CardFooter className="text-slate-500">
