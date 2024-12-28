@@ -7,6 +7,7 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from '@uzh-bf/design-system/dist/future'
+import { Button } from '@uzh-bf/design-system'
 
 interface Props {
   tabs: { name: string; href: string }[]
@@ -23,7 +24,7 @@ function NavBar({
   playerLevel,
   playerColor,
   playerImgPathAvatar,
-  playerHref = '/play/cockpit',
+  playerHref = '/play/welcome',
 }: Props) {
   return (
     <>
@@ -48,7 +49,9 @@ function NavBar({
               <div className="text-orange-700">Level {playerLevel}</div>
             </div>
             <div className="w-10">
-              <Logo imgPathAvatar={playerImgPathAvatar} color={playerColor} />
+              <Button className={{ root: 'p-0 hover:' }}>
+                <Logo imgPathAvatar={playerImgPathAvatar} color={playerColor} />
+              </Button>
             </div>
           </div>
         </Link>

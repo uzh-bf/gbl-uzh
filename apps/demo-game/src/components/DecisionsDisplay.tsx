@@ -107,9 +107,9 @@ function DecisionsDisplayCompact({ segmentDecisions }: DecisionDisplayProps) {
             <TableBody>
               {segmentDecisions.map((e) => {
                 return (
-                  <TableRow key={e.segment.id}>
+                  <TableRow key={e.segment?.id}>
                     <TableCell className="flex text-nowrap">
-                      P{e.period.index + 1} S{e.segment.index + 1}
+                      P{e.period?.index + 1} S{e.segment?.index + 1}
                     </TableCell>
                     <TableCell>
                       <OnOffIcon on={e.decisions.bank} />
