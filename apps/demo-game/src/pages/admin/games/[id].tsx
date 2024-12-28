@@ -392,6 +392,18 @@ function ManageGame() {
                         const diceShared = segment?.facts.diceRolls.map(
                           (dice) => dice.shared
                         )
+
+                        const dataToEncode = {
+                          diceBonds,
+                          diceShared,
+                          diceStocks,
+                          trendBonds,
+                          gapBonds,
+                          trendStocks,
+                          gapStocks,
+                        }
+                        const encoded = btoa(JSON.stringify(dataToEncode))
+
                         return (
                           <div
                             className={twMerge(
@@ -436,13 +448,7 @@ function ManageGame() {
 
                             {segment && (
                               <Link
-                                href={`/admin/dice/${
-                                  segment.id
-                                }/${diceBonds.join('-')}-${diceShared.join(
-                                  '-'
-                                )}-${diceStocks.join(
-                                  '-'
-                                )}-${trendBonds}-${gapBonds}-${trendStocks}-${gapStocks}`}
+                                href={`/admin/dice/${segment.id}/${encoded}`}
                                 target="_blank"
                                 className="flex flex-col rounded border border-gray-300 p-2"
                               >
