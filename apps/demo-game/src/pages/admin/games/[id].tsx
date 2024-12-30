@@ -8,11 +8,11 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Button,
+  FormikNumberField,
+  FormikTextField,
   H3,
   H4,
   Modal,
-  NewFormikTextField,
-  NewFromikNumberField,
 } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import Link from 'next/link'
@@ -677,14 +677,14 @@ function ManageGame() {
                   }
                 >
                   <div className="flex w-1/2 flex-col gap-2">
-                    <NewFormikTextField
+                    <FormikTextField
                       type="string"
                       name="periodName"
                       label="Period Name"
                       data={{ cy: 'period-name' }}
                       className={{ label: 'pb-2 font-normal' }}
                     />
-                    <NewFromikNumberField
+                    <FormikNumberField
                       placeholder={newPeriodForm.values.segmentCount}
                       label="Number of segments"
                       name="segmentCount"
@@ -703,7 +703,7 @@ function ManageGame() {
                   <div className="mt-4">
                     <H3>Scenario Parameters</H3>
                     <div className="flex w-1/2 flex-col gap-2">
-                      <NewFromikNumberField
+                      <FormikNumberField
                         placeholder={newPeriodForm.values.seed}
                         label="Seed"
                         name="seed"
@@ -717,7 +717,7 @@ function ManageGame() {
                   <div className="mt-4">
                     <H4>Bank</H4>
                     <div className="flex w-1/2 flex-col gap-2">
-                      <NewFromikNumberField
+                      <FormikNumberField
                         placeholder={newPeriodForm.values.interestBank}
                         label="Saving Interest"
                         name="interestBank"
@@ -731,7 +731,7 @@ function ManageGame() {
                   <div className="mt-4">
                     <H4>Bonds</H4>
                     <div className="flex w-1/2 gap-2">
-                      <NewFromikNumberField
+                      <FormikNumberField
                         placeholder={newPeriodForm.values.trendBonds}
                         label="Trend"
                         name="trendBonds"
@@ -740,7 +740,7 @@ function ManageGame() {
                         data={{ cy: 'trend-bonds' }}
                         className={{ label: 'pb-2 font-normal' }}
                       />
-                      <NewFromikNumberField
+                      <FormikNumberField
                         placeholder={newPeriodForm.values.gapBonds}
                         label="Gap"
                         name="gapBonds"
@@ -754,7 +754,7 @@ function ManageGame() {
                   <div className="mt-4">
                     <H4>Stocks</H4>
                     <div className="flex w-1/2 gap-2">
-                      <NewFromikNumberField
+                      <FormikNumberField
                         placeholder={newPeriodForm.values.trendStocks}
                         label="Trend"
                         name="trendStocks"
@@ -763,7 +763,7 @@ function ManageGame() {
                         data={{ cy: 'trend-stocks' }}
                         className={{ label: 'pb-2 font-normal' }}
                       />
-                      <NewFromikNumberField
+                      <FormikNumberField
                         placeholder={newPeriodForm.values.gapStocks}
                         label="Gap"
                         name="gapStocks"
@@ -820,7 +820,7 @@ function ManageGame() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <NewFromikNumberField
+                <FormikNumberField
                   name="countdownSeconds"
                   precision={0}
                   label="Countdown in seconds"
