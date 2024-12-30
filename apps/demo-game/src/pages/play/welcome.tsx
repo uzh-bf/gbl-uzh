@@ -3,19 +3,19 @@ import { COLORS } from '@gbl-uzh/platform/src/lib/constants'
 import { Logo } from '@gbl-uzh/ui'
 import {
   Button,
-  NewFormikSelectField,
-  NewFormikTextField,
+  FormikSelectField,
+  FormikTextField,
 } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import LogoSelector  from '~/components/LogoSelector'
 import {
   SelfDocument,
   UpdatePlayerDataDocument,
 } from 'src/graphql/generated/ops'
 import { LOCATIONS } from 'src/lib/constants'
 import * as Yup from 'yup'
+import LogoSelector from '~/components/LogoSelector'
 
 import {
   Card,
@@ -117,7 +117,7 @@ function Welcome() {
                     <CardTitle>Introduction</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className='pb-4'>
+                    <div className="pb-4">
                       Welcome, {values.name}
                       <br />
                       Lucky you! You recently found out that you picked five
@@ -134,7 +134,6 @@ function Welcome() {
                         want to invest in bonds and what proportion you want to
                         invest in stocks.
                       </div>
-                      
                     </div>
                   </CardContent>
                 </Card>
@@ -158,12 +157,12 @@ function Welcome() {
                     </div>
                     <div className="flex flex-col">
                       <div className="flex-initial space-y-1.5">
-                        <NewFormikTextField
+                        <FormikTextField
                           label="Name of bank"
                           name="name"
                           className={{ label: 'pb-2 font-normal' }}
                         />
-                        <NewFormikSelectField
+                        <FormikSelectField
                           label="Location"
                           name="location"
                           items={LOCATIONS.Trader.map((label) => ({
@@ -177,13 +176,13 @@ function Welcome() {
                           }}
                         />
                         <LogoSelector
-                          label='Avatar'
+                          label="Avatar"
                           className="w-48 pb-2 text-sm text-gray-600"
                           color={values.color}
                           name="imgPathAvatar"
                         />
 
-                        <NewFormikSelectField
+                        <FormikSelectField
                           label="Color"
                           name="color"
                           items={Object.keys(COLORS).map((label) => ({
