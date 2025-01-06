@@ -69,14 +69,19 @@ const Forecast = () => {
   const [roll, setRoll] = useState<boolean[]>([false, false, false])
   const [showDice, setShowDice] = useState<boolean[]>([false, false, false])
 
-  const nums = ((router.query?.roll?.[0] as string) ?? '').split('-')
-  const diceBonds = nums.slice(0, 3).map((num) => parseInt(num))
-  const diceShared = nums.slice(3, 6).map((num) => parseInt(num))
-  const diceStocks = nums.slice(6, 9).map((num) => parseInt(num))
-  const trendBonds = parseFloat(nums[9])
-  const gapBonds = parseFloat(nums[10])
-  const trendStocks = parseFloat(nums[11])
-  const gapStocks = parseFloat(nums[12])
+  if (!router.query?.roll?.[0]) return <div>Loading...</div>
+
+  const decodedData = JSON.parse(atob(router.query?.roll?.[0]))
+
+  const {
+    diceBonds,
+    diceShared,
+    diceStocks,
+    trendBonds,
+    gapBonds,
+    trendStocks,
+    gapStocks,
+  } = decodedData
 
   if (!diceBonds || !diceShared || !diceStocks) return <div>Loading...</div>
   const colors = [
