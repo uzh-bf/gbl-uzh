@@ -24,9 +24,9 @@ interface DecisionProps {
   period: ObjectProps
   segment: ObjectProps
   decisions: {
-    bank: boolean
-    bonds: boolean
-    stocks: boolean
+    bank: number
+    bonds: number
+    stocks: number
   }
 }
 
@@ -112,13 +112,22 @@ function DecisionsDisplayCompact({ segmentDecisions }: DecisionDisplayProps) {
                       P{e.period.index + 1} S{e.segment.index + 1}
                     </TableCell>
                     <TableCell>
-                      <OnOffIcon on={e.decisions.bank} />
+                      {/* <OnOffIcon on={e.decisions.bank} /> */}
+                      <div className="flex justify-center">
+                        {e.decisions.bank}%
+                      </div>
                     </TableCell>
                     <TableCell>
-                      <OnOffIcon on={e.decisions.bonds} />
+                      {/* <OnOffIcon on={e.decisions.bonds} /> */}
+                      <div className="flex justify-center">
+                        {e.decisions.bonds}%
+                      </div>
                     </TableCell>
                     <TableCell>
-                      <OnOffIcon on={e.decisions.stocks} />
+                      {/* <OnOffIcon on={e.decisions.stocks} /> */}
+                      <div className="flex justify-center">
+                        {e.decisions.stocks}%
+                      </div>
                     </TableCell>
                   </TableRow>
                 )

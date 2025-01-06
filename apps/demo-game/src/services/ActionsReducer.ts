@@ -2,35 +2,24 @@ import { Action } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PrismaClient } from '@prisma/client'
 import { produce } from 'immer'
-import { P, match } from 'ts-pattern'
+import { Decisions } from '../types/facts'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/index'
 
 export enum ActionTypes {
-  DECIDE_BANK = 'DECIDE_BANK',
-  DECIDE_BONDS = 'DECIDE_BONDS',
-  DECIDE_STOCK = 'DECIDE_STOCK',
+  NONE = '',
 }
 
 type PayloadType = {
-  playerArgs: {
-    decision: boolean
-  }
+  playerArgs: Decisions
   segmentFacts: PeriodSegmentFacts
   periodFacts: PeriodFacts
 }
 
 type State = {
-  decisions: {
-    bank: boolean
-    bonds: boolean
-    stocks: boolean
-  }
+  decisions: Decisions
 }
 
-type Actions =
-  | Action<ActionTypes.DECIDE_BANK, PayloadType, PrismaClient>
-  | Action<ActionTypes.DECIDE_BONDS, PayloadType, PrismaClient>
-  | Action<ActionTypes.DECIDE_STOCK, PayloadType, PrismaClient>
+type Actions = Action<ActionTypes.NONE, PayloadType, PrismaClient>
 
 export function apply(state: State, action: Actions) {
   // TODO: move this to platform? -> reducer should not have to care about isDirty and other non-user-logicstuff
@@ -42,56 +31,17 @@ export function apply(state: State, action: Actions) {
   // TODO: the user reducer could just get the "draft" inside this function as first parameter
   // TODO: and platform would do all code around it
   const newState = produce(baseState, (draft) => {
-    match(action)
-      .with(
-        { type: ActionTypes.DECIDE_BANK, payload: P.select() },
-        (payload) => {
-          // check if any of the other two decisions is set to true
-          // otherwise, do not allow to set bank to false
-          if (
-            !payload.playerArgs.decision &&
-            !draft.result.decisions.bonds &&
-            !draft.result.decisions.stocks
-          ) {
-            return
-          }
+    const { bank, bonds, stocks } = action.payload.playerArgs
+    if (bank < 0 || bank > 100)
+      throw new Error('Bank must be between 0 and 100')
+    if (bonds < 0 || bonds > 100)
+      throw new Error('Bonds must be between 0 and 100')
+    if (stocks < 0 || stocks > 100)
+      throw new Error('Stocks must be between 0 and 100')
+    if (bank + bonds + stocks !== 100)
+      throw new Error('Bank + Bonds + Stocks must equal 100')
 
-          draft.result.decisions.bank = payload.playerArgs.decision
-        }
-      )
-      .with(
-        { type: ActionTypes.DECIDE_BONDS, payload: P.select() },
-        (payload) => {
-          // check if any of the other two decisions is set to true
-          // otherwise, do not allow to set bank to false
-          if (
-            !payload.playerArgs.decision &&
-            !draft.result.decisions.bank &&
-            !draft.result.decisions.stocks
-          ) {
-            return
-          }
-
-          draft.result.decisions.bonds = payload.playerArgs.decision
-        }
-      )
-      .with(
-        { type: ActionTypes.DECIDE_STOCK, payload: P.select() },
-        (payload) => {
-          // check if any of the other two decisions is set to true
-          // otherwise, do not allow to set bank to false
-          if (
-            !payload.playerArgs.decision &&
-            !draft.result.decisions.bank &&
-            !draft.result.decisions.bonds
-          ) {
-            return
-          }
-
-          draft.result.decisions.stocks = payload.playerArgs.decision
-        }
-      )
-      .exhaustive()
+    draft.result.decisions = action.payload.playerArgs
   })
 
   // this computes the isDirty flag based on whether there were changes in state from baseState to newState

@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
-import { Switch } from '@uzh-bf/design-system'
+import { Button, FormikNumberField, Switch } from '@uzh-bf/design-system'
 import {
   Card,
   CardContent,
@@ -47,11 +47,12 @@ import {
   UpdateReadyStateDocument,
 } from 'src/graphql/generated/ops'
 import { getSegmentEndResults } from 'src/lib/analysis'
-import { ActionTypes } from 'src/services/ActionsReducer'
 import { DecisionsDisplayCompact } from '~/components/DecisionsDisplay'
 import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
 // TODO(JJ): This will be replaced by the design system
+import { Form, Formik } from 'formik'
+import * as yup from 'yup'
 import { useToast } from '../../components/ui/use-toast'
 
 const LABEL_MAP = {
@@ -813,39 +814,21 @@ function Cockpit() {
           category: 'Savings',
           currentValue: `${assets.bank.toFixed(2)} CHF`,
           futureValue: `${(
-            assets.totalAssets *
-            (resultFactsDecisions.bank
-              ? 1 /
-                (+resultFactsDecisions.bank +
-                  +resultFactsDecisions.bonds +
-                  +resultFactsDecisions.stocks)
-              : 0)
+            assets.totalAssets * resultFactsDecisions.bank
           ).toFixed(2)} CHF`,
         },
         {
           category: 'Bonds',
           currentValue: `${assets.bonds.toFixed(2)} CHF`,
           futureValue: `${(
-            assets.totalAssets *
-            (resultFactsDecisions.bonds
-              ? 1 /
-                (+resultFactsDecisions.bank +
-                  +resultFactsDecisions.bonds +
-                  +resultFactsDecisions.stocks)
-              : 0)
+            assets.totalAssets * resultFactsDecisions.bonds
           ).toFixed(2)} CHF`,
         },
         {
           category: 'Stocks',
           currentValue: `${assets.stocks.toFixed(2)} CHF`,
           futureValue: `${(
-            assets.totalAssets *
-            (resultFactsDecisions.stocks
-              ? 1 /
-                (+resultFactsDecisions.bank +
-                  +resultFactsDecisions.bonds +
-                  +resultFactsDecisions.stocks)
-              : 0)
+            assets.totalAssets * resultFactsDecisions.stocks
           ).toFixed(2)} CHF`,
         },
         {
@@ -858,27 +841,44 @@ function Cockpit() {
       const decisions = [
         {
           name: 'Savings',
-          label: (percentage: number) =>
-            `Put ${(percentage * 100).toFixed()}% in savings.`,
-          state: resultFactsDecisions.bank,
-          action: ActionTypes.DECIDE_BANK,
         },
         {
           name: 'Bonds',
-          label: (percentage: number) =>
-            `Invest ${(percentage * 100).toFixed()}% in bonds.`,
-          state: resultFactsDecisions.bonds,
-          action: ActionTypes.DECIDE_BONDS,
         },
         {
           name: 'Stocks',
-          label: (percentage: number) =>
-            `Invest ${(percentage * 100).toFixed()}% in stocks.`,
-          state: resultFactsDecisions.stocks,
-          action: ActionTypes.DECIDE_STOCK,
         },
       ]
 
+      const schema = yup
+        .object({
+          savings: yup
+            .number()
+            .integer()
+            .min(0, 'Savings % must be greater equal than 0')
+            .max(100, 'Savings % must be smaller equal than 100')
+            .required('Savings % is required'),
+          bonds: yup
+            .number()
+            .integer()
+            .min(0, 'Bonds % must be greater equal than 0')
+            .max(100, 'Bonds % must be smaller equal than 100')
+            .required('Bonds % is required'),
+          stocks: yup
+            .number()
+            .integer()
+            .min(0, 'Stocks % must be greater equal than 0')
+            .max(100, 'Stocks % must be smaller equal than 100')
+            .required('Stocks % is required'),
+        })
+        .test('sum', 'Sum of values must be 100', (values, ctx) => {
+          const sum = values.savings + values.bonds + values.stocks
+          if (sum === 100) return true
+          return ctx.createError({
+            path: 'sum',
+            message: 'Sum of values must be 100',
+          })
+        })
       return (
         <GameLayout>
           <div className="flex w-full grid-cols-2 flex-col gap-4 xl:grid">
@@ -952,35 +952,76 @@ function Cockpit() {
                 </Card>
 
                 <div className="mt-8 flex flex-row gap-2">
-                  {decisions.map((decision) => {
-                    return (
-                      <div className="p-1" key={decision.name}>
-                        <Switch
-                          label={decision.label(
-                            decision.state
-                              ? 1 /
-                                  (+resultFactsDecisions.bank +
-                                    +resultFactsDecisions.bonds +
-                                    +resultFactsDecisions.stocks)
-                              : 0
+                  <Formik
+                    initialValues={{
+                      savings: resultFactsDecisions.bank,
+                      bonds: resultFactsDecisions.bonds,
+                      stocks: resultFactsDecisions.stocks,
+                    }}
+                    validationSchema={schema}
+                    onSubmit={async (values) => {
+                      const savings = parseInt(values.savings)
+                      const bonds = parseInt(values.bonds)
+                      const stocks = parseInt(values.stocks)
+
+                      await performAction({
+                        variables: {
+                          type: '',
+                          payload: JSON.stringify({
+                            bank: savings,
+                            bonds,
+                            stocks,
+                          }),
+                        },
+                        refetchQueries: [ResultDocument],
+                      })
+                    }}
+                  >
+                    {(newDecisionForm) => {
+                      return (
+                        <Form>
+                          <div className="mb-2 flex gap-2">
+                            {decisions.map((decision) => {
+                              const fieldName = decision.name.toLowerCase()
+                              return (
+                                <FormikNumberField
+                                  key={fieldName}
+                                  placeholder="0 %"
+                                  label={decision.name}
+                                  name={fieldName}
+                                  tooltip={
+                                    <p>
+                                      Determine how much of all assets you want
+                                      to invest in the {decision.name}. The
+                                      total should be equal to 100 percent.
+                                    </p>
+                                  }
+                                  required
+                                  data={{ cy: decision.name + '-cy' }}
+                                  className={{ label: 'pb-2 font-normal' }}
+                                />
+                              )
+                            })}
+                          </div>
+                          {newDecisionForm.errors.sum && (
+                            <div className="text-red-500">
+                              The sum of the input values must be{' '}
+                              <span className="font-bold">100</span>!
+                            </div>
                           )}
-                          checked={decision.state}
-                          id="switch"
-                          onCheckedChange={async (checked) => {
-                            await performAction({
-                              variables: {
-                                type: decision.action,
-                                payload: JSON.stringify({
-                                  decision: checked,
-                                }),
-                              },
-                              refetchQueries: [ResultDocument],
-                            })
-                          }}
-                        />
-                      </div>
-                    )
-                  })}
+                          <Button
+                            type="submit"
+                            disabled={
+                              !newDecisionForm.isValid ||
+                              newDecisionForm.isSubmitting
+                            }
+                          >
+                            Submit
+                          </Button>
+                        </Form>
+                      )
+                    }}
+                  </Formik>
                 </div>
               </CardContent>
               <CardFooter className="text-slate-500">
