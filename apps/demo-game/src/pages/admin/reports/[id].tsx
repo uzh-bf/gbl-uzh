@@ -77,8 +77,6 @@ function ReportGame() {
     skip: !router.query.id,
   })
 
-  console.log('gamedata', data)
-
   const {
     data: segmentEndResults,
     loading: segmentEndResultsLoading,
