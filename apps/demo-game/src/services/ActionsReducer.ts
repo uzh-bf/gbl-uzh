@@ -31,6 +31,16 @@ export function apply(state: State, action: Actions) {
   // TODO: the user reducer could just get the "draft" inside this function as first parameter
   // TODO: and platform would do all code around it
   const newState = produce(baseState, (draft) => {
+    const { bank, bonds, stocks } = action.payload.playerArgs
+    if (bank < 0 || bank > 100)
+      throw new Error('Bank must be between 0 and 100')
+    if (bonds < 0 || bonds > 100)
+      throw new Error('Bonds must be between 0 and 100')
+    if (stocks < 0 || stocks > 100)
+      throw new Error('Stocks must be between 0 and 100')
+    if (bank + bonds + stocks !== 100)
+      throw new Error('Bank + Bonds + Stocks must equal 100')
+
     draft.result.decisions = action.payload.playerArgs
   })
 
