@@ -1,8 +1,7 @@
 #import "./FGameData.graphql"
-#import "./FPeriodData.graphql"
 #import "./FPlayerData.graphql"
 
-query Game($id: Int) {
+query Game($id: Int, $includeFacts: Boolean!) {
   game(id: $id) {
     ...GameData
     activePeriod {
@@ -19,7 +18,34 @@ query Game($id: Int) {
       }
     }
     periods {
-      ...PeriodData
+      id
+
+      index
+      activeSegmentIx
+
+      facts @include(if: $includeFacts)
+
+      segments {
+        id
+
+        index
+
+        countdownExpiresAt
+        countdownDurationMs
+
+        facts @include(if: $includeFacts)
+
+        learningElements {
+          id
+          title
+        }
+
+        storyElements {
+          id
+          title
+        }
+      }
+      segmentCount
     }
     players {
       id

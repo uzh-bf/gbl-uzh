@@ -76,7 +76,7 @@ function ManageGame() {
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
 
   const { data, error, loading } = useQuery(GameDocument, {
-    variables: { id: Number(router.query.id) },
+    variables: { id: Number(router.query.id), includeFacts: true },
     pollInterval: 15000,
     skip: !router.query.id,
   })

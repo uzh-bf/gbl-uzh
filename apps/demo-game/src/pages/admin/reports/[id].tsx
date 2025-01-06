@@ -72,10 +72,12 @@ function ReportGame() {
   const [currPeriod, setCurrPeriod] = useState<number>(0)
 
   const { data, error, loading } = useQuery(GameDocument, {
-    variables: { id: Number(router.query.id) },
+    variables: { id: Number(router.query.id), includeFacts: false },
     // pollInterval: 15000,
     skip: !router.query.id,
   })
+
+  console.log('gamedata', data)
 
   const {
     data: segmentEndResults,
@@ -257,8 +259,6 @@ function ReportGame() {
     }
 
     const previousPeriodResults = periodEndResults.specificResults
-
-    console.log('previousPeriodResults', previousPeriodResults)
 
     const riskReturnPerPeriod = previousPeriodResults.reduce((acc, result) => {
       if (!acc[result.period.index]) {
