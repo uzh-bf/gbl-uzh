@@ -151,6 +151,12 @@ function ManageGame() {
         title: 'All players are ready!',
         description: 'All players are ready to continue.',
       })
+
+      const audio = new Audio('/sounds/notification.mp3')
+      audio.play().catch((err) => {
+        alert('Autoplay restrictions. Please enable autoplay in your browser.')
+        console.error('Error playing notification sound:', err)
+      })
     }
   }, [data?.game])
 
