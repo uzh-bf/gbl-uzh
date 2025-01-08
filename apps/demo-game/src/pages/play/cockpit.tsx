@@ -1,5 +1,3 @@
-'use client'
-
 import { useMutation, useQuery } from '@apollo/client'
 import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
 import { Button, FormikNumberField, Switch } from '@uzh-bf/design-system'
@@ -28,7 +26,7 @@ import {
   TableRow,
 } from '@uzh-bf/design-system/dist/future'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Area,
   AreaChart,
@@ -53,6 +51,7 @@ import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
 // TODO(JJ): This will be replaced by the design system
 import { Form, Formik } from 'formik'
+import { io } from 'socket.io-client'
 import * as yup from 'yup'
 import { useToast } from '../../components/ui/use-toast'
 
@@ -80,172 +79,36 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   })
 
   const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument)
-
-  const [timeLeft, setTimeLeft] = useState<number>(0)
+  const [timeRemaining, setTimeRemaining] = useState(0)
 
   const { toast } = useToast()
 
-  // useEffect(() => {
-  //   const eventSource = new EventSource('/api/countdown')
-
-  //   eventSource.onopen = () => {
-  //     console.log('SSE connection opened')
-  //   }
-
-  //   eventSource.onerror = (error) => {
-  //     console.error('SSE connection error:', error)
-  //   }
-
-  //   // // Listen for the data event and update the state with the countdown
-  //   // eventSource.onmessage = (event) => {
-  //   //   console.log('event.data', event.data)
-  //   //   const countdownTime = parseInt(event.data)
-  //   //   setTimeLeft(countdownTime)
-  //   //   // if (countdownTime <= 0) {
-  //   //   //   eventSource.close()
-  //   //   // }
-  //   // }
-
-  //   eventSource.addEventListener('message', (event) => {
-  //     console.log('Received event:', event)
-  //     console.log('Received countdown:', event.data)
-  //     const countdownTime = parseInt(event.data)
-  //     setTimeLeft(countdownTime)
-  //   })
-
-  //   // Clean up the event source on unmount
-  //   return () => {
-  //     eventSource.close()
-  //   }
-  // }, [])
-
-  // useEffect(() => {
-  //   // Verbose logging for debugging
-
-  //   console.log('CLIENT: Attempting to create EventSource')
-
-  //   const eventSource = new EventSource('/api/countdown', {
-  //     withCredentials: false,
-  //   })
-
-  //   // Multiple event listeners for comprehensive debugging
-
-  //   eventSource.onopen = (event) => {
-  //     console.log('CLIENT: SSE connection opened', event)
-  //   }
-
-  //   eventSource.onerror = (error) => {
-  //     console.error('CLIENT: SSE connection error:', error)
-  //     console.log('CLIENT: Ready STATE:', eventSource.readyState)
-  //   }
-
-  //   // Listen for generic message events
-
-  //   eventSource.onmessage = (event) => {
-  //     console.log('CLIENT: Generic onmessage triggered')
-  //     console.log('CLIENT: Generic event:', event)
-  //     console.log('CLIENT: Generic event data:', event.data)
-  //   }
-
-  //   // Listen for specific countdown event
-
-  //   eventSource.addEventListener('countdown', (event: MessageEvent) => {
-  //     console.log('CLIENT: Countdown event received')
-  //     console.log('CLIENT: Countdown event:', event)
-  //     console.log('CLIENT: Countdown event data:', event.data)
-
-  //     const countdownTime = parseInt(event.data)
-
-  //     if (!isNaN(countdownTime)) {
-  //       console.log('CLIENT: Setting time left:', countdownTime)
-
-  //       setTimeLeft(countdownTime)
-  //     } else {
-  //       console.error('CLIENT: Invalid countdown time:', event.data)
-  //     }
-  //   })
-
-  //   // Cleanup
-
-  //   return () => {
-  //     console.log('CLIENT: Closing EventSource')
-
-  //     eventSource.close()
-  //   }
-  // }, [])
-
-  const [message, setMessage] = useState('Waiting...')
-  const eventSourceRef = useRef<EventSource | null>(null)
-
   useEffect(() => {
-    // Disable React strict mode double rendering
-
-    console.log('CLIENT: Initializing EventSource')
-
-    // Create event source
-
-    eventSourceRef.current = new EventSource('/api/countdown', {
-      withCredentials: false,
+    const socket = io(process.env.NEXT_PUBLIC_APP_URL, {
+      transports: ['websocket', 'polling'],
     })
 
-    // Comprehensive event listeners
+    socket.on('connect', () => {
+      console.log('Player connected')
+    })
 
-    const eventSource = eventSourceRef.current
+    socket.on('countdown-update', (time: number) => {
+      setTimeRemaining(time)
+    })
 
-    const handleOpen = (event: Event) => {
-      console.log('CLIENT: Connection OPENED', event)
+    // socket.on('countdown-finished', () => {
+    //   setTimeRemaining(0)
+    // })
 
-      setMessage('Connection opened')
-    }
-
-    const handleMessage = (event: MessageEvent) => {
-      try {
-        console.log('CLIENT: Raw event', event)
-
-        console.log('CLIENT: Event data', event.data)
-
-        setMessage(event.data)
-      } catch (error) {
-        console.error('CLIENT: Message processing error', error)
-      }
-    }
-
-    const handleError = (error: Event) => {
-      console.error('CLIENT: EventSource ERROR', error)
-
-      setMessage('Connection error')
-    }
-
-    // Add listeners
-
-    eventSource.addEventListener('open', handleOpen)
-
-    eventSource.addEventListener('message', handleMessage)
-
-    eventSource.addEventListener('error', handleError)
-
-    // Fallback listeners
-
-    eventSource.onopen = handleOpen
-
-    eventSource.onmessage = handleMessage
-
-    eventSource.onerror = handleError
-
-    // Cleanup
+    socket.on('connect_error', async (error) => {
+      console.error('Connection error B:', error)
+      await fetch('/api/socket')
+    })
 
     return () => {
-      console.log('CLIENT: Cleaning up EventSource')
-
-      eventSource.removeEventListener('open', handleOpen)
-
-      eventSource.removeEventListener('message', handleMessage)
-
-      eventSource.removeEventListener('error', handleError)
-
-      eventSource.close()
+      socket.disconnect()
     }
-  }, []) // Empty dependency array
+  }, [])
 
   const playerInfo = {
     name: data.self.name,
@@ -307,8 +170,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
               />
             )}
 
-            {Boolean(timeLeft) ?? <h1>Time Left: {timeLeft} seconds</h1>}
-            <div>{message}</div>
+            {timeRemaining > 0 && <h1>Time Left: {timeRemaining} seconds</h1>}
 
             {/* {countdownDurationMs !== null && (
               <CycleCountdown

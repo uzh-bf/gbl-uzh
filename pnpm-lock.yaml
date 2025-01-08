@@ -64,6 +64,12 @@ importers:
       '@radix-ui/react-toast':
         specifier: 1.2.2
         version: 1.2.2(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@types/socket.io':
+        specifier: ^3.0.2
+        version: 3.0.2
+      '@types/socket.io-client':
+        specifier: ^3.0.0
+        version: 3.0.0
       '@uzh-bf/design-system':
         specifier: 3.0.0-alpha.35
         version: 3.0.0-alpha.35(@fortawesome/fontawesome-svg-core@6.6.0)(@fortawesome/free-regular-svg-icons@6.6.0)(@fortawesome/free-solid-svg-icons@6.6.0)(@fortawesome/react-fontawesome@0.2.2(@fortawesome/fontawesome-svg-core@6.6.0)(react@18.3.1))(@types/react-dom@18.3.1)(@types/react@18.3.12)(class-variance-authority@0.7.0)(clsx@2.1.1)(dayjs@1.11.13)(formik@2.4.6(react@18.3.1))(lucide-react@0.424.0(react@18.3.1))(postcss-import@16.1.0(postcss@8.4.49))(postcss@8.4.49)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwind-merge@2.4.0)(tailwindcss-animate@1.0.7(tailwindcss@3.4.14))(tailwindcss-radix@3.0.5(tailwindcss@3.4.14))(tailwindcss@3.4.14)(yup@1.4.0)
@@ -148,6 +154,12 @@ importers:
       recharts:
         specifier: 2.13.3
         version: 2.13.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      socket.io:
+        specifier: 4.5.0
+        version: 4.5.0
+      socket.io-client:
+        specifier: ^4.8.1
+        version: 4.8.1
       tailwind-merge:
         specifier: 2.4.0
         version: 2.4.0
@@ -3951,6 +3963,9 @@ packages:
     peerDependencies:
       next: '>= 9.5.5'
 
+  '@socket.io/component-emitter@3.1.2':
+    resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
+
   '@swc/core-darwin-arm64@1.9.2':
     resolution: {integrity: sha512-nETmsCoY29krTF2PtspEgicb3tqw7Ci5sInTI03EU5zpqYbPjoPH99BVTjj0OsF53jP5MxwnLI5Hm21lUn1d6A==}
     engines: {node: '>=10'}
@@ -4302,6 +4317,14 @@ packages:
 
   '@types/sizzle@2.3.9':
     resolution: {integrity: sha512-xzLEyKB50yqCUPUJkIsrVvoWNfFUbIZI+RspLWt8u+tIW/BetMBZtgV2LY/2o+tYH8dRvQ+eoPf3NdhQCcLE2w==}
+
+  '@types/socket.io-client@3.0.0':
+    resolution: {integrity: sha512-s+IPvFoEIjKA3RdJz/Z2dGR4gLgysKi8owcnrVwNjgvc01Lk68LJDDsG2GRqegFITcxmvCMYM7bhMpwEMlHmDg==}
+    deprecated: This is a stub types definition. socket.io-client provides its own type definitions, so you do not need this installed.
+
+  '@types/socket.io@3.0.2':
+    resolution: {integrity: sha512-pu0sN9m5VjCxBZVK8hW37ZcMe8rjn4HHggBN5CbaRTvFwv5jOmuIRZEuddsBPa9Th0ts0SIo3Niukq+95cMBbQ==}
+    deprecated: This is a stub types definition. socket.io provides its own type definitions, so you do not need this installed.
 
   '@types/source-map-support@0.5.10':
     resolution: {integrity: sha512-tgVP2H469x9zq34Z0m/fgPewGhg/MLClalNOiPIzQlXrSS2YrKu/xCdSCKnEDwkFha51VKEKB6A9wW26/ZNwzA==}
@@ -5979,8 +6002,15 @@ packages:
   end-of-stream@1.4.4:
     resolution: {integrity: sha512-+uw1inIHVPQoaVuHzRyXd21icM+cnt4CzD5rW+NC1wjOUSTOs+Te7FOv7AhN7vS9x/oIyhLP5PR1H+phQAHu5Q==}
 
+  engine.io-client@6.6.2:
+    resolution: {integrity: sha512-TAr+NKeoVTjEVW8P3iHguO1LO6RlUz9O5Y8o7EY0fU+gY1NYqas7NN3slpFtbXEsLMHk0h90fJMfKjRkQ0qUIw==}
+
   engine.io-parser@5.0.7:
     resolution: {integrity: sha512-P+jDFbvK6lE3n1OL+q9KuzdOFWkkZ/cMV9gol/SbVfpyqfvrfrFTOFJ6fQm2VC3PZHlU3QPhVwmbsCnauHF2MQ==}
+    engines: {node: '>=10.0.0'}
+
+  engine.io-parser@5.2.3:
+    resolution: {integrity: sha512-HqD3yTBfnBxIrbnM1DoD6Pcq8NECnh8d4As1Qgh0z5Gg3jRRIqijury0CL3ghu/edArpUYiYqQiDUQBIs4np3Q==}
     engines: {node: '>=10.0.0'}
 
   engine.io@6.2.1:
@@ -10185,8 +10215,16 @@ packages:
   socket.io-adapter@2.4.0:
     resolution: {integrity: sha512-W4N+o69rkMEGVuk2D/cvca3uYsvGlMwsySWV447y99gUPghxq42BxqLNMndb+a1mm/5/7NeXVQS7RLa2XyXvYg==}
 
+  socket.io-client@4.8.1:
+    resolution: {integrity: sha512-hJVXfu3E28NmzGk8o1sHhN3om52tRvwYeidbj7xKy2eIIse5IoKX3USlS6Tqt3BHAtflLIkCQBkzVrEEfWUyYQ==}
+    engines: {node: '>=10.0.0'}
+
   socket.io-parser@4.0.5:
     resolution: {integrity: sha512-sNjbT9dX63nqUFIOv95tTVm6elyIU4RvB1m8dOeZt+IgWwcWklFDOdmGcfo3zSiRsnR/3pJkjY5lfoGqEe4Eig==}
+    engines: {node: '>=10.0.0'}
+
+  socket.io-parser@4.2.4:
+    resolution: {integrity: sha512-/GbIKmo8ioc+NIWIhwdecY0ge+qVBSMdgxGygevmdHj24bsfgtCmcUUcQ5ZzcylGFHsN3k4HB4Cgkl96KVnuew==}
     engines: {node: '>=10.0.0'}
 
   socket.io@4.5.0:
@@ -11277,6 +11315,18 @@ packages:
       utf-8-validate:
         optional: true
 
+  ws@8.17.1:
+    resolution: {integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   ws@8.18.0:
     resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
     engines: {node: '>=10.0.0'}
@@ -11314,6 +11364,10 @@ packages:
   xmldom-sre@0.1.31:
     resolution: {integrity: sha512-f9s+fUkX04BxQf+7mMWAp5zk61pciie+fFLC9hX9UVvCeJQfNHRHXpeo5MPcR0EUf57PYLdt+ZO4f3Ipk2oZUw==}
     engines: {node: '>=0.1'}
+
+  xmlhttprequest-ssl@2.1.2:
+    resolution: {integrity: sha512-TEU+nJVUUnA4CYJFLvK5X9AOeH4KvDvhIfm0vV1GaQRtchnG0hgK5p8hw/xjv8cunWYCsiPCSDzObPyhEwq3KQ==}
+    engines: {node: '>=0.4.0'}
 
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
@@ -14771,6 +14825,8 @@ snapshots:
     dependencies:
       next: 15.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.80.7)
 
+  '@socket.io/component-emitter@3.1.2': {}
+
   '@swc/core-darwin-arm64@1.9.2':
     optional: true
 
@@ -15150,6 +15206,22 @@ snapshots:
   '@types/sinonjs__fake-timers@8.1.1': {}
 
   '@types/sizzle@2.3.9': {}
+
+  '@types/socket.io-client@3.0.0':
+    dependencies:
+      socket.io-client: 4.8.1
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  '@types/socket.io@3.0.2':
+    dependencies:
+      socket.io: 4.5.0
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
 
   '@types/source-map-support@0.5.10':
     dependencies:
@@ -17118,7 +17190,21 @@ snapshots:
     dependencies:
       once: 1.4.0
 
+  engine.io-client@6.6.2:
+    dependencies:
+      '@socket.io/component-emitter': 3.1.2
+      debug: 4.3.7(supports-color@8.1.1)
+      engine.io-parser: 5.2.3
+      ws: 8.17.1
+      xmlhttprequest-ssl: 2.1.2
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
   engine.io-parser@5.0.7: {}
+
+  engine.io-parser@5.2.3: {}
 
   engine.io@6.2.1:
     dependencies:
@@ -17399,8 +17485,8 @@ snapshots:
       '@typescript-eslint/parser': 7.15.0(eslint@8.57.1)(typescript@5.6.3)
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1)
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.2(eslint@8.57.1)
       eslint-plugin-react-hooks: 5.0.0(eslint@8.57.1)
@@ -17419,37 +17505,37 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.3.7(supports-color@8.1.1)
       enhanced-resolve: 5.17.1
       eslint: 8.57.1
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1)
       fast-glob: 3.3.2
       get-tsconfig: 4.8.1
       is-bun-module: 1.2.1
       is-glob: 4.0.3
     optionalDependencies:
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
     transitivePeerDependencies:
       - '@typescript-eslint/parser'
       - eslint-import-resolver-node
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       debug: 3.2.7(supports-color@8.1.1)
     optionalDependencies:
       '@typescript-eslint/parser': 7.15.0(eslint@8.57.1)(typescript@5.6.3)
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.8
@@ -17460,7 +17546,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@7.15.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.15.1
       is-glob: 4.0.3
@@ -22787,10 +22873,28 @@ snapshots:
 
   socket.io-adapter@2.4.0: {}
 
+  socket.io-client@4.8.1:
+    dependencies:
+      '@socket.io/component-emitter': 3.1.2
+      debug: 4.3.7(supports-color@8.1.1)
+      engine.io-client: 6.6.2
+      socket.io-parser: 4.2.4
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
   socket.io-parser@4.0.5:
     dependencies:
       '@types/component-emitter': 1.2.14
       component-emitter: 1.3.1
+      debug: 4.3.7(supports-color@8.1.1)
+    transitivePeerDependencies:
+      - supports-color
+
+  socket.io-parser@4.2.4:
+    dependencies:
+      '@socket.io/component-emitter': 3.1.2
       debug: 4.3.7(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
@@ -24007,6 +24111,8 @@ snapshots:
     dependencies:
       async-limiter: 1.0.1
 
+  ws@8.17.1: {}
+
   ws@8.18.0: {}
 
   ws@8.2.3: {}
@@ -24018,6 +24124,8 @@ snapshots:
   xmlchars@2.2.0: {}
 
   xmldom-sre@0.1.31: {}
+
+  xmlhttprequest-ssl@2.1.2: {}
 
   xtend@4.0.2: {}
 

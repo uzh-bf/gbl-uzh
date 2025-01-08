@@ -23,11 +23,11 @@ import PlayerCompact from '~/components/PlayerCompact'
 
 import { useMutation, useQuery } from '@apollo/client'
 import {
-  STATUS,
   computePeriodStatus,
   computeSegmentStatus,
+  STATUS,
 } from '@gbl-uzh/platform/dist/lib/util'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
@@ -68,12 +68,16 @@ import {
   TREND_STOCKS,
 } from '~/types/Period'
 
+import { io, Socket } from 'socket.io-client'
+
 function ManageGame() {
   const router = useRouter()
 
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
-  const [countdownSeconds, setCountdownSeconds] = useState(0)
+  // const [countdownSeconds, setCountdownSeconds] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [socket, setSocket] = useState<Socket | null>(null)
 
   const { data, error, loading } = useQuery(GameDocument, {
     variables: { id: Number(router.query.id) },
@@ -122,20 +126,56 @@ function ManageGame() {
   )
 
   // const [addCountdown] = useMutation(AddCountdownDocument)
-  const handleCountdownChange = (event) => {
-    setCountdownSeconds(event.target.value)
-  }
+  // const handleCountdownChange = (event) => {
+  //   setCountdownSeconds(event.target.value)
+  // }
 
-  const setCountdown = async () => {
-    await fetch('/api/countdown', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        countdownTime: Number(countdownSeconds),
-      }),
+  // const setCountdown = async () => {
+  //   await fetch('/api/countdown', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({
+  //       countdownTime: Number(countdownSeconds),
+  //     }),
+  //   })
+  // }
+
+  useEffect(() => {
+    const socketInstance = io(process.env.NEXT_PUBLIC_APP_URL, {
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      timeout: 10000,
+      transports: ['websocket', 'polling'],
     })
+
+    if (!socketInstance.connected) {
+      fetch('/api/socket')
+    }
+
+    socketInstance.on('connect', () => {
+      console.log('Admin connected')
+      setSocket(socketInstance)
+    })
+
+    socketInstance.on('connect_error', async (error) => {
+      console.error('Connection error admin:', error)
+      await fetch('/api/socket')
+    })
+
+    return () => {
+      socketInstance.disconnect()
+    }
+  }, [])
+
+  const handleStartCountdown = () => {
+    if (socket) {
+      socket.emit('start-countdown', duration)
+    } else {
+      console.error('Socket not connected')
+    }
   }
 
   const nextPeriod = () =>
@@ -828,14 +868,17 @@ function ManageGame() {
           <CardContent>
             <input
               type="number"
-              value={countdownSeconds}
-              onChange={handleCountdownChange}
+              // value={countdownSeconds}
+              // onChange={handleCountdownChange}
+              value={duration}
+              onChange={(e) => setDuration(Number(e.target.value))}
               // placeholder="Countdown in seconds"
               min="1"
             />
           </CardContent>
           <CardFooter>
-            <Button onClick={setCountdown}>Set Countdown</Button>
+            <Button onClick={handleStartCountdown}>Set Countdown</Button>
+            {/* <Button onClick={setCountdown}>Set Countdown</Button> */}
           </CardFooter>
         </Card>
         {/* <Formik
