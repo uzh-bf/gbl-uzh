@@ -14,7 +14,7 @@ import {
   H4,
   Modal,
 } from '@uzh-bf/design-system'
-import { Form, Formik } from 'formik'
+import { Formik } from 'formik'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
@@ -31,7 +31,6 @@ import { useCallback, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
-  AddCountdownDocument,
   AddGamePeriodDocument,
   AddPeriodSegmentDocument,
   Game,
@@ -74,6 +73,7 @@ function ManageGame() {
 
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
+  const [countdownSeconds, setCountdownSeconds] = useState(0)
 
   const { data, error, loading } = useQuery(GameDocument, {
     variables: { id: Number(router.query.id) },
@@ -121,7 +121,22 @@ function ManageGame() {
     }
   )
 
-  const [addCountdown] = useMutation(AddCountdownDocument)
+  // const [addCountdown] = useMutation(AddCountdownDocument)
+  const handleCountdownChange = (event) => {
+    setCountdownSeconds(event.target.value)
+  }
+
+  const setCountdown = async () => {
+    await fetch('/api/countdown', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        countdownTime: Number(countdownSeconds),
+      }),
+    })
+  }
 
   const nextPeriod = () =>
     activateNextPeriod({
@@ -805,16 +820,35 @@ function ManageGame() {
           </div>
         </div>
 
-        <Formik
+        <Card className="flex flex-col">
+          <CardHeader>
+            <CardTitle>Countdown</CardTitle>
+            <CardDescription>Set a countdown for the segment.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <input
+              type="number"
+              value={countdownSeconds}
+              onChange={handleCountdownChange}
+              // placeholder="Countdown in seconds"
+              min="1"
+            />
+          </CardContent>
+          <CardFooter>
+            <Button onClick={setCountdown}>Set Countdown</Button>
+          </CardFooter>
+        </Card>
+        {/* <Formik
           initialValues={{ countdownSeconds: 300 }}
-          onSubmit={(values) =>
-            addCountdown({
-              variables: {
-                gameId: Number(router.query.id),
-                seconds: Number(values.countdownSeconds),
-              },
-              refetchQueries: [GameDocument],
-            })
+          onSubmit={
+            (values) => {}
+            // addCountdown({
+            //   variables: {
+            //     gameId: Number(router.query.id),
+            //     seconds: Number(values.countdownSeconds),
+            //   },
+            //   refetchQueries: [GameDocument],
+            // })
           }
         >
           <Form>
@@ -832,17 +866,13 @@ function ManageGame() {
                   label="Countdown in seconds"
                   className={{ label: 'pb-2 font-normal' }}
                 />
-                {/* TODO(JJ): @RS Do we want to show the following? If no we
-                  we can remove the refetchQueries.
-                */}
-                {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
               </CardContent>
               <CardFooter>
                 <Button type="submit">Set Countdown</Button>
               </CardFooter>
             </Card>
           </Form>
-        </Formik>
+        </Formik> */}
       </div>
     </div>
   )

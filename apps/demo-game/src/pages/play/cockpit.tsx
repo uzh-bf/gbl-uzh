@@ -1,3 +1,5 @@
+'use client'
+
 import { useMutation, useQuery } from '@apollo/client'
 import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
 import { Button, FormikNumberField, Switch } from '@uzh-bf/design-system'
@@ -26,8 +28,7 @@ import {
   TableRow,
 } from '@uzh-bf/design-system/dist/future'
 
-import dayjs from 'dayjs'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Area,
   AreaChart,
@@ -80,29 +81,171 @@ function GameLayout({ children }: { children: React.ReactNode }) {
 
   const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument)
 
-  const [countdownNotifications, setCountdownNotifications] = useState({
-    '60': false,
-    '180': false,
-  })
+  const [timeLeft, setTimeLeft] = useState<number>(0)
 
   const { toast } = useToast()
 
-  const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
-    ?.countdownExpiresAt as string | null
-  const countdownDurationMs = data?.result?.currentGame?.activePeriod
-    ?.activeSegment?.countdownDurationMs as number | null
+  // useEffect(() => {
+  //   const eventSource = new EventSource('/api/countdown')
+
+  //   eventSource.onopen = () => {
+  //     console.log('SSE connection opened')
+  //   }
+
+  //   eventSource.onerror = (error) => {
+  //     console.error('SSE connection error:', error)
+  //   }
+
+  //   // // Listen for the data event and update the state with the countdown
+  //   // eventSource.onmessage = (event) => {
+  //   //   console.log('event.data', event.data)
+  //   //   const countdownTime = parseInt(event.data)
+  //   //   setTimeLeft(countdownTime)
+  //   //   // if (countdownTime <= 0) {
+  //   //   //   eventSource.close()
+  //   //   // }
+  //   // }
+
+  //   eventSource.addEventListener('message', (event) => {
+  //     console.log('Received event:', event)
+  //     console.log('Received countdown:', event.data)
+  //     const countdownTime = parseInt(event.data)
+  //     setTimeLeft(countdownTime)
+  //   })
+
+  //   // Clean up the event source on unmount
+  //   return () => {
+  //     eventSource.close()
+  //   }
+  // }, [])
+
+  // useEffect(() => {
+  //   // Verbose logging for debugging
+
+  //   console.log('CLIENT: Attempting to create EventSource')
+
+  //   const eventSource = new EventSource('/api/countdown', {
+  //     withCredentials: false,
+  //   })
+
+  //   // Multiple event listeners for comprehensive debugging
+
+  //   eventSource.onopen = (event) => {
+  //     console.log('CLIENT: SSE connection opened', event)
+  //   }
+
+  //   eventSource.onerror = (error) => {
+  //     console.error('CLIENT: SSE connection error:', error)
+  //     console.log('CLIENT: Ready STATE:', eventSource.readyState)
+  //   }
+
+  //   // Listen for generic message events
+
+  //   eventSource.onmessage = (event) => {
+  //     console.log('CLIENT: Generic onmessage triggered')
+  //     console.log('CLIENT: Generic event:', event)
+  //     console.log('CLIENT: Generic event data:', event.data)
+  //   }
+
+  //   // Listen for specific countdown event
+
+  //   eventSource.addEventListener('countdown', (event: MessageEvent) => {
+  //     console.log('CLIENT: Countdown event received')
+  //     console.log('CLIENT: Countdown event:', event)
+  //     console.log('CLIENT: Countdown event data:', event.data)
+
+  //     const countdownTime = parseInt(event.data)
+
+  //     if (!isNaN(countdownTime)) {
+  //       console.log('CLIENT: Setting time left:', countdownTime)
+
+  //       setTimeLeft(countdownTime)
+  //     } else {
+  //       console.error('CLIENT: Invalid countdown time:', event.data)
+  //     }
+  //   })
+
+  //   // Cleanup
+
+  //   return () => {
+  //     console.log('CLIENT: Closing EventSource')
+
+  //     eventSource.close()
+  //   }
+  // }, [])
+
+  const [message, setMessage] = useState('Waiting...')
+  const eventSourceRef = useRef<EventSource | null>(null)
 
   useEffect(() => {
-    const dateExpiresAt = dayjs(strExpiresAt)
-    const secondsRemaining = dateExpiresAt.diff(dayjs(), 's')
+    // Disable React strict mode double rendering
 
-    if (secondsRemaining > 0) {
-      toast({
-        title: 'Countdown set',
-        description: `${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
-      })
+    console.log('CLIENT: Initializing EventSource')
+
+    // Create event source
+
+    eventSourceRef.current = new EventSource('/api/countdown', {
+      withCredentials: false,
+    })
+
+    // Comprehensive event listeners
+
+    const eventSource = eventSourceRef.current
+
+    const handleOpen = (event: Event) => {
+      console.log('CLIENT: Connection OPENED', event)
+
+      setMessage('Connection opened')
     }
-  }, [strExpiresAt])
+
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        console.log('CLIENT: Raw event', event)
+
+        console.log('CLIENT: Event data', event.data)
+
+        setMessage(event.data)
+      } catch (error) {
+        console.error('CLIENT: Message processing error', error)
+      }
+    }
+
+    const handleError = (error: Event) => {
+      console.error('CLIENT: EventSource ERROR', error)
+
+      setMessage('Connection error')
+    }
+
+    // Add listeners
+
+    eventSource.addEventListener('open', handleOpen)
+
+    eventSource.addEventListener('message', handleMessage)
+
+    eventSource.addEventListener('error', handleError)
+
+    // Fallback listeners
+
+    eventSource.onopen = handleOpen
+
+    eventSource.onmessage = handleMessage
+
+    eventSource.onerror = handleError
+
+    // Cleanup
+
+    return () => {
+      console.log('CLIENT: Cleaning up EventSource')
+
+      eventSource.removeEventListener('open', handleOpen)
+
+      eventSource.removeEventListener('message', handleMessage)
+
+      eventSource.removeEventListener('error', handleError)
+
+      eventSource.close()
+    }
+  }, []) // Empty dependency array
 
   const playerInfo = {
     name: data.self.name,
@@ -164,44 +307,47 @@ function GameLayout({ children }: { children: React.ReactNode }) {
               />
             )}
 
+            {Boolean(timeLeft) ?? <h1>Time Left: {timeLeft} seconds</h1>}
+            <div>{message}</div>
+
             {/* {countdownDurationMs !== null && (
-          <CycleCountdown
-            className={{
-              root: '',
-              countdownWrapper: '',
-              countdown: 'text-xs font-bold text-gray-600',
-            }}
-            totalDuration={countdownDurationMs / 1000}
-            expiresAt={dayjs(strExpiresAt).toDate()}
-            formatter={(value) => `${value}s`}
-            onExpire={() =>
-              toast({
-                title: 'Countdown expired',
-                description: 'Time is up! The period will be closed soon.',
-                variant: 'destructive',
-              })
-            }
-            onUpdate={(secondsRemaining) => {
-              const minutesRemainingThreshold = [1, 3]
-              minutesRemainingThreshold.forEach((minute) => {
-                const seconds = minute * 60
-                if (secondsRemaining <= seconds) {
-                  const secondsStr = String(seconds)
-                  if (countdownNotifications[secondsStr]) return
-                  const minutesRemaining = Math.ceil(secondsRemaining / 60)
+              <CycleCountdown
+                className={{
+                  root: '',
+                  countdownWrapper: '',
+                  countdown: 'text-xs font-bold text-gray-600',
+                }}
+                totalDuration={countdownDurationMs / 1000}
+                expiresAt={dayjs(strExpiresAt).toDate()}
+                formatter={(value) => `${value}s`}
+                onExpire={() =>
                   toast({
-                    title: 'Countdown update',
-                    description: `Less than ${minutesRemaining} min remaining! Please press ready once you are done.`,
+                    title: 'Countdown expired',
+                    description: 'Time is up! The period will be closed soon.',
+                    variant: 'destructive',
                   })
-                  setCountdownNotifications((prevState) => ({
-                    ...prevState,
-                    [secondsStr]: true,
-                  }))
                 }
-              })
-            }}
-          />
-        )} */}
+                onUpdate={(secondsRemaining) => {
+                  const minutesRemainingThreshold = [1, 3]
+                  minutesRemainingThreshold.forEach((minute) => {
+                    const seconds = minute * 60
+                    if (secondsRemaining <= seconds) {
+                      const secondsStr = String(seconds)
+                      if (countdownNotifications[secondsStr]) return
+                      const minutesRemaining = Math.ceil(secondsRemaining / 60)
+                      toast({
+                        title: 'Countdown update',
+                        description: `Less than ${minutesRemaining} min remaining! Please press ready once you are done.`,
+                      })
+                      setCountdownNotifications((prevState) => ({
+                        ...prevState,
+                        [secondsStr]: true,
+                      }))
+                    }
+                  })
+                }}
+              />
+            )} */}
           </div>
           <LearningElements />
         </CardContent>
