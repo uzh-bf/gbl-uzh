@@ -101,7 +101,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     // })
 
     socket.on('connect_error', async (error) => {
-      console.error('Connection error B:', error)
+      console.error('Connection error player:', error)
       await fetch('/api/socket')
     })
 

@@ -4,13 +4,17 @@ import { Server } from 'socket.io'
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (res.socket.server.io) {
-    // console.log('Socket already initialized')
     res.end()
     return
   }
 
-  // const io = new Server(res.socket.server)
-  const io = new Server(res.socket.server)
+  const io = new Server(res.socket.server, {
+    cors: {
+      origin: process.env.NEXT_PUBLIC_APP_URL,
+      methods: ['GET', 'POST'],
+      allowedHeaders: ['Content-Type'],
+    },
+  })
 
   let countdownInterval: NodeJS.Timeout | null = null
   let remainingTime = 0
@@ -38,8 +42,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
           if (countdownInterval) {
             clearInterval(countdownInterval)
           }
-
-          // io.emit('countdown-finished')
+          io.emit('countdown-finished')
         }
       }, 1000)
     })

@@ -125,23 +125,6 @@ function ManageGame() {
     }
   )
 
-  // const [addCountdown] = useMutation(AddCountdownDocument)
-  // const handleCountdownChange = (event) => {
-  //   setCountdownSeconds(event.target.value)
-  // }
-
-  // const setCountdown = async () => {
-  //   await fetch('/api/countdown', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({
-  //       countdownTime: Number(countdownSeconds),
-  //     }),
-  //   })
-  // }
-
   useEffect(() => {
     const socketInstance = io(process.env.NEXT_PUBLIC_APP_URL, {
       reconnection: true,
