@@ -788,7 +788,7 @@ function ManageGame() {
       </div>
       <div className="mt-2 flex flex-row gap-2">
         {getButton()}
-        <Link target="_blank" href={`/admin/reports/${game?.id}`}>
+        <Link target="_blank" href={`/reports/${game?.id}`}>
           <Button>Report</Button>
         </Link>
       </div>

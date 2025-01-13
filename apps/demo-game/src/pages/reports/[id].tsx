@@ -5,6 +5,7 @@ import { useQuery } from '@apollo/client'
 import {
   Game,
   GameDocument,
+  GameWithoutFactsDocument,
   SpecificResultsDocument,
 } from 'src/graphql/generated/ops'
 
@@ -48,6 +49,7 @@ import {
   YAxis,
 } from 'recharts'
 
+import { useSession } from 'next-auth/react'
 import { composeChartData } from '~/lib/analysis'
 import { NUM_MONTHS } from '~/lib/constants'
 
@@ -71,11 +73,20 @@ function ReportGame() {
 
   const [currPeriod, setCurrPeriod] = useState<number>(0)
 
-  const { data, error, loading } = useQuery(GameDocument, {
-    variables: { id: Number(router.query.id), includeFacts: false },
-    // pollInterval: 15000,
-    skip: !router.query.id,
-  })
+  const { data: sessionData, status: sessionStatus } = useSession()
+  const isAuthenticated = sessionStatus === 'authenticated'
+  const isAdmin = sessionData?.user?.role === 'ADMIN'
+
+  const skipQuery = !router.query.id || !isAuthenticated
+
+  const { data, error, loading } = useQuery(
+    isAdmin ? GameDocument : GameWithoutFactsDocument,
+    {
+      variables: { id: Number(router.query.id) },
+      // pollInterval: 15000,
+      skip: skipQuery,
+    }
+  )
 
   const {
     data: segmentEndResults,
@@ -306,7 +317,8 @@ function ReportGame() {
     segmentEndResultsLoading ||
     periodEndResultsLoading ||
     !memoizedDataPeriod ||
-    !memoizedData
+    !memoizedData ||
+    skipQuery
   ) {
     return <div>loading...</div>
   }

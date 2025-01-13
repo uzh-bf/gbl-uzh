@@ -27,6 +27,16 @@ export function generateBaseQueries() {
         },
       })
 
+      t.field('gameWithoutFacts', {
+        type: Game,
+        args: {
+          id: intArg(),
+        },
+        async resolve(_, args, ctx) {
+          return GameService.getGame(args, ctx)
+        },
+      })
+
       t.field('result', {
         type: PlayerState,
         async resolve(_, args, ctx) {

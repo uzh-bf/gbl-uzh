@@ -229,6 +229,7 @@ type PlayerState {
 
 type Query {
   game(id: Int): Game
+  gameWithoutFacts(id: Int): Game
   games: [Game!]
   learningElement(id: ID!): LearningElementState
   learningElements: [LearningElement!]

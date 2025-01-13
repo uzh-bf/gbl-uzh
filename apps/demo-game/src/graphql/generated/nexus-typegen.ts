@@ -387,6 +387,7 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     game: NexusGenRootTypes['Game'] | null; // Game
+    gameWithoutFacts: NexusGenRootTypes['Game'] | null; // Game
     games: NexusGenRootTypes['Game'][] | null; // [Game!]
     learningElement: NexusGenRootTypes['LearningElementState'] | null; // LearningElementState
     learningElements: NexusGenRootTypes['LearningElement'][] | null; // [LearningElement!]
@@ -565,6 +566,7 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     game: 'Game'
+    gameWithoutFacts: 'Game'
     games: 'Game'
     learningElement: 'LearningElementState'
     learningElements: 'LearningElement'
@@ -644,6 +646,9 @@ export interface NexusGenArgTypes {
   }
   Query: {
     game: { // args
+      id?: number | null; // Int
+    }
+    gameWithoutFacts: { // args
       id?: number | null; // Int
     }
     learningElement: { // args

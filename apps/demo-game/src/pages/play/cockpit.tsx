@@ -127,7 +127,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   const tabs = [
     {
       name: 'Reports',
-      href: `/admin/reports/${data?.result?.currentGame?.id}`,
+      href: `/reports/${data?.result?.currentGame?.id}`,
     },
   ]
 
