@@ -125,6 +125,13 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     role: data.self.role,
   }
 
+  const tabs = [
+    {
+      name: 'Reports',
+      href: `/admin/reports/${data?.result?.currentGame?.id}`,
+    },
+  ]
+
   const sidebar = (
     <div id="sidebar" className="flex flex-col justify-between">
       <Card
@@ -218,11 +225,6 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     </>
   )
 }
-
-const tabs = [
-  { name: 'Welcome', href: '/play/welcome' },
-  { name: 'Cockpit', href: '/play/cockpit' },
-]
 
 const colors = [
   'hsl(var(--chart-1))',
