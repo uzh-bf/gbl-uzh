@@ -96,9 +96,9 @@ function GameLayout({ children }: { children: React.ReactNode }) {
       setTimeRemaining(time)
     })
 
-    // socket.on('countdown-finished', () => {
-    //   setTimeRemaining(0)
-    // })
+    socket.on('countdown-finished', () => {
+      setTimeRemaining(0)
+    })
 
     socket.on('connect_error', async (error) => {
       console.error('Connection error player:', error)
