@@ -27,7 +27,7 @@ import {
   computePeriodStatus,
   computeSegmentStatus,
 } from '@gbl-uzh/platform/dist/lib/util'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
@@ -59,7 +59,7 @@ import {
 } from '@uzh-bf/design-system/dist/future'
 
 import { FormikMultiSelectField } from '~/components/fields/FormikMultiSelectField'
-
+import { useToast } from '~/components/ui/use-toast'
 import {
   DEFAULT_SEED,
   GAP_BONDS,
@@ -123,6 +123,8 @@ function ManageGame() {
 
   const [addCountdown] = useMutation(AddCountdownDocument)
 
+  const { toast } = useToast()
+
   const nextPeriod = () =>
     activateNextPeriod({
       variables: {
@@ -138,6 +140,25 @@ function ManageGame() {
       },
       refetchQueries: [GameDocument],
     })
+
+  useEffect(() => {
+    const game = data?.game
+    if (game?.status !== GameStatus.Running) return
+
+    const allPlayersReady = game.players.every((player) => player.isReady)
+    if (allPlayersReady) {
+      toast({
+        title: 'All players are ready!',
+        description: 'All players are ready to continue.',
+      })
+
+      const audio = new Audio('/sounds/notification.mp3')
+      audio.play().catch((err) => {
+        alert('Autoplay restrictions. Please enable autoplay in your browser.')
+        console.error('Error playing notification sound:', err)
+      })
+    }
+  }, [data?.game])
 
   const getButton = useCallback(() => {
     const game = data.game
