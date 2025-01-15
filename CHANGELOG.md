@@ -2,6 +2,106 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.14](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.13...v0.4.14) (2025-01-15)
+
+
+### Features
+
+* add expectations to student decision page ([#69](https://github.com/uzh-bf/gbl-uzh/issues/69)) ([82e2dac](https://github.com/uzh-bf/gbl-uzh/commit/82e2dac3f025304fa7ddfd563cb415cd6d724ea1))
+* **demo-game:** add dice page to visualize random development ([#68](https://github.com/uzh-bf/gbl-uzh/issues/68)) ([40c5d37](https://github.com/uzh-bf/gbl-uzh/commit/40c5d37ef97417f8d9de4386653b100a5c1ff497))
+* **demo-game:** add period end reports and charts for admin, improve player welcome page default values and better loading, improve build process, upgrade dependencies ([#66](https://github.com/uzh-bf/gbl-uzh/issues/66)) ([b4cb4dd](https://github.com/uzh-bf/gbl-uzh/commit/b4cb4dd140906fc570a78a3404b79c3a9a45d0d3))
+* **demo-game:** add story elements ([#54](https://github.com/uzh-bf/gbl-uzh/issues/54)) ([944fc6d](https://github.com/uzh-bf/gbl-uzh/commit/944fc6d046ce32090c859ff0f863760793f48a89))
+* **demo-game:** display period settings on admin page ([#74](https://github.com/uzh-bf/gbl-uzh/issues/74)) ([cdf2d04](https://github.com/uzh-bf/gbl-uzh/commit/cdf2d0479b6461de831a53990e8dc1659b7213cc))
+* **demo-game:** fixing and improving pause state in player window ([#71](https://github.com/uzh-bf/gbl-uzh/issues/71)) ([5c4d392](https://github.com/uzh-bf/gbl-uzh/commit/5c4d3920e1a05a5d120f2976b01ca48825baccf6))
+* **demo-game:** improve reports page ([#70](https://github.com/uzh-bf/gbl-uzh/issues/70)) ([a00add7](https://github.com/uzh-bf/gbl-uzh/commit/a00add77d8916cf696dbb47b7addf1590b0cda22))
+* **demo-game:** learning elements as modal ([#57](https://github.com/uzh-bf/gbl-uzh/issues/57)) ([14a6655](https://github.com/uzh-bf/gbl-uzh/commit/14a6655a0e148578b73a3a785ea728986413f77a))
+* **demo-game:** risk-return and sharpe-ratio charts ([#73](https://github.com/uzh-bf/gbl-uzh/issues/73)) ([42d2e19](https://github.com/uzh-bf/gbl-uzh/commit/42d2e19709bd5e1cdd97284bde0ea5d03c87cc81))
+
+
+### Bug Fixes
+
+* **apps/website:** ensure build includes gamification advisor from correct path ([af8cb62](https://github.com/uzh-bf/gbl-uzh/commit/af8cb62de51aa3f01bcccf06a29d4d2e0d44de28))
+* **apps/website:** escape room link to older url ([aca26c3](https://github.com/uzh-bf/gbl-uzh/commit/aca26c389460e6ea08afca93d1014dd0ef982e9a))
+* **apps/website:** export should include kb ([fa34cbb](https://github.com/uzh-bf/gbl-uzh/commit/fa34cbbd5ba7e02d53b9787fb7b735c3cc2b6721))
+* **apps/website:** fixed 500px height for image modal ([2b16bd3](https://github.com/uzh-bf/gbl-uzh/commit/2b16bd389c57097b10bb0468727f36712d5f8b53))
+* **apps/website:** remove forms embed ([7492df4](https://github.com/uzh-bf/gbl-uzh/commit/7492df4e358c1499330075c83f18464223b47510))
+* **apps/website:** update website build to use quartz kb and ensure initialPath links works ([d0dc38d](https://github.com/uzh-bf/gbl-uzh/commit/d0dc38d5f7e8fc26aade8c1f3b2f952c32838f6b))
+* casing for titles of cards ([62b0725](https://github.com/uzh-bf/gbl-uzh/commit/62b0725a59b95438c34ae0cf9d856019227a430a))
+* cockpit period select initialization, responsiveness of charts ([4dde721](https://github.com/uzh-bf/gbl-uzh/commit/4dde721f663502e7ec461cfec8eb6fafc394a945))
+* computation of sharpe based on bank benchmark value ([3dd6c27](https://github.com/uzh-bf/gbl-uzh/commit/3dd6c27ba1aa66aecb97be2d2871d5609aa52a78))
+* **demo-game:** Formik ManageGame ([#80](https://github.com/uzh-bf/gbl-uzh/issues/80)) ([61458b3](https://github.com/uzh-bf/gbl-uzh/commit/61458b3b46128731798100e13d9ddb201618f3a5))
+* **demo-game:** move useCallback above if conditions ([7bf965a](https://github.com/uzh-bf/gbl-uzh/commit/7bf965aed261b8bbbc8fd9d1201ade7b1ed8d432))
+* **demo-game:** Transaction to Decision History + Fix segment result service ([#65](https://github.com/uzh-bf/gbl-uzh/issues/65)) ([bd129fd](https://github.com/uzh-bf/gbl-uzh/commit/bd129fda0945a26afe07935f9f2d2e26e46cbd5f))
+* ops build with pnpm ([635a2fd](https://github.com/uzh-bf/gbl-uzh/commit/635a2fd4c0220e93881c7cfb20c2b3355a1213f0))
+* prettier ([2b61d4d](https://github.com/uzh-bf/gbl-uzh/commit/2b61d4d2f4a5a0d36e3743e3ec047b487e10f274))
+* prevent possibility of not investing in anything ([3c4ab92](https://github.com/uzh-bf/gbl-uzh/commit/3c4ab922cf7a50ef4188a47940e5f99644ce4a01))
+
+
+### Dependencies
+
+* upgrade turbo ([54bfbbf](https://github.com/uzh-bf/gbl-uzh/commit/54bfbbfa660c1df845e495babbb61a624280f3bd))
+
+
+### Refactors
+
+* **demo-game:** clean up cockpit - moved calculations into respective game states ([#51](https://github.com/uzh-bf/gbl-uzh/issues/51)) ([bae5d20](https://github.com/uzh-bf/gbl-uzh/commit/bae5d20c2b11f9047c4278b881d56e92ce8359e4))
+
+
+### Enhancements
+
+* add new use cases ([ab2b74a](https://github.com/uzh-bf/gbl-uzh/commit/ab2b74a259fdc86fe53a1af1284de084e5d24e98))
+* **apps/website:** add contents for EscapeUZH ([#26](https://github.com/uzh-bf/gbl-uzh/issues/26)) ([5f704c5](https://github.com/uzh-bf/gbl-uzh/commit/5f704c58830435e5503af5a3b30d381613bf2b3a))
+* **apps/website:** add external games and make external links work within cards ([#38](https://github.com/uzh-bf/gbl-uzh/issues/38)) ([55f38f3](https://github.com/uzh-bf/gbl-uzh/commit/55f38f32e251b90f97c25e2414aff48cbe686482))
+* **apps/website:** add tags for competencies on about page ([#35](https://github.com/uzh-bf/gbl-uzh/issues/35)) ([d62b13d](https://github.com/uzh-bf/gbl-uzh/commit/d62b13d7eff4495285f362cbb1f576b87f7a99c4))
+* **demo-game:** add docker build workflow and improve dockerfile ([#67](https://github.com/uzh-bf/gbl-uzh/issues/67)) ([1ff8b92](https://github.com/uzh-bf/gbl-uzh/commit/1ff8b92403021ff921a69d8f0068b928a4ab4772))
+* **demo-game:** add player avatars, small enhancements, adding images, better layout ([#72](https://github.com/uzh-bf/gbl-uzh/issues/72)) ([095ca91](https://github.com/uzh-bf/gbl-uzh/commit/095ca918b34a18eb99494bff82e7e85153faea18))
+* improve demo-game admin ui, add recharts for visualization between segments, update dependencies, fix dev mode and integration with UI package CSS ([#46](https://github.com/uzh-bf/gbl-uzh/issues/46)) ([640fe42](https://github.com/uzh-bf/gbl-uzh/commit/640fe42021db03f004b7cf1ba2121a1f6e4ea040))
+* improve use case overview page ([59d7719](https://github.com/uzh-bf/gbl-uzh/commit/59d7719170d5cb1e74d22cf43495aec6ccea5e3e))
+* other improvements and misc fixes ([0eaa969](https://github.com/uzh-bf/gbl-uzh/commit/0eaa969a5016e13ae412cbc5cfe814c179f694d8))
+* story elements with visualizations ([901c7e2](https://github.com/uzh-bf/gbl-uzh/commit/901c7e20d1fe1d59250eda5fec19f74f9d9442c8))
+
+
+### Other
+
+* add escape-uzh redirect ([8b6cb9c](https://github.com/uzh-bf/gbl-uzh/commit/8b6cb9c0a4e01e92d9f4462466f506e0a8f0d303))
+* add global prisma:setup command ([733120a](https://github.com/uzh-bf/gbl-uzh/commit/733120adb78caeb1a869b025aa32ec7a9cc120ab))
+* add jakob to about page and update links to DF ([#29](https://github.com/uzh-bf/gbl-uzh/issues/29)) ([5f80afc](https://github.com/uzh-bf/gbl-uzh/commit/5f80afce2ab4d7e89027330872ebfcd8e0c052ef))
+* add seed:stg command ([322823b](https://github.com/uzh-bf/gbl-uzh/commit/322823ba25b8d5994b948bab7a7a86a9de85bcb9))
+* add stub files for new gbl ui framework (packages/ui)  ([#42](https://github.com/uzh-bf/gbl-uzh/issues/42)) ([06e1ee2](https://github.com/uzh-bf/gbl-uzh/commit/06e1ee21a7810a93f0077e0f5c2d90a88ca8b719))
+* **apps/website:** add escape room diary ([51db8ae](https://github.com/uzh-bf/gbl-uzh/commit/51db8aebbdba1c9a356c0cc9a669915a29f63849))
+* **apps/website:** add escape room materials to public folder ([10c8e61](https://github.com/uzh-bf/gbl-uzh/commit/10c8e61501d4d07d735c1d8a61ef3505fae58d43))
+* **apps/website:** add gbl seminar ([6ac493c](https://github.com/uzh-bf/gbl-uzh/commit/6ac493c82f2680da3af14bfa07652b9306c4b315))
+* **apps/website:** use UZH logo for header, reduce orange ([#36](https://github.com/uzh-bf/gbl-uzh/issues/36)) ([82ebefd](https://github.com/uzh-bf/gbl-uzh/commit/82ebefdebaf8f8303481edc20ba1a5253873f58b))
+* change platform package to ESM ([316c01b](https://github.com/uzh-bf/gbl-uzh/commit/316c01b0731fd97ddd2893b57a987572c15318f3))
+* **ci:** adding workflow for platform release ([#84](https://github.com/uzh-bf/gbl-uzh/issues/84)) ([cbd35b5](https://github.com/uzh-bf/gbl-uzh/commit/cbd35b5784f16d6935752edf9e1013a11f8a54f7))
+* improve sidebar ([43b7c0b](https://github.com/uzh-bf/gbl-uzh/commit/43b7c0bee5323299a6ceb97f23ac833da116cc72))
+* improve UC sidebar ([0953761](https://github.com/uzh-bf/gbl-uzh/commit/09537613f72cedd1f94160b7aae1ea9d2b945cce))
+* integrate new quartz submodule ([773a73c](https://github.com/uzh-bf/gbl-uzh/commit/773a73c51b8c2f2101e9aa8a0b730c6b05751502))
+* kb update ([a0240e8](https://github.com/uzh-bf/gbl-uzh/commit/a0240e823c09bde81beccf39e51312574ce58a87))
+* kb update ([eed9807](https://github.com/uzh-bf/gbl-uzh/commit/eed98076704b7373a3b45c08f4d0deb930079fc0))
+* lockfile ([4554253](https://github.com/uzh-bf/gbl-uzh/commit/4554253587b75c2daa8a18dc3df9c78750f4f478))
+* lockfile maintenance ([a18c868](https://github.com/uzh-bf/gbl-uzh/commit/a18c868f92e5a0a92b6544d645bcfe7409b0eba3))
+* lockfile maintenance ([d1e409a](https://github.com/uzh-bf/gbl-uzh/commit/d1e409a797c44980b28adb55fdab334adaf6bc03))
+* lockfile maintenance ([20171e5](https://github.com/uzh-bf/gbl-uzh/commit/20171e53ab6d345604e99f1001aabfdb7fd4517a))
+* lockfile maintenance ([ee80a4a](https://github.com/uzh-bf/gbl-uzh/commit/ee80a4a8a70c541393d6716e0dba9d8f8a3770eb))
+* lockfile maintenance ([9c0d01e](https://github.com/uzh-bf/gbl-uzh/commit/9c0d01e9599294bdeb1eafaa01e4eefcd1c7295d))
+* lockfile maintenance ([3b0cb7a](https://github.com/uzh-bf/gbl-uzh/commit/3b0cb7a2ff4adcb1d967ba6595c2451aae4cb4dd))
+* lockfile maintenance ([c413fc2](https://github.com/uzh-bf/gbl-uzh/commit/c413fc23aaa85341254e9241ccb9dcf2f2f002f3))
+* move _run script and compose file to demo-game app ([88f70a9](https://github.com/uzh-bf/gbl-uzh/commit/88f70a95accab6f7c5f4a4c529cf78da184b3396))
+* nodemon for dev ([cf2b40b](https://github.com/uzh-bf/gbl-uzh/commit/cf2b40b326eafbfa427ccf6468ac68ff9646359b))
+* pnpm ([978bb86](https://github.com/uzh-bf/gbl-uzh/commit/978bb8676c2d04443f4fcebfc204afb7c58a483b))
+* remove old kb submodule ([c5f74cc](https://github.com/uzh-bf/gbl-uzh/commit/c5f74cc1c16038e56006bd4016f17df785b37c02))
+* run format on entire repo ([919dac4](https://github.com/uzh-bf/gbl-uzh/commit/919dac4ff577b14d6738e603cc906d4f18204f8a))
+* submodule maintenance ([e668168](https://github.com/uzh-bf/gbl-uzh/commit/e66816882f0e5a8574a88bd8681d0b4e0c46c66c))
+* submodule maintenance ([d89e53b](https://github.com/uzh-bf/gbl-uzh/commit/d89e53bb940144c68f50c26bc4135b7772c74c1a))
+* submodule update ([7b4f475](https://github.com/uzh-bf/gbl-uzh/commit/7b4f475829266eda75af807797ce4665c344dbc3))
+* update images for startinvest and business sim ([b8f0a69](https://github.com/uzh-bf/gbl-uzh/commit/b8f0a69831b92666ebd721ae80f4e937dfd142f6))
+* update license copyright statements ([7ff9703](https://github.com/uzh-bf/gbl-uzh/commit/7ff97039b43f5c9b564ddaa92f52384198fd1bd6))
+* update quartz ([3c03a4e](https://github.com/uzh-bf/gbl-uzh/commit/3c03a4e85a21dfd068334a8b9704e3b443195772))
+* update tsconfig files and change platform to ESM ([#49](https://github.com/uzh-bf/gbl-uzh/issues/49)) ([0f569c9](https://github.com/uzh-bf/gbl-uzh/commit/0f569c9373611fcc32bf5136344d6cee0a8303d7))
+* update turbo outputs to include public folder in quartz ([549ad7b](https://github.com/uzh-bf/gbl-uzh/commit/549ad7b32d51b619814c66cce2378f2a260bef45))
+* upgrade nextjs, add startinvest ([97f227b](https://github.com/uzh-bf/gbl-uzh/commit/97f227b0b666d0f457b2a223f973311a7fbf77b9))
+
 ### [0.4.13](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.12...v0.4.13) (2023-09-06)
 
 
