@@ -1,5 +1,5 @@
 name: Release Platform Package
-on: 
+on:
   push:
     tags:
       - 'v*'
@@ -25,17 +25,15 @@ jobs:
         working-directory: ./packages/platform
         run: pnpm run build
 
-      - uses: JS-DevTools/npm-publish@v1
+      - uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           registry: https://npm.pkg.github.com
           access: public
-          check-version: true
-        working-directory: ./packages/platform
+          package: ./packages/platform
 
-      # - uses: JS-DevTools/npm-publish@v1
-      #   with:
-      #     token: ${{ secrets.NPM_TOKEN }}
-      #     access: public
-      #     check-version: true
-      #   working-directory: ./packages/platform
+      - uses: JS-DevTools/npm-publish@v3
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          package: ./packages/platform
