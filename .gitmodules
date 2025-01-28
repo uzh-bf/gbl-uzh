@@ -4,3 +4,4 @@
 [submodule "apps/quartz"]
 	path = apps/quartz
 	url = https://github.com/uzh-bf/gbl-knowledge.git
+	branch = dev
