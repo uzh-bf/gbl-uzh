@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.17](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.16...v0.4.17) (2025-01-28)
+
+
+### Bug Fixes
+
+* **platform:** updating onDelete:Cascade for some relations in prisma schema ([#86](https://github.com/uzh-bf/gbl-uzh/issues/86)) ([b7b9711](https://github.com/uzh-bf/gbl-uzh/commit/b7b97111b56bceb6d6dfdae9a819db88dfb7f128))
+
 ### [0.4.16](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.15...v0.4.16) (2025-01-15)
 
 
