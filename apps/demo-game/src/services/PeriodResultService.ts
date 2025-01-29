@@ -22,7 +22,7 @@ type OutputPeriodResultFactsInit = OutputFacts<
 
 export function initialize(
   facts: InputPeriodResultFactsInit,
-  payload: PayloadPeriodResult<PlayerRole, PeriodFacts>
+  payload: PayloadPeriodResult<PeriodFacts, PlayerRole>
 ): OutputPeriodResultFactsInit {
   const baseFacts: OutputPeriodResultFactsInit = {
     resultFacts: {
@@ -72,7 +72,7 @@ export function initialize(
 
 export function start(
   facts: ResultFacts,
-  payload: PayloadPeriodResult<PlayerRole, PeriodFacts>
+  payload: PayloadPeriodResult<PeriodFacts, PlayerRole>
 ): OutputResultFacts {
   const baseFacts: OutputResultFacts = {
     resultFacts: facts,
