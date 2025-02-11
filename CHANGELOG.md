@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.18](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.17...v0.4.18) (2025-02-11)
+
+
+### Bug Fixes
+
+* **apps/demo-game:** bug ordering of types in PayloadPeriodResult ([#88](https://github.com/uzh-bf/gbl-uzh/issues/88)) ([b576abe](https://github.com/uzh-bf/gbl-uzh/commit/b576abed8e24829d5ae4de1d64a12fc52601a08d))
+
+
+### Other
+
+* **feat:** on delete cascade for playeractions ([#89](https://github.com/uzh-bf/gbl-uzh/issues/89)) ([7a3501c](https://github.com/uzh-bf/gbl-uzh/commit/7a3501c0b509dfc84f3a6074d20ca24bc8cd3f08))
+* **quartz:** make dev new default submodule of quartz ([#87](https://github.com/uzh-bf/gbl-uzh/issues/87)) ([ef39b6e](https://github.com/uzh-bf/gbl-uzh/commit/ef39b6eda9cf9c81a5989406a6df3346c955c5d8))
+
 ### [0.4.17](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.16...v0.4.17) (2025-01-28)
 
 
