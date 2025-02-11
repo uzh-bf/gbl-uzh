@@ -189,7 +189,7 @@ model Player {
 
   experience        Int         @default(0)
   experienceToNext  Int         @default(100)
-  level             PlayerLevel @relation(fields: [levelIx], references: [index])
+  level             PlayerLevel @relation(fields: [levelIx], references: [index], onDelete: Cascade)
   levelIx           Int
   tutorialCompleted Boolean     @default(false)
 
@@ -227,18 +227,18 @@ model PlayerAction {
   facts Json
 
   gameId Int
-  game   Game @relation(fields: [gameId], references: [id])
+  game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
   playerId String @db.Uuid
-  player   Player @relation(fields: [playerId], references: [id])
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   periodId Int
   periodIx Int
-  period   Period @relation(fields: [periodId], references: [id])
+  period   Period @relation(fields: [periodId], references: [id], onDelete: Cascade)
 
   segmentId Int?
   segmentIx Int?
-  segment   PeriodSegment? @relation(fields: [segmentId], references: [id])
+  segment   PeriodSegment? @relation(fields: [segmentId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 }
