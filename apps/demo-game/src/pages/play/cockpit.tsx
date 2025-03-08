@@ -26,7 +26,6 @@ import {
   TableRow,
 } from '@uzh-bf/design-system/dist/future'
 
-import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import {
   Area,
@@ -52,6 +51,7 @@ import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
 // TODO(JJ): This will be replaced by the design system
 import { Form, Formik } from 'formik'
+import { io } from 'socket.io-client'
 import * as yup from 'yup'
 import { useToast } from '../../components/ui/use-toast'
 
@@ -79,30 +79,36 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   })
 
   const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument)
-
-  const [countdownNotifications, setCountdownNotifications] = useState({
-    '60': false,
-    '180': false,
-  })
+  const [timeRemaining, setTimeRemaining] = useState(0)
 
   const { toast } = useToast()
 
-  const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
-    ?.countdownExpiresAt as string | null
-  const countdownDurationMs = data?.result?.currentGame?.activePeriod
-    ?.activeSegment?.countdownDurationMs as number | null
-
   useEffect(() => {
-    const dateExpiresAt = dayjs(strExpiresAt)
-    const secondsRemaining = dateExpiresAt.diff(dayjs(), 's')
+    const socket = io(process.env.NEXT_PUBLIC_APP_URL, {
+      transports: ['websocket', 'polling'],
+    })
 
-    if (secondsRemaining > 0) {
-      toast({
-        title: 'Countdown set',
-        description: `${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
-      })
+    socket.on('connect', () => {
+      console.log('Player connected')
+    })
+
+    socket.on('countdown-update', (time: number) => {
+      setTimeRemaining(time)
+    })
+
+    socket.on('countdown-finished', () => {
+      setTimeRemaining(0)
+    })
+
+    socket.on('connect_error', async (error) => {
+      console.error('Connection error player:', error)
+      await fetch('/api/socket')
+    })
+
+    return () => {
+      socket.disconnect()
     }
-  }, [strExpiresAt])
+  }, [])
 
   const playerInfo = {
     name: data.self.name,
@@ -164,44 +170,46 @@ function GameLayout({ children }: { children: React.ReactNode }) {
               />
             )}
 
+            {timeRemaining > 0 && <h1>Time Left: {timeRemaining} seconds</h1>}
+
             {/* {countdownDurationMs !== null && (
-          <CycleCountdown
-            className={{
-              root: '',
-              countdownWrapper: '',
-              countdown: 'text-xs font-bold text-gray-600',
-            }}
-            totalDuration={countdownDurationMs / 1000}
-            expiresAt={dayjs(strExpiresAt).toDate()}
-            formatter={(value) => `${value}s`}
-            onExpire={() =>
-              toast({
-                title: 'Countdown expired',
-                description: 'Time is up! The period will be closed soon.',
-                variant: 'destructive',
-              })
-            }
-            onUpdate={(secondsRemaining) => {
-              const minutesRemainingThreshold = [1, 3]
-              minutesRemainingThreshold.forEach((minute) => {
-                const seconds = minute * 60
-                if (secondsRemaining <= seconds) {
-                  const secondsStr = String(seconds)
-                  if (countdownNotifications[secondsStr]) return
-                  const minutesRemaining = Math.ceil(secondsRemaining / 60)
+              <CycleCountdown
+                className={{
+                  root: '',
+                  countdownWrapper: '',
+                  countdown: 'text-xs font-bold text-gray-600',
+                }}
+                totalDuration={countdownDurationMs / 1000}
+                expiresAt={dayjs(strExpiresAt).toDate()}
+                formatter={(value) => `${value}s`}
+                onExpire={() =>
                   toast({
-                    title: 'Countdown update',
-                    description: `Less than ${minutesRemaining} min remaining! Please press ready once you are done.`,
+                    title: 'Countdown expired',
+                    description: 'Time is up! The period will be closed soon.',
+                    variant: 'destructive',
                   })
-                  setCountdownNotifications((prevState) => ({
-                    ...prevState,
-                    [secondsStr]: true,
-                  }))
                 }
-              })
-            }}
-          />
-        )} */}
+                onUpdate={(secondsRemaining) => {
+                  const minutesRemainingThreshold = [1, 3]
+                  minutesRemainingThreshold.forEach((minute) => {
+                    const seconds = minute * 60
+                    if (secondsRemaining <= seconds) {
+                      const secondsStr = String(seconds)
+                      if (countdownNotifications[secondsStr]) return
+                      const minutesRemaining = Math.ceil(secondsRemaining / 60)
+                      toast({
+                        title: 'Countdown update',
+                        description: `Less than ${minutesRemaining} min remaining! Please press ready once you are done.`,
+                      })
+                      setCountdownNotifications((prevState) => ({
+                        ...prevState,
+                        [secondsStr]: true,
+                      }))
+                    }
+                  })
+                }}
+              />
+            )} */}
           </div>
           <LearningElements />
         </CardContent>

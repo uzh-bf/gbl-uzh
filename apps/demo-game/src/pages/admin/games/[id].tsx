@@ -14,7 +14,7 @@ import {
   H4,
   Modal,
 } from '@uzh-bf/design-system'
-import { Form, Formik } from 'formik'
+import { Formik } from 'formik'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
@@ -23,15 +23,14 @@ import PlayerCompact from '~/components/PlayerCompact'
 
 import { useMutation, useQuery } from '@apollo/client'
 import {
-  STATUS,
   computePeriodStatus,
   computeSegmentStatus,
+  STATUS,
 } from '@gbl-uzh/platform/dist/lib/util'
 import { useCallback, useEffect, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
-  AddCountdownDocument,
   AddGamePeriodDocument,
   AddPeriodSegmentDocument,
   Game,
@@ -69,11 +68,16 @@ import {
   TREND_STOCKS,
 } from '~/types/Period'
 
+import { io, Socket } from 'socket.io-client'
+
 function ManageGame() {
   const router = useRouter()
 
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
+  // const [countdownSeconds, setCountdownSeconds] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [socket, setSocket] = useState<Socket | null>(null)
 
   const { data, error, loading } = useQuery(GameDocument, {
     variables: { id: Number(router.query.id) },
@@ -121,7 +125,41 @@ function ManageGame() {
     }
   )
 
-  const [addCountdown] = useMutation(AddCountdownDocument)
+  useEffect(() => {
+    const socketInstance = io(process.env.NEXT_PUBLIC_APP_URL, {
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      timeout: 10000,
+      transports: ['websocket', 'polling'],
+    })
+
+    if (!socketInstance.connected) {
+      fetch('/api/socket')
+    }
+
+    socketInstance.on('connect', () => {
+      console.log('Admin connected')
+      setSocket(socketInstance)
+    })
+
+    socketInstance.on('connect_error', async (error) => {
+      console.error('Connection error admin:', error)
+      await fetch('/api/socket')
+    })
+
+    return () => {
+      socketInstance.disconnect()
+    }
+  }, [])
+
+  const handleStartCountdown = () => {
+    if (socket) {
+      socket.emit('start-countdown', duration)
+    } else {
+      console.error('Socket not connected')
+    }
+  }
 
   const { toast } = useToast()
 
@@ -826,16 +864,38 @@ function ManageGame() {
           </div>
         </div>
 
-        <Formik
+        <Card className="flex flex-col">
+          <CardHeader>
+            <CardTitle>Countdown</CardTitle>
+            <CardDescription>Set a countdown for the segment.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <input
+              type="number"
+              // value={countdownSeconds}
+              // onChange={handleCountdownChange}
+              value={duration}
+              onChange={(e) => setDuration(Number(e.target.value))}
+              // placeholder="Countdown in seconds"
+              min="1"
+            />
+          </CardContent>
+          <CardFooter>
+            <Button onClick={handleStartCountdown}>Set Countdown</Button>
+            {/* <Button onClick={setCountdown}>Set Countdown</Button> */}
+          </CardFooter>
+        </Card>
+        {/* <Formik
           initialValues={{ countdownSeconds: 300 }}
-          onSubmit={(values) =>
-            addCountdown({
-              variables: {
-                gameId: Number(router.query.id),
-                seconds: Number(values.countdownSeconds),
-              },
-              refetchQueries: [GameDocument],
-            })
+          onSubmit={
+            (values) => {}
+            // addCountdown({
+            //   variables: {
+            //     gameId: Number(router.query.id),
+            //     seconds: Number(values.countdownSeconds),
+            //   },
+            //   refetchQueries: [GameDocument],
+            // })
           }
         >
           <Form>
@@ -853,17 +913,13 @@ function ManageGame() {
                   label="Countdown in seconds"
                   className={{ label: 'pb-2 font-normal' }}
                 />
-                {/* TODO(JJ): @RS Do we want to show the following? If no we
-                  we can remove the refetchQueries.
-                */}
-                {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
               </CardContent>
               <CardFooter>
                 <Button type="submit">Set Countdown</Button>
               </CardFooter>
             </Card>
           </Form>
-        </Formik>
+        </Formik> */}
       </div>
     </div>
   )
