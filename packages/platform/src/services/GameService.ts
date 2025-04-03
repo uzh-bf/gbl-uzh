@@ -1335,6 +1335,11 @@ export function computeSegmentStartResults(game, ctx, { services }) {
     }
   }
 
+  // Use first segment of active period and not activeSegment as it's not
+  // active yet.
+  const activePeriod = game.activePeriod
+  const aboutToBeactiveSegment = activePeriod.segments[0]
+
   // if it is the first segment, transform PERIOD_START to SEGMENT_START
   const results = game.activePeriod.results
     .filter((result) => result.type === DB.PlayerResultType.PERIOD_START)
@@ -1344,8 +1349,8 @@ export function computeSegmentStartResults(game, ctx, { services }) {
         {
           playerRole: result.player.role,
           periodFacts: game.activePeriod.facts,
-          segmentFacts: game.activePeriod.activeSegment?.facts,
-          nextSegmentFacts: game.activePeriod.activeSegment?.nextSegment?.facts,
+          segmentFacts: aboutToBeactiveSegment.facts,
+          nextSegmentFacts: aboutToBeactiveSegment.nextSegment?.facts,
           segmentIx: nextSegmentIx,
         }
       )
