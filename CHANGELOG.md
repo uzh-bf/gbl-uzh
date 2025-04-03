@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.19](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.18...v0.4.19) (2025-04-03)
+
+
+### Bug Fixes
+
+* **platform:** use segments[0] of activePeriod instead of activeSegment for initialize ([#91](https://github.com/uzh-bf/gbl-uzh/issues/91)) ([27dacc6](https://github.com/uzh-bf/gbl-uzh/commit/27dacc64ff5f3ececb9a935152145f30d722d354))
+
+
+### Build and CI
+
+* add Azure Static Web Apps workflow file ([871b4bb](https://github.com/uzh-bf/gbl-uzh/commit/871b4bb3154573cc82d65ba4b2415ee50f26146e))
+
 ### [0.4.18](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.17...v0.4.18) (2025-02-11)
 
 
