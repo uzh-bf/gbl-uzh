@@ -708,11 +708,13 @@ export async function activateNextSegment(
       id: gameId,
     },
     include: {
-      players: true,
-      periods: true,
-      segments: true,
       activePeriod: {
         include: {
+          segments: {
+            include: {
+              nextSegment: true,
+            },
+          },
           results: {
             include: {
               player: true,
@@ -1341,14 +1343,14 @@ export function computeSegmentStartResults(game, ctx, { services }) {
   const aboutToBeactiveSegment = activePeriod.segments[0]
 
   // if it is the first segment, transform PERIOD_START to SEGMENT_START
-  const results = game.activePeriod.results
+  const results = activePeriod.results
     .filter((result) => result.type === DB.PlayerResultType.PERIOD_START)
     .reduce((acc, result, ix, allResults) => {
       let { resultFacts: facts } = services.SegmentResult.initialize(
         result.facts,
         {
           playerRole: result.player.role,
-          periodFacts: game.activePeriod.facts,
+          periodFacts: activePeriod.facts,
           segmentFacts: aboutToBeactiveSegment.facts,
           nextSegmentFacts: aboutToBeactiveSegment.nextSegment?.facts,
           segmentIx: nextSegmentIx,
