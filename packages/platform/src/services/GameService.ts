@@ -1338,7 +1338,7 @@ export function computeSegmentStartResults(game, ctx, { services }) {
   // Use first segment of active period and not activeSegment as it's not
   // active yet.
   const activePeriod = game.activePeriod
-  const activeSegment = activePeriod.segments[0]
+  const aboutToBeactiveSegment = activePeriod.segments[0]
 
   // if it is the first segment, transform PERIOD_START to SEGMENT_START
   const results = game.activePeriod.results
@@ -1349,8 +1349,8 @@ export function computeSegmentStartResults(game, ctx, { services }) {
         {
           playerRole: result.player.role,
           periodFacts: game.activePeriod.facts,
-          segmentFacts: activeSegment.facts,
-          nextSegmentFacts: activeSegment.nextSegment?.facts,
+          segmentFacts: aboutToBeactiveSegment.facts,
+          nextSegmentFacts: aboutToBeactiveSegment.nextSegment?.facts,
           segmentIx: nextSegmentIx,
         }
       )
