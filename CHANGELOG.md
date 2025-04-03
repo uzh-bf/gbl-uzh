@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.20](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.19...v0.4.20) (2025-04-03)
+
+
+### Bug Fixes
+
+* **platform:** adding segments in activePeriod game request ([#95](https://github.com/uzh-bf/gbl-uzh/issues/95)) ([f95bc7b](https://github.com/uzh-bf/gbl-uzh/commit/f95bc7b4fb35129ef48191aaf6b7a939c9d47c72))
+
 ### [0.4.19](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.18...v0.4.19) (2025-04-03)
 
 
