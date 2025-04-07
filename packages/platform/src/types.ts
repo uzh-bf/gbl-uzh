@@ -37,6 +37,7 @@ export type OutputFactsUser<FactsType, NotificationType, EventType> = {
   actions?: any[]
   notifications?: Notification<NotificationType>[]
   events?: Event<EventType>[]
+  updatedSegmentFacts?: any
 }
 
 export type OutputFacts<FactsType, NotificationType, EventType> = {

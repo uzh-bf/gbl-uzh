@@ -48,15 +48,21 @@ export async function performAction<ActionTypes>(
     throw new Error('ACTIONS_NOT_ALLOWED')
   }
 
-  const { result, events, notifications, isDirty, extras } =
-    services.Actions.apply(previousResult.facts, {
-      type: args.actionType,
-      payload: {
-        playerArgs: args.facts,
-        segmentFacts: previousResult.segment?.facts,
-        periodFacts: previousResult.period.facts,
-      },
-    })
+  const {
+    result,
+    events,
+    notifications,
+    isDirty,
+    extras,
+    updatedSegmentFacts,
+  } = services.Actions.apply(previousResult.facts, {
+    type: args.actionType,
+    payload: {
+      playerArgs: args.facts,
+      segmentFacts: previousResult.segment?.facts,
+      periodFacts: previousResult.period.facts,
+    },
+  })
 
   EventService.publishUserNotification(ctx, notifications)
 
@@ -76,7 +82,7 @@ export async function performAction<ActionTypes>(
     return previousResult
   }
 
-  const [updatedResult, _] = await ctx.prisma.$transaction([
+  const transactions: any[] = [
     ctx.prisma.playerResult.update({
       where: {
         periodIx_segmentIx_playerId_type,
@@ -126,7 +132,18 @@ export async function performAction<ActionTypes>(
         },
       },
     }),
-  ])
+  ]
+
+  if (updatedSegmentFacts && previousResult.segment?.id) {
+    transactions.push(
+      ctx.prisma.periodSegment.update({
+        where: { id: previousResult.segment.id },
+        data: { facts: updatedSegmentFacts },
+      })
+    )
+  }
+
+  const [updatedResult, _] = await ctx.prisma.$transaction(transactions)
 
   return updatedResult
 }
