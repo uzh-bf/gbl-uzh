@@ -22,19 +22,19 @@ interface CreateGameArgs<T> {
 }
 
 export async function createGame<TFacts>(
-  { name, facts, playerCount }: CreateGameArgs<TFacts>,
+  { name, playerCount, facts }: CreateGameArgs<TFacts>,
   ctx: Context,
   {
     schema,
     roleAssigner,
   }: { schema: yup.Schema<TFacts>; roleAssigner?: (ix: number) => any }
 ) {
-  const validatedFacts = schema.validateSync(facts)
+  const validatedFacts = schema.validateSync(facts) as any
 
   return ctx.prisma.game.create({
     data: {
       name,
-      facts: validatedFacts as any,
+      facts: validatedFacts,
       owner: {
         connect: {
           id: ctx.user.sub,

@@ -36,6 +36,9 @@ declare global {
 }
 
 export interface NexusGenInputs {
+  GameFactsInput: { // input type
+    myInt?: number | null; // Int
+  }
   PeriodFactsInput: { // input type
     rollsPerSegment: number | null; // Int
     scenario: NexusGenInputs['PeriodFactsScenarioInput'] | null; // PeriodFactsScenarioInput
@@ -95,6 +98,7 @@ export interface NexusGenObjects {
     activePeriod?: NexusGenRootTypes['Period'] | null; // Period
     activePeriodIx?: number | null; // Int
     activeSegmentIx?: number | null; // Int
+    facts: NexusGenScalars['JSONObject']; // JSONObject!
     id: string; // ID!
     name: string; // String!
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
@@ -254,6 +258,7 @@ export interface NexusGenFieldTypes {
     activePeriod: NexusGenRootTypes['Period'] | null; // Period
     activePeriodIx: number | null; // Int
     activeSegmentIx: number | null; // Int
+    facts: NexusGenScalars['JSONObject']; // JSONObject!
     id: string; // ID!
     name: string; // String!
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
@@ -432,6 +437,7 @@ export interface NexusGenFieldTypeNames {
     activePeriod: 'Period'
     activePeriodIx: 'Int'
     activeSegmentIx: 'Int'
+    facts: 'JSONObject'
     id: 'ID'
     name: 'String'
     periods: 'Period'
@@ -618,6 +624,7 @@ export interface NexusGenArgTypes {
       selection: string; // String!
     }
     createGame: { // args
+      facts: NexusGenInputs['GameFactsInput']; // GameFactsInput!
       name: string; // String!
       playerCount: number; // Int!
     }
