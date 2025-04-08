@@ -15,19 +15,26 @@ import * as EventService from './EventService.js'
 
 type Context = CtxWithPrisma<PrismaClient>
 
-interface CreateGameArgs {
+interface CreateGameArgs<T> {
   name: string
   playerCount: number
+  facts: T
 }
 
-export async function createGame(
-  { name, playerCount }: CreateGameArgs,
+export async function createGame<TFacts>(
+  { name, facts, playerCount }: CreateGameArgs<TFacts>,
   ctx: Context,
-  { roleAssigner }: { roleAssigner?: (ix: number) => any }
+  {
+    schema,
+    roleAssigner,
+  }: { schema: yup.Schema<TFacts>; roleAssigner?: (ix: number) => any }
 ) {
+  const validatedFacts = schema.validateSync(facts)
+
   return ctx.prisma.game.create({
     data: {
       name,
+      facts: validatedFacts as any,
       owner: {
         connect: {
           id: ctx.user.sub,
@@ -109,6 +116,7 @@ export async function addGamePeriod<TFacts>(
       previousPeriodFacts: game.periods[0]?.facts as any,
       previousSegmentFacts: game.periods[0]?.segments[0]?.facts as any,
       periodIx: index,
+      // gameFacts: game.facts,
     }
   )
 

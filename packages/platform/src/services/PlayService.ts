@@ -62,6 +62,8 @@ export async function performAction<ActionTypes>(
       segmentFacts: previousResult.segment?.facts,
       periodFacts: previousResult.period.facts,
     },
+    // TODO(JJ): another option would be to pass ctx and update db in the
+    // action reducer - but this way the user could change everything ...
   })
 
   EventService.publishUserNotification(ctx, notifications)

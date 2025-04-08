@@ -30,6 +30,7 @@ interface GenerateBaseMutationsArgs {
 }
 
 export function generateBaseMutations<
+  GameFacts,
   PeriodFacts,
   PeriodSegmentFacts,
   PlayerFacts
@@ -73,9 +74,13 @@ export function generateBaseMutations<
         args: {
           name: nonNull(stringArg()),
           playerCount: nonNull(intArg()),
+          facts: arg({
+            type: nonNull(inputTypes.GameFactsInput),
+          }),
         },
         async resolve(_, args, ctx) {
-          return GameService.createGame(args, ctx, {
+          return GameService.createGame<GameFacts>(args, ctx, {
+            schema: schemas.GameFactsSchema,
             roleAssigner,
           })
         },

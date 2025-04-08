@@ -90,6 +90,8 @@ model Game {
 
   name String
 
+  facts Json
+
   decisions PlayerDecision[]
   actions   PlayerAction[]
   players   Player[]
