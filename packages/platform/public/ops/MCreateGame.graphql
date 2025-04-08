@@ -1,7 +1,7 @@
 #import "./FGameData.graphql"
 
-mutation CreateGame($name: String!, $playerCount: Int!) {
-  createGame(name: $name, playerCount: $playerCount) {
+mutation CreateGame($name: String!, $playerCount: Int!, $facts: GameFactsInput!) {
+  createGame(name: $name, playerCount: $playerCount, facts: $facts) {
     ...GameData
   }
 }
