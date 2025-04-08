@@ -5,6 +5,7 @@ import {
 } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
+import { GameFacts } from '../types/Game'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
 type InputPeriodFacts = PeriodFacts
@@ -18,7 +19,11 @@ type OutputPeriodFacts = OutputFacts<InputPeriodFacts, any, any>
 
 export function initialize(
   facts: InputPeriodFacts,
-  payload: PayloadPeriodInitialisation<PeriodFacts, PeriodSegmentFacts>
+  payload: PayloadPeriodInitialisation<
+    GameFacts,
+    PeriodFacts,
+    PeriodSegmentFacts
+  >
 ): OutputPeriodFacts {
   const baseFacts: OutputPeriodFacts = {
     resultFacts: facts,
@@ -35,7 +40,7 @@ export function initialize(
 
 export function consolidate(
   facts: InputPeriodFacts,
-  payload: PayloadPeriodConsolidation<PeriodSegmentFacts>
+  payload: PayloadPeriodConsolidation<GameFacts, PeriodSegmentFacts>
 ): OutputPeriodFacts {
   const baseFacts: OutputPeriodFacts = {
     resultFacts: facts,

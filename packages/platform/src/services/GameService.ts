@@ -108,6 +108,7 @@ export async function addGamePeriod<TFacts>(
   const { resultFacts: initializedFacts } = services.Period.initialize(
     validatedFacts,
     {
+      gameFacts: game.facts,
       // TODO(JJ): replace with undefined
       // At RS: If we replace validatedFacts with periodFacts the
       // Derivative Game will be broken, as it computes the trend from
@@ -116,7 +117,6 @@ export async function addGamePeriod<TFacts>(
       previousPeriodFacts: game.periods[0]?.facts as any,
       previousSegmentFacts: game.periods[0]?.segments[0]?.facts as any,
       periodIx: index,
-      // gameFacts: game.facts,
     }
   )
 
@@ -190,6 +190,10 @@ export async function addPeriodSegment<TFacts>(
 ) {
   const validatedFacts = schema.validateSync(facts)
 
+  const game = await ctx.prisma.game.findUnique({ where: { id: gameId } })
+
+  if (!game) return null
+
   const period = await ctx.prisma.period.findUnique({
     where: {
       gameId_index: {
@@ -211,84 +215,101 @@ export async function addPeriodSegment<TFacts>(
 
   const index = (period.segments[0]?.index ?? -1) + 1
 
-  const { resultFacts: initializedFacts } = services.Segment.initialize(
-    validatedFacts,
-    {
+  const { resultFacts: initializedFacts, updatedGameFacts } =
+    services.Segment.initialize(validatedFacts, {
+      gameFacts: game.facts,
       periodFacts: period.facts,
       previousSegmentFacts: period.segments[0]?.facts,
       segmentIx: index,
       segmentCount: period.segmentCount,
       periodIx,
-    }
-  )
+    })
 
-  // create or update the facts and settings of a period segment
-  return ctx.prisma.periodSegment.upsert({
-    where: {
-      gameId_periodIx_index: {
-        gameId,
-        periodIx,
-        index,
-      },
-    },
-    create: {
-      index,
-      facts: initializedFacts,
-      learningElements: {
-        connect: learningElements
-          ? learningElements.map((item) => ({ id: item }))
-          : [],
-      },
-      storyElements: {
-        connect: storyElements
-          ? storyElements.map((item) => ({ id: item }))
-          : [],
-      },
-      game: {
-        connect: {
-          id: gameId,
+  const transactions: any[] = [
+    // create or update the facts and settings of a period segment
+    ctx.prisma.periodSegment.upsert({
+      where: {
+        gameId_periodIx_index: {
+          gameId,
+          periodIx,
+          index,
         },
       },
-      periodIx: periodIx,
-      period: {
-        connect: {
-          gameId_index: {
-            gameId,
-            index: periodIx,
+      create: {
+        index,
+        facts: initializedFacts,
+        learningElements: {
+          connect: learningElements
+            ? learningElements.map((item) => ({ id: item }))
+            : [],
+        },
+        storyElements: {
+          connect: storyElements
+            ? storyElements.map((item) => ({ id: item }))
+            : [],
+        },
+        game: {
+          connect: {
+            id: gameId,
           },
         },
+        periodIx: periodIx,
+        period: {
+          connect: {
+            gameId_index: {
+              gameId,
+              index: periodIx,
+            },
+          },
+        },
+        previousSegment: {
+          connect:
+            index > 0
+              ? {
+                  gameId_periodIx_index: {
+                    gameId,
+                    periodIx,
+                    index: index - 1,
+                  },
+                }
+              : [],
+        },
       },
-      previousSegment: {
-        connect:
-          index > 0
-            ? {
-                gameId_periodIx_index: {
-                  gameId,
-                  periodIx,
-                  index: index - 1,
-                },
-              }
+      update: {
+        facts: initializedFacts,
+        learningElements: {
+          connect: learningElements
+            ? learningElements.map((item) => ({ id: item }))
             : [],
+        },
+        storyElements: {
+          connect: storyElements
+            ? storyElements.map((item) => ({ id: item }))
+            : [],
+        },
       },
-    },
-    update: {
-      facts: initializedFacts,
-      learningElements: {
-        connect: learningElements
-          ? learningElements.map((item) => ({ id: item }))
-          : [],
+      include: {
+        learningElements: true,
+        storyElements: true,
       },
-      storyElements: {
-        connect: storyElements
-          ? storyElements.map((item) => ({ id: item }))
-          : [],
-      },
-    },
-    include: {
-      learningElements: true,
-      storyElements: true,
-    },
-  })
+    }),
+  ]
+
+  if (updatedGameFacts) {
+    transactions.push(
+      ctx.prisma.game.update({
+        where: {
+          id: gameId,
+        },
+        data: {
+          facts: updatedGameFacts,
+        },
+      })
+    )
+  }
+
+  const [updatedSegment, _] = await ctx.prisma.$transaction(transactions)
+  return updatedSegment
 }
 
 interface ActivateNextPeriodArgs {
@@ -373,7 +394,7 @@ export async function activateNextPeriod(
           results: undefined,
           players: game.players,
           activePeriodIx: currentPeriodIx,
-          gameId: game.id,
+          game,
           periodFacts: game.periods?.[0]?.facts,
         },
         ctx,
@@ -442,6 +463,7 @@ export async function activateNextPeriod(
       const { resultFacts: consolidatedFacts } = services.Period.consolidate(
         game.activePeriod.facts,
         {
+          gameFacts: game.facts,
           previousSegmentFacts: game.activePeriod.activeSegment.facts as any,
           periodIx: currentPeriodIx,
         }
@@ -520,7 +542,7 @@ export async function activateNextPeriod(
           periodDecisions: game.activePeriod.decisions,
           activePeriodIx: currentPeriodIx,
           activeSegmentIx: currentSegmentIx,
-          gameId: game.id,
+          game,
         },
         ctx,
         { services }
@@ -650,7 +672,7 @@ export async function activateNextPeriod(
           results: game.activePeriod.previousPeriod[0]?.results,
           players: game.players,
           activePeriodIx: currentPeriodIx,
-          gameId: game.id,
+          game,
           periodFacts: game.activePeriod.facts,
         },
         ctx,
@@ -1064,7 +1086,7 @@ function mapAction({ ctx, gameId, activePeriodIx, playerId }) {
 }
 
 export function computePeriodStartResults(
-  { results, players, activePeriodIx, gameId, periodFacts },
+  { results, players, activePeriodIx, game, periodFacts },
   ctx,
   { services }
 ) {
@@ -1083,6 +1105,7 @@ export function computePeriodStartResults(
           result.facts,
           {
             playerRole: result.player?.role ?? result.player.connect?.role,
+            gameFacts: game.facts,
             periodFacts,
           }
         )
@@ -1090,7 +1113,7 @@ export function computePeriodStartResults(
         if (actions && actions.length > 0) {
           const mapper = mapAction({
             ctx,
-            gameId,
+            gameId: game.id,
             activePeriodIx: currentPeriodIx,
             playerId: result.player.id,
           })
@@ -1109,7 +1132,7 @@ export function computePeriodStartResults(
           },
           game: {
             connect: {
-              id: gameId,
+              id: game.id,
             },
           },
         }
@@ -1125,13 +1148,13 @@ export function computePeriodStartResults(
   const result = players.map((player, ix, allPlayers) => {
     const { resultFacts: facts, actions } = services.PeriodResult.initialize(
       {},
-      { playerRole: player.role, periodFacts }
+      { playerRole: player.role, gameFacts: game.facts, periodFacts }
     )
 
     if (actions && actions.length > 0) {
       const mapper = mapAction({
         ctx,
-        gameId,
+        gameId: game.id,
         activePeriodIx: nextPeriodIx,
         playerId: player.id,
       })
@@ -1150,7 +1173,7 @@ export function computePeriodStartResults(
       },
       game: {
         connect: {
-          id: gameId,
+          id: game.id,
         },
       },
     }
@@ -1172,7 +1195,7 @@ export async function computePeriodEndResults(
     segmentFacts,
     activePeriodIx,
     activeSegmentIx,
-    gameId,
+    game,
   },
   ctx: Context,
   { services }
@@ -1204,6 +1227,7 @@ export async function computePeriodEndResults(
         events,
       } = services.PeriodResult.end(result.facts, {
         segmentEndResults,
+        gameFacts: game.facts,
         periodFacts,
         segmentFacts,
 
@@ -1221,7 +1245,7 @@ export async function computePeriodEndResults(
       if (actions && actions.length > 0) {
         const mapper = mapAction({
           ctx,
-          gameId,
+          gameId: game.id,
           activePeriodIx,
           playerId: result.player.id,
         })
@@ -1237,7 +1261,7 @@ export async function computePeriodEndResults(
             args: {
               playerId: result.player.id,
               periodIx: activePeriodIx,
-              gameId,
+              gameId: game.id,
             },
             user: ctx.user,
             achievements: result.player.achievementKeys,
@@ -1259,7 +1283,7 @@ export async function computePeriodEndResults(
         },
         game: {
           connect: {
-            id: gameId,
+            id: game.id,
           },
         },
       }
@@ -1287,6 +1311,7 @@ export function computeSegmentStartResults(game, ctx, { services }) {
           result.facts,
           {
             playerRole: result.player.role,
+            gameFacts: game.facts,
             periodFacts: game.activePeriod.facts,
             segmentFacts: game.activePeriod.activeSegment.facts,
             nextSegmentFacts:
@@ -1358,6 +1383,7 @@ export function computeSegmentStartResults(game, ctx, { services }) {
         result.facts,
         {
           playerRole: result.player.role,
+          gameFacts: game.facts,
           periodFacts: activePeriod.facts,
           segmentFacts: aboutToBeactiveSegment.facts,
           nextSegmentFacts: aboutToBeactiveSegment.nextSegment?.facts,
@@ -1415,6 +1441,7 @@ export function computeSegmentEndResults(game, ctx, { services }) {
         result.facts,
         {
           playerRole: result.player.role,
+          gameFacts: game.facts,
           periodFacts: game.activePeriod.facts,
           segmentFacts: game.activePeriod.activeSegment.facts,
           segmentIx: game.activePeriod.activeSegmentIx,

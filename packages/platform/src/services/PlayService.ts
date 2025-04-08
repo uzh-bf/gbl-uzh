@@ -145,7 +145,7 @@ export async function performAction<ActionTypes>(
     )
   }
 
-  const [updatedResult, _] = await ctx.prisma.$transaction(transactions)
+  const [updatedResult, _, __] = await ctx.prisma.$transaction(transactions)
 
   return updatedResult
 }

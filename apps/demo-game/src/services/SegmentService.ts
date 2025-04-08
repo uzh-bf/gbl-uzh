@@ -6,6 +6,7 @@ import {
 } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
 import * as R from 'ramda'
+import { GameFacts } from '../types/Game'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
 type InputSegmentFacts = {}
@@ -17,7 +18,7 @@ type OutputSegmentFacts = OutputFacts<
 
 export function initialize(
   facts: InputSegmentFacts,
-  payload: PayloadSegment<PeriodFacts, PeriodSegmentFacts>
+  payload: PayloadSegment<GameFacts, PeriodFacts, PeriodSegmentFacts>
 ): OutputSegmentFacts {
   const baseFacts: OutputSegmentFacts = {
     resultFacts: {
@@ -65,6 +66,11 @@ export function initialize(
 
       draft.resultFacts.diceRolls = diceRolls
       draft.resultFacts.returns = returns
+      // draft.updatedGameFacts = {
+      //   ...payload.gameFacts,
+      //   myInt: payload.gameFacts.myInt + 1,
+      //   newVar: 1,
+      // }
     }
   )
 

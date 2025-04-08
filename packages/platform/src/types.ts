@@ -1,3 +1,4 @@
+import { Game } from '@prisma/client'
 import { NextPageContext } from 'next'
 import type yup from 'yup'
 
@@ -46,6 +47,7 @@ export type OutputFacts<FactsType, NotificationType, EventType> = {
   extras?: any
   events?: Event<EventType>[]
   notifications?: Notification<NotificationType>[]
+  updatedGameFacts?: any
 }
 
 export type Action<ActionType, PayloadType, PrismaType> = {
@@ -55,32 +57,43 @@ export type Action<ActionType, PayloadType, PrismaType> = {
 }
 
 export type PayloadPeriodInitialisation<
+  GameFactsType,
   PeriodFactsType,
   PeriodSegmentFactsType
 > = {
   periodIx: number
+  gameFacts: GameFactsType
   periodFacts: PeriodFactsType
   previousPeriodFacts?: PeriodFactsType
   previousSegmentFacts?: PeriodSegmentFactsType
 }
 
-export type PayloadPeriodConsolidation<PeriodSegmentFactsType> = {
-  periodIx: number
-  previousSegmentFacts?: PeriodSegmentFactsType
-}
+export type PayloadPeriodConsolidation<GameFactsType, PeriodSegmentFactsType> =
+  {
+    periodIx: number
+    gameFacts: GameFactsType
+    previousSegmentFacts?: PeriodSegmentFactsType
+  }
 
-export type PayloadPeriodResult<PeriodFactsType, PlayerRoleType> = {
+export type PayloadPeriodResult<
+  GameFactsType,
+  PeriodFactsType,
+  PlayerRoleType
+> = {
   playerRole: PlayerRoleType
+  gameFacts: GameFactsType
   periodFacts: PeriodFactsType
 }
 
 export type PayloadPeriodResultEnd<
   ResultsFactsType,
+  GameFactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
   PlayerRoleType
 > = {
   segmentEndResults: ResultsFactsType
+  gameFacts: GameFactsType
   periodFacts: PeriodFactsType
   segmentFacts: PeriodSegmentFactsType
   playerRole: PlayerRoleType
@@ -91,20 +104,27 @@ export type PayloadPeriodResultEnd<
   segmentIx: number
 }
 
-export type PayloadSegment<PeriodFactsType, PeriodSegmentFactsType> = {
+export type PayloadSegment<
+  GameFactsType,
+  PeriodFactsType,
+  PeriodSegmentFactsType
+> = {
   segmentIx: number
   segmentCount: number
   periodIx: number
+  gameFacts: GameFactsType
   periodFacts: PeriodFactsType
   previousSegmentFacts?: PeriodSegmentFactsType
 }
 
 export type PayloadSegmentResult<
+  GameFactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
   PlayerRoleType
 > = {
   playerRole: PlayerRoleType
+  gameFacts: GameFactsType
   periodFacts: PeriodFactsType
   segmentFacts: PeriodSegmentFactsType
   nextSegmentFacts?: PeriodSegmentFactsType
@@ -116,6 +136,7 @@ export type PayloadSegmentResult<
 
 interface Period<
   FactsType,
+  GameFactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
   NotificationType,
@@ -127,18 +148,20 @@ interface Period<
   initialize: (
     facts: FactsType,
     payload: PayloadPeriodInitialisation<
+      GameFactsType,
       PeriodFactsType,
       PeriodSegmentFactsType
     >
   ) => OutputFacts<FactsType, NotificationType, EventType>
   consolidate: (
     facts: FactsType,
-    payload: PayloadPeriodConsolidation<PeriodSegmentFactsType>
+    payload: PayloadPeriodConsolidation<GameFactsType, PeriodSegmentFactsType>
   ) => OutputFacts<FactsType, NotificationType, EventType>
 }
 
 interface PeriodResult<
   FactsType,
+  GameFactsType,
   ResultFactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
@@ -149,15 +172,16 @@ interface PeriodResult<
 > {
   initialize: (
     facts: FactsType,
-    payload: PayloadPeriodResult<PeriodFactsType, PlayerRoleType>
+    payload: PayloadPeriodResult<GameFactsType, PeriodFactsType, PlayerRoleType>
   ) => OutputFacts<FactsType, NotificationType, EventType>
   start: (
     facts: FactsType,
-    payload: PayloadPeriodResult<PeriodFactsType, PlayerRoleType>
+    payload: PayloadPeriodResult<GameFactsType, PeriodFactsType, PlayerRoleType>
   ) => OutputFacts<FactsType, NotificationType, EventType>
   end: (
     facts: FactsType,
     payload: PayloadPeriodResultEnd<
+      GameFactsType,
       ResultFactsType,
       PeriodFactsType,
       PeriodSegmentFactsType,
@@ -168,6 +192,7 @@ interface PeriodResult<
 
 interface Segment<
   FactsType,
+  GameFactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
   NotificationType,
@@ -176,12 +201,17 @@ interface Segment<
 > {
   initialize: (
     facts: FactsType,
-    payload: PayloadSegment<PeriodFactsType, PeriodSegmentFactsType>
+    payload: PayloadSegment<
+      GameFactsType,
+      PeriodFactsType,
+      PeriodSegmentFactsType
+    >
   ) => OutputFacts<FactsType, NotificationType, EventType>
 }
 
 interface SegmentResult<
   FactsType,
+  GameFactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
   PlayerRoleType,
@@ -192,6 +222,7 @@ interface SegmentResult<
   initialize: (
     facts: FactsType,
     payload: PayloadSegmentResult<
+      GameFactsType,
       PeriodFactsType,
       PeriodSegmentFactsType,
       PlayerRoleType
@@ -200,6 +231,7 @@ interface SegmentResult<
   start: (
     facts: FactsType,
     payload: PayloadSegmentResult<
+      GameFactsType,
       PeriodFactsType,
       PeriodSegmentFactsType,
       PlayerRoleType
@@ -208,6 +240,7 @@ interface SegmentResult<
   end: (
     facts: FactsType,
     payload: PayloadSegmentResult<
+      GameFactsType,
       PeriodFactsType,
       PeriodSegmentFactsType,
       PlayerRoleType
@@ -232,10 +265,10 @@ interface Reducer<
 
 interface Services<PrismaType> {
   Actions: Reducer<any, any, any, any, any, PrismaType>
-  Period: Period<any, any, any, any, any, PrismaType>
-  PeriodResult: PeriodResult<any, any, any, any, any, any, any, PrismaType>
-  Segment: Segment<any, any, any, any, any, PrismaType>
-  SegmentResult: SegmentResult<any, any, any, any, any, any, PrismaType>
+  Period: Period<any, any, any, any, any, any, PrismaType>
+  PeriodResult: PeriodResult<any, any, any, any, any, any, any, any, PrismaType>
+  Segment: Segment<any, any, any, any, any, any, PrismaType>
+  SegmentResult: SegmentResult<any, any, any, any, any, any, any, PrismaType>
 }
 
 export interface CtxWithPrisma<PrismaType> extends NextPageContext {
