@@ -55,12 +55,14 @@ export async function performAction<ActionTypes>(
     isDirty,
     extras,
     updatedSegmentFacts,
+    updatedGameFacts,
   } = services.Actions.apply(previousResult.facts, {
     type: args.actionType,
     payload: {
       playerArgs: args.facts,
       segmentFacts: previousResult.segment?.facts,
       periodFacts: previousResult.period.facts,
+      gameFacts: previousResult.game.facts,
     },
     // TODO(JJ): another option would be to pass ctx and update db in the
     // action reducer - but this way the user could change everything ...
@@ -144,7 +146,14 @@ export async function performAction<ActionTypes>(
       })
     )
   }
-
+  if (updatedGameFacts) {
+    transactions.push(
+      ctx.prisma.game.update({
+        where: { id: previousResult.game.id },
+        data: { facts: updatedGameFacts },
+      })
+    )
+  }
   const [updatedResult, _, __] = await ctx.prisma.$transaction(transactions)
 
   return updatedResult

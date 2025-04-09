@@ -13,6 +13,7 @@ type PayloadType = {
   playerArgs: Decisions
   segmentFacts: PeriodSegmentFacts
   periodFacts: PeriodFacts
+  gameFacts?: any
 }
 
 type State = {
@@ -26,6 +27,7 @@ export function apply(state: State, action: Actions) {
   const baseState = {
     result: state,
     isDirty: false,
+    updatedGameFacts: action.payload.gameFacts,
   }
 
   // TODO: the user reducer could just get the "draft" inside this function as first parameter
@@ -42,6 +44,13 @@ export function apply(state: State, action: Actions) {
       throw new Error('Bank + Bonds + Stocks must equal 100')
 
     draft.result.decisions = action.payload.playerArgs
+
+    // This is only to test the game facts
+    let counter = action.payload.gameFacts.actionCounter || 0
+    counter += 1
+    draft.updatedGameFacts = {
+      actionCounter: counter,
+    }
   })
 
   // this computes the isDirty flag based on whether there were changes in state from baseState to newState
