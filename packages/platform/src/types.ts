@@ -38,6 +38,8 @@ export type OutputFactsUser<FactsType, NotificationType, EventType> = {
   actions?: any[]
   notifications?: Notification<NotificationType>[]
   events?: Event<EventType>[]
+  updatedGameFacts?: any
+  updatedPeriodFacts?: any
   updatedSegmentFacts?: any
 }
 
@@ -47,6 +49,7 @@ export type OutputFacts<FactsType, NotificationType, EventType> = {
   extras?: any
   events?: Event<EventType>[]
   notifications?: Notification<NotificationType>[]
+  // TODO(JJ): Add type
   updatedGameFacts?: any
 }
 
