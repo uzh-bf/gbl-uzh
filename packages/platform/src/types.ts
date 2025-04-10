@@ -1,4 +1,3 @@
-import { Game } from '@prisma/client'
 import { NextPageContext } from 'next'
 import type yup from 'yup'
 

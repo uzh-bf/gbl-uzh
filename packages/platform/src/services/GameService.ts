@@ -396,6 +396,12 @@ export async function activateNextPeriod(
   switch (game.status) {
     // SCHEDULED -> PREPARATION
     // if the game is scheduled, initialize period results and move to PREPARATION
+
+    // TODO(JJ):
+    // - The game facts should now be updated by the results
+    // - They should be updated by the game status, e.g. when going to the next
+    //   period or segment
+    // - Done: the game facts are updated on user interaction in PlayService
     case DB.GameStatus.SCHEDULED: {
       const { results, extras, gameFactsToUpdate } = computePeriodStartResults(
         {
@@ -1128,8 +1134,9 @@ export function computePeriodStartResults(
   const nextPeriodIx = currentPeriodIx + 1
 
   let extras: any[] = []
-  // TODO(JJ): Maybe we should initialize it with game.facts?
-  let gameFactsToUpdate: any = {}
+
+  let gameFactsToUpdate = { ...game.facts }
+  let gameFactsUpdated = false
 
   // if the game is running, transform previous results to next
   if (currentPeriodIx >= 0) {
@@ -1143,15 +1150,13 @@ export function computePeriodStartResults(
           updatedGameFacts,
         } = services.PeriodResult.start(result.facts, {
           playerRole: result.player?.role ?? result.player.connect?.role,
-          gameFacts: game.facts,
+          gameFacts: gameFactsToUpdate,
           periodFacts,
         })
 
         if (updatedGameFacts) {
-          gameFactsToUpdate = {
-            ...gameFactsToUpdate,
-            ...updatedGameFacts,
-          }
+          gameFactsToUpdate = { ...updatedGameFacts }
+          gameFactsUpdated = true
         }
 
         if (actions && actions.length > 0) {
@@ -1182,10 +1187,11 @@ export function computePeriodStartResults(
         }
       })
 
+    const gameFacts = gameFactsUpdated ? gameFactsToUpdate : {}
     return {
       results: result,
       extras,
-      gameFactsToUpdate,
+      gameFacts,
     }
   }
 
@@ -1201,10 +1207,8 @@ export function computePeriodStartResults(
     )
 
     if (updatedGameFacts) {
-      gameFactsToUpdate = {
-        ...gameFactsToUpdate,
-        ...updatedGameFacts,
-      }
+      gameFactsToUpdate = { ...updatedGameFacts }
+      gameFactsUpdated = true
     }
 
     if (actions && actions.length > 0) {
@@ -1235,10 +1239,11 @@ export function computePeriodStartResults(
     }
   })
 
+  const gameFacts = gameFactsUpdated ? gameFactsToUpdate : {}
   return {
     results: result,
     extras,
-    gameFactsToUpdate,
+    gameFacts,
   }
 }
 

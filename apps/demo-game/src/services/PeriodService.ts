@@ -9,7 +9,7 @@ import { GameFacts } from '../types/Game'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
 type InputPeriodFacts = PeriodFacts
-type OutputPeriodFacts = OutputFacts<InputPeriodFacts, any, any>
+type OutputPeriodFacts = OutputFacts<InputPeriodFacts, GameFacts, any, any>
 
 // TODO(JJ):
 // - Init baseFacts outside of fn and provide only draft as input

@@ -12,6 +12,7 @@ import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 type InputSegmentFacts = {}
 type OutputSegmentFacts = OutputFacts<
   InputSegmentFacts & PeriodSegmentFacts,
+  GameFacts,
   any,
   any
 >
