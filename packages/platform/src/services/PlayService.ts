@@ -142,8 +142,8 @@ export async function performAction<ActionTypes>(
         },
       })
 
-      // TODO(JJ): Double-check if updatedSegmentFacts is needed
-      // Update segment facts if needed
+      // TODO(JJ): Double-check if updatedSegmentFacts and updatedPeriodFacts
+      // are needed
       if (updatedSegmentFacts && previousResult.segment?.id) {
         await tx.periodSegment.update({
           where: { id: previousResult.segment.id },
