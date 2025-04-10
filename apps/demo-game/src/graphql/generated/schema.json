@@ -419,6 +419,18 @@
         "fields": null,
         "inputFields": [
           {
+            "name": "actionCounter",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": "0",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "myInt",
             "description": null,
             "type": {

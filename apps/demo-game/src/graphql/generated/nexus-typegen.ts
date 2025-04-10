@@ -37,6 +37,7 @@ declare global {
 
 export interface NexusGenInputs {
   GameFactsInput: { // input type
+    actionCounter?: number | null; // Int
     myInt?: number | null; // Int
   }
   PeriodFactsInput: { // input type

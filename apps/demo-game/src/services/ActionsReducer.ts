@@ -3,7 +3,7 @@ import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { PrismaClient } from '@prisma/client'
 import { produce } from 'immer'
 import { Decisions } from '../types/facts'
-import { PeriodFacts, PeriodSegmentFacts } from '../types/index'
+import { GameFacts, PeriodFacts, PeriodSegmentFacts } from '../types/index'
 
 export enum ActionTypes {
   NONE = '',
@@ -13,7 +13,7 @@ type PayloadType = {
   playerArgs: Decisions
   segmentFacts: PeriodSegmentFacts
   periodFacts: PeriodFacts
-  gameFacts?: any
+  gameFacts: GameFacts
 }
 
 type State = {

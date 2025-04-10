@@ -31,27 +31,32 @@ export type Event<EventType> = {
 }
 
 // TODO(JJ): remove isDirty for ActionReducer
-export type OutputFactsUser<FactsType, NotificationType, EventType> = {
+export type OutputFactsUser<
+  FactsType,
+  GameFactsType,
+  NotificationType,
+  EventType
+> = {
   result: FactsType
   isDirty?: boolean
   extras?: any
   actions?: any[]
   notifications?: Notification<NotificationType>[]
   events?: Event<EventType>[]
-  updatedGameFacts?: any
+  updatedGameFacts?: GameFactsType
   updatedPeriodFacts?: any
   updatedSegmentFacts?: any
 }
 
-export type OutputFacts<FactsType, NotificationType, EventType> = {
-  resultFacts: FactsType
-  actions?: any[]
-  extras?: any
-  events?: Event<EventType>[]
-  notifications?: Notification<NotificationType>[]
-  // TODO(JJ): Add type
-  updatedGameFacts?: any
-}
+export type OutputFacts<FactsType, GameFactsType, NotificationType, EventType> =
+  {
+    resultFacts: FactsType
+    actions?: any[]
+    extras?: any
+    events?: Event<EventType>[]
+    notifications?: Notification<NotificationType>[]
+    updatedGameFacts?: GameFactsType
+  }
 
 export type Action<ActionType, PayloadType, PrismaType> = {
   type: ActionType
@@ -155,11 +160,11 @@ interface Period<
       PeriodFactsType,
       PeriodSegmentFactsType
     >
-  ) => OutputFacts<FactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
   consolidate: (
     facts: FactsType,
     payload: PayloadPeriodConsolidation<GameFactsType, PeriodSegmentFactsType>
-  ) => OutputFacts<FactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
 }
 
 interface PeriodResult<
@@ -176,11 +181,11 @@ interface PeriodResult<
   initialize: (
     facts: FactsType,
     payload: PayloadPeriodResult<GameFactsType, PeriodFactsType, PlayerRoleType>
-  ) => OutputFacts<FactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
   start: (
     facts: FactsType,
     payload: PayloadPeriodResult<GameFactsType, PeriodFactsType, PlayerRoleType>
-  ) => OutputFacts<FactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
   end: (
     facts: FactsType,
     payload: PayloadPeriodResultEnd<
@@ -190,7 +195,7 @@ interface PeriodResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => OutputFacts<FactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
 }
 
 interface Segment<
@@ -209,7 +214,7 @@ interface Segment<
       PeriodFactsType,
       PeriodSegmentFactsType
     >
-  ) => OutputFacts<FactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
 }
 
 interface SegmentResult<
@@ -230,7 +235,7 @@ interface SegmentResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => OutputFacts<FactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
   start: (
     facts: FactsType,
     payload: PayloadSegmentResult<
@@ -239,7 +244,7 @@ interface SegmentResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => OutputFacts<FactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
   end: (
     facts: FactsType,
     payload: PayloadSegmentResult<
@@ -248,11 +253,12 @@ interface SegmentResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => OutputFacts<FactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
 }
 
 interface Reducer<
   StateType,
+  GameFactsType,
   ActionType,
   PayloadType,
   NotificationType,
@@ -262,12 +268,12 @@ interface Reducer<
   apply: (
     state: StateType,
     action: Action<ActionType, PayloadType, PrismaType>
-  ) => OutputFactsUser<StateType, NotificationType, EventType>
+  ) => OutputFactsUser<StateType, GameFactsType, NotificationType, EventType>
   ActionTypes: Record<string, string>
 }
 
 interface Services<PrismaType> {
-  Actions: Reducer<any, any, any, any, any, PrismaType>
+  Actions: Reducer<any, any, any, any, any, any, PrismaType>
   Period: Period<any, any, any, any, any, any, PrismaType>
   PeriodResult: PeriodResult<any, any, any, any, any, any, any, any, PrismaType>
   Segment: Segment<any, any, any, any, any, any, PrismaType>

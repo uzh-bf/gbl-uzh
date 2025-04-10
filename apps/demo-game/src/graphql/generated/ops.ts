@@ -62,6 +62,7 @@ export type Game = {
 };
 
 export type GameFactsInput = {
+  actionCounter?: InputMaybe<Scalars['Int']['input']>;
   myInt?: InputMaybe<Scalars['Int']['input']>;
 };
 
