@@ -124,9 +124,8 @@ export async function addGamePeriod<TFacts>(
     initializedFacts
   )
 
-  const transactions: any[] = [
-    // create or update the facts and settings of a game period
-    ctx.prisma.period.upsert({
+  const res = await ctx.prisma.$transaction(async (tx) => {
+    const updatedPeriod = await tx.period.upsert({
       where: {
         gameId_index: {
           gameId,
@@ -165,21 +164,22 @@ export async function addGamePeriod<TFacts>(
           },
         },
       },
-    }),
-  ]
+    })
 
-  if (updatedGameFacts) {
-    transactions.push(
-      ctx.prisma.game.update({
+    if (updatedGameFacts) {
+      await ctx.prisma.game.update({
         where: { id: gameId },
         data: { facts: updatedGameFacts },
       })
-    )
-  }
+    }
 
-  const [updatedPeriod, _] = await ctx.prisma.$transaction(transactions)
+    return updatedPeriod
 
-  return updatedPeriod
+    // NOTE(JJ): We don't a serialization isolation level here, as only one admin adds
+    // a period at a time
+  })
+
+  return res
 }
 
 interface AddPeriodSegmentArgs<TFacts> {
@@ -238,9 +238,9 @@ export async function addPeriodSegment<TFacts>(
       periodIx,
     })
 
-  const transactions: any[] = [
+  const res = await ctx.prisma.$transaction(async (tx) => {
     // create or update the facts and settings of a period segment
-    ctx.prisma.periodSegment.upsert({
+    const updatedSegment = ctx.prisma.periodSegment.upsert({
       where: {
         gameId_periodIx_index: {
           gameId,
@@ -305,24 +305,19 @@ export async function addPeriodSegment<TFacts>(
         learningElements: true,
         storyElements: true,
       },
-    }),
-  ]
+    })
 
-  if (updatedGameFacts) {
-    transactions.push(
-      ctx.prisma.game.update({
-        where: {
-          id: gameId,
-        },
-        data: {
-          facts: updatedGameFacts,
-        },
+    if (updatedGameFacts) {
+      await ctx.prisma.game.update({
+        where: { id: gameId },
+        data: { facts: updatedGameFacts },
       })
-    )
-  }
+    }
 
-  const [updatedSegment, _] = await ctx.prisma.$transaction(transactions)
-  return updatedSegment
+    return updatedSegment
+  })
+
+  return res
 }
 
 interface ActivateNextPeriodArgs {
