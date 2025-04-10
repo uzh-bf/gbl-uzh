@@ -30,133 +30,191 @@ export async function performAction<ActionTypes>(
     type: DB.PlayerResultType.SEGMENT_END,
   }
 
-  const previousResult = await ctx.prisma.playerResult.findUnique({
-    where: {
-      periodIx_segmentIx_playerId_type,
-    },
-    include: {
-      game: true,
-      segment: true,
-      period: true,
-      player: true,
-    },
-  })
+  let notificationsToPublish = []
 
-  if (!previousResult) return null
+  // All reads and writes are now in a single atomic transaction.
+  const res = ctx.prisma.$transaction(
+    async (tx) => {
+      const previousResult = await tx.playerResult.findUnique({
+        where: {
+          periodIx_segmentIx_playerId_type,
+        },
+        include: {
+          game: true,
+          segment: true,
+          period: true,
+          player: true,
+        },
+      })
 
-  if (previousResult.game.status !== DB.GameStatus.RUNNING) {
-    throw new Error('ACTIONS_NOT_ALLOWED')
-  }
+      if (!previousResult) return null
 
-  const {
-    result,
-    events,
-    notifications,
-    isDirty,
-    extras,
-    updatedSegmentFacts,
-    updatedGameFacts,
-  } = services.Actions.apply(previousResult.facts, {
-    type: args.actionType,
-    payload: {
-      playerArgs: args.facts,
-      segmentFacts: previousResult.segment?.facts,
-      periodFacts: previousResult.period.facts,
-      gameFacts: previousResult.game.facts,
-    },
-    // TODO(JJ): another option would be to pass ctx and update db in the
-    // action reducer - but this way the user could change everything ...
-  })
+      if (previousResult.game.status !== DB.GameStatus.RUNNING) {
+        throw new Error('ACTIONS_NOT_ALLOWED')
+      }
 
-  EventService.publishUserNotification(ctx, notifications)
+      const {
+        result,
+        events,
+        notifications,
+        isDirty,
+        extras,
+        updatedSegmentFacts,
+        updatedGameFacts,
+      } = services.Actions.apply(previousResult.facts, {
+        type: args.actionType,
+        payload: {
+          playerArgs: args.facts,
+          segmentFacts: previousResult.segment?.facts,
+          periodFacts: previousResult.period.facts,
+          gameFacts: previousResult.game.facts,
+        },
+      })
 
-  await EventService.receiveEvents({
-    events,
-    ctx: {
-      user: ctx.user,
-      args,
-      achievements: previousResult.player.achievementKeys,
-      experience: previousResult.player.experience,
-      currentLevelIx: previousResult.player.levelIx,
-    },
-    prisma: ctx.prisma,
-  })
+      notificationsToPublish = notifications
 
-  if (!isDirty) {
-    return previousResult
-  }
+      await EventService.receiveEvents({
+        events,
+        ctx: {
+          user: ctx.user,
+          args,
+          achievements: previousResult.player.achievementKeys,
+          experience: previousResult.player.experience,
+          currentLevelIx: previousResult.player.levelIx,
+        },
+        prisma: tx, // Use the transaction client
+      })
 
-  const transactions: any[] = [
-    ctx.prisma.playerResult.update({
-      where: {
-        periodIx_segmentIx_playerId_type,
-      },
-      data: {
-        facts: result,
-      },
-      include: {
-        period: true,
-      },
-    }),
-    ctx.prisma.playerAction.create({
-      data: {
-        periodIx: args.periodIx,
-        period: {
-          connect: {
-            gameId_index: {
-              gameId: args.gameId,
-              index: args.periodIx,
+      if (!isDirty) {
+        return previousResult
+      }
+
+      // Update player result
+      const updatedResult = await tx.playerResult.update({
+        where: {
+          periodIx_segmentIx_playerId_type,
+        },
+        data: {
+          facts: result,
+        },
+        include: {
+          period: true,
+        },
+      })
+
+      // Create player action
+      await tx.playerAction.create({
+        data: {
+          periodIx: args.periodIx,
+          period: {
+            connect: {
+              gameId_index: {
+                gameId: args.gameId,
+                index: args.periodIx,
+              },
             },
           },
-        },
-        segmentIx: args.segmentIx,
-        segment: {
-          connect: {
-            gameId_periodIx_index: {
-              gameId: args.gameId,
-              periodIx: args.periodIx,
-              index: args.segmentIx,
+          segmentIx: args.segmentIx,
+          segment: {
+            connect: {
+              gameId_periodIx_index: {
+                gameId: args.gameId,
+                periodIx: args.periodIx,
+                index: args.segmentIx,
+              },
             },
           },
-        },
-        game: {
-          connect: {
-            id: args.gameId,
+          game: {
+            connect: {
+              id: args.gameId,
+            },
+          },
+          player: {
+            connect: {
+              id: args.playerId,
+            },
+          },
+          type: args.actionType as any,
+          facts: {
+            ...args.facts,
+            ...extras,
           },
         },
-        player: {
-          connect: {
-            id: args.playerId,
-          },
-        },
-        type: args.actionType as any,
-        facts: {
-          ...args.facts,
-          ...extras,
-        },
-      },
-    }),
-  ]
-
-  if (updatedSegmentFacts && previousResult.segment?.id) {
-    transactions.push(
-      ctx.prisma.periodSegment.update({
-        where: { id: previousResult.segment.id },
-        data: { facts: updatedSegmentFacts },
       })
-    )
-  }
-  if (updatedGameFacts) {
-    transactions.push(
-      ctx.prisma.game.update({
-        where: { id: previousResult.game.id },
-        data: { facts: updatedGameFacts },
-      })
-    )
-  }
-  const [updatedResult, _, __] = await ctx.prisma.$transaction(transactions)
 
-  return updatedResult
+      // TODO(JJ): Double-check if updatedSegmentFacts is needed
+      // Update segment facts if needed
+      if (updatedSegmentFacts && previousResult.segment?.id) {
+        await tx.periodSegment.update({
+          where: { id: previousResult.segment.id },
+          data: { facts: updatedSegmentFacts },
+        })
+      }
+
+      // Update game facts if needed
+      if (updatedGameFacts) {
+        await tx.game.update({
+          where: { id: previousResult.game.id },
+          data: { facts: updatedGameFacts },
+        })
+        // TODO(JJ): More efficient way and better concurrency handling
+        // const path = `facts.${args.actionType}`
+        // const value = updatedGameFacts
+        // await tx.$queryRaw`
+        //   UPDATE "Game"
+        //   SET facts = jsonb_set(facts, ${path}::text[], ${JSON.stringify(
+        //         value
+        //       )}::jsonb, true),
+        //       version = version + 1
+        //   WHERE id = ${previousResult.game.id} AND version = ${
+        //         previousResult.game.version
+        //       }
+        // `
+      }
+
+      return updatedResult
+    },
+    {
+      // Use Serializable isolation level for the strongest guarantees
+      // This prevents phantom reads and other concurrency issues.
+      isolationLevel: DB.Prisma.TransactionIsolationLevel.Serializable,
+      // Set an appropriate timeout
+      // Prevents long-running transactions from blocking other operations.
+      timeout: 10000, // 10 seconds
+    }
+  )
+
+  // After transaction completes successfully, publish notifications
+  if (notificationsToPublish.length > 0) {
+    await EventService.publishUserNotification(ctx, notificationsToPublish)
+  }
+
+  return res
+}
+
+export async function performActionWithRetry<ActionTypes>(
+  args: PerformActionArgs<ActionTypes>,
+  ctx: Context,
+  { services }: any,
+  maxRetries: number = 3
+) {
+  let retries = 0
+  while (retries < maxRetries) {
+    try {
+      return await performAction(args, ctx, services)
+    } catch (error: any) {
+      // Check if this is a serialization failure or deadlock
+      if (error.code === 'P2034') {
+        retries++
+        await new Promise((resolve) =>
+          setTimeout(resolve, 100 * Math.pow(2, retries))
+        ) // Exponential backoff
+        continue
+      }
+      throw error // Re-throw if it's not a concurrency issue
+    }
+  }
+  throw new Error('Failed to perform action after multiple retries')
 }
 
 interface SaveDecisionsArgs {
