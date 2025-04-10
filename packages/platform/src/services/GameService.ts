@@ -403,7 +403,7 @@ export async function activateNextPeriod(
     //   period or segment
     // - Done: the game facts are updated on user interaction in PlayService
     case DB.GameStatus.SCHEDULED: {
-      const { results, extras, gameFactsToUpdate } = computePeriodStartResults(
+      const { results, extras } = computePeriodStartResults(
         {
           results: undefined,
           players: game.players,
@@ -424,9 +424,10 @@ export async function activateNextPeriod(
           connect: { gameId_index: { gameId, index: nextPeriodIx } },
         },
       }
-      if (Object.keys(gameFactsToUpdate).length > 0) {
-        gameData.facts = gameFactsToUpdate
-      }
+      // TODO(JJ): Somewhere here we need to have a gameFactsUpdateService
+      // if (Object.keys(gameFactsToUpdate).length > 0) {
+      //   gameData.facts = gameFactsToUpdate
+      // }
 
       const result = await ctx.prisma.$transaction([
         ctx.prisma.game.update({
@@ -469,13 +470,9 @@ export async function activateNextPeriod(
     case DB.GameStatus.RUNNING: {
       if (!game.activePeriod?.activeSegment || !currentSegmentIx) return null
 
-      const { results, extras, gameFactsToUpdate } = computeSegmentEndResults(
-        game,
-        ctx,
-        {
-          services,
-        }
-      )
+      const { results, extras } = computeSegmentEndResults(game, ctx, {
+        services,
+      })
 
       // TODO(JJ): Check if we need to update the game facts as well
       // update period facts when starting consolidation
@@ -488,14 +485,9 @@ export async function activateNextPeriod(
         }
       )
 
-      const gameData: any = { status: DB.GameStatus.CONSOLIDATION }
-      if (Object.keys(gameFactsToUpdate).length > 0) {
-        gameData.facts = gameFactsToUpdate
-      }
-
       const result = await ctx.prisma.$transaction([
         ctx.prisma.game.update({
-          data: gameData,
+          data: { status: DB.GameStatus.CONSOLIDATION },
           include: {
             periods: {
               include: {
@@ -554,22 +546,21 @@ export async function activateNextPeriod(
     case DB.GameStatus.CONSOLIDATION: {
       if (!game.activePeriod?.activeSegment) return null
 
-      const { results, extras, promises, gameFactsToUpdate } =
-        await computePeriodEndResults(
-          {
-            segmentEndResults: game.results,
-            players: game.players,
-            activeSegmentResults: game.activePeriod.activeSegment.results,
-            segmentFacts: game.activePeriod.activeSegment.facts,
-            periodFacts: game.activePeriod.facts,
-            periodDecisions: game.activePeriod.decisions,
-            activePeriodIx: currentPeriodIx,
-            activeSegmentIx: currentSegmentIx,
-            game,
-          },
-          ctx,
-          { services }
-        )
+      const { results, extras, promises } = await computePeriodEndResults(
+        {
+          segmentEndResults: game.results,
+          players: game.players,
+          activeSegmentResults: game.activePeriod.activeSegment.results,
+          segmentFacts: game.activePeriod.activeSegment.facts,
+          periodFacts: game.activePeriod.facts,
+          periodDecisions: game.activePeriod.decisions,
+          activePeriodIx: currentPeriodIx,
+          activeSegmentIx: currentSegmentIx,
+          game,
+        },
+        ctx,
+        { services }
+      )
 
       await Promise.all(promises)
 
@@ -610,9 +601,6 @@ export async function activateNextPeriod(
         activePeriod: {
           connect: { gameId_index: { gameId, index: periodIx } },
         },
-      }
-      if (Object.keys(gameFactsToUpdate).length > 0) {
-        gameData.facts = gameFactsToUpdate
       }
 
       // TODO(JJ): Check with RS
@@ -690,7 +678,7 @@ export async function activateNextPeriod(
       //   return result
       // }
 
-      const { results, extras, gameFactsToUpdate } = computePeriodStartResults(
+      const { results, extras } = computePeriodStartResults(
         {
           results: game.activePeriod.previousPeriod[0]?.results,
           players: game.players,
@@ -701,11 +689,6 @@ export async function activateNextPeriod(
         ctx,
         { services }
       )
-
-      const gameData: any = { status: DB.GameStatus.PREPARATION }
-      if (Object.keys(gameFactsToUpdate).length > 0) {
-        gameData.facts = gameFactsToUpdate
-      }
 
       const result = await ctx.prisma.$transaction([
         // update the status and active period of the current game
@@ -720,7 +703,7 @@ export async function activateNextPeriod(
               },
             },
           },
-          data: gameData,
+          data: { status: DB.GameStatus.PREPARATION },
         }),
 
         // create PERIOD_START results based on the previous PERIOD_END results
@@ -806,18 +789,9 @@ export async function activateNextSegment(
     // PAUSED -> RUNNING
     case DB.GameStatus.PREPARATION:
     case DB.GameStatus.PAUSED: {
-      const { results, extras, gameFactsToUpdate } = computeSegmentStartResults(
-        game,
-        ctx,
-        {
-          services,
-        }
-      )
-
-      const gameData: any = { status: DB.GameStatus.RUNNING }
-      if (Object.keys(gameFactsToUpdate).length > 0) {
-        gameData.facts = gameFactsToUpdate
-      }
+      const { results, extras } = computeSegmentStartResults(game, ctx, {
+        services,
+      })
 
       const result = await ctx.prisma.$transaction([
         ctx.prisma.game.update({
@@ -832,7 +806,7 @@ export async function activateNextSegment(
             },
             players: true,
           },
-          data: gameData,
+          data: { status: DB.GameStatus.RUNNING },
         }),
 
         // update the active segment of the current period
@@ -887,18 +861,9 @@ export async function activateNextSegment(
         return null
       }
 
-      const { results, extras, gameFactsToUpdate } = computeSegmentEndResults(
-        game,
-        ctx,
-        {
-          services,
-        }
-      )
-
-      const gameData: any = { status: DB.GameStatus.PAUSED }
-      if (Object.keys(gameFactsToUpdate).length > 0) {
-        gameData.facts = gameFactsToUpdate
-      }
+      const { results, extras } = computeSegmentEndResults(game, ctx, {
+        services,
+      })
 
       const result = await ctx.prisma.$transaction([
         ctx.prisma.game.update({
@@ -911,7 +876,7 @@ export async function activateNextSegment(
             },
             players: true,
           },
-          data: gameData,
+          data: { status: DB.GameStatus.PAUSED },
         }),
 
         ctx.prisma.periodSegment.update({
@@ -1135,29 +1100,20 @@ export function computePeriodStartResults(
 
   let extras: any[] = []
 
-  let gameFactsToUpdate = { ...game.facts }
-  let gameFactsUpdated = false
-
   // if the game is running, transform previous results to next
   if (currentPeriodIx >= 0) {
     const result = results
       // ensure that we only work on PERIOD_END results of the preceding period
       .filter((result) => result.type === DB.PlayerResultType.PERIOD_END)
       .map((result, ix, allResults) => {
-        const {
-          resultFacts: facts,
-          actions,
-          updatedGameFacts,
-        } = services.PeriodResult.start(result.facts, {
-          playerRole: result.player?.role ?? result.player.connect?.role,
-          gameFacts: gameFactsToUpdate,
-          periodFacts,
-        })
-
-        if (updatedGameFacts) {
-          gameFactsToUpdate = { ...updatedGameFacts }
-          gameFactsUpdated = true
-        }
+        const { resultFacts: facts, actions } = services.PeriodResult.start(
+          result.facts,
+          {
+            playerRole: result.player?.role ?? result.player.connect?.role,
+            gameFacts: game.facts,
+            periodFacts,
+          }
+        )
 
         if (actions && actions.length > 0) {
           const mapper = mapAction({
@@ -1187,29 +1143,18 @@ export function computePeriodStartResults(
         }
       })
 
-    const gameFacts = gameFactsUpdated ? gameFactsToUpdate : {}
     return {
       results: result,
       extras,
-      gameFacts,
     }
   }
 
   // if the game has not started yet, generate initial PERIOD_START results
   const result = players.map((player, ix, allPlayers) => {
-    const {
-      resultFacts: facts,
-      actions,
-      updatedGameFacts,
-    } = services.PeriodResult.initialize(
+    const { resultFacts: facts, actions } = services.PeriodResult.initialize(
       {},
       { playerRole: player.role, gameFacts: game.facts, periodFacts }
     )
-
-    if (updatedGameFacts) {
-      gameFactsToUpdate = { ...updatedGameFacts }
-      gameFactsUpdated = true
-    }
 
     if (actions && actions.length > 0) {
       const mapper = mapAction({
@@ -1239,11 +1184,9 @@ export function computePeriodStartResults(
     }
   })
 
-  const gameFacts = gameFactsUpdated ? gameFactsToUpdate : {}
   return {
     results: result,
     extras,
-    gameFacts,
   }
 }
 
@@ -1264,7 +1207,6 @@ export async function computePeriodEndResults(
 ) {
   let extras: any[] = []
   let promises: Promise<any>[] = []
-  let gameFactsToUpdate: any = {}
 
   const perPlayer = {}
   players.forEach((player) => {
@@ -1288,7 +1230,6 @@ export async function computePeriodEndResults(
         resultFacts: facts,
         actions,
         events,
-        updatedGameFacts,
       } = services.PeriodResult.end(result.facts, {
         segmentEndResults,
         gameFacts: game.facts,
@@ -1305,13 +1246,6 @@ export async function computePeriodEndResults(
       })
 
       log.debug(actions)
-
-      if (updatedGameFacts) {
-        gameFactsToUpdate = {
-          ...gameFactsToUpdate,
-          ...updatedGameFacts,
-        }
-      }
 
       if (actions && actions.length > 0) {
         const mapper = mapAction({
@@ -1364,7 +1298,6 @@ export async function computePeriodEndResults(
     extras,
     results,
     promises,
-    gameFactsToUpdate,
   }
 }
 
@@ -1373,7 +1306,6 @@ export function computeSegmentStartResults(game, ctx, { services }) {
   const nextSegmentIx = currentSegmentIx + 1
 
   let extras: any[] = []
-  let gameFactsToUpdate: any = {}
 
   // if there was a previous segment, compute the change in results
   if (currentSegmentIx >= 0) {
@@ -1392,13 +1324,6 @@ export function computeSegmentStartResults(game, ctx, { services }) {
           nextSegmentFacts: game.activePeriod.activeSegment.nextSegment?.facts,
           segmentIx: nextSegmentIx,
         })
-
-        if (updatedGameFacts) {
-          gameFactsToUpdate = {
-            ...gameFactsToUpdate,
-            ...updatedGameFacts,
-          }
-        }
 
         if (actions && actions.length > 0) {
           const mapper = mapAction({
@@ -1447,7 +1372,6 @@ export function computeSegmentStartResults(game, ctx, { services }) {
     return {
       results,
       extras,
-      gameFactsToUpdate,
     }
   }
 
@@ -1469,13 +1393,6 @@ export function computeSegmentStartResults(game, ctx, { services }) {
           nextSegmentFacts: aboutToBeactiveSegment.nextSegment?.facts,
           segmentIx: nextSegmentIx,
         })
-
-      if (updatedGameFacts) {
-        gameFactsToUpdate = {
-          ...gameFactsToUpdate,
-          ...updatedGameFacts,
-        }
-      }
 
       const common = {
         facts,
@@ -1514,13 +1431,11 @@ export function computeSegmentStartResults(game, ctx, { services }) {
   return {
     results,
     extras,
-    gameFactsToUpdate,
   }
 }
 
 export function computeSegmentEndResults(game, ctx, { services }) {
   let extras: any[] = []
-  let gameFactsToUpdate: any = {}
 
   // NOTE(JJ): We go through all results of the active segment of each player
   // and update the game facts if needed
@@ -1538,13 +1453,6 @@ export function computeSegmentEndResults(game, ctx, { services }) {
         segmentFacts: game.activePeriod.activeSegment.facts,
         segmentIx: game.activePeriod.activeSegmentIx,
       })
-
-      if (updatedGameFacts) {
-        gameFactsToUpdate = {
-          ...gameFactsToUpdate,
-          ...updatedGameFacts,
-        }
-      }
 
       if (actions && actions.length > 0) {
         const mapper = mapAction({
@@ -1580,6 +1488,5 @@ export function computeSegmentEndResults(game, ctx, { services }) {
   return {
     results,
     extras,
-    gameFactsToUpdate,
   }
 }
