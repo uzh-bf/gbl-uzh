@@ -29,6 +29,12 @@ export type Event<EventType> = {
   facts?: any
 }
 
+export type OutputFactsGame<GameFactsType, NotificationType, EventType> = {
+  updatedGameFacts?: GameFactsType
+  notifications?: Notification<NotificationType>[]
+  events?: Event<EventType>[]
+}
+
 // TODO(JJ): remove isDirty for ActionReducer
 export type OutputFactsUser<
   FactsType,
@@ -61,6 +67,12 @@ export type Action<ActionType, PayloadType, PrismaType> = {
   type: ActionType
   payload: PayloadType
   ctx?: CtxWithPrisma<PrismaType>
+}
+
+export type PayloadGame = {
+  periodIx: number
+  segmentIx: number
+  // TODO(JJ): Add whatever we need
 }
 
 export type PayloadPeriodInitialisation<
@@ -136,6 +148,13 @@ export type PayloadSegmentResult<
   segmentFacts: PeriodSegmentFactsType
   nextSegmentFacts?: PeriodSegmentFactsType
   segmentIx: number
+}
+
+interface Game<FactsType, GameFactsType, NotificationType, EventType> {
+  update: (
+    facts: FactsType,
+    payload: PayloadGame
+  ) => OutputFactsGame<GameFactsType, NotificationType, EventType>
 }
 
 // TODO(JJ):
@@ -272,6 +291,7 @@ interface Reducer<
 }
 
 interface Services<PrismaType> {
+  GameFacts: Game<any, any, any, any>
   Actions: Reducer<any, any, any, any, any, any, PrismaType>
   Period: Period<any, any, any, any, any, any, PrismaType>
   PeriodResult: PeriodResult<any, any, any, any, any, any, any, any, PrismaType>

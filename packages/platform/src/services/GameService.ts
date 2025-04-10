@@ -789,6 +789,16 @@ export async function activateNextSegment(
     // PAUSED -> RUNNING
     case DB.GameStatus.PREPARATION:
     case DB.GameStatus.PAUSED: {
+      // NOTE(JJ): Update game facts per segment, but not for the initialization
+      const { updatedGameFacts } = services.GameFacts.update(game.facts, {
+        periodIx: currentPeriodIx,
+        segmentIx: nextSegmentIx, // TODO(JJ): Double-check if this is right
+      })
+
+      if (updatedGameFacts && currentSegmentIx >= 0) {
+        game.facts = updatedGameFacts
+      }
+
       const { results, extras } = computeSegmentStartResults(game, ctx, {
         services,
       })
@@ -806,7 +816,10 @@ export async function activateNextSegment(
             },
             players: true,
           },
-          data: { status: DB.GameStatus.RUNNING },
+          data: {
+            status: DB.GameStatus.RUNNING,
+            ...(updatedGameFacts ? { facts: game.facts as any } : {}),
+          },
         }),
 
         // update the active segment of the current period
@@ -1312,18 +1325,18 @@ export function computeSegmentStartResults(game, ctx, { services }) {
     const results = game.activePeriod.activeSegment.results
       .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
       .reduce((acc, result, ix, allResults) => {
-        const {
-          resultFacts: facts,
-          actions,
-          updatedGameFacts,
-        } = services.SegmentResult.start(result.facts, {
-          playerRole: result.player.role,
-          gameFacts: game.facts,
-          periodFacts: game.activePeriod.facts,
-          segmentFacts: game.activePeriod.activeSegment.facts,
-          nextSegmentFacts: game.activePeriod.activeSegment.nextSegment?.facts,
-          segmentIx: nextSegmentIx,
-        })
+        const { resultFacts: facts, actions } = services.SegmentResult.start(
+          result.facts,
+          {
+            playerRole: result.player.role,
+            gameFacts: game.facts,
+            periodFacts: game.activePeriod.facts,
+            segmentFacts: game.activePeriod.activeSegment.facts,
+            nextSegmentFacts:
+              game.activePeriod.activeSegment.nextSegment?.facts,
+            segmentIx: nextSegmentIx,
+          }
+        )
 
         if (actions && actions.length > 0) {
           const mapper = mapAction({
@@ -1384,15 +1397,17 @@ export function computeSegmentStartResults(game, ctx, { services }) {
   const results = activePeriod.results
     .filter((result) => result.type === DB.PlayerResultType.PERIOD_START)
     .reduce((acc, result, ix, allResults) => {
-      let { resultFacts: facts, updatedGameFacts } =
-        services.SegmentResult.initialize(result.facts, {
+      let { resultFacts: facts } = services.SegmentResult.initialize(
+        result.facts,
+        {
           playerRole: result.player.role,
           gameFacts: game.facts,
           periodFacts: activePeriod.facts,
           segmentFacts: aboutToBeactiveSegment.facts,
           nextSegmentFacts: aboutToBeactiveSegment.nextSegment?.facts,
           segmentIx: nextSegmentIx,
-        })
+        }
+      )
 
       const common = {
         facts,
@@ -1442,17 +1457,16 @@ export function computeSegmentEndResults(game, ctx, { services }) {
   const results = game.activePeriod.activeSegment.results
     .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
     .map((result, ix, allResults) => {
-      const {
-        resultFacts: facts,
-        actions,
-        updatedGameFacts,
-      } = services.SegmentResult.end(result.facts, {
-        playerRole: result.player.role,
-        gameFacts: game.facts,
-        periodFacts: game.activePeriod.facts,
-        segmentFacts: game.activePeriod.activeSegment.facts,
-        segmentIx: game.activePeriod.activeSegmentIx,
-      })
+      const { resultFacts: facts, actions } = services.SegmentResult.end(
+        result.facts,
+        {
+          playerRole: result.player.role,
+          gameFacts: game.facts,
+          periodFacts: game.activePeriod.facts,
+          segmentFacts: game.activePeriod.activeSegment.facts,
+          segmentIx: game.activePeriod.activeSegmentIx,
+        }
+      )
 
       if (actions && actions.length > 0) {
         const mapper = mapAction({
