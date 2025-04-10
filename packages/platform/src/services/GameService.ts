@@ -1345,7 +1345,7 @@ export function computeSegmentStartResults(game, ctx, { services }) {
             activePeriodIx: game.activePeriodIx,
             playerId: result.player.id,
           })
-
+          // TODO(JJ): @RS Careful, here!!! We add this array to $transaction
           extras = [...extras, ...actions.map(mapper)]
         }
 
