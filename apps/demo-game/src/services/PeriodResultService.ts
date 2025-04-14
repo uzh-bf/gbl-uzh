@@ -8,6 +8,7 @@ import { produce } from 'immer'
 import { PlayerResult } from 'src/graphql/generated/ops'
 import { computeRiskAndReturnOfPlayer } from '../lib/analysis'
 import { PlayerRole } from '../settings/Constants'
+import { GameFacts } from '../types/Game'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 import { OutputResultFacts, ResultFacts, ResultFactsInit } from '../types/facts'
 
@@ -16,13 +17,14 @@ const INITIAL_CAPITAL = 10000
 type InputPeriodResultFactsInit = {}
 type OutputPeriodResultFactsInit = OutputFacts<
   InputPeriodResultFactsInit & ResultFactsInit,
+  GameFacts,
   any,
   any
 >
 
 export function initialize(
   facts: InputPeriodResultFactsInit,
-  payload: PayloadPeriodResult<PeriodFacts, PlayerRole>
+  payload: PayloadPeriodResult<GameFacts, PeriodFacts, PlayerRole>
 ): OutputPeriodResultFactsInit {
   const baseFacts: OutputPeriodResultFactsInit = {
     resultFacts: {
@@ -72,7 +74,7 @@ export function initialize(
 
 export function start(
   facts: ResultFacts,
-  payload: PayloadPeriodResult<PeriodFacts, PlayerRole>
+  payload: PayloadPeriodResult<GameFacts, PeriodFacts, PlayerRole>
 ): OutputResultFacts {
   const baseFacts: OutputResultFacts = {
     resultFacts: facts,
@@ -87,6 +89,7 @@ export function end(
   facts: ResultFacts,
   payload: PayloadPeriodResultEnd<
     PlayerResult[],
+    GameFacts,
     PeriodFacts,
     PeriodSegmentFacts,
     PlayerRole

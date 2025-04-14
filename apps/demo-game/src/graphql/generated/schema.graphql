@@ -35,11 +35,17 @@ type Game {
   activePeriod: Period
   activePeriodIx: Int
   activeSegmentIx: Int
+  facts: JSONObject!
   id: ID!
   name: String!
   periods: [Period!]!
   players: [Player!]!
   status: GameStatus!
+}
+
+input GameFactsInput {
+  actionCounter: Int = 0
+  myInt: Int = 0
 }
 
 enum GameStatus {
@@ -95,7 +101,7 @@ type Mutation {
   addGamePeriod(facts: PeriodFactsInput!, gameId: Int!, segmentCount: Int!): Period
   addPeriodSegment(facts: PeriodSegmentFactsInput!, gameId: Int!, learningElements: [String], periodIx: Int!, storyElements: [String]): PeriodSegment
   attemptLearningElement(elementId: ID!, selection: String!): LearningElementAttempt
-  createGame(name: String!, playerCount: Int!): Game
+  createGame(facts: GameFactsInput!, name: String!, playerCount: Int!): Game
   loginAsTeam(token: String!): Player
   logoutAsTeam: Boolean
   markStoryElement(elementId: ID!): Player

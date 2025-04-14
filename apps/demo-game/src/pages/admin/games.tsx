@@ -65,6 +65,9 @@ function Games() {
         initialValues={{
           name: '',
           playerCount: 1,
+          facts: {
+            myInt: 1,
+          },
         }}
         onSubmit={async (variables, { resetForm }) => {
           await createGame({ variables, refetchQueries: [GamesDocument] })

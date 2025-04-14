@@ -7,6 +7,7 @@ import {
 import { produce } from 'immer'
 import * as R from 'ramda'
 import { PlayerRole } from '../settings/Constants'
+import { GameFacts } from '../types/Game'
 import type { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 import {
   Assets,
@@ -23,13 +24,19 @@ type SegmentResultFactsInit = ResultFactsInit & {
 
 type OutputSegmentResultFactsInit = OutputFacts<
   SegmentResultFactsInit,
+  GameFacts,
   any,
   any
 >
 
 export function initialize(
   facts: SegmentResultFactsInit,
-  payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
+  payload: PayloadSegmentResult<
+    GameFacts,
+    PeriodFacts,
+    PeriodSegmentFacts,
+    PlayerRole
+  >
 ): OutputSegmentResultFactsInit {
   const basefacts: OutputSegmentResultFactsInit = {
     resultFacts: facts,
@@ -46,7 +53,12 @@ export function initialize(
 
 export function start(
   facts: ResultFacts,
-  payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
+  payload: PayloadSegmentResult<
+    GameFacts,
+    PeriodFacts,
+    PeriodSegmentFacts,
+    PlayerRole
+  >
 ): OutputResultFacts {
   const basefacts: OutputResultFacts = {
     resultFacts: facts,
@@ -63,7 +75,12 @@ export function start(
 
 export function end(
   facts: ResultFacts,
-  payload: PayloadSegmentResult<PeriodFacts, PeriodSegmentFacts, PlayerRole>
+  payload: PayloadSegmentResult<
+    GameFacts,
+    PeriodFacts,
+    PeriodSegmentFacts,
+    PlayerRole
+  >
 ): OutputResultFacts {
   const basefacts: OutputResultFacts = {
     resultFacts: facts,

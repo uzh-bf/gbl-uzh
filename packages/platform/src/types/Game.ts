@@ -32,6 +32,10 @@ export const Game = objectType({
     t.nonNull.list.nonNull.field('periods', {
       type: Period,
     })
+
+    t.nonNull.field('facts', {
+      type: 'JSONObject',
+    })
   },
 })
 

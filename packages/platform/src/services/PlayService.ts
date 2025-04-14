@@ -30,122 +30,198 @@ export async function performAction<ActionTypes>(
     type: DB.PlayerResultType.SEGMENT_END,
   }
 
-  const previousResult = await ctx.prisma.playerResult.findUnique({
-    where: {
-      periodIx_segmentIx_playerId_type,
-    },
-    include: {
-      game: true,
-      segment: true,
-      period: true,
-      player: true,
-    },
-  })
+  let notificationsToPublish = []
 
-  if (!previousResult) return null
-
-  if (previousResult.game.status !== DB.GameStatus.RUNNING) {
-    throw new Error('ACTIONS_NOT_ALLOWED')
-  }
-
-  const {
-    result,
-    events,
-    notifications,
-    isDirty,
-    extras,
-    updatedSegmentFacts,
-  } = services.Actions.apply(previousResult.facts, {
-    type: args.actionType,
-    payload: {
-      playerArgs: args.facts,
-      segmentFacts: previousResult.segment?.facts,
-      periodFacts: previousResult.period.facts,
-    },
-  })
-
-  EventService.publishUserNotification(ctx, notifications)
-
-  await EventService.receiveEvents({
-    events,
-    ctx: {
-      user: ctx.user,
-      args,
-      achievements: previousResult.player.achievementKeys,
-      experience: previousResult.player.experience,
-      currentLevelIx: previousResult.player.levelIx,
-    },
-    prisma: ctx.prisma,
-  })
-
-  if (!isDirty) {
-    return previousResult
-  }
-
-  const transactions: any[] = [
-    ctx.prisma.playerResult.update({
-      where: {
-        periodIx_segmentIx_playerId_type,
-      },
-      data: {
-        facts: result,
-      },
-      include: {
-        period: true,
-      },
-    }),
-    ctx.prisma.playerAction.create({
-      data: {
-        periodIx: args.periodIx,
-        period: {
-          connect: {
-            gameId_index: {
-              gameId: args.gameId,
-              index: args.periodIx,
-            },
-          },
+  // All reads and writes are now in a single atomic transaction.
+  const res = ctx.prisma.$transaction(
+    async (tx) => {
+      const previousResult = await tx.playerResult.findUnique({
+        where: {
+          periodIx_segmentIx_playerId_type,
         },
-        segmentIx: args.segmentIx,
-        segment: {
-          connect: {
-            gameId_periodIx_index: {
-              gameId: args.gameId,
-              periodIx: args.periodIx,
-              index: args.segmentIx,
-            },
-          },
+        include: {
+          game: true,
+          segment: true,
+          period: true,
+          player: true,
         },
-        game: {
-          connect: {
-            id: args.gameId,
-          },
-        },
-        player: {
-          connect: {
-            id: args.playerId,
-          },
-        },
-        type: args.actionType as any,
-        facts: {
-          ...args.facts,
-          ...extras,
-        },
-      },
-    }),
-  ]
-
-  if (updatedSegmentFacts && previousResult.segment?.id) {
-    transactions.push(
-      ctx.prisma.periodSegment.update({
-        where: { id: previousResult.segment.id },
-        data: { facts: updatedSegmentFacts },
       })
-    )
+
+      if (!previousResult) return null
+
+      if (previousResult.game.status !== DB.GameStatus.RUNNING) {
+        throw new Error('ACTIONS_NOT_ALLOWED')
+      }
+
+      const {
+        result,
+        events,
+        notifications,
+        isDirty,
+        extras,
+        updatedSegmentFacts,
+        updatedPeriodFacts,
+        updatedGameFacts,
+      } = services.Actions.apply(previousResult.facts, {
+        type: args.actionType,
+        payload: {
+          playerArgs: args.facts,
+          segmentFacts: previousResult.segment?.facts,
+          periodFacts: previousResult.period.facts,
+          gameFacts: previousResult.game.facts,
+        },
+      })
+
+      notificationsToPublish = notifications
+
+      await EventService.receiveEvents({
+        events,
+        ctx: {
+          user: ctx.user,
+          args,
+          achievements: previousResult.player.achievementKeys,
+          experience: previousResult.player.experience,
+          currentLevelIx: previousResult.player.levelIx,
+        },
+        prisma: tx, // Use the transaction client
+      })
+
+      if (!isDirty) {
+        return previousResult
+      }
+
+      // Update player result
+      const updatedResult = await tx.playerResult.update({
+        where: {
+          periodIx_segmentIx_playerId_type,
+        },
+        data: {
+          facts: result,
+        },
+        include: {
+          period: true,
+        },
+      })
+
+      // Create player action
+      await tx.playerAction.create({
+        data: {
+          periodIx: args.periodIx,
+          period: {
+            connect: {
+              gameId_index: {
+                gameId: args.gameId,
+                index: args.periodIx,
+              },
+            },
+          },
+          segmentIx: args.segmentIx,
+          segment: {
+            connect: {
+              gameId_periodIx_index: {
+                gameId: args.gameId,
+                periodIx: args.periodIx,
+                index: args.segmentIx,
+              },
+            },
+          },
+          game: {
+            connect: {
+              id: args.gameId,
+            },
+          },
+          player: {
+            connect: {
+              id: args.playerId,
+            },
+          },
+          type: args.actionType as any,
+          facts: {
+            ...args.facts,
+            ...extras,
+          },
+        },
+      })
+
+      // TODO(JJ): Maybe remove and only allow game facts to be updated
+      if (updatedSegmentFacts && previousResult.segment?.id) {
+        await tx.periodSegment.update({
+          where: { id: previousResult.segment.id },
+          data: { facts: updatedSegmentFacts },
+        })
+      }
+
+      if (updatedPeriodFacts) {
+        await tx.period.update({
+          where: { id: previousResult.period.id },
+          data: { facts: updatedPeriodFacts },
+        })
+      }
+
+      if (updatedGameFacts) {
+        // Update game facts if needed
+        await tx.game.update({
+          where: { id: previousResult.game.id },
+          data: { facts: updatedGameFacts },
+        })
+        // TODO(JJ): More efficient way and better concurrency handling
+        // const path = `facts.${args.actionType}`
+        // const value = updatedGameFacts
+        // await tx.$queryRaw`
+        //   UPDATE "Game"
+        //   SET facts = jsonb_set(facts, ${path}::text[], ${JSON.stringify(
+        //         value
+        //       )}::jsonb, true),
+        //       version = version + 1
+        //   WHERE id = ${previousResult.game.id} AND version = ${
+        //         previousResult.game.version
+        //       }
+        // `
+      }
+
+      return updatedResult
+    },
+    {
+      // Use Serializable isolation level for the strongest guarantees
+      // This prevents phantom reads and other concurrency issues.
+      isolationLevel: DB.Prisma.TransactionIsolationLevel.Serializable,
+      // Set an appropriate timeout
+      // Prevents long-running transactions from blocking other operations.
+      timeout: 10000, // 10 seconds
+    }
+  )
+
+  // After transaction completes successfully, publish notifications
+  if (notificationsToPublish.length > 0) {
+    await EventService.publishUserNotification(ctx, notificationsToPublish)
   }
 
-  const [updatedResult, _] = await ctx.prisma.$transaction(transactions)
+  return res
+}
 
-  return updatedResult
+export async function performActionWithRetry<ActionTypes>(
+  args: PerformActionArgs<ActionTypes>,
+  ctx: Context,
+  { services }: any,
+  maxRetries: number = 3
+) {
+  let retries = 0
+  while (retries < maxRetries) {
+    try {
+      return await performAction(args, ctx, services)
+    } catch (error: any) {
+      // Check if this is a serialization failure or deadlock
+      if (error.code === 'P2034') {
+        retries++
+        await new Promise((resolve) =>
+          setTimeout(resolve, 100 * Math.pow(2, retries))
+        ) // Exponential backoff
+        continue
+      }
+      throw error // Re-throw if it's not a concurrency issue
+    }
+  }
+  throw new Error('Failed to perform action after multiple retries')
 }
 
 interface SaveDecisionsArgs {

@@ -22,7 +22,13 @@ class SSELink extends ApolloLink {
       return this.client.subscribe<FetchResult>(
         { ...operation, query: print(operation.query) },
         {
-          next: sink.next.bind(sink),
+          next: (value) => {
+            if (value.errors) {
+              sink.error(value.errors)
+            } else if (value.data) {
+              sink.next(value.data as FetchResult)
+            }
+          },
           complete: sink.complete.bind(sink),
           error: sink.error.bind(sink),
         }
