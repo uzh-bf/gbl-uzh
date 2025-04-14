@@ -59,7 +59,6 @@ export async function performAction<ActionTypes>(
         notifications,
         isDirty,
         extras,
-        updatedSegmentFacts,
         updatedGameFacts,
       } = services.Actions.apply(previousResult.facts, {
         type: args.actionType,
@@ -141,15 +140,6 @@ export async function performAction<ActionTypes>(
           },
         },
       })
-
-      // TODO(JJ): Double-check if updatedSegmentFacts and updatedPeriodFacts
-      // are needed
-      if (updatedSegmentFacts && previousResult.segment?.id) {
-        await tx.periodSegment.update({
-          where: { id: previousResult.segment.id },
-          data: { facts: updatedSegmentFacts },
-        })
-      }
 
       // Update game facts if needed
       if (updatedGameFacts) {
