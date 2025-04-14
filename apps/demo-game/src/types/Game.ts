@@ -12,7 +12,7 @@ export const GameFactsInput = inputObjectType({
   name: 'GameFactsInput',
   definition(t) {
     t.int('myInt', { default: 0 })
-    t.int('actionCounter', { default: 0 })
+    t.nullable.int('actionCounter', { default: 0 })
     // t.field('scenario', {
     //   type: GameFactsScenarioInput,
     //   default: {

@@ -46,9 +46,12 @@ export function apply(state: State, action: Actions) {
     draft.result.decisions = action.payload.playerArgs
 
     // This is only to test the game facts
-    let counter = action.payload.gameFacts.actionCounter || 0
+    // Update game facts counter
+    const gameFacts = action.payload.gameFacts
+    let counter = gameFacts.actionCounter || 0
     counter += 1
     draft.updatedGameFacts = {
+      ...gameFacts,
       actionCounter: counter,
     }
   })
