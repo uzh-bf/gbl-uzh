@@ -143,6 +143,7 @@ export async function performAction<ActionTypes>(
         },
       })
 
+      // TODO(JJ): Maybe remove and only allow game facts to be updated
       if (updatedSegmentFacts && previousResult.segment?.id) {
         await tx.periodSegment.update({
           where: { id: previousResult.segment.id },
