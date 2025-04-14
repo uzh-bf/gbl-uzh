@@ -17,6 +17,7 @@ export function update(
     baseFacts,
     (draft: OutputGameFacts) => {
       draft.updatedGameFacts = {
+        ...facts,
         myInt: facts.myInt + 1,
       }
     }

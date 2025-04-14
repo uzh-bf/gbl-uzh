@@ -795,7 +795,8 @@ export async function activateNextSegment(
         segmentIx: nextSegmentIx, // TODO(JJ): Double-check if this is right
       })
 
-      if (updatedGameFacts && currentSegmentIx >= 0) {
+      const isVeryFirst = currentPeriodIx === 0 && currentSegmentIx === -1
+      if (updatedGameFacts && !isVeryFirst) {
         game.facts = updatedGameFacts
       }
 
