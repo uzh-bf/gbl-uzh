@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.22](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.21...v0.4.22) (2025-04-14)
+
+
+### Features
+
+* **platform:** Adding game facts for global updates ([#98](https://github.com/uzh-bf/gbl-uzh/issues/98)) ([018a458](https://github.com/uzh-bf/gbl-uzh/commit/018a4580d23f40e82e1e604204d1a53ddc351db5))
+
+
+### Bug Fixes
+
+* **platform:** update game facts during prep/pause except very first one ([#100](https://github.com/uzh-bf/gbl-uzh/issues/100)) ([a31b604](https://github.com/uzh-bf/gbl-uzh/commit/a31b6043b50b5e376b260bb6271e5095422b7204))
+
 ### [0.4.21](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.20...v0.4.21) (2025-04-07)
 
 ### [0.4.20](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.19...v0.4.20) (2025-04-03)
