@@ -35,9 +35,7 @@ export type OutputFactsGame<GameFactsType, NotificationType, EventType> = {
   events?: Event<EventType>[]
 }
 
-// TODO(JJ):
-// - remove isDirty for ActionReducer
-// - Double-check if updatedPeriodFacts and updatedSegmentFacts are needed
+// TODO(JJ): remove isDirty for ActionReducer
 export type OutputFactsUser<
   FactsType,
   GameFactsType,
@@ -51,8 +49,8 @@ export type OutputFactsUser<
   notifications?: Notification<NotificationType>[]
   events?: Event<EventType>[]
   updatedGameFacts?: GameFactsType
-  // updatedPeriodFacts?: any
-  // updatedSegmentFacts?: any
+  updatedPeriodFacts?: any
+  updatedSegmentFacts?: any
 }
 
 export type OutputFacts<FactsType, GameFactsType, NotificationType, EventType> =
