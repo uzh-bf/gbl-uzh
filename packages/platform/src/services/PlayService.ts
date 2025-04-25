@@ -73,6 +73,7 @@ export async function performAction<ActionTypes>(
           periodIx: previousResult.period.index,
           segmentIx: previousResult.segment?.index,
           segmentCount: previousResult.period.segmentCount,
+          playerId: previousResult.player.id,
         },
       })
 
