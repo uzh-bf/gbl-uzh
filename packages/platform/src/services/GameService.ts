@@ -1112,6 +1112,8 @@ export function computePeriodStartResults(
   const currentPeriodIx = activePeriodIx
   const nextPeriodIx = currentPeriodIx + 1
 
+  // TODO(JJ): Instead of creating prisma queries, just save the parameters
+  // of mapAction and call it later in an async transaction fn
   let extras: any[] = []
 
   // if the game is running, transform previous results to next
