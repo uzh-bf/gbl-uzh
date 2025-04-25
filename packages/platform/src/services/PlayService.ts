@@ -9,6 +9,7 @@ import dayjs from 'dayjs'
 
 type Context = CtxWithPrisma<DB.PrismaClient>
 
+// TODO(JJ): Add type of custom playerArgs type for facts
 interface PerformActionArgs<ActionTypes> {
   gameId: number
   periodIx: number
@@ -69,6 +70,9 @@ export async function performAction<ActionTypes>(
           segmentFacts: previousResult.segment?.facts,
           periodFacts: previousResult.period.facts,
           gameFacts: previousResult.game.facts,
+          periodIx: previousResult.period.index,
+          segmentIx: previousResult.segment?.index,
+          segmentCount: previousResult.period.segmentCount,
         },
       })
 
