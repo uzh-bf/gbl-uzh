@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.24](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.23...v0.4.24) (2025-04-25)
+
+
+### Features
+
+* **platform:** adding playerId to payload action reducer ([#102](https://github.com/uzh-bf/gbl-uzh/issues/102)) ([bf6f741](https://github.com/uzh-bf/gbl-uzh/commit/bf6f7412c49ad39500bf3f76e25aecbec9a3d790))
+
 ### [0.4.23](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.22...v0.4.23) (2025-04-25)
 
 
