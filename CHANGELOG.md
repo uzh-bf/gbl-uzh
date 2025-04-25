@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.23](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.22...v0.4.23) (2025-04-25)
+
+
+### Features
+
+* **platform:** add periodIx, segmentIx and segmentCount to payload of action reducer ([#101](https://github.com/uzh-bf/gbl-uzh/issues/101)) ([f9bb0e4](https://github.com/uzh-bf/gbl-uzh/commit/f9bb0e4d97b6eecb67692aa73b2b49531ad9e965))
+
 ### [0.4.22](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.21...v0.4.22) (2025-04-14)
 
 
