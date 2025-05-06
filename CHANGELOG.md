@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.14-beta.0](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.13...v0.4.14-beta.0) (2025-05-06)
+
+
+### Bug Fixes
+
+* persist actions returned from actions reducer ([4bb4222](https://github.com/uzh-bf/gbl-uzh/commit/4bb422233d6e8e1e6ae7066c51f32cb8ff67edd0))
+
 ### [0.4.13](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.12...v0.4.13) (2023-09-06)
 
 
