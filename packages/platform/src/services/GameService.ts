@@ -934,7 +934,7 @@ export async function getLearningElements(args, ctx: Context) {
   })
 }
 
-function mapAction({ ctx, gameId, activePeriodIx, playerId }) {
+export function mapAction({ ctx, gameId, activePeriodIx, playerId }) {
   return (action) =>
     ctx.prisma.playerAction.create({
       data: {

@@ -5,6 +5,7 @@ import {
   BaseUserNotificationType as UserNotificationType,
 } from '../types'
 import * as EventService from './EventService'
+import { mapAction } from './GameService'
 
 type Context = CtxWithPrisma<DB.PrismaClient>
 
@@ -47,7 +48,7 @@ export async function performAction<ActionTypes>(
     throw new Error('ACTIONS_NOT_ALLOWED')
   }
 
-  const { result, events, notifications, isDirty, extras } =
+  const { result, actions, events, notifications, isDirty, extras } =
     reducers.Actions.apply(previousResult.facts, {
       type: args.actionType,
       payload: {
@@ -56,6 +57,13 @@ export async function performAction<ActionTypes>(
         periodFacts: previousResult.period.facts,
       },
     })
+
+  const mapper = mapAction({
+    ctx,
+    gameId: args.gameId,
+    activePeriodIx: args.periodIx,
+    playerId: args.playerId,
+  })
 
   EventService.publishUserNotification(ctx, notifications)
 
@@ -125,6 +133,7 @@ export async function performAction<ActionTypes>(
         },
       },
     }),
+    ...(actions ?? []).map(mapper),
   ])
 
   return updatedResult
