@@ -1,6 +1,11 @@
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
-import { Button, FormikNumberField, Switch } from '@uzh-bf/design-system'
+import {
+  Button,
+  // CycleCountdown,
+  FormikNumberField,
+  Switch,
+} from '@uzh-bf/design-system'
 import {
   Card,
   CardContent,
@@ -26,8 +31,10 @@ import {
   TableRow,
 } from '@uzh-bf/design-system/dist/future'
 
+import { CycleCountdown } from '~/components/CycleCountDown'
+
 import dayjs from 'dayjs'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Area,
   AreaChart,
@@ -42,6 +49,7 @@ import {
 } from 'recharts'
 
 import {
+  GlobalEventsDocument,
   PerformActionDocument,
   ResultDocument,
   UpdateReadyStateDocument,
@@ -54,6 +62,13 @@ import StoryElements from '~/components/StoryElements'
 import { Form, Formik } from 'formik'
 import * as yup from 'yup'
 import { useToast } from '../../components/ui/use-toast'
+
+// import { BaseGlobalNotificationType } from '@gbl-uzh/platform/src/types.js'
+enum BaseGlobalNotificationType {
+  PERIOD_ACTIVATED = 'PERIOD_ACTIVATED',
+  SEGMENT_ACTIVATED = 'SEGMENT_ACTIVATED',
+  COUNTDOWN_UPDATED = 'COUNTDOWN_UPDATED',
+}
 
 const LABEL_MAP = {
   accTotalAssetsReturn: 'Total Assets Return',
@@ -73,9 +88,10 @@ function GameHeader({ currentGame }) {
 
 function GameLayout({ children }: { children: React.ReactNode }) {
   // TODO(JJ): Fetch data in Layout
-  const { data } = useQuery(ResultDocument, {
-    fetchPolicy: 'cache-first',
-    pollInterval: 10000,
+  const { data, refetch: refetchResult } = useQuery(ResultDocument, {
+    // fetchPolicy: 'cache-first',
+    fetchPolicy: 'cache-and-network',
+    // pollInterval: 10000,
   })
 
   const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument)
@@ -87,22 +103,63 @@ function GameLayout({ children }: { children: React.ReactNode }) {
 
   const { toast } = useToast()
 
+  const currentGameId = parseInt(data?.result?.currentGame?.id)
+
+  useSubscription(GlobalEventsDocument, {
+    skip: !currentGameId, // Only subscribe if we have a game ID
+    onData: ({ data: subData }) => {
+      if (subData?.data?.eventsGlobal) {
+        const event = subData.data.eventsGlobal
+        if (
+          event.type === BaseGlobalNotificationType.COUNTDOWN_UPDATED &&
+          event.facts?.gameId === currentGameId
+        ) {
+          console.log(
+            `Player Cockpit: Relevant COUNTDOWN_UPDATED event for game ${currentGameId}. Refetching ResultDocument...`
+          )
+          // Refetch the main ResultDocument to get the new countdown times
+          refetchResult()
+        } else if (
+          (event?.type === BaseGlobalNotificationType.PERIOD_ACTIVATED ||
+            event?.type === BaseGlobalNotificationType.SEGMENT_ACTIVATED) &&
+          event?.facts?.gameId === currentGameId
+        ) {
+          console.log(
+            `Player Cockpit: Relevant ${event.type} event for game ${currentGameId}. Refetching ResultDocument...`
+          )
+          refetchResult()
+        }
+      }
+    },
+    onError: (err) => {
+      console.error('Player Cockpit: Subscription error:', err)
+    },
+  })
+
   const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
     ?.countdownExpiresAt as string | null
   const countdownDurationMs = data?.result?.currentGame?.activePeriod
     ?.activeSegment?.countdownDurationMs as number | null
 
+  const expiresAtDate = useMemo(() => {
+    return strExpiresAt ? dayjs(strExpiresAt).toDate() : null
+  }, [strExpiresAt])
+
   useEffect(() => {
+    if (!strExpiresAt) return
+
     const dateExpiresAt = dayjs(strExpiresAt)
     const secondsRemaining = dateExpiresAt.diff(dayjs(), 's')
 
     if (secondsRemaining > 0) {
       toast({
-        title: 'Countdown set',
+        title: 'Countdown set/updated!',
         description: `${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
       })
     }
-  }, [strExpiresAt])
+
+    setCountdownNotifications({ '60': false, '180': false })
+  }, [strExpiresAt, countdownDurationMs])
 
   const playerInfo = {
     name: data.self.name,
@@ -164,44 +221,38 @@ function GameLayout({ children }: { children: React.ReactNode }) {
               />
             )}
 
-            {/* {countdownDurationMs !== null && (
-          <CycleCountdown
-            className={{
-              root: '',
-              countdownWrapper: '',
-              countdown: 'text-xs font-bold text-gray-600',
-            }}
-            totalDuration={countdownDurationMs / 1000}
-            expiresAt={dayjs(strExpiresAt).toDate()}
-            formatter={(value) => `${value}s`}
-            onExpire={() =>
-              toast({
-                title: 'Countdown expired',
-                description: 'Time is up! The period will be closed soon.',
-                variant: 'destructive',
-              })
-            }
-            onUpdate={(secondsRemaining) => {
-              const minutesRemainingThreshold = [1, 3]
-              minutesRemainingThreshold.forEach((minute) => {
-                const seconds = minute * 60
-                if (secondsRemaining <= seconds) {
-                  const secondsStr = String(seconds)
-                  if (countdownNotifications[secondsStr]) return
-                  const minutesRemaining = Math.ceil(secondsRemaining / 60)
-                  toast({
-                    title: 'Countdown update',
-                    description: `Less than ${minutesRemaining} min remaining! Please press ready once you are done.`,
+            {countdownDurationMs !== null && (
+              <CycleCountdown
+                expiresAt={expiresAtDate}
+                totalDuration={countdownDurationMs / 1000}
+                onUpdate={(secondsLeft) => {
+                  const minutesRemainingThreshold = [1, 3]
+                  minutesRemainingThreshold.forEach((minute) => {
+                    const secondsThreshold = minute * 60
+                    // Only trigger if we are *just crossing* this threshold
+                    if (
+                      secondsLeft <= secondsThreshold &&
+                      secondsLeft > secondsThreshold - 1
+                    ) {
+                      const secondsKey = String(secondsThreshold)
+                      if (!countdownNotifications[secondsKey]) {
+                        const friendlyMinutes = Math.ceil(secondsLeft / 60)
+                        toast({
+                          title: 'Countdown Update',
+                          description: `Less than ${friendlyMinutes} min remaining! Please press ready.`,
+                        })
+                        setCountdownNotifications((prevState) => ({
+                          ...prevState,
+                          [secondsKey]: true,
+                        }))
+                      }
+                    }
                   })
-                  setCountdownNotifications((prevState) => ({
-                    ...prevState,
-                    [secondsStr]: true,
-                  }))
-                }
-              })
-            }}
-          />
-        )} */}
+                }}
+                onExpire={() => console.log('Countdown expired')}
+                className="text-xs font-bold text-gray-600"
+              />
+            )}
           </div>
           <LearningElements />
         </CardContent>
@@ -989,13 +1040,9 @@ function Cockpit() {
                                   placeholder="0 %"
                                   label={decision.name}
                                   name={fieldName}
-                                  tooltip={
-                                    <p>
-                                      Determine how much of all assets you want
-                                      to invest in the {decision.name}. The
-                                      total should be equal to 100 percent.
-                                    </p>
-                                  }
+                                  tooltip={`Determine how much of all assets you want
+                                      to invest in the ${decision.name}. The
+                                      total should be equal to 100 percent.`}
                                   required
                                   data={{ cy: decision.name + '-cy' }}
                                   className={{ label: 'pb-2 font-normal' }}

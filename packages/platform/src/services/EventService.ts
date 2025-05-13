@@ -1,6 +1,11 @@
 import * as DB from '@prisma/client'
 import { pubSub } from '../lib/pubsub.js'
 import { BaseUserNotificationType as UserNotificationType } from '../types.js'
+import type {
+  BaseGlobalNotificationType,
+  Event as PlatformEvent,
+} from '../types.js'
+import log from '../lib/logger.js'
 
 export async function receiveEvents({ events, ctx, prisma }) {
   if (!Array.isArray(events)) return
@@ -216,9 +221,15 @@ export async function receiveEvent(
   return []
 }
 
-export function publishGlobalNotification(event: any) {
-  // console.log(event)
-  pubSub.publish('global:events', event as any)
+export function publishGlobalNotification(
+  event: PlatformEvent<BaseGlobalNotificationType>
+) {
+  try {
+    pubSub.publish('global:events', event)
+    log.info('[EventService] Successfully published to "global:events".')
+  } catch (e) {
+    log.error('[EventService] Error during pubSub.publish:', e)
+  }
 }
 
 export function publishUserNotification(

@@ -14,6 +14,8 @@ export const Event = objectType({
   name: 'Event',
   definition(t) {
     t.string('type')
+    t.string('sub')
+    t.field('facts', { type: 'JSONObject' })
   },
 })
 

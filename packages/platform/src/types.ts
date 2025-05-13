@@ -318,8 +318,10 @@ export interface CtxWithFactsAndSchema<FactsType, PrismaType> {
 }
 
 export enum BaseGlobalNotificationType {
+  GAME_STATE_UPDATED = 'GAME_STATE_UPDATED', // Generic, or more specific:
   PERIOD_ACTIVATED = 'PERIOD_ACTIVATED',
   SEGMENT_ACTIVATED = 'SEGMENT_ACTIVATED',
+  COUNTDOWN_UPDATED = 'COUNTDOWN_UPDATED',
 }
 
 export enum BaseUserNotificationType {

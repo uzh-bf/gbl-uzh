@@ -3,9 +3,12 @@ import {
   CtxWithPrisma,
   LearningElementState,
   BaseUserNotificationType as UserNotificationType,
+  BaseGlobalNotificationType,
+  Event as PlatformEvent,
 } from '../types.js'
 import * as EventService from './EventService.js'
 import dayjs from 'dayjs'
+import log from '../lib/logger.js'
 
 type Context = CtxWithPrisma<DB.PrismaClient>
 
@@ -743,18 +746,43 @@ export async function addCountdown(args, ctx: Context) {
     },
   })
 
-  if (!currentGame?.activePeriod?.activeSegment) return null
+  if (!currentGame?.activePeriod?.activeSegment) {
+    log.warn(
+      `addCountdown: No active period or segment for game ${args.gameId}`
+    )
+    return null // Or false, depending on expected return type
+  }
 
   const countdownDurationMs = args.seconds * 1000
+  const newExpiresAt = dayjs().add(countdownDurationMs, 'ms').toDate()
   await ctx.prisma.periodSegment.update({
     where: {
       id: currentGame.activePeriod.activeSegment.id,
     },
     data: {
-      countdownExpiresAt: dayjs().add(countdownDurationMs, 'ms').toDate(),
+      countdownExpiresAt: newExpiresAt,
       countdownDurationMs,
     },
   })
+
+  const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
+    type: BaseGlobalNotificationType.COUNTDOWN_UPDATED,
+    facts: {
+      gameId: args.gameId,
+      periodId: currentGame.activePeriod.id, // good to have for context
+      segmentId: currentGame.activePeriod.activeSegment.id,
+      countdownExpiresAt: newExpiresAt.toISOString(), // Standard format
+      countdownDurationMs,
+      status: currentGame.status,
+      activePeriodIx: currentGame.activePeriodIx,
+      activeSegmentIx: currentGame.activePeriod.activeSegmentIx,
+    },
+  }
+  EventService.publishGlobalNotification(eventToPublish)
+  log.info(
+    `Published ${eventToPublish.type} for game ${args.gameId}`,
+    eventToPublish.facts
+  )
 
   return true
 }
