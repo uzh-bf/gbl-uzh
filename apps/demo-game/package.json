@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@gbl-uzh/demo-game",
-  "version": "0.4.24",
+  "version": "0.4.25",
   "license": "AGPL-3.0",
   "dependencies": {
     "@apollo/client": "3.11.10",
