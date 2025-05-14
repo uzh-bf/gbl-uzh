@@ -165,6 +165,7 @@ type Player {
   experience: Int!
   experienceToNext: Int!
   facts: JSONObject!
+  game: Game!
   id: ID!
   isReady: Boolean!
   level: PlayerLevel!

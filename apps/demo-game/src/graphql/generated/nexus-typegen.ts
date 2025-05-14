@@ -166,6 +166,7 @@ export interface NexusGenObjects {
     experience: number; // Int!
     experienceToNext: number; // Int!
     facts: NexusGenScalars['JSONObject']; // JSONObject!
+    game: NexusGenRootTypes['Game']; // Game!
     id: string; // ID!
     isReady: boolean; // Boolean!
     level: NexusGenRootTypes['PlayerLevel']; // PlayerLevel!
@@ -341,6 +342,7 @@ export interface NexusGenFieldTypes {
     experience: number; // Int!
     experienceToNext: number; // Int!
     facts: NexusGenScalars['JSONObject']; // JSONObject!
+    game: NexusGenRootTypes['Game']; // Game!
     id: string; // ID!
     isReady: boolean; // Boolean!
     level: NexusGenRootTypes['PlayerLevel']; // PlayerLevel!
@@ -520,6 +522,7 @@ export interface NexusGenFieldTypeNames {
     experience: 'Int'
     experienceToNext: 'Int'
     facts: 'JSONObject'
+    game: 'Game'
     id: 'ID'
     isReady: 'Boolean'
     level: 'PlayerLevel'

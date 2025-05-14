@@ -83,22 +83,18 @@ function Welcome() {
         validationSchema={Schema}
         onSubmit={async (values) => {
           setIsSubmitting(true)
-          try {
-            await updatePlayerData({
-              variables: {
-                name: values.name,
-                facts: JSON.stringify({
-                  color: values.color,
-                  avatar: values.imgPathAvatar,
-                  location: values.location,
-                }),
-              },
-            })
-            router.replace('/play/cockpit')
-          } catch (e) {
-            console.error('Error updating player data:', e)
-            setIsSubmitting(false)
-          }
+
+          await updatePlayerData({
+            variables: {
+              name: values.name,
+              facts: JSON.stringify({
+                color: values.color,
+                avatar: values.imgPathAvatar,
+                location: values.location,
+              }),
+            },
+          })
+          router.replace('/play/cockpit')
         }}
       >
         {({ values, errors, touched }) => (
