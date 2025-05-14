@@ -84,6 +84,10 @@ export const Player = objectType({
       type: StoryElement,
     })
     t.nonNull.list.nonNull.string('visitedStoryElementIds')
+
+    t.nonNull.field('game', {
+      type: Game,
+    })
   },
 })
 

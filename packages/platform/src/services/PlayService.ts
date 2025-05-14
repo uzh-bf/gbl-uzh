@@ -424,6 +424,11 @@ export async function getPlayerData(args: GetPlayerDataArgs, ctx: Context) {
       id: args.playerId,
     },
     include: {
+      game: {
+        include: {
+          activePeriod: true,
+        },
+      },
       level: true,
       achievements: {
         include: {
@@ -537,8 +542,8 @@ export async function attemptLearningElement(
         },
         include: {
           game: {
-            select: {
-              activePeriodIx: true,
+            include: {
+              activePeriod: true,
             },
           },
         },

@@ -35,6 +35,11 @@ export async function loginAsTeam(
   const matchingPlayer = await ctx.prisma.player.findUnique({
     where: { token },
     include: {
+      game: {
+        include: {
+          activePeriod: true,
+        },
+      },
       level: true,
       achievements: {
         include: {

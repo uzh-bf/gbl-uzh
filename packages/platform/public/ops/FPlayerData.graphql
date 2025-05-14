@@ -11,6 +11,18 @@ fragment PlayerData on Player {
   experience
   experienceToNext
 
+
+  game {
+    id
+    name
+    status
+    facts
+    activePeriod {
+      index
+      activeSegmentIx
+    }
+  }
+
   achievementKeys
   achievements {
     id

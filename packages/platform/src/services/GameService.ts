@@ -961,6 +961,11 @@ export async function updatePlayerData<PlayerFactsType>(
     },
     data,
     include: {
+      game: {
+        include: {
+          activePeriod: true,
+        },
+      },
       level: true,
       achievements: {
         include: {
