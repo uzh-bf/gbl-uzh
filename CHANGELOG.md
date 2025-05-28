@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.26](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.25...v0.4.26) (2025-05-28)
+
+
+### Features
+
+* **platform:** subscriptions to global events ([#103](https://github.com/uzh-bf/gbl-uzh/issues/103)) ([d4672ac](https://github.com/uzh-bf/gbl-uzh/commit/d4672acdfca072ea137f85d50b6755120143e09b))
+
 ### [0.4.25](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.24...v0.4.25) (2025-05-14)
 
 
