@@ -308,7 +308,7 @@ function Cockpit() {
   const [performAction, updatedPlayerResult] = useMutation(
     PerformActionDocument,
     {
-      refetchQueries: 'active',
+      refetchQueries: [ResultDocument],
     }
   )
 
@@ -865,21 +865,27 @@ function Cockpit() {
           category: 'Savings',
           currentValue: `${assets.bank.toFixed(2)} CHF`,
           futureValue: `${(
-            assets.totalAssets * resultFactsDecisions.bank
+            assets.totalAssets *
+            resultFactsDecisions.bank *
+            0.01
           ).toFixed(2)} CHF`,
         },
         {
           category: 'Bonds',
           currentValue: `${assets.bonds.toFixed(2)} CHF`,
           futureValue: `${(
-            assets.totalAssets * resultFactsDecisions.bonds
+            assets.totalAssets *
+            resultFactsDecisions.bonds *
+            0.01
           ).toFixed(2)} CHF`,
         },
         {
           category: 'Stocks',
           currentValue: `${assets.stocks.toFixed(2)} CHF`,
           futureValue: `${(
-            assets.totalAssets * resultFactsDecisions.stocks
+            assets.totalAssets *
+            resultFactsDecisions.stocks *
+            0.01
           ).toFixed(2)} CHF`,
         },
         {
@@ -1024,7 +1030,6 @@ function Cockpit() {
                             stocks,
                           }),
                         },
-                        refetchQueries: [ResultDocument],
                       })
                     }}
                   >
