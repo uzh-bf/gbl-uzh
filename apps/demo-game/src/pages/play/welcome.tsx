@@ -44,7 +44,19 @@ const Schema = Yup.object().shape({
 function Welcome() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { data, loading, error } = useQuery(SelfDocument)
+  const { data, loading, error } = useQuery(SelfDocument, {
+    // fetchPolicy: 'network-cache',
+    onError: (error) => {
+      console.error('Error fetching player data:', error)
+      setIsSubmitting(false)
+    },
+    onCompleted: (data) => {
+      if (!data.self) {
+        console.error('No player data found')
+        setIsSubmitting(false)
+      }
+    },
+  })
 
   const [updatePlayerData] = useMutation(UpdatePlayerDataDocument, {
     optimisticResponse: {
