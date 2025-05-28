@@ -122,6 +122,17 @@ function ManageGame() {
 
   const [addCountdown] = useMutation(AddCountdownDocument, {
     refetchQueries: [GameDocument],
+    onCompleted: () =>
+      toast({
+        title: 'Countdown added',
+        description: 'Players were notified.',
+      }),
+    onError: (err) =>
+      toast({
+        title: 'Countdown failed',
+        description: err.message,
+        variant: 'destructive',
+      }),
   })
 
   const { toast } = useToast()

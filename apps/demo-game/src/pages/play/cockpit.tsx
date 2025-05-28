@@ -221,7 +221,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
               />
             )}
 
-            {countdownDurationMs !== null && (
+            {countdownDurationMs !== null && expiresAtDate !== null && (
               <CycleCountdown
                 expiresAt={expiresAtDate}
                 totalDuration={countdownDurationMs / 1000}
