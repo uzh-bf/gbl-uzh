@@ -48,12 +48,10 @@ function Welcome() {
     // fetchPolicy: 'network-cache',
     onError: (error) => {
       console.error('Error fetching player data:', error)
-      setIsSubmitting(false)
     },
     onCompleted: (data) => {
       if (!data.self) {
-        console.error('No player data found')
-        setIsSubmitting(false)
+        console.warn('No player data found - user may not be authenticated')
       }
     },
   })
