@@ -1,5 +1,4 @@
 import { pubSub } from '@gbl-uzh/platform/dist/lib/pubsub'
-import { useGraphQLSSE } from '@graphql-yoga/plugin-graphql-sse'
 import { createYoga } from 'graphql-yoga'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth/next'
@@ -20,7 +19,6 @@ export default createYoga<{
 }>({
   graphqlEndpoint: '/api/graphql',
   schema,
-  plugins: [useGraphQLSSE({})],
   async context({ req, res, ...ctx }) {
     const session = await getServerSession(req, res, authOptions)
 
