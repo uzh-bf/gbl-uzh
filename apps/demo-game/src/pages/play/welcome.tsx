@@ -44,7 +44,17 @@ const Schema = Yup.object().shape({
 function Welcome() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { data, loading, error } = useQuery(SelfDocument)
+  const { data, loading, error } = useQuery(SelfDocument, {
+    // fetchPolicy: 'network-cache',
+    onError: (error) => {
+      console.error('Error fetching player data:', error)
+    },
+    onCompleted: (data) => {
+      if (!data.self) {
+        console.warn('No player data found - user may not be authenticated')
+      }
+    },
+  })
 
   const [updatePlayerData] = useMutation(UpdatePlayerDataDocument, {
     optimisticResponse: {

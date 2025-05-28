@@ -1,3 +1,4 @@
+import { pubSub } from '@gbl-uzh/platform/dist/lib/pubsub'
 import { createYoga } from 'graphql-yoga'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth/next'
@@ -26,6 +27,7 @@ export default createYoga<{
       prisma,
       res,
       user: session?.user,
+      pubSub,
     }
   },
 })

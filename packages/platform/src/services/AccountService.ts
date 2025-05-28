@@ -61,16 +61,13 @@ export async function loginAsTeam(
       token: matchingPlayer.token,
     })
 
-    const cookieName =
-      process.env.NODE_ENV === 'production'
-        ? '__Secure-next-auth.session-token'
-        : 'next-auth.session-token'
+    const cookieName = '__Secure-next-auth.session-token'
 
     setCookie(ctx, cookieName, jwt, {
       path: '/',
       maxAge: 60 * 60 * 24 * 7,
-      httpOnly: process.env.NODE_ENV === 'production',
-      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      secure: true,
     })
   } catch (err) {
     console.error(err)
@@ -90,10 +87,7 @@ export async function logoutAsTeam(ctx: CtxWithPrisma<PrismaClient>) {
   })
 
   if (matchingPlayer) {
-    const cookieName =
-      process.env.NODE_ENV === 'production'
-        ? '__Secure-next-auth.session-token'
-        : 'next-auth.session-token'
+    const cookieName = '__Secure-next-auth.session-token'
 
     destroyCookie(ctx, cookieName)
 

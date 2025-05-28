@@ -38,7 +38,6 @@ import {
   GameDocument,
   GameStatus,
   LearningElementsDocument,
-  Period,
   Player,
   StoryElementsDocument,
 } from 'src/graphql/generated/ops'
@@ -121,7 +120,20 @@ function ManageGame() {
     }
   )
 
-  const [addCountdown] = useMutation(AddCountdownDocument)
+  const [addCountdown] = useMutation(AddCountdownDocument, {
+    refetchQueries: [GameDocument],
+    onCompleted: () =>
+      toast({
+        title: 'Countdown added',
+        description: 'Players were notified.',
+      }),
+    onError: (err) =>
+      toast({
+        title: 'Countdown failed',
+        description: err.message,
+        variant: 'destructive',
+      }),
+  })
 
   const { toast } = useToast()
 
@@ -161,8 +173,8 @@ function ManageGame() {
   }, [data?.game])
 
   const getButton = useCallback(() => {
-    const game = data.game
-    const disabled = game.periods.length === 0
+    const game = data.game as Game
+    // const disabled = game.periods.length === 0
     const activePeriod = game?.activePeriod
     const segments = activePeriod?.segments
     const activeSegmentIx = activePeriod?.activeSegmentIx
@@ -268,7 +280,7 @@ function ManageGame() {
     return <div>{error.message}</div>
   }
 
-  const game: Game = data.game
+  const game = data.game
 
   const learningElementsAll = (
     learningElementsData?.learningElements || []
@@ -393,7 +405,7 @@ function ManageGame() {
                         const segment = period.segments[ix]
                         const segmentStatus = computeSegmentStatus(
                           game,
-                          period as Period,
+                          period,
                           ix
                         )
 
@@ -716,11 +728,7 @@ function ManageGame() {
                       label="Number of segments"
                       name="segmentCount"
                       tooltip={
-                        <p>
-                          One period corresponds to one year. The number of
-                          segments <br />
-                          is used to compute the number of months in the period.
-                        </p>
+                        'One period corresponds to one year. The number of segments is used to compute the number of months in the period.'
                       }
                       required
                       data={{ cy: 'segment-count' }}
@@ -734,7 +742,7 @@ function ManageGame() {
                         placeholder={newPeriodForm.values.seed}
                         label="Seed"
                         name="seed"
-                        tooltip={<p>Seed ....</p>}
+                        tooltip={'Seed ....'}
                         required
                         data={{ cy: 'seed' }}
                         className={{ label: 'pb-2 font-normal' }}
@@ -748,7 +756,7 @@ function ManageGame() {
                         placeholder={newPeriodForm.values.interestBank}
                         label="Saving Interest"
                         name="interestBank"
-                        tooltip={<p>Saving interest ....</p>}
+                        tooltip={'Saving interest ....'}
                         required
                         data={{ cy: 'saving-interest' }}
                         className={{ label: 'pb-2 font-normal' }}
@@ -762,7 +770,7 @@ function ManageGame() {
                         placeholder={newPeriodForm.values.trendBonds}
                         label="Trend"
                         name="trendBonds"
-                        tooltip={<p>Trend is the expectation value.</p>}
+                        tooltip={'Trend is the expectation value.'}
                         required
                         data={{ cy: 'trend-bonds' }}
                         className={{ label: 'pb-2 font-normal' }}
@@ -771,7 +779,7 @@ function ManageGame() {
                         placeholder={newPeriodForm.values.gapBonds}
                         label="Gap"
                         name="gapBonds"
-                        tooltip={<p>TODO.</p>}
+                        tooltip={'TODO.'}
                         required
                         data={{ cy: 'gap-bonds' }}
                         className={{ label: 'pb-2 font-normal' }}
@@ -785,7 +793,7 @@ function ManageGame() {
                         placeholder={newPeriodForm.values.trendStocks}
                         label="Trend"
                         name="trendStocks"
-                        tooltip={<p>Trend is the expectation value.</p>}
+                        tooltip={'Trend is the expectation value.'}
                         required
                         data={{ cy: 'trend-stocks' }}
                         className={{ label: 'pb-2 font-normal' }}
@@ -794,7 +802,7 @@ function ManageGame() {
                         placeholder={newPeriodForm.values.gapStocks}
                         label="Gap"
                         name="gapStocks"
-                        tooltip={<p>TODO.</p>}
+                        tooltip={'TODO.'}
                         required
                         data={{ cy: 'gap-stocks' }}
                         className={{ label: 'pb-2 font-normal' }}
@@ -834,7 +842,6 @@ function ManageGame() {
                 gameId: Number(router.query.id),
                 seconds: Number(values.countdownSeconds),
               },
-              refetchQueries: [GameDocument],
             })
           }
         >

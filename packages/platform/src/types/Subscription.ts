@@ -5,13 +5,21 @@ import { Event } from '../nexus.js'
 export function generateBaseSubscriptions() {
   return subscriptionType({
     definition(t) {
-      t.list.nonNull.field('eventsGlobal', {
+      t.field('eventsGlobal', {
         type: Event,
         async subscribe(_, args, ctx) {
-          return pubSub.subscribe('global:events')
+          // ctx.pubSub should be the instance you configured in createYoga context
+          if (ctx.pubSub) {
+            return ctx.pubSub.subscribe('global:events') // pubSub.subscribe() returns AsyncIterableIterator
+          }
+          // Fallback or error handling if pubSub is not in context
+          // This will likely lead to the "Expected Iterable" error if this path is taken
+          // Forcing an error or returning an empty async iterable is better than returning undefined
+          async function* empty() {}
+          return empty()
         },
         async resolve(payload) {
-          return payload as any
+          return payload
         },
       })
       t.list.nonNull.field('eventsUser', {

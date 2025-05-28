@@ -93,6 +93,8 @@ export interface NexusGenObjects {
     id: number; // Int!
   }
   Event: { // root type
+    facts?: NexusGenScalars['JSONObject'] | null; // JSONObject
+    sub?: string | null; // String
     type?: string | null; // String
   }
   Game: { // root type
@@ -254,6 +256,8 @@ export interface NexusGenFieldTypes {
     id: number; // Int!
   }
   Event: { // field return type
+    facts: NexusGenScalars['JSONObject'] | null; // JSONObject
+    sub: string | null; // String
     type: string | null; // String
   }
   Game: { // field return type
@@ -414,7 +418,7 @@ export interface NexusGenFieldTypes {
     type: NexusGenEnums['StoryElementType']; // StoryElementType!
   }
   Subscription: { // field return type
-    eventsGlobal: NexusGenRootTypes['Event'][] | null; // [Event!]
+    eventsGlobal: NexusGenRootTypes['Event'] | null; // Event
     eventsUser: NexusGenRootTypes['Event'][] | null; // [Event!]
   }
 }
@@ -434,6 +438,8 @@ export interface NexusGenFieldTypeNames {
     id: 'Int'
   }
   Event: { // field return type name
+    facts: 'JSONObject'
+    sub: 'String'
     type: 'String'
   }
   Game: { // field return type name

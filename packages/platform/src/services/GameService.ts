@@ -1,8 +1,7 @@
 import * as DB from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
 import { nanoid } from 'nanoid'
-import { filter, none, repeat } from 'ramda'
-import { standardDeviation } from '../lib/util.js'
+import { none, repeat } from 'ramda'
 import * as yup from 'yup'
 import log from '../lib/logger.js'
 import {
@@ -10,6 +9,8 @@ import {
   CtxWithFactsAndSchema,
   CtxWithPrisma,
   UpdatePlayerDataArgs,
+  BaseGlobalNotificationType,
+  Event as PlatformEvent,
 } from '../types.js'
 import * as EventService from './EventService.js'
 
@@ -329,7 +330,7 @@ export async function activateNextPeriod(
   ctx: Context,
   { services }: CtxWithFacts<any, PrismaClient>
 ) {
-  log.info('activating next period')
+  log.info('activating next period for gameId:', gameId)
 
   // get the current game and as well as the results of the initially active period
   // these will be used by the model to compute the starting situation of the next period
@@ -393,6 +394,7 @@ export async function activateNextPeriod(
   //   type: GlobalNotificationType.PERIOD_ACTIVATED,
   // })
 
+  let finalTransactionResult
   switch (game.status) {
     // SCHEDULED -> PREPARATION
     // if the game is scheduled, initialize period results and move to PREPARATION
@@ -429,7 +431,7 @@ export async function activateNextPeriod(
       //   gameData.facts = gameFactsToUpdate
       // }
 
-      const result = await ctx.prisma.$transaction([
+      finalTransactionResult = await ctx.prisma.$transaction([
         ctx.prisma.game.update({
           where: {
             id: gameId,
@@ -461,7 +463,7 @@ export async function activateNextPeriod(
         ...extras,
       ])
 
-      return result
+      break
     }
 
     // RUNNING -> CONSOLIDATION
@@ -485,7 +487,7 @@ export async function activateNextPeriod(
         }
       )
 
-      const result = await ctx.prisma.$transaction([
+      finalTransactionResult = await ctx.prisma.$transaction([
         ctx.prisma.game.update({
           data: { status: DB.GameStatus.CONSOLIDATION },
           include: {
@@ -538,7 +540,7 @@ export async function activateNextPeriod(
         ...extras,
       ])
 
-      return result
+      break
     }
 
     // CONSOLIDATION -> RESULTS
@@ -605,7 +607,7 @@ export async function activateNextPeriod(
 
       // TODO(JJ): Check with RS
       // - when updating the game with the nextPeriodIx it crashes
-      const result = await ctx.prisma.$transaction([
+      finalTransactionResult = await ctx.prisma.$transaction([
         // update the status and active period of the current game
         ctx.prisma.game.update({
           where: {
@@ -642,7 +644,7 @@ export async function activateNextPeriod(
         ...extras,
       ])
 
-      return result
+      break
     }
 
     // RESULTS -> PREPARATION
@@ -690,7 +692,7 @@ export async function activateNextPeriod(
         { services }
       )
 
-      const result = await ctx.prisma.$transaction([
+      finalTransactionResult = await ctx.prisma.$transaction([
         // update the status and active period of the current game
         ctx.prisma.game.update({
           where: {
@@ -724,13 +726,45 @@ export async function activateNextPeriod(
         ...extras,
       ])
 
-      return result
+      break
     }
 
     default:
       // PREPARATION, PAUSED, COMPLETED, etc.
+      log.warn(
+        `activateNextPeriod called with unhandled game status: ${game.status} for gameId: ${gameId}`
+      )
       return null
   }
+
+  if (finalTransactionResult) {
+    // Re-fetch game state to ensure event reflects committed data
+    const gameAfterUpdate = await ctx.prisma.game.findUnique({
+      where: { id: gameId },
+      // Include what's necessary for the event payload
+      select: {
+        status: true,
+        activePeriodIx: true,
+      },
+    })
+
+    if (gameAfterUpdate) {
+      const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
+        type: BaseGlobalNotificationType.PERIOD_ACTIVATED,
+        facts: {
+          gameId: gameId,
+          status: gameAfterUpdate.status,
+          activePeriodIx: gameAfterUpdate.activePeriodIx,
+        },
+      }
+      EventService.publishGlobalNotification(eventToPublish)
+      log.info(
+        `Published ${eventToPublish.type} for game ${gameId}`,
+        eventToPublish.facts
+      )
+    }
+  }
+  return finalTransactionResult
 }
 
 interface ActivateSegmentArgs {
@@ -784,6 +818,7 @@ export async function activateNextSegment(
   //   type: GlobalNotificationType.SEGMENT_ACTIVATED,
   // })
 
+  let finalTransactionResult
   switch (game.status) {
     // PREPARATION -> RUNNING
     // PAUSED -> RUNNING
@@ -804,7 +839,7 @@ export async function activateNextSegment(
         services,
       })
 
-      const result = await ctx.prisma.$transaction([
+      finalTransactionResult = await ctx.prisma.$transaction([
         ctx.prisma.game.update({
           where: {
             id: gameId,
@@ -819,6 +854,8 @@ export async function activateNextSegment(
           },
           data: {
             status: DB.GameStatus.RUNNING,
+            // TODO(JJ): We need this to be updated
+            // activeSegmentIx: nextSegmentIx,
             ...(updatedGameFacts ? { facts: game.facts as any } : {}),
           },
         }),
@@ -864,7 +901,7 @@ export async function activateNextSegment(
         ...extras,
       ])
 
-      return result
+      break
     }
 
     // RUNNING -> PAUSED
@@ -879,7 +916,7 @@ export async function activateNextSegment(
         services,
       })
 
-      const result = await ctx.prisma.$transaction([
+      finalTransactionResult = await ctx.prisma.$transaction([
         ctx.prisma.game.update({
           where: { id: gameId },
           include: {
@@ -926,12 +963,48 @@ export async function activateNextSegment(
         ...extras,
       ])
 
-      return result
+      break
     }
 
     default:
+      log.warn(
+        `activateNextSegment called with unhandled game status: ${game.status} for gameId: ${gameId}`
+      )
       return null
   }
+  if (finalTransactionResult) {
+    const gameAfterUpdate = await ctx.prisma.game.findUnique({
+      where: { id: gameId },
+      select: {
+        status: true,
+        activePeriodIx: true,
+        activePeriod: {
+          include: {
+            activeSegment: true,
+          },
+        },
+      },
+    })
+
+    if (gameAfterUpdate && gameAfterUpdate.activePeriod) {
+      const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
+        type: BaseGlobalNotificationType.SEGMENT_ACTIVATED,
+        facts: {
+          gameId: gameId,
+          status: gameAfterUpdate.status,
+          activePeriodIx: gameAfterUpdate.activePeriodIx,
+          activeSegmentIx: gameAfterUpdate.activePeriod.activeSegmentIx,
+        },
+      }
+      EventService.publishGlobalNotification(eventToPublish)
+      log.info(
+        `Published ${eventToPublish.type} for game ${gameId}`,
+        eventToPublish.facts
+      )
+    }
+  }
+
+  return finalTransactionResult
 }
 
 export async function updatePlayerData<PlayerFactsType>(

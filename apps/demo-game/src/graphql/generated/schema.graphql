@@ -28,6 +28,8 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 scalar DateTime
 
 type Event {
+  facts: JSONObject
+  sub: String
   type: String
 }
 
@@ -262,7 +264,7 @@ enum StoryElementType {
 }
 
 type Subscription {
-  eventsGlobal: [Event!]
+  eventsGlobal: Event
   eventsUser: [Event!]
 }
 

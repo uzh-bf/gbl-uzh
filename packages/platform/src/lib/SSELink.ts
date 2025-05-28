@@ -25,8 +25,9 @@ class SSELink extends ApolloLink {
           next: (value) => {
             if (value.errors) {
               sink.error(value.errors)
-            } else if (value.data) {
-              sink.next(value.data as FetchResult)
+            } else {
+              // Ensure `sink.next()` always receives a full FetchResult object
+              sink.next(value as FetchResult)
             }
           },
           complete: sink.complete.bind(sink),
