@@ -90,6 +90,7 @@
     "check:fix": "npm-run-all check:ts format lint:fix",
     "check:ts": "tsc",
     "dev": "run-s prisma:copy prisma:generate build:nexus dev:exec",
+    "dev:doppler": "doppler run --config dev -- pnpm run dev",
     "dev:exec": "run-p dev:graphql dev:next dev:nexus",
     "dev:graphql": "graphql-codegen --config codegen.ts --watch",
     "dev:next": "next dev",
