@@ -7,7 +7,12 @@ import {
   Operation,
 } from '@apollo/client/core'
 import { print } from 'graphql'
-import { Client, ClientOptions, createClient } from 'graphql-sse'
+import {
+  Client,
+  ClientOptions,
+  createClient,
+  ExecutionResult,
+} from 'graphql-sse'
 
 class SSELink extends ApolloLink {
   private client: Client
@@ -22,13 +27,13 @@ class SSELink extends ApolloLink {
       return this.client.subscribe<FetchResult>(
         { ...operation, query: print(operation.query) },
         {
-          next: (value) => {
-            if (value.errors) {
-              sink.error(value.errors)
-            } else {
-              // Ensure `sink.next()` always receives a full FetchResult object
-              sink.next(value as FetchResult)
-            }
+          next: (value: ExecutionResult<FetchResult, unknown>) => {
+            sink.next(value as FetchResult)
+            // sink.next({
+            //   data: value.data,
+            //   errors: value.errors,
+            //   extensions: value.extensions,
+            // } as FetchResult)
           },
           complete: sink.complete.bind(sink),
           error: sink.error.bind(sink),

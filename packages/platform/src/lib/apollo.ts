@@ -17,14 +17,14 @@ function createIsomorphLink() {
 
   let httpLink: ApolloLink = new HttpLink({
     uri: apiUrl,
-    credentials: 'same-origin',
+    credentials: 'include',
   })
 
   // on the client, differentiate between links for query/mutation and subscriptions
   if (isBrowser) {
     const sseLink = new SSELink({
       url: apiUrl,
-      credentials: 'same-origin',
+      credentials: 'include',
     })
 
     // swap out the http link with a split based on operation type
