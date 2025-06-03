@@ -1,5 +1,4 @@
 import { subscriptionType } from 'nexus'
-import { pubSub } from '../lib/pubsub.js'
 import { Event } from '../nexus.js'
 
 export function generateBaseSubscriptions() {
@@ -26,10 +25,10 @@ export function generateBaseSubscriptions() {
         type: Event,
         async subscribe(_, args, ctx) {
           if (ctx.user) {
-            return pubSub.subscribe('user:events', String(ctx.user.sub))
+            return ctx.pubSub.subscribe('user:events', String(ctx.user.sub))
           }
 
-          return pubSub.subscribe('user:events', 'anonymous')
+          return ctx.pubSub.subscribe('user:events', 'anonymous')
         },
         async resolve(payload) {
           return payload as any

@@ -24,21 +24,27 @@ class SSELink extends ApolloLink {
 
   public override request(operation: Operation): Observable<FetchResult> {
     return new Observable((sink) => {
-      return this.client.subscribe<FetchResult>(
+      const unsubscribe = this.client.subscribe<FetchResult>(
         { ...operation, query: print(operation.query) },
         {
           next: (value: ExecutionResult<FetchResult, unknown>) => {
             sink.next(value as FetchResult)
-            // sink.next({
-            //   data: value.data,
-            //   errors: value.errors,
-            //   extensions: value.extensions,
-            // } as FetchResult)
           },
-          complete: sink.complete.bind(sink),
-          error: sink.error.bind(sink),
+          complete: () => {
+            sink.complete()
+          },
+          error: (err) => {
+            console.error(
+              '[SSELink] Error from SSE stream:',
+              err,
+              'for operation:',
+              operation.operationName
+            )
+            sink.error(err)
+          },
         }
       )
+      return unsubscribe
     })
   }
 }
