@@ -51,7 +51,15 @@ export async function performAction<ActionTypes>(
         },
       })
 
-      if (!previousResult) return null
+      if (!previousResult) {
+        console.warn('performAction: No previous result found', {
+          periodIx: args.periodIx,
+          segmentIx: args.segmentIx,
+          playerId: args.playerId,
+          actionType: args.actionType,
+        })
+        return null
+      }
 
       if (previousResult.game.status !== DB.GameStatus.RUNNING) {
         throw new Error('ACTIONS_NOT_ALLOWED')
