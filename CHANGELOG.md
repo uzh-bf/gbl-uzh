@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.27](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.26...v0.4.27) (2025-06-04)
+
+
+### Features
+
+* **platform:** sse improvements ([#106](https://github.com/uzh-bf/gbl-uzh/issues/106)) ([cfa4257](https://github.com/uzh-bf/gbl-uzh/commit/cfa4257f9f92c152548a6ec912025dcac65332bd))
+
+
+### Bug Fixes
+
+* **platform:** sse: make sure cookies etc are allowed to be send for sse ([#105](https://github.com/uzh-bf/gbl-uzh/issues/105)) ([ec3e202](https://github.com/uzh-bf/gbl-uzh/commit/ec3e20236b3cc1aa1b353336e11891c01c239eaa))
+
 ### [0.4.26](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.25...v0.4.26) (2025-05-28)
 
 
