@@ -355,7 +355,7 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
     segmentCount: period.segments.length,
   }))
 
-  // We filter up to the active period (and active segemnt) - future periods
+  // We filter up to the active period (and active segment) - future periods
   // should not be visible to the user
   const activePeriodIx = currentGame.activePeriodIx
   currentGame.periods = currentGame.periods.filter(
@@ -370,7 +370,7 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
   currentGame.periods[activePeriodIx]!.segments =
     currentGame.activePeriod.segments
 
-  const previousResults = ctx.prisma.playerResult.findMany({
+  const previousResults = await ctx.prisma.playerResult.findMany({
     orderBy: {
       id: 'asc',
     },
@@ -392,7 +392,10 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
         periodIx: currentGame.activePeriodIx,
         segmentIx: currentGame.activePeriod.activeSegmentIx,
         playerId: args.playerId,
-        type: DB.PlayerResultType.SEGMENT_END,
+        type:
+          activePeriodIx === 0 && activeSegmentIx === -1
+            ? DB.PlayerResultType.PERIOD_START
+            : DB.PlayerResultType.SEGMENT_END,
       },
     },
     include: {
@@ -406,7 +409,7 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
     },
   })
 
-  const transactions = ctx.prisma.playerAction.findMany({
+  const transactions = await ctx.prisma.playerAction.findMany({
     where: {
       player: {
         id: args.playerId,
