@@ -1223,6 +1223,7 @@ export function computePeriodStartResults(
         return {
           type: DB.PlayerResultType.PERIOD_START,
           periodIx: currentPeriodIx,
+          segmentIx: -1,
           facts,
           player: {
             connect: {
@@ -1264,6 +1265,7 @@ export function computePeriodStartResults(
     return {
       type: DB.PlayerResultType.PERIOD_START,
       periodIx: nextPeriodIx,
+      segmentIx: -1,
       facts,
       player: {
         connect: {
@@ -1317,7 +1319,8 @@ export async function computePeriodEndResults(
   const results = activeSegmentResults
     .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
     .map((result, ix, allResults) => {
-      const segmentEndResults = perPlayer[result.playerId].segmentEndResults
+      const segmentEndResultsLocal =
+        perPlayer[result.playerId].segmentEndResults
       const consolidationDecisions =
         perPlayer[result.playerId].consolidationDecisions
       const {
@@ -1325,7 +1328,7 @@ export async function computePeriodEndResults(
         actions,
         events,
       } = services.PeriodResult.end(result.facts, {
-        segmentEndResults,
+        segmentEndResults: segmentEndResultsLocal,
         gameFacts: game.facts,
         periodFacts,
         segmentFacts,
