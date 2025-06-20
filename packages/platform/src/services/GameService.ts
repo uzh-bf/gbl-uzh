@@ -1310,6 +1310,9 @@ export async function computePeriodEndResults(
       segmentEndResults: segmentEndResults.filter(
         (res) => res.playerId === player.id
       ),
+      otherPlayersSegmentEndResults: segmentEndResults.filter(
+        (res) => res.playerId !== player.id
+      ),
       consolidationDecisions: periodDecisions.find(
         (decision) => decision.playerId === player.id
       ),
@@ -1321,6 +1324,8 @@ export async function computePeriodEndResults(
     .map((result, ix, allResults) => {
       const segmentEndResultsLocal =
         perPlayer[result.playerId].segmentEndResults
+      const otherPlayersSegmentEndResults =
+        perPlayer[result.playerId].otherPlayersSegmentEndResults
       const consolidationDecisions =
         perPlayer[result.playerId].consolidationDecisions
       const {
@@ -1329,6 +1334,7 @@ export async function computePeriodEndResults(
         events,
       } = services.PeriodResult.end(result.facts, {
         segmentEndResults: segmentEndResultsLocal,
+        otherPlayersSegmentEndResults,
         gameFacts: game.facts,
         periodFacts,
         segmentFacts,

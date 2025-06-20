@@ -35,9 +35,10 @@ export async function performAction<ActionTypes>(
   }
 
   let notificationsToPublish = []
+  let globalNotificationToPublish
 
   // All reads and writes are now in a single atomic transaction.
-  const res = ctx.prisma.$transaction(
+  const res = await ctx.prisma.$transaction(
     async (tx) => {
       const previousResult = await tx.playerResult.findUnique({
         where: {
@@ -69,6 +70,7 @@ export async function performAction<ActionTypes>(
         result,
         events,
         notifications,
+        globalNotification,
         isDirty,
         extras,
         updatedSegmentFacts,
@@ -88,7 +90,8 @@ export async function performAction<ActionTypes>(
         },
       })
 
-      notificationsToPublish = notifications
+      notificationsToPublish = notifications ?? []
+      globalNotificationToPublish = globalNotification
 
       await EventService.receiveEvents({
         events,
@@ -207,9 +210,17 @@ export async function performAction<ActionTypes>(
     }
   )
 
+  if (globalNotificationToPublish) {
+    EventService.publishGlobalNotification(globalNotificationToPublish)
+    log.info(
+      `Published ${globalNotificationToPublish.type} for game ${args.gameId}`,
+      globalNotificationToPublish.facts
+    )
+  }
+
   // After transaction completes successfully, publish notifications
   if (notificationsToPublish.length > 0) {
-    await EventService.publishUserNotification(ctx, notificationsToPublish)
+    EventService.publishUserNotification(ctx, notificationsToPublish)
   }
 
   return res

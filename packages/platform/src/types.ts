@@ -40,6 +40,7 @@ export type OutputFactsUser<
   FactsType,
   GameFactsType,
   NotificationType,
+  GlobalNotificationType,
   EventType
 > = {
   result: FactsType
@@ -47,6 +48,7 @@ export type OutputFactsUser<
   extras?: any
   actions?: any[]
   notifications?: Notification<NotificationType>[]
+  globalNotification?: Notification<GlobalNotificationType>
   events?: Event<EventType>[]
   updatedGameFacts?: GameFactsType
   updatedPeriodFacts?: any
@@ -112,6 +114,7 @@ export type PayloadPeriodResultEnd<
   PlayerRoleType
 > = {
   segmentEndResults: ResultsFactsType
+  otherPlayersSegmentEndResults: ResultsFactsType
   gameFacts: GameFactsType
   periodFacts: PeriodFactsType
   segmentFacts: PeriodSegmentFactsType
@@ -280,19 +283,26 @@ interface Reducer<
   ActionType,
   PayloadType,
   NotificationType,
+  GlobalNotificationType,
   EventType,
   PrismaType
 > {
   apply: (
     state: StateType,
     action: Action<ActionType, PayloadType, PrismaType>
-  ) => OutputFactsUser<StateType, GameFactsType, NotificationType, EventType>
+  ) => OutputFactsUser<
+    StateType,
+    GameFactsType,
+    NotificationType,
+    GlobalNotificationType,
+    EventType
+  >
   ActionTypes: Record<string, string>
 }
 
 interface Services<PrismaType> {
   GameFacts: Game<any, any, any, any>
-  Actions: Reducer<any, any, any, any, any, any, PrismaType>
+  Actions: Reducer<any, any, any, any, any, any, any, PrismaType>
   Period: Period<any, any, any, any, any, any, PrismaType>
   PeriodResult: PeriodResult<any, any, any, any, any, any, any, any, PrismaType>
   Segment: Segment<any, any, any, any, any, any, PrismaType>
@@ -318,10 +328,11 @@ export interface CtxWithFactsAndSchema<FactsType, PrismaType> {
 }
 
 export enum BaseGlobalNotificationType {
-  GAME_STATE_UPDATED = 'GAME_STATE_UPDATED', // Generic, or more specific:
+  GAME_STATE_UPDATED = 'GAME_STATE_UPDATED',
   PERIOD_ACTIVATED = 'PERIOD_ACTIVATED',
   SEGMENT_ACTIVATED = 'SEGMENT_ACTIVATED',
   COUNTDOWN_UPDATED = 'COUNTDOWN_UPDATED',
+  ACTION_PERFORMED = 'ACTION_PERFORMED',
 }
 
 export enum BaseUserNotificationType {
