@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.28](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.27...v0.4.28) (2025-06-20)
+
+
+### Features
+
+* **platform:** add other segment end results of other teams + action subscription ([#108](https://github.com/uzh-bf/gbl-uzh/issues/108)) ([67dd6c8](https://github.com/uzh-bf/gbl-uzh/commit/67dd6c8858bc543de3702ceb1398c5eb33e899df))
+
+
+### Bug Fixes
+
+* **platform:** make sure period_start result has segment index for results before se… ([#107](https://github.com/uzh-bf/gbl-uzh/issues/107)) ([b961db7](https://github.com/uzh-bf/gbl-uzh/commit/b961db74729b4164598170c671947169a3b837a6))
+
 ### [0.4.27](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.26...v0.4.27) (2025-06-04)
 
 
