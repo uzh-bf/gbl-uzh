@@ -241,7 +241,7 @@ export async function addPeriodSegment<TFacts>(
     services.Segment.initialize(validatedFacts, {
       gameFacts: game.facts,
       periodFacts: period.facts,
-      previousSegmentFacts: previousSegmentFacts,
+      previousSegmentFacts,
       segmentIx: index,
       segmentCount: period.segmentCount,
       periodIx,
