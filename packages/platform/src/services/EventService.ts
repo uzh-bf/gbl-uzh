@@ -221,9 +221,7 @@ export async function receiveEvent(
   return []
 }
 
-export function publishGlobalNotification(
-  event: PlatformEvent<BaseGlobalNotificationType>
-) {
+export function publishGlobalNotification(event: PlatformEvent<any>) {
   try {
     pubSub.publish('global:events', event)
     log.info('[EventService] Successfully published to "global:events".')
