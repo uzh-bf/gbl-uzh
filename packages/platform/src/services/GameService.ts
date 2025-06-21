@@ -228,12 +228,20 @@ export async function addPeriodSegment<TFacts>(
   if (!period) return null
 
   const index = (period.segments[0]?.index ?? -1) + 1
+  let previousSegmentFacts = period.segments[0]?.facts
+  if (index === 0 && periodIx > 0) {
+    const previousPeriod = await ctx.prisma.period.findUnique({
+      where: { gameId_index: { gameId, index: periodIx - 1 } },
+      include: { segments: { orderBy: { index: 'desc' }, take: 1 } },
+    })
+    previousSegmentFacts = previousPeriod?.segments[0]?.facts
+  }
 
   const { resultFacts: initializedFacts, updatedGameFacts } =
     services.Segment.initialize(validatedFacts, {
       gameFacts: game.facts,
       periodFacts: period.facts,
-      previousSegmentFacts: period.segments[0]?.facts,
+      previousSegmentFacts,
       segmentIx: index,
       segmentCount: period.segmentCount,
       periodIx,
