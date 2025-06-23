@@ -1,7 +1,7 @@
 {
   "name": "@gbl-uzh/advisor",
   "description": "",
-  "version": "0.4.29",
+  "version": "0.4.30",
   "license": "AGPL-3.0",
   "main": "tailwind.config.js",
   "scripts": {

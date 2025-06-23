@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.30](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.29...v0.4.30) (2025-06-23)
+
+
+### Features
+
+* **platform:** adding toggle switch and toggle event for subscription ([#110](https://github.com/uzh-bf/gbl-uzh/issues/110)) ([1756d19](https://github.com/uzh-bf/gbl-uzh/commit/1756d192973123b50bb2f125ee7fcecf6cf59786))
+
+
+### Bug Fixes
+
+* **platform:** forgot to save file - basenotification type rename ([#111](https://github.com/uzh-bf/gbl-uzh/issues/111)) ([59540ae](https://github.com/uzh-bf/gbl-uzh/commit/59540ae6cfcdaf70cc06206f0a56fb7cb15e862a))
+
 ### [0.4.29](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.28...v0.4.29) (2025-06-21)
 
 ### [0.4.28](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.27...v0.4.28) (2025-06-20)
