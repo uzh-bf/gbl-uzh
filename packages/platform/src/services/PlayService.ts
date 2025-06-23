@@ -829,7 +829,7 @@ export async function toggleSwitch(args, ctx: Context) {
   }
 
   const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
-    type: BaseGlobalNotificationType.SWITCH_ACTIVATED,
+    type: BaseGlobalNotificationType.SWITCH_TOGGLED,
     facts: {
       gameId: args.gameId,
       periodId: currentGame.activePeriod.id,
