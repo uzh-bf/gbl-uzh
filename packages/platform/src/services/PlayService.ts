@@ -808,3 +808,43 @@ export async function addCountdown(args, ctx: Context) {
 
   return true
 }
+
+export async function toggleSwitch(args, ctx: Context) {
+  const currentGame = await ctx.prisma.game.findUnique({
+    where: { id: args.gameId },
+    include: {
+      activePeriod: {
+        include: {
+          activeSegment: true,
+        },
+      },
+    },
+  })
+
+  if (!currentGame?.activePeriod?.activeSegment) {
+    log.warn(
+      `toggleSwitch: No active period or segment for game ${args.gameId}`
+    )
+    return null // Or false, depending on expected return type
+  }
+
+  const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
+    type: BaseGlobalNotificationType.SWITCH_ACTIVATED,
+    facts: {
+      gameId: args.gameId,
+      periodId: currentGame.activePeriod.id,
+      segmentId: currentGame.activePeriod.activeSegment.id,
+      status: currentGame.status,
+      activePeriodIx: currentGame.activePeriodIx,
+      activeSegmentIx: currentGame.activePeriod.activeSegmentIx,
+      toggle: args.toggle,
+    },
+  }
+  EventService.publishGlobalNotification(eventToPublish)
+  log.info(
+    `Published ${eventToPublish.type} for game ${args.gameId}`,
+    eventToPublish.facts
+  )
+
+  return args.toggle
+}

@@ -244,6 +244,16 @@ export function generateBaseMutations<
           return PlayService.addCountdown(args, ctx)
         },
       })
+
+      t.boolean('toggleSwitch', {
+        args: {
+          gameId: nonNull(intArg()),
+          toggle: nonNull(booleanArg()),
+        },
+        async resolve(_, args, ctx) {
+          return PlayService.toggleSwitch(args, ctx)
+        },
+      })
     },
   })
 }
