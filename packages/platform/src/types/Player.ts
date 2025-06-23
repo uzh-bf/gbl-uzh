@@ -112,6 +112,8 @@ export const PlayerResult = objectType({
     t.field('segment', {
       type: PeriodSegment,
     })
+    t.int('segmentIx')
+    t.nonNull.int('periodIx')
   },
 })
 
