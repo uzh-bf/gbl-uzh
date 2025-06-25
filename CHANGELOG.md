@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.31](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.30...v0.4.31) (2025-06-25)
+
+
+### Bug Fixes
+
+* **platform:** update gamefacts db when toggling ([#112](https://github.com/uzh-bf/gbl-uzh/issues/112)) ([a161b3d](https://github.com/uzh-bf/gbl-uzh/commit/a161b3dc6abe8bfc6887587365441fec531c1bbd))
+
 ### [0.4.30](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.29...v0.4.30) (2025-06-23)
 
 
