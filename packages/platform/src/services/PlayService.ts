@@ -828,6 +828,11 @@ export async function toggleSwitch(args, ctx: Context) {
     return null // Or false, depending on expected return type
   }
 
+  await ctx.prisma.game.update({
+    where: { id: args.gameId },
+    data: { facts: { ...(currentGame.facts as any), toggle: args.toggle } },
+  })
+
   const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
     type: BaseGlobalNotificationType.SWITCH_TOGGLED,
     facts: {
