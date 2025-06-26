@@ -3,7 +3,7 @@ import * as GameService from '../services/GameService.js'
 import * as PlayService from '../services/PlayService.js'
 import { Game } from './Game.js'
 import { LearningElement, LearningElementState } from './LearningElement.js'
-import { Player, PlayerResult, PlayerState } from './Player.js'
+import { Player, PlayerDecision, PlayerResult, PlayerState } from './Player.js'
 import { StoryElement } from './StoryElement.js'
 
 export function generateBaseQueries() {
@@ -31,6 +31,16 @@ export function generateBaseQueries() {
         type: PlayerState,
         async resolve(_, args, ctx) {
           return PlayService.getPlayerResult(
+            { gameId: ctx.user.gameId, playerId: ctx.user.sub },
+            ctx
+          ) as any
+        },
+      })
+
+      t.field('decision', {
+        type: PlayerDecision,
+        async resolve(_, args, ctx) {
+          return PlayService.getPlayerDecision(
             { gameId: ctx.user.gameId, playerId: ctx.user.sub },
             ctx
           ) as any
