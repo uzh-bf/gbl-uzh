@@ -37,6 +37,16 @@ export function generateBaseQueries() {
         },
       })
 
+      t.field('decision', {
+        type: PlayerState,
+        async resolve(_, args, ctx) {
+          return PlayService.getPlayerDecision(
+            { gameId: ctx.user.gameId, playerId: ctx.user.sub },
+            ctx
+          ) as any
+        },
+      })
+
       t.field('self', {
         type: Player,
         async resolve(_, args, ctx) {

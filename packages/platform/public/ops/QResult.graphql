@@ -50,4 +50,10 @@ query Result {
   self {
     ...PlayerData
   }
+
+  decision {
+    type
+    facts
+    playerId
+  }
 }

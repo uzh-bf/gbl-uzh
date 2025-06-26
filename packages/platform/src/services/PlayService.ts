@@ -464,6 +464,32 @@ export async function getPlayerData(args: GetPlayerDataArgs, ctx: Context) {
   })
 }
 
+interface GetPlayerDecisionArgs {
+  gameId: number
+  playerId: string
+}
+
+export async function getPlayerDecision(
+  args: GetPlayerDecisionArgs,
+  ctx: Context
+) {
+  const currentGame = await ctx.prisma.game.findUnique({
+    where: { id: args.gameId },
+  })
+  if (!currentGame) return null
+
+  const decision = await ctx.prisma.playerDecision.findUnique({
+    where: {
+      playerId_periodIx_type: {
+        playerId: args.playerId,
+        periodIx: currentGame.activePeriodIx,
+        type: 'CONSOLIDATION',
+      },
+    },
+  })
+  return decision
+}
+
 interface GetLearningElementArgs {
   id: string
 }
