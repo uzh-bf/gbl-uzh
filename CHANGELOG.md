@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.32](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.31...v0.4.32) (2025-06-26)
+
+
+### Features
+
+* **platform:** add decision to result document ([#113](https://github.com/uzh-bf/gbl-uzh/issues/113)) ([db50cef](https://github.com/uzh-bf/gbl-uzh/commit/db50cef9b765abe3abd0ca9ee61e29151c8cadd1))
+
 ### [0.4.31](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.30...v0.4.31) (2025-06-25)
 
 
