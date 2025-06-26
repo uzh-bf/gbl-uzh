@@ -54,6 +54,5 @@ query Result {
   decision {
     type
     facts
-    playerId
   }
 }

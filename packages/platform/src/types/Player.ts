@@ -33,9 +33,6 @@ export const PlayerState = objectType({
     t.field('playerResult', {
       type: PlayerResult,
     })
-    t.field('playerDecision', {
-      type: PlayerDecision,
-    })
     t.field('currentGame', {
       type: Game,
     })
