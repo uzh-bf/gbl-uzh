@@ -91,6 +91,7 @@ model Game {
   name String
 
   facts Json
+  version Int @default(0)
 
   decisions PlayerDecision[]
   actions   PlayerAction[]

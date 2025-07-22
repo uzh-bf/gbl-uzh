@@ -109,6 +109,7 @@ type Mutation {
   markStoryElement(elementId: ID!): Player
   performAction(payload: String!, type: String!): PlayerResult
   saveConsolidationDecision(payload: String!): PlayerDecision
+  toggleSwitch(gameId: Int!, toggle: Boolean!): Boolean
   updatePlayerData(facts: String, name: String): Player
   updateReadyState(isReady: Boolean!): Player
 }
@@ -217,8 +218,10 @@ type PlayerResult {
   facts: JSONObject
   id: ID!
   period: Period!
+  periodIx: Int!
   player: Player!
   segment: PeriodSegment
+  segmentIx: Int
   type: PlayerResultType
 }
 
@@ -237,6 +240,7 @@ type PlayerState {
 }
 
 type Query {
+  decision: PlayerDecision
   game(id: Int): Game
   games: [Game!]
   learningElement(id: ID!): LearningElementState

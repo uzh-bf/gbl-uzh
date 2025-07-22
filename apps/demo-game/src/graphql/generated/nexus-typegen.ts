@@ -209,8 +209,10 @@ export interface NexusGenObjects {
     facts?: NexusGenScalars['JSONObject'] | null; // JSONObject
     id: string; // ID!
     period: NexusGenRootTypes['Period']; // Period!
+    periodIx: number; // Int!
     player: NexusGenRootTypes['Player']; // Player!
     segment?: NexusGenRootTypes['PeriodSegment'] | null; // PeriodSegment
+    segmentIx?: number | null; // Int
     type?: NexusGenEnums['PlayerResultType'] | null; // PlayerResultType
   }
   PlayerState: { // root type
@@ -311,6 +313,7 @@ export interface NexusGenFieldTypes {
     markStoryElement: NexusGenRootTypes['Player'] | null; // Player
     performAction: NexusGenRootTypes['PlayerResult'] | null; // PlayerResult
     saveConsolidationDecision: NexusGenRootTypes['PlayerDecision'] | null; // PlayerDecision
+    toggleSwitch: boolean | null; // Boolean
     updatePlayerData: NexusGenRootTypes['Player'] | null; // Player
     updateReadyState: NexusGenRootTypes['Player'] | null; // Player
   }
@@ -387,8 +390,10 @@ export interface NexusGenFieldTypes {
     facts: NexusGenScalars['JSONObject'] | null; // JSONObject
     id: string; // ID!
     period: NexusGenRootTypes['Period']; // Period!
+    periodIx: number; // Int!
     player: NexusGenRootTypes['Player']; // Player!
     segment: NexusGenRootTypes['PeriodSegment'] | null; // PeriodSegment
+    segmentIx: number | null; // Int
     type: NexusGenEnums['PlayerResultType'] | null; // PlayerResultType
   }
   PlayerState: { // field return type
@@ -398,6 +403,7 @@ export interface NexusGenFieldTypes {
     transactions: NexusGenRootTypes['PlayerAction'][] | null; // [PlayerAction!]
   }
   Query: { // field return type
+    decision: NexusGenRootTypes['PlayerDecision'] | null; // PlayerDecision
     game: NexusGenRootTypes['Game'] | null; // Game
     games: NexusGenRootTypes['Game'][] | null; // [Game!]
     learningElement: NexusGenRootTypes['LearningElementState'] | null; // LearningElementState
@@ -493,6 +499,7 @@ export interface NexusGenFieldTypeNames {
     markStoryElement: 'Player'
     performAction: 'PlayerResult'
     saveConsolidationDecision: 'PlayerDecision'
+    toggleSwitch: 'Boolean'
     updatePlayerData: 'Player'
     updateReadyState: 'Player'
   }
@@ -569,8 +576,10 @@ export interface NexusGenFieldTypeNames {
     facts: 'JSONObject'
     id: 'ID'
     period: 'Period'
+    periodIx: 'Int'
     player: 'Player'
     segment: 'PeriodSegment'
+    segmentIx: 'Int'
     type: 'PlayerResultType'
   }
   PlayerState: { // field return type name
@@ -580,6 +589,7 @@ export interface NexusGenFieldTypeNames {
     transactions: 'PlayerAction'
   }
   Query: { // field return type name
+    decision: 'PlayerDecision'
     game: 'Game'
     games: 'Game'
     learningElement: 'LearningElementState'
@@ -650,6 +660,10 @@ export interface NexusGenArgTypes {
     }
     saveConsolidationDecision: { // args
       payload: string; // String!
+    }
+    toggleSwitch: { // args
+      gameId: number; // Int!
+      toggle: boolean; // Boolean!
     }
     updatePlayerData: { // args
       facts?: string | null; // String
