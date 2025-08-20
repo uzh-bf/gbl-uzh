@@ -222,7 +222,7 @@ export async function performActionWithRetry<ActionTypes>(
   let retries = 0
   while (retries < maxRetries) {
     try {
-      return await performAction(args, ctx, services)
+      return await performAction(args, ctx, { services })
     } catch (error: any) {
       if (
         error.isPrismaError &&

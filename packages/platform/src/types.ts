@@ -38,7 +38,6 @@ export type OutputFactsGame<GameFactsType, NotificationType, EventType> = {
 // TODO(JJ): remove isDirty for ActionReducer
 export type OutputFactsUser<
   FactsType,
-  GameFactsType,
   NotificationType,
   GlobalNotificationType,
   EventType
@@ -50,7 +49,6 @@ export type OutputFactsUser<
   notifications?: Notification<NotificationType>[]
   globalNotification?: Notification<GlobalNotificationType>
   events?: Event<EventType>[]
-  updatedGameFacts?: GameFactsType
   gameFactsToUpdate?: any
   updatedPeriodFacts?: any
   updatedSegmentFacts?: any
@@ -280,7 +278,6 @@ interface SegmentResult<
 
 interface Reducer<
   StateType,
-  GameFactsType,
   ActionType,
   PayloadType,
   NotificationType,
@@ -293,7 +290,6 @@ interface Reducer<
     action: Action<ActionType, PayloadType, PrismaType>
   ) => OutputFactsUser<
     StateType,
-    GameFactsType,
     NotificationType,
     GlobalNotificationType,
     EventType
@@ -304,7 +300,7 @@ interface Reducer<
 
 interface Services<PrismaType> {
   GameFacts: Game<any, any, any, any>
-  Actions: Reducer<any, any, any, any, any, any, any, PrismaType>
+  Actions: Reducer<any, any, any, any, any, any, PrismaType>
   Period: Period<any, any, any, any, any, any, PrismaType>
   PeriodResult: PeriodResult<any, any, any, any, any, any, any, any, PrismaType>
   Segment: Segment<any, any, any, any, any, any, PrismaType>
