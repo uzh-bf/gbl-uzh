@@ -9,7 +9,6 @@ import {
 import * as EventService from './EventService.js'
 import dayjs from 'dayjs'
 import log from '../lib/logger.js'
-import { withRetry } from 'src/lib/util.js'
 
 type Context = CtxWithPrisma<DB.PrismaClient>
 
