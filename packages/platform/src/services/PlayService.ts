@@ -39,181 +39,163 @@ export async function performAction<ActionTypes>(
   let globalNotificationToPublish
 
   // All reads and writes are now in a single atomic transaction.
-  const res = await withRetry(() =>
-    ctx.prisma.$transaction(
-      async (tx) => {
-        const previousResult = await tx.playerResult.findUnique({
-          where: {
-            periodIx_segmentIx_playerId_type,
-          },
-          include: {
-            game: true,
-            segment: true,
-            period: true,
-            player: true,
-          },
+  const res = ctx.prisma.$transaction(
+    async (tx) => {
+      const previousResult = await tx.playerResult.findUnique({
+        where: {
+          periodIx_segmentIx_playerId_type,
+        },
+        include: {
+          game: true,
+          segment: true,
+          period: true,
+          player: true,
+        },
+      })
+
+      if (!previousResult) {
+        console.warn('performAction: No previous result found', {
+          periodIx: args.periodIx,
+          segmentIx: args.segmentIx,
+          playerId: args.playerId,
+          actionType: args.actionType,
         })
-
-        if (!previousResult) {
-          console.warn('performAction: No previous result found', {
-            periodIx: args.periodIx,
-            segmentIx: args.segmentIx,
-            playerId: args.playerId,
-            actionType: args.actionType,
-          })
-          return null
-        }
-
-        if (previousResult.game.status !== DB.GameStatus.RUNNING) {
-          throw new Error('ACTIONS_NOT_ALLOWED')
-        }
-
-        const {
-          result,
-          events,
-          notifications,
-          globalNotification,
-          isDirty,
-          extras,
-          updatedSegmentFacts,
-          updatedPeriodFacts,
-          updatedGameFacts,
-        } = services.Actions.apply(previousResult.facts, {
-          type: args.actionType,
-          payload: {
-            playerArgs: args.facts,
-            segmentFacts: previousResult.segment?.facts,
-            periodFacts: previousResult.period.facts,
-            gameFacts: previousResult.game.facts,
-            periodIx: previousResult.period.index,
-            segmentIx: previousResult.segment?.index,
-            segmentCount: previousResult.period.segmentCount,
-            playerId: previousResult.player.id,
-          },
-        })
-
-        notificationsToPublish = notifications ?? []
-        globalNotificationToPublish = globalNotification
-
-        await EventService.receiveEvents({
-          events,
-          ctx: {
-            user: ctx.user,
-            args,
-            achievements: previousResult.player.achievementKeys,
-            experience: previousResult.player.experience,
-            currentLevelIx: previousResult.player.levelIx,
-          },
-          prisma: tx, // Use the transaction client
-        })
-
-        if (!isDirty) {
-          return previousResult
-        }
-
-        // Update player result
-        const updatedResult = await tx.playerResult.update({
-          where: {
-            periodIx_segmentIx_playerId_type,
-          },
-          data: {
-            facts: result,
-          },
-          include: {
-            period: true,
-          },
-        })
-
-        // Create player action
-        await tx.playerAction.create({
-          data: {
-            periodIx: args.periodIx,
-            period: {
-              connect: {
-                gameId_index: {
-                  gameId: args.gameId,
-                  index: args.periodIx,
-                },
-              },
-            },
-            segmentIx: args.segmentIx,
-            segment: {
-              connect: {
-                gameId_periodIx_index: {
-                  gameId: args.gameId,
-                  periodIx: args.periodIx,
-                  index: args.segmentIx,
-                },
-              },
-            },
-            game: {
-              connect: {
-                id: args.gameId,
-              },
-            },
-            player: {
-              connect: {
-                id: args.playerId,
-              },
-            },
-            type: args.actionType as any,
-            facts: {
-              ...args.facts,
-              ...extras,
-            },
-          },
-        })
-
-        // TODO(JJ): Maybe remove and only allow game facts to be updated
-        if (updatedSegmentFacts && previousResult.segment?.id) {
-          await tx.periodSegment.update({
-            where: { id: previousResult.segment.id },
-            data: { facts: updatedSegmentFacts },
-          })
-        }
-
-        if (updatedPeriodFacts) {
-          await tx.period.update({
-            where: { id: previousResult.period.id },
-            data: { facts: updatedPeriodFacts },
-          })
-        }
-
-        if (updatedGameFacts) {
-          // Update game facts if needed
-          await tx.game.update({
-            where: {
-              id: previousResult.game.id,
-              version: previousResult.game.version,
-            },
-            data: { facts: updatedGameFacts, version: { increment: 1 } },
-          })
-          // TODO(JJ): More efficient way and better concurrency handling
-          // const path = `facts.${args.actionType}`
-          // const value = updatedGameFacts
-          // await tx.$queryRaw`
-          //   UPDATE "Game"
-          //   SET facts = jsonb_set(facts, ${path}::text[], ${JSON.stringify(
-          //         value
-          //       )}::jsonb, true),
-          //       version = version + 1
-          //   WHERE id = ${previousResult.game.id} AND version = ${
-          //         previousResult.game.version
-          //       }
-          // `
-        }
-
-        return updatedResult
-      },
-      {
-        // Use Serializable isolation level for the strongest guarantees
-        // This prevents phantom reads and other concurrency issues.
-        isolationLevel: DB.Prisma.TransactionIsolationLevel.Serializable,
-        // Set an appropriate timeout
-        // Prevents long-running transactions from blocking other operations.
-        timeout: 10000, // 10 seconds
+        return null
       }
-    )
+
+      if (previousResult.game.status !== DB.GameStatus.RUNNING) {
+        throw new Error('ACTIONS_NOT_ALLOWED')
+      }
+
+      const {
+        result,
+        events,
+        notifications,
+        globalNotification,
+        isDirty,
+        extras,
+        updatedSegmentFacts,
+        updatedPeriodFacts,
+        gameFactsToUpdate,
+      } = services.Actions.apply(previousResult.facts, {
+        type: args.actionType,
+        payload: {
+          playerArgs: args.facts,
+          segmentFacts: previousResult.segment?.facts,
+          periodFacts: previousResult.period.facts,
+          gameFacts: previousResult.game.facts,
+          periodIx: previousResult.period.index,
+          segmentIx: previousResult.segment?.index,
+          segmentCount: previousResult.period.segmentCount,
+          playerId: previousResult.player.id,
+        },
+      })
+
+      if (gameFactsToUpdate) {
+        await services.Actions.applyAtomicDBAction(
+          tx,
+          previousResult.game.id,
+          gameFactsToUpdate
+        )
+      }
+
+      notificationsToPublish = notifications ?? []
+      globalNotificationToPublish = globalNotification
+
+      await EventService.receiveEvents({
+        events,
+        ctx: {
+          user: ctx.user,
+          args,
+          achievements: previousResult.player.achievementKeys,
+          experience: previousResult.player.experience,
+          currentLevelIx: previousResult.player.levelIx,
+        },
+        prisma: tx, // Use the transaction client
+      })
+
+      if (!isDirty) {
+        return previousResult
+      }
+
+      // Update player result
+      const updatedResult = await tx.playerResult.update({
+        where: {
+          periodIx_segmentIx_playerId_type,
+        },
+        data: {
+          facts: result,
+        },
+        include: {
+          period: true,
+        },
+      })
+
+      // Create player action
+      await tx.playerAction.create({
+        data: {
+          periodIx: args.periodIx,
+          period: {
+            connect: {
+              gameId_index: {
+                gameId: args.gameId,
+                index: args.periodIx,
+              },
+            },
+          },
+          segmentIx: args.segmentIx,
+          segment: {
+            connect: {
+              gameId_periodIx_index: {
+                gameId: args.gameId,
+                periodIx: args.periodIx,
+                index: args.segmentIx,
+              },
+            },
+          },
+          game: {
+            connect: {
+              id: args.gameId,
+            },
+          },
+          player: {
+            connect: {
+              id: args.playerId,
+            },
+          },
+          type: args.actionType as any,
+          facts: {
+            ...args.facts,
+            ...extras,
+          },
+        },
+      })
+
+      // TODO(JJ): Maybe remove and only allow game facts to be updated
+      if (updatedSegmentFacts && previousResult.segment?.id) {
+        await tx.periodSegment.update({
+          where: { id: previousResult.segment.id },
+          data: { facts: updatedSegmentFacts },
+        })
+      }
+
+      if (updatedPeriodFacts) {
+        await tx.period.update({
+          where: { id: previousResult.period.id },
+          data: { facts: updatedPeriodFacts },
+        })
+      }
+
+      return updatedResult
+    },
+    {
+      // Use Serializable isolation level for the strongest guarantees
+      // This prevents phantom reads and other concurrency issues.
+      isolationLevel: DB.Prisma.TransactionIsolationLevel.Serializable,
+      // Set an appropriate timeout
+      // Prevents long-running transactions from blocking other operations.
+      timeout: 10000, // 10 seconds
+    }
   )
 
   if (globalNotificationToPublish) {
@@ -243,13 +225,13 @@ export async function performActionWithRetry<ActionTypes>(
     try {
       return await performAction(args, ctx, services)
     } catch (error: any) {
-      // Check if this is a serialization failure or deadlock
-      if (error.code === 'P2034') {
+      if (
+        error.isPrismaError &&
+        (error.code === 'P2025' || error.code === 'P2034')
+      ) {
         retries++
-        await new Promise((resolve) =>
-          setTimeout(resolve, 100 * Math.pow(2, retries))
-        ) // Exponential backoff
-        continue
+        // Wait a bit before retrying
+        await new Promise((res) => setTimeout(res, 50 + Math.random() * 50))
       }
       throw error // Re-throw if it's not a concurrency issue
     }

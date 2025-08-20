@@ -51,6 +51,7 @@ export type OutputFactsUser<
   globalNotification?: Notification<GlobalNotificationType>
   events?: Event<EventType>[]
   updatedGameFacts?: GameFactsType
+  gameFactsToUpdate?: any
   updatedPeriodFacts?: any
   updatedSegmentFacts?: any
 }
@@ -297,6 +298,7 @@ interface Reducer<
     GlobalNotificationType,
     EventType
   >
+  applyAtomicDBAction: (tx, gameId, updateDescriptor) => Promise<number>
   ActionTypes: Record<string, string>
 }
 

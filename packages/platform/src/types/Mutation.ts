@@ -163,7 +163,7 @@ export function generateBaseMutations<
 
           const facts = JSON.parse(args.payload)
 
-          const result = await PlayService.performAction(
+          const result = await PlayService.performActionWithRetry(
             {
               gameId: currentGame.id,
               actionType: args.type,
