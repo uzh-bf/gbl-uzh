@@ -7,7 +7,7 @@ try {
       __dirname,
       '../node_modules/@gbl-uzh/platform/dist/schema.prisma'
     ),
-    path.resolve(__dirname, './schema.prisma')
+    path.resolve(__dirname, './schema/platform.prisma')
   )
 } catch {
   fs.copyFileSync(
@@ -15,7 +15,7 @@ try {
       __dirname,
       '../../../node_modules/@gbl-uzh/platform/dist/schema.prisma'
     ),
-    path.resolve(__dirname, './schema.prisma')
+    path.resolve(__dirname, './schema/platform.prisma')
   )
 }
 
