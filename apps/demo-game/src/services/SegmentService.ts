@@ -12,7 +12,6 @@ import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 type InputSegmentFacts = {}
 type OutputSegmentFacts = OutputFacts<
   InputSegmentFacts & PeriodSegmentFacts,
-  GameFacts,
   any,
   any
 >
@@ -67,14 +66,16 @@ export function initialize(
 
       draft.resultFacts.diceRolls = diceRolls
       draft.resultFacts.returns = returns
-      // draft.updatedGameFacts = {
-      //   ...payload.gameFacts,
-      //   myInt: payload.gameFacts.myInt + 1,
-      //   newVar: 1,
-      // }
     }
   )
 
   debugLog('SegmentInitialize', facts, payload, resultFacts)
   return resultFacts
 }
+
+export async function updateDBBeforeActivation(tx, payload): Promise<void> {}
+export async function updateDBAfterInitialize(
+  tx,
+  facts,
+  payload
+): Promise<void> {}

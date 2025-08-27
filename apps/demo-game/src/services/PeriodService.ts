@@ -9,7 +9,7 @@ import { GameFacts } from '../types/Game'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
 type InputPeriodFacts = PeriodFacts
-type OutputPeriodFacts = OutputFacts<InputPeriodFacts, GameFacts, any, any>
+type OutputPeriodFacts = OutputFacts<InputPeriodFacts, any, any>
 
 // TODO(JJ):
 // - Init baseFacts outside of fn and provide only draft as input
@@ -53,3 +53,9 @@ export function consolidate(
   debugLog('PeriodConsolidate', facts, payload, resultFacts)
   return resultFacts
 }
+
+export async function updateDBAfterInitialize(
+  tx,
+  facts,
+  payload
+): Promise<void> {}

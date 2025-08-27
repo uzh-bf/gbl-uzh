@@ -106,7 +106,7 @@ export async function addGamePeriod<TFacts>(
 
   // TODO(JJ): Why do we provide validatedFacts twice?
   // - remove periodFacts from payload for initialize?
-  const { resultFacts: initializedFacts, updatedGameFacts } =
+  const { resultFacts: initializedFacts, specificFacts } =
     services.Period.initialize(validatedFacts, {
       gameFacts: game.facts,
       // TODO(JJ): replace with undefined
@@ -126,6 +126,11 @@ export async function addGamePeriod<TFacts>(
   )
 
   const res = await ctx.prisma.$transaction(async (tx) => {
+    if (specificFacts) {
+      await services.Period.updateDBAfterInitialize(tx, specificFacts, {
+        gameId,
+      })
+    }
     const updatedPeriod = await tx.period.upsert({
       where: {
         gameId_index: {
@@ -166,13 +171,6 @@ export async function addGamePeriod<TFacts>(
         },
       },
     })
-
-    if (updatedGameFacts) {
-      await ctx.prisma.game.update({
-        where: { id: gameId },
-        data: { facts: updatedGameFacts },
-      })
-    }
 
     return updatedPeriod
 
@@ -237,7 +235,7 @@ export async function addPeriodSegment<TFacts>(
     previousSegmentFacts = previousPeriod?.segments[0]?.facts
   }
 
-  const { resultFacts: initializedFacts, updatedGameFacts } =
+  const { resultFacts: initializedFacts, specificFacts } =
     services.Segment.initialize(validatedFacts, {
       gameFacts: game.facts,
       periodFacts: period.facts,
@@ -248,8 +246,14 @@ export async function addPeriodSegment<TFacts>(
     })
 
   const res = await ctx.prisma.$transaction(async (tx) => {
+    if (specificFacts) {
+      await services.Segment.updateDBAfterInitialize(tx, specificFacts, {
+        gameId,
+      })
+    }
+
     // create or update the facts and settings of a period segment
-    const updatedSegment = ctx.prisma.periodSegment.upsert({
+    const updatedSegment = tx.periodSegment.upsert({
       where: {
         gameId_periodIx_index: {
           gameId,
@@ -315,13 +319,6 @@ export async function addPeriodSegment<TFacts>(
         storyElements: true,
       },
     })
-
-    if (updatedGameFacts) {
-      await ctx.prisma.game.update({
-        where: { id: gameId },
-        data: { facts: updatedGameFacts },
-      })
-    }
 
     return updatedSegment
   })
@@ -832,23 +829,21 @@ export async function activateNextSegment(
     // PAUSED -> RUNNING
     case DB.GameStatus.PREPARATION:
     case DB.GameStatus.PAUSED: {
-      // NOTE(JJ): Update game facts per segment, but not for the initialization
-      const { updatedGameFacts } = services.GameFacts.update(game.facts, {
-        periodIx: currentPeriodIx,
-        segmentIx: nextSegmentIx, // TODO(JJ): Double-check if this is right
-      })
-
-      const isVeryFirst = currentPeriodIx === 0 && currentSegmentIx === -1
-      if (updatedGameFacts && !isVeryFirst) {
-        game.facts = updatedGameFacts
-      }
-
       const { results, extras } = computeSegmentStartResults(game, ctx, {
         services,
       })
 
-      finalTransactionResult = await ctx.prisma.$transaction([
-        ctx.prisma.game.update({
+      finalTransactionResult = await ctx.prisma.$transaction(async (tx) => {
+        const isVeryFirst = currentPeriodIx === 0 && currentSegmentIx === -1
+        if (!isVeryFirst) {
+          await services.Segment.updateDBBeforeActivation(tx, {
+            gameId,
+            periodIx: currentPeriodIx,
+            segmentIx: nextSegmentIx,
+          })
+        }
+
+        await tx.game.update({
           where: {
             id: gameId,
           },
@@ -864,12 +859,11 @@ export async function activateNextSegment(
             status: DB.GameStatus.RUNNING,
             // TODO(JJ): We need this to be updated
             // activeSegmentIx: nextSegmentIx,
-            ...(updatedGameFacts ? { facts: game.facts as any } : {}),
           },
-        }),
+        })
 
         // update the active segment of the current period
-        ctx.prisma.period.update({
+        await tx.period.update({
           where: {
             gameId_index: {
               gameId,
@@ -888,10 +882,10 @@ export async function activateNextSegment(
               },
             },
           },
-        }),
+        })
 
         // SEGMENT INITIALIZATION
-        ctx.prisma.periodSegment.update({
+        await tx.periodSegment.update({
           where: {
             gameId_periodIx_index: {
               gameId,
@@ -904,10 +898,14 @@ export async function activateNextSegment(
               create: results,
             },
           },
-        }),
+        })
 
-        ...extras,
-      ])
+        // TODO(JJ): These are currently nowhere used, how does the call look
+        // like?
+        // for (const extra of extras) {
+        //   await extra
+        // }
+      })
 
       break
     }

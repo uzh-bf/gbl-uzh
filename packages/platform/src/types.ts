@@ -1,5 +1,12 @@
+import { Prisma, PrismaClient } from '@prisma/client'
+import { DefaultArgs } from '@prisma/client/runtime/library'
 import { NextPageContext } from 'next'
 import type yup from 'yup'
+
+export type TxType = Omit<
+  PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+>
 
 export enum UserRole {
   PLAYER = 'PLAYER',
@@ -54,15 +61,14 @@ export type OutputFactsUser<
   updatedSegmentFacts?: any
 }
 
-export type OutputFacts<FactsType, GameFactsType, NotificationType, EventType> =
-  {
-    resultFacts: FactsType
-    actions?: any[]
-    extras?: any
-    events?: Event<EventType>[]
-    notifications?: Notification<NotificationType>[]
-    updatedGameFacts?: GameFactsType
-  }
+export type OutputFacts<FactsType, NotificationType, EventType> = {
+  resultFacts: FactsType
+  actions?: any[]
+  extras?: any
+  events?: Event<EventType>[]
+  notifications?: Notification<NotificationType>[]
+  specificFacts?: any
+}
 
 export type Action<ActionType, PayloadType, PrismaType> = {
   type: ActionType
@@ -180,11 +186,17 @@ interface Period<
       PeriodFactsType,
       PeriodSegmentFactsType
     >
-  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
   consolidate: (
     facts: FactsType,
     payload: PayloadPeriodConsolidation<GameFactsType, PeriodSegmentFactsType>
-  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
+
+  updateDBAfterInitialize: (
+    tx: TxType,
+    facts: any,
+    payload: any
+  ) => Promise<void>
 }
 
 interface PeriodResult<
@@ -201,11 +213,11 @@ interface PeriodResult<
   initialize: (
     facts: FactsType,
     payload: PayloadPeriodResult<GameFactsType, PeriodFactsType, PlayerRoleType>
-  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
   start: (
     facts: FactsType,
     payload: PayloadPeriodResult<GameFactsType, PeriodFactsType, PlayerRoleType>
-  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
   end: (
     facts: FactsType,
     payload: PayloadPeriodResultEnd<
@@ -215,7 +227,7 @@ interface PeriodResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
 }
 
 interface Segment<
@@ -234,7 +246,21 @@ interface Segment<
       PeriodFactsType,
       PeriodSegmentFactsType
     >
-  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
+
+  updateDBAfterInitialize: (
+    tx: TxType,
+    facts: any,
+    payload: { gameId: number }
+  ) => Promise<void>
+  updateDBBeforeActivation: (
+    tx: TxType,
+    payload: {
+      gameId: number
+      periodIx: number
+      segmentIx: number
+    }
+  ) => Promise<void>
 }
 
 interface SegmentResult<
@@ -255,7 +281,7 @@ interface SegmentResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
   start: (
     facts: FactsType,
     payload: PayloadSegmentResult<
@@ -264,7 +290,7 @@ interface SegmentResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
   end: (
     facts: FactsType,
     payload: PayloadSegmentResult<
@@ -273,7 +299,7 @@ interface SegmentResult<
       PeriodSegmentFactsType,
       PlayerRoleType
     >
-  ) => OutputFacts<FactsType, GameFactsType, NotificationType, EventType>
+  ) => OutputFacts<FactsType, NotificationType, EventType>
 }
 
 interface Reducer<
