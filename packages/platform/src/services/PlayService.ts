@@ -76,7 +76,7 @@ export async function performAction<ActionTypes>(
         extras,
         updatedSegmentFacts,
         updatedPeriodFacts,
-        gameFactsToUpdate,
+        specificFacts,
       } = services.Actions.apply(previousResult.facts, {
         type: args.actionType,
         payload: {
@@ -91,12 +91,13 @@ export async function performAction<ActionTypes>(
         },
       })
 
-      if (gameFactsToUpdate) {
-        await services.Actions.applyAtomicDBAction(
-          tx,
-          previousResult.game.id,
-          gameFactsToUpdate
-        )
+      // TODO(JJ): This has nothing to do with the results
+      // -> there should be another performAction function for specific game
+      // properties, like orders in the businessg game
+      if (specificFacts) {
+        await services.Actions.updateDBAfterApply(tx, specificFacts, {
+          gameId: previousResult.game.id,
+        })
       }
 
       notificationsToPublish = notifications ?? []
