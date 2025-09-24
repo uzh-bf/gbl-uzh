@@ -161,6 +161,7 @@ export type PayloadSegmentResult<
 }
 
 interface Game<FactsType, GameFactsType, NotificationType, EventType> {
+  // TODO(JJ): This should rather be an initialize fn when creating the game
   update: (
     facts: FactsType,
     payload: PayloadGame
@@ -230,6 +231,11 @@ interface PeriodResult<
       PlayerRoleType
     >
   ) => OutputFacts<FactsType, NotificationType, EventType>
+  updateDBAfterEnd: (
+    tx: TxType,
+    facts: any,
+    payload: { gameId: number }
+  ) => Promise<any>
 }
 
 interface Segment<
