@@ -26,10 +26,10 @@
     "Andrin Rehmann <andrin.rehmann@df.uzh.ch>"
   ],
   "devDependencies": {
-    "nodemon": "^2.0.16",
+    "nodemon": "^3.1.10",
     "standard-version": "~9.5.0",
-    "syncpack": "~13.0.0",
-    "turbo": "~2.2.3"
+    "syncpack": "~13.0.4",
+    "turbo": "~2.5.8"
   },
   "scripts": {
     "build": "turbo run build",
@@ -54,11 +54,11 @@
     "syncpack:update": "syncpack update"
   },
   "engines": {
-    "node": "=20"
+    "node": "=22"
   },
   "volta": {
-    "node": "20.18.0",
-    "pnpm": "9.12.3"
+    "node": "22.21.0",
+    "pnpm": "10.19.0"
   },
-  "packageManager": "pnpm@9.12.3"
+  "packageManager": "pnpm@10.19.0"
 }

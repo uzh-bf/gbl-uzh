@@ -3,7 +3,7 @@ FROM node:20.18-alpine AS base
 RUN apk add --no-cache git
 
 # Install pnpm and turbo
-RUN npm install -g pnpm@9.12.3 turbo@2.0.4
+RUN npm install -g pnpm@10.19.0 turbo@2.5.8
 
 # Set pnpm store directory
 ENV PNPM_HOME="/pnpm"
