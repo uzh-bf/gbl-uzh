@@ -332,7 +332,7 @@ interface Reducer<
     tx: TxType,
     facts: any,
     payload: { gameId: number }
-  ) => Promise<number>
+  ) => Promise<void>
   ActionTypes: Record<string, string>
 }
 
