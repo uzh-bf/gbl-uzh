@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.33](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.32...v0.4.33) (2025-11-25)
+
+
+### Features
+
+* **platform:** robustify race conditions with retry and before and after hooks ([86dd543](https://github.com/uzh-bf/gbl-uzh/commit/86dd543b592f1f2e6f8279d1f83c49b2fc78011c))
+
+
+### Other
+
+* Upgrade to Prisma v6 ([#115](https://github.com/uzh-bf/gbl-uzh/issues/115)) ([e2db9e5](https://github.com/uzh-bf/gbl-uzh/commit/e2db9e57628352b7fbad89c5532add6edb9a0ceb))
+
 ### [0.4.32](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.31...v0.4.32) (2025-06-26)
 
 
