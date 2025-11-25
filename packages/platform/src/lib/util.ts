@@ -103,3 +103,28 @@ export function computeSegmentStatus(
 
   return STATUS.COMPLETED
 }
+
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  retries = 3
+): Promise<T> {
+  let lastError
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn()
+    } catch (err: any) {
+      console.error('Retrying due to error:', err)
+      if (
+        err.message?.includes('Transaction failed') ||
+        err.code === 'P2034' // Deadlock
+        // err.message === 'ORDER_ALREADY_TAKEN'
+      ) {
+        lastError = err
+        await new Promise((r) => setTimeout(r, 50 * (i + 1)))
+        continue
+      }
+      throw err
+    }
+  }
+  throw lastError
+}

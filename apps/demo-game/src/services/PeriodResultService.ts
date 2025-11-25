@@ -17,7 +17,6 @@ const INITIAL_CAPITAL = 10000
 type InputPeriodResultFactsInit = {}
 type OutputPeriodResultFactsInit = OutputFacts<
   InputPeriodResultFactsInit & ResultFactsInit,
-  GameFacts,
   any,
   any
 >

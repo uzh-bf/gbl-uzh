@@ -27,7 +27,7 @@ export function apply(state: State, action: Actions) {
   const baseState = {
     result: state,
     isDirty: false,
-    updatedGameFacts: action.payload.gameFacts,
+    // updatedGameFacts: action.payload.gameFacts,
   }
 
   // TODO: the user reducer could just get the "draft" inside this function as first parameter
@@ -46,14 +46,15 @@ export function apply(state: State, action: Actions) {
     draft.result.decisions = action.payload.playerArgs
 
     // This is only to test the game facts
+    // TODO(JJ): Change to gameFactsToUpdate
     // Update game facts counter
-    const gameFacts = action.payload.gameFacts
-    let counter = gameFacts.actionCounter || 0
-    counter += 1
-    draft.updatedGameFacts = {
-      ...gameFacts,
-      actionCounter: counter,
-    }
+    // const gameFacts = action.payload.gameFacts
+    // let counter = gameFacts.actionCounter || 0
+    // counter += 1
+    // draft.updatedGameFacts = {
+    //   ...gameFacts,
+    //   actionCounter: counter,
+    // }
   })
 
   // this computes the isDirty flag based on whether there were changes in state from baseState to newState

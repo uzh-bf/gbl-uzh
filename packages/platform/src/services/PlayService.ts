@@ -9,6 +9,7 @@ import {
 import * as EventService from './EventService.js'
 import dayjs from 'dayjs'
 import log from '../lib/logger.js'
+import { withRetry } from 'src/lib/util.js'
 
 type Context = CtxWithPrisma<DB.PrismaClient>
 
@@ -38,7 +39,7 @@ export async function performAction<ActionTypes>(
   let globalNotificationToPublish
 
   // All reads and writes are now in a single atomic transaction.
-  const res = await ctx.prisma.$transaction(
+  const res = ctx.prisma.$transaction(
     async (tx) => {
       const previousResult = await tx.playerResult.findUnique({
         where: {
@@ -75,7 +76,7 @@ export async function performAction<ActionTypes>(
         extras,
         updatedSegmentFacts,
         updatedPeriodFacts,
-        updatedGameFacts,
+        specificFacts,
       } = services.Actions.apply(previousResult.facts, {
         type: args.actionType,
         payload: {
@@ -89,6 +90,15 @@ export async function performAction<ActionTypes>(
           playerId: previousResult.player.id,
         },
       })
+
+      // TODO(JJ): This has nothing to do with the results
+      // -> there should be another performAction function for specific game
+      // properties, like orders in the businessg game
+      if (specificFacts) {
+        await services.Actions.updateDBAfterApply(tx, specificFacts, {
+          gameId: previousResult.game.id,
+        })
+      }
 
       notificationsToPublish = notifications ?? []
       globalNotificationToPublish = globalNotification
@@ -177,27 +187,6 @@ export async function performAction<ActionTypes>(
         })
       }
 
-      if (updatedGameFacts) {
-        // Update game facts if needed
-        await tx.game.update({
-          where: { id: previousResult.game.id },
-          data: { facts: updatedGameFacts },
-        })
-        // TODO(JJ): More efficient way and better concurrency handling
-        // const path = `facts.${args.actionType}`
-        // const value = updatedGameFacts
-        // await tx.$queryRaw`
-        //   UPDATE "Game"
-        //   SET facts = jsonb_set(facts, ${path}::text[], ${JSON.stringify(
-        //         value
-        //       )}::jsonb, true),
-        //       version = version + 1
-        //   WHERE id = ${previousResult.game.id} AND version = ${
-        //         previousResult.game.version
-        //       }
-        // `
-      }
-
       return updatedResult
     },
     {
@@ -235,15 +224,15 @@ export async function performActionWithRetry<ActionTypes>(
   let retries = 0
   while (retries < maxRetries) {
     try {
-      return await performAction(args, ctx, services)
+      return await performAction(args, ctx, { services })
     } catch (error: any) {
-      // Check if this is a serialization failure or deadlock
-      if (error.code === 'P2034') {
+      if (
+        error.isPrismaError &&
+        (error.code === 'P2025' || error.code === 'P2034')
+      ) {
         retries++
-        await new Promise((resolve) =>
-          setTimeout(resolve, 100 * Math.pow(2, retries))
-        ) // Exponential backoff
-        continue
+        // Wait a bit before retrying
+        await new Promise((res) => setTimeout(res, 50 + Math.random() * 50))
       }
       throw error // Re-throw if it's not a concurrency issue
     }
