@@ -17,7 +17,8 @@ WORKDIR /app
 COPY . .
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/.pnpm-store \
-    pnpm install --frozen-lockfile
+    # HACK: Install without frozen lockfile - reevaluate after upgrades branch is merged
+    pnpm install --no-frozen-lockfile
 
 # Prune application with Turbo
 RUN turbo prune --scope="@gbl-uzh/demo-game" --docker
@@ -32,7 +33,8 @@ COPY --from=prune /app/out/json/ .
 
 # Install dependencies
 RUN --mount=type=cache,id=pnpm,target=/pnpm/.pnpm-store \
-    pnpm install --frozen-lockfile
+    # HACK: Install without frozen lockfile - reevaluate after upgrades branch is merged
+    pnpm install --no-frozen-lockfile
 
 COPY --from=prune /app/out/full/ .
 
