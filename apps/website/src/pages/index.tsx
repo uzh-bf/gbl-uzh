@@ -17,7 +17,7 @@ import HeroImage from '../components/common/HeroImage'
 import TitleImage from '../components/common/TitleImage'
 import GameCard from '../components/games/GameCard'
 import HomeSection from '../components/sections/HomeSection'
-import EscapeUZHImage from '/public/images/escape_hero.png'
+import EscapeUZHImage from '../../public/images/escape_hero.png'
 
 function Home() {
   const router = useRouter()
@@ -25,7 +25,7 @@ function Home() {
   return (
     <PageWithHeader title="Home">
       <TitleImage imgSrc="/images/DSC01864_cut4.jpg">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col max-w-6xl gap-4 px-4 mx-auto md:flex-row md:items-end md:justify-between">
           <div className="">
             <H1 className={{ root: 'text-3xl sm:text-4xl' }}>
               Game-Based Learning
@@ -35,7 +35,7 @@ function Home() {
             </div>
           </div>
           <a
-            className="hidden flex-row items-center gap-4 md:flex"
+            className="flex-row items-center hidden gap-4 md:flex"
             href="https://community.klicker.uzh.ch"
             target="_blank"
             rel="noreferrer"
@@ -45,9 +45,7 @@ function Home() {
                 root: 'gap-4 border-0 bg-uzh-red-100 text-white md:gap-8 md:px-4 md:py-3 md:text-xl',
               }}
             >
-              <Button.Icon>
-                <FontAwesomeIcon icon={faUsers} />
-              </Button.Icon>
+              <Button.Icon icon={faUsers} />
               <Button.Label>Join the community</Button.Label>
             </Button>
           </a>
@@ -56,7 +54,7 @@ function Home() {
 
       <Content>
         <div className="md:py-4">
-          <div className="m-auto max-w-6xl rounded bg-slate-100 p-6 shadow">
+          <div className="max-w-6xl p-6 m-auto rounded shadow bg-slate-100">
             <div>
               <div className="flex flex-col items-center gap-16 md:flex-row">
                 <div className="relative hidden h-44 w-44 md:block md:flex-initial">
@@ -106,12 +104,12 @@ function Home() {
         </div>
 
         <div className="py-4 md:py-8">
-          <div className="m-auto max-w-6xl">
+          <div className="max-w-6xl m-auto">
             <H2>Games & Courses</H2>
             <div>
               <div className="flex flex-col md:flex-row">
                 <div className="flex-1">
-                  <div className="prose mt-2 max-w-none md:prose-lg">
+                  <div className="mt-2 prose max-w-none md:prose-lg">
                     Games and simulations developed at the Department of Banking
                     and Finance, as well as courses supported with Game-Based
                     Learning.
@@ -148,9 +146,7 @@ function Home() {
                     className={{ root: 'mt-4' }}
                     onClick={() => router.push('/games')}
                   >
-                    <Button.Icon>
-                      <FontAwesomeIcon icon={faArrowRight} />
-                    </Button.Icon>
+                    <Button.Icon icon={faArrowRight} />
                     <Button.Label>Games and Courses</Button.Label>
                   </Button>
                 </div>
@@ -169,9 +165,7 @@ function Home() {
               className={{ root: 'mt-4' }}
               onClick={() => router.push('/escape')}
             >
-              <Button.Icon>
-                <FontAwesomeIcon icon={faArrowRight} />
-              </Button.Icon>
+              <Button.Icon icon={faArrowRight} />
               <Button.Label>EscapeUZH</Button.Label>
             </Button>
           </HomeSection.Content>
@@ -185,9 +179,7 @@ function Home() {
               className={{ root: 'mt-4' }}
               onClick={() => router.push('/kb')}
             >
-              <Button.Icon>
-                <FontAwesomeIcon icon={faArrowRight} />
-              </Button.Icon>
+              <Button.Icon icon={faArrowRight} />
               <Button.Label>Knowledge Base</Button.Label>
             </Button>
           </HomeSection.Content>
@@ -203,9 +195,7 @@ function Home() {
               className={{ root: 'mt-4' }}
               onClick={() => router.push('/dev')}
             >
-              <Button.Icon>
-                <FontAwesomeIcon icon={faArrowRight} />
-              </Button.Icon>
+              <Button.Icon icon={faArrowRight} />
               <Button.Label>Development Practices</Button.Label>
             </Button>
           </HomeSection.Content>
@@ -221,9 +211,7 @@ function Home() {
               className={{ root: 'mt-4' }}
               onClick={() => router.push('/about')}
             >
-              <Button.Icon>
-                <FontAwesomeIcon icon={faArrowRight} />
-              </Button.Icon>
+              <Button.Icon icon={faArrowRight} />
               <Button.Label>Roadmap</Button.Label>
             </Button>
           </HomeSection.Content>

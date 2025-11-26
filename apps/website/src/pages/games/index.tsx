@@ -28,7 +28,7 @@ function GBLinUse({ sourceArr }: Props) {
             Serious games and simulations that have been developed or are being
             developed at institutions of the University of Zurich.
           </Prose>
-          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2 md:grid-cols-3">
             {sortBy(
               ({ frontmatter }: any) => frontmatter.title,
               sourceArr[0].filter((item: any) => !item.frontmatter.external)
@@ -63,9 +63,7 @@ function GBLinUse({ sourceArr }: Props) {
                   root: 'h-full flex-col border-uzh-red-40 bg-uzh-red-20 text-lg',
                 }}
               >
-                <Button.Icon>
-                  <FontAwesomeIcon icon={faPlus} />
-                </Button.Icon>
+                <Button.Icon icon={faPlus} />
                 <Button.Label>Submit your own game</Button.Label>
               </Button>
             </a>
@@ -77,7 +75,7 @@ function GBLinUse({ sourceArr }: Props) {
           <Prose className={{ root: 'max-w-none' }}>
             Serious games and simulations of other educational institutions.
           </Prose>
-          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2 md:grid-cols-3">
             {sortBy(
               ({ frontmatter }: any) => frontmatter.title,
               sourceArr[0].filter((item: any) => item.frontmatter.external)
@@ -102,9 +100,7 @@ function GBLinUse({ sourceArr }: Props) {
                   root: 'h-full flex-col border-uzh-red-40 bg-uzh-red-20 text-lg',
                 }}
               >
-                <Button.Icon>
-                  <FontAwesomeIcon icon={faPlus} />
-                </Button.Icon>
+                <Button.Icon icon={faPlus} />
                 <Button.Label>Submit your own game</Button.Label>
               </Button>
             </a>
@@ -117,7 +113,7 @@ function GBLinUse({ sourceArr }: Props) {
             A selection of lectures and seminars at the University of Zurich
             that contain Game-Based Learning elements.
           </Prose>
-          <div className="mt-2 flex flex-col gap-2 md:grid md:grid-cols-2">
+          <div className="flex flex-col gap-2 mt-2 md:grid md:grid-cols-2">
             {sourceArr[1].map(({ frontmatter, ...source }: any, ix: number) => (
               <CourseEntry
                 key={frontmatter.name}
@@ -134,9 +130,7 @@ function GBLinUse({ sourceArr }: Props) {
 
             <a href="https://forms.office.com/e/nieHr9d1EX" target="_blank">
               <Button fluid className={{ root: 'h-full gap-4 text-lg' }}>
-                <Button.Icon>
-                  <FontAwesomeIcon icon={faPlus} />
-                </Button.Icon>
+                <Button.Icon icon={faPlus} />
                 <Button.Label>Submit your own course</Button.Label>
               </Button>
             </a>

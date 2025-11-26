@@ -1,4 +1,4 @@
-import { Button } from '@uzh-bf/design-system/dist/future'
+import { Button } from '@uzh-bf/design-system'
 import * as React from 'react'
 import { twMerge } from 'tailwind-merge'
 import {
@@ -60,7 +60,7 @@ export function MultiSelect({
         variant="outline"
         role="combobox"
         aria-expanded={open}
-        className="relative h-fit min-w-full justify-between"
+        className={{ root: 'relative h-fit min-w-full justify-between' }}
         onClick={() => setOpen(!open)}
       >
         <div className="flex flex-wrap justify-start gap-2">

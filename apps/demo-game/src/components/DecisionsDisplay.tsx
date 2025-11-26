@@ -7,12 +7,7 @@ import {
   ScrollArea,
   Separator,
   Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@uzh-bf/design-system/dist/future'
+} from '@uzh-bf/design-system'
 import { twMerge } from 'tailwind-merge'
 
 interface ObjectProps {
@@ -53,7 +48,7 @@ function DecisionLayout({
     <div>
       <div className="flex justify-between">
         {title && <div>{title}</div>}
-        <div className="flex min-w-36 items-center justify-between">
+        <div className="min-w-36 flex items-center justify-between">
           {actionTitle && <div>{actionTitle}</div>}
           {activeTitle && <div>{activeTitle}</div>}
           {icon}
@@ -88,7 +83,7 @@ function DecisionsDisplayCompact({ segmentDecisions }: DecisionDisplayProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {/* <ScrollArea className="h-96 rounded-md border p-4"> */}
+        {/* <ScrollArea className="p-4 border rounded-md h-96"> */}
         <ScrollArea className="h-56">
           <Table>
             <TableHeader>
@@ -103,7 +98,7 @@ function DecisionsDisplayCompact({ segmentDecisions }: DecisionDisplayProps) {
               {segmentDecisions.map((e) => {
                 return (
                   <TableRow key={e.segment.id}>
-                    <TableCell className="flex text-nowrap">
+                    <TableCell className="text-nowrap flex">
                       P{e.period.index + 1} S{e.segment.index + 1}
                     </TableCell>
                     <TableCell>

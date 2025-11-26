@@ -6,7 +6,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   navigationMenuTriggerStyle,
-} from '@uzh-bf/design-system/dist/future'
+} from '@uzh-bf/design-system/ui'
 
 interface Props {
   tabs: { name: string; href: string }[]
@@ -27,7 +27,7 @@ function NavBar({
 }: Props) {
   return (
     <>
-      <nav className="flex w-full items-center justify-between border-b px-4">
+      <nav className="flex items-center justify-between w-full px-4 border-b">
         <NavigationMenu>
           <NavigationMenuList>
             {tabs.map((tab, ix) => (
@@ -43,7 +43,7 @@ function NavBar({
         </NavigationMenu>
         <Link href={playerHref} legacyBehavior passHref>
           <div className="flex items-center">
-            <div className="m-2 flex flex-col text-right text-sm">
+            <div className="flex flex-col m-2 text-sm text-right">
               <div className="font-semibold">{playerName}</div>
               <div className="text-orange-700">Level {playerLevel}</div>
             </div>

@@ -119,7 +119,7 @@ function LearningElement({ elementId }: { elementId: string }) {
                   />
                   <div>
                     <div className="mb-1 font-bold">Explanation</div>
-                    <Markdown className="prose prose-sm">
+                    <Markdown className="prose-sm prose">
                       {learningElement.data.learningElement.element.feedback}
                     </Markdown>
                   </div>
@@ -137,7 +137,7 @@ function LearningElement({ elementId }: { elementId: string }) {
                 />
                 <div>
                   <div className="mb-1 font-bold">Why is it relevant?</div>
-                  <Markdown className="prose prose-sm">
+                  <Markdown className="prose-sm prose">
                     {learningElement.data.learningElement.element.motivation}
                   </Markdown>
                 </div>
@@ -180,7 +180,7 @@ function LearningElement({ elementId }: { elementId: string }) {
                   })
                 }
               >
-                <Markdown className="prose prose-sm">{option.content}</Markdown>
+                <Markdown className="prose-sm prose">{option.content}</Markdown>
               </Button>
             )
           )}

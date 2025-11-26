@@ -61,12 +61,12 @@ function Panel({
           <H2>{title}</H2>
           <div className="text-left text-gray-700">{duration}</div>
         </div>
-        <div className="w-6 flex-initial">
+        <div className="flex-initial w-6">
           {isCompleted && <FontAwesomeIcon icon={faCheck} />}
         </div>
       </Button>
       {isOpen && (
-        <div className="border border-t-0 p-4">
+        <div className="p-4 border border-t-0">
           {videoSrc && (
             <VideoWithSummary
               title={title}
@@ -77,7 +77,7 @@ function Panel({
             </VideoWithSummary>
           )}
           {!videoSrc && (
-            <p className="prose block max-w-none text-justify">{children}</p>
+            <p className="block prose text-justify max-w-none">{children}</p>
           )}
 
           {Array.isArray(resources) && (
@@ -96,7 +96,7 @@ function Panel({
                         >
                           <FontAwesomeIcon
                             icon={faBarChart}
-                            className="mr-1 h-4"
+                            className="h-4 mr-1"
                           />
                           {item.name}
                         </a>
@@ -114,12 +114,10 @@ function Panel({
             </div>
           )}
           {/* Simpler Layout on Mobile devices (only arrows without text are visible) */}
-          <div className="mt-4 flex justify-between border-t pt-4">
+          <div className="flex justify-between pt-4 mt-4 border-t">
             {onPrevious && (
               <Button onClick={onPrevious}>
-                <Button.Icon>
-                  <FontAwesomeIcon icon={faArrowLeft} />
-                </Button.Icon>
+                <Button.Icon icon={faArrowLeft} />
                 <Button.Label>Previous Module</Button.Label>
               </Button>
             )}
@@ -128,18 +126,14 @@ function Panel({
                 <div className="flex-1"></div>
                 <Button onClick={onNext}>
                   <Button.Label>Next Module</Button.Label>
-                  <Button.Icon>
-                    <FontAwesomeIcon icon={faArrowRight} />
-                  </Button.Icon>
+                  <Button.Icon icon={faArrowRight} />
                 </Button>
               </>
             )}
             {onNext && !!onPrevious && (
               <Button onClick={onNext}>
                 <Button.Label>Next Module</Button.Label>
-                <Button.Icon>
-                  <FontAwesomeIcon icon={faArrowRight} />
-                </Button.Icon>
+                <Button.Icon icon={faArrowRight} />
               </Button>
             )}
           </div>

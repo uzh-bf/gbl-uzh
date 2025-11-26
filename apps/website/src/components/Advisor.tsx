@@ -19,9 +19,7 @@ function Advisor() {
             push(['trackEvent', 'GBL Advisor', 'Opened'])
           }}
         >
-          <Button.Icon>
-            <FontAwesomeIcon icon={faArrowRight} />
-          </Button.Icon>
+          <Button.Icon icon={faArrowRight} />
           <Button.Label>Start Advisor</Button.Label>
         </Button>
       }

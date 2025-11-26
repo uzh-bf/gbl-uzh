@@ -30,7 +30,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@uzh-bf/design-system/dist/future'
+} from '@uzh-bf/design-system'
 
 import {
   Area,

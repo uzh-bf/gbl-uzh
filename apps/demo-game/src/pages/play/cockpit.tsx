@@ -2,11 +2,6 @@ import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
 import {
   Button,
-  // CycleCountdown,
-  FormikNumberField,
-  Switch,
-} from '@uzh-bf/design-system'
-import {
   Card,
   CardContent,
   CardDescription,
@@ -18,18 +13,12 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
+  FormikNumberField,
   Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Switch,
   Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@uzh-bf/design-system/dist/future'
+  type ColumnType,
+} from '@uzh-bf/design-system'
 
 import { CycleCountdown } from '~/components/CycleCountDown'
 
@@ -75,6 +64,13 @@ const LABEL_MAP = {
   accBankBenchmarkReturn: 'Savings Return',
   accBondsBenchmarkReturn: 'Bonds Return',
   accStocksBenchmarkReturn: 'Stocks Return',
+}
+
+type PortfolioRow = {
+  category: string
+  currentValue: number
+  futureValue: number
+  className?: string
 }
 
 function GameHeader({ currentGame }) {
@@ -614,58 +610,10 @@ function Cockpit() {
                   </CardHeader>
                   <CardContent>
                     <div>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            {columns_segment_results.map((column, ix) => (
-                              <TableHead
-                                key={column.accessor}
-                                className={`${
-                                  ix === 1
-                                    ? 'max-w-24 text-right text-gray-400'
-                                    : 'max-w-24 text-right'
-                                }`}
-                              >
-                                {column.label}
-                              </TableHead>
-                            ))}
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {data_segment_results.map((row, rowIx) => {
-                            return (
-                              <TableRow
-                                key={row.cat}
-                                className={`${
-                                  row.cat === 'Total' ? 'font-bold' : ''
-                                }`}
-                              >
-                                {['cat', '0', '1', '2', '3'].map((key, ix) => {
-                                  if (ix > 0) {
-                                    return (
-                                      <TableCell
-                                        key={key}
-                                        className={`${
-                                          key === '0' ? 'text-gray-400' : ''
-                                        }`}
-                                      >
-                                        <div className="flex justify-end">
-                                          {row[key].toFixed(2)} CHF
-                                        </div>
-                                      </TableCell>
-                                    )
-                                  }
-                                  return (
-                                    <TableCell key={key}>
-                                      <div className="flex">{row[key]}</div>
-                                    </TableCell>
-                                  )
-                                })}
-                              </TableRow>
-                            )
-                          })}
-                        </TableBody>
-                      </Table>
+                      <Table
+                        columns={columns_segment_results}
+                        data={data_segment_results}
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -679,27 +627,21 @@ function Cockpit() {
                       {period !== null && (
                         <Select
                           defaultValue={period.toString()}
-                          onValueChange={(value) => {
+                          onChange={(value) => {
                             setPeriod((prev) => parseInt(value))
                           }}
-                        >
-                          <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Period" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {allDataPerPeriod.map((_, index) => (
-                              <SelectItem key={index} value={index.toString()}>
-                                Period {index + 1}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          items={allDataPerPeriod.map((_, index) => ({
+                            label: `Period ${index + 1}`,
+                            value: index.toString(),
+                          }))}
+                          placeholder="Period"
+                        ></Select>
                       )}
                     </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {/* <div className="flex flex-1 flex-col gap-2 xl:flex-row"> */}
+                  {/* <div className="flex flex-col flex-1 gap-2 xl:flex-row"> */}
                   <div className="flex flex-col gap-2 lg:flex-row">
                     <Card className="flex-1">
                       <CardHeader>
@@ -846,52 +788,47 @@ function Cockpit() {
         })
         .reverse()
 
-      const columns_portfolio = [
+      const formatCurrency = (value: number) => `${value.toFixed(2)} CHF`
+
+      const columns_portfolio: ColumnType<PortfolioRow>[] = [
         { label: 'Assets', accessor: 'category', sortable: false },
         {
           label: 'Value before decisions',
           accessor: 'currentValue',
           sortable: false,
+          className: 'max-w-36 text-right whitespace-nowrap',
+          formatter: ({ row }) => formatCurrency(row.currentValue),
         },
         {
           label: 'Value after decisions',
           accessor: 'futureValue',
           sortable: false,
+          className: 'max-w-36 text-right whitespace-nowrap',
+          formatter: ({ row }) => formatCurrency(row.futureValue),
         },
       ]
 
-      const data_portfolio = [
+      const data_portfolio: PortfolioRow[] = [
         {
           category: 'Savings',
-          currentValue: `${assets.bank.toFixed(2)} CHF`,
-          futureValue: `${(
-            assets.totalAssets *
-            resultFactsDecisions.bank *
-            0.01
-          ).toFixed(2)} CHF`,
+          currentValue: assets.bank,
+          futureValue: assets.totalAssets * resultFactsDecisions.bank * 0.01,
         },
         {
           category: 'Bonds',
-          currentValue: `${assets.bonds.toFixed(2)} CHF`,
-          futureValue: `${(
-            assets.totalAssets *
-            resultFactsDecisions.bonds *
-            0.01
-          ).toFixed(2)} CHF`,
+          currentValue: assets.bonds,
+          futureValue: assets.totalAssets * resultFactsDecisions.bonds * 0.01,
         },
         {
           category: 'Stocks',
-          currentValue: `${assets.stocks.toFixed(2)} CHF`,
-          futureValue: `${(
-            assets.totalAssets *
-            resultFactsDecisions.stocks *
-            0.01
-          ).toFixed(2)} CHF`,
+          currentValue: assets.stocks,
+          futureValue: assets.totalAssets * resultFactsDecisions.stocks * 0.01,
         },
         {
           category: 'Total',
-          currentValue: `${assets.totalAssets.toFixed(2)} CHF`,
-          futureValue: `${assets.totalAssets.toFixed(2)} CHF`,
+          currentValue: assets.totalAssets,
+          futureValue: assets.totalAssets,
+          className: 'font-bold',
         },
       ]
 
@@ -957,53 +894,7 @@ function Cockpit() {
                   </CardHeader>
                   <CardContent>
                     <div>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            {columns_portfolio.map((column, ix) => (
-                              <TableHead key={column.accessor}>
-                                <div
-                                  className={`${
-                                    ix === 0 ? '' : 'max-w-36 text-right'
-                                  }`}
-                                >
-                                  {column.label}
-                                </div>
-                              </TableHead>
-                            ))}
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {data_portfolio.map((row, rowIx) => {
-                            return (
-                              <TableRow
-                                key={row.category}
-                                className={`${
-                                  row.category === 'Total' ? 'font-bold' : ''
-                                }`}
-                              >
-                                {[
-                                  'category',
-                                  'currentValue',
-                                  'futureValue',
-                                ].map((key, ix) => {
-                                  return (
-                                    <TableCell key={key}>
-                                      <div
-                                        className={`${
-                                          ix > 0 ? 'max-w-36 text-right' : ''
-                                        }`}
-                                      >
-                                        {row[key]}
-                                      </div>
-                                    </TableCell>
-                                  )
-                                })}
-                              </TableRow>
-                            )
-                          })}
-                        </TableBody>
-                      </Table>
+                      <Table columns={columns_portfolio} data={data_portfolio} />
                     </div>
                   </CardContent>
                 </Card>

@@ -55,7 +55,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@uzh-bf/design-system/dist/future'
+} from '@uzh-bf/design-system'
 
 import { FormikMultiSelectField } from '~/components/fields/FormikMultiSelectField'
 import { useToast } from '~/components/ui/use-toast'
@@ -485,7 +485,7 @@ function ManageGame() {
                                 target="_blank"
                                 className="flex flex-col rounded border border-gray-300 p-2"
                               >
-                                <div className="flex justify-between text-nowrap">
+                                <div className="text-nowrap flex justify-between">
                                   Dice Bonds:
                                   <div className="flex flex-row gap-2">
                                     {diceBonds?.map((dice, ix) => (
@@ -493,7 +493,7 @@ function ManageGame() {
                                     ))}
                                   </div>
                                 </div>
-                                <div className="flex justify-between gap-2 text-nowrap">
+                                <div className="text-nowrap flex justify-between gap-2">
                                   Dice Stocks:
                                   <div className="flex flex-row gap-2">
                                     {diceStocks?.map((dice, ix) => (

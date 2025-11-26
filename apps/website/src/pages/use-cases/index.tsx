@@ -45,28 +45,28 @@ function GBLUseCases({ sourceArr }: Props) {
           <section>
             <div className="mb-8">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50">
-                  <FontAwesomeIcon icon={faChalkboardTeacher} className="h-6 w-6 text-orange-600" />
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-orange-50">
+                  <FontAwesomeIcon icon={faChalkboardTeacher} className="w-6 h-6 text-orange-600" />
                 </div>
                 <H2 className={{ root: 'mb-0 text-3xl' }}>Didactics</H2>
               </div>
             </div>
             <div className="grid gap-6 md:grid-cols-2">
               {useCasesDidactics.map(({ frontmatter }: any, ix) => (
-                <div 
+                <div
                   key={frontmatter.slug}
-                  className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white transition-all hover:border-orange-200 hover:shadow-md"
+                  className="relative overflow-hidden transition-all bg-white border rounded-lg group border-slate-200 hover:border-orange-200 hover:shadow-md"
                 >
-                  <div className="relative aspect-video w-full overflow-hidden">
-                    <img 
-                      src={frontmatter.imgSrc} 
+                  <div className="relative w-full overflow-hidden aspect-video">
+                    <img
+                      src={frontmatter.imgSrc}
                       alt={frontmatter.title}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
                     />
-                    <div className="absolute bottom-0 left-0 h-12 w-full bg-gradient-to-t from-white to-transparent" />
+                    <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent" />
                   </div>
                   <div className="relative p-6">
-                    <div className="absolute -top-px left-4 right-4 h-px bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
+                    <div className="absolute h-px -top-px left-4 right-4 bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
                     <h3 className="mb-2 text-xl font-bold">{frontmatter.title}</h3>
                     <p className="mb-4 text-slate-600">{frontmatter.abstract}</p>
                     <Button
@@ -74,12 +74,8 @@ function GBLUseCases({ sourceArr }: Props) {
                       className={{ root: 'group/button' }}
                     >
                       <Button.Label>Read more</Button.Label>
-                      <Button.Icon>
-                        <FontAwesomeIcon 
-                          icon={faArrowRight} 
-                          className="transition-transform group-hover/button:translate-x-0.5" 
-                        />
-                      </Button.Icon>
+                      <Button.Icon icon={faArrowRight}
+                          className={{ root: "transition-transform group-hover/button:translate-x-0.5" }} />
                     </Button>
                   </div>
                 </div>
@@ -90,28 +86,28 @@ function GBLUseCases({ sourceArr }: Props) {
           <section>
             <div className="mb-8">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50">
-                  <FontAwesomeIcon icon={faGamepad} className="h-6 w-6 text-orange-600" />
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-orange-50">
+                  <FontAwesomeIcon icon={faGamepad} className="w-6 h-6 text-orange-600" />
                 </div>
                 <H2 className={{ root: 'mb-0 text-3xl' }}>Game Development</H2>
               </div>
             </div>
             <div className="grid gap-6 md:grid-cols-2">
               {useCasesDevelopment.map(({ frontmatter }: any, ix) => (
-                <div 
+                <div
                   key={frontmatter.slug}
-                  className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white transition-all hover:border-orange-200 hover:shadow-md"
+                  className="relative overflow-hidden transition-all bg-white border rounded-lg group border-slate-200 hover:border-orange-200 hover:shadow-md"
                 >
-                  <div className="relative aspect-video w-full overflow-hidden">
-                    <img 
-                      src={frontmatter.imgSrc} 
+                  <div className="relative w-full overflow-hidden aspect-video">
+                    <img
+                      src={frontmatter.imgSrc}
                       alt={frontmatter.title}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
                     />
-                    <div className="absolute bottom-0 left-0 h-12 w-full bg-gradient-to-t from-white to-transparent" />
+                    <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent" />
                   </div>
                   <div className="relative p-6">
-                    <div className="absolute -top-px left-4 right-4 h-px bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
+                    <div className="absolute h-px -top-px left-4 right-4 bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
                     <h3 className="mb-2 text-xl font-bold">{frontmatter.title}</h3>
                     <p className="mb-4 text-slate-600">{frontmatter.abstract}</p>
                     <Button
@@ -119,12 +115,8 @@ function GBLUseCases({ sourceArr }: Props) {
                       className={{ root: 'group/button' }}
                     >
                       <Button.Label>Read more</Button.Label>
-                      <Button.Icon>
-                        <FontAwesomeIcon 
-                          icon={faArrowRight} 
-                          className="transition-transform group-hover/button:translate-x-0.5" 
-                        />
-                      </Button.Icon>
+                      <Button.Icon icon={faArrowRight}
+                          className={{root: "transition-transform group-hover/button:translate-x-0.5" }} />
                     </Button>
                   </div>
                 </div>
@@ -135,28 +127,28 @@ function GBLUseCases({ sourceArr }: Props) {
           <section>
             <div className="mb-8">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50">
-                  <FontAwesomeIcon icon={faChartLine} className="h-6 w-6 text-orange-600" />
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-orange-50">
+                  <FontAwesomeIcon icon={faChartLine} className="w-6 h-6 text-orange-600" />
                 </div>
                 <H2 className={{ root: 'mb-0 text-3xl' }}>Simulations</H2>
               </div>
             </div>
             <div className="grid gap-6 md:grid-cols-2">
               {useCasesSimulations.map(({ frontmatter }: any, ix) => (
-                <div 
+                <div
                   key={frontmatter.slug}
-                  className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white transition-all hover:border-orange-200 hover:shadow-md"
+                  className="relative overflow-hidden transition-all bg-white border rounded-lg group border-slate-200 hover:border-orange-200 hover:shadow-md"
                 >
-                  <div className="relative aspect-video w-full overflow-hidden">
-                    <img 
-                      src={frontmatter.imgSrc} 
+                  <div className="relative w-full overflow-hidden aspect-video">
+                    <img
+                      src={frontmatter.imgSrc}
                       alt={frontmatter.title}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
                     />
-                    <div className="absolute bottom-0 left-0 h-12 w-full bg-gradient-to-t from-white to-transparent" />
+                    <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent" />
                   </div>
                   <div className="relative p-6">
-                    <div className="absolute -top-px left-4 right-4 h-px bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
+                    <div className="absolute h-px -top-px left-4 right-4 bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
                     <h3 className="mb-2 text-xl font-bold">{frontmatter.title}</h3>
                     <p className="mb-4 text-slate-600">{frontmatter.abstract}</p>
                     <Button
@@ -164,12 +156,8 @@ function GBLUseCases({ sourceArr }: Props) {
                       className={{ root: 'group/button' }}
                     >
                       <Button.Label>Read more</Button.Label>
-                      <Button.Icon>
-                        <FontAwesomeIcon 
-                          icon={faArrowRight} 
-                          className="transition-transform group-hover/button:translate-x-0.5" 
-                        />
-                      </Button.Icon>
+                      <Button.Icon icon={faArrowRight}
+                          className={{root: "transition-transform group-hover/button:translate-x-0.5"}} />
                     </Button>
                   </div>
                 </div>

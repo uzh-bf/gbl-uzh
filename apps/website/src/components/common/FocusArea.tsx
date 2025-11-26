@@ -31,22 +31,20 @@ function FocusArea({
       <div className="flex-1 md:w-36 md:flex-initial">
         <Card
           colored
-          className="w-36 p-4"
+          className="p-4 w-36"
           imgSrc={imgSrc}
           minHeight="min-h-[100px]"
         />
       </div>
 
-      <div className="mb-0 mt-4 md:mt-0 md:pl-4">
+      <div className="mt-4 mb-0 md:mt-0 md:pl-4">
         <H3>{title}</H3>
         <Prose>{description}</Prose>
         {roadmapHref && (
           <div className="mt-2">
             <Link href={roadmapHref} passHref target="_blank">
               <Button className={{ root: 'text-xs' }}>
-                <Button.Icon>
-                  <FontAwesomeIcon icon={faArrowRight} />
-                </Button.Icon>
+                <Button.Icon icon={faArrowRight} />
                 <Button.Label>Detailed Roadmap</Button.Label>
               </Button>
             </Link>

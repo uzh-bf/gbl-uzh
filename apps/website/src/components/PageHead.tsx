@@ -50,7 +50,7 @@ function Navigation({ isOpen }: NavigationProps) {
   const router = useRouter()
 
   const mobileMenu = (
-    <nav className="order-1 flex flex-col pb-4 md:hidden">
+    <nav className="flex flex-col order-1 pb-4 md:hidden">
       <NavigationItem isActive={router.pathname === '/'} href="/">
         Home
       </NavigationItem>
@@ -77,7 +77,7 @@ function Navigation({ isOpen }: NavigationProps) {
   return (
     <>
       {/* Menu for medium / large screens */}
-      <nav className="order-1 mt-8 hidden flex-col md:order-2 md:flex md:flex-row">
+      <nav className="flex-col order-1 hidden mt-8 md:order-2 md:flex md:flex-row">
         <NavigationItem isActive={router.pathname === '/'} href="/">
           Home
         </NavigationItem>
@@ -108,7 +108,7 @@ function Logo() {
       href="/"
       className="flex flex-col items-center justify-center md:flex-row"
     >
-      <div className="relative h-20 w-56">
+      <div className="relative w-56 h-20">
         <Image
           src={LogoImage}
           alt="Logo"
@@ -130,7 +130,7 @@ function PageHead() {
   const [isOpen, setOpen] = useState(false)
 
   return (
-    <header className="m-auto flex max-w-6xl flex-col justify-between pt-4">
+    <header className="flex flex-col justify-between max-w-6xl pt-4 m-auto">
       <div className="flex flex-row justify-between md:items-stretch">
         <div className="flex-initial">
           <Logo />
@@ -144,9 +144,7 @@ function PageHead() {
             }}
             onClick={() => setOpen(!isOpen)}
           >
-            <Button.Icon>
-              <FontAwesomeIcon icon={faBars} />
-            </Button.Icon>
+            <Button.Icon icon={faBars} />
           </Button>
         </div>
       </div>
