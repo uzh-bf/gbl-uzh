@@ -195,7 +195,7 @@ interface Period<
     payload: PayloadPeriodConsolidation<GameFactsType, PeriodSegmentFactsType>
   ) => OutputFacts<FactsType, NotificationType, EventType>
 
-  updateDBAfterInitialize: (
+  updateDBAfterInitialize?: (
     tx: TxType,
     facts: any,
     payload: any
@@ -231,7 +231,7 @@ interface PeriodResult<
       PlayerRoleType
     >
   ) => OutputFacts<FactsType, NotificationType, EventType>
-  updateDBAfterEnd: (
+  updateDBAfterEnd?: (
     tx: TxType,
     facts: any,
     payload: { gameId: number }
@@ -256,12 +256,12 @@ interface Segment<
     >
   ) => OutputFacts<FactsType, NotificationType, EventType>
 
-  updateDBAfterInitialize: (
+  updateDBAfterInitialize?: (
     tx: TxType,
     facts: any,
     payload: { gameId: number }
   ) => Promise<void>
-  updateDBBeforeActivation: (
+  updateDBBeforeActivation?: (
     tx: TxType,
     payload: {
       gameId: number
@@ -328,7 +328,7 @@ interface Reducer<
     GlobalNotificationType,
     EventType
   >
-  updateDBAfterApply: (
+  updateDBAfterApply?: (
     tx: TxType,
     facts: any,
     payload: { gameId: number }

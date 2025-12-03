@@ -53,9 +53,3 @@ export function consolidate(
   debugLog('PeriodConsolidate', facts, payload, resultFacts)
   return resultFacts
 }
-
-export async function updateDBAfterInitialize(
-  tx,
-  facts,
-  payload
-): Promise<void> {}

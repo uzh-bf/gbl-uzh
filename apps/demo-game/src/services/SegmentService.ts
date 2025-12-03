@@ -72,10 +72,3 @@ export function initialize(
   debugLog('SegmentInitialize', facts, payload, resultFacts)
   return resultFacts
 }
-
-export async function updateDBBeforeActivation(tx, payload): Promise<void> {}
-export async function updateDBAfterInitialize(
-  tx,
-  facts,
-  payload
-): Promise<void> {}

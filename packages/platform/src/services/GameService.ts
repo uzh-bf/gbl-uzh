@@ -126,7 +126,7 @@ export async function addGamePeriod<TFacts>(
   )
 
   const res = await ctx.prisma.$transaction(async (tx) => {
-    if (specificFacts) {
+    if (specificFacts && services.Period.updateDBAfterInitialize) {
       await services.Period.updateDBAfterInitialize(tx, specificFacts, {
         gameId,
       })
@@ -246,7 +246,7 @@ export async function addPeriodSegment<TFacts>(
     })
 
   const res = await ctx.prisma.$transaction(async (tx) => {
-    if (specificFacts) {
+    if (specificFacts && services.Segment.updateDBAfterInitialize) {
       await services.Segment.updateDBAfterInitialize(tx, specificFacts, {
         gameId,
       })
@@ -478,11 +478,13 @@ export async function activateNextPeriod(
       if (!game.activePeriod?.activeSegment || !currentSegmentIx) return null
 
       finalTransactionResult = await ctx.prisma.$transaction(async (tx) => {
-        await services.Segment.updateDBBeforeActivation(tx, {
-          gameId,
-          periodIx: currentPeriodIx,
-          segmentIx: currentSegmentIx,
-        })
+        if (services.Segment.updateDBBeforeActivation) {
+          await services.Segment.updateDBBeforeActivation(tx, {
+            gameId,
+            periodIx: currentPeriodIx,
+            segmentIx: currentSegmentIx,
+          })
+        }
         // NOTE(JJ): The results may have changed
         const gameLocal = await tx.game.findUnique({
           where: { id: gameId },
@@ -643,11 +645,13 @@ export async function activateNextPeriod(
           playerId: r.player.connect.id,
         }))
         const resultsFactsPerPlayer =
-          await services.PeriodResult.updateDBAfterEnd(
-            tx,
-            { results: resultsPerPlayer },
-            { gameId }
-          )
+          typeof services.PeriodResult.updateDBAfterEnd !== 'undefined'
+            ? await services.PeriodResult.updateDBAfterEnd(
+                tx,
+                { results: resultsPerPlayer },
+                { gameId }
+              )
+            : resultsPerPlayer
         // TODO(JJ): We need to change the facts here
         results.forEach((r) => {
           const updatedResultFacts = resultsFactsPerPlayer.find(
@@ -929,11 +933,14 @@ export async function activateNextSegment(
       }
 
       finalTransactionResult = await ctx.prisma.$transaction(async (tx) => {
-        await services.Segment.updateDBBeforeActivation(tx, {
-          gameId,
-          periodIx: currentPeriodIx,
-          segmentIx: currentSegmentIx,
-        })
+        if (services.Segment.updateDBBeforeActivation) {
+          await services.Segment.updateDBBeforeActivation(tx, {
+            gameId,
+            periodIx: currentPeriodIx,
+            segmentIx: currentSegmentIx,
+          })
+        }
+
         // NOTE(JJ): The results may have changed
         const gameLocal = await tx.game.findUnique({
           where: { id: gameId },
