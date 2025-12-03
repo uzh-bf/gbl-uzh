@@ -90,8 +90,8 @@ model Game {
 
   name String
 
-  facts Json
-  version Int @default(0)
+  facts   Json @default("{}")
+  version Int  @default(0)
 
   decisions PlayerDecision[]
   actions   PlayerAction[]
@@ -121,7 +121,7 @@ model Period {
 
   facts Json
 
-  segments PeriodSegment[]
+  segments     PeriodSegment[]
   segmentCount Int
 
   activeSegmentIx Int            @default(-1)
@@ -155,7 +155,7 @@ model PeriodSegment {
 
   facts Json
 
-  countdownExpiresAt DateTime?
+  countdownExpiresAt  DateTime?
   countdownDurationMs Int?
 
   actions PlayerAction[]
@@ -186,9 +186,9 @@ model PeriodSegment {
 model Player {
   id String @id @default(uuid()) @db.Uuid
 
-  number   Int     @default(-1)
-  name     String  @default("Anonymous")
-  isReady  Boolean @default(false)
+  number  Int     @default(-1)
+  name    String  @default("Anonymous")
+  isReady Boolean @default(false)
 
   experience        Int         @default(0)
   experienceToNext  Int         @default(100)

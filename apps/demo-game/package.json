@@ -102,6 +102,7 @@
     "prisma:deploy": "doppler run --config prd -- prisma migrate deploy --schema=prisma/schema",
     "prisma:generate": "prisma generate --schema=prisma/schema",
     "prisma:migrate": "prisma migrate dev --schema=prisma/schema",
+    "prisma:rollback": "doppler run --config prd -- prisma migrate resolve --schema=prisma/schema --rolled-back",
     "prisma:push": "prisma db push --schema=prisma/schema",
     "prisma:reset": "prisma migrate reset --schema=prisma/schema",
     "prisma:seed": "tsx prisma/seed.ts",

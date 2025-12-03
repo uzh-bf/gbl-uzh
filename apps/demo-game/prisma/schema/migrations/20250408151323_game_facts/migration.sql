@@ -47,7 +47,7 @@ ALTER TABLE "PlayerResult" DROP CONSTRAINT "PlayerResult_periodId_fkey";
 ALTER TABLE "PlayerResult" DROP CONSTRAINT "PlayerResult_playerId_fkey";
 
 -- AlterTable
-ALTER TABLE "Game" ADD COLUMN     "facts" JSONB NOT NULL;
+ALTER TABLE "Game" ADD COLUMN     "facts" JSONB NOT NULL DEFAULT '{}'::JSONB;
 
 -- AddForeignKey
 ALTER TABLE "Game" ADD CONSTRAINT "Game_activePeriodId_fkey" FOREIGN KEY ("activePeriodId") REFERENCES "Period"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
