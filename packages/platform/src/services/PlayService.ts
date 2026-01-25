@@ -761,7 +761,7 @@ export async function getPastResults(args, ctx: Context) {
 }
 
 export async function updateReadyState(args, ctx: Context) {
-  return ctx.prisma.player.update({
+  const updatedPlayer = await ctx.prisma.player.update({
     where: {
       id: ctx.user.sub,
     },
@@ -769,6 +769,24 @@ export async function updateReadyState(args, ctx: Context) {
       isReady: args.isReady,
     },
   })
+
+  if (typeof ctx.user.gameId === 'number') {
+    const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
+      type: BaseGlobalNotificationType.GAME_STATE_UPDATED,
+      facts: {
+        gameId: ctx.user.gameId,
+        playerId: updatedPlayer.id,
+        isReady: updatedPlayer.isReady,
+      },
+    }
+    EventService.publishGlobalNotification(eventToPublish)
+    log.info(
+      `Published ${eventToPublish.type} for game ${ctx.user.gameId}`,
+      eventToPublish.facts
+    )
+  }
+
+  return updatedPlayer
 }
 
 export async function addCountdown(args, ctx: Context) {
