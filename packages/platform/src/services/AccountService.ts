@@ -24,6 +24,15 @@ export function createLoginToken({
   })
 }
 
+function isSecureRequest(ctx: { req?: { headers?: Record<string, unknown> } }) {
+  const forwardedProto = ctx.req?.headers?.['x-forwarded-proto']
+  if (Array.isArray(forwardedProto)) return forwardedProto[0] === 'https'
+  if (typeof forwardedProto === 'string') return forwardedProto === 'https'
+
+  const nextAuthUrl = process.env.NEXTAUTH_URL
+  return typeof nextAuthUrl === 'string' && nextAuthUrl.startsWith('https://')
+}
+
 interface LoginAsTeamArgs {
   token: string
 }
@@ -61,13 +70,17 @@ export async function loginAsTeam(
       token: matchingPlayer.token,
     })
 
-    const cookieName = '__Secure-next-auth.session-token'
+    const secure = isSecureRequest(ctx)
+    const cookieName = secure
+      ? '__Secure-next-auth.session-token'
+      : 'next-auth.session-token'
 
     setCookie(ctx, cookieName, jwt, {
       path: '/',
       maxAge: 60 * 60 * 24 * 7,
       httpOnly: true,
-      secure: true,
+      secure,
+      sameSite: 'lax',
     })
   } catch (err) {
     console.error(err)
@@ -87,9 +100,8 @@ export async function logoutAsTeam(ctx: CtxWithPrisma<PrismaClient>) {
   })
 
   if (matchingPlayer) {
-    const cookieName = '__Secure-next-auth.session-token'
-
-    destroyCookie(ctx, cookieName)
+    destroyCookie(ctx, '__Secure-next-auth.session-token', { path: '/' })
+    destroyCookie(ctx, 'next-auth.session-token', { path: '/' })
 
     return true
   }

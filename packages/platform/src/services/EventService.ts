@@ -8,7 +8,7 @@ import type {
 import log from '../lib/logger.js'
 
 export async function receiveEvents({ events, ctx, prisma }) {
-  if (!Array.isArray(events)) return
+  if (!Array.isArray(events) || events.length === 0) return []
 
   const definedEvents = await prisma.event.findMany({
     include: {
@@ -18,13 +18,18 @@ export async function receiveEvents({ events, ctx, prisma }) {
 
   const definedLevels = await prisma.playerLevel.findMany()
 
-  const promises = await Promise.all(
+  const perEventOps = await Promise.all(
     events.map(async (event) =>
       receiveEvent({ ...event, ctx }, definedEvents, definedLevels, prisma)
     )
   )
 
-  const results = prisma.$transaction(promises.flat())
+  const ops = perEventOps.flat()
+  if (ops.length === 0) return []
+
+  const transaction = (prisma as any)?.$transaction
+  const results =
+    typeof transaction === 'function' ? transaction.call(prisma, ops) : Promise.all(ops)
 
   return results
 }
