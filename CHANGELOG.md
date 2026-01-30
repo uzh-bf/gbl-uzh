@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.34](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.33...v0.4.34) (2026-01-30)
+
+
+### Bug Fixes
+
+* **apps/demo-game:** install without frozen lockfile (hack) ([3f9c1db](https://github.com/uzh-bf/gbl-uzh/commit/3f9c1db40a8487e8d654f62babcdbf49ac2f0242))
+* build for demo-game ([01037af](https://github.com/uzh-bf/gbl-uzh/commit/01037affe19535f955fa8c326c761d8d878b3e0b))
+* create migration for platform updates ([87f2ff4](https://github.com/uzh-bf/gbl-uzh/commit/87f2ff45bffc92d36b94b4a72d8f24a27d40b3c4))
+* issue with events ([27265cb](https://github.com/uzh-bf/gbl-uzh/commit/27265cbad09a9f9a927b0ea6739ea19b12824c6a))
+* optional hooks ([64de0e3](https://github.com/uzh-bf/gbl-uzh/commit/64de0e318c1710e4545d9d67ac3b71d69ef0f4d0))
+* prisma schema with default game facts ([29876d6](https://github.com/uzh-bf/gbl-uzh/commit/29876d63fa42a4991ee5259f7549ca0a36fc3882))
+
+
+### Other
+
+* add GAME_STATE_UPDATED ([2b9fb5e](https://github.com/uzh-bf/gbl-uzh/commit/2b9fb5e2f67f3d597038d69a7ca0a11189fe31bc))
+* lockfile maintenance ([f20c29c](https://github.com/uzh-bf/gbl-uzh/commit/f20c29cceec87ca80ddf14e80158ae5501de0336))
+* run build locally ([aed9b5b](https://github.com/uzh-bf/gbl-uzh/commit/aed9b5be88dc55c86a8bebddc685295bdbb3ee09))
+
 ### [0.4.33](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.32...v0.4.33) (2025-11-25)
 
 
