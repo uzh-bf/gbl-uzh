@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.35](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.34...v0.4.35) (2026-01-30)
+
+
+### Build and CI
+
+* publish platform via npm trusted publishing ([bc2d411](https://github.com/uzh-bf/gbl-uzh/commit/bc2d411db885b91a4b0b426a0eceb13509deec89))
+
 ### [0.4.34](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.33...v0.4.34) (2026-01-30)
 
 
