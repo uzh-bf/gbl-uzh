@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.36](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.35...v0.4.36) (2026-01-30)
+
+
+### Other
+
+* add repository url for npm provenance ([75338b5](https://github.com/uzh-bf/gbl-uzh/commit/75338b5f2cd9ba03dbb5100a99bd276394190bfb))
+
 ### [0.4.35](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.34...v0.4.35) (2026-01-30)
 
 
