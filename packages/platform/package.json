@@ -2,6 +2,10 @@
   "name": "@gbl-uzh/platform",
   "version": "0.4.35",
   "license": "LGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uzh-bf/gbl-uzh"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
