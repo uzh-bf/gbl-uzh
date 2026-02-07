@@ -27,12 +27,16 @@ fragment PlayerData on Player {
   achievements {
     id
     count
+    periodIx
 
     achievement {
       id
       name
       description
       image
+      when
+      scope
+      activePeriods
       reward
     }
   }

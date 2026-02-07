@@ -1,6 +1,8 @@
+import * as DB from '@prisma/client'
 import { idArg, intArg, nonNull, objectType, stringArg } from 'nexus'
 import * as GameService from '../services/GameService.js'
 import * as PlayService from '../services/PlayService.js'
+import { Achievement } from './Achievement.js'
 import { Game } from './Game.js'
 import { LearningElement, LearningElementState } from './LearningElement.js'
 import { Player, PlayerDecision, PlayerResult, PlayerState } from './Player.js'
@@ -101,6 +103,17 @@ export function generateBaseQueries() {
         type: StoryElement,
         async resolve(_, args, ctx) {
           return GameService.getStoryElements(args, ctx)
+        },
+      })
+
+      t.list.nonNull.field('questAchievements', {
+        type: Achievement,
+        async resolve(_, _args, ctx) {
+          return ctx.prisma.achievement.findMany({
+            where: {
+              scope: DB.AchievementScope.PERIOD,
+            },
+          })
         },
       })
     },

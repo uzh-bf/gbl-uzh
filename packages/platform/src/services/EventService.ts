@@ -43,6 +43,7 @@ function prepareAchievementData({
 }) {
   return {
     count,
+    periodIx,
     achievement: { connect: { id: achievementId } },
     game: { connect: { id: gameId } },
     period: { connect: { gameId_index: { gameId, index: periodIx } } },
@@ -63,23 +64,51 @@ export async function receiveEvent(
   if (matchingEvent && matchingEvent.achievements?.length > 0) {
     const awardedAchievements = await matchingEvent.achievements.reduce(
       async (acc, achievement) => {
+        const isPeriodScoped =
+          achievement.scope === DB.AchievementScope.PERIOD
+
+        // For GAME-scoped FIRST achievements, skip if already earned globally
         if (
+          !isPeriodScoped &&
           achievement.when === DB.AchievementFrequency.FIRST &&
           event.ctx.achievements.includes(achievement.id)
         ) {
           return acc
         }
 
-        const existingInstance = await prisma.achievementInstance.findFirst({
-          where: {
-            achievement: {
-              id: achievement.id,
+        let existingInstance
+        if (isPeriodScoped) {
+          // PERIOD scope: look up by (achievementId, playerId, periodIx)
+          existingInstance = await prisma.achievementInstance.findUnique({
+            where: {
+              achievementId_playerId_periodIx: {
+                achievementId: achievement.id,
+                playerId: event.ctx.args.playerId,
+                periodIx: event.ctx.args.periodIx,
+              },
             },
-            player: {
-              id: event.ctx.args.playerId,
+          })
+
+          // For PERIOD-scoped FIRST achievements, skip if already earned this period
+          if (
+            achievement.when === DB.AchievementFrequency.FIRST &&
+            existingInstance
+          ) {
+            return acc
+          }
+        } else {
+          // GAME scope: look up by (achievementId, playerId) ignoring period
+          existingInstance = await prisma.achievementInstance.findFirst({
+            where: {
+              achievement: {
+                id: achievement.id,
+              },
+              player: {
+                id: event.ctx.args.playerId,
+              },
             },
-          },
-        })
+          })
+        }
 
         let achievementInstance
         if (existingInstance) {

@@ -55,4 +55,15 @@ query Result {
     type
     facts
   }
+
+  questAchievements {
+    id
+    name
+    description
+    image
+    when
+    scope
+    activePeriods
+    reward
+  }
 }
