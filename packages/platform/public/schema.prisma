@@ -354,7 +354,8 @@ model Achievement {
   scope         AchievementScope @default(GAME)
   activePeriods Int[]
 
-  reward Json?
+  reward     Json?
+  conditions Json?
 
   instances AchievementInstance[]
 

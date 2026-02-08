@@ -12,6 +12,7 @@ import {
 import * as AccountService from '../services/AccountService.js'
 import * as GameService from '../services/GameService.js'
 
+import * as EventService from '../services/EventService.js'
 import * as PlayService from '../services/PlayService.js'
 import { Game, Period, PeriodSegment } from './Game.js'
 import { LearningElementAttempt } from './LearningElement.js'
@@ -209,11 +210,36 @@ export function generateBaseMutations<
         },
         async resolve(_, args, ctx) {
           const facts = args.facts ? JSON.parse(args.facts) : {}
-          return GameService.updatePlayerData<PlayerFacts>(
+          const player = await GameService.updatePlayerData<PlayerFacts>(
             { ...args, facts },
             ctx,
             { schema: schemas.PlayerFactsSchema }
           )
+
+          if (player?.name && (player as any).facts?.color) {
+            await EventService.receiveEvents({
+              events: [
+                {
+                  type: 'COMPANY_SETUP_COMPLETED',
+                  facts: { hasName: 1, hasColor: 1 },
+                },
+              ],
+              ctx: {
+                user: ctx.user,
+                args: {
+                  gameId: ctx.user.gameId,
+                  periodIx: player.game?.activePeriodIx ?? 0,
+                  playerId: ctx.user.sub,
+                },
+                achievements: player.achievementKeys,
+                experience: player.experience,
+                currentLevelIx: player.levelIx,
+              },
+              prisma: ctx.prisma,
+            })
+          }
+
+          return player
         },
       })
 

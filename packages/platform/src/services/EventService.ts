@@ -51,6 +51,36 @@ function prepareAchievementData({
   }
 }
 
+function evaluateConditions(
+  conditions: { fact: string; op: string; value: number }[] | null | undefined,
+  facts: Record<string, any> | null | undefined
+): boolean {
+  if (!conditions || !Array.isArray(conditions) || conditions.length === 0)
+    return true
+  if (!facts) return false
+
+  return conditions.every((cond) => {
+    const actual = facts[cond.fact]
+    if (actual == null) return false
+    switch (cond.op) {
+      case 'gt':
+        return actual > cond.value
+      case 'gte':
+        return actual >= cond.value
+      case 'lt':
+        return actual < cond.value
+      case 'lte':
+        return actual <= cond.value
+      case 'eq':
+        return actual === cond.value
+      case 'neq':
+        return actual !== cond.value
+      default:
+        return false
+    }
+  })
+}
+
 export async function receiveEvent(
   event,
   definedEvents,
@@ -64,6 +94,11 @@ export async function receiveEvent(
   if (matchingEvent && matchingEvent.achievements?.length > 0) {
     const awardedAchievements = await matchingEvent.achievements.reduce(
       async (acc, achievement) => {
+        // skip if event facts don't match achievement conditions
+        if (!evaluateConditions(achievement.conditions, event.facts)) {
+          return acc
+        }
+
         const isPeriodScoped =
           achievement.scope === DB.AchievementScope.PERIOD
 

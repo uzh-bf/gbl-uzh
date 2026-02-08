@@ -33,6 +33,10 @@ export const Achievement = objectType({
     t.field('reward', {
       type: 'JSONObject',
     })
+
+    t.field('conditions', {
+      type: 'JSONObject',
+    })
   },
 })
 
