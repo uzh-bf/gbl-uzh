@@ -30,6 +30,20 @@ interface GenerateBaseMutationsArgs {
   roleAssigner?: (ix: number) => any
 }
 
+function hasCompletedCompanySetup(
+  player: { name?: unknown; facts?: unknown } | null | undefined
+) {
+  const hasName =
+    typeof player?.name === 'string' && player.name.trim().length > 0
+  if (!hasName) return false
+
+  const facts = player?.facts
+  if (!facts || typeof facts !== 'object' || Array.isArray(facts)) return false
+
+  const color = (facts as Record<string, unknown>).color
+  return typeof color === 'string' && color.trim().length > 0
+}
+
 export function generateBaseMutations<
   GameFacts,
   PeriodFacts,
@@ -209,6 +223,17 @@ export function generateBaseMutations<
           facts: stringArg(),
         },
         async resolve(_, args, ctx) {
+          const previousPlayer = await ctx.prisma.player.findUnique({
+            where: {
+              id: ctx.user.sub,
+            },
+            select: {
+              name: true,
+              facts: true,
+            },
+          })
+          const hadSetupBefore = hasCompletedCompanySetup(previousPlayer)
+
           const facts = args.facts ? JSON.parse(args.facts) : {}
           const player = await GameService.updatePlayerData<PlayerFacts>(
             { ...args, facts },
@@ -216,7 +241,8 @@ export function generateBaseMutations<
             { schema: schemas.PlayerFactsSchema }
           )
 
-          if (player?.name && (player as any).facts?.color) {
+          const hasSetupAfter = hasCompletedCompanySetup(player)
+          if (!hadSetupBefore && hasSetupAfter && player) {
             await EventService.receiveEvents({
               events: [
                 {

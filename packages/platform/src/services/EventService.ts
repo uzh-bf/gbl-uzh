@@ -92,106 +92,104 @@ export async function receiveEvent(
 
   // if there is a matching event and it awards achievements, process each
   if (matchingEvent && matchingEvent.achievements?.length > 0) {
-    const awardedAchievements = await matchingEvent.achievements.reduce(
-      async (acc, achievement) => {
-        // skip if event facts don't match achievement conditions
-        if (!evaluateConditions(achievement.conditions, event.facts)) {
-          return acc
-        }
+    const awardedAchievements: {
+      achievements: { achievement: any; achievementInstance: any }[]
+      achievementKeys: string[]
+      rewards: { xp?: number }
+    } = {
+      achievements: [],
+      achievementKeys: [],
+      rewards: {},
+    }
 
-        const isPeriodScoped =
-          achievement.scope === DB.AchievementScope.PERIOD
-
-        // For GAME-scoped FIRST achievements, skip if already earned globally
-        if (
-          !isPeriodScoped &&
-          achievement.when === DB.AchievementFrequency.FIRST &&
-          event.ctx.achievements.includes(achievement.id)
-        ) {
-          return acc
-        }
-
-        let existingInstance
-        if (isPeriodScoped) {
-          // PERIOD scope: look up by (achievementId, playerId, periodIx)
-          existingInstance = await prisma.achievementInstance.findUnique({
-            where: {
-              achievementId_playerId_periodIx: {
-                achievementId: achievement.id,
-                playerId: event.ctx.args.playerId,
-                periodIx: event.ctx.args.periodIx,
-              },
-            },
-          })
-
-          // For PERIOD-scoped FIRST achievements, skip if already earned this period
-          if (
-            achievement.when === DB.AchievementFrequency.FIRST &&
-            existingInstance
-          ) {
-            return acc
-          }
-        } else {
-          // GAME scope: look up by (achievementId, playerId) ignoring period
-          existingInstance = await prisma.achievementInstance.findFirst({
-            where: {
-              achievement: {
-                id: achievement.id,
-              },
-              player: {
-                id: event.ctx.args.playerId,
-              },
-            },
-          })
-        }
-
-        let achievementInstance
-        if (existingInstance) {
-          achievementInstance = await prisma.achievementInstance.update({
-            where: {
-              id: existingInstance.id,
-            },
-            data: prepareAchievementData({
-              count: existingInstance.count + 1,
-              achievementId: achievement.id,
-              gameId: event.ctx.args.gameId,
-              periodIx: event.ctx.args.periodIx,
-              playerId: event.ctx.args.playerId,
-            }),
-          })
-        } else {
-          achievementInstance = await prisma.achievementInstance.create({
-            data: prepareAchievementData({
-              count: 1,
-              achievementId: achievement.id,
-              gameId: event.ctx.args.gameId,
-              periodIx: event.ctx.args.periodIx,
-              playerId: event.ctx.args.playerId,
-            }),
-          })
-        }
-
-        return {
-          achievements: [
-            ...acc.achievements,
-            {
-              achievement,
-              achievementInstance,
-            },
-          ],
-          achievementKeys: [...acc.achievementKeys, achievement.id],
-          rewards: {
-            ...acc.rewards,
-            xp: (acc.rewards.xp ?? 0) + (achievement.reward?.xp ?? 0),
-          },
-        }
-      },
-      {
-        achievements: [],
-        achievementKeys: [],
-        rewards: {},
+    for (const achievement of matchingEvent.achievements) {
+      // skip if event facts don't match achievement conditions
+      if (!evaluateConditions(achievement.conditions, event.facts)) {
+        continue
       }
-    )
+
+      const isPeriodScoped = achievement.scope === DB.AchievementScope.PERIOD
+
+      // For GAME-scoped FIRST achievements, skip if already earned globally
+      if (
+        !isPeriodScoped &&
+        achievement.when === DB.AchievementFrequency.FIRST &&
+        event.ctx.achievements.includes(achievement.id)
+      ) {
+        continue
+      }
+
+      let existingInstance
+      if (isPeriodScoped) {
+        // PERIOD scope: look up by (achievementId, playerId, periodIx)
+        existingInstance = await prisma.achievementInstance.findUnique({
+          where: {
+            achievementId_playerId_periodIx: {
+              achievementId: achievement.id,
+              playerId: event.ctx.args.playerId,
+              periodIx: event.ctx.args.periodIx,
+            },
+          },
+        })
+
+        // For PERIOD-scoped FIRST achievements, skip if already earned this period
+        if (
+          achievement.when === DB.AchievementFrequency.FIRST &&
+          existingInstance
+        ) {
+          continue
+        }
+      } else {
+        // GAME scope: look up by (achievementId, playerId) ignoring period
+        existingInstance = await prisma.achievementInstance.findFirst({
+          where: {
+            achievement: {
+              id: achievement.id,
+            },
+            player: {
+              id: event.ctx.args.playerId,
+            },
+          },
+        })
+      }
+
+      let achievementInstance
+      if (existingInstance) {
+        achievementInstance = await prisma.achievementInstance.update({
+          where: {
+            id: existingInstance.id,
+          },
+          data: prepareAchievementData({
+            count: existingInstance.count + 1,
+            achievementId: achievement.id,
+            gameId: event.ctx.args.gameId,
+            periodIx: event.ctx.args.periodIx,
+            playerId: event.ctx.args.playerId,
+          }),
+        })
+      } else {
+        achievementInstance = await prisma.achievementInstance.create({
+          data: prepareAchievementData({
+            count: 1,
+            achievementId: achievement.id,
+            gameId: event.ctx.args.gameId,
+            periodIx: event.ctx.args.periodIx,
+            playerId: event.ctx.args.playerId,
+          }),
+        })
+      }
+
+      awardedAchievements.achievements.push({
+        achievement,
+        achievementInstance,
+      })
+      awardedAchievements.achievementKeys.push(achievement.id)
+      awardedAchievements.rewards = {
+        ...awardedAchievements.rewards,
+        xp:
+          (awardedAchievements.rewards.xp ?? 0) + (achievement.reward?.xp ?? 0),
+      }
+    }
 
     const currentLevelPlus1 = definedLevels.find(
       (level) => level.index === event.ctx.currentLevelIx + 1

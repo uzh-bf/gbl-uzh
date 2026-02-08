@@ -1,8 +1,9 @@
 import * as DB from '@prisma/client'
-import { DateTimeResolver, JSONObjectResolver } from 'graphql-scalars'
+import { DateTimeResolver, JSONResolver, JSONObjectResolver } from 'graphql-scalars'
 import { asNexusMethod, enumType, objectType } from 'nexus'
 
 export const JsonScalar = asNexusMethod(JSONObjectResolver, 'json')
+export const JsonValueScalar = asNexusMethod(JSONResolver, 'jsonValue')
 export const DateScalar = asNexusMethod(DateTimeResolver, 'date')
 
 export const UserRole = enumType({

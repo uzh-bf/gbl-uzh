@@ -17,6 +17,8 @@ export type Scalars = {
   Float: { input: number; output: number; }
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
   DateTime: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+  JSON: { input: any; output: any; }
   /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSONObject: { input: any; output: any; }
 };
@@ -24,7 +26,7 @@ export type Scalars = {
 export type Achievement = {
   __typename?: 'Achievement';
   activePeriods: Array<Scalars['Int']['output']>;
-  conditions?: Maybe<Scalars['JSONObject']['output']>;
+  conditions?: Maybe<Scalars['JSON']['output']>;
   description: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   image?: Maybe<Scalars['String']['output']>;
@@ -703,6 +705,7 @@ export type ResolversTypes = {
   GameStatus: GameStatus;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   JSONObject: ResolverTypeWrapper<Scalars['JSONObject']['output']>;
   LearningAnswerOption: ResolverTypeWrapper<LearningAnswerOption>;
   LearningElement: ResolverTypeWrapper<LearningElement>;
@@ -742,6 +745,7 @@ export type ResolversParentTypes = {
   GameFactsInput: GameFactsInput;
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
+  JSON: Scalars['JSON']['output'];
   JSONObject: Scalars['JSONObject']['output'];
   LearningAnswerOption: LearningAnswerOption;
   LearningElement: LearningElement;
@@ -767,7 +771,7 @@ export type ResolversParentTypes = {
 
 export type AchievementResolvers<ContextType = any, ParentType extends ResolversParentTypes['Achievement'] = ResolversParentTypes['Achievement']> = {
   activePeriods?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
-  conditions?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  conditions?: Resolver<Maybe<ResolversTypes['JSON']>, ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   image?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -809,6 +813,10 @@ export type GameResolvers<ContextType = any, ParentType extends ResolversParentT
   status?: Resolver<ResolversTypes['GameStatus'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
+
+export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSON'], any> {
+  name: 'JSON';
+}
 
 export interface JsonObjectScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSONObject'], any> {
   name: 'JSONObject';
@@ -1004,6 +1012,7 @@ export type Resolvers<ContextType = any> = {
   DateTime?: GraphQLScalarType;
   Event?: EventResolvers<ContextType>;
   Game?: GameResolvers<ContextType>;
+  JSON?: GraphQLScalarType;
   JSONObject?: GraphQLScalarType;
   LearningAnswerOption?: LearningAnswerOptionResolvers<ContextType>;
   LearningElement?: LearningElementResolvers<ContextType>;

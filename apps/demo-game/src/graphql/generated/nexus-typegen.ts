@@ -15,6 +15,10 @@ declare global {
      * The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
      */
     json<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "JSONObject";
+    /**
+     * The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+     */
+    jsonValue<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "JSON";
   }
 }
 declare global {
@@ -27,6 +31,10 @@ declare global {
      * The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
      */
     json<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "JSONObject";
+    /**
+     * The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+     */
+    jsonValue<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "JSON";
   }
 }
 
@@ -76,13 +84,14 @@ export interface NexusGenScalars {
   Boolean: boolean
   ID: string
   DateTime: any
+  JSON: any
   JSONObject: any
 }
 
 export interface NexusGenObjects {
   Achievement: { // root type
     activePeriods: number[]; // [Int!]!
-    conditions?: NexusGenScalars['JSONObject'] | null; // JSONObject
+    conditions?: NexusGenScalars['JSON'] | null; // JSON
     description: string; // String!
     id: string; // ID!
     image?: string | null; // String
@@ -251,7 +260,7 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnu
 export interface NexusGenFieldTypes {
   Achievement: { // field return type
     activePeriods: number[]; // [Int!]!
-    conditions: NexusGenScalars['JSONObject'] | null; // JSONObject
+    conditions: NexusGenScalars['JSON'] | null; // JSON
     description: string; // String!
     id: string; // ID!
     image: string | null; // String
@@ -442,7 +451,7 @@ export interface NexusGenFieldTypes {
 export interface NexusGenFieldTypeNames {
   Achievement: { // field return type name
     activePeriods: 'Int'
-    conditions: 'JSONObject'
+    conditions: 'JSON'
     description: 'String'
     id: 'ID'
     image: 'String'

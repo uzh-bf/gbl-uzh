@@ -35,7 +35,7 @@ export const Achievement = objectType({
     })
 
     t.field('conditions', {
-      type: 'JSONObject',
+      type: 'JSON',
     })
   },
 })
