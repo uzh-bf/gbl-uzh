@@ -3,11 +3,14 @@
 
 
 type Achievement {
+  activePeriods: [Int!]!
+  conditions: JSONObject
   description: String!
   id: ID!
   image: String
   name: String!
   reward: JSONObject
+  scope: AchievementScope!
   when: AchievementFrequency!
 }
 
@@ -20,6 +23,12 @@ type AchievementInstance {
   achievement: Achievement!
   count: Int!
   id: Int!
+  periodIx: Int!
+}
+
+enum AchievementScope {
+  GAME
+  PERIOD
 }
 
 """
@@ -246,6 +255,7 @@ type Query {
   learningElement(id: ID!): LearningElementState
   learningElements: [LearningElement!]
   pastResults: [PlayerResult!]
+  questAchievements: [Achievement!]
   result: PlayerState
   results: [PlayerResult!]
   self: Player
