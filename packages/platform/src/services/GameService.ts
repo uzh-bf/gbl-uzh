@@ -914,11 +914,9 @@ export async function activateNextSegment(
           },
         })
 
-        // TODO(JJ): These are currently nowhere used, how does the call look
-        // like?
-        // for (const extra of extras) {
-        //   await extra
-        // }
+        for (const extra of extras) {
+          await extra
+        }
       })
 
       break
