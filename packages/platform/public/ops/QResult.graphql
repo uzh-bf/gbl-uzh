@@ -60,8 +60,7 @@ query Result {
     id
     name
     description
-    descriptionBuyer
-    descriptionSeller
+    descriptionsByRole
     image
     when
     scope
