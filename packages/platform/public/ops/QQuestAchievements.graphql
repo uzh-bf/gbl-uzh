@@ -3,6 +3,8 @@ query QuestAchievements {
     id
     name
     description
+    descriptionBuyer
+    descriptionSeller
     image
     when
     scope

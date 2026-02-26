@@ -37,6 +37,9 @@ function hasCompletedCompanySetup(
     typeof player?.name === 'string' && player.name.trim().length > 0
   if (!hasName) return false
 
+  // Default names like "Team 1" don't count as custom company setup
+  if (/^Team \d+$/i.test(player!.name as string)) return false
+
   const facts = player?.facts
   if (!facts || typeof facts !== 'object' || Array.isArray(facts)) return false
 

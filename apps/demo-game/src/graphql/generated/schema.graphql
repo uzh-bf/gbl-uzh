@@ -6,6 +6,8 @@ type Achievement {
   activePeriods: [Int!]!
   conditions: JSON
   description: String!
+  descriptionBuyer: String
+  descriptionSeller: String
   id: ID!
   image: String
   name: String!

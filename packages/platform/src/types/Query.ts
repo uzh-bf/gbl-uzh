@@ -111,7 +111,7 @@ export function generateBaseQueries() {
         async resolve(_, _args, ctx) {
           return ctx.prisma.achievement.findMany({
             where: {
-              scope: DB.AchievementScope.PERIOD,
+              id: { notIn: ['LEARNING_ELEMENT_SOLVED'] },
             },
           })
         },

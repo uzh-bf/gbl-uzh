@@ -18,6 +18,8 @@ export const Achievement = objectType({
 
     t.nonNull.string('name')
     t.nonNull.string('description')
+    t.string('descriptionBuyer')
+    t.string('descriptionSeller')
     t.string('image')
 
     t.nonNull.field('when', {

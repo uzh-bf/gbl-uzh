@@ -343,9 +343,11 @@ enum AchievementScope {
 model Achievement {
   id String @id
 
-  name        String
-  description String
-  image       String?
+  name              String
+  description       String
+  descriptionBuyer  String?
+  descriptionSeller String?
+  image             String?
 
   onEventId String
   onEvent   Event                @relation(fields: [onEventId], references: [id])
