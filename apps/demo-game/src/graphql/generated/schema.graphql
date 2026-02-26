@@ -3,11 +3,16 @@
 
 
 type Achievement {
+  activePeriods: [Int!]!
+  conditions: JSON
   description: String!
+  descriptionBuyer: String
+  descriptionSeller: String
   id: ID!
   image: String
   name: String!
   reward: JSONObject
+  scope: AchievementScope!
   when: AchievementFrequency!
 }
 
@@ -20,6 +25,12 @@ type AchievementInstance {
   achievement: Achievement!
   count: Int!
   id: Int!
+  periodIx: Int!
+}
+
+enum AchievementScope {
+  GAME
+  PERIOD
 }
 
 """
@@ -59,6 +70,11 @@ enum GameStatus {
   RUNNING
   SCHEDULED
 }
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 """
 The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
@@ -246,6 +262,7 @@ type Query {
   learningElement(id: ID!): LearningElementState
   learningElements: [LearningElement!]
   pastResults: [PlayerResult!]
+  questAchievements: [Achievement!]
   result: PlayerState
   results: [PlayerResult!]
   self: Player

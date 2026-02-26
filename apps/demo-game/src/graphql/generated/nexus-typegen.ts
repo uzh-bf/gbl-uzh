@@ -15,6 +15,10 @@ declare global {
      * The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
      */
     json<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "JSONObject";
+    /**
+     * The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+     */
+    jsonValue<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "JSON";
   }
 }
 declare global {
@@ -27,6 +31,10 @@ declare global {
      * The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
      */
     json<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "JSONObject";
+    /**
+     * The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+     */
+    jsonValue<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "JSON";
   }
 }
 
@@ -61,6 +69,7 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   AchievementFrequency: "EACH" | "FIRST"
+  AchievementScope: "GAME" | "PERIOD"
   GameStatus: "COMPLETED" | "CONSOLIDATION" | "PAUSED" | "PREPARATION" | "RESULTS" | "RUNNING" | "SCHEDULED"
   PlayerDecisionType: "CONSOLIDATION" | "PREPARATION"
   PlayerResultType: "PERIOD_END" | "PERIOD_START" | "SEGMENT_END" | "SEGMENT_START"
@@ -75,22 +84,29 @@ export interface NexusGenScalars {
   Boolean: boolean
   ID: string
   DateTime: any
+  JSON: any
   JSONObject: any
 }
 
 export interface NexusGenObjects {
   Achievement: { // root type
+    activePeriods: number[]; // [Int!]!
+    conditions?: NexusGenScalars['JSON'] | null; // JSON
     description: string; // String!
+    descriptionBuyer?: string | null; // String
+    descriptionSeller?: string | null; // String
     id: string; // ID!
     image?: string | null; // String
     name: string; // String!
     reward?: NexusGenScalars['JSONObject'] | null; // JSONObject
+    scope: NexusGenEnums['AchievementScope']; // AchievementScope!
     when: NexusGenEnums['AchievementFrequency']; // AchievementFrequency!
   }
   AchievementInstance: { // root type
     achievement: NexusGenRootTypes['Achievement']; // Achievement!
     count: number; // Int!
     id: number; // Int!
+    periodIx: number; // Int!
   }
   Event: { // root type
     facts?: NexusGenScalars['JSONObject'] | null; // JSONObject
@@ -245,17 +261,23 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnu
 
 export interface NexusGenFieldTypes {
   Achievement: { // field return type
+    activePeriods: number[]; // [Int!]!
+    conditions: NexusGenScalars['JSON'] | null; // JSON
     description: string; // String!
+    descriptionBuyer: string | null; // String
+    descriptionSeller: string | null; // String
     id: string; // ID!
     image: string | null; // String
     name: string; // String!
     reward: NexusGenScalars['JSONObject'] | null; // JSONObject
+    scope: NexusGenEnums['AchievementScope']; // AchievementScope!
     when: NexusGenEnums['AchievementFrequency']; // AchievementFrequency!
   }
   AchievementInstance: { // field return type
     achievement: NexusGenRootTypes['Achievement']; // Achievement!
     count: number; // Int!
     id: number; // Int!
+    periodIx: number; // Int!
   }
   Event: { // field return type
     facts: NexusGenScalars['JSONObject'] | null; // JSONObject
@@ -409,6 +431,7 @@ export interface NexusGenFieldTypes {
     learningElement: NexusGenRootTypes['LearningElementState'] | null; // LearningElementState
     learningElements: NexusGenRootTypes['LearningElement'][] | null; // [LearningElement!]
     pastResults: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
+    questAchievements: NexusGenRootTypes['Achievement'][] | null; // [Achievement!]
     result: NexusGenRootTypes['PlayerState'] | null; // PlayerState
     results: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
     self: NexusGenRootTypes['Player'] | null; // Player
@@ -431,17 +454,23 @@ export interface NexusGenFieldTypes {
 
 export interface NexusGenFieldTypeNames {
   Achievement: { // field return type name
+    activePeriods: 'Int'
+    conditions: 'JSON'
     description: 'String'
+    descriptionBuyer: 'String'
+    descriptionSeller: 'String'
     id: 'ID'
     image: 'String'
     name: 'String'
     reward: 'JSONObject'
+    scope: 'AchievementScope'
     when: 'AchievementFrequency'
   }
   AchievementInstance: { // field return type name
     achievement: 'Achievement'
     count: 'Int'
     id: 'Int'
+    periodIx: 'Int'
   }
   Event: { // field return type name
     facts: 'JSONObject'
@@ -595,6 +624,7 @@ export interface NexusGenFieldTypeNames {
     learningElement: 'LearningElementState'
     learningElements: 'LearningElement'
     pastResults: 'PlayerResult'
+    questAchievements: 'Achievement'
     result: 'PlayerState'
     results: 'PlayerResult'
     self: 'Player'

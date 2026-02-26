@@ -12,6 +12,7 @@ import {
 import * as AccountService from '../services/AccountService.js'
 import * as GameService from '../services/GameService.js'
 
+import * as EventService from '../services/EventService.js'
 import * as PlayService from '../services/PlayService.js'
 import { Game, Period, PeriodSegment } from './Game.js'
 import { LearningElementAttempt } from './LearningElement.js'
@@ -27,6 +28,23 @@ interface GenerateBaseMutationsArgs {
   inputTypes?: any
   // TODO(JJ): return value should be unknown
   roleAssigner?: (ix: number) => any
+}
+
+function hasCompletedCompanySetup(
+  player: { name?: unknown; facts?: unknown } | null | undefined
+) {
+  const hasName =
+    typeof player?.name === 'string' && player.name.trim().length > 0
+  if (!hasName) return false
+
+  // Default names like "Team 1" don't count as custom company setup
+  if (/^Team \d+$/i.test(player!.name as string)) return false
+
+  const facts = player?.facts
+  if (!facts || typeof facts !== 'object' || Array.isArray(facts)) return false
+
+  const color = (facts as Record<string, unknown>).color
+  return typeof color === 'string' && color.trim().length > 0
 }
 
 export function generateBaseMutations<
@@ -208,12 +226,49 @@ export function generateBaseMutations<
           facts: stringArg(),
         },
         async resolve(_, args, ctx) {
+          const previousPlayer = await ctx.prisma.player.findUnique({
+            where: {
+              id: ctx.user.sub,
+            },
+            select: {
+              name: true,
+              facts: true,
+            },
+          })
+          const hadSetupBefore = hasCompletedCompanySetup(previousPlayer)
+
           const facts = args.facts ? JSON.parse(args.facts) : {}
-          return GameService.updatePlayerData<PlayerFacts>(
+          const player = await GameService.updatePlayerData<PlayerFacts>(
             { ...args, facts },
             ctx,
             { schema: schemas.PlayerFactsSchema }
           )
+
+          const hasSetupAfter = hasCompletedCompanySetup(player)
+          if (!hadSetupBefore && hasSetupAfter && player) {
+            await EventService.receiveEvents({
+              events: [
+                {
+                  type: 'COMPANY_SETUP_COMPLETED',
+                  facts: { hasName: 1, hasColor: 1 },
+                },
+              ],
+              ctx: {
+                user: ctx.user,
+                args: {
+                  gameId: ctx.user.gameId,
+                  periodIx: player.game?.activePeriodIx ?? 0,
+                  playerId: ctx.user.sub,
+                },
+                achievements: player.achievementKeys,
+                experience: player.experience,
+                currentLevelIx: player.levelIx,
+              },
+              prisma: ctx.prisma,
+            })
+          }
+
+          return player
         },
       })
 

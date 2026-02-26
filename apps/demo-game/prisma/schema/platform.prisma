@@ -90,8 +90,8 @@ model Game {
 
   name String
 
-  facts   Json @default("{}")
-  version Int  @default(0)
+  facts Json
+  version Int @default(0)
 
   decisions PlayerDecision[]
   actions   PlayerAction[]
@@ -121,7 +121,7 @@ model Period {
 
   facts Json
 
-  segments     PeriodSegment[]
+  segments PeriodSegment[]
   segmentCount Int
 
   activeSegmentIx Int            @default(-1)
@@ -155,7 +155,7 @@ model PeriodSegment {
 
   facts Json
 
-  countdownExpiresAt  DateTime?
+  countdownExpiresAt DateTime?
   countdownDurationMs Int?
 
   actions PlayerAction[]
@@ -186,9 +186,9 @@ model PeriodSegment {
 model Player {
   id String @id @default(uuid()) @db.Uuid
 
-  number  Int     @default(-1)
-  name    String  @default("Anonymous")
-  isReady Boolean @default(false)
+  number   Int     @default(-1)
+  name     String  @default("Anonymous")
+  isReady  Boolean @default(false)
 
   experience        Int         @default(0)
   experienceToNext  Int         @default(100)
@@ -335,18 +335,29 @@ enum AchievementFrequency {
   EACH
 }
 
+enum AchievementScope {
+  GAME
+  PERIOD
+}
+
 model Achievement {
   id String @id
 
-  name        String
-  description String
-  image       String?
+  name              String
+  description       String
+  descriptionBuyer  String?
+  descriptionSeller String?
+  image             String?
 
   onEventId String
   onEvent   Event                @relation(fields: [onEventId], references: [id])
   when      AchievementFrequency
 
-  reward Json?
+  scope         AchievementScope @default(GAME)
+  activePeriods Int[]
+
+  reward     Json?
+  conditions Json?
 
   instances AchievementInstance[]
 
@@ -367,6 +378,7 @@ model AchievementInstance {
 
   periodId Int
   period   Period @relation(fields: [periodId], references: [id])
+  periodIx Int
 
   gameId Int
   game   Game @relation(fields: [gameId], references: [id])
@@ -374,6 +386,7 @@ model AchievementInstance {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([achievementId, playerId, periodIx])
   @@index([playerId, achievementId])
 }
 

@@ -335,18 +335,28 @@ enum AchievementFrequency {
   EACH
 }
 
+enum AchievementScope {
+  GAME
+  PERIOD
+}
+
 model Achievement {
   id String @id
 
-  name        String
-  description String
-  image       String?
+  name              String
+  description       String
+  descriptionsByRole Json?
+  image             String?
 
   onEventId String
   onEvent   Event                @relation(fields: [onEventId], references: [id])
   when      AchievementFrequency
 
-  reward Json?
+  scope         AchievementScope @default(GAME)
+  activePeriods Int[]
+
+  reward     Json?
+  conditions Json?
 
   instances AchievementInstance[]
 
@@ -367,6 +377,7 @@ model AchievementInstance {
 
   periodId Int
   period   Period @relation(fields: [periodId], references: [id])
+  periodIx Int
 
   gameId Int
   game   Game @relation(fields: [gameId], references: [id])
@@ -374,6 +385,7 @@ model AchievementInstance {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([achievementId, playerId, periodIx])
   @@index([playerId, achievementId])
 }
 
