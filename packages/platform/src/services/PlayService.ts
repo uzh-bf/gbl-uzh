@@ -326,6 +326,7 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
             },
           },
           segments: {
+            orderBy: { index: 'asc' },
             include: {
               learningElements: true,
               storyElements: true,
@@ -337,6 +338,7 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
         orderBy: { createdAt: 'asc' },
         include: {
           segments: {
+            orderBy: { index: 'asc' },
             include: {
               learningElements: true,
               storyElements: true,
@@ -359,12 +361,12 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
   // should not be visible to the user
   const activePeriodIx = currentGame.activePeriodIx
   currentGame.periods = currentGame.periods.filter(
-    (_, ix) => ix <= activePeriodIx
+    (period) => period.index <= activePeriodIx
   )
   const activeSegmentIx = currentGame.activePeriod.activeSegmentIx
 
   currentGame.activePeriod.segments = currentGame.activePeriod.segments.filter(
-    (_, ix) => ix <= activeSegmentIx
+    (segment) => segment.index <= activeSegmentIx
   )
 
   currentGame.periods[activePeriodIx]!.segments =

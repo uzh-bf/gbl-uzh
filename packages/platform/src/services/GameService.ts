@@ -564,6 +564,12 @@ export async function activateNextPeriod(
           },
         })
 
+        // reset player readiness
+        await tx.player.updateMany({
+          where: { game: { id: gameId } },
+          data: { isReady: false },
+        })
+
         for (const extra of extras) {
           await extra
         }
@@ -676,6 +682,12 @@ export async function activateNextPeriod(
           include: { results: true },
         })
 
+        // reset player readiness
+        await tx.player.updateMany({
+          where: { game: { id: gameId } },
+          data: { isReady: false },
+        })
+
         for (const extra of extras) {
           await extra
         }
@@ -760,6 +772,12 @@ export async function activateNextPeriod(
           },
         }),
 
+        // reset player readiness
+        ctx.prisma.player.updateMany({
+          where: { game: { id: gameId } },
+          data: { isReady: false },
+        }),
+
         ...extras,
       ])
 
@@ -818,7 +836,7 @@ export async function activateNextSegment(
     include: {
       activePeriod: {
         include: {
-          segments: { include: { nextSegment: true } },
+          segments: { orderBy: { index: 'asc' }, include: { nextSegment: true } },
           results: { include: { player: true } },
           activeSegment: {
             include: {
@@ -912,6 +930,12 @@ export async function activateNextSegment(
               create: results,
             },
           },
+        })
+
+        // reset player readiness
+        await tx.player.updateMany({
+          where: { game: { id: gameId } },
+          data: { isReady: false },
         })
 
         for (const extra of extras) {
