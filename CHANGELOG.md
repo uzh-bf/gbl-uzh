@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.38](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.37...v0.4.38) (2026-03-02)
+
+
+### Bug Fixes
+
+* ordering of segments ([4c9f536](https://github.com/uzh-bf/gbl-uzh/commit/4c9f536e18e2dfe28621060f9ec051a2f6e842d6))
+* use descriptionsByRole with generically usable JSON object ([fc90310](https://github.com/uzh-bf/gbl-uzh/commit/fc90310db95d2199dbfd4a6c5fc9123abec344f4))
+
 ### [0.4.37](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.36...v0.4.37) (2026-02-26)
 
 
