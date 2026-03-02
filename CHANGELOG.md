@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.40](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.39...v0.4.40) (2026-03-02)
+
+
+### Bug Fixes
+
+* adjust transaction timeout to 120000 ([4f76af7](https://github.com/uzh-bf/gbl-uzh/commit/4f76af7356670a6ed5ed3120d7e33ea313043e88))
+
 ### [0.4.39](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.38...v0.4.39) (2026-03-02)
 
 
