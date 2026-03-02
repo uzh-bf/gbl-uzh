@@ -573,7 +573,7 @@ export async function activateNextPeriod(
         for (const extra of extras) {
           await extra
         }
-      })
+      }, { timeout: 30000 })
 
       break
     }
@@ -691,7 +691,7 @@ export async function activateNextPeriod(
         for (const extra of extras) {
           await extra
         }
-      })
+      }, { timeout: 30000 })
 
       break
     }
@@ -941,7 +941,7 @@ export async function activateNextSegment(
         for (const extra of extras) {
           await extra
         }
-      })
+      }, { timeout: 30000 })
 
       break
     }
@@ -1025,7 +1025,7 @@ export async function activateNextSegment(
         for (const extra of extras) {
           await extra
         }
-      })
+      }, { timeout: 30000 })
 
       break
     }
