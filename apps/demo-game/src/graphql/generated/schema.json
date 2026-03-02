@@ -69,24 +69,12 @@
             "deprecationReason": null
           },
           {
-            "name": "descriptionBuyer",
+            "name": "descriptionsByRole",
             "description": null,
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "descriptionSeller",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
+              "name": "JSONObject",
               "ofType": null
             },
             "isDeprecated": false,

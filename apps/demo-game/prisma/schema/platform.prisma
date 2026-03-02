@@ -345,8 +345,7 @@ model Achievement {
 
   name              String
   description       String
-  descriptionBuyer  String?
-  descriptionSeller String?
+  descriptionsByRole Json?
   image             String?
 
   onEventId String

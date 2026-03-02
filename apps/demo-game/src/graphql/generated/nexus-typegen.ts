@@ -93,8 +93,7 @@ export interface NexusGenObjects {
     activePeriods: number[]; // [Int!]!
     conditions?: NexusGenScalars['JSON'] | null; // JSON
     description: string; // String!
-    descriptionBuyer?: string | null; // String
-    descriptionSeller?: string | null; // String
+    descriptionsByRole?: NexusGenScalars['JSONObject'] | null; // JSONObject
     id: string; // ID!
     image?: string | null; // String
     name: string; // String!
@@ -264,8 +263,7 @@ export interface NexusGenFieldTypes {
     activePeriods: number[]; // [Int!]!
     conditions: NexusGenScalars['JSON'] | null; // JSON
     description: string; // String!
-    descriptionBuyer: string | null; // String
-    descriptionSeller: string | null; // String
+    descriptionsByRole: NexusGenScalars['JSONObject'] | null; // JSONObject
     id: string; // ID!
     image: string | null; // String
     name: string; // String!
@@ -457,8 +455,7 @@ export interface NexusGenFieldTypeNames {
     activePeriods: 'Int'
     conditions: 'JSON'
     description: 'String'
-    descriptionBuyer: 'String'
-    descriptionSeller: 'String'
+    descriptionsByRole: 'JSONObject'
     id: 'ID'
     image: 'String'
     name: 'String'
