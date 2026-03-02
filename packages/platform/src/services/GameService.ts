@@ -477,103 +477,104 @@ export async function activateNextPeriod(
     case DB.GameStatus.RUNNING: {
       if (!game.activePeriod?.activeSegment || !currentSegmentIx) return null
 
-      finalTransactionResult = await ctx.prisma.$transaction(async (tx) => {
-        if (services.Segment.updateDBBeforeActivation) {
-          await services.Segment.updateDBBeforeActivation(tx, {
-            gameId,
-            periodIx: currentPeriodIx,
-            segmentIx: currentSegmentIx,
-          })
-        }
-        // NOTE(JJ): The results may have changed
-        const gameLocal = await tx.game.findUnique({
-          where: { id: gameId },
-          include: {
-            activePeriod: {
-              include: {
-                activeSegment: {
-                  include: { results: { include: { player: true } } },
+      finalTransactionResult = await ctx.prisma.$transaction(
+        async (tx) => {
+          if (services.Segment.updateDBBeforeActivation) {
+            await services.Segment.updateDBBeforeActivation(tx, {
+              gameId,
+              periodIx: currentPeriodIx,
+              segmentIx: currentSegmentIx,
+            })
+          }
+          // NOTE(JJ): The results may have changed
+          const gameLocal = await tx.game.findUnique({
+            where: { id: gameId },
+            include: {
+              activePeriod: {
+                include: {
+                  activeSegment: {
+                    include: { results: { include: { player: true } } },
+                  },
                 },
               },
             },
-          },
-        })
+          })
 
-        const { results, extras } = computeSegmentEndResults(gameLocal, ctx, {
-          services,
-        })
+          const { results, extras } = computeSegmentEndResults(gameLocal, ctx, {
+            services,
+          })
 
-        // TODO(JJ): Check if we need to update the game facts as well
-        // update period facts when starting consolidation
-        const { resultFacts: consolidatedFacts } = services.Period.consolidate(
-          gameLocal?.activePeriod?.facts,
-          {
-            gameFacts: gameLocal?.facts,
-            previousSegmentFacts: gameLocal?.activePeriod?.activeSegment
-              ?.facts as any,
-            periodIx: currentPeriodIx,
-          }
-        )
-
-        await tx.game.update({
-          data: { status: DB.GameStatus.CONSOLIDATION },
-          include: {
-            periods: {
-              include: {
-                segments: true,
-              },
-            },
-          },
-          where: {
-            id: gameId,
-          },
-        })
-
-        await tx.period.update({
-          where: {
-            gameId_index: {
-              gameId,
-              index: currentPeriodIx,
-            },
-          },
-          data: {
-            facts: consolidatedFacts,
-          },
-        })
-
-        await tx.periodSegment.update({
-          where: {
-            gameId_periodIx_index: {
-              gameId,
+          // TODO(JJ): Check if we need to update the game facts as well
+          // update period facts when starting consolidation
+          const { resultFacts: consolidatedFacts } =
+            services.Period.consolidate(gameLocal?.activePeriod?.facts, {
+              gameFacts: gameLocal?.facts,
+              previousSegmentFacts: gameLocal?.activePeriod?.activeSegment
+                ?.facts as any,
               periodIx: currentPeriodIx,
-              index: currentSegmentIx,
-            },
-          },
-          data: {
-            results: {
-              // compute SEGMENT_END results using model
-              update: results,
-            },
-          },
-          include: {
-            results: {
-              include: {
-                player: true,
+            })
+
+          await tx.game.update({
+            data: { status: DB.GameStatus.CONSOLIDATION },
+            include: {
+              periods: {
+                include: {
+                  segments: true,
+                },
               },
             },
-          },
-        })
+            where: {
+              id: gameId,
+            },
+          })
 
-        // reset player readiness
-        await tx.player.updateMany({
-          where: { game: { id: gameId } },
-          data: { isReady: false },
-        })
+          await tx.period.update({
+            where: {
+              gameId_index: {
+                gameId,
+                index: currentPeriodIx,
+              },
+            },
+            data: {
+              facts: consolidatedFacts,
+            },
+          })
 
-        for (const extra of extras) {
-          await extra
-        }
-      }, { timeout: 30000 })
+          await tx.periodSegment.update({
+            where: {
+              gameId_periodIx_index: {
+                gameId,
+                periodIx: currentPeriodIx,
+                index: currentSegmentIx,
+              },
+            },
+            data: {
+              results: {
+                // compute SEGMENT_END results using model
+                update: results,
+              },
+            },
+            include: {
+              results: {
+                include: {
+                  player: true,
+                },
+              },
+            },
+          })
+
+          // reset player readiness
+          await tx.player.updateMany({
+            where: { game: { id: gameId } },
+            data: { isReady: false },
+          })
+
+          for (const extra of extras) {
+            await extra
+          }
+        },
+        { timeout: 120000 }
+      )
 
       break
     }
@@ -642,56 +643,59 @@ export async function activateNextPeriod(
 
       // TODO(JJ): Check with RS
       // - when updating the game with the nextPeriodIx it crashes
-      finalTransactionResult = await ctx.prisma.$transaction(async (tx) => {
-        // TODO(JJ):
-        // - Here we have all the latest results of all players
-        // - add all players and all results
-        const resultsPerPlayer = results.map((r) => ({
-          facts: r.facts,
-          playerId: r.player.connect.id,
-        }))
-        const resultsFactsPerPlayer =
-          typeof services.PeriodResult.updateDBAfterEnd !== 'undefined'
-            ? await services.PeriodResult.updateDBAfterEnd(
-                tx,
-                { results: resultsPerPlayer },
-                { gameId }
-              )
-            : resultsPerPlayer
-        // TODO(JJ): We need to change the facts here
-        results.forEach((r) => {
-          const updatedResultFacts = resultsFactsPerPlayer.find(
-            (f) => f.playerId === r.player.connect.id
-          )?.facts
-          if (updatedResultFacts) {
-            r.facts = updatedResultFacts
+      finalTransactionResult = await ctx.prisma.$transaction(
+        async (tx) => {
+          // TODO(JJ):
+          // - Here we have all the latest results of all players
+          // - add all players and all results
+          const resultsPerPlayer = results.map((r) => ({
+            facts: r.facts,
+            playerId: r.player.connect.id,
+          }))
+          const resultsFactsPerPlayer =
+            typeof services.PeriodResult.updateDBAfterEnd !== 'undefined'
+              ? await services.PeriodResult.updateDBAfterEnd(
+                  tx,
+                  { results: resultsPerPlayer },
+                  { gameId }
+                )
+              : resultsPerPlayer
+          // TODO(JJ): We need to change the facts here
+          results.forEach((r) => {
+            const updatedResultFacts = resultsFactsPerPlayer.find(
+              (f) => f.playerId === r.player.connect.id
+            )?.facts
+            if (updatedResultFacts) {
+              r.facts = updatedResultFacts
+            }
+          })
+
+          // update the status and active period of the current game
+          await tx.game.update({
+            where: { id: gameId },
+            include: { periods: { include: { segments: true } } },
+            data: gameData,
+          })
+
+          // create PERIOD_END results based on the previous SEGMENT_END results
+          await tx.period.update({
+            where: { gameId_index: { gameId, index: currentPeriodIx } },
+            data: { results: { create: results } },
+            include: { results: true },
+          })
+
+          // reset player readiness
+          await tx.player.updateMany({
+            where: { game: { id: gameId } },
+            data: { isReady: false },
+          })
+
+          for (const extra of extras) {
+            await extra
           }
-        })
-
-        // update the status and active period of the current game
-        await tx.game.update({
-          where: { id: gameId },
-          include: { periods: { include: { segments: true } } },
-          data: gameData,
-        })
-
-        // create PERIOD_END results based on the previous SEGMENT_END results
-        await tx.period.update({
-          where: { gameId_index: { gameId, index: currentPeriodIx } },
-          data: { results: { create: results } },
-          include: { results: true },
-        })
-
-        // reset player readiness
-        await tx.player.updateMany({
-          where: { game: { id: gameId } },
-          data: { isReady: false },
-        })
-
-        for (const extra of extras) {
-          await extra
-        }
-      }, { timeout: 30000 })
+        },
+        { timeout: 120000 }
+      )
 
       break
     }
@@ -836,7 +840,10 @@ export async function activateNextSegment(
     include: {
       activePeriod: {
         include: {
-          segments: { orderBy: { index: 'asc' }, include: { nextSegment: true } },
+          segments: {
+            orderBy: { index: 'asc' },
+            include: { nextSegment: true },
+          },
           results: { include: { player: true } },
           activeSegment: {
             include: {
@@ -869,79 +876,82 @@ export async function activateNextSegment(
         services,
       })
 
-      finalTransactionResult = await ctx.prisma.$transaction(async (tx) => {
-        // const isVeryFirst = currentPeriodIx === 0 && currentSegmentIx === -1
-        // if (!isVeryFirst) {
+      finalTransactionResult = await ctx.prisma.$transaction(
+        async (tx) => {
+          // const isVeryFirst = currentPeriodIx === 0 && currentSegmentIx === -1
+          // if (!isVeryFirst) {
 
-        // }
+          // }
 
-        await tx.game.update({
-          where: {
-            id: gameId,
-          },
-          include: {
-            periods: {
-              include: {
-                segments: true,
+          await tx.game.update({
+            where: {
+              id: gameId,
+            },
+            include: {
+              periods: {
+                include: {
+                  segments: true,
+                },
+              },
+              players: true,
+            },
+            data: {
+              status: DB.GameStatus.RUNNING,
+              // TODO(JJ): We need this to be updated
+              // activeSegmentIx: nextSegmentIx,
+            },
+          })
+
+          // update the active segment of the current period
+          await tx.period.update({
+            where: {
+              gameId_index: {
+                gameId,
+                index: currentPeriodIx,
               },
             },
-            players: true,
-          },
-          data: {
-            status: DB.GameStatus.RUNNING,
-            // TODO(JJ): We need this to be updated
-            // activeSegmentIx: nextSegmentIx,
-          },
-        })
-
-        // update the active segment of the current period
-        await tx.period.update({
-          where: {
-            gameId_index: {
-              gameId,
-              index: currentPeriodIx,
-            },
-          },
-          data: {
-            activeSegmentIx: nextSegmentIx,
-            activeSegment: {
-              connect: {
-                gameId_periodIx_index: {
-                  gameId,
-                  periodIx: currentPeriodIx,
-                  index: nextSegmentIx,
+            data: {
+              activeSegmentIx: nextSegmentIx,
+              activeSegment: {
+                connect: {
+                  gameId_periodIx_index: {
+                    gameId,
+                    periodIx: currentPeriodIx,
+                    index: nextSegmentIx,
+                  },
                 },
               },
             },
-          },
-        })
+          })
 
-        // SEGMENT INITIALIZATION
-        await tx.periodSegment.update({
-          where: {
-            gameId_periodIx_index: {
-              gameId,
-              periodIx: currentPeriodIx,
-              index: nextSegmentIx,
+          // SEGMENT INITIALIZATION
+          await tx.periodSegment.update({
+            where: {
+              gameId_periodIx_index: {
+                gameId,
+                periodIx: currentPeriodIx,
+                index: nextSegmentIx,
+              },
             },
-          },
-          data: {
-            results: {
-              create: results,
+            data: {
+              results: {
+                create: results,
+              },
             },
-          },
-        })
+          })
 
-        // reset player readiness
-        await tx.player.updateMany({
-          where: { game: { id: gameId } },
-          data: { isReady: false },
-        })
+          // reset player readiness
+          await tx.player.updateMany({
+            where: { game: { id: gameId } },
+            data: { isReady: false },
+          })
 
-        for (const extra of extras) {
-          await extra
-        }
-      }, { timeout: 30000 })
+          for (const extra of extras) {
+            await extra
+          }
+        },
+        { timeout: 120000 }
+      )
 
       break
     }
@@ -954,78 +964,81 @@ export async function activateNextSegment(
         return null
       }
 
-      finalTransactionResult = await ctx.prisma.$transaction(async (tx) => {
-        if (services.Segment.updateDBBeforeActivation) {
-          await services.Segment.updateDBBeforeActivation(tx, {
-            gameId,
-            periodIx: currentPeriodIx,
-            segmentIx: currentSegmentIx,
-          })
-        }
+      finalTransactionResult = await ctx.prisma.$transaction(
+        async (tx) => {
+          if (services.Segment.updateDBBeforeActivation) {
+            await services.Segment.updateDBBeforeActivation(tx, {
+              gameId,
+              periodIx: currentPeriodIx,
+              segmentIx: currentSegmentIx,
+            })
+          }
 
-        // NOTE(JJ): The results may have changed
-        const gameLocal = await tx.game.findUnique({
-          where: { id: gameId },
-          include: {
-            activePeriod: {
-              include: {
-                activeSegment: {
-                  include: { results: { include: { player: true } } },
+          // NOTE(JJ): The results may have changed
+          const gameLocal = await tx.game.findUnique({
+            where: { id: gameId },
+            include: {
+              activePeriod: {
+                include: {
+                  activeSegment: {
+                    include: { results: { include: { player: true } } },
+                  },
                 },
               },
             },
-          },
-        })
+          })
 
-        const { results, extras } = computeSegmentEndResults(gameLocal, ctx, {
-          services,
-        })
+          const { results, extras } = computeSegmentEndResults(gameLocal, ctx, {
+            services,
+          })
 
-        await tx.game.update({
-          where: { id: gameId },
-          include: {
-            periods: {
-              include: {
-                segments: true,
+          await tx.game.update({
+            where: { id: gameId },
+            include: {
+              periods: {
+                include: {
+                  segments: true,
+                },
+              },
+              players: true,
+            },
+            data: { status: DB.GameStatus.PAUSED },
+          })
+          await tx.periodSegment.update({
+            where: {
+              gameId_periodIx_index: {
+                gameId,
+                periodIx: currentPeriodIx,
+                index: currentSegmentIx,
               },
             },
-            players: true,
-          },
-          data: { status: DB.GameStatus.PAUSED },
-        })
-        await tx.periodSegment.update({
-          where: {
-            gameId_periodIx_index: {
-              gameId,
-              periodIx: currentPeriodIx,
-              index: currentSegmentIx,
+            data: {
+              results: {
+                update: results,
+              },
             },
-          },
-          data: {
-            results: {
-              update: results,
+            include: {
+              results: true,
             },
-          },
-          include: {
-            results: true,
-          },
-        })
-        // reset player readiness
-        await tx.player.updateMany({
-          where: {
-            game: {
-              id: gameId,
+          })
+          // reset player readiness
+          await tx.player.updateMany({
+            where: {
+              game: {
+                id: gameId,
+              },
             },
-          },
-          data: {
-            isReady: false,
-          },
-        })
+            data: {
+              isReady: false,
+            },
+          })
 
-        for (const extra of extras) {
-          await extra
-        }
-      }, { timeout: 30000 })
+          for (const extra of extras) {
+            await extra
+          }
+        },
+        { timeout: 120000 }
+      )
 
       break
     }
