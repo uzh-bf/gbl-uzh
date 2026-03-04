@@ -2,6 +2,7 @@ query QuestAchievements {
   questAchievements {
     id
     name
+    namesByRole
     description
     descriptionsByRole
     image

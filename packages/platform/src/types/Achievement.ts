@@ -17,6 +17,9 @@ export const Achievement = objectType({
     t.nonNull.id('id')
 
     t.nonNull.string('name')
+    t.field('namesByRole', {
+      type: 'JSONObject',
+    })
     t.nonNull.string('description')
     t.field('descriptionsByRole', {
       type: 'JSONObject',

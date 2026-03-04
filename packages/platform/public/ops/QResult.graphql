@@ -59,6 +59,7 @@ query Result {
   questAchievements {
     id
     name
+    namesByRole
     description
     descriptionsByRole
     image
