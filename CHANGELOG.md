@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.41](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.40...v0.4.41) (2026-03-04)
+
+
+### Bug Fixes
+
+* return null if not dirty to ensure we can catch it in the frontend ([566b6a8](https://github.com/uzh-bf/gbl-uzh/commit/566b6a8709f9e3f8ffaa1ce4eca2dd49b51dc802))
+
 ### [0.4.40](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.39...v0.4.40) (2026-03-02)
 
 
