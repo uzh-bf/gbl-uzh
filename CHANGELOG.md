@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.42](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.41...v0.4.42) (2026-03-04)
+
+
+### Enhancements
+
+* add namesByRole for achievements, add optional redis event target for subscriptions ([b3d0dbb](https://github.com/uzh-bf/gbl-uzh/commit/b3d0dbb9414ef946cf85cf3ac62108afe3ad6a48))
+
 ### [0.4.41](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.40...v0.4.41) (2026-03-04)
 
 
