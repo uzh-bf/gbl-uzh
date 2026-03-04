@@ -88,6 +88,7 @@ export async function performAction<ActionTypes>(
           segmentIx: previousResult.segment?.index,
           segmentCount: previousResult.period.segmentCount,
           playerId: previousResult.player.id,
+          playerRole: previousResult.player.role,
         },
       })
 
@@ -116,7 +117,7 @@ export async function performAction<ActionTypes>(
       })
 
       if (!isDirty) {
-        return previousResult
+        return null
       }
 
       // Update player result
