@@ -123,6 +123,7 @@ export interface NexusGenObjects {
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
     players: NexusGenRootTypes['Player'][]; // [Player!]!
     status: NexusGenEnums['GameStatus']; // GameStatus!
+    version: number; // Int!
   }
   LearningAnswerOption: { // root type
     content: string; // String!
@@ -294,6 +295,7 @@ export interface NexusGenFieldTypes {
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
     players: NexusGenRootTypes['Player'][]; // [Player!]!
     status: NexusGenEnums['GameStatus']; // GameStatus!
+    version: number; // Int!
   }
   LearningAnswerOption: { // field return type
     content: string; // String!
@@ -487,6 +489,7 @@ export interface NexusGenFieldTypeNames {
     periods: 'Period'
     players: 'Player'
     status: 'GameStatus'
+    version: 'Int'
   }
   LearningAnswerOption: { // field return type name
     content: 'String'

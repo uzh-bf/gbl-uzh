@@ -54,6 +54,7 @@ type Game {
   periods: [Period!]!
   players: [Player!]!
   status: GameStatus!
+  version: Int!
 }
 
 input GameFactsInput {
