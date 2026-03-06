@@ -19,6 +19,7 @@ export const Game = objectType({
       type: GameStatus,
     })
     t.nonNull.string('name')
+    t.nonNull.int('version')
     t.int('activePeriodIx')
     t.field('activePeriod', {
       type: Period,

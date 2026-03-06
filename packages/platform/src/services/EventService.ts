@@ -1,11 +1,56 @@
 import * as DB from '@prisma/client'
-import { pubSub } from '../lib/pubsub.js'
+import { getPubSub } from '../lib/pubsub.js'
 import { BaseUserNotificationType as UserNotificationType } from '../types.js'
 import type {
   BaseGlobalNotificationType,
   Event as PlatformEvent,
 } from '../types.js'
 import log from '../lib/logger.js'
+
+export const realtimeGameStateSelect = {
+  status: true,
+  activePeriodIx: true,
+  version: true,
+  activePeriod: {
+    select: {
+      activeSegmentIx: true,
+    },
+  },
+} as const
+
+type RealtimeGameState = {
+  status: DB.GameStatus
+  activePeriodIx: number
+  version: number
+  activePeriod: {
+    activeSegmentIx: number | null
+  } | null
+}
+
+export async function getGameRealtimeState(
+  prisma: DB.PrismaClient,
+  gameId: number
+) {
+  return prisma.game.findUnique({
+    where: { id: gameId },
+    select: realtimeGameStateSelect,
+  }) as Promise<RealtimeGameState | null>
+}
+
+export function buildGameRealtimeFacts(
+  gameId: number,
+  gameState: RealtimeGameState | null,
+  extraFacts: Record<string, unknown> = {}
+) {
+  return {
+    ...extraFacts,
+    gameId,
+    version: gameState?.version ?? 0,
+    status: gameState?.status ?? null,
+    activePeriodIx: gameState?.activePeriodIx ?? null,
+    activeSegmentIx: gameState?.activePeriod?.activeSegmentIx ?? null,
+  }
+}
 
 export async function receiveEvents({ events, ctx, prisma }) {
   if (!Array.isArray(events) || events.length === 0) return []
@@ -290,8 +335,12 @@ export async function receiveEvent(
 
 export function publishGlobalNotification(event: PlatformEvent<any>) {
   try {
-    pubSub.publish('global:events', event)
-    log.info('[EventService] Successfully published to "global:events".')
+    getPubSub().publish('global:events', event)
+    log.info('[EventService] Published to "global:events".', {
+      gameId: event?.facts?.gameId ?? null,
+      type: event?.type ?? null,
+      version: event?.facts?.version ?? null,
+    })
   } catch (e) {
     log.error('[EventService] Error during pubSub.publish:', e)
   }
@@ -303,6 +352,6 @@ export function publishUserNotification(
 ) {
   if (events && events.length > 0) {
     // console.log(events)
-    pubSub.publish('user:events', ctx.user.sub, events as any)
+    getPubSub().publish('user:events', ctx.user.sub, events as any)
   }
 }

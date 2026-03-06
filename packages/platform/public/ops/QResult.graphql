@@ -55,17 +55,4 @@ query Result {
     type
     facts
   }
-
-  questAchievements {
-    id
-    name
-    namesByRole
-    description
-    descriptionsByRole
-    image
-    when
-    scope
-    activePeriods
-    reward
-  }
 }
