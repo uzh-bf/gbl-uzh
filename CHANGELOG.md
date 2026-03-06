@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.44](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.43...v0.4.44) (2026-03-06)
+
+
+### Bug Fixes
+
+* stabilize platform realtime pubsub events ([#133](https://github.com/uzh-bf/gbl-uzh/issues/133)) ([49fce4d](https://github.com/uzh-bf/gbl-uzh/commit/49fce4d03861338805ef5dab606940729bd62865))
+
 ### [0.4.43](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.42...v0.4.43) (2026-03-06)
 
 
