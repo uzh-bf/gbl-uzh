@@ -774,13 +774,16 @@ export async function updateReadyState(args, ctx: Context) {
   })
 
   if (typeof ctx.user.gameId === 'number') {
+    const gameState = await EventService.getGameRealtimeState(
+      ctx.prisma,
+      ctx.user.gameId
+    )
     const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
       type: BaseGlobalNotificationType.GAME_STATE_UPDATED,
-      facts: {
-        gameId: ctx.user.gameId,
+      facts: EventService.buildGameRealtimeFacts(ctx.user.gameId, gameState, {
         playerId: updatedPlayer.id,
         isReady: updatedPlayer.isReady,
-      },
+      }),
     }
     EventService.publishGlobalNotification(eventToPublish)
     log.info(
@@ -813,28 +816,35 @@ export async function addCountdown(args, ctx: Context) {
 
   const countdownDurationMs = args.seconds * 1000
   const newExpiresAt = dayjs().add(countdownDurationMs, 'ms').toDate()
-  await ctx.prisma.periodSegment.update({
-    where: {
-      id: currentGame.activePeriod.activeSegment.id,
-    },
-    data: {
-      countdownExpiresAt: newExpiresAt,
-      countdownDurationMs,
-    },
-  })
+  const [, updatedGame] = await ctx.prisma.$transaction([
+    ctx.prisma.periodSegment.update({
+      where: {
+        id: currentGame.activePeriod.activeSegment.id,
+      },
+      data: {
+        countdownExpiresAt: newExpiresAt,
+        countdownDurationMs,
+      },
+    }),
+    ctx.prisma.game.update({
+      where: { id: args.gameId },
+      data: {
+        version: {
+          increment: 1,
+        },
+      },
+      select: EventService.realtimeGameStateSelect,
+    }),
+  ])
 
   const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
     type: BaseGlobalNotificationType.COUNTDOWN_UPDATED,
-    facts: {
-      gameId: args.gameId,
-      periodId: currentGame.activePeriod.id, // good to have for context
+    facts: EventService.buildGameRealtimeFacts(args.gameId, updatedGame, {
+      periodId: currentGame.activePeriod.id,
       segmentId: currentGame.activePeriod.activeSegment.id,
-      countdownExpiresAt: newExpiresAt.toISOString(), // Standard format
+      countdownExpiresAt: newExpiresAt.toISOString(),
       countdownDurationMs,
-      status: currentGame.status,
-      activePeriodIx: currentGame.activePeriodIx,
-      activeSegmentIx: currentGame.activePeriod.activeSegmentIx,
-    },
+    }),
   }
   EventService.publishGlobalNotification(eventToPublish)
   log.info(
@@ -864,22 +874,24 @@ export async function toggleSwitch(args, ctx: Context) {
     return null // Or false, depending on expected return type
   }
 
-  await ctx.prisma.game.update({
+  const updatedGame = await ctx.prisma.game.update({
     where: { id: args.gameId },
-    data: { facts: { ...(currentGame.facts as any), toggle: args.toggle } },
+    data: {
+      facts: { ...(currentGame.facts as any), toggle: args.toggle },
+      version: {
+        increment: 1,
+      },
+    },
+    select: EventService.realtimeGameStateSelect,
   })
 
   const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
     type: BaseGlobalNotificationType.SWITCH_TOGGLED,
-    facts: {
-      gameId: args.gameId,
+    facts: EventService.buildGameRealtimeFacts(args.gameId, updatedGame, {
       periodId: currentGame.activePeriod.id,
       segmentId: currentGame.activePeriod.activeSegment.id,
-      status: currentGame.status,
-      activePeriodIx: currentGame.activePeriodIx,
-      activeSegmentIx: currentGame.activePeriod.activeSegmentIx,
       toggle: args.toggle,
-    },
+    }),
   }
   EventService.publishGlobalNotification(eventToPublish)
   log.info(
