@@ -344,6 +344,7 @@ model Achievement {
   id String @id
 
   name              String
+  namesByRole       Json?
   description       String
   descriptionsByRole Json?
   image             String?

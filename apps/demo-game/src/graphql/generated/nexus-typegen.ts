@@ -97,6 +97,7 @@ export interface NexusGenObjects {
     id: string; // ID!
     image?: string | null; // String
     name: string; // String!
+    namesByRole?: NexusGenScalars['JSONObject'] | null; // JSONObject
     reward?: NexusGenScalars['JSONObject'] | null; // JSONObject
     scope: NexusGenEnums['AchievementScope']; // AchievementScope!
     when: NexusGenEnums['AchievementFrequency']; // AchievementFrequency!
@@ -267,6 +268,7 @@ export interface NexusGenFieldTypes {
     id: string; // ID!
     image: string | null; // String
     name: string; // String!
+    namesByRole: NexusGenScalars['JSONObject'] | null; // JSONObject
     reward: NexusGenScalars['JSONObject'] | null; // JSONObject
     scope: NexusGenEnums['AchievementScope']; // AchievementScope!
     when: NexusGenEnums['AchievementFrequency']; // AchievementFrequency!
@@ -459,6 +461,7 @@ export interface NexusGenFieldTypeNames {
     id: 'ID'
     image: 'String'
     name: 'String'
+    namesByRole: 'JSONObject'
     reward: 'JSONObject'
     scope: 'AchievementScope'
     when: 'AchievementFrequency'

@@ -125,6 +125,18 @@
             "deprecationReason": null
           },
           {
+            "name": "namesByRole",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "reward",
             "description": null,
             "args": [],

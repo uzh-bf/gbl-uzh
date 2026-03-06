@@ -10,6 +10,7 @@ type Achievement {
   id: ID!
   image: String
   name: String!
+  namesByRole: JSONObject
   reward: JSONObject
   scope: AchievementScope!
   when: AchievementFrequency!

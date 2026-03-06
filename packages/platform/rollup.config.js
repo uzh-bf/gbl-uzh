@@ -11,6 +11,7 @@ const config = defineConfig([
       'src/nexus.ts',
       'src/lib/util.ts',
       'src/lib/apollo.ts',
+      'src/lib/pubsub.ts',
     ],
     output: {
       dir: 'dist',
