@@ -336,7 +336,7 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
         },
       },
       periods: {
-        orderBy: { createdAt: 'asc' },
+        orderBy: { index: 'asc' },
         include: {
           segments: {
             orderBy: { index: 'asc' },
@@ -352,11 +352,8 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
 
   if (!currentGame?.activePeriod) return null
 
-  // The segementCount for active period is currently not needed
-  currentGame.periods = currentGame.periods.map((period) => ({
-    ...period,
-    segmentCount: period.segments.length,
-  }))
+  // segmentCount from DB is used as-is (not overwritten with segments.length)
+  // so the timeline can correctly forecast remaining segments
 
   // We filter up to the active period (and active segment) - future periods
   // should not be visible to the user

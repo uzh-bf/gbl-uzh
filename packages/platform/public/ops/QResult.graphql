@@ -20,6 +20,7 @@ query Result {
     currentGame {
       id
       status
+      nextAutoContinueAt
       periods {
         ...PeriodData
         segmentCount
