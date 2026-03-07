@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.47](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.46...v0.4.47) (2026-03-07)
+
+
+### Bug Fixes
+
+* merge playerstate and result ([546ccc5](https://github.com/uzh-bf/gbl-uzh/commit/546ccc581f34f40c1bb79c79675751c35702114f))
+
 ### [0.4.46](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.45...v0.4.46) (2026-03-07)
 
 
