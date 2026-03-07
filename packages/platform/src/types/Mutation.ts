@@ -27,7 +27,7 @@ interface GenerateBaseMutationsArgs {
   schemas?: any
   inputTypes?: any
   // TODO(JJ): return value should be unknown
-  roleAssigner?: (ix: number) => any
+  roleAssigner?: (ix: number, facts: any) => any
 }
 
 function hasCompletedCompanySetup(
