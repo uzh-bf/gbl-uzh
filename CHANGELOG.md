@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.46](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.45...v0.4.46) (2026-03-07)
+
+
+### Enhancements
+
+* pass validated facts to roleAssigner callback ([#134](https://github.com/uzh-bf/gbl-uzh/issues/134)) ([609cdd5](https://github.com/uzh-bf/gbl-uzh/commit/609cdd51624d80308369b5d7ce35c92ed2b79208))
+
 ### [0.4.45](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.44...v0.4.45) (2026-03-06)
 
 ### [0.4.44](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.43...v0.4.44) (2026-03-06)

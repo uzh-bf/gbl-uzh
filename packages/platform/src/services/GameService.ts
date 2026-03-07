@@ -28,7 +28,7 @@ export async function createGame<TFacts>(
   {
     schema,
     roleAssigner,
-  }: { schema: yup.Schema<TFacts>; roleAssigner?: (ix: number) => any }
+  }: { schema: yup.Schema<TFacts>; roleAssigner?: (ix: number, facts: any) => any }
 ) {
   const validatedFacts = schema.validateSync(facts) as any
 
@@ -46,7 +46,7 @@ export async function createGame<TFacts>(
           return {
             facts: {},
             token: nanoid(),
-            role: roleAssigner ? roleAssigner(ix) : undefined,
+            role: roleAssigner ? roleAssigner(ix, validatedFacts) : undefined,
             number: playerCount - ix,
             name: `Team ${playerCount - ix}`,
             level: {
