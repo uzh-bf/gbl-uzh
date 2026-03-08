@@ -292,6 +292,7 @@ export interface NexusGenFieldTypes {
     facts: NexusGenScalars['JSONObject']; // JSONObject!
     id: string; // ID!
     name: string; // String!
+    nextAutoContinueAt: NexusGenScalars['DateTime'] | null; // DateTime
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
     players: NexusGenRootTypes['Player'][]; // [Player!]!
     status: NexusGenEnums['GameStatus']; // GameStatus!
@@ -486,6 +487,7 @@ export interface NexusGenFieldTypeNames {
     facts: 'JSONObject'
     id: 'ID'
     name: 'String'
+    nextAutoContinueAt: 'DateTime'
     periods: 'Period'
     players: 'Player'
     status: 'GameStatus'

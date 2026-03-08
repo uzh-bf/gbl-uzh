@@ -51,6 +51,7 @@ type Game {
   facts: JSONObject!
   id: ID!
   name: String!
+  nextAutoContinueAt: DateTime
   periods: [Period!]!
   players: [Player!]!
   status: GameStatus!

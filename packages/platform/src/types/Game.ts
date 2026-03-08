@@ -10,35 +10,58 @@ export const GameStatus = enumType({
   members: Object.values(DB.GameStatus),
 })
 
-export const Game = objectType({
-  name: 'Game',
-  definition(t) {
-    t.nonNull.id('id')
+export interface GenerateBaseGameOpts {
+  resolveNextAutoContinueAt?: (
+    parent: any,
+    args: any,
+    ctx: any,
+    info: any
+  ) => Date | null | Promise<Date | null>
+}
 
-    t.nonNull.field('status', {
-      type: GameStatus,
-    })
-    t.nonNull.string('name')
-    t.nonNull.int('version')
-    t.int('activePeriodIx')
-    t.field('activePeriod', {
-      type: Period,
-    })
+/**
+ * Factory that returns the base `Game` objectType with an optional
+ * custom resolver for `nextAutoContinueAt`. Games that don't need the
+ * field get a default `() => null` resolver.
+ */
+export function generateBaseGame(opts?: GenerateBaseGameOpts) {
+  return objectType({
+    name: 'Game',
+    definition(t) {
+      t.nonNull.id('id')
 
-    t.int('activeSegmentIx')
+      t.nonNull.field('status', {
+        type: GameStatus,
+      })
+      t.nonNull.string('name')
+      t.nonNull.int('version')
+      t.int('activePeriodIx')
+      t.field('activePeriod', {
+        type: Period,
+      })
 
-    t.nonNull.list.nonNull.field('players', {
-      type: Player,
-    })
-    t.nonNull.list.nonNull.field('periods', {
-      type: Period,
-    })
+      t.int('activeSegmentIx')
 
-    t.nonNull.field('facts', {
-      type: 'JSONObject',
-    })
-  },
-})
+      t.nonNull.list.nonNull.field('players', {
+        type: Player,
+      })
+      t.nonNull.list.nonNull.field('periods', {
+        type: Period,
+      })
+
+      t.nonNull.field('facts', {
+        type: 'JSONObject',
+      })
+
+      t.nullable.field('nextAutoContinueAt', {
+        type: 'DateTime',
+        resolve: opts?.resolveNextAutoContinueAt ?? (() => null),
+      })
+    },
+  })
+}
+
+export const Game = generateBaseGame()
 
 export const Period = objectType({
   name: 'Period',
