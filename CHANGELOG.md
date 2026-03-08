@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.48](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.47...v0.4.48) (2026-03-08)
+
+
+### Enhancements
+
+* enable auto continue and real segment count ([89283d9](https://github.com/uzh-bf/gbl-uzh/commit/89283d91a4c725f8b082190f1e9da4c8a3b5ca63))
+
 ### [0.4.47](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.46...v0.4.47) (2026-03-07)
 
 
