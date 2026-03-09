@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.49](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.48...v0.4.49) (2026-03-09)
+
+
+### Features
+
+* move nextAutoContinueAt into base Game via generateBaseGame factory ([7cdd840](https://github.com/uzh-bf/gbl-uzh/commit/7cdd840154447982d09602ef796bbf3cbde7c122))
+
 ### [0.4.48](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.47...v0.4.48) (2026-03-08)
 
 
