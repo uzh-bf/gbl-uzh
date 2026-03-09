@@ -117,6 +117,7 @@ export async function addGamePeriod<TFacts>(
       previousPeriodFacts: game.periods[0]?.facts as any,
       previousSegmentFacts: game.periods[0]?.segments[0]?.facts as any,
       periodIx: index,
+      segmentCount,
     })
 
   console.log(
@@ -519,6 +520,7 @@ export async function activateNextPeriod(
               previousSegmentFacts: gameLocal?.activePeriod?.activeSegment
                 ?.facts as any,
               periodIx: currentPeriodIx,
+              segmentCount: gameLocal?.activePeriod?.segmentCount,
             })
 
           const updatedGame = await tx.game.update({
@@ -877,6 +879,12 @@ export async function activateNextSegment(
   })
 
   if (!game?.activePeriod) return null
+
+  if (game.activePeriod.segments.length === 0) {
+    throw new Error(
+      'Cannot activate segment: no segments have been prepared for the active period. Add at least one segment first.'
+    )
+  }
 
   const currentPeriodIx = game.activePeriodIx
   const currentSegmentIx = game.activePeriod.activeSegmentIx
@@ -1572,6 +1580,11 @@ export function computeSegmentStartResults(game, ctx, { services }) {
   // Use first segment of active period and not activeSegment as it's not
   // active yet.
   const activePeriod = game.activePeriod
+  if (activePeriod.segments.length === 0) {
+    throw new Error(
+      'Cannot compute segment start results: no segments exist in the active period.'
+    )
+  }
   const aboutToBeactiveSegment = activePeriod.segments[0]
 
   // if it is the first segment, transform PERIOD_START to SEGMENT_START

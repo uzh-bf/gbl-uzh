@@ -3,7 +3,6 @@ import { idArg, intArg, nonNull, objectType, stringArg } from 'nexus'
 import * as GameService from '../services/GameService.js'
 import * as PlayService from '../services/PlayService.js'
 import { Achievement } from './Achievement.js'
-import { Game } from './Game.js'
 import { LearningElement, LearningElementState } from './LearningElement.js'
 import { Player, PlayerDecision, PlayerResult, PlayerState } from './Player.js'
 import { StoryElement } from './StoryElement.js'
@@ -13,14 +12,14 @@ export function generateBaseQueries() {
     name: 'Query',
     definition(t) {
       t.list.nonNull.field('games', {
-        type: Game,
+        type: 'Game',
         async resolve(_, args, ctx) {
           return GameService.getGames(args, ctx)
         },
       })
 
       t.field('game', {
-        type: Game,
+        type: 'Game',
         args: {
           id: intArg(),
         },

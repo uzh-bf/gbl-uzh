@@ -14,7 +14,7 @@ import * as GameService from '../services/GameService.js'
 
 import * as EventService from '../services/EventService.js'
 import * as PlayService from '../services/PlayService.js'
-import { Game, Period, PeriodSegment } from './Game.js'
+import { Period, PeriodSegment } from './Game.js'
 import { LearningElementAttempt } from './LearningElement.js'
 import { Player, PlayerDecision, PlayerResult } from './Player.js'
 
@@ -88,7 +88,7 @@ export function generateBaseMutations<
       })
 
       t.field('createGame', {
-        type: Game,
+        type: 'Game',
         args: {
           name: nonNull(stringArg()),
           playerCount: nonNull(intArg()),
@@ -141,7 +141,7 @@ export function generateBaseMutations<
       })
 
       t.field('activateNextPeriod', {
-        type: Game,
+        type: 'Game',
         args: {
           gameId: nonNull(intArg()),
         },
@@ -155,7 +155,7 @@ export function generateBaseMutations<
       })
 
       t.field('activateNextSegment', {
-        type: Game,
+        type: 'Game',
         args: {
           gameId: nonNull(intArg()),
         },

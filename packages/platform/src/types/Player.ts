@@ -2,7 +2,7 @@ import * as DB from '@prisma/client'
 
 import { enumType, objectType } from 'nexus'
 import { AchievementInstance } from './Achievement.js'
-import { Game, Period, PeriodSegment } from './Game.js'
+import { Period, PeriodSegment } from './Game.js'
 import { LearningElement } from './LearningElement.js'
 import { StoryElement } from './StoryElement.js'
 
@@ -34,7 +34,7 @@ export const PlayerState = objectType({
       type: PlayerResult,
     })
     t.field('currentGame', {
-      type: Game,
+      type: 'Game',
     })
     t.list.nonNull.field('previousResults', {
       type: PlayerResult,
@@ -86,7 +86,7 @@ export const Player = objectType({
     t.nonNull.list.nonNull.string('visitedStoryElementIds')
 
     t.nonNull.field('game', {
-      type: Game,
+      type: 'Game',
     })
   },
 })

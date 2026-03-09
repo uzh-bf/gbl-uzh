@@ -90,6 +90,7 @@ export type PayloadPeriodInitialisation<
   PeriodSegmentFactsType
 > = {
   periodIx: number
+  segmentCount?: number
   gameFacts: GameFactsType
   periodFacts: PeriodFactsType
   previousPeriodFacts?: PeriodFactsType
@@ -99,6 +100,7 @@ export type PayloadPeriodInitialisation<
 export type PayloadPeriodConsolidation<GameFactsType, PeriodSegmentFactsType> =
   {
     periodIx: number
+    segmentCount?: number
     gameFacts: GameFactsType
     previousSegmentFacts?: PeriodSegmentFactsType
   }
