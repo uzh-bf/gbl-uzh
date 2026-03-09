@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.50](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.49...v0.4.50) (2026-03-09)
+
+
+### Features
+
+* pass segmentCount through period payloads, guard empty segments, fix Game type refs ([0d41a28](https://github.com/uzh-bf/gbl-uzh/commit/0d41a28ff3c118eb19a9db21cf128dd6ab8c1d7d))
+
 ### [0.4.49](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.48...v0.4.49) (2026-03-09)
 
 
