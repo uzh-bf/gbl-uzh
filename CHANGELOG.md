@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.51](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.50...v0.4.51) (2026-04-14)
+
+
+### Features
+
+* updating notifications enum, and make global event more customizable ([#141](https://github.com/uzh-bf/gbl-uzh/issues/141)) ([2da2c56](https://github.com/uzh-bf/gbl-uzh/commit/2da2c56bb5d95ae79f125cef716e2538184eba08))
+
+
+### Other
+
+* adding binary targets for prisma ([#140](https://github.com/uzh-bf/gbl-uzh/issues/140)) ([f4b071b](https://github.com/uzh-bf/gbl-uzh/commit/f4b071bbae35a8fdc785c786c2ac76e271833534))
+
 ### [0.4.50](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.49...v0.4.50) (2026-03-09)
 
 
