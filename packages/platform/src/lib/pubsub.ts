@@ -1,11 +1,11 @@
 import { createPubSub } from 'graphql-yoga'
-import type {
-  BaseGlobalNotificationType,
-  Event as PlatformEvent,
-} from '../types.js'
+import type { Event as PlatformEvent } from '../types.js'
 
+// We use a string instead of BaseGlobalNotificationType for PlatformEvent to
+// make it more flexible with Custom Notifications as these are anyway enum
+// strings.
 type PubSubChannels = {
-  'global:events': [event: PlatformEvent<BaseGlobalNotificationType>]
+  'global:events': [event: PlatformEvent<string>]
   'user:events': [userId: string, events: any]
 }
 
