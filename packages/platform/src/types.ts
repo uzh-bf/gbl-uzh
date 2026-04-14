@@ -372,6 +372,7 @@ export enum BaseGlobalNotificationType {
   COUNTDOWN_UPDATED = 'COUNTDOWN_UPDATED',
   ACTION_PERFORMED = 'ACTION_PERFORMED',
   SWITCH_TOGGLED = 'SWITCH_TOGGLED',
+  RESET_READY_STATE = 'RESET_READY_STATE',
 }
 
 export enum BaseUserNotificationType {
