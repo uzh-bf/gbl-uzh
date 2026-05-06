@@ -12,9 +12,12 @@
     "dist"
   ],
   "dependencies": {
+    "@trpc/server": "11.17.0",
     "nanoid": "5.0.8",
     "random-js": "2.1.0",
-    "winston": "3.17.0"
+    "superjson": "2.2.6",
+    "winston": "3.17.0",
+    "zod": "3.23.8"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "~15.3.0",
