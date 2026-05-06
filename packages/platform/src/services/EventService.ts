@@ -338,9 +338,10 @@ export async function receiveEvent(
 }
 
 export function publishGlobalNotification(event: PlatformEvent<any>) {
+  publishGlobalNotificationRealtime(event)
+
   try {
     getPubSub().publish('global:events', event)
-    publishGlobalNotificationRealtime(event)
     log.info('[EventService] Published to "global:events".', {
       gameId: event?.facts?.gameId ?? null,
       type: event?.type ?? null,
@@ -357,7 +358,7 @@ export function publishUserNotification(
 ) {
   if (events && events.length > 0) {
     // console.log(events)
-    getPubSub().publish('user:events', ctx.user.sub, events as any)
     publishUserNotificationRealtime(ctx.user.sub, events as any)
+    getPubSub().publish('user:events', ctx.user.sub, events as any)
   }
 }

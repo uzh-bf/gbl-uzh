@@ -1,8 +1,8 @@
-import { playerProcedure, createTRPCRouter } from "../init.js";
+import { playerProcedure, createTRPCRouter } from '../init.js'
 import {
   subscribeToGlobalEvents,
   subscribeToUserEvents,
-} from "../../lib/realtime.js";
+} from '../../lib/realtime.js'
 
 export function createEventsRouter() {
   return createTRPCRouter({
@@ -12,5 +12,5 @@ export function createEventsRouter() {
     user: playerProcedure.subscription(({ ctx, signal }) =>
       subscribeToUserEvents(ctx.user.sub, signal)
     ),
-  });
+  })
 }
