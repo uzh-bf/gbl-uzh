@@ -12,7 +12,7 @@
     "dist"
   ],
   "dependencies": {
-    "@trpc/server": "11.17.0",
+    "@trpc/server": "10.45.4",
     "nanoid": "5.0.8",
     "random-js": "2.1.0",
     "superjson": "2.2.6",
