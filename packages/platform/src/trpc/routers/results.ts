@@ -14,6 +14,10 @@ const specificInput = z.object({
   type: playerResultTypeSchema,
 })
 
+function present<T>(value: T | null): value is T {
+  return value !== null
+}
+
 export function createResultsRouter() {
   return createTRPCRouter({
     listForCurrentGame: playerProcedure.query(async ({ ctx }) => {
@@ -22,7 +26,7 @@ export function createResultsRouter() {
 
         return (results ?? [])
           .map((result: any) => toPlayerResultCoreDto(result))
-          .filter((item): item is any => item !== null)
+          .filter(present)
       } catch (error) {
         throwAsTRPCError(error)
       }
@@ -40,7 +44,7 @@ export function createResultsRouter() {
 
         return (results ?? [])
           .map((result: any) => toSpecificResultDto(result))
-          .filter((item): item is any => item !== null)
+          .filter(present)
       } catch (error) {
         throwAsTRPCError(error)
       }
@@ -53,7 +57,7 @@ export function createResultsRouter() {
 
         return (results ?? [])
           .map((result: any) => toPastResultDto(result))
-          .filter((item): item is any => item !== null)
+          .filter(present)
       } catch (error) {
         throwAsTRPCError(error)
       }

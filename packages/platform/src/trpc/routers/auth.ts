@@ -1,8 +1,7 @@
 import { idSchema } from '../schemas.js'
 import * as AccountService from '../../services/AccountService.js'
 import { toPlayerSelfDto } from '../dto/player.js'
-import { publicProcedure, playerProcedure } from '../init.js'
-import { createTRPCRouter } from '../init.js'
+import { createTRPCRouter, publicProcedure, playerProcedure } from '../init.js'
 import { throwAsTRPCError } from '../errors.js'
 import { z } from 'zod'
 
@@ -26,7 +25,7 @@ export function createAuthRouter() {
 
     logoutAsTeam: playerProcedure.mutation(async ({ ctx }) => {
       try {
-        return await AccountService.logoutAsTeam(ctx as any)
+        return AccountService.logoutAsTeam(ctx as any)
       } catch (error) {
         throwAsTRPCError(error)
       }

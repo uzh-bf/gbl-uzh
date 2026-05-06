@@ -4,7 +4,12 @@ import { createTRPCRouter, playerProcedure } from '../init.js'
 import { idSchema } from '../schemas.js'
 import * as GameService from '../../services/GameService.js'
 import * as PlayService from '../../services/PlayService.js'
-import { toLearningElementAttemptDto, toLearningElementListDto, toLearningElementStateDto } from '../dto/learning.js'
+import {
+  type LearningElementListDto,
+  toLearningElementAttemptDto,
+  toLearningElementListDto,
+  toLearningElementStateDto,
+} from '../dto/learning.js'
 import { throwAsTRPCError } from '../errors.js'
 
 const byIdInput = z.object({ id: idSchema })
@@ -25,8 +30,8 @@ export function createLearningRouter() {
 
         return (elements ?? [])
           .map((element: any) => toLearningElementListDto(element))
-          .filter((element): element is NonNullable<ReturnType<typeof toLearningElementListDto>> =>
-            element !== null
+          .filter(
+            (element): element is LearningElementListDto => element !== null
           )
       } catch (error) {
         throwAsTRPCError(error)

@@ -71,8 +71,9 @@ function asId(value: unknown): string | null {
 function toDate(value: unknown): Date | null {
   if (value instanceof Date) return value
   if (!value) return null
+  if (typeof value !== 'string' && typeof value !== 'number') return null
 
-  const maybeDate = new Date(value as any)
+  const maybeDate = new Date(value)
   return Number.isNaN(maybeDate.getTime()) ? null : maybeDate
 }
 
@@ -111,7 +112,7 @@ function toStoryElementRefs(elements: unknown): StoryElementRefDto[] | undefined
   return refs.length > 0 ? refs : undefined
 }
 
-function mapActiveSegment(
+export function toActiveSegmentDto(
   segment:
     | {
         id?: unknown
@@ -143,7 +144,7 @@ function mapActiveSegment(
   }
 }
 
-function mapPeriod(
+export function toPeriodDto(
   period:
     | {
         id?: unknown
@@ -164,7 +165,7 @@ function mapPeriod(
 
   const segments = Array.isArray(period.segments)
     ? period.segments
-        .map((item) => mapActiveSegment(item as any))
+        .map((item) => toActiveSegmentDto(item as any))
         .filter((item): item is ActiveSegmentDto => item !== null)
     : []
 
@@ -179,7 +180,7 @@ function mapPeriod(
     segmentCount:
       period.segmentCount === null ? null : normalizeNumber(period.segmentCount),
     segments,
-    activeSegment: mapActiveSegment(period.activeSegment as any),
+    activeSegment: toActiveSegmentDto(period.activeSegment as any),
   }
 }
 
@@ -256,7 +257,7 @@ export function toAdminGameDto(
 
   const periods = Array.isArray(game.periods)
     ? game.periods
-        .map((period) => mapPeriod(period as any))
+        .map((period) => toPeriodDto(period as any))
         .filter((period): period is PeriodDto => period !== null)
     : []
 
@@ -282,6 +283,6 @@ export function toAdminGameDto(
           )
       : [],
     periods,
-    activePeriod: mapPeriod(game.activePeriod as any),
+    activePeriod: toPeriodDto(game.activePeriod as any),
   }
 }

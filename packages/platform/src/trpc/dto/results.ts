@@ -1,36 +1,8 @@
 import * as DB from '@prisma/client'
 
-export interface ResultPeriodDto {
-  id: number
-  index: number
-  facts?: unknown
-  segmentCount?: number | null
-}
-
-export interface ResultSegmentDto {
-  id: number
-  index: number
-  facts?: unknown
-}
-
 export interface ResultPlayerDto {
   id: string
   name: string
-}
-
-export interface ResultPlayerDetailedDto {
-  id: string
-  name: string
-  role?: string | null
-  facts?: unknown
-  experience?: number
-  experienceToNext?: number
-  level?: {
-    id: number
-    index: number
-  }
-  completedLearningElementIds?: string[]
-  visitedStoryElementIds?: string[]
 }
 
 export interface PlayerResultCoreDto {
@@ -301,7 +273,7 @@ export function toPlayerResultDto(
     return null
   }
 
-  const currentGamePeriods = toResultPeriodSummaryDto(
+  const activePeriod = toResultPeriodSummaryDto(
     rawCurrentGame.activePeriod as any
   )
   const periods = Array.isArray(rawCurrentGame.periods)
@@ -316,9 +288,9 @@ export function toPlayerResultDto(
       status: currentGameStatus,
       nextAutoContinueAt: rawCurrentGame.nextAutoContinueAt,
       periods,
-      activePeriod: currentGamePeriods
+      activePeriod: activePeriod
         ? {
-            ...currentGamePeriods,
+            ...activePeriod,
             activeSegment: toResultSegmentSummaryDto(
               (rawCurrentGame.activePeriod as any)?.activeSegment as any
             ),

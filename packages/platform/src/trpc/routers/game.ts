@@ -1,7 +1,10 @@
-import { createTRPCRouter } from '../init.js'
-import { adminProcedure } from '../init.js'
+import { adminProcedure, createTRPCRouter } from '../init.js'
 import { gameIdSchema, jsonObjectSchema } from '../schemas.js'
-import { toAdminGameDto, toGameListItemDto } from '../dto/game.js'
+import {
+  toAdminGameDto,
+  toGameListItemDto,
+  type GameListItemDto,
+} from '../dto/game.js'
 import * as GameService from '../../services/GameService.js'
 import * as PlayService from '../../services/PlayService.js'
 import { throwAsTRPCError } from '../errors.js'
@@ -23,7 +26,11 @@ function firstResult<T>(value: T | T[] | null | undefined): T | null {
   return value ?? null
 }
 
-export function createGameRouter({ services = {}, schemas = {}, roleAssigner }: RouterDeps = {}) {
+export function createGameRouter({
+  services = {},
+  schemas = {},
+  roleAssigner,
+}: RouterDeps = {}) {
   const createGameInput = z.object({
     name: z.string().trim().min(1),
     playerCount: z.number().int().positive(),
@@ -48,7 +55,7 @@ export function createGameRouter({ services = {}, schemas = {}, roleAssigner }: 
 
         return games
           .map((game: any) => toGameListItemDto(game))
-          .filter((game): game is NonNullable<ReturnType<typeof toGameListItemDto>> => game !== null)
+          .filter((game): game is GameListItemDto => game !== null)
       } catch (error) {
         throwAsTRPCError(error)
       }
@@ -117,7 +124,7 @@ export function createGameRouter({ services = {}, schemas = {}, roleAssigner }: 
       .input(countdownInput)
       .mutation(async ({ input, ctx }) => {
         try {
-          return await PlayService.addCountdown(input, ctx as any)
+          return PlayService.addCountdown(input, ctx as any)
         } catch (error) {
           throwAsTRPCError(error)
         }
@@ -127,7 +134,7 @@ export function createGameRouter({ services = {}, schemas = {}, roleAssigner }: 
       .input(switchInput)
       .mutation(async ({ input, ctx }) => {
         try {
-          return await PlayService.toggleSwitch(input, ctx as any)
+          return PlayService.toggleSwitch(input, ctx as any)
         } catch (error) {
           throwAsTRPCError(error)
         }

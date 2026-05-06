@@ -93,6 +93,7 @@ Play:
 - [ ] `play.self`
 - [ ] `play.result`
 - [ ] `play.updateReadyState`
+- [ ] `play.updatePlayerData`
 - [ ] `play.performAction`
 - [ ] `play.saveConsolidationDecision`
 
