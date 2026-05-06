@@ -66,7 +66,7 @@ function Welcome() {
           location: data?.self.facts.location,
         }),
       },
-    },
+    } as any,
     onError: (error) => {
       console.error('Error updating player data:', error)
       setIsSubmitting(false)

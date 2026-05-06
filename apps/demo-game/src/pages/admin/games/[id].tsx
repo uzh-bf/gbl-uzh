@@ -34,7 +34,6 @@ import {
   AddCountdownDocument,
   AddGamePeriodDocument,
   AddPeriodSegmentDocument,
-  Game,
   GameDocument,
   GameStatus,
   LearningElementsDocument,
@@ -173,7 +172,7 @@ function ManageGame() {
   }, [data?.game])
 
   const getButton = useCallback(() => {
-    const game = data.game as Game
+    const game = data.game
     // const disabled = game.periods.length === 0
     const activePeriod = game?.activePeriod
     const segments = activePeriod?.segments
@@ -301,7 +300,7 @@ function ManageGame() {
       <div>
         <div className="mb-4 flex flex-col gap-2 overflow-x-auto md:flex-row">
           {game.periods.map((period, ix) => {
-            const periodStatus = computePeriodStatus(game, ix)
+            const periodStatus = computePeriodStatus(game as any, ix)
 
             const labels = [
               period.facts.spotTradingEnabled && 'S',
@@ -404,8 +403,8 @@ function ManageGame() {
                       (_, ix) => {
                         const segment = period.segments[ix]
                         const segmentStatus = computeSegmentStatus(
-                          game,
-                          period,
+                          game as any,
+                          period as any,
                           ix
                         )
 

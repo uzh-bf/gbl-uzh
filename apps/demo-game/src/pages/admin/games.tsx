@@ -96,11 +96,16 @@ function Games() {
       </Formik>
       <div className="mt-4 flex flex-col gap-1">
         {data.games.map((game, index, array) => {
+          const gameView = game as typeof game & {
+            playerCount?: number
+            activePeriod?: { activeSegmentIx?: number | null } | null
+          }
+
           return (
             <Link
               className="w-96"
-              href={`/admin/games/${game?.id}`}
-              key={game?.id}
+              href={`/admin/games/${gameView?.id}`}
+              key={gameView?.id}
             >
               <Button
                 className={{
@@ -108,18 +113,18 @@ function Games() {
                 }}
               >
                 <div className="flex w-full justify-between p-2">
-                  <div>{game?.name}</div>
-                  <div className="flex w-10">Id: {game?.id}</div>
+                  <div>{gameView?.name}</div>
+                  <div className="flex w-10">Id: {gameView?.id}</div>
                 </div>
                 <div className="flex w-full items-end justify-between p-2 text-sm">
                   <div className="flex flex-col justify-between gap-y-1 text-left">
-                    <div>Player count: {game?.playerCount}</div>
+                    <div>Player count: {gameView?.playerCount}</div>
                     <div>
-                      Active Period/Segment: {game?.activePeriodIx}/
-                      {game?.activePeriod?.activeSegmentIx}
+                      Active Period/Segment: {gameView?.activePeriodIx}/
+                      {gameView?.activePeriod?.activeSegmentIx}
                     </div>
                   </div>
-                  <div className="text-right">Status: {game?.status}</div>
+                  <div className="text-right">Status: {gameView?.status}</div>
                 </div>
               </Button>
             </Link>

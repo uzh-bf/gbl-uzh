@@ -4,7 +4,11 @@ import Image from 'next/image'
 import { sortBy } from 'ramda'
 import { useEffect, useMemo, useState } from 'react'
 import Markdown from 'react-markdown'
-import { MarkStoryElementDocument } from 'src/graphql/generated/ops'
+import {
+  MarkStoryElementDocument,
+  StoryElementDataFragment,
+  StoryElementType,
+} from 'src/graphql/generated/ops'
 
 interface Props {
   playerState: any
@@ -13,7 +17,9 @@ interface Props {
 
 // TODO(JJ): Check if we should fetch the story elements in the component
 function StoryElements({ playerState, player }: Props) {
-  const [unseenStoryElements, setUnseenStoryElements] = useState([])
+  const [unseenStoryElements, setUnseenStoryElements] = useState<
+    StoryElementDataFragment[]
+  >([])
 
   const activeStoryElements = useMemo(() => {
     if (
@@ -21,10 +27,10 @@ function StoryElements({ playerState, player }: Props) {
       !playerState?.data?.result.currentGame.activePeriod.activeSegment
     )
       return []
-    return sortBy(
+    return sortBy<StoryElementDataFragment>(
       (elem) => elem.title,
       playerState?.data?.result.currentGame.activePeriod.activeSegment
-        ?.storyElements
+        ?.storyElements ?? []
     )
   }, [playerState?.data])
 
@@ -47,9 +53,9 @@ function StoryElements({ playerState, player }: Props) {
 
     const firstElement = unseenStoryElements[0]
     switch (firstElement?.type) {
-      case 'GENERIC':
-        return firstElement.content
-      case 'ROLE_BASED':
+      case StoryElementType.Generic:
+        return firstElement.content ?? ''
+      case StoryElementType.RoleBased:
         return firstElement.contentRole?.[player.role] ?? ''
       default:
         return ''
@@ -94,16 +100,19 @@ function StoryElements({ playerState, player }: Props) {
         />
       </div>
 
-      <div className="prose prose-img:max-w-xs prose-img:rounded mt-4 max-w-none">
+      <div className="prose mt-4 max-w-none prose-img:max-w-xs prose-img:rounded">
         <Markdown
           components={{
-            img: ({ node, ...props }) => {
+            img: ({ node, src, alt, ...props }) => {
+              if (!src) return null
+
               return (
                 <Image
                   {...props}
+                  src={src}
                   width={250}
                   height={250}
-                  alt="Visual representation of the story element"
+                  alt={alt ?? 'Visual representation of the story element'}
                   className="mt-4 rounded-lg"
                   style={{ maxWidth: '100%' }}
                 />

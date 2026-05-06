@@ -196,7 +196,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
             level={playerInfo.level}
             // xp={playerInfo.xp}
             // xpMax={playerInfo.xpMax}
-            achievements={playerInfo.achievements}
+            achievements={playerInfo.achievements as any}
             imgPathAvatar={playerInfo.imgPathAvatar}
             imgPathLocation={playerInfo.imgPathLocation}
             onClick={playerInfo.onClick}
@@ -488,7 +488,9 @@ function Cockpit() {
     case 'PAUSED': {
       const numPeriods = currentGame.periods.length
       const previousResults = playerDataResult.previousResults
-      const previousSegmentResults = getSegmentEndResults(previousResults)
+      const previousSegmentResults = getSegmentEndResults(
+        previousResults as any
+      )
       const segmentEndResults = previousSegmentResults
         .map((e) => {
           return {
@@ -705,8 +707,8 @@ function Cockpit() {
                       <CardHeader>
                         <CardTitle>Absolute Performance</CardTitle>
                         <CardDescription>
-                          Your portfolio's total value (total assets) compared
-                          to benchmarks (savings, bonds and stocks,
+                          Your portfolio&apos;s total value (total assets)
+                          compared to benchmarks (savings, bonds and stocks,
                           respectively) over time.
                         </CardDescription>
                       </CardHeader>
@@ -784,7 +786,7 @@ function Cockpit() {
                                         </span>
                                       </div>
                                       <span className="font-bold text-black">
-                                        {(value * 100).toFixed(2)}%
+                                        {(Number(value) * 100).toFixed(2)}%
                                       </span>
                                     </div>,
                                   ]}
@@ -1055,7 +1057,7 @@ function Cockpit() {
                               )
                             })}
                           </div>
-                          {newDecisionForm.errors.sum && (
+                          {(newDecisionForm.errors as { sum?: string }).sum && (
                             <div className="text-red-500">
                               The sum of the input values must be{' '}
                               <span className="font-bold">100</span>!

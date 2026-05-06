@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react'
 
 import { useQuery } from '@apollo/client'
 import {
-  Game,
   GameDocument,
   SpecificResultsDocument,
 } from 'src/graphql/generated/ops'
@@ -66,6 +65,27 @@ const config = {
   stocks: { label: labels[2], color: colors[2] },
 }
 
+type DecisionFacts = {
+  bank: number
+  bonds: number
+  stocks: number
+}
+
+type PlayerPeriodData = {
+  decisions: DecisionFacts[]
+  name: string
+  totalAssets: number[]
+  accTotalAssetsReturn: number[]
+  risk?: number
+  totalAssetsReturnsPA?: number
+}
+
+type RiskReturnPlayerData = {
+  name: string
+  risk: number
+  totalAssetsReturnsPA: number
+}
+
 function ReportGame() {
   const router = useRouter()
 
@@ -117,7 +137,7 @@ function ReportGame() {
       return null
     }
 
-    const game: Game = data.game
+    const game = data.game
 
     const numPeriods = game.periods.length
     // const numPeriodsVis = numPeriods - 1
@@ -139,14 +159,14 @@ function ReportGame() {
     const computeDataPerPeriod = () => {
       if (!previousSegmentResults || previousSegmentResults.length === 0)
         return []
-      let output = []
+      const output: Record<string, PlayerPeriodData>[] = []
       for (let i = 0; i < numPeriods; i++) {
         const playerResPerPeriod = previousSegmentResults.filter(
           (result) => result.period.index === i
         )
-        let dataPerPlayer = {}
+        const dataPerPlayer: Record<string, PlayerPeriodData> = {}
         playerResPerPeriod.map((result) => {
-          const decisions = {}
+          const decisions = {} as DecisionFacts
           Object.keys(result.facts.decisions).forEach((v) => {
             decisions[v] = Number(result.facts.decisions[v])
           })
@@ -260,7 +280,9 @@ function ReportGame() {
 
     console.log('previousPeriodResults', previousPeriodResults)
 
-    const riskReturnPerPeriod = previousPeriodResults.reduce((acc, result) => {
+    const riskReturnPerPeriod = previousPeriodResults.reduce<
+      Record<string, RiskReturnPlayerData>[]
+    >((acc, result) => {
       if (!acc[result.period.index]) {
         acc[result.period.index] = {
           [result.player.id]: {
@@ -375,7 +397,7 @@ function ReportGame() {
                         <span className="text-xs text-gray-600">{name}</span>
                       </div>
                       <span className="font-bold text-black">
-                        {value.toFixed(2)}
+                        {Number(value).toFixed(2)}
                       </span>
                     </div>,
                   ]}
@@ -468,7 +490,7 @@ function ReportGame() {
                         <span className="text-xs text-gray-600">{name}</span>
                       </div>
                       <span className="font-bold text-black">
-                        {(value * 100).toFixed(2)}%
+                        {(Number(value) * 100).toFixed(2)}%
                       </span>
                     </div>,
                   ]}
@@ -619,7 +641,7 @@ function ReportGame() {
                           position="top"
                           className="fill-foreground"
                           fontSize={12}
-                          formatter={(v) => `${(v * 100).toFixed(1)}%`}
+                          formatter={(v) => `${(Number(v) * 100).toFixed(1)}%`}
                         />
                       )}
                     </Bar>
@@ -636,7 +658,7 @@ function ReportGame() {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tickFormatter={(v) => `${(v * 100).toFixed(1)}%`}
+                  tickFormatter={(v) => `${(Number(v) * 100).toFixed(1)}%`}
                   domain={['auto', (dataMax) => dataMax * 1.1]}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
@@ -671,7 +693,7 @@ function ReportGame() {
                         <span className="text-xs text-gray-600">{name}</span>
                       </div>
                       <span className="font-bold text-black">
-                        {(value * 100).toFixed(2)}%
+                        {(Number(value) * 100).toFixed(2)}%
                       </span>
                     </div>,
                   ]}
@@ -683,7 +705,7 @@ function ReportGame() {
                   tickMargin={8}
                   type="number"
                   name="Risk"
-                  tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
+                  tickFormatter={(v) => `${(Number(v) * 100).toFixed(2)}%`}
                 />
                 <YAxis
                   dataKey="totalAssetsReturnsPA"
@@ -691,7 +713,7 @@ function ReportGame() {
                   name="Returns p.a."
                   tickLine={false}
                   tickMargin={8}
-                  tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
+                  tickFormatter={(v) => `${(Number(v) * 100).toFixed(2)}%`}
                 />
                 {Object.values(
                   riskReturnPerPeriod[riskReturnPerPeriod.length - 1]
@@ -729,7 +751,7 @@ function ReportGame() {
                         position="top"
                         className="fill-foreground"
                         fontSize={12}
-                        formatter={(v) => `${v.toFixed(2)}`}
+                        formatter={(v) => `${Number(v).toFixed(2)}`}
                       />
                     </Bar>
                   )
@@ -746,7 +768,7 @@ function ReportGame() {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tickFormatter={(v) => `${v.toFixed(2)}`}
+                  tickFormatter={(v) => `${Number(v).toFixed(2)}`}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
               </BarChart>

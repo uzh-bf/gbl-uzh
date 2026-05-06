@@ -30,14 +30,7 @@ function Achievement({
   )
 }
 
-function PlayerData({
-  achievements,
-  name,
-  color,
-  level,
-  avatar,
-  location,
-}: Player) {
+function PlayerData({ achievements, name, level }: Player) {
   const router = useRouter()
 
   return (

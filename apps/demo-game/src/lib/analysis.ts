@@ -2,6 +2,11 @@ import { standardDeviation } from '@gbl-uzh/platform/dist/lib/util'
 import { PlayerResult } from 'src/graphql/generated/ops'
 import { MONTHS, NUM_MONTHS } from './constants'
 
+type ChartPlayerData = {
+  name: string
+  [key: string]: any
+}
+
 export const getSegmentEndResults = (results: PlayerResult[]) => {
   return results.filter((o) => o.type == 'SEGMENT_END')
 }
@@ -11,14 +16,14 @@ export const composeChartData = (dataPerPeriod: any, key: string) => {
   dataPerPeriod.forEach((periodData, periodIndex) => {
     if (Object.keys(periodData).length === 0) return
 
-    const players = Object.values(periodData)
+    const players = Object.values(periodData) as ChartPlayerData[]
     const num = players.length > 0 ? players[0][key].length : NUM_MONTHS
 
     for (let i = 0; i < num; i++) {
       const entry = {
         period: periodIndex,
         month: MONTHS[i % NUM_MONTHS] + ' P' + (periodIndex + 1).toString(),
-      }
+      } as Record<string, string | number>
 
       players.forEach((player) => {
         entry[player.name] = player[key][i]
