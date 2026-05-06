@@ -4,6 +4,7 @@ import { createGameRouter } from './routers/game.js'
 import { createLearningRouter } from './routers/learning.js'
 import { createPeriodRouter } from './routers/period.js'
 import { createPlayRouter } from './routers/play.js'
+import { createEventsRouter } from './routers/events.js'
 import { createResultsRouter } from './routers/results.js'
 import { createSegmentRouter } from './routers/segment.js'
 import { createStoryRouter } from './routers/story.js'
@@ -38,6 +39,7 @@ export function createPlatformRouter({
     segment: createSegmentRouter({ services, schemas }),
     play: createPlayRouter({ schemas }),
     learning: createLearningRouter(),
+    events: createEventsRouter(),
     story: createStoryRouter(),
     results: createResultsRouter(),
     ...extensions,

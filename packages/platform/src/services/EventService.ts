@@ -1,5 +1,9 @@
 import * as DB from '@prisma/client'
 import { getPubSub } from '../lib/pubsub.js'
+import {
+  publishGlobalNotificationRealtime,
+  publishUserNotificationRealtime,
+} from '../lib/realtime.js'
 import { BaseUserNotificationType as UserNotificationType } from '../types.js'
 import type {
   BaseGlobalNotificationType,
@@ -336,6 +340,7 @@ export async function receiveEvent(
 export function publishGlobalNotification(event: PlatformEvent<any>) {
   try {
     getPubSub().publish('global:events', event)
+    publishGlobalNotificationRealtime(event)
     log.info('[EventService] Published to "global:events".', {
       gameId: event?.facts?.gameId ?? null,
       type: event?.type ?? null,
@@ -353,5 +358,6 @@ export function publishUserNotification(
   if (events && events.length > 0) {
     // console.log(events)
     getPubSub().publish('user:events', ctx.user.sub, events as any)
+    publishUserNotificationRealtime(ctx.user.sub, events as any)
   }
 }
