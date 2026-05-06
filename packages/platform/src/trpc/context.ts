@@ -36,7 +36,9 @@ function normalizeGameId(gameId: unknown): number | undefined {
   return undefined
 }
 
-export function createPlatformContextUser(user?: RawPlatformUser | null) {
+export function createPlatformContextUser(
+  user?: RawPlatformUser | null
+): PlatformUser | undefined {
   if (!user || typeof user !== 'object') {
     return
   }
