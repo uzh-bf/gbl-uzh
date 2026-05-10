@@ -6,6 +6,7 @@ import {
   faSync,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { GameStatus } from '@prisma/client'
 import {
   Button,
   FormikNumberField,
@@ -15,8 +16,6 @@ import {
   Modal,
 } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
-import { useQueryClient } from '@tanstack/react-query'
-import { GameStatus } from '@prisma/client'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
@@ -24,9 +23,11 @@ import { twMerge } from 'tailwind-merge'
 
 import PlayerCompact from '~/components/PlayerCompact'
 
-import { trpc } from '~/lib/trpc'
-import { useToast } from '~/components/ui/use-toast'
-import { STATUS, computePeriodStatus, computeSegmentStatus } from '@gbl-uzh/platform/dist/lib/util'
+import {
+  STATUS,
+  computePeriodStatus,
+  computeSegmentStatus,
+} from '@gbl-uzh/platform/dist/lib/util'
 import {
   Card,
   CardContent,
@@ -41,6 +42,8 @@ import {
   TableHeader,
   TableRow,
 } from '@uzh-bf/design-system/dist/future'
+import { useToast } from '~/components/ui/use-toast'
+import { trpc } from '~/lib/trpc'
 
 import { FormikMultiSelectField } from '~/components/fields/FormikMultiSelectField'
 import {
@@ -52,9 +55,31 @@ import {
   TREND_STOCKS,
 } from '~/types/Period'
 
+type PeriodFacts = {
+  spotTradingEnabled?: boolean
+  futuresTradingEnabled?: boolean
+  optionsTradingEnabled?: boolean
+  scenario?: {
+    trendBonds?: number
+    gapBonds?: number
+    trendStocks?: number
+    gapStocks?: number
+    interestBank?: number
+    seed?: number
+  }
+}
+
+type SegmentFacts = {
+  diceRolls?: Array<{
+    bonds?: number
+    stocks?: number
+    shared?: number
+  }>
+}
+
 function ManageGame() {
   const router = useRouter()
-  const queryClient = useQueryClient()
+  const trpcUtils = trpc.useUtils()
 
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
@@ -62,14 +87,17 @@ function ManageGame() {
   const gameId = Number(router.query.id)
   const hasGameId = Number.isFinite(gameId)
 
-  const { data: game, error: gameError, isLoading: gameLoading } =
-    trpc.game.byId.useQuery(
-      { id: hasGameId ? gameId : 0 },
-      {
-        enabled: hasGameId,
-        refetchInterval: hasGameId ? 15000 : false,
-      }
-    )
+  const {
+    data: game,
+    error: gameError,
+    isLoading: gameLoading,
+  } = trpc.game.byId.useQuery(
+    { id: hasGameId ? gameId : 0 },
+    {
+      enabled: hasGameId,
+      refetchInterval: hasGameId ? 15000 : false,
+    }
+  )
 
   const {
     data: learningElementsData = [],
@@ -87,10 +115,8 @@ function ManageGame() {
 
   const invalidateGameById = useCallback(async () => {
     if (!hasGameId) return
-    await queryClient.invalidateQueries({
-      queryKey: trpc.game.byId.queryKey({ id: gameId }),
-    })
-  }, [gameId, hasGameId, queryClient])
+    await trpcUtils.game.byId.invalidate({ id: gameId })
+  }, [gameId, hasGameId, trpcUtils])
 
   const scrollToActivePeriod = useCallback(() => {
     const anchor = document.querySelector('#active-period')
@@ -257,7 +283,7 @@ function ManageGame() {
           <Button disabled={anotherPeriod} onClick={nextPeriodFn}>
             Next Period
           </Button>
-          )
+        )
       }
 
       case GameStatus.COMPLETED:
@@ -269,7 +295,13 @@ function ManageGame() {
       default:
         return null
     }
-  }, [game, nextPeriod.isPending, nextSegment.isPending, nextPeriodFn, nextSegmentFn])
+  }, [
+    game,
+    nextPeriod.isPending,
+    nextSegment.isPending,
+    nextPeriodFn,
+    nextSegmentFn,
+  ])
 
   if (gameLoading || !game) {
     return <div>loading...</div>
@@ -296,10 +328,12 @@ function ManageGame() {
           {game.periods.map((period, ix) => {
             const periodStatus = computePeriodStatus(game as any, ix)
 
+            const periodFacts = period.facts as PeriodFacts
+            const scenario = periodFacts.scenario ?? {}
             const labels = [
-              period.facts.spotTradingEnabled && 'S',
-              period.facts.futuresTradingEnabled && 'F',
-              period.facts.optionsTradingEnabled && 'O',
+              periodFacts.spotTradingEnabled && 'S',
+              periodFacts.futuresTradingEnabled && 'F',
+              periodFacts.optionsTradingEnabled && 'O',
             ].filter(Boolean)
 
             const isPeriodPlanned = periodStatus === STATUS.SCHEDULED
@@ -309,13 +343,12 @@ function ManageGame() {
               periodStatus === STATUS.COMPLETED ||
               periodStatus === STATUS.RESULTS
 
-            const scenario = period.facts.scenario
-            const trendBonds = scenario.trendBonds
-            const gapBonds = scenario.gapBonds
-            const trendStocks = scenario.trendStocks
-            const gapStocks = scenario.gapStocks
-            const savingsInterest = scenario.interestBank
-            const seed = scenario.seed
+            const trendBonds = scenario.trendBonds ?? 0
+            const gapBonds = scenario.gapBonds ?? 0
+            const trendStocks = scenario.trendStocks ?? 0
+            const gapStocks = scenario.gapStocks ?? 0
+            const savingsInterest = scenario.interestBank ?? 0
+            const seed = scenario.seed ?? 0
 
             return (
               <div
@@ -393,111 +426,116 @@ function ManageGame() {
                     </div>
                   </div>
                   <div className="mt-1 flex flex-row gap-1">
-                    {Array.apply(null, Array(period.segmentCount)).map((_, ix) => {
-                      const segment = period.segments[ix]
-                      const segmentStatus = computeSegmentStatus(
-                        game as any,
-                        period as any,
-                        ix
-                      )
+                    {Array.apply(null, Array(period.segmentCount)).map(
+                      (_, ix) => {
+                        const segment = period.segments[ix]
+                        const segmentStatus = computeSegmentStatus(
+                          game as any,
+                          period as any,
+                          ix
+                        )
 
-                      const isSegmentActive =
-                        periodStatus === STATUS.ACTIVE &&
-                        segmentStatus === STATUS.ACTIVE
-                      const isSegmentCompleted =
-                        periodStatus === STATUS.COMPLETED ||
-                        segmentStatus === STATUS.COMPLETED
+                        const isSegmentActive =
+                          periodStatus === STATUS.ACTIVE &&
+                          segmentStatus === STATUS.ACTIVE
+                        const isSegmentCompleted =
+                          periodStatus === STATUS.COMPLETED ||
+                          segmentStatus === STATUS.COMPLETED
 
-                      const diceBonds = segment?.facts.diceRolls.map(
-                        (dice) => dice.bonds
-                      )
-                      const diceStocks = segment?.facts.diceRolls.map(
-                        (dice) => dice.stocks
-                      )
-                      const diceShared = segment?.facts.diceRolls.map(
-                        (dice) => dice.shared
-                      )
+                        const segmentFacts = segment?.facts as
+                          | SegmentFacts
+                          | undefined
+                        const diceBonds = segmentFacts?.diceRolls?.map(
+                          (dice) => dice.bonds
+                        )
+                        const diceStocks = segmentFacts?.diceRolls?.map(
+                          (dice) => dice.stocks
+                        )
+                        const diceShared = segmentFacts?.diceRolls?.map(
+                          (dice) => dice.shared
+                        )
 
-                      const dataToEncode = {
-                        diceBonds,
-                        diceShared,
-                        diceStocks,
-                        trendBonds,
-                        gapBonds,
-                        trendStocks,
-                        gapStocks,
-                      }
-                      const encoded = btoa(JSON.stringify(dataToEncode))
+                        const dataToEncode = {
+                          diceBonds,
+                          diceShared,
+                          diceStocks,
+                          trendBonds,
+                          gapBonds,
+                          trendStocks,
+                          gapStocks,
+                        }
+                        const encoded = btoa(JSON.stringify(dataToEncode))
 
-                      return (
-                        <div
-                          className={twMerge(
-                            'flex-initial rounded border p-2 text-center',
-                            (!segment || isSegmentCompleted) &&
-                              'bg-gray-100 text-gray-400',
-                            isSegmentActive && 'border-green-600 bg-green-100'
-                          )}
-                          key={ix}
-                        >
-                          <div className="flex flex-row items-center gap-2">
-                            <div>
-                              {!isSegmentActive && !isSegmentCompleted && (
-                                <FontAwesomeIcon icon={faCalendar} />
-                              )}
-                              {isSegmentActive && (
-                                <FontAwesomeIcon icon={faSync} />
-                              )}
-                              {isSegmentCompleted && (
-                                <FontAwesomeIcon icon={faCheck} />
-                              )}
-                            </div>
-                            {
+                        return (
+                          <div
+                            className={twMerge(
+                              'flex-initial rounded border p-2 text-center',
+                              (!segment || isSegmentCompleted) &&
+                                'bg-gray-100 text-gray-400',
+                              isSegmentActive && 'border-green-600 bg-green-100'
+                            )}
+                            key={ix}
+                          >
+                            <div className="flex flex-row items-center gap-2">
                               <div>
-                                Segment{' '}
-                                {segment?.index !== undefined
-                                  ? segment.index + 1
-                                  : ''}
+                                {!isSegmentActive && !isSegmentCompleted && (
+                                  <FontAwesomeIcon icon={faCalendar} />
+                                )}
+                                {isSegmentActive && (
+                                  <FontAwesomeIcon icon={faSync} />
+                                )}
+                                {isSegmentCompleted && (
+                                  <FontAwesomeIcon icon={faCheck} />
+                                )}
                               </div>
-                            }
-                          </div>
-                          <div className="my-2">
-                            <div className="flex flex-row gap-2">
-                              <div className="text-sm">
-                                Story: {segment?.storyElements.length ?? 0}
-                              </div>
-                              <div className="text-sm">
-                                Learn: {segment?.learningElements.length ?? 0}
+                              {
+                                <div>
+                                  Segment{' '}
+                                  {segment?.index !== undefined
+                                    ? segment.index + 1
+                                    : ''}
+                                </div>
+                              }
+                            </div>
+                            <div className="my-2">
+                              <div className="flex flex-row gap-2">
+                                <div className="text-sm">
+                                  Story: {segment?.storyElements.length ?? 0}
+                                </div>
+                                <div className="text-sm">
+                                  Learn: {segment?.learningElements.length ?? 0}
+                                </div>
                               </div>
                             </div>
-                          </div>
 
-                          {segment && (
-                            <Link
-                              href={`/admin/dice/${segment.id}/${encoded}`}
-                              target="_blank"
-                              className="flex flex-col rounded border border-gray-300 p-2"
-                            >
-                              <div className="flex justify-between text-nowrap">
-                                Dice Bonds:
-                                <div className="flex flex-row gap-2">
-                                  {diceBonds?.map((dice, ix) => (
-                                    <div key={ix}>{dice}</div>
-                                  ))}
+                            {segment && (
+                              <Link
+                                href={`/admin/dice/${segment.id}/${encoded}`}
+                                target="_blank"
+                                className="flex flex-col rounded border border-gray-300 p-2"
+                              >
+                                <div className="flex justify-between text-nowrap">
+                                  Dice Bonds:
+                                  <div className="flex flex-row gap-2">
+                                    {diceBonds?.map((dice, ix) => (
+                                      <div key={ix}>{dice}</div>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex justify-between gap-2 text-nowrap">
-                                Dice Stocks:
-                                <div className="flex flex-row gap-2">
-                                  {diceStocks?.map((dice, ix) => (
-                                    <div key={ix}>{dice}</div>
-                                  ))}
+                                <div className="flex justify-between gap-2 text-nowrap">
+                                  Dice Stocks:
+                                  <div className="flex flex-row gap-2">
+                                    {diceStocks?.map((dice, ix) => (
+                                      <div key={ix}>{dice}</div>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            </Link>
-                          )}
-                        </div>
-                      )
-                    })}
+                              </Link>
+                            )}
+                          </div>
+                        )
+                      }
+                    )}
                     {!isPeriodCompleted && game.periods.length - 1 === ix && (
                       <Formik
                         initialValues={{
@@ -547,7 +585,8 @@ function ManageGame() {
                               trigger={
                                 <Button
                                   disabled={
-                                    period.segmentCount === period.segments.length
+                                    period.segmentCount ===
+                                    period.segments.length
                                   }
                                   className={{
                                     root: 'h-full w-12 font-bold text-gray-500',
@@ -846,7 +885,10 @@ function ManageGame() {
                 {/* TODO(JJ): @RS Do we want to show the following? If no we
                   we can remove the refetchQueries.
                 */}
-                {game?.activePeriod?.activeSegment?.countdownExpiresAt}
+                {game?.activePeriod?.activeSegment
+                  ?.countdownExpiresAt instanceof Date
+                  ? game?.activePeriod?.activeSegment?.countdownExpiresAt?.toLocaleString()
+                  : game?.activePeriod?.activeSegment?.countdownExpiresAt}
               </CardContent>
               <CardFooter>
                 <Button type="submit">Set Countdown</Button>

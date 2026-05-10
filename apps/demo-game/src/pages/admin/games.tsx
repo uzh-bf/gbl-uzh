@@ -1,17 +1,16 @@
-import { useQueryClient } from '@tanstack/react-query'
-
 import { Button, FormikTextField } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { trpc, type RouterOutputs } from '../../server/trpc/router'
+import { trpc } from '~/lib/trpc'
+import { type RouterOutputs } from '~/server/trpc/router'
 
 type GameListItem = RouterOutputs['game']['list'][number]
 
 function Games() {
-  const queryClient = useQueryClient()
   const router = useRouter()
+  const utils = trpc.useUtils()
 
   const session = useSession({
     required: true,
@@ -23,9 +22,7 @@ function Games() {
   const gamesQuery = trpc.game.list.useQuery()
   const createGame = trpc.game.create.useMutation({
     async onSuccess() {
-      await queryClient.invalidateQueries({
-        queryKey: trpc.game.list.queryKey(),
-      })
+      await utils.game.list.invalidate()
     },
   })
 
@@ -90,7 +87,11 @@ function Games() {
           const game = gameView as GameListItem
 
           return (
-            <Link className="w-96" href={`/admin/games/${game?.id}`} key={game?.id}>
+            <Link
+              className="w-96"
+              href={`/admin/games/${game?.id}`}
+              key={game?.id}
+            >
               <Button
                 className={{
                   root: 'flex w-full flex-col items-start justify-around',
