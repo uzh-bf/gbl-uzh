@@ -4,6 +4,7 @@ import { useApollo } from '@gbl-uzh/platform/dist/lib/apollo'
 import { SessionProvider } from 'next-auth/react'
 import type { AppProps } from 'next/app'
 import { Toaster } from '../components/ui/toaster'
+import { TRPCProvider } from '../lib/trpc'
 // import { Toaster } from '@uzh-bf/design-system'
 
 import '@fortawesome/fontawesome-svg-core/styles.css'
@@ -22,9 +23,11 @@ export default function App({
     <RootLayout>
       <SessionProvider session={session}>
         <ApolloProvider client={apolloClient}>
-          <Toaster />
+          <TRPCProvider>
+            <Toaster />
 
-          <Component {...pageProps} />
+            <Component {...pageProps} />
+          </TRPCProvider>
         </ApolloProvider>
       </SessionProvider>
     </RootLayout>
