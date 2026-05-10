@@ -1,17 +1,16 @@
-import { useMutation, useQuery } from '@apollo/client'
-import {
-  CreateGameDocument,
-  GameDataFragmentDoc,
-  GamesDocument,
-} from 'src/graphql/generated/ops'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { Button, FormikTextField } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { trpc, type RouterOutputs } from '../../server/trpc/router'
+
+type GameListItem = RouterOutputs['game']['list'][number]
 
 function Games() {
+  const queryClient = useQueryClient()
   const router = useRouter()
 
   const session = useSession({
@@ -21,29 +20,21 @@ function Games() {
     },
   })
 
-  const { data, error, loading } = useQuery(GamesDocument)
-  const [createGame] = useMutation(CreateGameDocument, {
-    update(cache, { data: { createGame: createGameResult } }) {
-      cache.modify({
-        fields: {
-          games(existingGames = []) {
-            const newGameRef = cache.writeFragment({
-              data: createGameResult,
-              fragment: GameDataFragmentDoc,
-            })
-            return [...existingGames, newGameRef]
-          },
-        },
+  const gamesQuery = trpc.game.list.useQuery()
+  const createGame = trpc.game.create.useMutation({
+    async onSuccess() {
+      await queryClient.invalidateQueries({
+        queryKey: trpc.game.list.queryKey(),
       })
     },
   })
 
-  if (loading || !data) {
+  if (gamesQuery.isLoading || !gamesQuery.data) {
     return <div>loading...</div>
   }
 
-  if (error) {
-    return <div>{error.message}</div>
+  if (gamesQuery.error) {
+    return <div>{gamesQuery.error.message}</div>
   }
 
   return (
@@ -70,7 +61,7 @@ function Games() {
           },
         }}
         onSubmit={async (variables, { resetForm }) => {
-          await createGame({ variables, refetchQueries: [GamesDocument] })
+          await createGame.mutateAsync(variables)
           resetForm()
         }}
       >
@@ -95,36 +86,29 @@ function Games() {
         )}
       </Formik>
       <div className="mt-4 flex flex-col gap-1">
-        {data.games.map((game, index, array) => {
-          const gameView = game as typeof game & {
-            playerCount?: number
-            activePeriod?: { activeSegmentIx?: number | null } | null
-          }
+        {(gamesQuery.data as GameListItem[]).map((gameView) => {
+          const game = gameView as GameListItem
 
           return (
-            <Link
-              className="w-96"
-              href={`/admin/games/${gameView?.id}`}
-              key={gameView?.id}
-            >
+            <Link className="w-96" href={`/admin/games/${game?.id}`} key={game?.id}>
               <Button
                 className={{
                   root: 'flex w-full flex-col items-start justify-around',
                 }}
               >
                 <div className="flex w-full justify-between p-2">
-                  <div>{gameView?.name}</div>
-                  <div className="flex w-10">Id: {gameView?.id}</div>
+                  <div>{game?.name}</div>
+                  <div className="flex w-10">Id: {game?.id}</div>
                 </div>
                 <div className="flex w-full items-end justify-between p-2 text-sm">
                   <div className="flex flex-col justify-between gap-y-1 text-left">
-                    <div>Player count: {gameView?.playerCount}</div>
+                    <div>Player count: {game?.playersCount}</div>
                     <div>
-                      Active Period/Segment: {gameView?.activePeriodIx}/
-                      {gameView?.activePeriod?.activeSegmentIx}
+                      Active Period/Segment: {game?.activePeriodIx}/
+                      {game?.activeSegmentIx}
                     </div>
                   </div>
-                  <div className="text-right">Status: {gameView?.status}</div>
+                  <div className="text-right">Status: {game?.status}</div>
                 </div>
               </Button>
             </Link>
