@@ -1,7 +1,0 @@
-subscription GlobalEvents {
-  eventsGlobal {
-    type
-    sub
-    facts
-  }
-}

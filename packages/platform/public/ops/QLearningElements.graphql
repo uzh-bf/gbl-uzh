@@ -1,7 +1,0 @@
-#import "./FLearningElementData.graphql"
-
-query LearningElements {
-  learningElements {
-    ...LearningElementData
-  }
-}

@@ -1,3 +1,0 @@
-mutation ToggleSwitch($gameId: Int!, $toggle: Boolean!) {
-  toggleSwitch(gameId: $gameId, toggle: $toggle)
-}

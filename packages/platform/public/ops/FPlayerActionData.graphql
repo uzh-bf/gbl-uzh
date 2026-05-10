@@ -1,9 +1,0 @@
-fragment PlayerActionData on PlayerAction {
-  id
-
-  periodIx
-  segmentIx
-
-  type
-  facts
-}

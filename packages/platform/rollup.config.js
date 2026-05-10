@@ -8,10 +8,7 @@ const config = defineConfig([
     // Main build configuration
     input: [
       'src/index.ts',
-      'src/nexus.ts',
       'src/lib/util.ts',
-      'src/lib/apollo.ts',
-      'src/lib/pubsub.ts',
       'src/trpc/init.ts',
       'src/trpc/createPlatformRouter.ts',
       'src/trpc/context.ts',

@@ -50,7 +50,6 @@ import {
 import { DecisionsDisplayCompact } from '~/components/DecisionsDisplay'
 import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
-import { BaseGlobalNotificationType } from '@gbl-uzh/platform'
 import { trpc } from '~/lib/trpc'
 import type { RouterOutputs } from '~/server/trpc/router'
 // TODO(JJ): This will be replaced by the design system
@@ -138,26 +137,18 @@ function GameLayout({ children }: { children: ReactNode }) {
     enabled: Boolean(currentGameId),
     onData(event) {
       const eventGameId = Number(event.facts?.gameId)
-      if (!currentGameId || Number.isNaN(eventGameId) || eventGameId !== currentGameId)
-        return
-
-      if (event.type === BaseGlobalNotificationType.COUNTDOWN_UPDATED) {
-        console.log(
-          `Player Cockpit: Relevant COUNTDOWN_UPDATED event for game ${currentGameId}. Refreshing result...`
-        )
-        void utils.play.result.invalidate()
-        return
-      }
-
       if (
-        event.type === BaseGlobalNotificationType.PERIOD_ACTIVATED ||
-        event.type === BaseGlobalNotificationType.SEGMENT_ACTIVATED
-      ) {
-        console.log(
-          `Player Cockpit: Relevant ${event.type} event for game ${currentGameId}. Refreshing result...`
-        )
-        void utils.play.result.invalidate()
-      }
+        !currentGameId ||
+        Number.isNaN(eventGameId) ||
+        eventGameId !== currentGameId ||
+        !COCKPIT_REFRESH_EVENTS.has(event.type)
+      )
+        return
+
+      console.log(
+        `Player Cockpit: Relevant ${event.type} event for game ${currentGameId}. Refreshing result...`
+      )
+      void utils.play.result.invalidate()
     },
     onError: (err) => {
       console.error('Player Cockpit: Subscription error:', err)
@@ -358,6 +349,11 @@ const months = [
 ]
 const numMonths = months.length
 const PLAYER_DECISION_ACTION_TYPE = ''
+const COCKPIT_REFRESH_EVENTS = new Set<string>([
+  'COUNTDOWN_UPDATED',
+  'PERIOD_ACTIVATED',
+  'SEGMENT_ACTIVATED',
+])
 
 function Cockpit() {
   const [period, setPeriod] = useState<number | null>(null)

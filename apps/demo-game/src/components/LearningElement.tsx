@@ -4,7 +4,6 @@ import {
   faInfoCircle,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { LearningElementState } from '@gbl-uzh/platform'
 import { Button } from '@uzh-bf/design-system'
 import { without } from 'ramda'
 import { useEffect, useState } from 'react'
@@ -12,6 +11,12 @@ import Markdown from 'react-markdown'
 import { twMerge } from 'tailwind-merge'
 import { trpc } from '~/lib/trpc'
 import { useToast } from './ui/use-toast'
+
+enum LearningElementState {
+  NEW = 'NEW',
+  ATTEMPTED = 'ATTEMPTED',
+  SOLVED = 'SOLVED',
+}
 
 function parseSolution(solution: string | null): number[] {
   if (!solution) return []

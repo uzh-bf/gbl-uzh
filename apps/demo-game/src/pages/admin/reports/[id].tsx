@@ -290,7 +290,13 @@ function ReportGame() {
 
     const previousPeriodResults = reportPeriodEndResults
 
-    console.log('previousPeriodResults', previousPeriodResults)
+    if (previousPeriodResults.length === 0) {
+      return {
+        riskReturnPerPeriod: [],
+        sharpeRatioPerPeriod: [],
+        configSharpeRatio: {},
+      }
+    }
 
     const riskReturnPerPeriod = previousPeriodResults.reduce<
       Record<string, RiskReturnPlayerData>[]
@@ -322,7 +328,7 @@ function ReportGame() {
       return acc
     }, [])
 
-    const configSharpeRatio = Object.keys(sharpeRatioPerPeriod[0]).reduce(
+    const configSharpeRatio = Object.keys(sharpeRatioPerPeriod[0] ?? {}).reduce(
       (acc, item) => {
         if (item.endsWith('sharpeRatio')) {
           acc[item] = {

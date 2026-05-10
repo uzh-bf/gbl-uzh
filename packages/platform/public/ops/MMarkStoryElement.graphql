@@ -1,6 +1,0 @@
-mutation MarkStoryElement($elementId: ID!) {
-  markStoryElement(elementId: $elementId) {
-    id
-    visitedStoryElementIds
-  }
-}

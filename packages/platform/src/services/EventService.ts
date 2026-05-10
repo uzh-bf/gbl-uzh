@@ -1,15 +1,10 @@
 import * as DB from '@prisma/client'
-import { getPubSub } from '../lib/pubsub.js'
 import {
   publishGlobalNotificationRealtime,
   publishUserNotificationRealtime,
 } from '../lib/realtime.js'
+import type { Event as PlatformEvent } from '../types.js'
 import { BaseUserNotificationType as UserNotificationType } from '../types.js'
-import type {
-  BaseGlobalNotificationType,
-  Event as PlatformEvent,
-} from '../types.js'
-import log from '../lib/logger.js'
 
 export const realtimeGameStateSelect = {
   status: true,
@@ -78,7 +73,9 @@ export async function receiveEvents({ events, ctx, prisma }) {
 
   const transaction = (prisma as any)?.$transaction
   const results =
-    typeof transaction === 'function' ? transaction.call(prisma, ops) : Promise.all(ops)
+    typeof transaction === 'function'
+      ? transaction.call(prisma, ops)
+      : Promise.all(ops)
 
   return results
 }
@@ -339,17 +336,6 @@ export async function receiveEvent(
 
 export function publishGlobalNotification(event: PlatformEvent<any>) {
   publishGlobalNotificationRealtime(event)
-
-  try {
-    getPubSub().publish('global:events', event)
-    log.info('[EventService] Published to "global:events".', {
-      gameId: event?.facts?.gameId ?? null,
-      type: event?.type ?? null,
-      version: event?.facts?.version ?? null,
-    })
-  } catch (e) {
-    log.error('[EventService] Error during pubSub.publish:', e)
-  }
 }
 
 export function publishUserNotification(
@@ -357,8 +343,6 @@ export function publishUserNotification(
   events?: any
 ) {
   if (events && events.length > 0) {
-    // console.log(events)
     publishUserNotificationRealtime(ctx.user.sub, events as any)
-    getPubSub().publish('user:events', ctx.user.sub, events as any)
   }
 }

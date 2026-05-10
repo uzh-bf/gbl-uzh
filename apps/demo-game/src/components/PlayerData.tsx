@@ -1,5 +1,20 @@
 import { useRouter } from 'next/router'
-import { Player } from 'src/graphql/generated/ops'
+
+type PlayerAchievement = {
+  id: number
+  count: number
+  achievement: {
+    name: string
+    reward: {
+      xp: number
+    }
+    image: string
+  }
+}
+
+type PlayerDataProps = {
+  achievements: PlayerAchievement[]
+}
 
 function Achievement({
   name,
@@ -30,7 +45,7 @@ function Achievement({
   )
 }
 
-function PlayerData({ achievements, name, level }: Player) {
+function PlayerData({ achievements }: PlayerDataProps) {
   const router = useRouter()
 
   return (

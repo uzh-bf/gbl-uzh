@@ -1,8 +1,0 @@
-mutation SaveConsolidationDecision($payload: String!) {
-  saveConsolidationDecision(payload: $payload) {
-    id
-
-    type
-    facts
-  }
-}

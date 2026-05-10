@@ -1,18 +1,26 @@
-import { Player } from 'src/graphql/generated/ops'
-
 import { faCheck, faSnowboarding } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import Link from 'next/link'
 
+type CompactPlayer = {
+  name: string
+  role?: string | null
+  token?: string | null
+  isReady: boolean
+  facts?: {
+    avatar?: string
+  } | null
+}
+
 // TODO(JJ):
 // Move this to ui package when checking with RS, also about Link in ui
-function PlayerCompact({ player }: { player: Player }) {
+function PlayerCompact({ player }: { player: CompactPlayer }) {
   return (
     <div className="flex w-4/5 flex-col border-b py-1 last:border-0">
       <div className="flex justify-between">
         <div>{player.name}</div>
-        <img width="20px" src={player.facts.avatar} />
+        <img width="20px" src={player.facts?.avatar} />
       </div>
       <div className="flex justify-between">
         <div className="flex flex-col justify-between text-sm">
