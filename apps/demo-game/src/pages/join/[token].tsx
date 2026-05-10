@@ -1,24 +1,39 @@
-import { useMutation } from '@apollo/client'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
-import { LoginAsTeamDocument } from 'src/graphql/generated/ops'
+import { useEffect, useRef } from 'react'
+import { trpc } from '~/lib/trpc'
 
 function Join() {
   const router = useRouter()
+  const token =
+    typeof router.query?.token === 'string'
+      ? router.query.token
+      : Array.isArray(router.query?.token)
+      ? router.query.token[0]
+      : undefined
 
-  const [loginAsTeam] = useMutation(LoginAsTeamDocument)
+  const loginAsTeam = trpc.auth.loginAsTeam.useMutation()
+  const { isPending: isLoginAsTeamPending, mutateAsync: loginAsTeamAsync } =
+    loginAsTeam
+  const handledToken = useRef<string | null>(null)
 
   useEffect(() => {
-    if (router.query?.token) {
-      const executeAsync = async () => {
-        await loginAsTeam({
-          variables: { token: router.query.token as string },
-        })
-        router.push('/play/welcome')
+    if (!token) return
+    if (isLoginAsTeamPending) return
+    if (handledToken.current === token) return
+
+    handledToken.current = token
+    const executeAsync = async () => {
+      try {
+        await loginAsTeamAsync({ token })
+        await router.replace('/play/welcome')
+      } catch (error) {
+        console.error('Error logging in with join token:', error)
+        handledToken.current = null
       }
-      executeAsync()
     }
-  }, [router.query?.token])
+
+    void executeAsync()
+  }, [isLoginAsTeamPending, loginAsTeamAsync, router, token])
 
   return null
 }

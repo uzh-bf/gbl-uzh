@@ -1,4 +1,3 @@
-import { useMutation, useQuery } from '@apollo/client'
 import { COLORS } from '@gbl-uzh/platform/src/lib/constants'
 import { Logo } from '@gbl-uzh/ui'
 import {
@@ -9,13 +8,8 @@ import {
 import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import {
-  SelfDocument,
-  UpdatePlayerDataDocument,
-} from 'src/graphql/generated/ops'
 import { LOCATIONS } from 'src/lib/constants'
 import * as Yup from 'yup'
-import LogoSelector from '~/components/LogoSelector'
 
 import {
   Card,
@@ -25,6 +19,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@uzh-bf/design-system/dist/future'
+import LogoSelector from '~/components/LogoSelector'
+import { trpc } from '~/lib/trpc'
 
 const Schema = Yup.object().shape({
   name: Yup.string()
@@ -33,81 +29,69 @@ const Schema = Yup.object().shape({
     .required('Required'),
 })
 
-// TODO(JJ):
-// - Move modal to ui package
-// - LogoSelector
-
-// props:
-// - descriptions
-// - avatar info, color, location, onSubmit, no player.role
-// - add banks, like colors
 function Welcome() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { data, loading, error } = useQuery(SelfDocument, {
-    // fetchPolicy: 'network-cache',
-    onError: (error) => {
-      console.error('Error fetching player data:', error)
-    },
-    onCompleted: (data) => {
-      if (!data.self) {
-        console.warn('No player data found - user may not be authenticated')
-      }
-    },
-  })
 
-  const [updatePlayerData] = useMutation(UpdatePlayerDataDocument, {
-    optimisticResponse: {
-      updatePlayerData: {
-        name: data?.self.name,
-        facts: JSON.stringify({
-          color: data?.self.facts.color,
-          avatar: data?.self.facts.avatar,
-          location: data?.self.facts.location,
-        }),
-      },
-    } as any,
-    onError: (error) => {
-      console.error('Error updating player data:', error)
+  const {
+    data: player,
+    isLoading: isPlayerLoading,
+    error: playerError,
+  } = trpc.play.self.useQuery()
+
+  const utils = trpc.useUtils()
+  const updatePlayerData = trpc.play.updatePlayerData.useMutation({
+    onSuccess: async () => {
+      await utils.play.self.invalidate()
+    },
+    onError: () => {
       setIsSubmitting(false)
     },
   })
 
-  if (loading) return null
-  if (error) return `Error! ${error}`
+  if (isPlayerLoading) return null
+  if (playerError) return `Error! ${playerError}`
+  if (!player) {
+    return 'No player data found - user may not be authenticated'
+  }
 
+  const playerFacts =
+    typeof player.facts === 'object' && player.facts !== null
+      ? (player.facts as Record<string, string>)
+      : {}
   const gameName = 'Minigame'
-
-  const player = data.self
 
   return (
     <div className="m-auto w-full max-w-4xl p-8">
       <Formik
         initialValues={{
           name: player.name,
-          color: player.facts.color ?? Object.keys(COLORS)[0],
-          location: player.facts.location ?? LOCATIONS.Trader[0],
+          color: playerFacts.color ?? Object.keys(COLORS)[0],
+          location: playerFacts.location ?? LOCATIONS.Trader[0],
           imgPathAvatar:
-            player.facts.avatar ?? '/avatars/avatar_placeholder.png',
+            playerFacts.avatar ?? '/avatars/avatar_placeholder.png',
         }}
         validationSchema={Schema}
         onSubmit={async (values) => {
           setIsSubmitting(true)
 
-          await updatePlayerData({
-            variables: {
+          try {
+            await updatePlayerData.mutateAsync({
               name: values.name,
               facts: JSON.stringify({
                 color: values.color,
                 avatar: values.imgPathAvatar,
                 location: values.location,
               }),
-            },
-          })
-          router.replace('/play/cockpit')
+            })
+
+            await router.replace('/play/cockpit')
+          } catch (error) {
+            console.error('Error updating player data:', error)
+          }
         }}
       >
-        {({ values, errors, touched }) => (
+        {({ values }) => (
           <Card className="flex w-full flex-col">
             <CardHeader>
               <CardTitle>Welcome to the {gameName}!</CardTitle>
@@ -208,7 +192,7 @@ function Welcome() {
                     <Button
                       className={{ root: 'mt-4' }}
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || updatePlayerData.isPending}
                     >
                       {isSubmitting ? 'Loading...' : 'Start Game'}
                     </Button>

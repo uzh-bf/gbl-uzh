@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useSubscription } from '@apollo/client'
+import { useSubscription } from '@apollo/client'
 import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
 import {
   Button,
@@ -34,7 +34,7 @@ import {
 import { CycleCountdown } from '~/components/CycleCountDown'
 
 import dayjs from 'dayjs'
-import { useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import {
   Area,
   AreaChart,
@@ -48,16 +48,12 @@ import {
   YAxis,
 } from 'recharts'
 
-import {
-  GlobalEventsDocument,
-  PerformActionDocument,
-  ResultDocument,
-  UpdateReadyStateDocument,
-} from 'src/graphql/generated/ops'
-import { getSegmentEndResults } from 'src/lib/analysis'
+import { GlobalEventsDocument } from 'src/graphql/generated/ops'
 import { DecisionsDisplayCompact } from '~/components/DecisionsDisplay'
 import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
+import { trpc } from '~/lib/trpc'
+import type { RouterOutputs } from '~/server/trpc/router'
 // TODO(JJ): This will be replaced by the design system
 import { Form, Formik } from 'formik'
 import * as yup from 'yup'
@@ -77,6 +73,9 @@ const LABEL_MAP = {
   accStocksBenchmarkReturn: 'Stocks Return',
 }
 
+type CockpitResult = RouterOutputs['play']['result']
+type FactMap = Record<string, unknown>
+
 function GameHeader({ currentGame }) {
   return (
     <div className="col-span-2 flex justify-between rounded border p-4">
@@ -86,15 +85,49 @@ function GameHeader({ currentGame }) {
   )
 }
 
-function GameLayout({ children }: { children: React.ReactNode }) {
-  // TODO(JJ): Fetch data in Layout
-  const { data, refetch: refetchResult } = useQuery(ResultDocument, {
-    // fetchPolicy: 'cache-first',
-    fetchPolicy: 'cache-and-network',
-    // pollInterval: 10000,
-  })
+function getFacts(value: unknown): Record<string, unknown> {
+  if (value === null || value === undefined || typeof value !== 'object')
+    return {}
+  if (Array.isArray(value)) return {}
+  return value as Record<string, unknown>
+}
 
-  const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument)
+function getFactsArray(value: unknown): FactMap[] {
+  if (!Array.isArray(value)) return []
+  return value as FactMap[]
+}
+
+function getNumber(value: unknown, fallback = 0): number {
+  const parsed =
+    typeof value === 'number' && Number.isFinite(value)
+      ? value
+      : typeof value === 'string'
+      ? Number(value)
+      : fallback
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+function GameLayout({ children }: { children: ReactNode }) {
+  // TODO(JJ): Fetch data in Layout
+  const utils = trpc.useUtils()
+
+  const {
+    data: resultData,
+    isLoading: isResultLoading,
+    error: resultError,
+  } = trpc.play.result.useQuery()
+  const {
+    data: selfData,
+    isLoading: isSelfLoading,
+    error: selfError,
+  } = trpc.play.self.useQuery()
+
+  const updateReadyState = trpc.play.updateReadyState.useMutation({
+    async onSuccess() {
+      await utils.play.result.invalidate()
+      await utils.play.self.invalidate()
+    },
+  })
 
   const [countdownNotifications, setCountdownNotifications] = useState({
     '60': false,
@@ -103,31 +136,31 @@ function GameLayout({ children }: { children: React.ReactNode }) {
 
   const { toast } = useToast()
 
-  const currentGameId = parseInt(data?.result?.currentGame?.id)
+  const currentGameId = resultData?.currentGame?.id
 
   useSubscription(GlobalEventsDocument, {
-    skip: !currentGameId, // Only subscribe if we have a game ID
+    skip: !currentGameId,
     onData: ({ data: subData }) => {
       if (subData?.data?.eventsGlobal) {
         const event = subData.data.eventsGlobal
+        const eventGameId = event.facts?.gameId
         if (
           event.type === BaseGlobalNotificationType.COUNTDOWN_UPDATED &&
-          event.facts?.gameId === currentGameId
+          Number(eventGameId) === currentGameId
         ) {
           console.log(
-            `Player Cockpit: Relevant COUNTDOWN_UPDATED event for game ${currentGameId}. Refetching ResultDocument...`
+            `Player Cockpit: Relevant COUNTDOWN_UPDATED event for game ${currentGameId}. Refreshing result...`
           )
-          // Refetch the main ResultDocument to get the new countdown times
-          refetchResult()
+          void utils.play.result.invalidate()
         } else if (
           (event?.type === BaseGlobalNotificationType.PERIOD_ACTIVATED ||
             event?.type === BaseGlobalNotificationType.SEGMENT_ACTIVATED) &&
-          event?.facts?.gameId === currentGameId
+          Number(eventGameId) === currentGameId
         ) {
           console.log(
-            `Player Cockpit: Relevant ${event.type} event for game ${currentGameId}. Refetching ResultDocument...`
+            `Player Cockpit: Relevant ${event.type} event for game ${currentGameId}. Refreshing result...`
           )
-          refetchResult()
+          void utils.play.result.invalidate()
         }
       }
     },
@@ -136,10 +169,19 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     },
   })
 
-  const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
-    ?.countdownExpiresAt as string | null
-  const countdownDurationMs = data?.result?.currentGame?.activePeriod
-    ?.activeSegment?.countdownDurationMs as number | null
+  const countdownExpiresAt =
+    resultData?.currentGame?.activePeriod?.activeSegment?.countdownExpiresAt
+  const strExpiresAt =
+    countdownExpiresAt instanceof Date
+      ? countdownExpiresAt.toISOString()
+      : typeof countdownExpiresAt === 'string'
+      ? countdownExpiresAt
+      : null
+  const countdownDurationMs =
+    typeof resultData?.currentGame?.activePeriod?.activeSegment
+      ?.countdownDurationMs === 'number'
+      ? resultData.currentGame.activePeriod.activeSegment.countdownDurationMs
+      : null
 
   const expiresAtDate = useMemo(() => {
     return strExpiresAt ? dayjs(strExpiresAt).toDate() : null
@@ -159,27 +201,59 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     }
 
     setCountdownNotifications({ '60': false, '180': false })
-  }, [strExpiresAt, countdownDurationMs])
+  }, [strExpiresAt, countdownDurationMs, toast])
+
+  if (isResultLoading || isSelfLoading) return null
+  if (resultError) return `Error! ${resultError}`
+  if (selfError) return `Error! ${selfError}`
+
+  if (!resultData || !selfData) return null
+
+  const playerFacts = getFacts(selfData.facts)
+  const playerResult = resultData.playerResult
+  const playerResultWithProgress =
+    playerResult == null
+      ? null
+      : {
+          ...playerResult,
+          player: {
+            ...((playerResult as any).player ?? {}),
+            completedLearningElementIds:
+              selfData.completedLearningElementIds ??
+              (playerResult as any)?.player?.completedLearningElementIds ??
+              [],
+            visitedStoryElementIds:
+              selfData.visitedStoryElementIds ??
+              (playerResult as any)?.player?.visitedStoryElementIds ??
+              [],
+          },
+        }
 
   const playerInfo = {
-    name: data.self.name,
-    color: data.self.facts.color,
-    location: data.self.facts.location,
-    level: data.self.level.index,
-    xp: data.self.experience,
-    xpMax: data.self.experienceToNext,
-    achievements: data.self.achievements,
-    imgPathAvatar: data.self.facts.avatar,
-    imgPathLocation: `/locations/${data.self.facts.location}.svg`,
+    name: selfData.name,
+    color: (playerFacts.color as string) ?? 'Red',
+    location: (playerFacts.location as string) ?? 'ZH',
+    level: selfData.level.index,
+    xp: selfData.experience,
+    xpMax: selfData.experienceToNext,
+    achievements: selfData.achievements,
+    imgPathAvatar:
+      (playerFacts.avatar as string) ?? '/avatars/avatar_placeholder.png',
+    imgPathLocation: `/locations/${
+      (playerFacts.location as string | undefined) ?? 'ZH'
+    }.svg`,
     onClick: () => {
       // router.replace('/play/welcome')
     },
   }
   const playerState = {
-    data,
+    data: {
+      ...resultData,
+      playerResult: playerResultWithProgress,
+    },
   }
   const player = {
-    role: data.self.role,
+    role: selfData.role,
   }
 
   const sidebar = (
@@ -202,20 +276,18 @@ function GameLayout({ children }: { children: React.ReactNode }) {
             onClick={playerInfo.onClick}
           />
           <div className="flex items-center justify-between">
-            {data?.self && (
+            {selfData && (
               <Switch
                 className={{
                   root: 'text-xs font-bold text-gray-600',
                 }}
-                disabled={!data.self || loading}
+                disabled={updateReadyState.isPending}
                 id="isReady"
-                checked={data.self.isReady}
+                checked={selfData.isReady}
                 label="Ready?"
                 onCheckedChange={async () => {
-                  await updateReadyState({
-                    variables: {
-                      isReady: !data.self.isReady,
-                    },
+                  await updateReadyState.mutateAsync({
+                    isReady: !selfData.isReady,
                   })
                 }}
               />
@@ -299,31 +371,34 @@ const months = [
 const numMonths = months.length
 
 function Cockpit() {
-  const [period, setPeriod] = useState<number>(null)
+  const [period, setPeriod] = useState<number | null>(null)
 
-  const { loading, error, data } = useQuery(ResultDocument, {
-    fetchPolicy: 'cache-first',
+  const utils = trpc.useUtils()
+
+  const { data, isLoading, error } = trpc.play.result.useQuery()
+
+  const performAction = trpc.play.performAction.useMutation({
+    async onSuccess() {
+      await utils.play.result.invalidate()
+    },
+    onError: (err) => {
+      console.error('Player Cockpit: performAction failed', err)
+    },
   })
 
-  const [performAction, updatedPlayerResult] = useMutation(
-    PerformActionDocument,
-    {
-      refetchQueries: [ResultDocument],
-    }
-  )
-
   useEffect(() => {
-    if (data?.result?.currentGame?.periods?.length > 0) {
-      setPeriod(data.result.currentGame.periods.length - 1)
+    if (data?.currentGame?.periods?.length > 0) {
+      setPeriod(data.currentGame.periods.length - 1)
     }
-  }, [data?.result?.currentGame?.periods?.length])
+  }, [data?.currentGame?.periods?.length])
 
-  if (loading) return null
+  if (isLoading) return null
   if (error) return `Error! ${error}`
 
-  const playerDataResult = data.result
+  const playerDataResult = data as CockpitResult
   if (!playerDataResult) return null
   const currentGame = playerDataResult.currentGame
+  const activePeriodFacts = getFacts(currentGame.activePeriod?.facts)
 
   // TODO(JJ): The results should only be computed for certain states.
   // - Create different components, which compute the things internally.
@@ -347,19 +422,21 @@ function Cockpit() {
       )
 
       const assets = previousPeriodResults.map((e, ix) => {
+        const facts = getFacts(e.facts)
+        const periodAssets = getFacts(facts.assets)
         return {
-          ...e.facts.assets,
+          ...periodAssets,
           period: 'Period ' + (ix + 1),
         }
       })
 
-      const assetsWithReturns = previousPeriodResults.map(
-        (e) => e.facts.assetsWithReturns
+      const assetsWithReturns = previousPeriodResults.map((e) =>
+        getFactsArray((e.facts as FactMap).assetsWithReturns)
       )
 
       const lastAssets = assetsWithReturns.map((e, ix) => {
         return {
-          ...e[e.length - 1],
+          ...((e as Array<FactMap>)[e.length - 1] ?? {}),
           period: 'Period ' + (ix + 1),
         }
       })
@@ -488,21 +565,28 @@ function Cockpit() {
     case 'PAUSED': {
       const numPeriods = currentGame.periods.length
       const previousResults = playerDataResult.previousResults
-      const previousSegmentResults = getSegmentEndResults(
-        previousResults as any
+      const previousSegmentResults = previousResults.filter(
+        (o) => o.type == 'SEGMENT_END'
       )
       const segmentEndResults = previousSegmentResults
         .map((e) => {
+          const facts = getFacts(e.facts)
           return {
-            period: e.period,
-            segment: e.segment,
-            decisions: e.facts.decisions,
+            period: {
+              ...e.period,
+              id: String(e.period.id),
+            },
+            segment: {
+              ...e.segment,
+              id: String(e.segment.id),
+            },
+            decisions: getFacts(facts.decisions),
           }
         })
         .reverse()
 
-      const assetsWithReturns = previousSegmentResults.map(
-        (e) => e.facts.assetsWithReturns
+      const assetsWithReturns = previousSegmentResults.map((e) =>
+        getFacts((e.facts as FactMap).assetsWithReturns)
       )
       const assetsWithReturnsFlat = assetsWithReturns.flat()
 
@@ -555,7 +639,10 @@ function Cockpit() {
       const columns_segment_results = [
         { label: '', accessor: 'cat', sortable: false, transformer: null },
       ]
-      const numMonthsPerSegment = currentGame.activePeriod.facts.rollsPerSegment
+      const numMonthsPerSegment = Math.max(
+        1,
+        Math.floor(getNumber(activePeriodFacts.rollsPerSegment))
+      )
       const numMonthsInTable = numMonthsPerSegment + 1
       const periodIx = currentGame.activePeriod.index + 1
 
@@ -576,28 +663,57 @@ function Cockpit() {
         })
       })
 
+      type SegmentSeries = Record<string, number>
+
       const reduceFn = (type: string) => {
-        return (acc, value) => {
-          let val = value.bank
+        return (acc: SegmentSeries, value: FactMap) => {
+          let val = getNumber(value.bank)
+          const idx = String(getNumber(value.ix))
           if (type == 'bonds') {
-            val = value.bonds
+            val = getNumber(value.bonds)
           } else if (type == 'stocks') {
-            val = value.stocks
+            val = getNumber(value.stocks)
           } else if (type == 'total') {
-            val = value.totalAssets
+            val = getNumber(value.totalAssets)
           }
-          acc[value.ix] = val
+          acc[idx] = val
           return acc
         }
       }
 
-      const resultFacts = playerDataResult.playerResult.facts
-      const assetsWithReturnsArr = resultFacts.assetsWithReturns ?? []
+      const resultFacts = getFacts(
+        (playerDataResult.playerResult as any)?.facts
+      )
+      const assetsWithReturnsArr = getFactsArray(resultFacts.assetsWithReturns)
       const data_segment_results = [
-        assetsWithReturnsArr.reduce(reduceFn('bank'), { cat: 'Savings' }),
-        assetsWithReturnsArr.reduce(reduceFn('bonds'), { cat: 'Bonds' }),
-        assetsWithReturnsArr.reduce(reduceFn('stocks'), { cat: 'Stocks' }),
-        assetsWithReturnsArr.reduce(reduceFn('total'), { cat: 'Total' }),
+        {
+          cat: 'Savings',
+          ...(assetsWithReturnsArr.reduce(reduceFn('bank'), {}) as Record<
+            string,
+            number
+          >),
+        },
+        {
+          cat: 'Bonds',
+          ...(assetsWithReturnsArr.reduce(reduceFn('bonds'), {}) as Record<
+            string,
+            number
+          >),
+        },
+        {
+          cat: 'Stocks',
+          ...(assetsWithReturnsArr.reduce(reduceFn('stocks'), {}) as Record<
+            string,
+            number
+          >),
+        },
+        {
+          cat: 'Total',
+          ...(assetsWithReturnsArr.reduce(reduceFn('total'), {}) as Record<
+            string,
+            number
+          >),
+        },
       ]
 
       return (
@@ -634,12 +750,15 @@ function Cockpit() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {data_segment_results.map((row, rowIx) => {
+                          {data_segment_results.map((row) => {
+                            const rowData = row as Record<string, unknown> & {
+                              cat: string
+                            }
                             return (
                               <TableRow
-                                key={row.cat}
+                                key={rowData.cat}
                                 className={`${
-                                  row.cat === 'Total' ? 'font-bold' : ''
+                                  rowData.cat === 'Total' ? 'font-bold' : ''
                                 }`}
                               >
                                 {['cat', '0', '1', '2', '3'].map((key, ix) => {
@@ -652,14 +771,17 @@ function Cockpit() {
                                         }`}
                                       >
                                         <div className="flex justify-end">
-                                          {row[key].toFixed(2)} CHF
+                                          {getNumber(rowData[key]).toFixed(2)}{' '}
+                                          CHF
                                         </div>
                                       </TableCell>
                                     )
                                   }
                                   return (
                                     <TableCell key={key}>
-                                      <div className="flex">{row[key]}</div>
+                                      <div className="flex">
+                                        {String(rowData[key] ?? '')}
+                                      </div>
                                     </TableCell>
                                   )
                                 })}
@@ -671,7 +793,9 @@ function Cockpit() {
                     </div>
                   </CardContent>
                 </Card>
-                <DecisionsDisplayCompact segmentDecisions={segmentEndResults} />
+                <DecisionsDisplayCompact
+                  segmentDecisions={segmentEndResults as any}
+                />
               </div>
               <Card>
                 <CardHeader>
@@ -832,18 +956,32 @@ function Cockpit() {
     }
 
     case 'RUNNING': {
-      const resultFacts = playerDataResult.playerResult.facts
-      const assets = resultFacts.assets
-      const resultFactsDecisions = resultFacts.decisions
+      const selectedPeriodFacts = getFacts(
+        currentGame.periods[period ?? 0]?.facts
+      )
+      const selectedPeriodScenario = getFacts(selectedPeriodFacts.scenario)
+
+      const resultFacts = getFacts(
+        (playerDataResult.playerResult as any)?.facts
+      )
+      const assets = getFacts(resultFacts.assets)
+      const resultFactsDecisions = getFacts(resultFacts.decisions)
       const previousResults = playerDataResult.previousResults
 
       const segmentEndResults = previousResults
         .filter((o) => o.type == 'SEGMENT_END')
         .map((e) => {
+          const facts = getFacts(e.facts)
           return {
-            period: e.period,
-            segment: e.segment,
-            decisions: e.facts.decisions,
+            period: {
+              ...e.period,
+              id: String(e.period.id),
+            },
+            segment: {
+              ...e.segment,
+              id: String(e.segment.id),
+            },
+            decisions: getFacts(facts.decisions),
           }
         })
         .reverse()
@@ -865,35 +1003,35 @@ function Cockpit() {
       const data_portfolio = [
         {
           category: 'Savings',
-          currentValue: `${assets.bank.toFixed(2)} CHF`,
+          currentValue: `${getNumber(assets.bank).toFixed(2)} CHF`,
           futureValue: `${(
-            assets.totalAssets *
-            resultFactsDecisions.bank *
+            getNumber(assets.totalAssets) *
+            getNumber(resultFactsDecisions.bank) *
             0.01
           ).toFixed(2)} CHF`,
         },
         {
           category: 'Bonds',
-          currentValue: `${assets.bonds.toFixed(2)} CHF`,
+          currentValue: `${getNumber(assets.bonds).toFixed(2)} CHF`,
           futureValue: `${(
-            assets.totalAssets *
-            resultFactsDecisions.bonds *
+            getNumber(assets.totalAssets) *
+            getNumber(resultFactsDecisions.bonds) *
             0.01
           ).toFixed(2)} CHF`,
         },
         {
           category: 'Stocks',
-          currentValue: `${assets.stocks.toFixed(2)} CHF`,
+          currentValue: `${getNumber(assets.stocks).toFixed(2)} CHF`,
           futureValue: `${(
-            assets.totalAssets *
-            resultFactsDecisions.stocks *
+            getNumber(assets.totalAssets) *
+            getNumber(resultFactsDecisions.stocks) *
             0.01
           ).toFixed(2)} CHF`,
         },
         {
           category: 'Total',
-          currentValue: `${assets.totalAssets.toFixed(2)} CHF`,
-          futureValue: `${assets.totalAssets.toFixed(2)} CHF`,
+          currentValue: `${getNumber(assets.totalAssets).toFixed(2)} CHF`,
+          futureValue: `${getNumber(assets.totalAssets).toFixed(2)} CHF`,
         },
       ]
 
@@ -1013,25 +1151,23 @@ function Cockpit() {
                 <div className="mt-8 flex flex-row gap-2">
                   <Formik
                     initialValues={{
-                      savings: resultFactsDecisions.bank,
-                      bonds: resultFactsDecisions.bonds,
-                      stocks: resultFactsDecisions.stocks,
+                      savings: getNumber(resultFactsDecisions.bank),
+                      bonds: getNumber(resultFactsDecisions.bonds),
+                      stocks: getNumber(resultFactsDecisions.stocks),
                     }}
                     validationSchema={schema}
                     onSubmit={async (values) => {
-                      const savings = parseInt(values.savings)
-                      const bonds = parseInt(values.bonds)
-                      const stocks = parseInt(values.stocks)
+                      const savings = Math.trunc(values.savings)
+                      const bonds = Math.trunc(values.bonds)
+                      const stocks = Math.trunc(values.stocks)
 
-                      await performAction({
-                        variables: {
-                          type: '',
-                          payload: JSON.stringify({
-                            bank: savings,
-                            bonds,
-                            stocks,
-                          }),
-                        },
+                      await performAction.mutateAsync({
+                        type: 'decision',
+                        payload: JSON.stringify({
+                          bank: savings,
+                          bonds,
+                          stocks,
+                        }),
                       })
                     }}
                   >
@@ -1080,13 +1216,15 @@ function Cockpit() {
               </CardContent>
               <CardFooter className="text-slate-500">
                 The assets put in savings yield a continuous return of{' '}
-                {currentGame.periods[period]?.facts.scenario.interestBank * 100}
-                % per month. The return of bonds and stocks is determined by the
+                {getNumber(selectedPeriodScenario.interestBank) * 100}% per
+                month. The return of bonds and stocks is determined by the
                 market expectation and simulated by two dice.
               </CardFooter>
             </Card>
 
-            <DecisionsDisplayCompact segmentDecisions={segmentEndResults} />
+            <DecisionsDisplayCompact
+              segmentDecisions={segmentEndResults as any}
+            />
 
             <Card>
               <CardHeader>
@@ -1098,12 +1236,8 @@ function Cockpit() {
               </CardHeader>
               <CardContent>
                 <ProbabilityChart
-                  trendE={
-                    currentGame.periods[period]?.facts.scenario.trendBonds
-                  }
-                  trendGap={
-                    currentGame.periods[period]?.facts.scenario.gapBonds
-                  }
+                  trendE={getNumber(selectedPeriodScenario.trendBonds)}
+                  trendGap={getNumber(selectedPeriodScenario.gapBonds)}
                 />
               </CardContent>
             </Card>
@@ -1118,12 +1252,8 @@ function Cockpit() {
               </CardHeader>
               <CardContent>
                 <ProbabilityChart
-                  trendE={
-                    currentGame.periods[period]?.facts.scenario.trendStocks
-                  }
-                  trendGap={
-                    currentGame.periods[period]?.facts.scenario.gapStocks
-                  }
+                  trendE={getNumber(selectedPeriodScenario.trendStocks)}
+                  trendGap={getNumber(selectedPeriodScenario.gapStocks)}
                 />
               </CardContent>
             </Card>
