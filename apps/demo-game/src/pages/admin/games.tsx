@@ -4,9 +4,6 @@ import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { trpc } from '~/lib/trpc'
-import { type RouterOutputs } from '~/server/trpc/router'
-
-type GameListItem = RouterOutputs['game']['list'][number]
 
 function Games() {
   const router = useRouter()
@@ -83,38 +80,30 @@ function Games() {
         )}
       </Formik>
       <div className="mt-4 flex flex-col gap-1">
-        {(gamesQuery.data as GameListItem[]).map((gameView) => {
-          const game = gameView as GameListItem
-
-          return (
-            <Link
-              className="w-96"
-              href={`/admin/games/${game?.id}`}
-              key={game?.id}
+        {gamesQuery.data.map((game) => (
+          <Link className="w-96" href={`/admin/games/${game.id}`} key={game.id}>
+            <Button
+              className={{
+                root: 'flex w-full flex-col items-start justify-around',
+              }}
             >
-              <Button
-                className={{
-                  root: 'flex w-full flex-col items-start justify-around',
-                }}
-              >
-                <div className="flex w-full justify-between p-2">
-                  <div>{game?.name}</div>
-                  <div className="flex w-10">Id: {game?.id}</div>
-                </div>
-                <div className="flex w-full items-end justify-between p-2 text-sm">
-                  <div className="flex flex-col justify-between gap-y-1 text-left">
-                    <div>Player count: {game?.playersCount}</div>
-                    <div>
-                      Active Period/Segment: {game?.activePeriodIx}/
-                      {game?.activeSegmentIx}
-                    </div>
+              <div className="flex w-full justify-between p-2">
+                <div>{game.name}</div>
+                <div className="flex w-10">Id: {game.id}</div>
+              </div>
+              <div className="flex w-full items-end justify-between p-2 text-sm">
+                <div className="flex flex-col justify-between gap-y-1 text-left">
+                  <div>Player count: {game.playersCount}</div>
+                  <div>
+                    Active Period/Segment: {game.activePeriodIx}/
+                    {game.activeSegmentIx}
                   </div>
-                  <div className="text-right">Status: {game?.status}</div>
                 </div>
-              </Button>
-            </Link>
-          )
-        })}
+                <div className="text-right">Status: {game.status}</div>
+              </div>
+            </Button>
+          </Link>
+        ))}
       </div>
     </div>
   )

@@ -18,7 +18,7 @@ import {
 import { Form, Formik } from 'formik'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 import PlayerCompact from '~/components/PlayerCompact'
@@ -77,9 +77,16 @@ type SegmentFacts = {
   }>
 }
 
+function scrollToActivePeriod() {
+  const anchor = document.querySelector('#active-period')
+  if (anchor) {
+    anchor.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+}
+
 function ManageGame() {
   const router = useRouter()
-  const trpcUtils = trpc.useUtils()
+  const utils = trpc.useUtils()
 
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
@@ -113,17 +120,10 @@ function ManageGame() {
 
   const { toast } = useToast()
 
-  const invalidateGameById = useCallback(async () => {
+  async function invalidateGameById() {
     if (!hasGameId) return
-    await trpcUtils.game.byId.invalidate({ id: gameId })
-  }, [gameId, hasGameId, trpcUtils])
-
-  const scrollToActivePeriod = useCallback(() => {
-    const anchor = document.querySelector('#active-period')
-    if (anchor) {
-      anchor.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
-  }, [])
+    await utils.game.byId.invalidate({ id: gameId })
+  }
 
   const nextPeriod = trpc.game.activateNextPeriod.useMutation({
     async onSuccess() {
@@ -184,21 +184,21 @@ function ManageGame() {
         console.error('Error playing notification sound:', err)
       })
     }
-  }, [game?.players, toast])
+  }, [game?.players, game?.status, toast])
 
-  const nextPeriodFn = async () => {
+  async function activateNextPeriod() {
     if (!hasGameId) return
     await nextPeriod.mutateAsync({ gameId })
   }
 
-  const nextSegmentFn = async () => {
+  async function activateNextSegment() {
     if (!hasGameId) return
     await nextSegment.mutateAsync({ gameId })
   }
 
-  const getButton = useCallback(() => {
+  function renderActionButton() {
     if (!game) return null
-    const activePeriod = game?.activePeriod
+    const activePeriod = game.activePeriod
     const segments = activePeriod?.segments ?? []
     const activeSegmentIx = activePeriod?.activeSegmentIx ?? -1
 
@@ -207,15 +207,17 @@ function ManageGame() {
         const atLastSegment = activeSegmentIx >= segments.length - 1
         if (!atLastSegment) {
           return (
-            <Button disabled={nextSegment.isPending} onClick={nextSegmentFn}>
+            <Button
+              disabled={nextSegment.isPending}
+              onClick={activateNextSegment}
+            >
               Next Segment
             </Button>
           )
         }
-        const disabled =
-          game.periods.length === 0 || activePeriod.segments.length === 0
+        const disabled = game.periods.length === 0 || segments.length === 0
         return (
-          <Button disabled={disabled} onClick={nextPeriodFn}>
+          <Button disabled={disabled} onClick={activateNextPeriod}>
             Start Period
           </Button>
         )
@@ -225,19 +227,24 @@ function ManageGame() {
           const disabled =
             game.periods.length === 0 || game.periods[0].segments.length === 0
           return (
-            <Button disabled={disabled} onClick={nextPeriodFn}>
+            <Button disabled={disabled} onClick={activateNextPeriod}>
               Start Period
             </Button>
           )
         }
-        return <Button onClick={nextPeriodFn}>Start Segment</Button>
+        return <Button onClick={activateNextPeriod}>Start Segment</Button>
       case GameStatus.RUNNING: {
+        if (!activePeriod) return null
+
         const atLastSegment =
           activeSegmentIx >= segments.length - 1 &&
           activePeriod.segmentCount === segments.length
         if (atLastSegment) {
           return (
-            <Button disabled={nextPeriod.isPending} onClick={nextPeriodFn}>
+            <Button
+              disabled={nextPeriod.isPending}
+              onClick={activateNextPeriod}
+            >
               Consolidate
             </Button>
           )
@@ -248,7 +255,7 @@ function ManageGame() {
         return (
           <Button
             disabled={nextSegment.isPending || disabled}
-            onClick={nextSegmentFn}
+            onClick={activateNextSegment}
           >
             Segment Results
           </Button>
@@ -259,7 +266,7 @@ function ManageGame() {
         return (
           <Button
             disabled={nextSegment.isPending || atLastSegment}
-            onClick={nextSegmentFn}
+            onClick={activateNextSegment}
           >
             Next Segment
           </Button>
@@ -273,14 +280,14 @@ function ManageGame() {
       //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
       case GameStatus.CONSOLIDATION:
         return (
-          <Button disabled={nextPeriod.isPending} onClick={nextPeriodFn}>
+          <Button disabled={nextPeriod.isPending} onClick={activateNextPeriod}>
             Period Results
           </Button>
         )
       case GameStatus.RESULTS: {
         const anotherPeriod = game.activePeriodIx > game.periods.length - 1
         return (
-          <Button disabled={anotherPeriod} onClick={nextPeriodFn}>
+          <Button disabled={anotherPeriod} onClick={activateNextPeriod}>
             Next Period
           </Button>
         )
@@ -295,13 +302,7 @@ function ManageGame() {
       default:
         return null
     }
-  }, [
-    game,
-    nextPeriod.isPending,
-    nextSegment.isPending,
-    nextPeriodFn,
-    nextSegmentFn,
-  ])
+  }
 
   if (gameLoading || !game) {
     return <div>loading...</div>
@@ -311,15 +312,17 @@ function ManageGame() {
     return <div>{gameError.message}</div>
   }
 
-  const learningElementsAll = (learningElementsData ?? []).map((e) => ({
+  const learningElementsAll = learningElementsData.map((e) => ({
     label: e.id,
     value: e.id,
   }))
 
-  const storyElementsAll = (storyElementsData ?? []).map((e) => ({
+  const storyElementsAll = storyElementsData.map((e) => ({
     label: e.id,
     value: e.id,
   }))
+  const countdownExpiresAt =
+    game.activePeriod?.activeSegment?.countdownExpiresAt
 
   return (
     <div className="p-4">
@@ -426,116 +429,112 @@ function ManageGame() {
                     </div>
                   </div>
                   <div className="mt-1 flex flex-row gap-1">
-                    {Array.apply(null, Array(period.segmentCount)).map(
-                      (_, ix) => {
-                        const segment = period.segments[ix]
-                        const segmentStatus = computeSegmentStatus(
-                          game as any,
-                          period as any,
-                          ix
-                        )
+                    {Array.from({ length: period.segmentCount }, (_, ix) => {
+                      const segment = period.segments[ix]
+                      const segmentStatus = computeSegmentStatus(
+                        game as any,
+                        period as any,
+                        ix
+                      )
 
-                        const isSegmentActive =
-                          periodStatus === STATUS.ACTIVE &&
-                          segmentStatus === STATUS.ACTIVE
-                        const isSegmentCompleted =
-                          periodStatus === STATUS.COMPLETED ||
-                          segmentStatus === STATUS.COMPLETED
+                      const isSegmentActive =
+                        periodStatus === STATUS.ACTIVE &&
+                        segmentStatus === STATUS.ACTIVE
+                      const isSegmentCompleted =
+                        periodStatus === STATUS.COMPLETED ||
+                        segmentStatus === STATUS.COMPLETED
 
-                        const segmentFacts = segment?.facts as
-                          | SegmentFacts
-                          | undefined
-                        const diceBonds = segmentFacts?.diceRolls?.map(
-                          (dice) => dice.bonds
-                        )
-                        const diceStocks = segmentFacts?.diceRolls?.map(
-                          (dice) => dice.stocks
-                        )
-                        const diceShared = segmentFacts?.diceRolls?.map(
-                          (dice) => dice.shared
-                        )
+                      const segmentFacts = segment?.facts as
+                        | SegmentFacts
+                        | undefined
+                      const diceBonds = segmentFacts?.diceRolls?.map(
+                        (dice) => dice.bonds
+                      )
+                      const diceStocks = segmentFacts?.diceRolls?.map(
+                        (dice) => dice.stocks
+                      )
+                      const diceShared = segmentFacts?.diceRolls?.map(
+                        (dice) => dice.shared
+                      )
 
-                        const dataToEncode = {
-                          diceBonds,
-                          diceShared,
-                          diceStocks,
-                          trendBonds,
-                          gapBonds,
-                          trendStocks,
-                          gapStocks,
-                        }
-                        const encoded = btoa(JSON.stringify(dataToEncode))
-
-                        return (
-                          <div
-                            className={twMerge(
-                              'flex-initial rounded border p-2 text-center',
-                              (!segment || isSegmentCompleted) &&
-                                'bg-gray-100 text-gray-400',
-                              isSegmentActive && 'border-green-600 bg-green-100'
-                            )}
-                            key={ix}
-                          >
-                            <div className="flex flex-row items-center gap-2">
-                              <div>
-                                {!isSegmentActive && !isSegmentCompleted && (
-                                  <FontAwesomeIcon icon={faCalendar} />
-                                )}
-                                {isSegmentActive && (
-                                  <FontAwesomeIcon icon={faSync} />
-                                )}
-                                {isSegmentCompleted && (
-                                  <FontAwesomeIcon icon={faCheck} />
-                                )}
-                              </div>
-                              {
-                                <div>
-                                  Segment{' '}
-                                  {segment?.index !== undefined
-                                    ? segment.index + 1
-                                    : ''}
-                                </div>
-                              }
-                            </div>
-                            <div className="my-2">
-                              <div className="flex flex-row gap-2">
-                                <div className="text-sm">
-                                  Story: {segment?.storyElements.length ?? 0}
-                                </div>
-                                <div className="text-sm">
-                                  Learn: {segment?.learningElements.length ?? 0}
-                                </div>
-                              </div>
-                            </div>
-
-                            {segment && (
-                              <Link
-                                href={`/admin/dice/${segment.id}/${encoded}`}
-                                target="_blank"
-                                className="flex flex-col rounded border border-gray-300 p-2"
-                              >
-                                <div className="flex justify-between text-nowrap">
-                                  Dice Bonds:
-                                  <div className="flex flex-row gap-2">
-                                    {diceBonds?.map((dice, ix) => (
-                                      <div key={ix}>{dice}</div>
-                                    ))}
-                                  </div>
-                                </div>
-                                <div className="flex justify-between gap-2 text-nowrap">
-                                  Dice Stocks:
-                                  <div className="flex flex-row gap-2">
-                                    {diceStocks?.map((dice, ix) => (
-                                      <div key={ix}>{dice}</div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </Link>
-                            )}
-                          </div>
-                        )
+                      const dataToEncode = {
+                        diceBonds,
+                        diceShared,
+                        diceStocks,
+                        trendBonds,
+                        gapBonds,
+                        trendStocks,
+                        gapStocks,
                       }
-                    )}
+                      const encoded = btoa(JSON.stringify(dataToEncode))
+
+                      return (
+                        <div
+                          className={twMerge(
+                            'flex-initial rounded border p-2 text-center',
+                            (!segment || isSegmentCompleted) &&
+                              'bg-gray-100 text-gray-400',
+                            isSegmentActive && 'border-green-600 bg-green-100'
+                          )}
+                          key={ix}
+                        >
+                          <div className="flex flex-row items-center gap-2">
+                            <div>
+                              {!isSegmentActive && !isSegmentCompleted && (
+                                <FontAwesomeIcon icon={faCalendar} />
+                              )}
+                              {isSegmentActive && (
+                                <FontAwesomeIcon icon={faSync} />
+                              )}
+                              {isSegmentCompleted && (
+                                <FontAwesomeIcon icon={faCheck} />
+                              )}
+                            </div>
+                            <div>
+                              Segment{' '}
+                              {segment?.index !== undefined
+                                ? segment.index + 1
+                                : ''}
+                            </div>
+                          </div>
+                          <div className="my-2">
+                            <div className="flex flex-row gap-2">
+                              <div className="text-sm">
+                                Story: {segment?.storyElements.length ?? 0}
+                              </div>
+                              <div className="text-sm">
+                                Learn: {segment?.learningElements.length ?? 0}
+                              </div>
+                            </div>
+                          </div>
+
+                          {segment && (
+                            <Link
+                              href={`/admin/dice/${segment.id}/${encoded}`}
+                              target="_blank"
+                              className="flex flex-col rounded border border-gray-300 p-2"
+                            >
+                              <div className="flex justify-between text-nowrap">
+                                Dice Bonds:
+                                <div className="flex flex-row gap-2">
+                                  {diceBonds?.map((dice, ix) => (
+                                    <div key={ix}>{dice}</div>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="flex justify-between gap-2 text-nowrap">
+                                Dice Stocks:
+                                <div className="flex flex-row gap-2">
+                                  {diceStocks?.map((dice, ix) => (
+                                    <div key={ix}>{dice}</div>
+                                  ))}
+                                </div>
+                              </div>
+                            </Link>
+                          )}
+                        </div>
+                      )
+                    })}
                     {!isPeriodCompleted && game.periods.length - 1 === ix && (
                       <Formik
                         initialValues={{
@@ -564,7 +563,7 @@ function ManageGame() {
                           if (learningElementsError) {
                             return (
                               <div>
-                                Error loading story elements:{' '}
+                                Error loading learning elements:{' '}
                                 {learningElementsError.message}
                               </div>
                             )
@@ -840,7 +839,7 @@ function ManageGame() {
         </div>
       </div>
       <div className="mt-2 flex flex-row gap-2">
-        {getButton()}
+        {renderActionButton()}
         <Link target="_blank" href={`/admin/reports/${game?.id}`}>
           <Button>Report</Button>
         </Link>
@@ -885,10 +884,7 @@ function ManageGame() {
                 {/* TODO(JJ): @RS Do we want to show the following? If no we
                   we can remove the refetchQueries.
                 */}
-                {game?.activePeriod?.activeSegment
-                  ?.countdownExpiresAt instanceof Date
-                  ? game?.activePeriod?.activeSegment?.countdownExpiresAt?.toLocaleString()
-                  : game?.activePeriod?.activeSegment?.countdownExpiresAt}
+                {countdownExpiresAt?.toLocaleString()}
               </CardContent>
               <CardFooter>
                 <Button type="submit">Set Countdown</Button>
