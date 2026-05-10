@@ -73,8 +73,12 @@ const LABEL_MAP = {
   accStocksBenchmarkReturn: 'Stocks Return',
 }
 
-type CockpitResult = RouterOutputs['play']['result']
+type CockpitResult = NonNullable<RouterOutputs['play']['result']>
 type FactMap = Record<string, unknown>
+type SegmentResultColumn = {
+  label: string
+  accessor: string
+}
 
 function GameHeader({ currentGame }) {
   return (
@@ -217,15 +221,10 @@ function GameLayout({ children }: { children: ReactNode }) {
       : {
           ...playerResult,
           player: {
-            ...((playerResult as any).player ?? {}),
+            id: selfData.id,
             completedLearningElementIds:
-              selfData.completedLearningElementIds ??
-              (playerResult as any)?.player?.completedLearningElementIds ??
-              [],
-            visitedStoryElementIds:
-              selfData.visitedStoryElementIds ??
-              (playerResult as any)?.player?.visitedStoryElementIds ??
-              [],
+              selfData.completedLearningElementIds ?? [],
+            visitedStoryElementIds: selfData.visitedStoryElementIds ?? [],
           },
         }
 
@@ -246,14 +245,9 @@ function GameLayout({ children }: { children: ReactNode }) {
       // router.replace('/play/welcome')
     },
   }
-  const playerState = {
-    data: {
-      ...resultData,
-      playerResult: playerResultWithProgress,
-    },
-  }
-  const player = {
-    role: selfData.role,
+  const playerResultData = {
+    ...resultData,
+    playerResult: playerResultWithProgress,
   }
 
   const sidebar = (
@@ -326,7 +320,7 @@ function GameLayout({ children }: { children: ReactNode }) {
               />
             )}
           </div>
-          <LearningElements />
+          <LearningElements playerResult={playerResultData} />
         </CardContent>
       </Card>
     </div>
@@ -334,7 +328,10 @@ function GameLayout({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <StoryElements playerState={playerState} player={player} />
+      <StoryElements
+        playerResult={playerResultData}
+        playerRole={selfData.role}
+      />
       <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
         {children}
       </Layout>
@@ -369,6 +366,7 @@ const months = [
   'Dec',
 ]
 const numMonths = months.length
+const PLAYER_DECISION_ACTION_TYPE = ''
 
 function Cockpit() {
   const [period, setPeriod] = useState<number | null>(null)
@@ -395,7 +393,7 @@ function Cockpit() {
   if (isLoading) return null
   if (error) return `Error! ${error}`
 
-  const playerDataResult = data as CockpitResult
+  const playerDataResult = data
   if (!playerDataResult) return null
   const currentGame = playerDataResult.currentGame
   const activePeriodFacts = getFacts(currentGame.activePeriod?.facts)
@@ -585,10 +583,9 @@ function Cockpit() {
         })
         .reverse()
 
-      const assetsWithReturns = previousSegmentResults.map((e) =>
-        getFacts((e.facts as FactMap).assetsWithReturns)
+      const assetsWithReturnsFlat = previousSegmentResults.flatMap((e) =>
+        getFactsArray(getFacts(e.facts).assetsWithReturns)
       )
-      const assetsWithReturnsFlat = assetsWithReturns.flat()
 
       // The current data stores some values twice: once as a last value from
       // the previous segment and once as a first value from the current
@@ -636,9 +633,6 @@ function Cockpit() {
         accTotalAssetsReturn: { label: labels[3], color: colors[3] },
       }
 
-      const columns_segment_results = [
-        { label: '', accessor: 'cat', sortable: false, transformer: null },
-      ]
       const numMonthsPerSegment = Math.max(
         1,
         Math.floor(getNumber(activePeriodFacts.rollsPerSegment))
@@ -648,20 +642,24 @@ function Cockpit() {
 
       const activeSegmentIx = currentGame.activePeriod.activeSegment.index
       const indexArr = Array.from({ length: numMonthsInTable }, (_, i) => i - 1)
-      indexArr.map((i) => {
-        const index = (i + activeSegmentIx * numMonthsPerSegment) % numMonths
+      const columns_segment_results: SegmentResultColumn[] = [
+        { label: '', accessor: 'cat' },
+        ...indexArr.map((i) => {
+          const index = (i + activeSegmentIx * numMonthsPerSegment) % numMonths
 
-        const strNum = String(i + 1)
-        const p = index === -1 ? periodIx - 1 : periodIx
-        const m = index === -1 ? months[numMonths + index] : months[index]
-        columns_segment_results.push({
-          label: m + ' Period ' + p,
-          accessor: strNum,
-          sortable: false,
-          transformer: ({ row }: { row: any }) =>
-            typeof row[strNum] === 'number' && `CHF ${row[strNum].toFixed(2)}`,
-        })
-      })
+          const strNum = String(i + 1)
+          const p = index === -1 ? periodIx - 1 : periodIx
+          const m = index === -1 ? months[numMonths + index] : months[index]
+
+          return {
+            label: m + ' Period ' + p,
+            accessor: strNum,
+          }
+        }),
+      ]
+      const segmentResultAccessors = columns_segment_results.map(
+        (column) => column.accessor
+      )
 
       type SegmentSeries = Record<string, number>
 
@@ -681,9 +679,7 @@ function Cockpit() {
         }
       }
 
-      const resultFacts = getFacts(
-        (playerDataResult.playerResult as any)?.facts
-      )
+      const resultFacts = getFacts(playerDataResult.playerResult?.facts)
       const assetsWithReturnsArr = getFactsArray(resultFacts.assetsWithReturns)
       const data_segment_results = [
         {
@@ -761,7 +757,7 @@ function Cockpit() {
                                   rowData.cat === 'Total' ? 'font-bold' : ''
                                 }`}
                               >
-                                {['cat', '0', '1', '2', '3'].map((key, ix) => {
+                                {segmentResultAccessors.map((key, ix) => {
                                   if (ix > 0) {
                                     return (
                                       <TableCell
@@ -961,9 +957,7 @@ function Cockpit() {
       )
       const selectedPeriodScenario = getFacts(selectedPeriodFacts.scenario)
 
-      const resultFacts = getFacts(
-        (playerDataResult.playerResult as any)?.facts
-      )
+      const resultFacts = getFacts(playerDataResult.playerResult?.facts)
       const assets = getFacts(resultFacts.assets)
       const resultFactsDecisions = getFacts(resultFacts.decisions)
       const previousResults = playerDataResult.previousResults
@@ -1162,7 +1156,7 @@ function Cockpit() {
                       const stocks = Math.trunc(values.stocks)
 
                       await performAction.mutateAsync({
-                        type: 'decision',
+                        type: PLAYER_DECISION_ACTION_TYPE,
                         payload: JSON.stringify({
                           bank: savings,
                           bonds,

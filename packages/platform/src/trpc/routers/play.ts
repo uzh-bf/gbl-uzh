@@ -1,13 +1,13 @@
-import { z } from 'zod'
-import { createTRPCRouter, playerProcedure } from '../init.js'
+import * as DB from '@prisma/client'
 import { TRPCError } from '@trpc/server'
-import { throwAsTRPCError } from '../errors.js'
-import * as PlayService from '../../services/PlayService.js'
-import * as GameService from '../../services/GameService.js'
+import { z } from 'zod'
 import * as EventService from '../../services/EventService.js'
+import * as GameService from '../../services/GameService.js'
+import * as PlayService from '../../services/PlayService.js'
 import { toPlayerSelfDto } from '../dto/player.js'
 import { toPlayerResultDto } from '../dto/results.js'
-import * as DB from '@prisma/client'
+import { throwAsTRPCError } from '../errors.js'
+import { createTRPCRouter, playerProcedure } from '../init.js'
 
 type RouterDeps = {
   schemas?: {
@@ -157,7 +157,7 @@ export function createPlayRouter({ schemas = {} }: RouterDeps = {}) {
     performAction: playerProcedure
       .input(
         z.object({
-          type: z.string().trim().min(1),
+          type: z.string(),
           payload: z.string(),
         })
       )

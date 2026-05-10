@@ -1,62 +1,83 @@
-import { useMutation } from '@apollo/client'
 import { Button, Modal, Progress } from '@uzh-bf/design-system'
 import Image from 'next/image'
 import { sortBy } from 'ramda'
 import { useEffect, useMemo, useState } from 'react'
 import Markdown from 'react-markdown'
-import {
-  MarkStoryElementDocument,
-  StoryElementDataFragment,
-  StoryElementType,
-} from 'src/graphql/generated/ops'
+import { trpc } from '~/lib/trpc'
+import type { RouterOutputs } from '~/server/trpc/router'
 
-interface Props {
-  playerState: any
-  player: any
+type PlayerResult = NonNullable<RouterOutputs['play']['result']>
+type PlayerResultWithStoryProgress = PlayerResult & {
+  playerResult?:
+    | (NonNullable<PlayerResult['playerResult']> & {
+        player?: {
+          visitedStoryElementIds?: string[]
+        }
+      })
+    | null
 }
 
+type StoryElement = {
+  id: string
+  type?: string
+  title: string
+  content?: string | null
+  contentRole?: Record<string, string> | null
+}
+
+const EMPTY_VISITED_STORY_ELEMENT_IDS: string[] = []
+
 // TODO(JJ): Check if we should fetch the story elements in the component
-function StoryElements({ playerState, player }: Props) {
+function StoryElements({
+  playerResult,
+  playerRole,
+}: {
+  playerResult?: PlayerResultWithStoryProgress
+  playerRole?: string | null
+}) {
   const [unseenStoryElements, setUnseenStoryElements] = useState<
-    StoryElementDataFragment[]
+    StoryElement[]
   >([])
+  const utils = trpc.useUtils()
+
+  const markStoryElement = trpc.story.markVisited.useMutation({
+    async onSuccess() {
+      await utils.play.result.invalidate()
+      await utils.play.self.invalidate()
+    },
+  })
 
   const activeStoryElements = useMemo(() => {
-    if (
-      !playerState?.data ||
-      !playerState?.data?.result.currentGame.activePeriod.activeSegment
-    )
-      return []
-    return sortBy<StoryElementDataFragment>(
+    const activeSegment = playerResult?.currentGame?.activePeriod?.activeSegment
+    if (!activeSegment) return []
+
+    return sortBy<StoryElement>(
       (elem) => elem.title,
-      playerState?.data?.result.currentGame.activePeriod.activeSegment
-        ?.storyElements ?? []
+      (activeSegment.storyElements ?? []) as StoryElement[]
     )
-  }, [playerState?.data])
+  }, [playerResult?.currentGame?.activePeriod?.activeSegment])
 
   const visitedStoryElements =
-    playerState?.data?.result?.playerResult?.player.visitedStoryElementIds
+    playerResult?.playerResult?.player?.visitedStoryElementIds ??
+    EMPTY_VISITED_STORY_ELEMENT_IDS
 
   useEffect(() => {
-    if (activeStoryElements?.length > 0) {
-      const unseenStoryElements = activeStoryElements.filter(
-        (elem) => !visitedStoryElements?.includes(elem.id)
+    setUnseenStoryElements(
+      activeStoryElements.filter(
+        (elem) => !visitedStoryElements.includes(elem.id)
       )
-      setUnseenStoryElements(unseenStoryElements)
-    }
-  }, [activeStoryElements, playerState, visitedStoryElements])
-
-  const [markStoryElement, { loading }] = useMutation(MarkStoryElementDocument)
+    )
+  }, [activeStoryElements, visitedStoryElements])
 
   const content: string = (() => {
     if (unseenStoryElements.length === 0) return ''
 
     const firstElement = unseenStoryElements[0]
     switch (firstElement?.type) {
-      case StoryElementType.Generic:
+      case 'GENERIC':
         return firstElement.content ?? ''
-      case StoryElementType.RoleBased:
-        return firstElement.contentRole?.[player.role] ?? ''
+      case 'ROLE_BASED':
+        return firstElement.contentRole?.[playerRole ?? ''] ?? ''
       default:
         return ''
     }
@@ -73,19 +94,14 @@ function StoryElements({ playerState, player }: Props) {
       onPrimaryAction={
         <Button
           onClick={() => {
-            markStoryElement({
-              variables: {
-                elementId: unseenStoryElements[0]?.id,
-              },
-              // optimisticResponse: {
-              //   markStoryElement: {
-              //     id: unseenStoryElements[0]?.id,
-              //     visitedStoryElementIds: [unseenStoryElements[0]?.id],
-              //     __typename: 'Player',
-              //   },
-              // },
+            const elementId = unseenStoryElements[0]?.id
+            if (!elementId) return
+
+            markStoryElement.mutate({
+              elementId,
             })
           }}
+          disabled={markStoryElement.isPending}
         >
           Continue
         </Button>

@@ -29,6 +29,19 @@ export interface PlayerTransactionDto {
   facts?: unknown
 }
 
+interface LearningElementRefDto {
+  id: string
+  title: string
+}
+
+interface StoryElementDto {
+  id: string
+  title: string
+  type?: DB.StoryElementType
+  content?: string | null
+  contentRole?: unknown
+}
+
 export interface PlayerResultDto {
   currentGame: {
     id: number
@@ -42,8 +55,8 @@ export interface PlayerResultDto {
         facts?: unknown
         countdownExpiresAt?: Date | null
         countdownDurationMs?: number | null
-        learningElements?: { id: string; title: string }[]
-        storyElements?: { id: string; title: string }[]
+        learningElements?: LearningElementRefDto[]
+        storyElements?: StoryElementDto[]
       } | null
     }
   }
@@ -100,6 +113,7 @@ interface ResultPeriodSummaryDto {
   activeSegmentIx: number | null
   facts: unknown
   segmentCount?: number | null
+  segments: ActiveSegmentSummaryDto[]
 }
 
 interface ActiveSegmentSummaryDto {
@@ -108,8 +122,61 @@ interface ActiveSegmentSummaryDto {
   facts: unknown
   countdownExpiresAt?: Date | null
   countdownDurationMs?: number | null
-  learningElements?: { id: string; title: string }[]
-  storyElements?: { id: string; title: string }[]
+  learningElements?: LearningElementRefDto[]
+  storyElements?: StoryElementDto[]
+}
+
+function toLearningElementRefDto(
+  element: unknown
+): LearningElementRefDto | null {
+  if (!element || typeof element !== 'object') return null
+
+  const id = (element as { id?: unknown }).id
+  const title = (element as { title?: unknown }).title
+
+  if (
+    (typeof id !== 'string' && typeof id !== 'number') ||
+    typeof title !== 'string'
+  ) {
+    return null
+  }
+
+  return { id: String(id), title }
+}
+
+function toStoryElementDto(
+  element: unknown,
+  includeContent = false
+): StoryElementDto | null {
+  if (!element || typeof element !== 'object') return null
+
+  const id = (element as { id?: unknown }).id
+  const title = (element as { title?: unknown }).title
+
+  if (
+    (typeof id !== 'string' && typeof id !== 'number') ||
+    typeof title !== 'string'
+  ) {
+    return null
+  }
+
+  const storyElement: StoryElementDto = {
+    id: String(id),
+    title,
+    type: (element as { type?: DB.StoryElementType }).type,
+  }
+
+  if (includeContent) {
+    storyElement.content =
+      typeof (element as { content?: unknown }).content === 'string'
+        ? (element as { content: string }).content
+        : null
+    storyElement.contentRole = (
+      element as { contentRole?: unknown }
+    ).contentRole
+  }
+
+  return storyElement
 }
 
 function toResultPeriodSummaryDto(
@@ -130,6 +197,13 @@ function toResultPeriodSummaryDto(
     activeSegmentIx: period.activeSegmentIx ?? null,
     facts: period.facts,
     segmentCount: period.segmentCount ?? null,
+    segments: Array.isArray(period.segments)
+      ? period.segments
+          .map((segment: any) => toResultSegmentSummaryDto(segment))
+          .filter(
+            (segment): segment is ActiveSegmentSummaryDto => segment !== null
+          )
+      : [],
   }
 }
 
@@ -142,7 +216,8 @@ function toResultSegmentSummaryDto(
     countdownDurationMs?: number | null
     learningElements?: unknown
     storyElements?: unknown
-  } | null
+  } | null,
+  { includeStoryContent = false } = {}
 ): ActiveSegmentSummaryDto | null {
   if (!segment?.id || typeof segment.id !== 'number') return null
 
@@ -157,39 +232,27 @@ function toResultSegmentSummaryDto(
       typeof segment.countdownDurationMs === 'number'
         ? segment.countdownDurationMs
         : undefined,
-    learningElements:
-      Array.isArray(segment.learningElements)
-        ? segment.learningElements
-            .map((item: any) => {
-              if (!item?.id || typeof item.title !== 'string') return null
-
-              return { id: String(item.id), title: item.title }
-            })
-            .filter((item): item is { id: string; title: string } => item !== null)
-        : undefined,
-    storyElements:
-      Array.isArray(segment.storyElements)
-        ? segment.storyElements
-            .map((item: any) => {
-              if (!item?.id || typeof item.title !== 'string') return null
-
-              return { id: String(item.id), title: item.title }
-            })
-            .filter((item): item is { id: string; title: string } => item !== null)
-        : undefined,
+    learningElements: Array.isArray(segment.learningElements)
+      ? segment.learningElements
+          .map((item) => toLearningElementRefDto(item))
+          .filter((item): item is LearningElementRefDto => item !== null)
+      : undefined,
+    storyElements: Array.isArray(segment.storyElements)
+      ? segment.storyElements
+          .map((item) => toStoryElementDto(item, includeStoryContent))
+          .filter((item): item is StoryElementDto => item !== null)
+      : undefined,
   }
 }
 
 export function toPlayerResultCoreDto(
-  source:
-    | {
-        id?: number
-        type?: DB.PlayerResultType
-        facts?: unknown
-        period?: { id?: number; index?: number; facts?: unknown }
-        segment?: { id?: number; index?: number; facts?: unknown } | null
-      }
-    | null
+  source: {
+    id?: number
+    type?: DB.PlayerResultType
+    facts?: unknown
+    period?: { id?: number; index?: number; facts?: unknown }
+    segment?: { id?: number; index?: number; facts?: unknown } | null
+  } | null
 ): PlayerResultCoreDto | null {
   if (!source?.id || !source?.type) return null
 
@@ -216,23 +279,20 @@ export function toPlayerResultCoreDto(
 }
 
 export function toPlayerTransactionDto(
-  action:
-    | {
-        id?: number
-        periodIx?: number
-        segmentIx?: number | null
-        type?: string
-        facts?: unknown
-      }
-    | null
+  action: {
+    id?: number
+    periodIx?: number
+    segmentIx?: number | null
+    type?: string
+    facts?: unknown
+  } | null
 ): PlayerTransactionDto | null {
   if (!action?.id || typeof action.id !== 'number') return null
 
   return {
     id: action.id,
     periodIx: action.periodIx ?? 0,
-    segmentIx:
-      action.segmentIx == null ? null : Number(action.segmentIx),
+    segmentIx: action.segmentIx == null ? null : Number(action.segmentIx),
     type: action.type ?? '',
     facts: action.facts,
   }
@@ -292,14 +352,15 @@ export function toPlayerResultDto(
         ? {
             ...activePeriod,
             activeSegment: toResultSegmentSummaryDto(
-              (rawCurrentGame.activePeriod as any)?.activeSegment as any
+              (rawCurrentGame.activePeriod as any)?.activeSegment as any,
+              { includeStoryContent: true }
             ),
           }
         : undefined,
     },
-    playerResult: toPlayerResultCoreDto(source.playerResult) as
-      | PlayerResultCoreDto
-      | null,
+    playerResult: toPlayerResultCoreDto(
+      source.playerResult
+    ) as PlayerResultCoreDto | null,
     previousResults: Array.isArray(source.previousResults)
       ? source.previousResults
           .map((result: any) => toPlayerResultCoreDto(result))
@@ -314,16 +375,14 @@ export function toPlayerResultDto(
 }
 
 export function toSpecificResultDto(
-  source:
-    | {
-        id?: number
-        type?: DB.PlayerResultType
-        facts?: unknown
-        period?: { id?: number; index?: number }
-        segment?: { id?: number; index?: number } | null
-        player?: { id?: string; name?: string }
-      }
-    | null
+  source: {
+    id?: number
+    type?: DB.PlayerResultType
+    facts?: unknown
+    period?: { id?: number; index?: number }
+    segment?: { id?: number; index?: number } | null
+    player?: { id?: string; name?: string }
+  } | null
 ): SpecificResultDto | null {
   if (
     !source?.id ||
@@ -357,28 +416,31 @@ export function toSpecificResultDto(
 }
 
 export function toPastResultDto(
-  source:
-    | {
-        id?: number
-        type?: DB.PlayerResultType
-        facts?: unknown
-        period?: { id?: number; index?: number; facts?: unknown }
-        segment?: { id?: number; index?: number; facts?: unknown } | null
-        player?: {
-          id?: string
-          name?: string
-          role?: string | null
-          facts?: unknown
-          experience?: number
-          experienceToNext?: number
-          level?: { id?: number; index?: number }
-          completedLearningElementIds?: string[]
-          visitedStoryElementIds?: string[]
-        }
-      }
-    | null
+  source: {
+    id?: number
+    type?: DB.PlayerResultType
+    facts?: unknown
+    period?: { id?: number; index?: number; facts?: unknown }
+    segment?: { id?: number; index?: number; facts?: unknown } | null
+    player?: {
+      id?: string
+      name?: string
+      role?: string | null
+      facts?: unknown
+      experience?: number
+      experienceToNext?: number
+      level?: { id?: number; index?: number }
+      completedLearningElementIds?: string[]
+      visitedStoryElementIds?: string[]
+    }
+  } | null
 ): PastResultDto | null {
-  if (!source?.id || !source?.type || !source?.player?.id || !source?.period?.id)
+  if (
+    !source?.id ||
+    !source?.type ||
+    !source?.player?.id ||
+    !source?.period?.id
+  )
     return null
 
   return {

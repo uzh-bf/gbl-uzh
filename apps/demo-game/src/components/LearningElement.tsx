@@ -1,4 +1,3 @@
-import { useMutation, useQuery } from '@apollo/client'
 import { faGem } from '@fortawesome/free-regular-svg-icons'
 import {
   faBookOpenReader,
@@ -10,66 +9,96 @@ import { Button } from '@uzh-bf/design-system'
 import { without } from 'ramda'
 import { useEffect, useState } from 'react'
 import Markdown from 'react-markdown'
-import {
-  AttemptLearningElementDocument,
-  LearningElementDocument,
-} from 'src/graphql/generated/ops'
 import { twMerge } from 'tailwind-merge'
+import { trpc } from '~/lib/trpc'
 import { useToast } from './ui/use-toast'
 
-function LearningElement({ elementId }: { elementId: string }) {
-  const [activeElements, setActiveElements] = useState([])
+function parseSolution(solution: string | null): number[] {
+  if (!solution) return []
 
-  const [elementState, setElementState] = useState(null)
+  try {
+    const parsed = JSON.parse(solution)
+    return Array.isArray(parsed)
+      ? parsed.filter((value): value is number => typeof value === 'number')
+      : []
+  } catch {
+    return []
+  }
+}
+
+function LearningElement({ elementId }: { elementId: string | null }) {
+  const utils = trpc.useUtils()
+  const [activeElements, setActiveElements] = useState<number[]>([])
+  const [elementState, setElementState] = useState<LearningElementState | null>(
+    null
+  )
 
   useEffect(() => {
     setActiveElements([])
+    setElementState(null)
   }, [elementId])
 
   const { toast } = useToast()
 
-  const learningElement = useQuery(LearningElementDocument, {
-    variables: {
-      id: elementId,
-    },
-    onCompleted({ learningElement }) {
-      setElementState(learningElement.state as any)
-      try {
-        if (learningElement.solution) {
-          setActiveElements(JSON.parse(learningElement.solution))
-        }
-      } catch (e) {}
+  const learningElement = trpc.learning.byId.useQuery(
+    { id: elementId ?? '' },
+    { enabled: Boolean(elementId) }
+  )
+
+  useEffect(() => {
+    const data = learningElement.data
+    if (!data) return
+
+    setElementState((currentState) => {
+      if (
+        currentState === LearningElementState.ATTEMPTED &&
+        data.state === LearningElementState.NEW
+      ) {
+        return currentState
+      }
+
+      return data.state
+    })
+
+    const solvedSelection = parseSolution(data.solution)
+    if (solvedSelection.length > 0) {
+      setActiveElements(solvedSelection)
+    }
+  }, [learningElement.data])
+
+  const attemptLearningElement = trpc.learning.attempt.useMutation({
+    async onSuccess(result) {
+      if (elementId) {
+        await utils.learning.byId.invalidate({ id: elementId })
+      }
+      await utils.play.result.invalidate()
+      await utils.play.self.invalidate()
+
+      if (!result) return
+
+      if (result.pointsAchieved === result.pointsMax) {
+        setElementState(LearningElementState.SOLVED)
+      } else {
+        setElementState(LearningElementState.ATTEMPTED)
+        toast({
+          title: 'Wrong answer',
+          description: 'Try again!',
+        })
+      }
     },
   })
 
-  // TODO(JJ): Experience points are not updated...
-  const [attemptLearningElement, { loading }] = useMutation(
-    AttemptLearningElementDocument,
-    {
-      variables: {
-        elementId: elementId,
-        selection: JSON.stringify(activeElements),
-      },
-      onCompleted({ attemptLearningElement: result }) {
-        if (result.pointsAchieved === result.pointsMax) {
-          setElementState(LearningElementState.SOLVED)
-        } else {
-          setElementState(LearningElementState.ATTEMPTED)
-          toast({
-            title: 'Wrong answer',
-            description: 'Try again!',
-          })
-        }
-      },
-      refetchQueries: 'all',
-    }
-  )
+  if (!elementId) return null
 
-  if (loading) return <div>Loading...</div>
+  if (learningElement.isLoading || attemptLearningElement.isPending) {
+    return <div>Loading...</div>
+  }
 
   if (!learningElement.data || elementState == null) {
     return null
   }
+
+  const element = learningElement.data.element
 
   return (
     <div className="m-auto flex w-full max-w-5xl flex-col rounded border">
@@ -85,11 +114,9 @@ function LearningElement({ elementId }: { elementId: string }) {
       </div>
       <div className="flex flex-row items-start gap-4 border-b px-8 py-4">
         <div className="flex-1">
-          <h1 className="mb-1 text-lg font-bold">
-            {learningElement.data.learningElement.element.title}
-          </h1>
+          <h1 className="mb-1 text-lg font-bold">{element.title}</h1>
           <Markdown className="prose prose-lg max-w-full">
-            {learningElement.data.learningElement.element.question}
+            {element.question}
           </Markdown>
         </div>
         <div className="flex flex-initial flex-col items-end gap-2">
@@ -110,7 +137,7 @@ function LearningElement({ elementId }: { elementId: string }) {
         >
           <div>
             {elementState === LearningElementState.SOLVED &&
-              learningElement.data.learningElement.element.feedback && (
+              element.feedback && (
                 <div className="flex max-w-none flex-row gap-4 px-4 py-2 text-sm">
                   <FontAwesomeIcon
                     className="mt-1 text-gray-400"
@@ -120,7 +147,7 @@ function LearningElement({ elementId }: { elementId: string }) {
                   <div>
                     <div className="mb-1 font-bold">Explanation</div>
                     <Markdown className="prose prose-sm">
-                      {learningElement.data.learningElement.element.feedback}
+                      {element.feedback}
                     </Markdown>
                   </div>
                 </div>
@@ -138,7 +165,7 @@ function LearningElement({ elementId }: { elementId: string }) {
                 <div>
                   <div className="mb-1 font-bold">Why is it relevant?</div>
                   <Markdown className="prose prose-sm">
-                    {learningElement.data.learningElement.element.motivation}
+                    {element.motivation}
                   </Markdown>
                 </div>
               </div>
@@ -153,44 +180,47 @@ function LearningElement({ elementId }: { elementId: string }) {
             elementState === LearningElementState.SOLVED ? 'order-1' : 'order-2'
           )}
         >
-          {learningElement.data.learningElement.element.options.map(
-            (option, ix) => (
-              <Button
-                key={ix}
-                disabled={elementState === LearningElementState.SOLVED}
-                className={{
-                  root: twMerge(
-                    'prose prose-sm p-3',
-                    activeElements?.includes(ix) &&
-                      elementState === LearningElementState.SOLVED &&
-                      'border-green-200 bg-green-100'
-                  ),
-                }}
-                active={activeElements?.includes(ix)}
-                onClick={() =>
-                  setActiveElements((prevState) => {
-                    if (prevState.includes(ix)) {
-                      return without([ix], prevState)
-                    }
-                    // FIXME: multiple choice logic
-                    // return [...activeElements, ix]
+          {(element.options ?? []).map((option, ix) => (
+            <Button
+              key={ix}
+              disabled={elementState === LearningElementState.SOLVED}
+              className={{
+                root: twMerge(
+                  'prose prose-sm p-3',
+                  activeElements?.includes(ix) &&
+                    elementState === LearningElementState.SOLVED &&
+                    'border-green-200 bg-green-100'
+                ),
+              }}
+              active={activeElements?.includes(ix)}
+              onClick={() =>
+                setActiveElements((prevState) => {
+                  if (prevState.includes(ix)) {
+                    return without([ix], prevState)
+                  }
+                  // FIXME: multiple choice logic
+                  // return [...activeElements, ix]
 
-                    // FIXME: single choice logic
-                    return [ix]
-                  })
-                }
-              >
-                <Markdown className="prose prose-sm">{option.content}</Markdown>
-              </Button>
-            )
-          )}
+                  // FIXME: single choice logic
+                  return [ix]
+                })
+              }
+            >
+              <Markdown className="prose prose-sm">{option.content}</Markdown>
+            </Button>
+          ))}
         </div>
       </div>
       <div className="flex flex-row items-center justify-end border-t p-8">
         {elementState !== LearningElementState.SOLVED && (
           <Button
             disabled={activeElements.length === 0}
-            onClick={() => attemptLearningElement()}
+            onClick={() =>
+              attemptLearningElement.mutate({
+                elementId,
+                selection: activeElements,
+              })
+            }
           >
             {elementState === LearningElementState.ATTEMPTED
               ? 'Try Again'

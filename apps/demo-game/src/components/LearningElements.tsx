@@ -4,12 +4,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { H3 } from '@uzh-bf/design-system'
 import { sortBy } from 'ramda'
 
-import { useQuery } from '@apollo/client'
 import { Button, Modal } from '@uzh-bf/design-system'
 import { useMemo, useState } from 'react'
-import { ResultDocument } from 'src/graphql/generated/ops'
+import type { RouterOutputs } from '~/server/trpc/router'
 
 import LearningElement from './LearningElement'
+
+type PlayerResult = NonNullable<RouterOutputs['play']['result']>
 
 type LearningElementSummary = {
   id: string
@@ -22,23 +23,35 @@ type PeriodWithLearningElements = {
   }[]
 }
 
-function LearningElements() {
-  const { data } = useQuery(ResultDocument, {
-    fetchPolicy: 'cache-only',
-  })
+const EMPTY_COMPLETED_LEARNING_ELEMENT_IDS: string[] = []
 
+type PlayerResultWithProgress = NonNullable<PlayerResult['playerResult']> & {
+  player?: {
+    completedLearningElementIds?: string[]
+  }
+}
+
+export type PlayerResultWithLearningProgress = PlayerResult & {
+  playerResult?: PlayerResultWithProgress | null
+}
+
+function LearningElements({
+  playerResult,
+}: {
+  playerResult?: PlayerResultWithLearningProgress
+}) {
   const [activeId, setActiveId] = useState<string | null>(null)
 
-  const playerDataResult = data?.result
-  const currentGame = playerDataResult?.currentGame
-  const periods = currentGame?.periods as
+  const currentGame = playerResult?.currentGame
+  const periods = currentGame?.periods as unknown as
     | PeriodWithLearningElements[]
     | undefined
   const learningElements = currentGame?.activePeriod?.activeSegment
     ?.learningElements as LearningElementSummary[] | undefined
 
   const completedLearningElementIds =
-    playerDataResult?.playerResult?.player?.completedLearningElementIds ?? []
+    playerResult?.playerResult?.player?.completedLearningElementIds ??
+    EMPTY_COMPLETED_LEARNING_ELEMENT_IDS
 
   const completedLearningElements = useMemo(() => {
     if (completedLearningElementIds.length === 0 || !periods) return []
@@ -46,13 +59,14 @@ function LearningElements() {
       .flatMap((period) =>
         period.segments.flatMap((segment) => segment.learningElements)
       )
-      .reduce((acc, elem) => {
+      .reduce<Record<string, LearningElementSummary>>((acc, elem) => {
         acc[elem.id] = elem
         return acc
       }, {})
-    return completedLearningElementIds.map(
-      (id) => allLearningElements[id]
-    ) as LearningElementSummary[]
+    return completedLearningElementIds.flatMap((id) => {
+      const element = allLearningElements[id]
+      return element ? [element] : []
+    })
   }, [periods, completedLearningElementIds])
 
   if (!learningElements) return null
@@ -96,7 +110,7 @@ function LearningElements() {
       </ul>
       <Modal
         className={{ content: 'max-w-4xl overflow-y-auto' }}
-        open={activeId ? true : false}
+        open={Boolean(activeId)}
         onClose={() => setActiveId(null)}
         title="Learning Activity"
       >

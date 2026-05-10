@@ -7,7 +7,6 @@ import {
 } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
 import { LOCATIONS } from 'src/lib/constants'
 import * as Yup from 'yup'
 
@@ -31,8 +30,6 @@ const Schema = Yup.object().shape({
 
 function Welcome() {
   const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
   const {
     data: player,
     isLoading: isPlayerLoading,
@@ -43,9 +40,6 @@ function Welcome() {
   const updatePlayerData = trpc.play.updatePlayerData.useMutation({
     onSuccess: async () => {
       await utils.play.self.invalidate()
-    },
-    onError: () => {
-      setIsSubmitting(false)
     },
   })
 
@@ -73,8 +67,6 @@ function Welcome() {
         }}
         validationSchema={Schema}
         onSubmit={async (values) => {
-          setIsSubmitting(true)
-
           try {
             await updatePlayerData.mutateAsync({
               name: values.name,
@@ -192,9 +184,9 @@ function Welcome() {
                     <Button
                       className={{ root: 'mt-4' }}
                       type="submit"
-                      disabled={isSubmitting || updatePlayerData.isPending}
+                      disabled={updatePlayerData.isPending}
                     >
-                      {isSubmitting ? 'Loading...' : 'Start Game'}
+                      {updatePlayerData.isPending ? 'Loading...' : 'Start Game'}
                     </Button>
                   </CardFooter>
                 </Card>
