@@ -1,4 +1,3 @@
-import { useSubscription } from '@apollo/client'
 import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
 import {
   Button,
@@ -48,23 +47,16 @@ import {
   YAxis,
 } from 'recharts'
 
-import { GlobalEventsDocument } from 'src/graphql/generated/ops'
 import { DecisionsDisplayCompact } from '~/components/DecisionsDisplay'
 import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
+import { BaseGlobalNotificationType } from '@gbl-uzh/platform'
 import { trpc } from '~/lib/trpc'
 import type { RouterOutputs } from '~/server/trpc/router'
 // TODO(JJ): This will be replaced by the design system
 import { Form, Formik } from 'formik'
 import * as yup from 'yup'
 import { useToast } from '../../components/ui/use-toast'
-
-// import { BaseGlobalNotificationType } from '@gbl-uzh/platform/src/types.js'
-enum BaseGlobalNotificationType {
-  PERIOD_ACTIVATED = 'PERIOD_ACTIVATED',
-  SEGMENT_ACTIVATED = 'SEGMENT_ACTIVATED',
-  COUNTDOWN_UPDATED = 'COUNTDOWN_UPDATED',
-}
 
 const LABEL_MAP = {
   accTotalAssetsReturn: 'Total Assets Return',
@@ -142,30 +134,29 @@ function GameLayout({ children }: { children: ReactNode }) {
 
   const currentGameId = resultData?.currentGame?.id
 
-  useSubscription(GlobalEventsDocument, {
-    skip: !currentGameId,
-    onData: ({ data: subData }) => {
-      if (subData?.data?.eventsGlobal) {
-        const event = subData.data.eventsGlobal
-        const eventGameId = event.facts?.gameId
-        if (
-          event.type === BaseGlobalNotificationType.COUNTDOWN_UPDATED &&
-          Number(eventGameId) === currentGameId
-        ) {
-          console.log(
-            `Player Cockpit: Relevant COUNTDOWN_UPDATED event for game ${currentGameId}. Refreshing result...`
-          )
-          void utils.play.result.invalidate()
-        } else if (
-          (event?.type === BaseGlobalNotificationType.PERIOD_ACTIVATED ||
-            event?.type === BaseGlobalNotificationType.SEGMENT_ACTIVATED) &&
-          Number(eventGameId) === currentGameId
-        ) {
-          console.log(
-            `Player Cockpit: Relevant ${event.type} event for game ${currentGameId}. Refreshing result...`
-          )
-          void utils.play.result.invalidate()
-        }
+  trpc.events.global.useSubscription(undefined, {
+    enabled: Boolean(currentGameId),
+    onData(event) {
+      const eventGameId = Number(event.facts?.gameId)
+      if (!currentGameId || Number.isNaN(eventGameId) || eventGameId !== currentGameId)
+        return
+
+      if (event.type === BaseGlobalNotificationType.COUNTDOWN_UPDATED) {
+        console.log(
+          `Player Cockpit: Relevant COUNTDOWN_UPDATED event for game ${currentGameId}. Refreshing result...`
+        )
+        void utils.play.result.invalidate()
+        return
+      }
+
+      if (
+        event.type === BaseGlobalNotificationType.PERIOD_ACTIVATED ||
+        event.type === BaseGlobalNotificationType.SEGMENT_ACTIVATED
+      ) {
+        console.log(
+          `Player Cockpit: Relevant ${event.type} event for game ${currentGameId}. Refreshing result...`
+        )
+        void utils.play.result.invalidate()
       }
     },
     onError: (err) => {
