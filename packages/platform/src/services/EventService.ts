@@ -134,9 +134,7 @@ export async function receiveEvent(
   prisma
 ) {
   const matchingEvent = definedEvents.find((item) => item.id === event.type)
-  // console.warn(event, matchingEvent)
 
-  // if there is a matching event and it awards achievements, process each
   if (matchingEvent && matchingEvent.achievements?.length > 0) {
     const awardedAchievements: {
       achievements: { achievement: any; achievementInstance: any }[]
@@ -149,14 +147,12 @@ export async function receiveEvent(
     }
 
     for (const achievement of matchingEvent.achievements) {
-      // skip if event facts don't match achievement conditions
       if (!evaluateConditions(achievement.conditions, event.facts)) {
         continue
       }
 
       const isPeriodScoped = achievement.scope === DB.AchievementScope.PERIOD
 
-      // For GAME-scoped FIRST achievements, skip if already earned globally
       if (
         !isPeriodScoped &&
         achievement.when === DB.AchievementFrequency.FIRST &&
@@ -167,7 +163,6 @@ export async function receiveEvent(
 
       let existingInstance
       if (isPeriodScoped) {
-        // PERIOD scope: look up by (achievementId, playerId, periodIx)
         existingInstance = await prisma.achievementInstance.findUnique({
           where: {
             achievementId_playerId_periodIx: {
@@ -178,7 +173,6 @@ export async function receiveEvent(
           },
         })
 
-        // For PERIOD-scoped FIRST achievements, skip if already earned this period
         if (
           achievement.when === DB.AchievementFrequency.FIRST &&
           existingInstance
@@ -186,7 +180,6 @@ export async function receiveEvent(
           continue
         }
       } else {
-        // GAME scope: look up by (achievementId, playerId) ignoring period
         existingInstance = await prisma.achievementInstance.findFirst({
           where: {
             achievement: {

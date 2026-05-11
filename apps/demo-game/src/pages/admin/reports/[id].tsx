@@ -1,3 +1,4 @@
+import { PlayerResultType } from '@prisma/client'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
 
@@ -110,7 +111,7 @@ function ReportGame() {
   } = trpc.results.specific.useQuery(
     {
       gameId: hasGameId ? gameId : 0,
-      type: 'SEGMENT_END',
+      type: PlayerResultType.SEGMENT_END,
     },
     {
       enabled: hasGameId,
@@ -124,7 +125,7 @@ function ReportGame() {
   } = trpc.results.specific.useQuery(
     {
       gameId: hasGameId ? gameId : 0,
-      type: 'PERIOD_END',
+      type: PlayerResultType.PERIOD_END,
     },
     {
       enabled: hasGameId,

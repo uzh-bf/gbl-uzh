@@ -27,7 +27,6 @@ type StoryElement = {
 
 const EMPTY_VISITED_STORY_ELEMENT_IDS: string[] = []
 
-// TODO(JJ): Check if we should fetch the story elements in the component
 function StoryElements({
   playerResult,
   playerRole,
@@ -42,8 +41,10 @@ function StoryElements({
 
   const markStoryElement = trpc.story.markVisited.useMutation({
     async onSuccess() {
-      await utils.play.result.invalidate()
-      await utils.play.self.invalidate()
+      await Promise.all([
+        utils.play.result.invalidate(),
+        utils.play.self.invalidate(),
+      ])
     },
   })
 
@@ -86,7 +87,6 @@ function StoryElements({
   return (
     <Modal
       className={{ content: 'max-w-4xl overflow-y-auto' }}
-      // disabled={loading}
       open={unseenStoryElements.length > 0}
       onClose={() => {
         setUnseenStoryElements((elem) => elem.slice(1))

@@ -217,7 +217,7 @@ function toResultSegmentSummaryDto(
     learningElements?: unknown
     storyElements?: unknown
   } | null,
-  { includeStoryContent = false } = {}
+  includeStoryContent = false
 ): ActiveSegmentSummaryDto | null {
   if (!segment?.id || typeof segment.id !== 'number') return null
 
@@ -353,7 +353,7 @@ export function toPlayerResultDto(
             ...activePeriod,
             activeSegment: toResultSegmentSummaryDto(
               (rawCurrentGame.activePeriod as any)?.activeSegment as any,
-              { includeStoryContent: true }
+              true
             ),
           }
         : undefined,

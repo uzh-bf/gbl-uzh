@@ -1,7 +1,7 @@
 import superjson from 'superjson'
 import { TRPCError, initTRPC } from '@trpc/server'
 import { UserRole } from '../types.js'
-import { type PlatformContext, ensurePlatformContextUser } from './context.js'
+import type { PlatformContext, PlatformUser } from './context.js'
 
 const t = initTRPC.context<PlatformContext>().create({
   transformer: superjson,
@@ -10,17 +10,15 @@ const t = initTRPC.context<PlatformContext>().create({
 export const createTRPCRouter = t.router
 export const createCallerFactory = t.createCallerFactory
 
-function requireUser(ctx: PlatformContext) {
-  const user = ensurePlatformContextUser(ctx)
-
-  if (!user) {
+function requireUser(ctx: PlatformContext): PlatformUser {
+  if (!ctx.user) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
       message: 'Not authenticated',
     })
   }
 
-  return user
+  return ctx.user
 }
 
 const enforceAuthenticatedUser = t.middleware(({ ctx, next }) => {
@@ -34,11 +32,11 @@ const enforceAuthenticatedUser = t.middleware(({ ctx, next }) => {
   })
 })
 
-const enforceRole = (role: UserRole | string) =>
+const enforceRole = (role: UserRole) =>
   t.middleware(({ ctx, next }) => {
     const user = requireUser(ctx)
 
-    if (user.role !== role && user.role !== String(role)) {
+    if (user.role !== role) {
       throw new TRPCError({
         code: 'FORBIDDEN',
         message: 'Forbidden',

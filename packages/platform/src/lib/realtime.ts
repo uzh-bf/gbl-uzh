@@ -2,10 +2,14 @@ import { EventEmitter, on } from 'node:events'
 import type { Event as PlatformEvent } from '../types.js'
 
 const GLOBAL_EVENT_CHANNEL = 'global:events'
-const USER_EVENT_CHANNEL = 'user:events'
+const USER_EVENT_CHANNEL_PREFIX = 'user:events:'
 
 const eventBus = new EventEmitter()
 eventBus.setMaxListeners(0)
+
+function userChannel(userId: string): string {
+  return `${USER_EVENT_CHANNEL_PREFIX}${userId}`
+}
 
 function isAbortError(error: unknown): boolean {
   return error instanceof Error && error.name === 'AbortError'
@@ -23,7 +27,7 @@ export function publishUserNotificationRealtime(
 ): void {
   if (!events.length) return
 
-  eventBus.emit(USER_EVENT_CHANNEL, userId, events)
+  eventBus.emit(userChannel(userId), events)
 }
 
 export function subscribeToGlobalEvents(
@@ -52,14 +56,13 @@ export function subscribeToUserEvents(
 ): AsyncIterable<PlatformEvent<string>[]> {
   const iterator = on(
     eventBus,
-    USER_EVENT_CHANNEL,
+    userChannel(userId),
     signal ? { signal } : undefined
   )
 
   return (async function* () {
     try {
-      for await (const [publishedUserId, events] of iterator) {
-        if (publishedUserId !== userId) continue
+      for await (const [events] of iterator) {
         yield events as PlatformEvent<string>[]
       }
     } catch (error) {

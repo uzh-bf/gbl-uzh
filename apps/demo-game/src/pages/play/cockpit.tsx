@@ -33,7 +33,7 @@ import {
 import { CycleCountdown } from '~/components/CycleCountDown'
 
 import dayjs from 'dayjs'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import {
   Area,
   AreaChart,
@@ -52,7 +52,6 @@ import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
 import { trpc } from '~/lib/trpc'
 import type { RouterOutputs } from '~/server/trpc/router'
-// TODO(JJ): This will be replaced by the design system
 import { Form, Formik } from 'formik'
 import * as yup from 'yup'
 import { useToast } from '../../components/ui/use-toast'
@@ -103,7 +102,6 @@ function getNumber(value: unknown, fallback = 0): number {
 }
 
 function GameLayout({ children }: { children: ReactNode }) {
-  // TODO(JJ): Fetch data in Layout
   const utils = trpc.useUtils()
 
   const {
@@ -119,8 +117,10 @@ function GameLayout({ children }: { children: ReactNode }) {
 
   const updateReadyState = trpc.play.updateReadyState.useMutation({
     async onSuccess() {
-      await utils.play.result.invalidate()
-      await utils.play.self.invalidate()
+      await Promise.all([
+        utils.play.result.invalidate(),
+        utils.play.self.invalidate(),
+      ])
     },
   })
 
@@ -155,29 +155,18 @@ function GameLayout({ children }: { children: ReactNode }) {
     },
   })
 
-  const countdownExpiresAt =
-    resultData?.currentGame?.activePeriod?.activeSegment?.countdownExpiresAt
-  const strExpiresAt =
-    countdownExpiresAt instanceof Date
-      ? countdownExpiresAt.toISOString()
-      : typeof countdownExpiresAt === 'string'
-      ? countdownExpiresAt
-      : null
+  const expiresAtDate =
+    resultData?.currentGame?.activePeriod?.activeSegment?.countdownExpiresAt ??
+    null
   const countdownDurationMs =
-    typeof resultData?.currentGame?.activePeriod?.activeSegment
-      ?.countdownDurationMs === 'number'
-      ? resultData.currentGame.activePeriod.activeSegment.countdownDurationMs
-      : null
-
-  const expiresAtDate = useMemo(() => {
-    return strExpiresAt ? dayjs(strExpiresAt).toDate() : null
-  }, [strExpiresAt])
+    resultData?.currentGame?.activePeriod?.activeSegment?.countdownDurationMs ??
+    null
+  const expiresAtKey = expiresAtDate?.getTime() ?? null
 
   useEffect(() => {
-    if (!strExpiresAt) return
+    if (!expiresAtDate) return
 
-    const dateExpiresAt = dayjs(strExpiresAt)
-    const secondsRemaining = dateExpiresAt.diff(dayjs(), 's')
+    const secondsRemaining = dayjs(expiresAtDate).diff(dayjs(), 's')
 
     if (secondsRemaining > 0) {
       toast({
@@ -187,7 +176,7 @@ function GameLayout({ children }: { children: ReactNode }) {
     }
 
     setCountdownNotifications({ '60': false, '180': false })
-  }, [strExpiresAt, countdownDurationMs, toast])
+  }, [expiresAtKey, countdownDurationMs, toast])
 
   if (isResultLoading || isSelfLoading) return null
   if (resultError) return `Error! ${resultError}`
@@ -274,10 +263,14 @@ function GameLayout({ children }: { children: ReactNode }) {
                 expiresAt={expiresAtDate}
                 totalDuration={countdownDurationMs / 1000}
                 onUpdate={(secondsLeft) => {
-                  const minutesRemainingThreshold = [1, 3]
-                  minutesRemainingThreshold.forEach((minute) => {
+                  if (
+                    countdownNotifications['60'] &&
+                    countdownNotifications['180']
+                  )
+                    return
+
+                  for (const minute of [1, 3]) {
                     const secondsThreshold = minute * 60
-                    // Only trigger if we are *just crossing* this threshold
                     if (
                       secondsLeft <= secondsThreshold &&
                       secondsLeft > secondsThreshold - 1
@@ -295,7 +288,7 @@ function GameLayout({ children }: { children: ReactNode }) {
                         }))
                       }
                     }
-                  })
+                  }
                 }}
                 onExpire={() => console.log('Countdown expired')}
                 className="text-xs font-bold text-gray-600"
@@ -387,9 +380,6 @@ function Cockpit() {
 
   // TODO(JJ): The results should only be computed for certain states.
   // - Create different components, which compute the things internally.
-
-  // console.log(data.result.transactions)
-
   switch (currentGame?.status) {
     case 'PREPARATION':
     case 'COMPLETED':

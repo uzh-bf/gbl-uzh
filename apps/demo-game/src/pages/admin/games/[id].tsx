@@ -18,7 +18,7 @@ import {
 import { Form, Formik } from 'formik'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 import PlayerCompact from '~/components/PlayerCompact'
@@ -168,11 +168,16 @@ function ManageGame() {
     },
   })
 
+  const wasAllReady = useRef(false)
   useEffect(() => {
-    if (game?.status !== GameStatus.RUNNING) return
+    if (game?.status !== GameStatus.RUNNING) {
+      wasAllReady.current = false
+      return
+    }
 
     const allPlayersReady = game.players.every((player) => player.isReady)
-    if (allPlayersReady) {
+    if (allPlayersReady && !wasAllReady.current) {
+      wasAllReady.current = true
       toast({
         title: 'All players are ready!',
         description: 'All players are ready to continue.',
@@ -183,6 +188,8 @@ function ManageGame() {
         alert('Autoplay restrictions. Please enable autoplay in your browser.')
         console.error('Error playing notification sound:', err)
       })
+    } else if (!allPlayersReady) {
+      wasAllReady.current = false
     }
   }, [game?.players, game?.status, toast])
 

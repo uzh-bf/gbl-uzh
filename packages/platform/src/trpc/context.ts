@@ -53,13 +53,3 @@ export function createPlatformContextUser(
     gameId: normalizeGameId(user.gameId),
   }
 }
-
-export function ensurePlatformContextUser(
-  context: { user?: unknown } | undefined
-): PlatformUser | undefined {
-  if (!context?.user || typeof context.user !== 'object') {
-    return
-  }
-
-  return createPlatformContextUser(context.user as RawPlatformUser)
-}

@@ -73,11 +73,11 @@ function LearningElement({ elementId }: { elementId: string | null }) {
 
   const attemptLearningElement = trpc.learning.attempt.useMutation({
     async onSuccess(result) {
-      if (elementId) {
-        await utils.learning.byId.invalidate({ id: elementId })
-      }
-      await utils.play.result.invalidate()
-      await utils.play.self.invalidate()
+      await Promise.all([
+        elementId ? utils.learning.byId.invalidate({ id: elementId }) : null,
+        utils.play.result.invalidate(),
+        utils.play.self.invalidate(),
+      ])
 
       if (!result) return
 
