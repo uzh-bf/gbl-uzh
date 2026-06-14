@@ -96,7 +96,9 @@ function ManageGame() {
         'SWITCH_TOGGLED',
       ]
       if (event.type && RELEVANT_EVENT_TYPES.includes(event.type)) {
-        refetch()
+        refetch().catch((err) => {
+          console.error('Admin: failed to refetch game after event:', err)
+        })
       }
     },
     onError: (err) => {

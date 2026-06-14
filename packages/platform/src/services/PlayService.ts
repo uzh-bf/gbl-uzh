@@ -225,6 +225,7 @@ export async function performActionWithRetry<ActionTypes>(
   maxRetries: number = 3
 ) {
   let retries = 0
+  let lastError: unknown
   while (retries < maxRetries) {
     try {
       return await performAction(args, ctx, { services })
@@ -233,6 +234,7 @@ export async function performActionWithRetry<ActionTypes>(
         error instanceof DB.Prisma.PrismaClientKnownRequestError &&
         (error.code === 'P2025' || error.code === 'P2034')
       ) {
+        lastError = error
         retries++
         // Wait a bit before retrying
         await new Promise((res) => setTimeout(res, 50 + Math.random() * 50))
@@ -241,7 +243,12 @@ export async function performActionWithRetry<ActionTypes>(
       throw error // Re-throw if it's not a concurrency issue
     }
   }
-  throw new Error('Failed to perform action after multiple retries')
+  // keep the underlying Prisma error as the cause so the concurrency code that
+  // exhausted the retries is not lost when this surfaces to the caller
+  throw new Error(
+    `Failed to perform action after ${maxRetries} retries`,
+    { cause: lastError }
+  )
 }
 
 interface SaveDecisionsArgs {

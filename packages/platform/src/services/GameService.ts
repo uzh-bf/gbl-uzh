@@ -746,8 +746,21 @@ export async function activateNextPeriod(
 
       // run achievement/experience side-effects only after the game-state
       // transaction has committed (deferred thunks; they previously fired
-      // eagerly during result computation, regardless of transaction outcome)
-      await Promise.all(promises.map((p) => p()))
+      // eagerly during result computation, regardless of transaction outcome).
+      // The period transition is already durably committed at this point, so a
+      // failing side-effect must not fail the whole call (that would mislead the
+      // admin into thinking the transition was rejected). Attempt every thunk
+      // and surface failures via the log instead of abandoning the rest.
+      const sideEffects = await Promise.allSettled(promises.map((p) => p()))
+      const failedSideEffects = sideEffects.filter(
+        (r) => r.status === 'rejected'
+      )
+      if (failedSideEffects.length > 0) {
+        log.error(
+          `period-end side-effects failed for ${failedSideEffects.length}/${promises.length} player(s) in game ${gameId} (period ${currentPeriodIx}); game state already committed to RESULTS`,
+          failedSideEffects.map((r) => (r as PromiseRejectedResult).reason)
+        )
+      }
 
       didUpdate = true
 
