@@ -658,35 +658,25 @@ export async function activateNextPeriod(
       //    => it's better not imo, but open for discussion
       // -> Discuss with RS
 
-      // const lastPeriodIx = game.periods.length - 1
       let periodIx = nextPeriodIx
 
-      // let data: any = {
-      //   status: DB.GameStatus.RESULTS,
-      // }
-      // if (nextPeriodIx <= lastPeriodIx) {
-      //   // periodIx = lastPeriodIx
-      //   data.activePeriodIx = periodIx
-      //   data.activePeriod = {
-      //     connect: {
-      //       gameId_index: {
-      //         gameId,
-      //         index: periodIx,
-      //       },
-      //     },
-      //   }
-      // }
-
+      // Advance the active-period index even for the final period (so
+      // `activePeriodIx === totalPeriods` becomes the "no more periods" marker
+      // that gates FINISH_GAME -> COMPLETED), but only `connect` the next period
+      // when it actually exists. Connecting period `totalPeriods` (which does not
+      // exist) was the long-standing last-period crash.
+      const hasNextPeriod = periodIx < game.periods.length
       const gameData: any = {
         status: targetStatus,
         activePeriodIx: periodIx,
-        activePeriod: {
-          connect: { gameId_index: { gameId, index: periodIx } },
-        },
+        ...(hasNextPeriod
+          ? {
+              activePeriod: {
+                connect: { gameId_index: { gameId, index: periodIx } },
+              },
+            }
+          : {}),
       }
-
-      // TODO(JJ): Check with RS
-      // - when updating the game with the nextPeriodIx it crashes
       finalTransactionResult = await ctx.prisma.$transaction(
         async (tx) => {
           // TODO(JJ):

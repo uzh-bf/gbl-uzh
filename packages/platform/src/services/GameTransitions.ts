@@ -22,11 +22,15 @@ import * as DB from '@prisma/client'
  * surface them as divergences, which is the point.
  */
 
-export type GameEvent = 'ACTIVATE_NEXT_PERIOD' | 'ACTIVATE_NEXT_SEGMENT'
+export type GameEvent =
+  | 'ACTIVATE_NEXT_PERIOD'
+  | 'ACTIVATE_NEXT_SEGMENT'
+  | 'FINISH_GAME'
 
 export const GAME_EVENTS: readonly GameEvent[] = [
   'ACTIVATE_NEXT_PERIOD',
   'ACTIVATE_NEXT_SEGMENT',
+  'FINISH_GAME',
 ]
 
 /**
@@ -122,18 +126,27 @@ export const GAME_TRANSITIONS: Record<
   },
 
   // RESULTS --ACTIVATE_NEXT_PERIOD--> PREPARATION (more periods remain)
-  // (GameService.ts, case RESULTS in activateNextPeriod)
+  // RESULTS --FINISH_GAME----------> COMPLETED  (final period finished)
+  // (GameService.ts, case RESULTS in activateNextPeriod / finishGame)
   [DB.GameStatus.RESULTS]: {
     ACTIVATE_NEXT_PERIOD: {
       // `activePeriodIx` is advanced early (at CONSOLIDATION -> RESULTS), so at
       // RESULTS it already points at the period about to be prepared. The
       // transition is valid while that period exists, i.e.
       // `activePeriodIx < totalPeriods`. (A `- 1` here would wrongly block
-      // entering the final period.) Reaching COMPLETED after the final period is
-      // a separate, deferred change (dedicated event + active-period index fix).
+      // entering the final period.)
       to: DB.GameStatus.PREPARATION,
       guard: (ctx) => ctx.activePeriodIx < ctx.totalPeriods,
       description: 'Initialize the next period and move to preparation.',
+    },
+    FINISH_GAME: {
+      // After the final period's consolidation, CONSOLIDATION -> RESULTS advances
+      // `activePeriodIx` to `totalPeriods` (without connecting a non-existent next
+      // period), so `activePeriodIx >= totalPeriods` is the unambiguous "no more
+      // periods" marker that gates completion.
+      to: DB.GameStatus.COMPLETED,
+      guard: (ctx) => ctx.activePeriodIx >= ctx.totalPeriods,
+      description: 'Finish the game after the final period.',
     },
   },
 

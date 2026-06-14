@@ -25,7 +25,8 @@ for (const segmentCount of [0, 2]) {
     for (const hasNextSegment of [false, true]) {
       for (const [activePeriodIx, totalPeriods] of [
         [0, 2], // not the last period
-        [1, 2], // the last period
+        [1, 2], // entering the last period
+        [2, 2], // past the last period (advanced early) -> FINISH_GAME territory
       ] as Array<[number, number]>) {
         CONTEXTS.push({
           activePeriodIx,
@@ -137,6 +138,45 @@ test('a running first segment (segmentIx 0) can still be consolidated', () => {
   actor.start()
   assert.equal(actor.getSnapshot().can({ type: 'ACTIVATE_NEXT_PERIOD' }), true)
   actor.stop()
+})
+
+test('FINISH_GAME completes the game only after the final period', () => {
+  // intermediate RESULTS (next period still queued): FINISH_GAME invalid,
+  // ACTIVATE_NEXT_PERIOD valid.
+  const intermediate: GameTransitionContext = {
+    activePeriodIx: 1,
+    totalPeriods: 2,
+    segmentCount: 2,
+    hasActiveSegment: true,
+    hasNextSegment: false,
+  }
+  const a = createActor(gameMachine, {
+    snapshot: snapshotAt(DB.GameStatus.RESULTS, intermediate),
+  })
+  a.start()
+  assert.equal(a.getSnapshot().can({ type: 'FINISH_GAME' }), false)
+  assert.equal(a.getSnapshot().can({ type: 'ACTIVATE_NEXT_PERIOD' }), true)
+  a.stop()
+
+  // final RESULTS (activePeriodIx advanced to totalPeriods): FINISH_GAME valid,
+  // ACTIVATE_NEXT_PERIOD invalid; sending FINISH_GAME reaches COMPLETED.
+  const final: GameTransitionContext = {
+    activePeriodIx: 2,
+    totalPeriods: 2,
+    segmentCount: 2,
+    hasActiveSegment: true,
+    hasNextSegment: false,
+  }
+  const b = createActor(gameMachine, {
+    snapshot: snapshotAt(DB.GameStatus.RESULTS, final),
+  })
+  b.start()
+  assert.equal(b.getSnapshot().can({ type: 'ACTIVATE_NEXT_PERIOD' }), false)
+  assert.equal(b.getSnapshot().can({ type: 'FINISH_GAME' }), true)
+  b.send({ type: 'FINISH_GAME' })
+  assert.equal(b.getSnapshot().value, DB.GameStatus.COMPLETED)
+  assert.equal(b.getSnapshot().status, 'done') // COMPLETED is a final state
+  b.stop()
 })
 
 test('a persisted snapshot round-trips through getPersistedSnapshot/restore', () => {

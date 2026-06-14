@@ -26,6 +26,7 @@ export type GameMachineContext = GameTransitionContext
 export type GameMachineEvent =
   | { type: 'ACTIVATE_NEXT_PERIOD' }
   | { type: 'ACTIVATE_NEXT_SEGMENT' }
+  | { type: 'FINISH_GAME' }
 
 /**
  * Default context for a freshly created actor. Actors are always hydrated to a
@@ -58,6 +59,10 @@ export const gameMachine = setup({
     // period about to be prepared -> valid while activePeriodIx < totalPeriods.
     hasNextPeriod: ({ context }) =>
       context.activePeriodIx < context.totalPeriods,
+    // no further period remains (RESULTS -> COMPLETED via FINISH_GAME). The final
+    // period's consolidation advances activePeriodIx to totalPeriods.
+    noNextPeriod: ({ context }) =>
+      context.activePeriodIx >= context.totalPeriods,
   },
 }).createMachine({
   id: 'game',
@@ -113,9 +118,10 @@ export const gameMachine = setup({
           target: DB.GameStatus.PREPARATION,
           guard: 'hasNextPeriod',
         },
-        // After the final period there is no further PREPARATION (hasNextPeriod
-        // is false); reaching COMPLETED here needs a dedicated event/guard and
-        // an active-period index fix, deferred to a later slice.
+        FINISH_GAME: {
+          target: DB.GameStatus.COMPLETED,
+          guard: 'noNextPeriod',
+        },
       },
     },
     [DB.GameStatus.COMPLETED]: {
