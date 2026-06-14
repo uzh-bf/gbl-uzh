@@ -21,7 +21,7 @@ import { twMerge } from 'tailwind-merge'
 
 import PlayerCompact from '~/components/PlayerCompact'
 
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import {
   STATUS,
   computePeriodStatus,
@@ -37,6 +37,7 @@ import {
   Game,
   GameDocument,
   GameStatus,
+  GlobalEventsDocument,
   LearningElementsDocument,
   Player,
   StoryElementsDocument,
@@ -74,10 +75,33 @@ function ManageGame() {
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
 
-  const { data, error, loading } = useQuery(GameDocument, {
+  const { data, error, loading, refetch } = useQuery(GameDocument, {
     variables: { id: Number(router.query.id) },
-    pollInterval: 15000,
     skip: !router.query.id,
+  })
+
+  // Realtime: refetch the game whenever a relevant lifecycle event is published
+  // for this game (admin-triggered transitions, countdowns, switches). Replaces
+  // the previous 15s poll.
+  useSubscription(GlobalEventsDocument, {
+    skip: !router.query.id,
+    onData: ({ data: subData }) => {
+      const event = subData?.data?.eventsGlobal
+      if (!event || event.facts?.gameId !== Number(router.query.id)) return
+      const RELEVANT_EVENT_TYPES = [
+        'GAME_STATE_UPDATED',
+        'PERIOD_ACTIVATED',
+        'SEGMENT_ACTIVATED',
+        'COUNTDOWN_UPDATED',
+        'SWITCH_TOGGLED',
+      ]
+      if (event.type && RELEVANT_EVENT_TYPES.includes(event.type)) {
+        refetch()
+      }
+    },
+    onError: (err) => {
+      console.error('Admin: GlobalEvents subscription error:', err)
+    },
   })
 
   const {
@@ -255,9 +279,18 @@ function ManageGame() {
           </Button>
         )
       case GameStatus.Results: {
-        const anotherPeriod = game.activePeriodIx > game.periods.length - 1
+        // Disable on the last period: there is no next period to advance to.
+        // (The previous check `activePeriodIx > periods.length - 1` was always
+        // false, so the button stayed enabled and triggered the broken
+        // last-period transition. The RESULTS -> COMPLETED path is wired up in
+        // a later slice.)
+        const isLastPeriod =
+          (game.activePeriodIx ?? 0) >= game.periods.length - 1
         return (
-          <Button disabled={anotherPeriod} onClick={nextPeriod}>
+          <Button
+            disabled={isLastPeriod || nextPeriodLoading}
+            onClick={nextPeriod}
+          >
             Next Period
           </Button>
         )
