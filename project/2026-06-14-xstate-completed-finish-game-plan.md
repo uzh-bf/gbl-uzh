@@ -128,4 +128,32 @@ and add a distinct `FINISH_GAME` admin action that transitions `RESULTS → COMP
 
 ## Progress
 
-(none yet)
+- **F1 done** (`29a50e8`): FINISH_GAME event + RESULTS→COMPLETED (`noNextPeriod`
+  guard) in table + machine; CONSOLIDATION advances the index for the final
+  period but skips the missing-period `connect` (crash fix). Machine matrix grid
+  extended with `ix==totalPeriods`; explicit FINISH_GAME completion test. 11/11
+  platform tests, tsc clean.
+- **F2 done** (`3789e8b`): `GameService.finishGame` (OCC guard + version +
+  GAME_STATE_UPDATED after commit); `finishGame` mutation; `MFinishGame.graphql`;
+  regenerated demo-game GraphQL artifacts (`FinishGameDocument`). Deviation:
+  skipped `canFinishGame` on `GameLifecycleState` (YAGNI — `availableEvents`
+  already exposes it). Incidentally dropped the stale unused `GameWithoutFacts`
+  generated document.
+- **F3 done** (`9579d1b`): admin RESULTS button shows "Finish Game" once
+  `activePeriodIx >= periods.length`, else "Next Period"; SSE already refetches on
+  GAME_STATE_UPDATED; README updated (FINISH_GAME now wired).
+- **F4 (partial):**
+  - Decision 2 resolved: **skip** `GAME_COMPLETED` event type (YAGNI; reuse
+    GAME_STATE_UPDATED). Revisit if a player-facing "game over" handler is added.
+  - Decision 3 resolved by code inspection: final-results display is safe.
+    `computePeriodStatus` handles `activePeriodIx == totalPeriods` correctly
+    (last period → RESULTS, all → COMPLETED at COMPLETED). Results *content* is
+    read from stored result rows (player results / reports), not by traversing
+    the `activePeriod` relation, so it is unaffected by the index marker.
+  - Final checks: platform tsc clean, 11/11 tests, demo-game admin tsc clean.
+  - **Pending: live browser E2E.** A full multi-period playthrough to COMPLETED
+    needs a seeded local env (Postgres + secrets + dev server + game/period/
+    segment setup). Run the demo-game locally, create a ≥2-period game, play
+    through every period, and confirm: the final period consolidates without
+    crashing, its results show, "Finish Game" appears, and clicking it reaches
+    COMPLETED. Capture screenshots for the PR.
