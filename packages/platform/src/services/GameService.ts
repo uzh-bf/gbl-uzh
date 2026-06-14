@@ -498,7 +498,11 @@ export async function activateNextPeriod(
     // if the final segment is running, go on with consolidation of the period
     // compute the results of the last segment and update the game status
     case DB.GameStatus.RUNNING: {
-      if (!game.activePeriod?.activeSegment || !currentSegmentIx) return null
+      // Guard on the *presence* of an active segment, not its truthiness:
+      // `!currentSegmentIx` was also true at segment index 0, which wrongly
+      // blocked consolidating a period whose only/first segment is active.
+      if (!game.activePeriod?.activeSegment || currentSegmentIx == null)
+        return null
 
       finalTransactionResult = await ctx.prisma.$transaction(
         async (tx) => {

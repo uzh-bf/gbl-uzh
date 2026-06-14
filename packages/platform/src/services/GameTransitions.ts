@@ -102,9 +102,9 @@ export const GAME_TRANSITIONS: Record<
       description: 'End the current segment; another segment follows.',
     },
     ACTIVATE_NEXT_PERIOD: {
-      // BUG (current switch): guard is `!currentSegmentIx`, which is falsy when
-      // currentSegmentIx === 0, so the first segment of a period can never be
-      // consolidated. The correct guard only requires an active segment.
+      // Requires an active segment. (The switch previously guarded on
+      // `!currentSegmentIx`, which was also true at segment index 0 and wrongly
+      // blocked consolidation of the first segment; that is now fixed.)
       to: DB.GameStatus.CONSOLIDATION,
       guard: (ctx) => ctx.hasActiveSegment,
       description: 'Begin consolidation of the (final) running segment.',
