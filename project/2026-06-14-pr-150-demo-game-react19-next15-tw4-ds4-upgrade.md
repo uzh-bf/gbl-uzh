@@ -19,7 +19,7 @@ THEN migrate to DS v5 local alpha tarball (keep UZH branding). Visualize everyth
 
 - Plan: `project/2026-06-14-demo-game-react19-tw4-ds5-upgrade.md`
 - Repo: gbl-uzh (github uzh-bf/gbl-uzh). Worktree: `/Users/rschlae/Git/gbl/gbl-uzh-wt-demo-upgrade`
-- Branch: `feat/demo-game-react19-tw4-ds5`  Target: `dev`  MR: (none yet)
+- Branch: `feat/demo-game-react19-tw4-ds5`  Target: `dev`  PR: #150 (draft) — https://github.com/uzh-bf/gbl-uzh/pull/150 (M1 only)
 - DS source: `/Users/rschlae/Git/df/design-system` branch `v5` (PR #179). v4 = 4.1.6 on main.
 
 ## Decisions (user-confirmed 2026-06-14)
