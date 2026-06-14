@@ -114,9 +114,27 @@ tsc/build first, then dev boot + agent-browser for app screens. Review + simplif
       - website React-18/19 @types clash: monorepo now has @types/react 18 (website) + 19 (rest); TS resolves React 19 ReactNode (bigint) for next's d.ts → spurious "Link not a JSX component". website next.config → typescript.ignoreBuildErrors only (ESLint left enabled — clash is TS-only; frozen app, runtime unaffected; remove on website upgrade).
       - Accepted side-effect: website's transitive `yup` (via DS v3 peer) deduped 1.4.0→1.6.1 from the workspace yup unification. Backward-compatible 1.x minor; website declares no direct yup and is a content site unlikely to run yup validation. Re-verify when website is upgraded; pin website yup 1.4.0 if a regression surfaces.
       - syncpack: GREEN. .syncpackrc.js versionGroups: (1) ignore website (legacy stack), (2) ignore ui/platform broad react/react-dom peer ranges. Aligned upgraded-set peers (ui/platform next ^15.5.19, platform next-auth ^4.24.14, ui/platform yup ^1.6.1, platform tsx ~4.19.3, ui fortawesome ^6.7.2, ui eslint ~8.57.1). Fixed `~` dev-range on my new deps (tailwindcss, @tailwindcss/postcss, tw-animate-css, @tailwindcss/typography, ui DS devDep). nodemon ^→~. Pre-existing prettier 2-vs-3 drift left as-is (not introduced here; syncpack not CI-gated).
-- [ ] M2-S5 v5 tarball swap — NEXT
-- [ ] M2-S6 visualize
+- [x] M2-S5 v5 swap — DONE (committed 79f9c8d). Decision changed from tarball → **point at v5 branch** (user pick): root `pnpm-workspace.yaml` overrides `@uzh-bf/design-system` → `file:/Users/rschlae/Git/df/design-system/packages/design-system` (LOCAL-DEV ONLY, loud DO-NOT-PUSH comment). globals.css `:root` UZH block removed; `_document.tsx` `<Html data-theme="uzh">`. Resolved DS css confirmed dual-theme (`[data-theme=neutral]`+`[data-theme=uzh]`).
+- [x] M2-S6 visualize — DONE. demo-game run locally on v5 + agent-browser.
+      - Runtime: demo-game own `docker-compose.yml` postgres on host :5432; prisma copy/generate/push; `next dev -p 3001` (`:3000` taken by an unrelated derivatives-game devcontainer). Dummy NEXTAUTH_SECRET; Auth0 has no dev bypass so only unauthenticated pages reachable — but the v5 theme pipeline is global (globals.css + `data-theme` on `<html>`) so any page fully exercises it.
+      - **Evidence**: index (cockpit) renders fully on DS v5 + React19 + Next15.5 + TW4 — nav, Storage panel, recharts probability chart, Period/Segment cards, Volume Input + Buy/Sell Buttons, timeline cards. Clean console + server log (`GET / 200`, `/api/auth/session 200`). Screenshots `/tmp/m2-index-{uzh,neutral}.png`.
+      - **Dual-theme proof** (computed tokens on `<html>`): `--theme-color-primary` uzh `#0028a5` (UZH blue) vs neutral `oklch(0.205 0 0)`; body font uzh `Source Sans 3/Pro` vs neutral system. RootLayout legacy `--theme-font-primary` is dead under v5 (v5 drives `--theme-font-sans`) but harmless.
+      - **Two v5-readiness findings (design-system repo, not this MR):**
+        - F1 — v5 `package.json` exports add a `"development": "./src/*.ts"` condition; Next dev sets that webpack condition → pulls raw `.tsx` source → `Module parse failed`. Preview fix: `transpilePackages: ['@uzh-bf/design-system']`. Published alpha should not point external consumers at source (or ship `import`→dist only).
+        - F2 — v5 declares a **React 18** peer; the `file:` link resolves its own `react@18.3.1` subtree → 2 physical React copies → `Cannot read properties of null (reading 'useMemo')`. Preview fix: webpack-alias `react`/`react-dom` to demo-game's single react@19. Published v5 should widen peer to `^18 || ^19`.
+      - Preview-only `next.config.ts` edits (transpilePackages + react alias), clearly commented DO-NOT-PUSH, paired with the `file:` override. Preserved off the MR branch on tag **`m2-v5-preview`** (`02aacd1` = `79f9c8d` + next.config preview commit).
+
+## MR scope (decided by constraint)
+
+M2 depends on an **unpublished local v5 via an absolute `file:` path** → physically unmergeable (CI + any other machine cannot resolve it). Therefore:
+- **MR = M1 only** (React19 + Next15.5 + TW4 + **DS v4.1.6**, UZH branding intact via `:root`). Mergeable tip = `eeebb64`, verified clean (no override, DS pinned 4.1.6, `:root` branding present, next.config clean, default `_document`).
+- **M2 = local preview, deferred** to a follow-up once design-system v5 publishes `@uzh-bf/design-system@5.0.0-alpha.x` (and fixes F1/F2). Preserve `79f9c8d` + preview next.config via a local tag.
 
 ## Next steps (running)
 
-After M1-S4 green → M2. After M2 → MR via $df-mr-description-writer vs `dev`, screenshots as evidence. Follow-ups: replace react-dice-complete; tsconfig moduleResolution bundler; consider website upgrade + DS v5 publish.
+1. [x] MR scope decided: **M1-only** (M2 unmergeable). User: no preference → proceed.
+2. [x] Preserved M2 on tag `m2-v5-preview` (`02aacd1`); reset feat branch to M1 tip `eeebb64`; plan docs re-landed.
+3. [ ] Re-verify M1 builds green against **DS v4** (reinstall without override) — prior `turbo build 3/3` ran before the override existed, but node_modules has since diverged to v5.
+4. [ ] Final security review subagent on `dev..HEAD`.
+5. [ ] MR via `$df-mr-description-writer` vs `dev`. Push only after user confirms the drafted MR.
+Follow-ups: design-system v5 F1/F2 fixes + publish alpha; replace react-dice-complete; tsconfig moduleResolution bundler; website upgrade.
