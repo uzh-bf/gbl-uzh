@@ -13,6 +13,7 @@ import {
   Event as PlatformEvent,
 } from '../types.js'
 import * as EventService from './EventService.js'
+import * as GameTransitions from './GameTransitions.js'
 
 type Context = CtxWithPrisma<PrismaClient>
 
@@ -395,6 +396,18 @@ export async function activateNextPeriod(
   const currentPeriodIx = game.activePeriodIx
   const currentSegmentIx = game.activePeriod?.activeSegmentIx
   const nextPeriodIx = currentPeriodIx + 1
+
+  // Shadow-run: predict the target status from the explicit transition table
+  // so it can be compared against the actual switch outcome below. Log-only,
+  // never gates execution. Enable with XSTATE_SHADOW=true.
+  const shadowPredictedStatus =
+    process.env.XSTATE_SHADOW === 'true'
+      ? GameTransitions.nextStatus(
+          game.status,
+          'ACTIVATE_NEXT_PERIOD',
+          GameTransitions.buildTransitionContext(game)
+        )
+      : undefined
 
   // NotificationService.publishGlobalNotification({
   //   type: GlobalNotificationType.PERIOD_ACTIVATED,
@@ -848,6 +861,19 @@ export async function activateNextPeriod(
     )
 
     if (gameAfterUpdate) {
+      if (
+        shadowPredictedStatus !== undefined &&
+        shadowPredictedStatus !== gameAfterUpdate.status
+      ) {
+        log.warn('[xstate-shadow] activateNextPeriod divergence', {
+          gameId,
+          fromStatus: game.status,
+          event: 'ACTIVATE_NEXT_PERIOD',
+          predicted: shadowPredictedStatus,
+          actual: gameAfterUpdate.status,
+        })
+      }
+
       const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
         type: BaseGlobalNotificationType.PERIOD_ACTIVATED,
         facts: EventService.buildGameRealtimeFacts(gameId, gameAfterUpdate),
@@ -903,6 +929,18 @@ export async function activateNextSegment(
   const currentPeriodIx = game.activePeriodIx
   const currentSegmentIx = game.activePeriod.activeSegmentIx
   const nextSegmentIx = currentSegmentIx + 1
+
+  // Shadow-run: predict the target status from the explicit transition table
+  // so it can be compared against the actual switch outcome below. Log-only,
+  // never gates execution. Enable with XSTATE_SHADOW=true.
+  const shadowPredictedStatus =
+    process.env.XSTATE_SHADOW === 'true'
+      ? GameTransitions.nextStatus(
+          game.status,
+          'ACTIVATE_NEXT_SEGMENT',
+          GameTransitions.buildTransitionContext(game)
+        )
+      : undefined
 
   // NotificationService.publishGlobalNotification({
   //   type: GlobalNotificationType.SEGMENT_ACTIVATED,
@@ -1117,6 +1155,20 @@ export async function activateNextSegment(
       ctx.prisma,
       gameId
     )
+
+    if (
+      shadowPredictedStatus !== undefined &&
+      gameAfterUpdate &&
+      shadowPredictedStatus !== gameAfterUpdate.status
+    ) {
+      log.warn('[xstate-shadow] activateNextSegment divergence', {
+        gameId,
+        fromStatus: game.status,
+        event: 'ACTIVATE_NEXT_SEGMENT',
+        predicted: shadowPredictedStatus,
+        actual: gameAfterUpdate.status,
+      })
+    }
 
     if (gameAfterUpdate && gameAfterUpdate.activePeriod) {
       const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {

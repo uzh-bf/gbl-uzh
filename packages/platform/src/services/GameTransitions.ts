@@ -139,15 +139,18 @@ export const GAME_TRANSITIONS: Record<
   [DB.GameStatus.COMPLETED]: {},
 }
 
-/** Build a guard context from a loaded Prisma game row (or a compatible shape). */
+/**
+ * Build a guard context from a loaded Prisma game row.
+ *
+ * The active-period shape varies between call sites (each loads a different
+ * Prisma `include`), so it is intentionally untyped here; the body reads only
+ * the fields it needs, defensively. `periods` stays typed so `totalPeriods` is
+ * derived correctly.
+ */
 export function buildTransitionContext(game: {
   activePeriodIx: number
-  periods?: { length: number } | unknown[]
-  activePeriod?: {
-    segments?: unknown[]
-    segmentCount?: number | null
-    activeSegment?: { nextSegment?: unknown | null } | null
-  } | null
+  periods?: unknown[] | null
+  activePeriod?: any
 }): GameTransitionContext {
   const totalPeriods = Array.isArray(game.periods) ? game.periods.length : 0
   const segments = game.activePeriod?.segments
