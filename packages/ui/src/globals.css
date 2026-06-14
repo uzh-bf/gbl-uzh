@@ -1,2 +1,13 @@
-@tailwind components;
-@tailwind utilities;
+/*
+ * Tailwind v4, utilities only.
+ * Preflight/base is intentionally NOT emitted here: @gbl-uzh/ui is a library
+ * consumed inside apps that already ship preflight (via the design system),
+ * so shipping our own reset would double-apply. This preserves the previous
+ * Tailwind v3 `corePlugins.preflight: false` behaviour.
+ */
+@layer theme, base, components, utilities;
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@source './components/**/*.{ts,tsx}';

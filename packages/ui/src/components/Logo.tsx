@@ -39,7 +39,7 @@ function Logo({
         />
       )}
       {name && (
-        <div className="absolute left-0 right-0 p-1 text-center text-white shadow bg-slate-600 bg-opacity-90 bottom-2">
+        <div className="absolute left-0 right-0 p-1 text-center text-white shadow bg-slate-600/90 bottom-2">
           <div className="text-sm font-semibold">{name}</div>
           {location && <div className="text-xs">HQ: {location}</div>}
         </div>
