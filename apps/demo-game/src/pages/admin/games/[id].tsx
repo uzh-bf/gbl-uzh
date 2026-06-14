@@ -34,6 +34,7 @@ import {
   AddCountdownDocument,
   AddGamePeriodDocument,
   AddPeriodSegmentDocument,
+  FinishGameDocument,
   Game,
   GameDocument,
   GameStatus,
@@ -133,6 +134,8 @@ function ManageGame() {
   const [activateNextSegment, { loading: nextSegmentLoading }] = useMutation(
     ActivateNextSegmentDocument
   )
+  const [finishGame, { loading: finishGameLoading }] =
+    useMutation(FinishGameDocument)
   const [addGamePeriod, { loading: addGamePeriodLoading }] = useMutation(
     AddGamePeriodDocument,
     {
@@ -173,6 +176,14 @@ function ManageGame() {
 
   const nextSegment = () =>
     activateNextSegment({
+      variables: {
+        gameId: Number(router.query.id),
+      },
+      refetchQueries: [GameDocument],
+    })
+
+  const endGame = () =>
+    finishGame({
       variables: {
         gameId: Number(router.query.id),
       },
@@ -281,20 +292,22 @@ function ManageGame() {
           </Button>
         )
       case GameStatus.Results: {
-        // RESULTS -> PREPARATION prepares the period at `activePeriodIx`, which
-        // is advanced early (at consolidation) to point at the period to play
-        // next. So it is valid while that period exists, i.e.
-        // `activePeriodIx < periods.length` — this MUST stay enabled for the
-        // final period. The server (GameTransitions) is the source of truth and
-        // no-ops past the last period; we mirror it here. Cleanly finishing
-        // after the final period (RESULTS/CONSOLIDATION -> COMPLETED) is
-        // deferred — see the consolidation TODO in GameService.
-        const canAdvance = (game.activePeriodIx ?? 0) < game.periods.length
+        // `activePeriodIx` is advanced early (at consolidation). While it still
+        // points at an existing period, RESULTS -> PREPARATION starts that
+        // period ("Next Period"). Once it reaches `periods.length` (the final
+        // period's consolidation advanced past the last period), the only move
+        // is FINISH_GAME -> COMPLETED ("Finish Game"). Mirrors the server-side
+        // GameTransitions guards.
+        const isFinished = (game.activePeriodIx ?? 0) >= game.periods.length
+        if (isFinished) {
+          return (
+            <Button disabled={finishGameLoading} onClick={endGame}>
+              Finish Game
+            </Button>
+          )
+        }
         return (
-          <Button
-            disabled={!canAdvance || nextPeriodLoading}
-            onClick={nextPeriod}
-          >
+          <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
             Next Period
           </Button>
         )

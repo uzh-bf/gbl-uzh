@@ -44,7 +44,7 @@ stateDiagram-v2
     RUNNING --> CONSOLIDATION: ACTIVATE_NEXT_PERIOD [hasActiveSegment]
     CONSOLIDATION --> RESULTS: ACTIVATE_NEXT_PERIOD [hasActiveSegment]
     RESULTS --> PREPARATION: ACTIVATE_NEXT_PERIOD [hasNextPeriod]
-    RESULTS --> COMPLETED: FINISH_GAME (not yet wired — see below)
+    RESULTS --> COMPLETED: FINISH_GAME [noNextPeriod]
     COMPLETED --> [*]
 ```
 
@@ -68,13 +68,20 @@ with the official tooling:
   `GameMachineService.getGameLifecycleState(game)`, which returns the currently
   valid transitions without any visual tooling.
 
-## Not yet wired: `COMPLETED`
+## Reaching `COMPLETED` (FINISH_GAME)
 
-`COMPLETED` exists as a final state but is not yet reachable. Reaching it is not
-a one-line guard change because `activePeriodIx` is advanced early (during
-`CONSOLIDATION → RESULTS`), which makes the final results phase indistinguishable
-from an intermediate one by index alone, and the last period's
-`CONSOLIDATION → RESULTS` currently attempts to connect a non-existent next
-period. Completing a game cleanly should be a dedicated change (e.g. a
-`FINISH_GAME` admin action, plus disambiguating the active-period index) with
-end-to-end tests, and is tracked separately.
+`COMPLETED` is reached via a dedicated `FINISH_GAME` admin action
+(`finishGame` mutation → `GameService.finishGame`), guarded by `noNextPeriod`
+(`activePeriodIx >= totalPeriods`).
+
+The active-period index ambiguity is resolved by advancing `activePeriodIx` even
+for the final period at `CONSOLIDATION → RESULTS` — but **without** connecting a
+next period when none exists (that connect was the old last-period crash). So
+`activePeriodIx === totalPeriods` is the unambiguous "no more periods" marker:
+at that final RESULTS, `ACTIVATE_NEXT_PERIOD` is invalid and `FINISH_GAME` is the
+only valid move. The `activePeriod` relation still points at the last played
+period so the final results remain displayable.
+
+See `project/2026-06-14-xstate-completed-finish-game-plan.md` for the full design
+and the remaining polish (a dedicated `GAME_COMPLETED` event type, final-results
+display verification).
