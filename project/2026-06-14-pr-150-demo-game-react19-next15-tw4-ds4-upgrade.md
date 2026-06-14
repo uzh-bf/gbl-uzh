@@ -124,6 +124,21 @@ tsc/build first, then dev boot + agent-browser for app screens. Review + simplif
         - F2 — v5 declares a **React 18** peer; the `file:` link resolves its own `react@18.3.1` subtree → 2 physical React copies → `Cannot read properties of null (reading 'useMemo')`. Preview fix: webpack-alias `react`/`react-dom` to demo-game's single react@19. Published v5 should widen peer to `^18 || ^19`.
       - Preview-only `next.config.ts` edits (transpilePackages + react alias), clearly commented DO-NOT-PUSH, paired with the `file:` override. Preserved off the MR branch on tag **`m2-v5-preview`** (`02aacd1` = `79f9c8d` + next.config preview commit).
 
+## Slice M3 — Next 16.2.9 (added to PR #150)
+
+User: "upgrade next to the latest 16 while we are at it." Latest stable = 16.2.9 (Node ≥20.9 ✓, React 19 ✓). Researched via a workflow over live Next docs + adversarial verify (refuted 2 synthesis claims → narrowed scope).
+
+**Done (verified): demo-game runs on Next 16, dev + production.**
+- next 15.5.19→**16.2.9** (demo-game dep); ui + platform `next` peer `^15.5.19`→`^16.2.9` (demo-game is the sole consumer; website/advisor don't import them). website stays next 15.1.2 (frozen).
+- next.config.ts: removed the now-removed `eslint` key; `transpilePackages:['@uzh-bf/design-system']` **dev-only**; react/react-dom `resolve.alias` to the app's single react@19 **client-only** (`!isServer`), resolved via `require.resolve(...,{paths:[__dirname]})` so it survives pnpm hoisting in the Docker build.
+- scripts: `build:next`/`dev:next` += `--webpack` (Turbopack is now the default; keeps the fs-fallback webpack config); `next lint`→`eslint .`, `next lint --fix`→`eslint . --fix`. `.eslintrc.js` += `root:true` + ignorePatterns (bare eslint no longer auto-ignores build output).
+- tsconfig.json: Next 16 auto-applied `moduleResolution: node→bundler`, `jsx: preserve→react-jsx` (kept — these are Next 16's settings; `bundler` was the earlier deferred follow-up).
+- **Latent M1 bug found + fixed**: DS v4 declares a React-18 peer → pnpm puts react@18 in its subtree → the **production client bundle** shipped two React copies and crashed (`Cannot read properties of null (reading 'useMemo')`). M1's PR #150 was build-green but client-broken (build never exercised the client). The client-only alias fixes it; verified by running the **standalone server (the Docker artifact)** — client renders, 0 useMemo crashes.
+
+**Verification:** `turbo build` 3/3 green (Next 16, `--webpack`); standalone prod server client renders (cockpit + Kompetenz-Navigator map); `next dev --webpack` renders; `eslint .` runs; `syncpack lint` green; review + simplify subagents integrated (hardened alias path; trimmed ignores). Non-gating/pre-existing: `check:ts` fails inside react-markdown@8's own .d.ts (React-19 JSX namespace, since M1; `next build` has ignoreBuildErrors); hydration-mismatch warning from RootLayout styled-jsx.
+
+**Deferred:** eslint-config-next stays 15.x (bumping forces ESLint 9 + flat-config; lint is non-gating); Dockerfile `--no-frozen-lockfile` HACK (pre-existing); the `legacyBehavior`/`passHref` NavBar cleanup (NOT removed in 16 — dev warning only).
+
 ## MR scope (decided by constraint)
 
 M2 depends on an **unpublished local v5 via an absolute `file:` path** → physically unmergeable (CI + any other machine cannot resolve it). Therefore:
