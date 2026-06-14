@@ -24,6 +24,19 @@
 
 @source './**/*.{ts,tsx}';
 
+/*
+ * design-system v4's ChartContainer sizes its recharts ResponsiveContainer with
+ * the `aspect-video` utility, which is missing from the shipped design-system.css
+ * (a DS packaging gap) and never appears literally in this app's source — so
+ * Tailwind v4 never emits it and charts collapse to zero height. Define it in the
+ * utilities layer so it always ships and stays overridable.
+ */
+@layer utilities {
+  .aspect-video {
+    aspect-ratio: 16 / 9;
+  }
+}
+
 html {
   font-size: 14px;
 }
