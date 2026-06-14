@@ -281,16 +281,18 @@ function ManageGame() {
           </Button>
         )
       case GameStatus.Results: {
-        // Disable on the last period: there is no next period to advance to.
-        // (The previous check `activePeriodIx > periods.length - 1` was always
-        // false, so the button stayed enabled and triggered the broken
-        // last-period transition. The RESULTS -> COMPLETED path is wired up in
-        // a later slice.)
-        const isLastPeriod =
-          (game.activePeriodIx ?? 0) >= game.periods.length - 1
+        // RESULTS -> PREPARATION prepares the period at `activePeriodIx`, which
+        // is advanced early (at consolidation) to point at the period to play
+        // next. So it is valid while that period exists, i.e.
+        // `activePeriodIx < periods.length` — this MUST stay enabled for the
+        // final period. The server (GameTransitions) is the source of truth and
+        // no-ops past the last period; we mirror it here. Cleanly finishing
+        // after the final period (RESULTS/CONSOLIDATION -> COMPLETED) is
+        // deferred — see the consolidation TODO in GameService.
+        const canAdvance = (game.activePeriodIx ?? 0) < game.periods.length
         return (
           <Button
-            disabled={isLastPeriod || nextPeriodLoading}
+            disabled={!canAdvance || nextPeriodLoading}
             onClick={nextPeriod}
           >
             Next Period
