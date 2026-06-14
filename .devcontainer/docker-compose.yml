@@ -1,0 +1,128 @@
+# Self-contained dev stack for the gbl-uzh demo-game devcontainer.
+# The devcontainer owns the environment (toolchain, Postgres, the local OIDC
+# mock, install/build/seed, the dev server); routing is delegated to devrouter
+# via the shared external `devnet` network (NO published host ports → many
+# projects run at once with zero collisions). app/postgres join devnet with
+# stable aliases; devrouter's Traefik (also on devnet) routes to them BY NAME.
+# The OIDC mock shares the app's netns, so it is reached on devnet as
+# `demo-game-app:8090`. `dev up` must run before the container starts so
+# `devnet` exists (external network). See `.devrouter.yml`.
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: prisma
+      POSTGRES_PASSWORD: prisma
+      POSTGRES_DB: prisma
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U prisma -d prisma']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      default: {}
+      # devrouter SNI-routes db.demo-game.localhost:5432 to this alias.
+      devnet:
+        aliases: [demo-game-db]
+    volumes:
+      - ./docker/init-shadow-db.sql:/docker-entrypoint-initdb.d/01-init-shadow-db.sql:ro
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # tini as PID1: reaps the many zombie children the dev server spawns and
+    # forwards signals cleanly.
+    init: true
+    env_file:
+      - devcontainer.env
+    # No published app/OIDC ports: devrouter routes https://demo-game.localhost
+    # and https://oidc.demo-game.localhost over devnet (so many projects coexist
+    # with zero host-port collisions). The OIDC mock shares this container's netns,
+    # so devrouter reaches it as `demo-game-app:8090`.
+    #
+    # OIDC server-side reachability: the app validates the token issuer against
+    # AUTH0_ISSUER=https://oidc.demo-game.localhost/default and fetches discovery/
+    # token/jwks from it server-side. So that host must resolve + be reachable from
+    # INSIDE this container too — map it to the host gateway (where Traefik listens
+    # on :443). The server-side HTTPS fetch trusts the local mkcert CA, mounted
+    # read-only and pointed to by NODE_EXTRA_CA_CERTS (devcontainer.env). Browser +
+    # server thus use the SAME issuer host over verified TLS → consistent `iss`.
+    extra_hosts:
+      - 'oidc.demo-game.localhost:host-gateway'
+    networks:
+      default: {}
+      devnet:
+        aliases: [demo-game-app]
+    volumes:
+      - ..:/workspaces/gbl-uzh:cached
+      # Named volumes shadow the host node_modules so Linux-native binaries
+      # (Prisma engines, esbuild, vite) are not clobbered by the host's darwin
+      # ones, and a container `pnpm install` never corrupts the host tree. One
+      # per workspace package that the install may touch.
+      - node_modules_root:/workspaces/gbl-uzh/node_modules
+      - node_modules_demo_game:/workspaces/gbl-uzh/apps/demo-game/node_modules
+      - node_modules_platform:/workspaces/gbl-uzh/packages/platform/node_modules
+      - node_modules_ui:/workspaces/gbl-uzh/packages/ui/node_modules
+      - node_modules_website:/workspaces/gbl-uzh/apps/website/node_modules
+      - node_modules_advisor:/workspaces/gbl-uzh/apps/advisor/node_modules
+      - node_modules_cypress:/workspaces/gbl-uzh/cypress/node_modules
+      # Local mkcert root CA (created by `dev tls install`), so the app trusts the
+      # https://oidc.demo-game.localhost cert server-side. Override
+      # DEVROUTER_MKCERT_CAROOT on non-macOS (Linux mkcert: ~/.local/share/mkcert).
+      - '${DEVROUTER_MKCERT_CAROOT:-${HOME}/Library/Application Support/mkcert}/rootCA.pem:/etc/devrouter/mkcert-rootCA.pem:ro'
+    command: sleep infinity
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Local OIDC provider (Auth0 replacement). Shares the app container's network
+  # namespace so the issuer is identical whether reached by the app server
+  # (token/jwks) or the host browser (authorize). Routed by devrouter at
+  # https://oidc.demo-game.localhost/default (-> demo-game-app:8090 over devnet).
+  oidc:
+    image: ghcr.io/navikt/mock-oauth2-server:2.1.11
+    network_mode: service:app
+    depends_on:
+      - app
+    environment:
+      SERVER_PORT: '8090'
+      # interactiveLogin=false -> one-click auto-login as the fixed dev admin.
+      # Constant `sub` keeps the same User/Account across restarts.
+      JSON_CONFIG: >-
+        {
+          "interactiveLogin": false,
+          "tokenCallbacks": [
+            {
+              "issuerId": "default",
+              "requestMappings": [
+                {
+                  "requestParam": "grant_type",
+                  "match": "*",
+                  "claims": {
+                    "sub": "dev-admin",
+                    "email": "gbl-dev@df.uzh.ch",
+                    "name": "GBL Dev",
+                    "email_verified": true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+
+networks:
+  # Created by `dev up` (devrouter). Must exist before this stack starts.
+  devnet:
+    external: true
+
+volumes:
+  pgdata:
+  node_modules_root:
+  node_modules_demo_game:
+  node_modules_platform:
+  node_modules_ui:
+  node_modules_website:
+  node_modules_advisor:
+  node_modules_cypress:
