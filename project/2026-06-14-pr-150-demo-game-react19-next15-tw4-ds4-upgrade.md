@@ -139,6 +139,27 @@ User: "upgrade next to the latest 16 while we are at it." Latest stable = 16.2.9
 
 **Deferred:** eslint-config-next stays 15.x (bumping forces ESLint 9 + flat-config; lint is non-gating); Dockerfile `--no-frozen-lockfile` HACK (pre-existing); the `legacyBehavior`/`passHref` NavBar cleanup (NOT removed in 16 — dev warning only).
 
+## Slice M4 — devpod acceptance-test fixes (PR #150)
+
+Ran demo-game in a self-contained **devpod** (mock-OIDC auto-login as ADMIN, gitignored local-only) → exercised the **authenticated** admin + player pages for the first time (M1/M3 only ever ran unauthenticated). Surfaced real runtime bugs the build can't catch.
+
+**Core fixes already landed via PR #151** (`e78071e`, the self-contained-devcontainer PR, squash-merged into this branch — its devrouter/devnet runtime exercised the same authenticated pages and carried the same fixes, byte-identical to this session's independently-developed versions):
+- `/admin/games` hung on "loading…" forever — React18→19 made pnpm materialise **two physical `@apollo/client` copies** → two `ApolloContext` objects → `useQuery` read the foreign one (200 but never settles). Fix: pin `@apollo/client` to one copy in the client-only webpack `resolve.alias`.
+- period/segment/story **modals had no save button** — DS v4 changed `onPrimaryAction`/`onSecondaryAction` from a ReactNode `<Button>` to a callback + `primaryLabel`/`secondaryLabel` string (masked by `ignoreBuildErrors`). Migrated all 3 modals.
+- `createGame` `playerCount` reached GraphQL as a string → `Int!` rejected. Coerced.
+- solved learning-element green highlight lost the twMerge conflict to DS v4 Button's blue `active`; moved to `className.active`.
+- dropped invalid `type="string"`; `Progress formatter={Number}` → `(v)=>String(v)`.
+
+**This PR (#150) adds on top of `e78071e`:**
+- **`fix`: chart `aspect-video`** — **consolidation charts rendered title+description but no graphic** (0 height). DS v4 `ChartContainer` sizes its recharts `ResponsiveContainer` with `aspect-video`, absent from the shipped `design-system.css` and never literal in app source → TW4 never emits it. Defined the rule in `@layer utilities` in `globals.css` (a file #151 never touched) until the **DS CSS packaging gap** is fixed upstream.
+- **`chore`: review refinements** on the #151 fixes — `parseInt(String(x),10)` + `step={1}` for playerCount (over `Number`, so a fractional "1.5" can't slip past `Int!`); dropped dead `// disabled={loading}`; `undefined` not `''` for the non-solved active class.
+
+**Verification:**
+- Review workflow (4 dims: correctness / config / simplify / completeness, each material finding adversarially verified) over the session delta → **no Critical/Important**. Completeness pass: all 3 Modals migrated, every `ChartContainer` covered (reports use explicit `h-[300px]`; cockpit relies on the global rule), no stray invalid props. One reviewer "duplicate comment" finding refuted against the actual file.
+- Final **security review** subagent → **SECURE** (alias `require.resolve` uses static `__dirname`, no user/env input; no secrets; lockfile SRI-clean; modal callbacks pure state, no XSS).
+- Fresh **prod build** `next build --webpack` → green, all 11 routes; served via `next start` on host `:3000` → `/admin/games` 200, `/api/graphql` 200, built CSS `9bec2f90…css` contains `aspect-video{aspect-ratio:16/9}` (the `@layer`-wrapped rule emits).
+- devpod note: `demo-game.localhost` currently resolves (via #151's devrouter/devnet) to a parallel devpod instance; the verified build is on host `:3000` (`default-gb-44860`).
+
 ## MR scope (decided by constraint)
 
 M2 depends on an **unpublished local v5 via an absolute `file:` path** → physically unmergeable (CI + any other machine cannot resolve it). Therefore:
@@ -149,7 +170,7 @@ M2 depends on an **unpublished local v5 via an absolute `file:` path** → physi
 
 1. [x] MR scope decided: **M1-only** (M2 unmergeable). User: no preference → proceed.
 2. [x] Preserved M2 on tag `m2-v5-preview` (`02aacd1`); reset feat branch to M1 tip `eeebb64`; plan docs re-landed.
-3. [ ] Re-verify M1 builds green against **DS v4** (reinstall without override) — prior `turbo build 3/3` ran before the override existed, but node_modules has since diverged to v5.
-4. [ ] Final security review subagent on `dev..HEAD`.
-5. [ ] MR via `$df-mr-description-writer` vs `dev`. Push only after user confirms the drafted MR.
-Follow-ups: design-system v5 F1/F2 fixes + publish alpha; replace react-dice-complete; tsconfig moduleResolution bundler; website upgrade.
+3. [x] M1 re-verified green against DS v4; M3 Next 16 landed; M4 devpod acceptance fixes landed + verified (fresh prod build, review + security SECURE).
+4. [x] Final security review subagent on the session delta `f6ddcf3..HEAD` → SECURE.
+5. [ ] Push session fixes (`76382dd`..`a91fc4a`) to PR #150; update body via `$df-mr-description-writer`; watch CI Docker build.
+Follow-ups: **design-system v5 F1/F2 fixes + the M4 `aspect-video` DS CSS packaging gap** + publish alpha; Dockerfile `--no-frozen-lockfile` removal (verify turbo-prune lockfile sync first); replace react-dice-complete; tsconfig moduleResolution bundler; website upgrade.
