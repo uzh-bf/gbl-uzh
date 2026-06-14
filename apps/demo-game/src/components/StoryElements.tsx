@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client'
-import { Button, Modal, Progress } from '@uzh-bf/design-system'
+import { Modal, Progress } from '@uzh-bf/design-system'
 import Image from 'next/image'
 import { sortBy } from 'ramda'
 import { useEffect, useMemo, useState } from 'react'
@@ -64,26 +64,21 @@ function StoryElements({ playerState, player }: Props) {
       onClose={() => {
         setUnseenStoryElements((elem) => elem.slice(1))
       }}
-      onPrimaryAction={
-        <Button
-          onClick={() => {
-            markStoryElement({
-              variables: {
-                elementId: unseenStoryElements[0]?.id,
-              },
-              // optimisticResponse: {
-              //   markStoryElement: {
-              //     id: unseenStoryElements[0]?.id,
-              //     visitedStoryElementIds: [unseenStoryElements[0]?.id],
-              //     __typename: 'Player',
-              //   },
-              // },
-            })
-          }}
-        >
-          Continue
-        </Button>
-      }
+      onPrimaryAction={() => {
+        markStoryElement({
+          variables: {
+            elementId: unseenStoryElements[0]?.id,
+          },
+          // optimisticResponse: {
+          //   markStoryElement: {
+          //     id: unseenStoryElements[0]?.id,
+          //     visitedStoryElementIds: [unseenStoryElements[0]?.id],
+          //     __typename: 'Player',
+          //   },
+          // },
+        })
+      }}
+      primaryLabel="Continue"
       title={unseenStoryElements[0]?.title}
     >
       <div>
