@@ -59,7 +59,6 @@ function StoryElements({ playerState, player }: Props) {
   return (
     <Modal
       className={{ content: 'max-w-4xl overflow-y-auto' }}
-      // disabled={loading}
       open={unseenStoryElements.length > 0}
       onClose={() => {
         setUnseenStoryElements((elem) => elem.slice(1))

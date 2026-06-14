@@ -166,7 +166,7 @@ function LearningElement({ elementId }: { elementId: string }) {
                   active:
                     elementState === LearningElementState.SOLVED
                       ? 'border-green-200 bg-green-100'
-                      : '',
+                      : undefined,
                 }}
                 active={activeElements?.includes(ix)}
                 onClick={() =>

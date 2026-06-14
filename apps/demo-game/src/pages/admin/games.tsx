@@ -74,8 +74,9 @@ function Games() {
             variables: {
               ...variables,
               // playerCount is edited through a text input, so Formik stores it
-              // as a string; the GraphQL schema requires Int!. Coerce it back.
-              playerCount: Number(variables.playerCount),
+              // as a string; the GraphQL schema requires Int!. parseInt guarantees
+              // an integer (Number would pass a fractional "1.5" through and fail).
+              playerCount: parseInt(String(variables.playerCount), 10),
             },
             refetchQueries: [GamesDocument],
           })
@@ -93,6 +94,7 @@ function Games() {
               name="playerCount"
               type="number"
               min={1}
+              step={1}
               label="Player Count"
               data={{ cy: 'game-player-count' }}
             />
