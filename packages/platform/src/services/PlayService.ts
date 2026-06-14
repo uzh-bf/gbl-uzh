@@ -39,7 +39,9 @@ export async function performAction<ActionTypes>(
   let globalNotificationToPublish
 
   // All reads and writes are now in a single atomic transaction.
-  const res = ctx.prisma.$transaction(
+  // NOTE: must be awaited so that the notification variables below are
+  // populated (the transaction callback assigns them) before we publish.
+  const res = await ctx.prisma.$transaction(
     async (tx) => {
       const previousResult = await tx.playerResult.findUnique({
         where: {
@@ -228,12 +230,13 @@ export async function performActionWithRetry<ActionTypes>(
       return await performAction(args, ctx, { services })
     } catch (error: any) {
       if (
-        error.isPrismaError &&
+        error instanceof DB.Prisma.PrismaClientKnownRequestError &&
         (error.code === 'P2025' || error.code === 'P2034')
       ) {
         retries++
         // Wait a bit before retrying
         await new Promise((res) => setTimeout(res, 50 + Math.random() * 50))
+        continue
       }
       throw error // Re-throw if it's not a concurrency issue
     }

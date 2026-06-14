@@ -442,6 +442,8 @@ export async function activateNextPeriod(
         ctx.prisma.game.update({
           where: {
             id: gameId,
+            // optimistic concurrency: only transition if status is unchanged
+            status: game.status,
           },
           include: {
             periods: {
@@ -539,6 +541,8 @@ export async function activateNextPeriod(
             },
             where: {
               id: gameId,
+              // optimistic concurrency: only transition if status is unchanged
+              status: game.status,
             },
           })
 
@@ -617,8 +621,6 @@ export async function activateNextPeriod(
         { services }
       )
 
-      await Promise.all(promises)
-
       // TODO(JJ): The error happens here for the last consolidation
       // - there are no more periods
       // - we prob. need to change the nextPeriodIx if it the last period
@@ -689,7 +691,11 @@ export async function activateNextPeriod(
 
           // update the status and active period of the current game
           const updatedGame = await tx.game.update({
-            where: { id: gameId },
+            where: {
+              id: gameId,
+              // optimistic concurrency: only transition if status is unchanged
+              status: game.status,
+            },
             include: { periods: { include: { segments: true } } },
             data: {
               ...gameData,
@@ -720,6 +726,12 @@ export async function activateNextPeriod(
         },
         { timeout: 120000 }
       )
+
+      // run achievement/experience side-effects only after the game-state
+      // transaction has committed (deferred thunks; they previously fired
+      // eagerly during result computation, regardless of transaction outcome)
+      await Promise.all(promises.map((p) => p()))
+
       didUpdate = true
 
       break
@@ -775,6 +787,8 @@ export async function activateNextPeriod(
         ctx.prisma.game.update({
           where: {
             id: gameId,
+            // optimistic concurrency: only transition if status is unchanged
+            status: game.status,
           },
           include: {
             periods: {
@@ -915,6 +929,8 @@ export async function activateNextSegment(
           const updatedGame = await tx.game.update({
             where: {
               id: gameId,
+              // optimistic concurrency: only transition if status is unchanged
+              status: game.status,
             },
             include: {
               periods: {
@@ -1028,7 +1044,11 @@ export async function activateNextSegment(
           })
 
           const updatedGame = await tx.game.update({
-            where: { id: gameId },
+            where: {
+              id: gameId,
+              // optimistic concurrency: only transition if status is unchanged
+              status: game.status,
+            },
             include: {
               periods: {
                 include: {
@@ -1409,7 +1429,10 @@ export async function computePeriodEndResults(
   { services }
 ) {
   let extras: any[] = []
-  let promises: Promise<any>[] = []
+  // deferred thunks: invoked by the caller only AFTER the game-state
+  // transaction has committed, so achievement/experience side-effects are
+  // not applied when the transaction rolls back
+  let promises: Array<() => Promise<any>> = []
 
   const perPlayer = {}
   players.forEach((player) => {
@@ -1470,21 +1493,22 @@ export async function computePeriodEndResults(
 
       promises = [
         ...promises,
-        EventService.receiveEvents({
-          events,
-          ctx: {
-            args: {
-              playerId: result.player.id,
-              periodIx: activePeriodIx,
-              gameId: game.id,
+        () =>
+          EventService.receiveEvents({
+            events,
+            ctx: {
+              args: {
+                playerId: result.player.id,
+                periodIx: activePeriodIx,
+                gameId: game.id,
+              },
+              user: ctx.user,
+              achievements: result.player.achievementKeys,
+              experience: result.player.experience,
+              currentLevelIx: result.player.levelIx,
             },
-            user: ctx.user,
-            achievements: result.player.achievementKeys,
-            experience: result.player.experience,
-            currentLevelIx: result.player.levelIx,
-          },
-          prisma: ctx.prisma,
-        }),
+            prisma: ctx.prisma,
+          }),
       ]
 
       return {
