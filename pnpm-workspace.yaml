@@ -19,3 +19,9 @@ overrides:
   # React that would break hooks). Die.tsx wrapper unchanged.
   'react-dice-complete>react': '^19.0.0'
   'react-dice-complete>react-dom': '^19.0.0'
+  # The workspace mixes Font Awesome 6.6.0 (website, legacy) and 6.7.2
+  # (demo-game/ui). fontawesome-common-types holds the IconProp/IconPrefix
+  # types; two copies make IconDefinition vs IconProp nominally incompatible
+  # and break @gbl-uzh/ui's tsc. Pin one (6.7.2 is a superset) so the type is
+  # identical everywhere.
+  '@fortawesome/fontawesome-common-types': '6.7.2'

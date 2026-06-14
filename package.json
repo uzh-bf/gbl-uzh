@@ -26,7 +26,7 @@
     "Andrin Rehmann <andrin.rehmann@df.uzh.ch>"
   ],
   "devDependencies": {
-    "nodemon": "^2.0.16",
+    "nodemon": "~2.0.16",
     "standard-version": "~9.5.0",
     "syncpack": "~13.0.0",
     "turbo": "~2.2.3"
