@@ -70,7 +70,15 @@ function Games() {
           },
         }}
         onSubmit={async (variables, { resetForm }) => {
-          await createGame({ variables, refetchQueries: [GamesDocument] })
+          await createGame({
+            variables: {
+              ...variables,
+              // playerCount is edited through a text input, so Formik stores it
+              // as a string; the GraphQL schema requires Int!. Coerce it back.
+              playerCount: Number(variables.playerCount),
+            },
+            refetchQueries: [GamesDocument],
+          })
           resetForm()
         }}
       >
