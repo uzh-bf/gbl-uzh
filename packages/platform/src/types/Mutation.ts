@@ -168,6 +168,18 @@ export function generateBaseMutations<
         },
       })
 
+      t.field('finishGame', {
+        type: 'Game',
+        args: {
+          gameId: nonNull(intArg()),
+        },
+        async resolve(_, args, ctx) {
+          const result = await GameService.finishGame(args, ctx)
+          if (!result) return
+          return result as any
+        },
+      })
+
       t.field('performAction', {
         type: PlayerResult,
         args: {

@@ -1,0 +1,23 @@
+#import "./FGameData.graphql"
+
+mutation FinishGame($gameId: Int!) {
+  finishGame(gameId: $gameId) {
+    ...GameData
+    periods {
+      id
+
+      index
+      activeSegmentIx
+
+      facts
+
+      segments {
+        id
+
+        index
+
+        facts
+      }
+    }
+  }
+}

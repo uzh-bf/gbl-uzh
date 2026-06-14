@@ -1217,6 +1217,70 @@ export async function activateNextSegment(
   return finalTransactionResult
 }
 
+interface FinishGameArgs {
+  gameId: number
+}
+
+/**
+ * Finish a game once its final period has been consolidated: RESULTS ->
+ * COMPLETED. Validity is decided by the lifecycle machine (GameTransitions); the
+ * FINISH_GAME guard requires `activePeriodIx >= totalPeriods`, which the final
+ * period's consolidation establishes. Returns null when the transition is not
+ * valid from the current state (e.g. the game is not on its final results).
+ */
+export async function finishGame({ gameId }: FinishGameArgs, ctx: Context) {
+  const game = await ctx.prisma.game.findUnique({
+    where: { id: gameId },
+    include: { periods: true },
+  })
+
+  if (!game) return null
+
+  const event = 'FINISH_GAME' as const
+  const targetStatus = GameTransitions.nextStatus(
+    game.status,
+    event,
+    GameTransitions.buildTransitionContext(game)
+  )
+  if (!targetStatus) {
+    log.warn(`finishGame: no valid ${event} from status ${game.status}`, {
+      gameId,
+    })
+    return null
+  }
+
+  const updatedGame = await ctx.prisma.game.update({
+    where: {
+      id: gameId,
+      // optimistic concurrency: only transition if status is unchanged
+      status: game.status,
+    },
+    include: { periods: { include: { segments: true } } },
+    data: {
+      status: targetStatus,
+      version: { increment: 1 },
+    },
+  })
+
+  const gameAfterUpdate = await EventService.getGameRealtimeState(
+    ctx.prisma,
+    gameId
+  )
+  if (gameAfterUpdate) {
+    const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
+      type: BaseGlobalNotificationType.GAME_STATE_UPDATED,
+      facts: EventService.buildGameRealtimeFacts(gameId, gameAfterUpdate),
+    }
+    EventService.publishGlobalNotification(eventToPublish)
+    log.info(
+      `Published ${eventToPublish.type} for game ${gameId}`,
+      eventToPublish.facts
+    )
+  }
+
+  return updatedGame
+}
+
 export async function updatePlayerData<PlayerFactsType>(
   { name, facts }: UpdatePlayerDataArgs<PlayerFactsType>,
   ctx: Context,
