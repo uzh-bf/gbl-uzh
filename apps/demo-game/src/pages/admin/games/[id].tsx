@@ -697,7 +697,6 @@ function ManageGame() {
                 >
                   <div className="flex w-1/2 flex-col gap-2">
                     <FormikTextField
-                      type="string"
                       name="periodName"
                       label="Period Name"
                       data={{ cy: 'period-name' }}

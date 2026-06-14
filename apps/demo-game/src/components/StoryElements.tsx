@@ -85,7 +85,7 @@ function StoryElements({ playerState, player }: Props) {
         <Progress
           max={activeStoryElements?.length}
           value={activeStoryElements?.length - unseenStoryElements?.length + 1}
-          formatter={Number}
+          formatter={(value) => String(value)}
         />
       </div>
 
