@@ -125,12 +125,14 @@ export const GAME_TRANSITIONS: Record<
   // (GameService.ts, case RESULTS in activateNextPeriod)
   [DB.GameStatus.RESULTS]: {
     ACTIVATE_NEXT_PERIOD: {
-      // BUG (current switch): no last-period guard exists, so the game loops
-      // RESULTS -> PREPARATION forever and can never reach COMPLETED. The
-      // correct machine only advances while a next period exists; the
-      // last-period case transitions to COMPLETED (handled in a later slice).
+      // `activePeriodIx` is advanced early (at CONSOLIDATION -> RESULTS), so at
+      // RESULTS it already points at the period about to be prepared. The
+      // transition is valid while that period exists, i.e.
+      // `activePeriodIx < totalPeriods`. (A `- 1` here would wrongly block
+      // entering the final period.) Reaching COMPLETED after the final period is
+      // a separate, deferred change (dedicated event + active-period index fix).
       to: DB.GameStatus.PREPARATION,
-      guard: (ctx) => ctx.activePeriodIx < ctx.totalPeriods - 1,
+      guard: (ctx) => ctx.activePeriodIx < ctx.totalPeriods,
       description: 'Initialize the next period and move to preparation.',
     },
   },

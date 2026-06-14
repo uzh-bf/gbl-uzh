@@ -397,17 +397,25 @@ export async function activateNextPeriod(
   const currentSegmentIx = game.activePeriod?.activeSegmentIx
   const nextPeriodIx = currentPeriodIx + 1
 
-  // Shadow-run: predict the target status from the explicit transition table
-  // so it can be compared against the actual switch outcome below. Log-only,
-  // never gates execution. Enable with XSTATE_SHADOW=true.
-  const shadowPredictedStatus =
-    process.env.XSTATE_SHADOW === 'true'
-      ? GameTransitions.nextStatus(
-          game.status,
-          'ACTIVATE_NEXT_PERIOD',
-          GameTransitions.buildTransitionContext(game)
-        )
-      : undefined
+  // The game lifecycle machine (GameTransitions / gameMachine) is the single
+  // authority on which admin event is valid from the current status and what the
+  // resulting status is. Drive the transition from it: a null target means there
+  // is no valid transition from here, so this is a no-op. The switch below only
+  // selects the side-effects for the (already validated) transition and writes
+  // `targetStatus`.
+  const event = 'ACTIVATE_NEXT_PERIOD' as const
+  const targetStatus = GameTransitions.nextStatus(
+    game.status,
+    event,
+    GameTransitions.buildTransitionContext(game)
+  )
+  if (!targetStatus) {
+    log.warn(
+      `activateNextPeriod: no valid ${event} from status ${game.status}`,
+      { gameId }
+    )
+    return null
+  }
 
   // NotificationService.publishGlobalNotification({
   //   type: GlobalNotificationType.PERIOD_ACTIVATED,
@@ -440,7 +448,7 @@ export async function activateNextPeriod(
       // update the status and active period of the current game
       // and prepare PERIOD_START results
       const gameData: any = {
-        status: DB.GameStatus.PREPARATION,
+        status: targetStatus,
         activePeriodIx: nextPeriodIx,
         activePeriod: {
           connect: { gameId_index: { gameId, index: nextPeriodIx } },
@@ -544,7 +552,7 @@ export async function activateNextPeriod(
 
           const updatedGame = await tx.game.update({
             data: {
-              status: DB.GameStatus.CONSOLIDATION,
+              status: targetStatus,
               version: {
                 increment: 1,
               },
@@ -670,7 +678,7 @@ export async function activateNextPeriod(
       // }
 
       const gameData: any = {
-        status: DB.GameStatus.RESULTS,
+        status: targetStatus,
         activePeriodIx: periodIx,
         activePeriod: {
           connect: { gameId_index: { gameId, index: periodIx } },
@@ -828,7 +836,7 @@ export async function activateNextPeriod(
             },
           },
           data: {
-            status: DB.GameStatus.PREPARATION,
+            status: targetStatus,
             version: {
               increment: 1,
             },
@@ -878,17 +886,22 @@ export async function activateNextPeriod(
     )
 
     if (gameAfterUpdate) {
+      // Safety net (opt-in via XSTATE_SHADOW): the machine authorized
+      // `targetStatus`; verify the committed row actually reached it.
       if (
-        shadowPredictedStatus !== undefined &&
-        shadowPredictedStatus !== gameAfterUpdate.status
+        process.env.XSTATE_SHADOW === 'true' &&
+        gameAfterUpdate.status !== targetStatus
       ) {
-        log.warn('[xstate-shadow] activateNextPeriod divergence', {
-          gameId,
-          fromStatus: game.status,
-          event: 'ACTIVATE_NEXT_PERIOD',
-          predicted: shadowPredictedStatus,
-          actual: gameAfterUpdate.status,
-        })
+        log.warn(
+          '[xstate] activateNextPeriod: committed status != machine target',
+          {
+            gameId,
+            fromStatus: game.status,
+            event,
+            target: targetStatus,
+            actual: gameAfterUpdate.status,
+          }
+        )
       }
 
       const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
@@ -947,17 +960,23 @@ export async function activateNextSegment(
   const currentSegmentIx = game.activePeriod.activeSegmentIx
   const nextSegmentIx = currentSegmentIx + 1
 
-  // Shadow-run: predict the target status from the explicit transition table
-  // so it can be compared against the actual switch outcome below. Log-only,
-  // never gates execution. Enable with XSTATE_SHADOW=true.
-  const shadowPredictedStatus =
-    process.env.XSTATE_SHADOW === 'true'
-      ? GameTransitions.nextStatus(
-          game.status,
-          'ACTIVATE_NEXT_SEGMENT',
-          GameTransitions.buildTransitionContext(game)
-        )
-      : undefined
+  // The game lifecycle machine is the authority on which event is valid here and
+  // what status results. Drive the transition from it (null -> no valid
+  // transition -> no-op); the switch below only runs the side-effects for the
+  // validated transition and writes `targetStatus`.
+  const event = 'ACTIVATE_NEXT_SEGMENT' as const
+  const targetStatus = GameTransitions.nextStatus(
+    game.status,
+    event,
+    GameTransitions.buildTransitionContext(game)
+  )
+  if (!targetStatus) {
+    log.warn(
+      `activateNextSegment: no valid ${event} from status ${game.status}`,
+      { gameId }
+    )
+    return null
+  }
 
   // NotificationService.publishGlobalNotification({
   //   type: GlobalNotificationType.SEGMENT_ACTIVATED,
@@ -996,7 +1015,7 @@ export async function activateNextSegment(
               players: true,
             },
             data: {
-              status: DB.GameStatus.RUNNING,
+              status: targetStatus,
               version: {
                 increment: 1,
               },
@@ -1113,7 +1132,7 @@ export async function activateNextSegment(
               players: true,
             },
             data: {
-              status: DB.GameStatus.PAUSED,
+              status: targetStatus,
               version: {
                 increment: 1,
               },
@@ -1173,18 +1192,23 @@ export async function activateNextSegment(
       gameId
     )
 
+    // Safety net (opt-in via XSTATE_SHADOW): the machine authorized
+    // `targetStatus`; verify the committed row actually reached it.
     if (
-      shadowPredictedStatus !== undefined &&
+      process.env.XSTATE_SHADOW === 'true' &&
       gameAfterUpdate &&
-      shadowPredictedStatus !== gameAfterUpdate.status
+      gameAfterUpdate.status !== targetStatus
     ) {
-      log.warn('[xstate-shadow] activateNextSegment divergence', {
-        gameId,
-        fromStatus: game.status,
-        event: 'ACTIVATE_NEXT_SEGMENT',
-        predicted: shadowPredictedStatus,
-        actual: gameAfterUpdate.status,
-      })
+      log.warn(
+        '[xstate] activateNextSegment: committed status != machine target',
+        {
+          gameId,
+          fromStatus: game.status,
+          event,
+          target: targetStatus,
+          actual: gameAfterUpdate.status,
+        }
+      )
     }
 
     if (gameAfterUpdate && gameAfterUpdate.activePeriod) {

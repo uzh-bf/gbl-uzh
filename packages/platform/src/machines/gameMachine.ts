@@ -53,9 +53,11 @@ export const gameMachine = setup({
     hasNextSegment: ({ context }) => context.hasNextSegment,
     // activePeriod.activeSegment exists (RUNNING -> CONSOLIDATION -> RESULTS)
     hasActiveSegment: ({ context }) => context.hasActiveSegment,
-    // a further period exists (RESULTS -> PREPARATION)
+    // the period to prepare exists (RESULTS -> PREPARATION). activePeriodIx is
+    // advanced early at CONSOLIDATION -> RESULTS, so it already points at the
+    // period about to be prepared -> valid while activePeriodIx < totalPeriods.
     hasNextPeriod: ({ context }) =>
-      context.activePeriodIx < context.totalPeriods - 1,
+      context.activePeriodIx < context.totalPeriods,
   },
 }).createMachine({
   id: 'game',
@@ -111,8 +113,9 @@ export const gameMachine = setup({
           target: DB.GameStatus.PREPARATION,
           guard: 'hasNextPeriod',
         },
-        // last period -> COMPLETED is added in a later slice (needs a dedicated
-        // event/guard); today the switch loops back to PREPARATION.
+        // After the final period there is no further PREPARATION (hasNextPeriod
+        // is false); reaching COMPLETED here needs a dedicated event/guard and
+        // an active-period index fix, deferred to a later slice.
       },
     },
     [DB.GameStatus.COMPLETED]: {

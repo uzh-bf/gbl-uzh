@@ -9,6 +9,14 @@ It is kept in lock-step with the declarative transition table in
 (`gameMachine.test.ts`) asserts the machine and table agree for every
 state/event/context combination.
 
+`GameService` now **drives** transitions from this model: `activateNextPeriod` /
+`activateNextSegment` ask `GameTransitions.nextStatus(status, event, ctx)` for
+the validity and target of the transition, return early (no-op) when there is no
+valid transition, and write the machine-supplied `targetStatus`. The `switch`
+remains only to select the side-effects (result computation, DB writes) for the
+already-validated transition. Setting `XSTATE_SHADOW=true` enables a post-commit
+invariant check that the persisted `game.status` matches the machine target.
+
 ## States and events
 
 - **States** map one-to-one to the `GameStatus` enum: `SCHEDULED`,

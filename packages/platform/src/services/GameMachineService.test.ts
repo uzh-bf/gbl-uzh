@@ -100,10 +100,25 @@ test('getGameLifecycleState reports available events', () => {
     }
   )
 
-  // RESULTS on the last period: cannot advance (would be COMPLETED once wired)
+  // RESULTS entering the final period: activePeriodIx is advanced early to 1 of
+  // 2, so it points at the last period, which still needs preparing -> allowed.
   assert.deepEqual(
     getGameLifecycleState(
       gameRow(DB.GameStatus.RESULTS, { activePeriodIx: 1, periodCount: 2 })
+    ),
+    {
+      status: DB.GameStatus.RESULTS,
+      availableEvents: ['ACTIVATE_NEXT_PERIOD'],
+      canActivateNextPeriod: true,
+      canActivateNextSegment: false,
+    }
+  )
+
+  // RESULTS past the final period (activePeriodIx === periodCount): blocked.
+  // This is the boundary where COMPLETED would be reached once wired (deferred).
+  assert.deepEqual(
+    getGameLifecycleState(
+      gameRow(DB.GameStatus.RESULTS, { activePeriodIx: 2, periodCount: 2 })
     ),
     {
       status: DB.GameStatus.RESULTS,
