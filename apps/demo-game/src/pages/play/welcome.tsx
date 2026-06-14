@@ -24,7 +24,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@uzh-bf/design-system/dist/future'
+} from '@uzh-bf/design-system'
 
 const Schema = Yup.object().shape({
   name: Yup.string()

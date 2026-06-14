@@ -49,13 +49,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@uzh-bf/design-system/dist/future'
+  ShadcnTable as Table,
+  ShadcnTableBody as TableBody,
+  ShadcnTableCell as TableCell,
+  ShadcnTableHead as TableHead,
+  ShadcnTableHeader as TableHeader,
+  ShadcnTableRow as TableRow,
+} from '@uzh-bf/design-system'
 
 import { FormikMultiSelectField } from '~/components/fields/FormikMultiSelectField'
 import { useToast } from '~/components/ui/use-toast'

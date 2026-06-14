@@ -13,3 +13,9 @@ allowBuilds:
   prisma: true
   sharp: true
   unrs-resolver: true
+overrides:
+  # react-dice-complete@2.2.0 peer-deps React <=18; force it onto the
+  # workspace React 19 so there is a single React instance (avoids a duplicate
+  # React that would break hooks). Die.tsx wrapper unchanged.
+  'react-dice-complete>react': '^19.0.0'
+  'react-dice-complete>react-dom': '^19.0.0'

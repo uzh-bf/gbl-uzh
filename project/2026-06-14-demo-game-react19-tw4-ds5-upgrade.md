@@ -98,10 +98,16 @@ tsc/build first, then dev boot + agent-browser for app screens. Review + simplif
 ## Progress
 
 - [x] Research (6-dim workflow wf_6a53f760-3d3) done. Plan approved (4 decisions). Worktree + branch created.
-- [ ] M1-S1 toolchain — NEXT
-- [ ] M1-S2 packages/ui + platform
-- [ ] M1-S3 demo-game app
-- [ ] M1-S4 milestone gate
+- [x] M1-S1 toolchain — Node>=24, pnpm 11.6, allowBuilds map, Dockerfile/CI/.nvmrc. Committed.
+- [x] M1-S2 packages/ui + platform → React19 + TW4 + DS v4. Both build green. Committed a3f3c57.
+- [x] M1-S3 demo-game app — DONE, verified.
+      - deps: React 19.2.7, Next 15.5.19, DS v4.1.6, TW4.1, recharts 2.15.4, lucide 0.522, fortawesome 6.7.2, cva 0.7.1, tw-merge 3.3.1, yup 1.6.1; added @radix-ui/react-select 2.2.5, @tailwindcss/postcss, tw-animate-css; removed i18n trio, autoprefixer, postcss-import, tailwindcss-animate, tailwindcss-radix.
+      - root pnpm-workspace.yaml `overrides:` force react-dice-complete>react/-dom ^19.
+      - TW4 CSS-first: deleted tailwind.config.js; postcss → @tailwindcss/postcss; globals.css layered (theme+utilities, no preflight — preflight from DS base layer), `@source './**'`, `@plugin typography`, `@import tw-animate-css`, kept UZH `:root` + html 14px.
+      - DS v4 has a restrictive `exports` map (no CSS). Workaround: relative `@import '../node_modules/@uzh-bf/design-system/dist/design-system.css'` (enhanced-resolve enforces exports; relative bypasses). Remove in M2 when v5 exports CSS.
+      - re-pointed 7 `dist/future` imports → main barrel; `Table*` → `ShadcnTable* as Table*` aliases (JSX untouched); Select primitives → new local `ui/select.tsx` (radix-select); MultiSelect raw Button → new local `ui/button.tsx` (slot-less cva); PlayerData `bg-opacity-90`→`/90`; MultiSelect ref typed.
+      - Verify: TW4 CSS compile OK (283KB; preflight+DS utils+demo utils+prose+animate present). `next build` GREEN — Next 15.5.19, all 11 static pages prerendered, css 31.3kB. platform+ui build green. react override → single react@19.2.7 in demo subtree; website keeps react@18.3.1.
+- [ ] M1-S4 milestone gate — NEXT (full `pnpm build` chain incl nexus/codegen; website/advisor still build; syncpack green/excepted)
 - [ ] M2-S5 v5 tarball swap
 - [ ] M2-S6 visualize
 
