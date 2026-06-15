@@ -1,11 +1,6 @@
 import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
 import {
   Button,
-  // CycleCountdown,
-  FormikNumberField,
-  Switch,
-} from '@uzh-bf/design-system'
-import {
   Card,
   CardContent,
   CardDescription,
@@ -17,6 +12,9 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
+  // CycleCountdown,
+  FormikNumberField,
+  Switch,
   ShadcnTable as Table,
   ShadcnTableBody as TableBody,
   ShadcnTableCell as TableCell,
@@ -98,8 +96,8 @@ function getNumber(value: unknown, fallback = 0): number {
     typeof value === 'number' && Number.isFinite(value)
       ? value
       : typeof value === 'string'
-      ? Number(value)
-      : fallback
+        ? Number(value)
+        : fallback
   return Number.isFinite(parsed) ? parsed : fallback
 }
 

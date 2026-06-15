@@ -8,8 +8,8 @@ function Join() {
     typeof router.query?.token === 'string'
       ? router.query.token
       : Array.isArray(router.query?.token)
-      ? router.query.token[0]
-      : undefined
+        ? router.query.token[0]
+        : undefined
 
   const loginAsTeam = trpc.auth.loginAsTeam.useMutation()
   const { isPending: isLoginAsTeamPending, mutateAsync: loginAsTeamAsync } =

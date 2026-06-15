@@ -160,7 +160,7 @@ function LearningElement({ elementId }: { elementId: string | null }) {
           </div>
           <div>
             {elementState === LearningElementState.SOLVED && (
-              <div className="flex flex-row gap-4 px-4 py-2 text-sm ">
+              <div className="flex flex-row gap-4 px-4 py-2 text-sm">
                 <FontAwesomeIcon
                   className="mt-1 text-orange-500"
                   // className="text--400"

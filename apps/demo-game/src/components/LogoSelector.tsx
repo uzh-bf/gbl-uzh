@@ -1,12 +1,9 @@
 import * as Avatar from '@radix-ui/react-avatar'
 import { useField } from 'formik'
-import { range } from 'ramda'
-import { useContext } from 'react'
 // import { PlayerContext } from 'src/components/layouts/GameLayout'
-import { COLORS, AVATARS } from 'src/lib/constants'
+import { AVATARS } from 'src/lib/constants'
 // import { PlayerRole } from 'src/types/app'
 import { twMerge } from 'tailwind-merge'
-
 
 interface Props {
   color?: string
@@ -22,18 +19,14 @@ function LogoSelector({ color, label, className, ...props }: Props) {
 
   return (
     <div className={computedClassName}>
-      {label && (
-        <label htmlFor="avatarSelection">
-          {label}
-        </label>
-      )}
+      {label && <label htmlFor="avatarSelection">{label}</label>}
       <div className="mt-1 grid grid-cols-4 gap-2">
         {Object.entries(AVATARS).map(([key, src]) => {
           return (
             <Avatar.Root
               key={key}
               className={twMerge(
-                'flex-1 cursor-pointer rounded border border-slate-500 p-1 hover:border-red-800 hover:shadow',
+                'flex-1 cursor-pointer rounded border border-slate-500 p-1 hover:border-red-800 hover:shadow'
                 // key === field.value && 'border-red-800',
                 // color && COLORS[color]
               )}
@@ -43,7 +36,6 @@ function LogoSelector({ color, label, className, ...props }: Props) {
             </Avatar.Root>
           )
         })}
-        
       </div>
     </div>
   )

@@ -203,14 +203,14 @@ importers:
         specifier: ~8.4.49
         version: 8.4.49
       prettier:
-        specifier: ~2.8.8
-        version: 2.8.8
+        specifier: ~3.3.2
+        version: 3.3.3
       prettier-plugin-organize-imports:
         specifier: ~4.1.0
-        version: 4.1.0(prettier@2.8.8)(typescript@5.6.3)
+        version: 4.1.0(prettier@3.3.3)(typescript@5.6.3)
       prettier-plugin-tailwindcss:
-        specifier: ~0.8.0
-        version: 0.8.0(prettier-plugin-organize-imports@4.1.0(prettier@2.8.8)(typescript@5.6.3))(prettier@2.8.8)
+        specifier: ~0.6.14
+        version: 0.6.14(prettier-plugin-organize-imports@4.1.0(prettier@3.3.3)(typescript@5.6.3))(prettier@3.3.3)
       tailwindcss:
         specifier: ~4.1.11
         version: 4.1.18
@@ -7927,9 +7927,9 @@ packages:
       prettier-plugin-twig-melody:
         optional: true
 
-  prettier-plugin-tailwindcss@0.8.0:
-    resolution: {integrity: sha512-V8ITGH87yuBDF6JpEZTOVlUz/saAwqb8f3HRgUj8Lh+tGCcrmorhsLpYqzygwFwK0PE2Ib6Mv3M7T/uE2tZV1g==}
-    engines: {node: '>=20.19'}
+  prettier-plugin-tailwindcss@0.6.14:
+    resolution: {integrity: sha512-pi2e/+ZygeIqntN+vC573BcW5Cve8zUB0SSAGxqpB4f96boZF4M3phPVoOFCeypwkpRYdi7+jQ5YJJUwrkGUAg==}
+    engines: {node: '>=14.21.3'}
     peerDependencies:
       '@ianvs/prettier-plugin-sort-imports': '*'
       '@prettier/plugin-hermes': '*'
@@ -7941,12 +7941,14 @@ packages:
       prettier: ^3.0
       prettier-plugin-astro: '*'
       prettier-plugin-css-order: '*'
+      prettier-plugin-import-sort: '*'
       prettier-plugin-jsdoc: '*'
       prettier-plugin-marko: '*'
       prettier-plugin-multiline-arrays: '*'
       prettier-plugin-organize-attributes: '*'
       prettier-plugin-organize-imports: '*'
       prettier-plugin-sort-imports: '*'
+      prettier-plugin-style-order: '*'
       prettier-plugin-svelte: '*'
     peerDependenciesMeta:
       '@ianvs/prettier-plugin-sort-imports':
@@ -7967,6 +7969,8 @@ packages:
         optional: true
       prettier-plugin-css-order:
         optional: true
+      prettier-plugin-import-sort:
+        optional: true
       prettier-plugin-jsdoc:
         optional: true
       prettier-plugin-marko:
@@ -7979,13 +7983,10 @@ packages:
         optional: true
       prettier-plugin-sort-imports:
         optional: true
+      prettier-plugin-style-order:
+        optional: true
       prettier-plugin-svelte:
         optional: true
-
-  prettier@2.8.8:
-    resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
-    engines: {node: '>=10.13.0'}
-    hasBin: true
 
   prettier@3.3.3:
     resolution: {integrity: sha512-i2tDNA0O5IrMO757lfrdQZCc2jPNDVntV0m/+4whiDfWaTKfMNgR7Qz0NAeGz/nRqF4m5/6CLzbP4/liHt12Ew==}
@@ -13437,7 +13438,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/scope-manager': 7.15.0
       '@typescript-eslint/types': 7.15.0
-      '@typescript-eslint/typescript-estree': 7.15.0(supports-color@8.1.1)(typescript@5.6.3)
+      '@typescript-eslint/typescript-estree': 7.15.0(typescript@5.6.3)
       '@typescript-eslint/visitor-keys': 7.15.0
       debug: 4.4.3(supports-color@8.1.1)
       eslint: 8.57.1(supports-color@8.1.1)
@@ -13450,7 +13451,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/scope-manager': 7.15.0
       '@typescript-eslint/types': 7.15.0
-      '@typescript-eslint/typescript-estree': 7.15.0(supports-color@8.1.1)(typescript@5.6.3)
+      '@typescript-eslint/typescript-estree': 7.15.0(typescript@5.6.3)
       '@typescript-eslint/visitor-keys': 7.15.0
       debug: 4.4.3(supports-color@8.1.1)
       eslint: 9.39.4(jiti@2.7.0)
@@ -13496,7 +13497,7 @@ snapshots:
 
   '@typescript-eslint/type-utils@7.15.0(eslint@8.57.1(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.6.3)':
     dependencies:
-      '@typescript-eslint/typescript-estree': 7.15.0(supports-color@8.1.1)(typescript@5.6.3)
+      '@typescript-eslint/typescript-estree': 7.15.0(typescript@5.6.3)
       '@typescript-eslint/utils': 7.15.0(eslint@8.57.1(supports-color@8.1.1))(typescript@5.6.3)
       debug: 4.4.3(supports-color@8.1.1)
       eslint: 8.57.1(supports-color@8.1.1)
@@ -13508,7 +13509,7 @@ snapshots:
 
   '@typescript-eslint/type-utils@7.15.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.6.3)':
     dependencies:
-      '@typescript-eslint/typescript-estree': 7.15.0(supports-color@8.1.1)(typescript@5.6.3)
+      '@typescript-eslint/typescript-estree': 7.15.0(typescript@5.6.3)
       '@typescript-eslint/utils': 7.15.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.6.3)
       debug: 4.4.3(supports-color@8.1.1)
       eslint: 9.39.4(jiti@2.7.0)
@@ -13534,7 +13535,7 @@ snapshots:
 
   '@typescript-eslint/types@8.61.0': {}
 
-  '@typescript-eslint/typescript-estree@7.15.0(supports-color@8.1.1)(typescript@5.6.3)':
+  '@typescript-eslint/typescript-estree@7.15.0(typescript@5.6.3)':
     dependencies:
       '@typescript-eslint/types': 7.15.0
       '@typescript-eslint/visitor-keys': 7.15.0
@@ -13569,7 +13570,7 @@ snapshots:
       '@eslint-community/eslint-utils': 4.9.0(eslint@8.57.1(supports-color@8.1.1))
       '@typescript-eslint/scope-manager': 7.15.0
       '@typescript-eslint/types': 7.15.0
-      '@typescript-eslint/typescript-estree': 7.15.0(supports-color@8.1.1)(typescript@5.6.3)
+      '@typescript-eslint/typescript-estree': 7.15.0(typescript@5.6.3)
       eslint: 8.57.1(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
@@ -13580,7 +13581,7 @@ snapshots:
       '@eslint-community/eslint-utils': 4.9.0(eslint@9.39.4(jiti@2.7.0))
       '@typescript-eslint/scope-manager': 7.15.0
       '@typescript-eslint/types': 7.15.0
-      '@typescript-eslint/typescript-estree': 7.15.0(supports-color@8.1.1)(typescript@5.6.3)
+      '@typescript-eslint/typescript-estree': 7.15.0(typescript@5.6.3)
       eslint: 9.39.4(jiti@2.7.0)
     transitivePeerDependencies:
       - supports-color
@@ -18226,9 +18227,9 @@ snapshots:
       prettier: 3.3.3
       typescript: 5.6.3
 
-  prettier-plugin-organize-imports@4.1.0(prettier@2.8.8)(typescript@5.6.3):
+  prettier-plugin-organize-imports@4.1.0(prettier@3.3.3)(typescript@5.6.3):
     dependencies:
-      prettier: 2.8.8
+      prettier: 3.3.3
       typescript: 5.6.3
 
   prettier-plugin-tailwindcss@0.4.1(prettier-plugin-organize-imports@3.2.4(prettier@3.3.3)(typescript@5.6.3))(prettier@3.3.3):
@@ -18237,13 +18238,11 @@ snapshots:
     optionalDependencies:
       prettier-plugin-organize-imports: 3.2.4(prettier@3.3.3)(typescript@5.6.3)
 
-  prettier-plugin-tailwindcss@0.8.0(prettier-plugin-organize-imports@4.1.0(prettier@2.8.8)(typescript@5.6.3))(prettier@2.8.8):
+  prettier-plugin-tailwindcss@0.6.14(prettier-plugin-organize-imports@4.1.0(prettier@3.3.3)(typescript@5.6.3))(prettier@3.3.3):
     dependencies:
-      prettier: 2.8.8
+      prettier: 3.3.3
     optionalDependencies:
-      prettier-plugin-organize-imports: 4.1.0(prettier@2.8.8)(typescript@5.6.3)
-
-  prettier@2.8.8: {}
+      prettier-plugin-organize-imports: 4.1.0(prettier@3.3.3)(typescript@5.6.3)
 
   prettier@3.3.3: {}
 

@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { Button } from '~/components/ui/button'
 import { twMerge } from 'tailwind-merge'
+import { Button } from '~/components/ui/button'
 import {
   Command,
   CommandEmpty,

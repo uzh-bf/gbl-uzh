@@ -110,7 +110,7 @@ function StoryElements({
         />
       </div>
 
-      <div className="prose mt-4 max-w-none prose-img:max-w-xs prose-img:rounded">
+      <div className="prose prose-img:max-w-xs prose-img:rounded mt-4 max-w-none">
         <Markdown
           components={{
             img: ({ node, ...props }) => {

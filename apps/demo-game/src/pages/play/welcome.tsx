@@ -92,7 +92,7 @@ function Welcome() {
                 avator form.
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-wrap gap-4 sm:flex-nowrap  sm:justify-center">
+            <CardContent className="flex flex-wrap gap-4 sm:flex-nowrap sm:justify-center">
               <div className="flex w-full flex-col gap-4">
                 <Card className="h-full">
                   <CardHeader>
@@ -121,7 +121,7 @@ function Welcome() {
                 </Card>
               </div>
 
-              <Form className="max-w-1/2 w-full sm:w-max">
+              <Form className="w-full max-w-1/2 sm:w-max">
                 <Card>
                   <CardHeader>
                     <CardTitle>Avatar</CardTitle>
