@@ -49,9 +49,9 @@ function resolveTargetStatus(
 }
 
 /**
- * Safety net (opt-in via XSTATE_SHADOW): the machine authorized `target`; warn
- * when the committed row did not actually reach it. No-op when the flag is off
- * or the status matches.
+ * Safety net (opt-in via the XSTATE_SHADOW env flag, kept for back-compat): the
+ * transition table authorized `target`; warn when the committed row did not
+ * actually reach it. No-op when the flag is off or the status matches.
  */
 function assertMachineTarget(
   fnName: string,
@@ -68,7 +68,7 @@ function assertMachineTarget(
     meta.actual != null &&
     meta.actual !== meta.target
   ) {
-    log.warn(`[xstate] ${fnName}: committed status != machine target`, meta)
+    log.warn(`[lifecycle-shadow] ${fnName}: committed status != table target`, meta)
   }
 }
 

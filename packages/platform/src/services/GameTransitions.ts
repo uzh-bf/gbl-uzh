@@ -1,25 +1,20 @@
 import * as DB from '@prisma/client'
 
 /**
- * Typed transition table for the game lifecycle state machine.
+ * Typed transition table for the game lifecycle — the single source of truth
+ * for the state machine.
  *
- * The lifecycle is implemented today as imperative `switch (game.status)`
- * blocks inside `GameService.activateNextPeriod` and
- * `GameService.activateNextSegment`. This module makes that implicit machine
- * explicit: a single, declarative source of truth for
+ * `GameService.activateNextPeriod` / `activateNextSegment` / `finishGame` drive
+ * their transitions from this table (`nextStatus`): which admin event is valid
+ * in which state, the guard that gates each transition, and the resulting
+ * target state. `getGameLifecycleState` derives the admin-control view from it.
  *
- *   - which admin event is valid in which state,
- *   - the guard that gates each transition, and
- *   - the resulting target state.
- *
- * It is intentionally framework-free (no XState, no Prisma queries) so it can
- * be used everywhere: to drive the admin control buttons, to shadow-check the
- * existing switch logic, and as the specification the XState machine mirrors.
- *
- * NOTE: this table encodes the *intended* machine, with two long-standing bugs
- * in the current switch logic corrected (see inline `BUG:` comments). Those
- * code paths are fixed in a later slice; until then a shadow comparison will
- * surface them as divergences, which is the point.
+ * It is intentionally framework-free (no XState, no Prisma queries) so it can be
+ * used everywhere — server transitions, the admin controls, and an optional
+ * generated diagram (`scripts/lifecycle-diagram.ts`). A mirrored XState machine
+ * was kept in lock-step for a while; it has been removed and this table is now
+ * the sole authority. See CONTEXT.md at the repo root ("transition table
+ * authority").
  */
 
 export type GameEvent =
@@ -209,4 +204,35 @@ export function availableEvents(
   ctx: GameTransitionContext
 ): GameEvent[] {
   return GAME_EVENTS.filter((event) => canTransition(status, event, ctx))
+}
+
+/** The minimal game-row shape needed to derive the lifecycle view. */
+export type GameRowForLifecycle = {
+  status: DB.GameStatus
+} & Parameters<typeof buildTransitionContext>[0]
+
+export interface GameLifecycleState {
+  status: DB.GameStatus
+  /** events that are currently valid from this state */
+  availableEvents: GameEvent[]
+  canActivateNextPeriod: boolean
+  canActivateNextSegment: boolean
+}
+
+/**
+ * The lifecycle view used to drive admin controls: which transitions are valid
+ * right now, derived directly from the transition table. Cheap; no actor or
+ * machine instance involved.
+ */
+export function getGameLifecycleState(
+  game: GameRowForLifecycle
+): GameLifecycleState {
+  const ctx = buildTransitionContext(game)
+  const events = availableEvents(game.status, ctx)
+  return {
+    status: game.status,
+    availableEvents: events,
+    canActivateNextPeriod: events.includes('ACTIVATE_NEXT_PERIOD'),
+    canActivateNextSegment: events.includes('ACTIVATE_NEXT_SEGMENT'),
+  }
 }

@@ -1,7 +1,6 @@
 export { default as log } from './lib/logger.js'
 export * as AccountService from './services/AccountService.js'
 export * as EventService from './services/EventService.js'
-export * as GameMachineService from './services/GameMachineService.js'
 export * as GameService from './services/GameService.js'
 export * as GameTransitions from './services/GameTransitions.js'
 export * as PlayService from './services/PlayService.js'

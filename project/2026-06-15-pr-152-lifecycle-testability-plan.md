@@ -112,7 +112,21 @@ S4 — collapse the xstate machine (user: Collapse fully)
       GameService.finishGame.test.ts proves the seam (spy + fake prisma, no DB).
       Reviewed (both subagents caught + fixed the array-form actual=undefined
       shadow-check regression) + simplified. Verify: tsc 0, tests 27/27.
-- [ ] S4 collapse machine
+- [x] S4 collapse machine. GameTransitions table is sole authority. Deleted
+      gameMachine.ts/.test.ts, GameMachineService.ts/.test.ts, machines/README.md.
+      Folded getGameLifecycleState (+ GameRowForLifecycle, GameLifecycleState)
+      into GameTransitions.ts. Removed GameMachineService re-export from index.ts;
+      removed xstate dep from package.json + 3 blocks from pnpm-lock.yaml (surgical,
+      8 deletions). Added scripts/lifecycle-diagram.ts (Mermaid from GAME_TRANSITIONS)
+      + lifecycle:diagram script. New GameTransitions.test.ts (8 tests). GameService.ts
+      doc/log wording only ([xstate]->[lifecycle-shadow]; XSTATE_SHADOW env kept).
+      Reviewed + simplified: rejected canFinishGame (no caller, not in old shape),
+      the canActivate* removal (preserved contract), and a vacuous property-test port
+      (canTransition === nextStatus!==null is its own defn); accepted dedupe of the
+      triple ctx-eval in getGameLifecycleState (derive canActivate* from availableEvents)
+      + CONTEXT.md path note. Deferred dead jest devDeps (out of scope, chipped).
+      Verify: tsc 0, tests 24/24 (count drops from 27: removed machine/service tests,
+      added 8 table tests).
 - [ ] Final security review
 - [ ] PR #152 body update
-- Active: S3 committed, starting S4 (collapse machine).
+- Active: S4 done; next = final security review, then PR #152 body.
