@@ -147,6 +147,16 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     return strExpiresAt ? dayjs(strExpiresAt).toDate() : null
   }, [strExpiresAt])
 
+  // Re-arm the per-threshold countdown notifications whenever the countdown
+  // changes. Done as a render-phase reset (tracking the previous countdown key)
+  // rather than an effect, so it complies with react-hooks/set-state-in-effect.
+  const countdownKey = `${strExpiresAt}|${countdownDurationMs}`
+  const [prevCountdownKey, setPrevCountdownKey] = useState(countdownKey)
+  if (prevCountdownKey !== countdownKey) {
+    setPrevCountdownKey(countdownKey)
+    setCountdownNotifications({ '60': false, '180': false })
+  }
+
   useEffect(() => {
     if (!strExpiresAt) return
 
@@ -159,8 +169,6 @@ function GameLayout({ children }: { children: React.ReactNode }) {
         description: `${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
       })
     }
-
-    setCountdownNotifications({ '60': false, '180': false })
   }, [strExpiresAt, countdownDurationMs])
 
   const playerInfo = {
@@ -314,11 +322,20 @@ function Cockpit() {
     }
   )
 
-  useEffect(() => {
-    if (data?.result?.currentGame?.periods?.length > 0) {
-      setPeriod(data.result.currentGame.periods.length - 1)
+  // Default the selected period to the latest one whenever the number of
+  // periods changes (e.g. a new period is activated). Done as a render-phase
+  // update (tracking the previous count, seeded at 0 so the initial load is
+  // also covered) rather than an effect, per react-hooks/set-state-in-effect.
+  // Manual navigation via setPeriod is preserved because this only fires when
+  // the count itself changes.
+  const periodsLength = data?.result?.currentGame?.periods?.length ?? 0
+  const [prevPeriodsLength, setPrevPeriodsLength] = useState(0)
+  if (prevPeriodsLength !== periodsLength) {
+    setPrevPeriodsLength(periodsLength)
+    if (periodsLength > 0) {
+      setPeriod(periodsLength - 1)
     }
-  }, [data?.result?.currentGame?.periods?.length])
+  }
 
   if (loading) return null
   if (error) return `Error! ${error}`
