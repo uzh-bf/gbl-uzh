@@ -21,18 +21,6 @@ const appReactDomDir = path.dirname(
   require.resolve('react-dom', { paths: [__dirname] })
 )
 
-// @apollo/client peer-resolves separately for react@18 and react@19, so pnpm
-// materialises two physical copies. demo-game imports its hooks from the
-// react@19 copy, while `@gbl-uzh/platform/dist` (which creates the client and is
-// imported by `_app`) pulls the react@18 copy. Two copies = two distinct
-// `ApolloContext` objects: the provider seeds one, `useQuery` reads the other,
-// so queries never settle and pages hang on `loading` forever despite the
-// network request returning 200. Pin every `@apollo/client` import in this
-// app's bundle to a single copy.
-const appApolloDir = path.dirname(
-  require.resolve('@apollo/client/package.json', { paths: [__dirname] })
-)
-
 const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
@@ -63,17 +51,6 @@ const nextConfig: NextConfig = {
         ...config.resolve.alias,
         react: appReactDir,
         'react-dom': appReactDomDir,
-        // Collapse the duplicate @apollo/client copies (see appApolloDir above)
-        // to one, so the provider and useQuery share a single ApolloContext.
-        '@apollo/client': appApolloDir,
-        // Some `~/types/*` modules (nexus GraphQL type defs) are imported by
-        // client pages for an incidental util (e.g. computePeriodStatus). nexus
-        // statically pulls in `prettier`, whose ESM build imports Node builtins
-        // (`module`, `v8`, ...) that don't exist in the browser. Production
-        // tree-shakes the dead nexus/prettier code; `next dev` does not, so it
-        // 500s. prettier is never needed client-side -> stub it to an empty
-        // module. (Pre-existing import-boundary smell, surfaced by dev mode.)
-        prettier: false,
       }
     }
     return config
