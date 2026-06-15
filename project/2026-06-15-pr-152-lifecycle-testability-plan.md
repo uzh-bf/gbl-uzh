@@ -100,9 +100,13 @@ S4 — collapse the xstate machine (user: Collapse fully)
       toReceiveEventsThunk. New GameService.results.test.ts (8 tests, no Prisma).
       Reviewed (behavior-preserving across all 6 arms, no Critical) +
       simplified (dropped unused .map/.reduce params). Verify: tsc 0, tests 19/19.
-- [ ] S2 pure visibility filter
+- [x] S2 pure visibility filter. filterVisiblePeriods extracted (generic over
+      row types so rich Prisma rows pass through); getPlayerResult consumes it +
+      resultType; in-place filter logic gone. New PlayService.visibility.test.ts
+      (6 tests). Reviewed (behavior-preserving, any[]→generics) + simplified.
+      Verify: tsc 0, tests 25/25.
 - [ ] S3 injectable notifier
 - [ ] S4 collapse machine
 - [ ] Final security review
 - [ ] PR #152 body update
-- Active: S1 committed, starting S2.
+- Active: S2 committed, starting S3.
