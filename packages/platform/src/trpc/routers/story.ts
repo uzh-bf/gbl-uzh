@@ -1,5 +1,9 @@
 import { z } from 'zod'
-import { createTRPCRouter, playerProcedure } from '../init.js'
+import {
+  createTRPCRouter,
+  playerProcedure,
+  protectedProcedure,
+} from '../init.js'
 import { idSchema } from '../schemas.js'
 import * as GameService from '../../services/GameService.js'
 import * as PlayService from '../../services/PlayService.js'
@@ -7,7 +11,7 @@ import { throwAsTRPCError } from '../errors.js'
 
 export function createStoryRouter() {
   return createTRPCRouter({
-    list: playerProcedure.query(async ({ ctx }) => {
+    list: protectedProcedure.query(async ({ ctx }) => {
       try {
         return GameService.getStoryElements({}, ctx as any)
       } catch (error) {
@@ -19,10 +23,19 @@ export function createStoryRouter() {
       .input(z.object({ elementId: idSchema }))
       .mutation(async ({ input, ctx }) => {
         try {
-          return PlayService.markStoryElement(
+          const player = await PlayService.markStoryElement(
             { elementId: input.elementId } as any,
             ctx as any
           )
+
+          if (!player) return null
+
+          // Return only the fields the client needs; the raw Player record
+          // includes the login token and other internal columns.
+          return {
+            id: player.id,
+            visitedStoryElementIds: player.visitedStoryElementIds,
+          }
         } catch (error) {
           throwAsTRPCError(error)
         }

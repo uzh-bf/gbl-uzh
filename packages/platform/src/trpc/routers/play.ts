@@ -5,11 +5,12 @@ import * as EventService from '../../services/EventService.js'
 import * as GameService from '../../services/GameService.js'
 import * as PlayService from '../../services/PlayService.js'
 import { toPlayerSelfDto } from '../dto/player.js'
-import { toPlayerResultDto } from '../dto/results.js'
+import { toPlayerResultCoreDto, toPlayerResultDto } from '../dto/results.js'
 import { throwAsTRPCError } from '../errors.js'
 import { createTRPCRouter, playerProcedure } from '../init.js'
 
 type RouterDeps = {
+  services?: Record<string, unknown>
   schemas?: {
     PlayerFactsSchema?: any
   }
@@ -51,7 +52,10 @@ function hasCompletedCompanySetup(
   return typeof color === 'string' && color.trim().length > 0
 }
 
-export function createPlayRouter({ schemas = {} }: RouterDeps = {}) {
+export function createPlayRouter({
+  services = {},
+  schemas = {},
+}: RouterDeps = {}) {
   return createTRPCRouter({
     self: playerProcedure.query(async ({ ctx }) => {
       try {
@@ -169,7 +173,7 @@ export function createPlayRouter({ schemas = {} }: RouterDeps = {}) {
 
           const facts = parsePayload(input.payload)
 
-          return PlayService.performActionWithRetry(
+          const actionResult = await PlayService.performActionWithRetry(
             {
               gameId: currentGame.id,
               actionType: input.type,
@@ -180,9 +184,11 @@ export function createPlayRouter({ schemas = {} }: RouterDeps = {}) {
             } as any,
             ctx as any,
             {
-              services: (ctx.services ?? {}) as any,
+              services: services as any,
             } as any
           )
+
+          return toPlayerResultCoreDto(actionResult as any)
         } catch (error) {
           throwAsTRPCError(error)
         }
@@ -194,13 +200,21 @@ export function createPlayRouter({ schemas = {} }: RouterDeps = {}) {
         try {
           const facts = parsePayload(input.payload)
 
-          return PlayService.saveDecisions(
+          const decision = await PlayService.saveDecisions(
             {
               decisionType: DB.PlayerDecisionType.CONSOLIDATION,
               facts,
             } as any,
             ctx as any
           )
+
+          if (!decision) return null
+
+          return {
+            id: decision.id,
+            type: decision.type,
+            facts: decision.facts,
+          }
         } catch (error) {
           throwAsTRPCError(error)
         }

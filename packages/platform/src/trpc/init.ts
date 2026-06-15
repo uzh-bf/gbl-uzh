@@ -5,6 +5,19 @@ import type { PlatformContext, PlatformUser } from './context.js'
 
 const t = initTRPC.context<PlatformContext>().create({
   transformer: superjson,
+  // Never leak raw internal error messages (Prisma/service internals) to
+  // clients. Mapped errors (UNAUTHORIZED/FORBIDDEN/BAD_REQUEST) keep their
+  // message; anything that fell through to INTERNAL_SERVER_ERROR is genericized.
+  errorFormatter({ shape }) {
+    if (shape.data.code === 'INTERNAL_SERVER_ERROR') {
+      return {
+        ...shape,
+        message: 'Internal server error',
+      }
+    }
+
+    return shape
+  },
 })
 
 export const createTRPCRouter = t.router

@@ -1,5 +1,11 @@
+import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
-import { createTRPCRouter, playerProcedure } from '../init.js'
+import {
+  createTRPCRouter,
+  playerProcedure,
+  protectedProcedure,
+} from '../init.js'
+import { UserRole } from '../../types.js'
 import { gameIdSchema, playerResultTypeSchema } from '../schemas.js'
 import * as PlayService from '../../services/PlayService.js'
 import {
@@ -32,23 +38,34 @@ export function createResultsRouter() {
       }
     }),
 
-    specific: playerProcedure.input(specificInput).query(async ({ input, ctx }) => {
-      try {
-        const results = await PlayService.getSpecificResults(
-          {
-            gameId: input.gameId,
-            type: input.type,
-          } as any,
-          ctx as any
-        )
+    specific: protectedProcedure
+      .input(specificInput)
+      .query(async ({ input, ctx }) => {
+        // Players may only read results for their own game; admins (reports)
+        // may query any game. Guarded outside try so it is not re-mapped.
+        if (
+          ctx.user.role !== UserRole.ADMIN &&
+          input.gameId !== ctx.user.gameId
+        ) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Forbidden' })
+        }
 
-        return (results ?? [])
-          .map((result: any) => toSpecificResultDto(result))
-          .filter(present)
-      } catch (error) {
-        throwAsTRPCError(error)
-      }
-    }),
+        try {
+          const results = await PlayService.getSpecificResults(
+            {
+              gameId: input.gameId,
+              type: input.type,
+            } as any,
+            ctx as any
+          )
+
+          return (results ?? [])
+            .map((result: any) => toSpecificResultDto(result))
+            .filter(present)
+        } catch (error) {
+          throwAsTRPCError(error)
+        }
+      }),
 
     pastForPlayer: playerProcedure.query(async ({ ctx }) => {
       try {

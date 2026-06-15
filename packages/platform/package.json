@@ -12,7 +12,6 @@
     "dist"
   ],
   "dependencies": {
-    "@trpc/server": "11.17.0",
     "nanoid": "5.0.8",
     "random-js": "2.1.0",
     "superjson": "2.2.6",
@@ -39,6 +38,7 @@
   },
   "peerDependencies": {
     "@prisma/client": "^6.14.0",
+    "@trpc/server": "11.17.0",
     "dayjs": "^1.11.13",
     "jsonwebtoken": "^9.0.2",
     "next": "^15.2.2",

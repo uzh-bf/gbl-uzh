@@ -37,7 +37,7 @@ export function createPlatformRouter({
     game: createGameRouter({ services, schemas, roleAssigner }),
     period: createPeriodRouter({ services, schemas }),
     segment: createSegmentRouter({ services, schemas }),
-    play: createPlayRouter({ schemas }),
+    play: createPlayRouter({ services, schemas }),
     learning: createLearningRouter(),
     events: createEventsRouter(),
     story: createStoryRouter(),

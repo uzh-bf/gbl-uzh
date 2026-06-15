@@ -1,6 +1,10 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
-import { createTRPCRouter, playerProcedure } from '../init.js'
+import {
+  createTRPCRouter,
+  playerProcedure,
+  protectedProcedure,
+} from '../init.js'
 import { idSchema } from '../schemas.js'
 import * as GameService from '../../services/GameService.js'
 import * as PlayService from '../../services/PlayService.js'
@@ -24,7 +28,7 @@ function normalizeSelection(selection: string | number[]) {
 
 export function createLearningRouter() {
   return createTRPCRouter({
-    list: playerProcedure.query(async ({ ctx }) => {
+    list: protectedProcedure.query(async ({ ctx }) => {
       try {
         const elements = await GameService.getLearningElements({}, ctx as any)
 

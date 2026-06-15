@@ -20,6 +20,10 @@ export function asTRPCCodeFromServiceError(
 }
 
 export function throwAsTRPCError(error: unknown): never {
+  // Preserve already-typed tRPC errors (e.g. BAD_REQUEST/FORBIDDEN thrown by a
+  // procedure); re-mapping them by message would downgrade them to 500s.
+  if (error instanceof TRPCError) throw error
+
   const code = asTRPCCodeFromServiceError(error)
   const message =
     error instanceof Error ? error.message : 'Internal server error'

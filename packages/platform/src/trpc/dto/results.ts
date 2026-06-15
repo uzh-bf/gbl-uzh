@@ -9,15 +9,15 @@ export interface PlayerResultCoreDto {
   id: number
   type: DB.PlayerResultType
   facts: unknown
+  // period/segment expose only id+index here; their `facts` hold operator-only
+  // simulation parameters and were never part of the player-facing result shape.
   period: {
     id: number
     index: number
-    facts?: unknown
   }
   segment?: {
     id: number
     index: number
-    facts?: unknown
   } | null
 }
 
@@ -265,14 +265,12 @@ export function toPlayerResultCoreDto(
     period: {
       id: source.period.id,
       index: source.period.index ?? 0,
-      facts: source.period.facts,
     },
     segment:
       source.segment?.id && typeof source.segment.id === 'number'
         ? {
             id: source.segment.id,
             index: source.segment.index ?? 0,
-            facts: source.segment.facts,
           }
         : null,
   }

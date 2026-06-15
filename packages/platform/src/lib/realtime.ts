@@ -4,8 +4,24 @@ import type { Event as PlatformEvent } from '../types.js'
 const GLOBAL_EVENT_CHANNEL = 'global:events'
 const USER_EVENT_CHANNEL_PREFIX = 'user:events:'
 
-const eventBus = new EventEmitter()
-eventBus.setMaxListeners(0)
+// Cache the emitter on globalThis so Next.js dev HMR (which re-evaluates this
+// module) does not split publishers and subscribers across separate emitter
+// instances, which would silently drop realtime events after a hot reload.
+const REALTIME_EVENT_BUS_KEY = Symbol.for('__gbl_realtime_event_bus')
+
+function getOrCreateEventBus(): EventEmitter {
+  const cached = (globalThis as Record<symbol, unknown>)[
+    REALTIME_EVENT_BUS_KEY
+  ] as EventEmitter | undefined
+  if (cached) return cached
+
+  const instance = new EventEmitter()
+  instance.setMaxListeners(0)
+  ;(globalThis as Record<symbol, unknown>)[REALTIME_EVENT_BUS_KEY] = instance
+  return instance
+}
+
+const eventBus = getOrCreateEventBus()
 
 function userChannel(userId: string): string {
   return `${USER_EVENT_CHANNEL_PREFIX}${userId}`
