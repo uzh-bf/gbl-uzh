@@ -29,7 +29,7 @@
     "nodemon": "~2.0.16",
     "standard-version": "~9.5.0",
     "syncpack": "~13.0.0",
-    "turbo": "~2.2.3"
+    "turbo": "~2.9.14"
   },
   "scripts": {
     "build": "turbo run build",
