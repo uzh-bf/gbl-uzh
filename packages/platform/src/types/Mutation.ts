@@ -11,6 +11,7 @@ import {
 } from 'nexus'
 import * as AccountService from '../services/AccountService.js'
 import * as GameService from '../services/GameService.js'
+import { UserRole } from '../types.js'
 
 import * as EventService from '../services/EventService.js'
 import * as PlayService from '../services/PlayService.js'
@@ -45,6 +46,20 @@ function hasCompletedCompanySetup(
 
   const color = (facts as Record<string, unknown>).color
   return typeof color === 'string' && color.trim().length > 0
+}
+
+/**
+ * Guard admin-only mutations: the game lifecycle transitions
+ * (activateNextPeriod / activateNextSegment / finishGame) accept a caller-supplied
+ * gameId and must only be invoked by an authenticated ADMIN. Without this, a
+ * PLAYER-role session (or an unauthenticated request, where `user` is undefined)
+ * could drive any game's state. Throws the same plain-Error convention used
+ * elsewhere in the resolvers (e.g. ACTIONS_NOT_ALLOWED).
+ */
+function requireAdmin(ctx: { user?: { role?: UserRole } }) {
+  if (ctx.user?.role !== UserRole.ADMIN) {
+    throw new Error('UNAUTHORIZED')
+  }
 }
 
 export function generateBaseMutations<
@@ -146,6 +161,7 @@ export function generateBaseMutations<
           gameId: nonNull(intArg()),
         },
         async resolve(_, args, ctx) {
+          requireAdmin(ctx)
           const results = await GameService.activateNextPeriod(args, ctx, {
             services,
           })
@@ -160,6 +176,7 @@ export function generateBaseMutations<
           gameId: nonNull(intArg()),
         },
         async resolve(_, args, ctx) {
+          requireAdmin(ctx)
           const results = await GameService.activateNextSegment(args, ctx, {
             services,
           })
@@ -174,6 +191,7 @@ export function generateBaseMutations<
           gameId: nonNull(intArg()),
         },
         async resolve(_, args, ctx) {
+          requireAdmin(ctx)
           const result = await GameService.finishGame(args, ctx)
           if (!result) return
           return result as any
