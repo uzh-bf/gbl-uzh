@@ -2,3 +2,26 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - cypress
+allowBuilds:
+  '@parcel/watcher': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  '@swc/core': true
+  core-js: false
+  cypress: true
+  esbuild: true
+  prisma: true
+  sharp: true
+  unrs-resolver: true
+overrides:
+  # react-dice-complete@2.2.0 peer-deps React <=18; force it onto the
+  # workspace React 19 so there is a single React instance (avoids a duplicate
+  # React that would break hooks). Die.tsx wrapper unchanged.
+  'react-dice-complete>react': '^19.0.0'
+  'react-dice-complete>react-dom': '^19.0.0'
+  # The workspace mixes Font Awesome 6.6.0 (website, legacy) and 6.7.2
+  # (demo-game/ui). fontawesome-common-types holds the IconProp/IconPrefix
+  # types; two copies make IconDefinition vs IconProp nominally incompatible
+  # and break @gbl-uzh/ui's tsc. Pin one (6.7.2 is a superset) so the type is
+  # identical everywhere.
+  '@fortawesome/fontawesome-common-types': '6.7.2'

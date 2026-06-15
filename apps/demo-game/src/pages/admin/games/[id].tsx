@@ -49,13 +49,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@uzh-bf/design-system/dist/future'
+  ShadcnTable as Table,
+  ShadcnTableBody as TableBody,
+  ShadcnTableCell as TableCell,
+  ShadcnTableHead as TableHead,
+  ShadcnTableHeader as TableHeader,
+  ShadcnTableRow as TableRow,
+} from '@uzh-bf/design-system'
 
 import { FormikMultiSelectField } from '~/components/fields/FormikMultiSelectField'
 import { useToast } from '~/components/ui/use-toast'
@@ -572,30 +572,20 @@ function ManageGame() {
                                 </Button>
                               }
                               title="Add Segment"
-                              onSecondaryAction={
-                                <Button
-                                  onClick={() => {
-                                    newSegmentForm.resetForm()
-                                    setIsSegmentModalOpen(false)
-                                  }}
-                                >
-                                  Discard
-                                </Button>
-                              }
-                              onPrimaryAction={
-                                <Button
-                                  onClick={async () => {
-                                    await newSegmentForm.setFieldValue(
-                                      'periodIx',
-                                      period.index
-                                    )
-                                    newSegmentForm.handleSubmit()
-                                    setIsSegmentModalOpen(false)
-                                  }}
-                                >
-                                  Submit
-                                </Button>
-                              }
+                              onSecondaryAction={() => {
+                                newSegmentForm.resetForm()
+                                setIsSegmentModalOpen(false)
+                              }}
+                              secondaryLabel="Discard"
+                              onPrimaryAction={async () => {
+                                await newSegmentForm.setFieldValue(
+                                  'periodIx',
+                                  period.index
+                                )
+                                newSegmentForm.handleSubmit()
+                                setIsSegmentModalOpen(false)
+                              }}
+                              primaryLabel="Submit"
                             >
                               <div className="flex w-1/2 flex-col gap-2">
                                 <FormikMultiSelectField
@@ -690,34 +680,23 @@ function ManageGame() {
                     </Button>
                   }
                   title="Add Period"
-                  onSecondaryAction={
-                    <Button
-                      onClick={() => {
-                        newPeriodForm.resetForm()
-                        setIsPeriodModalOpen(false)
-                      }}
-                    >
-                      Discard
-                    </Button>
-                  }
-                  onPrimaryAction={
-                    <Button
-                      onClick={async () => {
-                        await newPeriodForm.setFieldValue(
-                          'newPeriodIx',
-                          game.periods.length
-                        )
-                        newPeriodForm.handleSubmit()
-                        setIsPeriodModalOpen(false)
-                      }}
-                    >
-                      Submit
-                    </Button>
-                  }
+                  onSecondaryAction={() => {
+                    newPeriodForm.resetForm()
+                    setIsPeriodModalOpen(false)
+                  }}
+                  secondaryLabel="Discard"
+                  onPrimaryAction={async () => {
+                    await newPeriodForm.setFieldValue(
+                      'newPeriodIx',
+                      game.periods.length
+                    )
+                    newPeriodForm.handleSubmit()
+                    setIsPeriodModalOpen(false)
+                  }}
+                  primaryLabel="Submit"
                 >
                   <div className="flex w-1/2 flex-col gap-2">
                     <FormikTextField
-                      type="string"
                       name="periodName"
                       label="Period Name"
                       data={{ cy: 'period-name' }}
