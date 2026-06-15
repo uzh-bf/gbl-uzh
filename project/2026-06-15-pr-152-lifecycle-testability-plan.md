@@ -127,6 +127,26 @@ S4 — collapse the xstate machine (user: Collapse fully)
       + CONTEXT.md path note. Deferred dead jest devDeps (out of scope, chipped).
       Verify: tsc 0, tests 24/24 (count drops from 27: removed machine/service tests,
       added 8 table tests).
-- [ ] Final security review
-- [ ] PR #152 body update
-- Active: S4 done; next = final security review, then PR #152 body.
+- [x] Final security review. Whole-branch pass weighted on the refactor.
+      DONE_WITH_CONCERNS, merge-ready for branch scope, no new findings.
+      Verified: requireAdmin on all 3 lifecycle mutations; OCC predicate on every
+      arm; visibility filter faithful (no over-exposure; player/game from ctx.user);
+      playerId from DB rows not caller input; shadow check logging-only; no secrets.
+      Deferred (pre-existing, tracked): cross-admin ownership isolation (Important,
+      chipped task_35b0eb3d); createGame/addGamePeriod/addPeriodSegment lack
+      requireAdmin (Minor); previousResults no type filter (Minor).
+- [x] PR #152 body update. $df-mr-description-writer; whole branch vs origin/dev
+      (24 files +3358/-355, 26 commits, head a9d0955). Corrected stale phase-1
+      claims (no net xstate dep; machine/GameMachineService deleted; single export).
+      Read back: base dev, draft, OPEN.
+- Active: plan complete. See Next Steps.
+
+## Next Steps
+- Re-run host CI on head a9d0955 (the green build/lint were on 66f57e5; SonarCloud
+  quality-gate + Vercel preview failing — Vercel looks like preview config, not a
+  compile break). Confirm before merge.
+- Mark PR ready-for-review (currently draft) once CI re-runs green.
+- Follow-ups carried in the PR body + chips: cross-admin ownership scoping
+  (task_35b0eb3d), requireAdmin on the 3 setup mutations, previousResults type
+  filter, remove dead jest devDeps (task_696c6e51), Prisma tx hardening (T1-T6),
+  optional GAME_COMPLETED event, resolver-level auth regression test.
