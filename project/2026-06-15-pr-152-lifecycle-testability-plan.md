@@ -105,8 +105,14 @@ S4 — collapse the xstate machine (user: Collapse fully)
       resultType; in-place filter logic gone. New PlayService.visibility.test.ts
       (6 tests). Reviewed (behavior-preserving, any[]→generics) + simplified.
       Verify: tsc 0, tests 25/25.
-- [ ] S3 injectable notifier
+- [x] S3 injectable notifier. GamePublisher type + defaultGamePublisher(ctx,
+      requireActivePeriod) factory; optional publish in the options bag of all 3
+      lifecycle fns (default preserves each block's guard). assertMachineTarget
+      now reads the committed tx result (handles array- vs callback-form). New
+      GameService.finishGame.test.ts proves the seam (spy + fake prisma, no DB).
+      Reviewed (both subagents caught + fixed the array-form actual=undefined
+      shadow-check regression) + simplified. Verify: tsc 0, tests 27/27.
 - [ ] S4 collapse machine
 - [ ] Final security review
 - [ ] PR #152 body update
-- Active: S2 committed, starting S3.
+- Active: S3 committed, starting S4 (collapse machine).

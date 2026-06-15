@@ -92,6 +92,33 @@ function publishGameRealtimeEvent(
   )
 }
 
+/**
+ * Injectable post-commit realtime publish. The lifecycle transitions accept an
+ * optional publisher in their options bag; production passes nothing and gets
+ * `defaultGamePublisher` (which re-reads the realtime game state and publishes
+ * it). Tests pass a no-op / spy, keeping that second Prisma read and the pubsub
+ * singleton out of the unit path. See CONTEXT.md.
+ */
+export type GamePublisher = (
+  gameId: number,
+  type: BaseGlobalNotificationType
+) => void | Promise<void>
+
+function defaultGamePublisher(
+  ctx: Context,
+  requireActivePeriod = false
+): GamePublisher {
+  return async (gameId, type) => {
+    const gameAfterUpdate = await EventService.getGameRealtimeState(
+      ctx.prisma,
+      gameId
+    )
+    if (gameAfterUpdate && (!requireActivePeriod || gameAfterUpdate.activePeriod)) {
+      publishGameRealtimeEvent(gameId, gameAfterUpdate, type)
+    }
+  }
+}
+
 interface CreateGameArgs<T> {
   name: string
   playerCount: number
@@ -410,7 +437,9 @@ interface ActivateNextPeriodArgs {
 export async function activateNextPeriod(
   { gameId }: ActivateNextPeriodArgs,
   ctx: Context,
-  { services }: CtxWithFacts<any, PrismaClient>
+  { services, publish }: CtxWithFacts<any, PrismaClient> & {
+    publish?: GamePublisher
+  }
 ) {
   log.info('activating next period for gameId:', gameId)
 
@@ -929,25 +958,24 @@ export async function activateNextPeriod(
   }
 
   if (didUpdate) {
-    const gameAfterUpdate = await EventService.getGameRealtimeState(
-      ctx.prisma,
-      gameId
-    )
+    // the committed game row: array-form $transaction([game.update, ...]) arms
+    // (SCHEDULED, RESULTS) return an array whose [0] is the game.update result;
+    // callback-form arms (RUNNING, CONSOLIDATION) return the game directly
+    const committedGame = Array.isArray(finalTransactionResult)
+      ? finalTransactionResult[0]
+      : finalTransactionResult
+    assertMachineTarget('activateNextPeriod', {
+      gameId,
+      fromStatus: game.status,
+      event,
+      target: targetStatus,
+      actual: (committedGame as any)?.status,
+    })
 
-    if (gameAfterUpdate) {
-      assertMachineTarget('activateNextPeriod', {
-        gameId,
-        fromStatus: game.status,
-        event,
-        target: targetStatus,
-        actual: gameAfterUpdate.status,
-      })
-      publishGameRealtimeEvent(
-        gameId,
-        gameAfterUpdate,
-        BaseGlobalNotificationType.PERIOD_ACTIVATED
-      )
-    }
+    await (publish ?? defaultGamePublisher(ctx))(
+      gameId,
+      BaseGlobalNotificationType.PERIOD_ACTIVATED
+    )
   }
   return finalTransactionResult
 }
@@ -959,7 +987,9 @@ interface ActivateSegmentArgs {
 export async function activateNextSegment(
   { gameId }: ActivateSegmentArgs,
   ctx: Context,
-  { services }: CtxWithFacts<any, PrismaClient>
+  { services, publish }: CtxWithFacts<any, PrismaClient> & {
+    publish?: GamePublisher
+  }
 ) {
   const game = await ctx.prisma.game.findUnique({
     where: { id: gameId },
@@ -1219,26 +1249,20 @@ export async function activateNextSegment(
       return null
   }
   if (didUpdate) {
-    const gameAfterUpdate = await EventService.getGameRealtimeState(
-      ctx.prisma,
-      gameId
-    )
-
     assertMachineTarget('activateNextSegment', {
       gameId,
       fromStatus: game.status,
       event,
       target: targetStatus,
-      actual: gameAfterUpdate?.status,
+      actual: (finalTransactionResult as any)?.status,
     })
 
-    if (gameAfterUpdate && gameAfterUpdate.activePeriod) {
-      publishGameRealtimeEvent(
-        gameId,
-        gameAfterUpdate,
-        BaseGlobalNotificationType.SEGMENT_ACTIVATED
-      )
-    }
+    // segment events only publish once the active period is present (the
+    // requireActivePeriod guard), matching the previous inline condition
+    await (publish ?? defaultGamePublisher(ctx, true))(
+      gameId,
+      BaseGlobalNotificationType.SEGMENT_ACTIVATED
+    )
   }
 
   return finalTransactionResult
@@ -1255,7 +1279,11 @@ interface FinishGameArgs {
  * period's consolidation establishes. Returns null when the transition is not
  * valid from the current state (e.g. the game is not on its final results).
  */
-export async function finishGame({ gameId }: FinishGameArgs, ctx: Context) {
+export async function finishGame(
+  { gameId }: FinishGameArgs,
+  ctx: Context,
+  { publish }: { publish?: GamePublisher } = {}
+) {
   const game = await ctx.prisma.game.findUnique({
     where: { id: gameId },
     include: { periods: true },
@@ -1288,17 +1316,10 @@ export async function finishGame({ gameId }: FinishGameArgs, ctx: Context) {
     actual: updatedGame.status,
   })
 
-  const gameAfterUpdate = await EventService.getGameRealtimeState(
-    ctx.prisma,
-    gameId
+  await (publish ?? defaultGamePublisher(ctx))(
+    gameId,
+    BaseGlobalNotificationType.GAME_STATE_UPDATED
   )
-  if (gameAfterUpdate) {
-    publishGameRealtimeEvent(
-      gameId,
-      gameAfterUpdate,
-      BaseGlobalNotificationType.GAME_STATE_UPDATED
-    )
-  }
 
   return updatedGame
 }
