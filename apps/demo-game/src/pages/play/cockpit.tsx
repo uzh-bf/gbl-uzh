@@ -707,7 +707,7 @@ function Cockpit() {
                       <CardHeader>
                         <CardTitle>Absolute Performance</CardTitle>
                         <CardDescription>
-                          Your portfolio's total value (total assets) compared
+                          Your portfolio&apos;s total value (total assets) compared
                           to benchmarks (savings, bonds and stocks,
                           respectively) over time.
                         </CardDescription>
