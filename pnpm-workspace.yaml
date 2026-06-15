@@ -14,21 +14,24 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
 overrides:
-  # demo-game runs Next 16 + React 19, but design-system v4 declares a React 18
-  # peer. Without forcing it up, pnpm installs a second react@18 copy and even
-  # resolves Next 16's own react peer to 18.3.1 — so Next's dev client runtime
-  # hydrates the react@19 app tree with react-dom@18 and the client never takes
-  # over (the page stays on the SSR markup and effects never fire). Pin the
-  # Next 16 / design-system v4 graph to React 19 so there is a single React
-  # instance. website still runs Next 15 + React 18 (design-system v3); the
-  # version-scoped selectors leave that graph untouched.
+  # demo-game runs Next 16 + React 19; several of its deps declare a React 18
+  # peer with a *capped* range (`^18`), so pnpm installs a second react@18 copy
+  # for them. With one React instance required (Turbopack has no per-bundle react
+  # alias to dedupe, so a duplicate breaks its build with "Cannot read properties
+  # of null (reading 'useState')"), force these onto React 19. Selectors are
+  # version/parent-scoped so the website app (still Next 15 + React 18 +
+  # design-system v3) is untouched — and @gbl-uzh/ui is consumed only by the
+  # React 19 apps. Shared deps with open peers (react-markdown `>=16`,
+  # react-fontawesome `>=16.3`) resolve per-consumer automatically and need no
+  # override.
   'next@16>react': '^19.0.0'
   'next@16>react-dom': '^19.0.0'
   '@uzh-bf/design-system@4>react': '^19.0.0'
   '@uzh-bf/design-system@4>react-dom': '^19.0.0'
-  # react-dice-complete@2.2.0 peer-deps React <=18; force it onto the
-  # workspace React 19 so there is a single React instance (avoids a duplicate
-  # React that would break hooks). Die.tsx wrapper unchanged.
+  '@gbl-uzh/ui>react': '^19.0.0'
+  '@gbl-uzh/ui>react-dom': '^19.0.0'
+  # react-dice-complete@2.2.0 peer-deps React <=18; force it onto React 19 so
+  # there is a single React instance. Die.tsx wrapper unchanged.
   'react-dice-complete>react': '^19.0.0'
   'react-dice-complete>react-dom': '^19.0.0'
   # The workspace mixes Font Awesome 6.6.0 (website, legacy) and 6.7.2
