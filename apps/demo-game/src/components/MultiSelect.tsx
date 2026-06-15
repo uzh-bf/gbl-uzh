@@ -1,5 +1,5 @@
-import { Button } from '@uzh-bf/design-system/dist/future'
 import * as React from 'react'
+import { Button } from '~/components/ui/button'
 import { twMerge } from 'tailwind-merge'
 import {
   Command,
@@ -26,7 +26,7 @@ export function MultiSelect({
   placeholderCmdSearch,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false)
-  const containerRef = React.useRef(null)
+  const containerRef = React.useRef<HTMLDivElement>(null)
 
   const handleValueChange = (val) => {
     if (value.includes(val)) {

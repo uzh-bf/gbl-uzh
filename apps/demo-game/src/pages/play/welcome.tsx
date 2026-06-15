@@ -17,7 +17,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@uzh-bf/design-system/dist/future'
+} from '@uzh-bf/design-system'
 import LogoSelector from '~/components/LogoSelector'
 import { trpc } from '~/lib/trpc'
 

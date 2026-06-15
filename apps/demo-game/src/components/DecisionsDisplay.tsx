@@ -6,13 +6,13 @@ import {
   CardTitle,
   ScrollArea,
   Separator,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@uzh-bf/design-system/dist/future'
+  ShadcnTable as Table,
+  ShadcnTableBody as TableBody,
+  ShadcnTableCell as TableCell,
+  ShadcnTableHead as TableHead,
+  ShadcnTableHeader as TableHeader,
+  ShadcnTableRow as TableRow,
+} from '@uzh-bf/design-system'
 import { twMerge } from 'tailwind-merge'
 
 interface ObjectProps {

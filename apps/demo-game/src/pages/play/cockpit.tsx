@@ -17,18 +17,20 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
+  ShadcnTable as Table,
+  ShadcnTableBody as TableBody,
+  ShadcnTableCell as TableCell,
+  ShadcnTableHead as TableHead,
+  ShadcnTableHeader as TableHeader,
+  ShadcnTableRow as TableRow,
+} from '@uzh-bf/design-system'
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@uzh-bf/design-system/dist/future'
+} from '~/components/ui/select'
 
 import { CycleCountdown } from '~/components/CycleCountDown'
 

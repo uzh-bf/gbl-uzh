@@ -1,4 +1,4 @@
-import { Button, Modal, Progress } from '@uzh-bf/design-system'
+import { Modal, Progress } from '@uzh-bf/design-system'
 import Image from 'next/image'
 import { sortBy } from 'ramda'
 import { useEffect, useMemo, useState } from 'react'
@@ -91,44 +91,35 @@ function StoryElements({
       onClose={() => {
         setUnseenStoryElements((elem) => elem.slice(1))
       }}
-      onPrimaryAction={
-        <Button
-          onClick={() => {
-            const elementId = unseenStoryElements[0]?.id
-            if (!elementId) return
+      onPrimaryAction={() => {
+        const elementId = unseenStoryElements[0]?.id
+        if (!elementId) return
 
-            markStoryElement.mutate({
-              elementId,
-            })
-          }}
-          disabled={markStoryElement.isPending}
-        >
-          Continue
-        </Button>
-      }
+        markStoryElement.mutate({
+          elementId,
+        })
+      }}
+      primaryLabel="Continue"
       title={unseenStoryElements[0]?.title}
     >
       <div>
         <Progress
           max={activeStoryElements?.length}
           value={activeStoryElements?.length - unseenStoryElements?.length + 1}
-          formatter={Number}
+          formatter={(value) => String(value)}
         />
       </div>
 
       <div className="prose mt-4 max-w-none prose-img:max-w-xs prose-img:rounded">
         <Markdown
           components={{
-            img: ({ node, src, alt, ...props }) => {
-              if (!src) return null
-
+            img: ({ node, ...props }) => {
               return (
                 <Image
                   {...props}
-                  src={src}
                   width={250}
                   height={250}
-                  alt={alt ?? 'Visual representation of the story element'}
+                  alt="Visual representation of the story element"
                   className="mt-4 rounded-lg"
                   style={{ maxWidth: '100%' }}
                 />

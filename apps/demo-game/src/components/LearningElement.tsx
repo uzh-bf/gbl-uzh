@@ -190,12 +190,14 @@ function LearningElement({ elementId }: { elementId: string | null }) {
               key={ix}
               disabled={elementState === LearningElementState.SOLVED}
               className={{
-                root: twMerge(
-                  'prose prose-sm p-3',
-                  activeElements?.includes(ix) &&
-                    elementState === LearningElementState.SOLVED &&
-                    'border-green-200 bg-green-100'
-                ),
+                root: 'prose prose-sm p-3',
+                // Apply the solved-state "your answer" highlight through
+                // `active` (twMerged after the default blue active styling)
+                // so it wins; on `root` it would lose the twMerge conflict.
+                active:
+                  elementState === LearningElementState.SOLVED
+                    ? 'border-green-200 bg-green-100'
+                    : undefined,
               }}
               active={activeElements?.includes(ix)}
               onClick={() =>

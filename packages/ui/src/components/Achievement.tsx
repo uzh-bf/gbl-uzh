@@ -12,11 +12,11 @@ function Achievement({ name, xpReward, image, count }: AchievementProps) {
       title={name}
     >
       <img className="w-6 h-6 md:w-8 md:h-8" src={`/${image}`} />
-      <div className="absolute bottom-0 right-0 p-[2px] text-xs text-red-700 bg-white bg-opacity-90 rounded">
+      <div className="absolute bottom-0 right-0 p-[2px] text-xs text-red-700 bg-white/90 rounded">
         {xpReward}
       </div>
       {count > 1 && (
-        <div className="absolute top-0 right-0 p-[2px] text-xs text-red-700 bg-white bg-opacity-90 rounded">
+        <div className="absolute top-0 right-0 p-[2px] text-xs text-red-700 bg-white/90 rounded">
           {count}x
         </div>
       )}

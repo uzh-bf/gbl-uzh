@@ -55,7 +55,13 @@ function Games() {
           },
         }}
         onSubmit={async (variables, { resetForm }) => {
-          await createGame.mutateAsync(variables)
+          await createGame.mutateAsync({
+            ...variables,
+            // playerCount is edited through a text input, so Formik stores it
+            // as a string; parseInt coerces to an integer (Number would let a
+            // fractional "1.5" through and fail schema validation).
+            playerCount: parseInt(String(variables.playerCount), 10),
+          })
           resetForm()
         }}
       >
@@ -70,6 +76,7 @@ function Games() {
               name="playerCount"
               type="number"
               min={1}
+              step={1}
               label="Player Count"
               data={{ cy: 'game-player-count' }}
             />

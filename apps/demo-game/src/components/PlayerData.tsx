@@ -33,11 +33,11 @@ function Achievement({
       title={name}
     >
       <img className="h-6 w-6 md:h-8 md:w-8" src={`/${image}`} />
-      <div className="absolute bottom-0 right-0 rounded bg-white bg-opacity-90 p-[2px] text-xs text-red-700">
+      <div className="absolute bottom-0 right-0 rounded bg-white/90 p-[2px] text-xs text-red-700">
         {xpReward}
       </div>
       {count > 1 && (
-        <div className="absolute right-0 top-0 rounded bg-white bg-opacity-90 p-[2px] text-xs text-red-700">
+        <div className="absolute right-0 top-0 rounded bg-white/90 p-[2px] text-xs text-red-700">
           {count}x
         </div>
       )}
