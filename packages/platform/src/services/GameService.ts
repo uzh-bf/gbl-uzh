@@ -500,7 +500,7 @@ export async function activateNextPeriod(
     //   period or segment
     // - Done: the game facts are updated on user interaction in PlayService
     case DB.GameStatus.SCHEDULED: {
-      const { results, extras } = computePeriodStartResults(
+      const { results, actions } = computePeriodStartResults(
         {
           results: undefined,
           players: game.players,
@@ -508,9 +508,9 @@ export async function activateNextPeriod(
           game,
           periodFacts: game.periods?.[0]?.facts,
         },
-        ctx,
         { services }
       )
+      const extras = actions.map((a) => toPlayerActionCreate(ctx, gameId, a))
 
       // update the status and active period of the current game
       // and prepare PERIOD_START results
@@ -602,9 +602,12 @@ export async function activateNextPeriod(
             },
           })
 
-          const { results, extras } = computeSegmentEndResults(gameLocal, ctx, {
+          const { results, actions } = computeSegmentEndResults(gameLocal, {
             services,
           })
+          const extras = actions.map((a) =>
+            toPlayerActionCreate(ctx, gameId, a)
+          )
 
           // TODO(JJ): Check if we need to update the game facts as well
           // update period facts when starting consolidation
@@ -697,7 +700,7 @@ export async function activateNextPeriod(
     case DB.GameStatus.CONSOLIDATION: {
       if (!game.activePeriod?.activeSegment) return null
 
-      const { results, extras, promises } = await computePeriodEndResults(
+      const { results, actions, events } = computePeriodEndResults(
         {
           segmentEndResults: game.results,
           players: game.players,
@@ -709,9 +712,10 @@ export async function activateNextPeriod(
           activeSegmentIx: currentSegmentIx,
           game,
         },
-        ctx,
         { services }
       )
+      const extras = actions.map((a) => toPlayerActionCreate(ctx, gameId, a))
+      const promises = events.map((e) => toReceiveEventsThunk(ctx, e))
 
       let periodIx = nextPeriodIx
 
@@ -853,7 +857,7 @@ export async function activateNextPeriod(
       //   return result
       // }
 
-      const { results, extras } = computePeriodStartResults(
+      const { results, actions } = computePeriodStartResults(
         {
           results: game.activePeriod.previousPeriod[0]?.results,
           players: game.players,
@@ -861,9 +865,9 @@ export async function activateNextPeriod(
           game,
           periodFacts: game.activePeriod.facts,
         },
-        ctx,
         { services }
       )
+      const extras = actions.map((a) => toPlayerActionCreate(ctx, gameId, a))
 
       finalTransactionResult = await ctx.prisma.$transaction([
         // update the status and active period of the current game
@@ -1013,9 +1017,10 @@ export async function activateNextSegment(
     // PAUSED -> RUNNING
     case DB.GameStatus.PREPARATION:
     case DB.GameStatus.PAUSED: {
-      const { results, extras } = computeSegmentStartResults(game, ctx, {
+      const { results, actions } = computeSegmentStartResults(game, {
         services,
       })
+      const extras = actions.map((a) => toPlayerActionCreate(ctx, gameId, a))
 
       finalTransactionResult = await ctx.prisma.$transaction(
         async (tx) => {
@@ -1137,9 +1142,12 @@ export async function activateNextSegment(
             },
           })
 
-          const { results, extras } = computeSegmentEndResults(gameLocal, ctx, {
+          const { results, actions } = computeSegmentEndResults(gameLocal, {
             services,
           })
+          const extras = actions.map((a) =>
+            toPlayerActionCreate(ctx, gameId, a)
+          )
 
           const updatedGame = await tx.game.update({
             where: {
@@ -1431,81 +1439,136 @@ export async function getStoryElements(args, ctx: Context) {
   return ctx.prisma.storyElement.findMany()
 }
 
-function mapAction({ ctx, gameId, activePeriodIx, playerId }) {
-  return (action) =>
-    ctx.prisma.playerAction.create({
-      data: {
-        type: action.type,
-        facts: action.facts,
-        game: {
-          connect: { id: gameId },
-        },
-        player: {
-          connect: { id: playerId },
-        },
-        periodIx: activePeriodIx,
-        period: {
-          connect: {
-            gameId_index: {
-              gameId,
-              index: activePeriodIx,
-            },
+/**
+ * Plain, Prisma-free descriptor of a player action produced by result
+ * computation. The compute* cores return these instead of live Prisma promises,
+ * so they stay pure and unit-testable; a call-site mapper (`toPlayerActionCreate`)
+ * turns each into a `playerAction.create` inside the transaction. See CONTEXT.md
+ * ("result descriptor").
+ */
+export interface ActionDescriptor {
+  type: string
+  facts: any
+  /** segment index the action belongs to, when segment-scoped */
+  segment?: number
+  playerId: string
+  periodIx: number
+}
+
+/**
+ * Plain descriptor of a period-end domain-event batch for one player. A
+ * call-site mapper (`toReceiveEventsThunk`) turns it into a deferred
+ * `EventService.receiveEvents` thunk run only after the game-state transaction
+ * commits.
+ */
+export interface EventDescriptor {
+  playerId: string
+  events: any
+  periodIx: number
+  gameId: number
+  achievementKeys: any
+  experience: any
+  levelIx: any
+}
+
+/**
+ * I/O seam: build the Prisma `playerAction.create` for an ActionDescriptor.
+ * Lives at the call site (closes over `ctx`) so the compute* cores never touch
+ * Prisma.
+ */
+function toPlayerActionCreate(
+  ctx: Context,
+  gameId: number,
+  d: ActionDescriptor
+) {
+  return ctx.prisma.playerAction.create({
+    data: {
+      type: d.type,
+      facts: d.facts,
+      game: {
+        connect: { id: gameId },
+      },
+      player: {
+        connect: { id: d.playerId },
+      },
+      periodIx: d.periodIx,
+      period: {
+        connect: {
+          gameId_index: {
+            gameId,
+            index: d.periodIx,
           },
         },
-        segmentIx:
-          typeof action.segment === 'number' ? action.segment : undefined,
-        segment:
-          typeof action.segment === 'number'
-            ? {
-                connect: {
-                  gameId_periodIx_index: {
-                    gameId,
-                    periodIx: activePeriodIx,
-                    index: action.segment,
-                  },
-                },
-              }
-            : undefined,
       },
+      segmentIx: typeof d.segment === 'number' ? d.segment : undefined,
+      segment:
+        typeof d.segment === 'number'
+          ? {
+              connect: {
+                gameId_periodIx_index: {
+                  gameId,
+                  periodIx: d.periodIx,
+                  index: d.segment,
+                },
+              },
+            }
+          : undefined,
+    },
+  })
+}
+
+/** I/O seam: build the deferred receiveEvents thunk for an EventDescriptor. */
+function toReceiveEventsThunk(ctx: Context, d: EventDescriptor) {
+  return () =>
+    EventService.receiveEvents({
+      events: d.events,
+      ctx: {
+        args: {
+          playerId: d.playerId,
+          periodIx: d.periodIx,
+          gameId: d.gameId,
+        },
+        user: ctx.user,
+        achievements: d.achievementKeys,
+        experience: d.experience,
+        currentLevelIx: d.levelIx,
+      },
+      prisma: ctx.prisma,
     })
 }
 
 export function computePeriodStartResults(
   { results, players, activePeriodIx, game, periodFacts },
-  ctx,
-  { services }
-) {
+  { services }: { services: any }
+): { results: any[]; actions: ActionDescriptor[] } {
   const currentPeriodIx = activePeriodIx
   const nextPeriodIx = currentPeriodIx + 1
 
-  // TODO(JJ): Instead of creating prisma queries, just save the parameters
-  // of mapAction and call it later in an async transaction fn
-  let extras: any[] = []
+  const actions: ActionDescriptor[] = []
 
   // if the game is running, transform previous results to next
   if (currentPeriodIx >= 0) {
     const result = results
       // ensure that we only work on PERIOD_END results of the preceding period
       .filter((result) => result.type === DB.PlayerResultType.PERIOD_END)
-      .map((result, ix, allResults) => {
-        const { resultFacts: facts, actions } = services.PeriodResult.start(
-          result.facts,
-          {
+      .map((result) => {
+        const { resultFacts: facts, actions: domainActions } =
+          services.PeriodResult.start(result.facts, {
             playerRole: result.player?.role ?? result.player.connect?.role,
             gameFacts: game.facts,
             periodFacts,
-          }
-        )
-
-        if (actions && actions.length > 0) {
-          const mapper = mapAction({
-            ctx,
-            gameId: game.id,
-            activePeriodIx: currentPeriodIx,
-            playerId: result.player.id,
           })
 
-          extras = [...extras, ...actions.map(mapper)]
+        if (domainActions && domainActions.length > 0) {
+          for (const a of domainActions) {
+            actions.push({
+              type: a.type,
+              facts: a.facts,
+              segment: a.segment,
+              playerId: result.player.id,
+              periodIx: currentPeriodIx,
+            })
+          }
         }
 
         return {
@@ -1528,26 +1591,28 @@ export function computePeriodStartResults(
 
     return {
       results: result,
-      extras,
+      actions,
     }
   }
 
   // if the game has not started yet, generate initial PERIOD_START results
-  const result = players.map((player, ix, allPlayers) => {
-    const { resultFacts: facts, actions } = services.PeriodResult.initialize(
-      {},
-      { playerRole: player.role, gameFacts: game.facts, periodFacts }
-    )
+  const result = players.map((player) => {
+    const { resultFacts: facts, actions: domainActions } =
+      services.PeriodResult.initialize(
+        {},
+        { playerRole: player.role, gameFacts: game.facts, periodFacts }
+      )
 
-    if (actions && actions.length > 0) {
-      const mapper = mapAction({
-        ctx,
-        gameId: game.id,
-        activePeriodIx: nextPeriodIx,
-        playerId: player.id,
-      })
-
-      extras = [...extras, ...actions.map(mapper)]
+    if (domainActions && domainActions.length > 0) {
+      for (const a of domainActions) {
+        actions.push({
+          type: a.type,
+          facts: a.facts,
+          segment: a.segment,
+          playerId: player.id,
+          periodIx: nextPeriodIx,
+        })
+      }
     }
 
     return {
@@ -1570,11 +1635,11 @@ export function computePeriodStartResults(
 
   return {
     results: result,
-    extras,
+    actions,
   }
 }
 
-export async function computePeriodEndResults(
+export function computePeriodEndResults(
   {
     segmentEndResults,
     players,
@@ -1586,14 +1651,14 @@ export async function computePeriodEndResults(
     activeSegmentIx,
     game,
   },
-  ctx: Context,
-  { services }
-) {
-  let extras: any[] = []
-  // deferred thunks: invoked by the caller only AFTER the game-state
-  // transaction has committed, so achievement/experience side-effects are
-  // not applied when the transaction rolls back
-  let promises: Array<() => Promise<any>> = []
+  { services }: { services: any }
+): { results: any[]; actions: ActionDescriptor[]; events: EventDescriptor[] } {
+  const actions: ActionDescriptor[] = []
+  // one descriptor per player result; the caller builds the deferred
+  // receiveEvents thunks and runs them only AFTER the game-state transaction
+  // has committed, so achievement/experience side-effects are not applied when
+  // the transaction rolls back
+  const events: EventDescriptor[] = []
 
   const perPlayer = {}
   players.forEach((player) => {
@@ -1621,8 +1686,8 @@ export async function computePeriodEndResults(
         perPlayer[result.playerId].consolidationDecisions
       const {
         resultFacts: facts,
-        actions,
-        events,
+        actions: domainActions,
+        events: domainEvents,
       } = services.PeriodResult.end(result.facts, {
         segmentEndResults: segmentEndResultsLocal,
         otherPlayersSegmentEndResults,
@@ -1639,38 +1704,29 @@ export async function computePeriodEndResults(
         segmentIx: activeSegmentIx,
       })
 
-      log.debug(actions)
+      log.debug(domainActions)
 
-      if (actions && actions.length > 0) {
-        const mapper = mapAction({
-          ctx,
-          gameId: game.id,
-          activePeriodIx,
-          playerId: result.player.id,
-        })
-
-        extras = [...extras, ...actions.map(mapper)]
+      if (domainActions && domainActions.length > 0) {
+        for (const a of domainActions) {
+          actions.push({
+            type: a.type,
+            facts: a.facts,
+            segment: a.segment,
+            playerId: result.player.id,
+            periodIx: activePeriodIx,
+          })
+        }
       }
 
-      promises = [
-        ...promises,
-        () =>
-          EventService.receiveEvents({
-            events,
-            ctx: {
-              args: {
-                playerId: result.player.id,
-                periodIx: activePeriodIx,
-                gameId: game.id,
-              },
-              user: ctx.user,
-              achievements: result.player.achievementKeys,
-              experience: result.player.experience,
-              currentLevelIx: result.player.levelIx,
-            },
-            prisma: ctx.prisma,
-          }),
-      ]
+      events.push({
+        playerId: result.player.id,
+        events: domainEvents,
+        periodIx: activePeriodIx,
+        gameId: game.id,
+        achievementKeys: result.player.achievementKeys,
+        experience: result.player.experience,
+        levelIx: result.player.levelIx,
+      })
 
       return {
         type: DB.PlayerResultType.PERIOD_END,
@@ -1682,26 +1738,28 @@ export async function computePeriodEndResults(
     })
 
   return {
-    extras,
     results,
-    promises,
+    actions,
+    events,
   }
 }
 
-export function computeSegmentStartResults(game, ctx, { services }) {
+export function computeSegmentStartResults(
+  game,
+  { services }: { services: any }
+): { results: any[]; actions: ActionDescriptor[] } {
   const currentSegmentIx = game.activePeriod.activeSegmentIx
   const nextSegmentIx = currentSegmentIx + 1
 
-  let extras: any[] = []
+  const actions: ActionDescriptor[] = []
 
   // if there was a previous segment, compute the change in results
   if (currentSegmentIx >= 0) {
     const results = game.activePeriod.activeSegment.results
       .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
-      .reduce((acc, result, ix, allResults) => {
-        const { resultFacts: facts, actions } = services.SegmentResult.start(
-          result.facts,
-          {
+      .reduce((acc, result) => {
+        const { resultFacts: facts, actions: domainActions } =
+          services.SegmentResult.start(result.facts, {
             playerRole: result.player.role,
             gameFacts: game.facts,
             periodFacts: game.activePeriod.facts,
@@ -1709,18 +1767,18 @@ export function computeSegmentStartResults(game, ctx, { services }) {
             nextSegmentFacts:
               game.activePeriod.activeSegment.nextSegment?.facts,
             segmentIx: nextSegmentIx,
-          }
-        )
-
-        if (actions && actions.length > 0) {
-          const mapper = mapAction({
-            ctx,
-            gameId: game.id,
-            activePeriodIx: game.activePeriodIx,
-            playerId: result.player.id,
           })
-          // TODO(JJ): @RS Careful, here!!! We add this array to $transaction
-          extras = [...extras, ...actions.map(mapper)]
+
+        if (domainActions && domainActions.length > 0) {
+          for (const a of domainActions) {
+            actions.push({
+              type: a.type,
+              facts: a.facts,
+              segment: a.segment,
+              playerId: result.player.id,
+              periodIx: game.activePeriodIx,
+            })
+          }
         }
 
         const common = {
@@ -1758,7 +1816,7 @@ export function computeSegmentStartResults(game, ctx, { services }) {
 
     return {
       results,
-      extras,
+      actions,
     }
   }
 
@@ -1824,38 +1882,40 @@ export function computeSegmentStartResults(game, ctx, { services }) {
 
   return {
     results,
-    extras,
+    actions,
   }
 }
 
-export function computeSegmentEndResults(game, ctx, { services }) {
-  let extras: any[] = []
+export function computeSegmentEndResults(
+  game,
+  { services }: { services: any }
+): { results: any[]; actions: ActionDescriptor[] } {
+  const actions: ActionDescriptor[] = []
 
   // NOTE(JJ): We go through all results of the active segment of each player
   // and update the game facts if needed
   const results = game.activePeriod.activeSegment.results
     .filter((result) => result.type === DB.PlayerResultType.SEGMENT_END)
     .map((result, ix, allResults) => {
-      const { resultFacts: facts, actions } = services.SegmentResult.end(
-        result.facts,
-        {
+      const { resultFacts: facts, actions: domainActions } =
+        services.SegmentResult.end(result.facts, {
           playerRole: result.player.role,
           gameFacts: game.facts,
           periodFacts: game.activePeriod.facts,
           segmentFacts: game.activePeriod.activeSegment.facts,
           segmentIx: game.activePeriod.activeSegmentIx,
-        }
-      )
-
-      if (actions && actions.length > 0) {
-        const mapper = mapAction({
-          ctx,
-          gameId: game.id,
-          activePeriodIx: game.activePeriodIx,
-          playerId: result.player.id,
         })
 
-        extras = [...extras, ...actions.map(mapper)]
+      if (domainActions && domainActions.length > 0) {
+        for (const a of domainActions) {
+          actions.push({
+            type: a.type,
+            facts: a.facts,
+            segment: a.segment,
+            playerId: result.player.id,
+            periodIx: game.activePeriodIx,
+          })
+        }
       }
 
       return {
@@ -1880,6 +1940,6 @@ export function computeSegmentEndResults(game, ctx, { services }) {
 
   return {
     results,
-    extras,
+    actions,
   }
 }

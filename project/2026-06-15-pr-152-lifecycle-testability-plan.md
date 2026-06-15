@@ -95,10 +95,14 @@ S4 — collapse the xstate machine (user: Collapse fully)
 ## Progress
 - [x] Baseline captured: tests 11/11, tsc 0.
 - [x] CONTEXT.md + plan written (commit separately: docs first, plan second).
-- [ ] S1 pure result computation
+- [x] S1 pure result computation. 4 cores pure (drop ctx, return descriptors);
+      call sites build extras via toPlayerActionCreate + promises via
+      toReceiveEventsThunk. New GameService.results.test.ts (8 tests, no Prisma).
+      Reviewed (behavior-preserving across all 6 arms, no Critical) +
+      simplified (dropped unused .map/.reduce params). Verify: tsc 0, tests 19/19.
 - [ ] S2 pure visibility filter
 - [ ] S3 injectable notifier
 - [ ] S4 collapse machine
 - [ ] Final security review
 - [ ] PR #152 body update
-- Active: committing docs + plan, then S1.
+- Active: S1 committed, starting S2.
