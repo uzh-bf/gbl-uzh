@@ -10,7 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@uzh-bf/design-system/dist/future'
+} from '@uzh-bf/design-system'
 
 const Die = dynamic(() => import('~/components/Die'), {
   ssr: false,

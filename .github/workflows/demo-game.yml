@@ -15,6 +15,27 @@ env:
   IMAGE_NAME: ${{ github.repository }}/demo-game
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+
+      - name: Lint demo-game
+        working-directory: ./apps/demo-game
+        run: pnpm run lint
+
   build:
     runs-on: ubuntu-latest
     permissions:

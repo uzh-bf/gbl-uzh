@@ -21,9 +21,8 @@ jobs:
           node-version: 24.x
           registry-url: https://registry.npmjs.org
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
-          version: 9.12.3
           run_install: true
 
       - name: Build

@@ -6,7 +6,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   navigationMenuTriggerStyle,
-} from '@uzh-bf/design-system/dist/future'
+} from '@uzh-bf/design-system'
 
 interface Props {
   tabs: { name: string; href: string }[]
