@@ -5,6 +5,10 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  next@16>react: ^19.0.0
+  next@16>react-dom: ^19.0.0
+  '@uzh-bf/design-system@4>react': ^19.0.0
+  '@uzh-bf/design-system@4>react-dom': ^19.0.0
   react-dice-complete>react: ^19.0.0
   react-dice-complete>react-dom: ^19.0.0
   '@fortawesome/fontawesome-common-types': 6.7.2
@@ -4377,8 +4381,8 @@ packages:
       formik: ^2.4.6
       lucide-react: ^0.522.0
       postcss: ^8.4.41
-      react: ^19.1.0
-      react-dom: ^19.1.0
+      react: ^19.0.0
+      react-dom: ^19.0.0
       tailwind-merge: ^3.3.1
       tailwindcss: ^4.1.11
       tailwindcss-animate: ^1.0.7
@@ -7457,8 +7461,8 @@ packages:
       '@opentelemetry/api': ^1.1.0
       '@playwright/test': ^1.51.1
       babel-plugin-react-compiler: '*'
-      react: ^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0
-      react-dom: ^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0
+      react: ^19.0.0
+      react-dom: ^19.0.0
       sass: ^1.3.0
     peerDependenciesMeta:
       '@opentelemetry/api':
