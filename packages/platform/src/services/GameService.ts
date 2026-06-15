@@ -17,6 +17,81 @@ import * as GameTransitions from './GameTransitions.js'
 
 type Context = CtxWithPrisma<PrismaClient>
 
+/**
+ * Ask the lifecycle machine (GameTransitions) for the status that `event` leads
+ * to from the game's current status. Returns null — and logs — when there is no
+ * valid transition, in which case the calling admin action is a no-op. The
+ * switch in each transition then only selects side-effects for the (already
+ * validated) transition and writes the returned `targetStatus`.
+ */
+function resolveTargetStatus(
+  game: {
+    status: DB.GameStatus
+    activePeriodIx: number
+    periods?: unknown[] | null
+    activePeriod?: any
+  },
+  event: GameTransitions.GameEvent,
+  gameId: number,
+  fnName: string
+): DB.GameStatus | null {
+  const targetStatus = GameTransitions.nextStatus(
+    game.status,
+    event,
+    GameTransitions.buildTransitionContext(game)
+  )
+  if (!targetStatus) {
+    log.warn(`${fnName}: no valid ${event} from status ${game.status}`, {
+      gameId,
+    })
+  }
+  return targetStatus
+}
+
+/**
+ * Safety net (opt-in via XSTATE_SHADOW): the machine authorized `target`; warn
+ * when the committed row did not actually reach it. No-op when the flag is off
+ * or the status matches.
+ */
+function assertMachineTarget(
+  fnName: string,
+  meta: {
+    gameId: number
+    fromStatus: DB.GameStatus
+    event: GameTransitions.GameEvent
+    target: DB.GameStatus
+    actual: DB.GameStatus | null | undefined
+  }
+) {
+  if (
+    process.env.XSTATE_SHADOW === 'true' &&
+    meta.actual != null &&
+    meta.actual !== meta.target
+  ) {
+    log.warn(`[xstate] ${fnName}: committed status != machine target`, meta)
+  }
+}
+
+/**
+ * Publish a realtime game notification built from the post-transition realtime
+ * state. Shared by the admin lifecycle transitions.
+ */
+function publishGameRealtimeEvent(
+  gameId: number,
+  gameState: Parameters<typeof EventService.buildGameRealtimeFacts>[1],
+  type: BaseGlobalNotificationType
+) {
+  const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
+    type,
+    facts: EventService.buildGameRealtimeFacts(gameId, gameState),
+  }
+  EventService.publishGlobalNotification(eventToPublish)
+  log.info(
+    `Published ${eventToPublish.type} for game ${gameId}`,
+    eventToPublish.facts
+  )
+}
+
 interface CreateGameArgs<T> {
   name: string
   playerCount: number
@@ -397,25 +472,17 @@ export async function activateNextPeriod(
   const currentSegmentIx = game.activePeriod?.activeSegmentIx
   const nextPeriodIx = currentPeriodIx + 1
 
-  // The game lifecycle machine (GameTransitions / gameMachine) is the single
-  // authority on which admin event is valid from the current status and what the
-  // resulting status is. Drive the transition from it: a null target means there
-  // is no valid transition from here, so this is a no-op. The switch below only
-  // selects the side-effects for the (already validated) transition and writes
-  // `targetStatus`.
+  // Drive the transition from the lifecycle machine (see resolveTargetStatus):
+  // a null target means no valid transition from here, so this is a no-op. The
+  // switch below only selects side-effects for the validated transition.
   const event = 'ACTIVATE_NEXT_PERIOD' as const
-  const targetStatus = GameTransitions.nextStatus(
-    game.status,
+  const targetStatus = resolveTargetStatus(
+    game,
     event,
-    GameTransitions.buildTransitionContext(game)
+    gameId,
+    'activateNextPeriod'
   )
-  if (!targetStatus) {
-    log.warn(
-      `activateNextPeriod: no valid ${event} from status ${game.status}`,
-      { gameId }
-    )
-    return null
-  }
+  if (!targetStatus) return null
 
   // NotificationService.publishGlobalNotification({
   //   type: GlobalNotificationType.PERIOD_ACTIVATED,
@@ -646,18 +713,6 @@ export async function activateNextPeriod(
         { services }
       )
 
-      // TODO(JJ): The error happens here for the last consolidation
-      // - there are no more periods
-      // - we prob. need to change the nextPeriodIx if it the last period
-      // suggestion
-      // - maybe setting game.activePeriod to undefined is enough
-      // - In the DB.GameStatus.RESULTS case set the new status
-      // to completed when we are done
-      // - we prob. need to update the game to completed state
-      // - maybe we would like to add a button that finishes the game?
-      //    => it's better not imo, but open for discussion
-      // -> Discuss with RS
-
       let periodIx = nextPeriodIx
 
       // Advance the active-period index even for the final period (so
@@ -876,32 +931,17 @@ export async function activateNextPeriod(
     )
 
     if (gameAfterUpdate) {
-      // Safety net (opt-in via XSTATE_SHADOW): the machine authorized
-      // `targetStatus`; verify the committed row actually reached it.
-      if (
-        process.env.XSTATE_SHADOW === 'true' &&
-        gameAfterUpdate.status !== targetStatus
-      ) {
-        log.warn(
-          '[xstate] activateNextPeriod: committed status != machine target',
-          {
-            gameId,
-            fromStatus: game.status,
-            event,
-            target: targetStatus,
-            actual: gameAfterUpdate.status,
-          }
-        )
-      }
-
-      const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
-        type: BaseGlobalNotificationType.PERIOD_ACTIVATED,
-        facts: EventService.buildGameRealtimeFacts(gameId, gameAfterUpdate),
-      }
-      EventService.publishGlobalNotification(eventToPublish)
-      log.info(
-        `Published ${eventToPublish.type} for game ${gameId}`,
-        eventToPublish.facts
+      assertMachineTarget('activateNextPeriod', {
+        gameId,
+        fromStatus: game.status,
+        event,
+        target: targetStatus,
+        actual: gameAfterUpdate.status,
+      })
+      publishGameRealtimeEvent(
+        gameId,
+        gameAfterUpdate,
+        BaseGlobalNotificationType.PERIOD_ACTIVATED
       )
     }
   }
@@ -950,23 +990,17 @@ export async function activateNextSegment(
   const currentSegmentIx = game.activePeriod.activeSegmentIx
   const nextSegmentIx = currentSegmentIx + 1
 
-  // The game lifecycle machine is the authority on which event is valid here and
-  // what status results. Drive the transition from it (null -> no valid
-  // transition -> no-op); the switch below only runs the side-effects for the
-  // validated transition and writes `targetStatus`.
+  // Drive the transition from the lifecycle machine (see resolveTargetStatus):
+  // null -> no valid transition -> no-op; the switch below only runs the
+  // side-effects for the validated transition.
   const event = 'ACTIVATE_NEXT_SEGMENT' as const
-  const targetStatus = GameTransitions.nextStatus(
-    game.status,
+  const targetStatus = resolveTargetStatus(
+    game,
     event,
-    GameTransitions.buildTransitionContext(game)
+    gameId,
+    'activateNextSegment'
   )
-  if (!targetStatus) {
-    log.warn(
-      `activateNextSegment: no valid ${event} from status ${game.status}`,
-      { gameId }
-    )
-    return null
-  }
+  if (!targetStatus) return null
 
   // NotificationService.publishGlobalNotification({
   //   type: GlobalNotificationType.SEGMENT_ACTIVATED,
@@ -1182,34 +1216,19 @@ export async function activateNextSegment(
       gameId
     )
 
-    // Safety net (opt-in via XSTATE_SHADOW): the machine authorized
-    // `targetStatus`; verify the committed row actually reached it.
-    if (
-      process.env.XSTATE_SHADOW === 'true' &&
-      gameAfterUpdate &&
-      gameAfterUpdate.status !== targetStatus
-    ) {
-      log.warn(
-        '[xstate] activateNextSegment: committed status != machine target',
-        {
-          gameId,
-          fromStatus: game.status,
-          event,
-          target: targetStatus,
-          actual: gameAfterUpdate.status,
-        }
-      )
-    }
+    assertMachineTarget('activateNextSegment', {
+      gameId,
+      fromStatus: game.status,
+      event,
+      target: targetStatus,
+      actual: gameAfterUpdate?.status,
+    })
 
     if (gameAfterUpdate && gameAfterUpdate.activePeriod) {
-      const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
-        type: BaseGlobalNotificationType.SEGMENT_ACTIVATED,
-        facts: EventService.buildGameRealtimeFacts(gameId, gameAfterUpdate),
-      }
-      EventService.publishGlobalNotification(eventToPublish)
-      log.info(
-        `Published ${eventToPublish.type} for game ${gameId}`,
-        eventToPublish.facts
+      publishGameRealtimeEvent(
+        gameId,
+        gameAfterUpdate,
+        BaseGlobalNotificationType.SEGMENT_ACTIVATED
       )
     }
   }
@@ -1237,17 +1256,8 @@ export async function finishGame({ gameId }: FinishGameArgs, ctx: Context) {
   if (!game) return null
 
   const event = 'FINISH_GAME' as const
-  const targetStatus = GameTransitions.nextStatus(
-    game.status,
-    event,
-    GameTransitions.buildTransitionContext(game)
-  )
-  if (!targetStatus) {
-    log.warn(`finishGame: no valid ${event} from status ${game.status}`, {
-      gameId,
-    })
-    return null
-  }
+  const targetStatus = resolveTargetStatus(game, event, gameId, 'finishGame')
+  if (!targetStatus) return null
 
   const updatedGame = await ctx.prisma.game.update({
     where: {
@@ -1262,19 +1272,23 @@ export async function finishGame({ gameId }: FinishGameArgs, ctx: Context) {
     },
   })
 
+  assertMachineTarget('finishGame', {
+    gameId,
+    fromStatus: game.status,
+    event,
+    target: targetStatus,
+    actual: updatedGame.status,
+  })
+
   const gameAfterUpdate = await EventService.getGameRealtimeState(
     ctx.prisma,
     gameId
   )
   if (gameAfterUpdate) {
-    const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
-      type: BaseGlobalNotificationType.GAME_STATE_UPDATED,
-      facts: EventService.buildGameRealtimeFacts(gameId, gameAfterUpdate),
-    }
-    EventService.publishGlobalNotification(eventToPublish)
-    log.info(
-      `Published ${eventToPublish.type} for game ${gameId}`,
-      eventToPublish.facts
+    publishGameRealtimeEvent(
+      gameId,
+      gameAfterUpdate,
+      BaseGlobalNotificationType.GAME_STATE_UPDATED
     )
   }
 

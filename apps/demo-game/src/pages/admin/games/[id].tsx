@@ -70,6 +70,16 @@ import {
   TREND_STOCKS,
 } from '~/types/Period'
 
+// Global event types that should trigger an admin refetch. Module-level so it
+// is not rebuilt on every subscription callback.
+const RELEVANT_EVENT_TYPES = new Set([
+  'GAME_STATE_UPDATED',
+  'PERIOD_ACTIVATED',
+  'SEGMENT_ACTIVATED',
+  'COUNTDOWN_UPDATED',
+  'SWITCH_TOGGLED',
+])
+
 function ManageGame() {
   const router = useRouter()
 
@@ -89,14 +99,7 @@ function ManageGame() {
     onData: ({ data: subData }) => {
       const event = subData?.data?.eventsGlobal
       if (!event || event.facts?.gameId !== Number(router.query.id)) return
-      const RELEVANT_EVENT_TYPES = [
-        'GAME_STATE_UPDATED',
-        'PERIOD_ACTIVATED',
-        'SEGMENT_ACTIVATED',
-        'COUNTDOWN_UPDATED',
-        'SWITCH_TOGGLED',
-      ]
-      if (event.type && RELEVANT_EVENT_TYPES.includes(event.type)) {
+      if (event.type && RELEVANT_EVENT_TYPES.has(event.type)) {
         refetch().catch((err) => {
           console.error('Admin: failed to refetch game after event:', err)
         })
