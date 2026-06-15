@@ -5,7 +5,12 @@ import type { NextConfig } from 'next'
 // @uzh-bf/design-system declares a React 18 peer, so pnpm resolves its subtree
 // to react@18 while this app runs react@19. In dev it is additionally consumed
 // as raw TypeScript source (its `development` export condition). Handle both.
-const isDev = process.env.NODE_ENV !== 'production'
+// Match `development` explicitly: an unset NODE_ENV must NOT enable
+// transpilePackages (transpiling the DS source breaks a production build), so
+// the unknown case defaults to the safe production path. `next dev` sets
+// NODE_ENV=development and `next build` sets production, so both real paths are
+// correct.
+const isDev = process.env.NODE_ENV === 'development'
 
 // Resolve the app's single React copy through pnpm's symlinks (not a hardcoded
 // node_modules path, which may not exist under pnpm hoisting in a clean Docker
