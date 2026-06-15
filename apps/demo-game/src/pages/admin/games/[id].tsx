@@ -507,10 +507,10 @@ function ManageGame() {
                           <div className="my-2">
                             <div className="flex flex-row gap-2">
                               <div className="text-sm">
-                                Story: {segment?.storyElements.length ?? 0}
+                                Story: {segment?.storyElements?.length ?? 0}
                               </div>
                               <div className="text-sm">
-                                Learn: {segment?.learningElements.length ?? 0}
+                                Learn: {segment?.learningElements?.length ?? 0}
                               </div>
                             </div>
                           </div>

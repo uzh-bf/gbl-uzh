@@ -47,13 +47,13 @@ import {
   YAxis,
 } from 'recharts'
 
+import { Form, Formik } from 'formik'
+import * as yup from 'yup'
 import { DecisionsDisplayCompact } from '~/components/DecisionsDisplay'
 import LearningElements from '~/components/LearningElements'
 import StoryElements from '~/components/StoryElements'
 import { trpc } from '~/lib/trpc'
 import type { RouterOutputs } from '~/server/trpc/router'
-import { Form, Formik } from 'formik'
-import * as yup from 'yup'
 import { useToast } from '../../components/ui/use-toast'
 
 const LABEL_MAP = {
@@ -149,6 +149,7 @@ function GameLayout({ children }: { children: ReactNode }) {
         `Player Cockpit: Relevant ${event.type} event for game ${currentGameId}. Refreshing result...`
       )
       void utils.play.result.invalidate()
+      void utils.play.self.invalidate()
     },
     onError: (err) => {
       console.error('Player Cockpit: Subscription error:', err)
