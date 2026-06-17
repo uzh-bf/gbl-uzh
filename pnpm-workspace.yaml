@@ -1,5 +1,7 @@
 packages:
   - 'apps/*'
+  - '!apps/escapp'
+  - '!apps/quartz'
   - 'packages/*'
   - cypress
 allowBuilds:
