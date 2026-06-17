@@ -100,11 +100,20 @@
     "prisma:studio:prd": "infisical run --env=prd -- prisma studio --schema=prisma/schema",
     "prisma:studio:stg": "infisical run --env=stg -- prisma studio --schema=prisma/schema",
     "start": "next start",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:debug": "node --inspect node_modules/.bin/jest --runInBand --watch",
     "test:watch": "jest --watch"
   },
   "volta": {
     "extends": "../../package.json"
+  },
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "<rootDir>/.next/"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "<rootDir>/.next/"
+    ]
   }
 }
