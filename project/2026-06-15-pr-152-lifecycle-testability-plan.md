@@ -262,8 +262,20 @@ C4 — diagram/docs/PR finish (Medium)
       `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 16/16;
       `rg "GameTransitions|transition table|table target|GAME_TRANSITIONS|xstate gone|machine deleted"`
       over live app/platform code no matches; `git diff --check` 0.
-- [ ] C3 active. Restore behavior coverage around XState.
-- [ ] C4 pending.
+- [x] C3 restored behavior coverage around XState. Added
+      `machines/gameMachine.test.ts` and `services/GameMachineService.test.ts`
+      for machine state keys, happy path, guard blocks, active-period-0
+      consolidation, intermediate RESULTS -> PREPARATION target,
+      final RESULTS -> COMPLETED, COMPLETED terminal state, context derivation
+      including `segmentCount` fallback, snapshot rebuild, `nextStatus`,
+      `availableEvents`, and admin booleans including segment activation.
+      Review/simplification caught missing non-final RESULTS target,
+      CONSOLIDATION active-segment guard, inaccurate "first segment" wording,
+      missing segmentCount fallback, and missing segment button boolean. Fixed.
+      Verify: `node_modules/.bin/tsc --noEmit -p tsconfig.json` 0;
+      `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 28/28;
+      `git diff --check` 0.
+- [ ] C4 active. Final docs/PR/security finish.
 
 ## Next Steps
 - Finish corrective slices C0-C4.
