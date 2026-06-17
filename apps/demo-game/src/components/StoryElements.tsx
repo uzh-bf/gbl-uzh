@@ -114,12 +114,16 @@ function StoryElements({
         <Markdown
           components={{
             img: ({ node, ...props }) => {
+              const { src, alt, ...imageProps } = props
+              if (typeof src !== 'string' || !src) return null
+
               return (
                 <Image
-                  {...props}
+                  {...imageProps}
+                  src={src}
                   width={250}
                   height={250}
-                  alt="Visual representation of the story element"
+                  alt={alt ?? 'Visual representation of the story element'}
                   className="mt-4 rounded-lg"
                   style={{ maxWidth: '100%' }}
                 />

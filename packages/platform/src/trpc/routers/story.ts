@@ -13,7 +13,7 @@ export function createStoryRouter() {
   return createTRPCRouter({
     list: protectedProcedure.query(async ({ ctx }) => {
       try {
-        return GameService.getStoryElements({}, ctx as any)
+        return await GameService.getStoryElements({}, ctx as any)
       } catch (error) {
         throwAsTRPCError(error)
       }

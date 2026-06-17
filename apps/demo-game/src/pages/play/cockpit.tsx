@@ -148,8 +148,12 @@ function GameLayout({ children }: { children: ReactNode }) {
       console.log(
         `Player Cockpit: Relevant ${event.type} event for game ${currentGameId}. Refreshing result...`
       )
-      void utils.play.result.invalidate()
-      void utils.play.self.invalidate()
+      Promise.all([
+        utils.play.result.invalidate(),
+        utils.play.self.invalidate(),
+      ]).catch((error) => {
+        console.error('Player Cockpit: Failed to refresh result:', error)
+      })
     },
     onError: (err) => {
       console.error('Player Cockpit: Subscription error:', err)

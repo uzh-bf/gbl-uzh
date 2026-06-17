@@ -124,7 +124,7 @@ export function createGameRouter({
       .input(countdownInput)
       .mutation(async ({ input, ctx }) => {
         try {
-          return PlayService.addCountdown(input, ctx as any)
+          return await PlayService.addCountdown(input, ctx as any)
         } catch (error) {
           throwAsTRPCError(error)
         }
@@ -134,7 +134,7 @@ export function createGameRouter({
       .input(switchInput)
       .mutation(async ({ input, ctx }) => {
         try {
-          return PlayService.toggleSwitch(input, ctx as any)
+          return await PlayService.toggleSwitch(input, ctx as any)
         } catch (error) {
           throwAsTRPCError(error)
         }

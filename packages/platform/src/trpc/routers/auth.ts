@@ -25,7 +25,7 @@ export function createAuthRouter() {
 
     logoutAsTeam: playerProcedure.mutation(async ({ ctx }) => {
       try {
-        return AccountService.logoutAsTeam(ctx as any)
+        return await AccountService.logoutAsTeam(ctx as any)
       } catch (error) {
         throwAsTRPCError(error)
       }
