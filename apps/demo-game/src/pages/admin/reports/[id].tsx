@@ -180,7 +180,7 @@ function ReportGame() {
           (result) => result.period.index === i
         )
         const dataPerPlayer: Record<string, PlayerPeriodData> = {}
-        playerResPerPeriod.map((result) => {
+        playerResPerPeriod.forEach((result) => {
           const decisions = {} as DecisionFacts
           Object.keys(result.facts.decisions).forEach((v) => {
             decisions[v] = Number(result.facts.decisions[v])

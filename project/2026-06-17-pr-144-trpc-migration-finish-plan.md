@@ -71,6 +71,7 @@ Finish PR #144 after tRPC migration work:
 - 2026-06-17: Slice 4 verification active. Evidence: `pnpm -F @gbl-uzh/platform build` passed; `pnpm -F @gbl-uzh/demo-game check` passed with 14 existing warnings; `pnpm --filter @gbl-uzh/demo-game... build` passed. `pnpm -F @gbl-uzh/demo-game test` initially failed because Jest scanned `.next/standalone`; added `.next` ignores and `--passWithNoTests`, then test command passed with zero tests.
 - 2026-06-17: Runtime smoke: devcontainer Next dev ready on port 3000. Local devrouter proxy was unavailable because `docker-nginx-1` is restarting on missing upstream `api`, so smoke used temporary `nginx` forwarder from host `localhost:3000` to devnet `demo-game-app:3000`. Browser smoke: `/admin/games` and `/admin/games/2` reached server 200 and rendered login redirect with no browser page errors; `/play/welcome` unauthenticated rendered 404, so full player smoke still needs a valid player session/token. `/` returns 500 from pre-existing Formik demo page issue and is not part of target smoke.
 - 2026-06-17: Security review complete. Scope: changed tRPC auth/context/procedures, join token flow, client tRPC links, markdown image rendering, Docker/GitHub Actions/Vercel config. Result: no high-confidence exploitable findings found. Notes: no subagent review used because current tool policy only permits spawning subagents when the user explicitly requests them.
+- 2026-06-17: Push/CI follow-up active after first push. New failures: Sonar new-code reliability flagged `map` used for side effects in `apps/demo-game/src/pages/admin/reports/[id].tsx`; Vercel failed during frozen install because the deployment used old `pnpm@9.15.9` against the current lockfile override config. Fixes: changed `map` to `forEach`; changed `vercel.json` to invoke `corepack pnpm@11.6.0 install --frozen-lockfile` directly. Evidence: `npx --yes pnpm@11.6.0 install --frozen-lockfile` passed; after `prisma:copy` and `prisma:generate`, `npx --yes pnpm@11.6.0 -F @gbl-uzh/demo-game check` passed with existing warnings; `npx --yes pnpm@11.6.0 -F @gbl-uzh/demo-game test` passed with zero tests.
 
 ## Slice 1: CI Build Timeout
 
@@ -218,8 +219,6 @@ Commit boundary:
 
 ## Next Steps
 
-1. Slice 1: diagnose/fix CI build timeout.
-2. Slice 2: diagnose/fix Vercel.
-3. Slice 3: diagnose/fix Sonar and stale active GraphQL config.
-4. Slice 4: full local/runtime verification.
-5. Slice 5: reviews and PR body prep.
+1. Commit and push CI follow-up fixes.
+2. Monitor new commit checks until pass/fail.
+3. If green, refresh PR finish notes; if red, diagnose the next failing check.
