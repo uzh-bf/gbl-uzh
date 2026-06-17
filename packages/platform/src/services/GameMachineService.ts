@@ -1,14 +1,23 @@
 import * as DB from '@prisma/client'
-import { getNextSnapshot } from 'xstate'
+import { transition } from 'xstate'
 import {
   GAME_EVENTS,
+  GAME_TAGS,
   gameMachine,
   type GameEvent,
+  type GameStateMeta,
   type GameMachineContext,
   type GameMachineEvent,
+  type GameTag,
 } from '../machines/gameMachine.js'
 
-export type { GameEvent, GameMachineContext } from '../machines/gameMachine.js'
+export type {
+  GameEvent,
+  GameLifecyclePhase,
+  GameMachineContext,
+  GameStateMeta,
+  GameTag,
+} from '../machines/gameMachine.js'
 
 /**
  * Bridge between the persisted game row and the XState game machine.
@@ -70,16 +79,19 @@ export function nextStatus(
   const snapshot = getGameMachineSnapshot(game)
   const machineEvent: GameMachineEvent = { type: event }
   if (!snapshot.can(machineEvent)) return null
-  return getNextSnapshot(
-    gameMachine,
-    snapshot,
-    machineEvent
-  ).value as DB.GameStatus
+  return transition(gameMachine, snapshot, machineEvent)[0].value as DB.GameStatus
 }
 
 export function availableEvents(game: GameRowForMachine): GameEvent[] {
   const snapshot = getGameMachineSnapshot(game)
   return GAME_EVENTS.filter((event) => snapshot.can({ type: event }))
+}
+
+function getStateMeta(
+  snapshot: ReturnType<typeof getGameMachineSnapshot>
+): GameStateMeta {
+  const meta = snapshot.getMeta()
+  return Object.values(meta)[0] as GameStateMeta
 }
 
 export interface GameLifecycleState {
@@ -89,12 +101,50 @@ export interface GameLifecycleState {
   canActivateNextSegment: boolean
 }
 
-export function getGameLifecycleState(game: GameRowForMachine): GameLifecycleState {
-  const events = availableEvents(game)
+export interface GameLifecycleInsights extends GameLifecycleState {
+  tags: GameTag[]
+  meta: GameStateMeta
+  nextStatuses: Partial<Record<GameEvent, DB.GameStatus>>
+  isTerminal: boolean
+}
+
+export function getGameLifecycleInsights(
+  game: GameRowForMachine
+): GameLifecycleInsights {
+  const snapshot = getGameMachineSnapshot(game)
+  const events = GAME_EVENTS.filter((event) => snapshot.can({ type: event }))
+  const nextStatuses = Object.fromEntries(
+    events.map((event) => [
+      event,
+      transition(gameMachine, snapshot, { type: event })[0]
+        .value as DB.GameStatus,
+    ])
+  ) as Partial<Record<GameEvent, DB.GameStatus>>
+
   return {
     status: game.status,
     availableEvents: events,
     canActivateNextPeriod: events.includes('ACTIVATE_NEXT_PERIOD'),
     canActivateNextSegment: events.includes('ACTIVATE_NEXT_SEGMENT'),
+    tags: GAME_TAGS.filter((tag) => snapshot.hasTag(tag)),
+    meta: getStateMeta(snapshot),
+    nextStatuses,
+    isTerminal: snapshot.status === 'done',
+  }
+}
+
+export function getGameLifecycleState(game: GameRowForMachine): GameLifecycleState {
+  const {
+    status,
+    availableEvents,
+    canActivateNextPeriod,
+    canActivateNextSegment,
+  } = getGameLifecycleInsights(game)
+
+  return {
+    status,
+    availableEvents,
+    canActivateNextPeriod,
+    canActivateNextSegment,
   }
 }

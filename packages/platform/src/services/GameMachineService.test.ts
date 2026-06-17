@@ -6,6 +6,7 @@ import {
   buildGameMachineContext,
   canTransition,
   getGameLifecycleState,
+  getGameLifecycleInsights,
   getGameMachineSnapshot,
   nextStatus,
   type GameRowForMachine,
@@ -172,4 +173,50 @@ test('getGameLifecycleState reports admin controls from XState', () => {
       canActivateNextSegment: false,
     }
   )
+})
+
+test('getGameLifecycleInsights reports tags, meta, next statuses, and terminal status', () => {
+  assert.deepEqual(
+    getGameLifecycleInsights(
+      gameRow(DB.GameStatus.RUNNING, {
+        hasActiveSegment: true,
+        hasNextSegment: true,
+      })
+    ),
+    {
+      status: DB.GameStatus.RUNNING,
+      availableEvents: ['ACTIVATE_NEXT_PERIOD', 'ACTIVATE_NEXT_SEGMENT'],
+      canActivateNextPeriod: true,
+      canActivateNextSegment: true,
+      tags: [
+        'admin-controlled',
+        'active-period',
+        'segment-workflow',
+        'players-can-act',
+      ],
+      meta: {
+        phase: 'segment-running',
+        label: 'Segment running',
+      },
+      nextStatuses: {
+        ACTIVATE_NEXT_PERIOD: DB.GameStatus.CONSOLIDATION,
+        ACTIVATE_NEXT_SEGMENT: DB.GameStatus.PAUSED,
+      },
+      isTerminal: false,
+    }
+  )
+
+  assert.deepEqual(getGameLifecycleInsights(gameRow(DB.GameStatus.COMPLETED)), {
+    status: DB.GameStatus.COMPLETED,
+    availableEvents: [],
+    canActivateNextPeriod: false,
+    canActivateNextSegment: false,
+    tags: ['terminal'],
+    meta: {
+      phase: 'completed',
+      label: 'Completed',
+    },
+    nextStatuses: {},
+    isTerminal: true,
+  })
 })

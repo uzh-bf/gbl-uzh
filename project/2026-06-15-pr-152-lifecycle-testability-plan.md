@@ -44,8 +44,9 @@ Correction research (2026-06-17)
   mirrored `GAME_TRANSITIONS` instead of owning the lifecycle.
 - Context7 `/statelyai/xstate`: XState v5 supports typed guards in
   `setup/createMachine`, rebuilding a snapshot with `machine.resolveState`, and
-  pure next-state evaluation with `getNextSnapshot`. Use these APIs so service
-  code can ask XState for targets without long-lived actors or side effects.
+  pure next-state evaluation. Use these APIs so service code can ask XState for
+  targets without long-lived actors or side effects. Later C5 cleanup uses
+  installed `xstate@5.20.1`'s non-deprecated `transition(...)` helper.
 
 ## Slices
 
@@ -118,7 +119,7 @@ C2 — make XState the sole lifecycle authority (Strong)
   - `buildGameMachineContext(game)`
   - `getGameMachineSnapshot(game)`
   - `canTransition(game, event)`
-  - `nextStatus(game, event)` using `getNextSnapshot`
+  - `nextStatus(game, event)` using XState pure transition evaluation
   - `availableEvents(game)`
   - `getGameLifecycleState(game)`
 - Decision: remove `GameTransitions.ts` or replace it with no-op compatibility
@@ -178,6 +179,22 @@ C4 — diagram/docs/PR finish (Medium)
 - Check: `rg "GameTransitions|transition table|xstate gone|machine deleted"`;
   full platform checks; PR readback.
 - Commit: `docs(platform): align lifecycle docs with xstate`
+
+C5 — XState insights + simplification (Medium)
+- Problem: XState now enforces transition validity, but insight APIs are still
+  limited to available events and admin booleans. `getGameLifecycleState`
+  duplicates part of the snapshot/event derivation.
+- Decision: use typed XState tags + state metadata for durable insights:
+  phase labels, player-facing tags, terminal tag, and next-status map for each
+  currently valid event. Keep Prisma writes/side-effects outside XState actions.
+- Files:
+  - `packages/platform/src/machines/gameMachine.ts`
+  - `packages/platform/src/services/GameMachineService.ts`
+  - `packages/platform/src/machines/gameMachine.test.ts`
+  - `packages/platform/src/services/GameMachineService.test.ts`
+  - `CONTEXT.md`
+- Check: platform `tsc`, full `tsx --test`, stale-ref grep.
+- Commit: `refactor(platform): expose xstate lifecycle insights`
 
 ## Finish gate
 - Mandatory final security review subagent ($security-review) over the branch scope.
@@ -249,7 +266,7 @@ C4 — diagram/docs/PR finish (Medium)
 - [x] C2 made XState the sole lifecycle authority. Moved lifecycle event/context
       types + `GAME_EVENTS` into `gameMachine`; `GameMachineService` now owns
       `buildGameMachineContext`, snapshot rebuild, `canTransition`,
-      `nextStatus` via XState `getNextSnapshot`, `availableEvents`, and
+      `nextStatus` via XState pure transition evaluation, `availableEvents`, and
       `getGameLifecycleState`. `GameService` now calls `GameMachineService`,
       `GameTransitions.ts` + table tests deleted, index export restored to
       `GameMachineService`, and live refs cleared. Diagram script + admin
@@ -287,6 +304,24 @@ C4 — diagram/docs/PR finish (Medium)
       `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 28/28;
       `node_modules/.bin/tsx scripts/lifecycle-diagram.ts` 0;
       live-code stale-ref grep 0; `git diff --check` 0.
+- [x] C5 XState insight/simplification. Added typed XState tags + state meta
+      (`GameLifecyclePhase`, `GameTag`, `GameStateMeta`) and
+      `getGameLifecycleInsights` with tags, phase metadata, valid next statuses,
+      terminal flag, available events, and existing admin booleans. Simplified
+      `getGameLifecycleState` into a projection of the insight object. Avoided
+      putting Prisma writes or domain side-effects into XState actions; they
+      remain in `GameService` transactions. Replaced deprecated
+      `getNextSnapshot` usage with installed `xstate@5.20.1`'s
+      `transition(...)`. Review conclusion: current machine uses the right core
+      XState capabilities for this PR (guards, pure transition eval,
+      tags/meta/terminal snapshots); deeper candidates should be follow-ups:
+      server-sourced admin controls via GraphQL, transition-handler coverage
+      registry for GameService side-effects, optional player-view state machine
+      for result visibility, and optional Stately/graph tooling. Verify:
+      `node_modules/.bin/tsc --noEmit -p tsconfig.json` 0;
+      `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 30/30;
+      `node_modules/.bin/tsx scripts/lifecycle-diagram.ts` 0;
+      `rg getNextSnapshot` no code refs; `git diff --check` 0.
 
 ## Next Steps
 - Finish corrective slices C0-C4.
@@ -294,6 +329,11 @@ C4 — diagram/docs/PR finish (Medium)
   `$df-mr-description-writer` so it reflects whole branch vs `dev`, including the
   C0-C4 correction. Do not mark PR ready until pushed checks pass and PR
   body/title reflect the whole branch.
+- Follow-up design options from C5: expose lifecycle insights in GraphQL so demo
+  admin controls stop duplicating guard logic; add transition-handler coverage
+  tests so every XState event has exactly one GameService side-effect handler;
+  consider a separate player-view state machine for visibility/result-state
+  rules if UI drift continues.
 - Keep deferred follow-ups unchanged: cross-admin ownership scoping
   (`task_35b0eb3d`), requireAdmin on the 3 setup mutations, previousResults type
   filter, remove dead jest devDeps (`task_696c6e51`), Prisma tx hardening

@@ -25,6 +25,11 @@ architecture vocabulary the lifecycle code is structured around.
   `getGameLifecycleState`. Lifecycle methods *ask the machine* for the target;
   they never hard-code status.
 
+- **Lifecycle insight** — `getGameLifecycleInsights` derives tags, phase metadata,
+  terminal status, available events, and next target statuses from the same
+  XState snapshot used for enforcement. Use it when UI or diagnostics need to
+  ask "what can happen next?" without duplicating lifecycle rules.
+
 - **Result descriptor** — the plain, Prisma-free output of a result computation.
   The `compute*` cores in `GameService` decide *what* results/actions/events
   follow a transition using injected domain `services`; they return descriptors,

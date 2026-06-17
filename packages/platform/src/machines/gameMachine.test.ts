@@ -1,7 +1,7 @@
 import * as DB from '@prisma/client'
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { getNextSnapshot } from 'xstate'
+import { transition } from 'xstate'
 import {
   GAME_EVENTS,
   gameMachine,
@@ -33,11 +33,11 @@ function next(
   event: GameEvent,
   context: GameMachineContext
 ) {
-  return getNextSnapshot(
+  return transition(
     gameMachine,
     snapshotAt(status, context),
     { type: event }
-  )
+  )[0]
 }
 
 test('machine state nodes are exactly the GameStatus enum values', () => {
@@ -104,6 +104,24 @@ test('guards block invalid segment and period activation', () => {
   )
 })
 
+test('state tags and metadata expose lifecycle insight', () => {
+  const running = snapshotAt(DB.GameStatus.RUNNING, ctx())
+  assert.equal(running.hasTag('players-can-act'), true)
+  assert.equal(running.hasTag('segment-workflow'), true)
+  assert.equal(running.hasTag('terminal'), false)
+  assert.deepEqual(Object.values(running.getMeta())[0], {
+    phase: 'segment-running',
+    label: 'Segment running',
+  })
+
+  const completed = snapshotAt(DB.GameStatus.COMPLETED, ctx())
+  assert.equal(completed.hasTag('terminal'), true)
+  assert.deepEqual(Object.values(completed.getMeta())[0], {
+    phase: 'completed',
+    label: 'Completed',
+  })
+})
+
 test('active period 0 can still be consolidated', () => {
   const context = ctx({
     activePeriodIx: 0,
@@ -115,11 +133,11 @@ test('active period 0 can still be consolidated', () => {
   const snapshot = snapshotAt(DB.GameStatus.RUNNING, context)
   assert.equal(snapshot.can({ type: 'ACTIVATE_NEXT_PERIOD' }), true)
   assert.equal(
-    getNextSnapshot(
+    transition(
       gameMachine,
       snapshot,
       { type: 'ACTIVATE_NEXT_PERIOD' }
-    ).value,
+    )[0].value,
     DB.GameStatus.CONSOLIDATION
   )
 })
@@ -132,11 +150,11 @@ test('FINISH_GAME completes only after the final period', () => {
   assert.equal(intermediate.can({ type: 'FINISH_GAME' }), false)
   assert.equal(intermediate.can({ type: 'ACTIVATE_NEXT_PERIOD' }), true)
   assert.equal(
-    getNextSnapshot(
+    transition(
       gameMachine,
       intermediate,
       { type: 'ACTIVATE_NEXT_PERIOD' }
-    ).value,
+    )[0].value,
     DB.GameStatus.PREPARATION
   )
 
@@ -147,7 +165,7 @@ test('FINISH_GAME completes only after the final period', () => {
   assert.equal(final.can({ type: 'ACTIVATE_NEXT_PERIOD' }), false)
   assert.equal(final.can({ type: 'FINISH_GAME' }), true)
   assert.equal(
-    getNextSnapshot(gameMachine, final, { type: 'FINISH_GAME' }).value,
+    transition(gameMachine, final, { type: 'FINISH_GAME' })[0].value,
     DB.GameStatus.COMPLETED
   )
 })
