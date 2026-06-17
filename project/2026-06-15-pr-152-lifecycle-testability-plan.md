@@ -275,12 +275,25 @@ C4 — diagram/docs/PR finish (Medium)
       Verify: `node_modules/.bin/tsc --noEmit -p tsconfig.json` 0;
       `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 28/28;
       `git diff --check` 0.
-- [ ] C4 active. Final docs/PR/security finish.
+- [x] C4 local docs/security finish. `CONTEXT.md` now states current XState
+      authority without corrective-target caveat. Diagram script was already
+      moved to `gameMachine.config.states` in C2; verified output includes
+      SCHEDULED -> PREPARATION -> RUNNING/PAUSED -> CONSOLIDATION -> RESULTS
+      -> PREPARATION/COMPLETED and final COMPLETED. Final security review:
+      DONE_WITH_CONCERNS, no new high-confidence exploitable finding introduced;
+      residual cross-admin ownership isolation, Prisma tx hardening, and global
+      event subscription remain pre-existing/tracked. Verify:
+      `node_modules/.bin/tsc --noEmit -p tsconfig.json` 0;
+      `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 28/28;
+      `node_modules/.bin/tsx scripts/lifecycle-diagram.ts` 0;
+      live-code stale-ref grep 0; `git diff --check` 0.
 
 ## Next Steps
 - Finish corrective slices C0-C4.
-- Do not mark PR ready until XState is restored as authority, checks pass, final
-  security review is updated, and PR body/title reflect the whole branch.
+- Push local commits when approved. Then update PR #152 body using
+  `$df-mr-description-writer` so it reflects whole branch vs `dev`, including the
+  C0-C4 correction. Do not mark PR ready until pushed checks pass and PR
+  body/title reflect the whole branch.
 - Keep deferred follow-ups unchanged: cross-admin ownership scoping
   (`task_35b0eb3d`), requireAdmin on the 3 setup mutations, previousResults type
   filter, remove dead jest devDeps (`task_696c6e51`), Prisma tx hardening

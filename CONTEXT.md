@@ -16,15 +16,14 @@ architecture vocabulary the lifecycle code is structured around.
 
 ## Architecture
 
-- **XState lifecycle authority** — corrective target for PR #152 after the
-  2026-06-17 plan update. `gameMachine` (`machines/gameMachine.ts`) is the
-  single source of truth for which lifecycle event is valid in which state, the
-  guard on each transition, and the resulting target state. `GameMachineService`
-  rebuilds an XState snapshot from the persisted game row (`game.status` plus
-  derived guard context) and exposes the small server/admin API: `nextStatus`,
-  `canTransition`, `availableEvents`, and `getGameLifecycleState`. Lifecycle
-  methods *ask the machine* for the target; they never hard-code status. During
-  corrective work, any remaining `GameTransitions` references are temporary.
+- **XState lifecycle authority** — `gameMachine` (`machines/gameMachine.ts`) is
+  the single source of truth for which lifecycle event is valid in which state,
+  the guard on each transition, and the resulting target state.
+  `GameMachineService` rebuilds an XState snapshot from the persisted game row
+  (`game.status` plus derived guard context) and exposes the small server/admin
+  API: `nextStatus`, `canTransition`, `availableEvents`, and
+  `getGameLifecycleState`. Lifecycle methods *ask the machine* for the target;
+  they never hard-code status.
 
 - **Result descriptor** — the plain, Prisma-free output of a result computation.
   The `compute*` cores in `GameService` decide *what* results/actions/events
