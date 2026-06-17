@@ -66,6 +66,7 @@ Finish PR #144 after tRPC migration work:
 - 2026-06-17: Plan file created. Next: Slice 1, diagnose CI build timeout.
 - 2026-06-17: Slice 1 active. Feedback loop: local demo-game build, then Docker/workflow comparison.
 - 2026-06-17: Slice 1 fix ready. Evidence: dependency-inclusive `pnpm --filter @gbl-uzh/demo-game... build` passed in devcontainer; no-cache Docker builder stage reproduced stale artifact/cache failure before `.dockerignore` fix, then passed after nested artifact ignores; workflow YAML parsed via Ruby.
+- 2026-06-17: Slice 2 active. Vercel failed before build during install: Vercel selected `pnpm@9.15.9`, then frozen install failed with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH` against current overrides/lockfile. Added `vercel.json` install command to enable Corepack, activate pinned `pnpm@11.6.0`, and run frozen install.
 
 ## Slice 1: CI Build Timeout
 
