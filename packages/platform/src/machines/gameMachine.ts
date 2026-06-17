@@ -1,6 +1,5 @@
 import * as DB from '@prisma/client'
 import { setup } from 'xstate'
-import type { GameTransitionContext } from '../services/GameTransitions.js'
 
 /**
  * XState v5 model of the game lifecycle.
@@ -13,12 +12,26 @@ import type { GameTransitionContext } from '../services/GameTransitions.js'
  * effects.
  */
 
-export type GameMachineContext = GameTransitionContext
+export type GameEvent =
+  | 'ACTIVATE_NEXT_PERIOD'
+  | 'ACTIVATE_NEXT_SEGMENT'
+  | 'FINISH_GAME'
 
-export type GameMachineEvent =
-  | { type: 'ACTIVATE_NEXT_PERIOD' }
-  | { type: 'ACTIVATE_NEXT_SEGMENT' }
-  | { type: 'FINISH_GAME' }
+export const GAME_EVENTS: readonly GameEvent[] = [
+  'ACTIVATE_NEXT_PERIOD',
+  'ACTIVATE_NEXT_SEGMENT',
+  'FINISH_GAME',
+]
+
+export interface GameMachineContext {
+  activePeriodIx: number
+  totalPeriods: number
+  segmentCount: number
+  hasActiveSegment: boolean
+  hasNextSegment: boolean
+}
+
+export type GameMachineEvent = { type: GameEvent }
 
 const DEFAULT_GAME_CONTEXT: GameMachineContext = {
   activePeriodIx: -1,

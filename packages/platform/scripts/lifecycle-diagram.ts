@@ -1,22 +1,35 @@
 import * as DB from '@prisma/client'
-import { GAME_TRANSITIONS } from '../src/services/GameTransitions.js'
+import { gameMachine } from '../src/machines/gameMachine.js'
 
 /**
  * Emit a Mermaid stateDiagram-v2 of the game lifecycle, generated from the
- * GAME_TRANSITIONS table — the single source of truth, so the diagram can never
- * drift from the running code. This replaces the old XState/Stately model as the
- * way to visualize the lifecycle.
+ * XState machine config so the diagram tracks the running lifecycle model.
  *
  * Usage:  pnpm -F @gbl-uzh/platform lifecycle:diagram
  * then paste the output into any Mermaid renderer (e.g. mermaid.live).
  */
 const lines: string[] = ['stateDiagram-v2', '  [*] --> SCHEDULED']
 
-for (const [from, byEvent] of Object.entries(GAME_TRANSITIONS)) {
-  for (const [event, transition] of Object.entries(byEvent)) {
-    if (!transition) continue
-    const guard = transition.guard ? ' (guarded)' : ''
-    lines.push(`  ${from} --> ${transition.to}: ${event}${guard}`)
+type TransitionConfig =
+  | string
+  | { target?: string; guard?: unknown }
+  | Array<{ target?: string; guard?: unknown }>
+
+type StateConfig = {
+  on?: Record<string, TransitionConfig>
+}
+
+for (const [from, state] of Object.entries(
+  gameMachine.config.states as Record<string, StateConfig>
+)) {
+  for (const [event, transition] of Object.entries(state.on ?? {})) {
+    const transitions = Array.isArray(transition) ? transition : [transition]
+    for (const entry of transitions) {
+      const target = typeof entry === 'string' ? entry : entry.target
+      if (!target) continue
+      const guard = typeof entry === 'string' || !entry.guard ? '' : ' (guarded)'
+      lines.push(`  ${from} --> ${target}: ${event}${guard}`)
+    }
   }
 }
 

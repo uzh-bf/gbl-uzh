@@ -300,7 +300,7 @@ function ManageGame() {
         // period ("Next Period"). Once it reaches `periods.length` (the final
         // period's consolidation advanced past the last period), the only move
         // is FINISH_GAME -> COMPLETED ("Finish Game"). Mirrors the server-side
-        // GameTransitions guards.
+        // XState guards.
         const isFinished = (game.activePeriodIx ?? 0) >= game.periods.length
         if (isFinished) {
           return (

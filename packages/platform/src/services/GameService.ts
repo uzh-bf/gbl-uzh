@@ -13,13 +13,13 @@ import {
   Event as PlatformEvent,
 } from '../types.js'
 import * as EventService from './EventService.js'
-import * as GameTransitions from './GameTransitions.js'
+import * as GameMachineService from './GameMachineService.js'
 
 type Context = CtxWithPrisma<PrismaClient>
 
 /**
- * Ask the lifecycle machine (GameTransitions) for the status that `event` leads
- * to from the game's current status. Returns null — and logs — when there is no
+ * Ask the XState lifecycle machine for the status that `event` leads to from
+ * the game's current status. Returns null — and logs — when there is no
  * valid transition, in which case the calling admin action is a no-op. The
  * switch in each transition then only selects side-effects for the (already
  * validated) transition and writes the returned `targetStatus`.
@@ -31,15 +31,11 @@ function resolveTargetStatus(
     periods?: unknown[] | null
     activePeriod?: any
   },
-  event: GameTransitions.GameEvent,
+  event: GameMachineService.GameEvent,
   gameId: number,
   fnName: string
 ): DB.GameStatus | null {
-  const targetStatus = GameTransitions.nextStatus(
-    game.status,
-    event,
-    GameTransitions.buildTransitionContext(game)
-  )
+  const targetStatus = GameMachineService.nextStatus(game, event)
   if (!targetStatus) {
     log.warn(`${fnName}: no valid ${event} from status ${game.status}`, {
       gameId,
@@ -50,15 +46,15 @@ function resolveTargetStatus(
 
 /**
  * Safety net (opt-in via the XSTATE_SHADOW env flag, kept for back-compat): the
- * transition table authorized `target`; warn when the committed row did not
- * actually reach it. No-op when the flag is off or the status matches.
+ * XState authorized `target`; warn when the committed row did not actually
+ * reach it. No-op when the flag is off or the status matches.
  */
 function assertMachineTarget(
   fnName: string,
   meta: {
     gameId: number
     fromStatus: DB.GameStatus
-    event: GameTransitions.GameEvent
+    event: GameMachineService.GameEvent
     target: DB.GameStatus
     actual: DB.GameStatus | null | undefined
   }
@@ -68,7 +64,7 @@ function assertMachineTarget(
     meta.actual != null &&
     meta.actual !== meta.target
   ) {
-    log.warn(`[lifecycle-shadow] ${fnName}: committed status != table target`, meta)
+    log.warn(`[lifecycle-shadow] ${fnName}: committed status != XState target`, meta)
   }
 }
 
@@ -1274,7 +1270,7 @@ interface FinishGameArgs {
 
 /**
  * Finish a game once its final period has been consolidated: RESULTS ->
- * COMPLETED. Validity is decided by the lifecycle machine (GameTransitions); the
+ * COMPLETED. Validity is decided by the XState lifecycle machine; the
  * FINISH_GAME guard requires `activePeriodIx >= totalPeriods`, which the final
  * period's consolidation establishes. Returns null when the transition is not
  * valid from the current state (e.g. the game is not on its final results).

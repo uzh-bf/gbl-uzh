@@ -246,8 +246,23 @@ C4 — diagram/docs/PR finish (Medium)
       dropped unused legacy admin adapter, actor helper, exported default
       context, stale C1/C2 comments, and `AnyStateMachine` cast. Verify:
       `node_modules/.bin/tsc --noEmit -p tsconfig.json` 0; `git diff --check` 0.
-- [ ] C2 active. Make XState the sole lifecycle authority.
-- [ ] C3 pending.
+- [x] C2 made XState the sole lifecycle authority. Moved lifecycle event/context
+      types + `GAME_EVENTS` into `gameMachine`; `GameMachineService` now owns
+      `buildGameMachineContext`, snapshot rebuild, `canTransition`,
+      `nextStatus` via XState `getNextSnapshot`, `availableEvents`, and
+      `getGameLifecycleState`. `GameService` now calls `GameMachineService`,
+      `GameTransitions.ts` + table tests deleted, index export restored to
+      `GameMachineService`, and live refs cleared. Diagram script + admin
+      comment were updated in C2 (not C4) because `GameTransitions` deletion
+      would otherwise break typecheck / leave live stale refs. Review: no
+      critical/important issues; simplification accepted narrower public API
+      (no raw `gameMachine` export), clearer input type/comment, no wrapper
+      helper, one snapshot for `availableEvents`. Verify:
+      `node_modules/.bin/tsc --noEmit -p tsconfig.json` 0;
+      `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 16/16;
+      `rg "GameTransitions|transition table|table target|GAME_TRANSITIONS|xstate gone|machine deleted"`
+      over live app/platform code no matches; `git diff --check` 0.
+- [ ] C3 active. Restore behavior coverage around XState.
 - [ ] C4 pending.
 
 ## Next Steps
