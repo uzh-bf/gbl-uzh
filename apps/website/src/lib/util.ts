@@ -25,6 +25,18 @@ const wikiPlugin: any = [
   },
 ]
 
+async function serializeMarkdown(source: Buffer | string) {
+  const { content, data } = matter(source.toString())
+  const mdxSource = await serialize(content, {
+    mdxOptions: { remarkPlugins: [wikiPlugin] },
+  })
+
+  return {
+    ...mdxSource,
+    frontmatter: data,
+  }
+}
+
 export function getStaticProps(dir_name: string) {
   return async ({ params }: any) => {
     const dirPath = path.join(process.cwd(), `${PREFIX}/${dir_name}/`)
@@ -39,10 +51,7 @@ export function getStaticProps(dir_name: string) {
       `${PREFIX}/${dir_name}/${filename}`
     )
     const source = fs.readFileSync(mdxPath)
-    const mdxSource = await serialize(source, {
-      parseFrontmatter: true,
-      mdxOptions: { remarkPlugins: [wikiPlugin] },
-    })
+    const mdxSource = await serializeMarkdown(source)
     return {
       props: {
         source: mdxSource,
@@ -67,10 +76,7 @@ export function getStaticPropsSinglePage(dir_name: string, slug: string) {
   return async () => {
     const mdxPath = path.join(process.cwd(), `${PREFIX}/${dir_name}/${slug}.md`)
     const source = fs.readFileSync(mdxPath)
-    const mdxSource = await serialize(source, {
-      parseFrontmatter: true,
-      mdxOptions: { remarkPlugins: [wikiPlugin] },
-    })
+    const mdxSource = await serializeMarkdown(source)
     return {
       props: {
         source: mdxSource,
@@ -122,10 +128,7 @@ export function getStaticPropsFolder(
         fileMissingArr.push(true)
       }
 
-      let temp2 = await serialize(source, {
-        parseFrontmatter: true,
-        mdxOptions: { remarkPlugins: [wikiPlugin] },
-      })
+      let temp2 = await serializeMarkdown(source)
       mdxSources.push(temp2)
     }
 
@@ -169,10 +172,7 @@ export function getStaticPropsFolders(folders: Array<string>) {
           fileMissingArr[k].push(true)
         }
 
-        let temp2 = await serialize(source, {
-          parseFrontmatter: true,
-          mdxOptions: { remarkPlugins: [wikiPlugin] },
-        })
+        let temp2 = await serializeMarkdown(source)
         mdxSources[k].push(temp2)
       }
     }
