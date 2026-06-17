@@ -10,7 +10,11 @@ Plan identity
 
 Goal
 - Restructure the lifecycle modules so the CRITICAL logic is unit-testable.
-- Adapt `GameService` + `PlayService`. NO new services/machines.
+- Adapt `GameService` + `PlayService`. No unrelated lifecycle services/machines
+  beyond the restored XState machine + service pair.
+- Correction 2026-06-17: restore the intended XState architecture. S4 removed
+  XState and made `GameTransitions` the authority; user clarified the whole
+  purpose of PR #152 was to use XState. Keep S1-S3, supersede S4.
 
 Non-goals
 - Prisma transaction hardening (T1-T6) — separate branch.
@@ -23,14 +27,25 @@ Constraints
 - Tests: `tsx --test 'src/**/*.test.ts'` (node:test).
 - Baseline (pre-work): platform tests 11/11 pass, `tsc --noEmit` exit 0.
 
-Vocabulary seeded in `CONTEXT.md`: transition table authority, result descriptor,
+Vocabulary seeded in `CONTEXT.md`: XState lifecycle authority, result descriptor,
 ActionDescriptor, EventDescriptor, visibility filter.
 
 ## Research
 
-None. Internal refactor backed by the architecture review + direct reads of
+Original S1-S4: internal refactor backed by the architecture review + direct reads of
 `GameService.ts`, `PlayService.ts`, `GameTransitions.ts`, `gameMachine.ts`,
 `GameMachineService.ts`, admin `[id].tsx`. Evidence is local code, not external.
+
+Correction research (2026-06-17)
+- Local: commit `a9d0955` deleted `gameMachine.ts`, `GameMachineService.ts`,
+  XState tests, and the `xstate` dependency. This conflicts with PR #152's core
+  purpose.
+- Local: pre-collapse commit `a9d0955^` had a valid XState v5 machine, but it
+  mirrored `GAME_TRANSITIONS` instead of owning the lifecycle.
+- Context7 `/statelyai/xstate`: XState v5 supports typed guards in
+  `setup/createMachine`, rebuilding a snapshot with `machine.resolveState`, and
+  pure next-state evaluation with `getNextSnapshot`. Use these APIs so service
+  code can ask XState for targets without long-lived actors or side effects.
 
 ## Slices
 
@@ -66,26 +81,103 @@ S3 — injectable notifier (Worth exploring; enabler)
 - Check: `tsc` 0; suite green; behavior identical with default.
 - Commit: `refactor(platform): make lifecycle realtime publish injectable`
 
-S4 — collapse the xstate machine (user: Collapse fully)
-- Evidence: machine has ZERO runtime callers (only `index.ts` re-export); no
-  `@statelyai/inspect` dep; `getGameLifecycleState` reads the table, not the machine.
-- Decision: delete `machines/gameMachine.ts` + `machines/gameMachine.test.ts`;
-  remove actor helpers (`getGameMachineSnapshot`, `hydrateGameActor`) and the
-  `xstate` dep from `packages/platform/package.json` (+ lockfile in same commit);
-  fold `getGameLifecycleState` into `GameTransitions`; update `index.ts` re-exports;
-  re-express the table-level behavioral coverage (lifecycle walk, segment-0,
-  FINISH_GAME-after-final, target-known, available-events) as direct
-  `GameTransitions` tests so NO coverage is lost. Optional: tiny script emitting
-  a Mermaid diagram from `GAME_TRANSITIONS`.
-- Files: delete `machines/gameMachine.ts`, `machines/gameMachine.test.ts`;
-  edit `services/GameMachineService.ts` (or remove), `services/GameTransitions.ts`,
-  `index.ts`, `package.json`, `machines/README.md`; new `services/GameTransitions.test.ts`;
-  lockfile.
-- Risk: deleting tests loses coverage → re-author against the table first, verify,
-  then delete the machine. Admin `[id].tsx` does not import the machine (safe).
-- Check: new table tests green; total test count ≥ prior minus machine-internal;
-  `tsc` 0; xstate gone from deps; grep confirms no dangling imports.
-- Commit: `refactor(platform): collapse xstate machine; GameTransitions is sole authority`
+S4 — collapse the xstate machine (SUPERSEDED; do not implement)
+- Historical note: commit `a9d0955` implemented this wrong direction. It deleted
+  XState, made `GameTransitions` the authority, and conflicts with the user
+  clarification that PR #152's purpose is to model lifecycle with XState.
+- Corrective work below keeps S1-S3 and replaces S4 with C0-C4.
+
+## Corrective slices (2026-06-17)
+
+C0 — corrected plan + vocabulary (Strong)
+- Problem: plan/CONTEXT still encode the bad S4 decision.
+- Decision: record user clarification; change vocabulary to XState lifecycle
+  authority; keep historical S4 notes but mark superseded.
+- Files: `CONTEXT.md`, this plan.
+- Check: `git diff --check`; status contains only docs.
+- Commit: `docs(project): correct lifecycle xstate plan`
+
+C1 — restore XState package + machine shell (Strong)
+- Problem: `xstate` dependency and machine files are gone.
+- Decision: restore `xstate@5.20.1` exactly, restore the machine/service file
+  paths, and keep DB row as persisted state (`game.status` + derived context).
+  No DB snapshot column. No `pnpm install`; restore lockfile blocks by exact
+  text from pre-collapse. Tests are C3.
+- Files:
+  - `packages/platform/package.json`
+  - `pnpm-lock.yaml`
+  - `packages/platform/src/machines/gameMachine.ts`
+  - `packages/platform/src/services/GameMachineService.ts`
+- Check: `rg "xstate|gameMachine|GameMachineService"`; `tsc --noEmit`.
+- Commit: `refactor(platform): restore xstate lifecycle machine`
+
+C2 — make XState the sole lifecycle authority (Strong)
+- Problem: restored machine must not mirror a parallel transition table.
+- Decision: move lifecycle decisions into `gameMachine`; make
+  `GameMachineService` the adapter:
+  - `buildGameMachineContext(game)`
+  - `getGameMachineSnapshot(game)`
+  - `canTransition(game, event)`
+  - `nextStatus(game, event)` using `getNextSnapshot`
+  - `availableEvents(game)`
+  - `getGameLifecycleState(game)`
+- Decision: remove `GameTransitions.ts` or replace it with no-op compatibility
+  only if imports require it. Prefer no compatibility export in this branch.
+- Decision: update `GameService.resolveTargetStatus` to call
+  `GameMachineService.nextStatus`; keep the existing switch arms only for
+  transition side effects and DB writes.
+- Decision: update `assertMachineTarget` wording to compare committed DB status
+  with XState target.
+- Files:
+  - `packages/platform/src/services/GameService.ts`
+  - `packages/platform/src/services/GameMachineService.ts`
+  - `packages/platform/src/services/GameTransitions.ts` (delete or empty-shim)
+  - `packages/platform/src/index.ts`
+- Check: `rg "GameTransitions|transition table|table target"` returns no live
+  authority references; `tsc --noEmit`.
+- Commit: `refactor(platform): drive lifecycle transitions from xstate`
+
+C3 — restore behavior coverage around XState (Strong)
+- Problem: S4 moved machine coverage to table tests; need coverage around the
+  actual authority.
+- Decision: machine tests cover:
+  - state nodes exactly equal `DB.GameStatus`
+  - happy-path lifecycle walk
+  - guard blocks for missing segments/next segment/active segment
+  - segment index 0 consolidation regression
+  - `FINISH_GAME` only after final period
+  - `COMPLETED` final/terminal
+  - persisted row -> XState snapshot rebuild
+- Decision: service tests cover:
+  - snapshot value equals `game.status`
+  - `nextStatus` returns target/null from XState
+  - `availableEvents` and admin booleans
+- Files:
+  - `packages/platform/src/machines/gameMachine.test.ts`
+  - `packages/platform/src/services/GameMachineService.test.ts`
+  - delete/replace `packages/platform/src/services/GameTransitions.test.ts`
+- Check: `node_modules/.bin/tsx --test 'src/**/*.test.ts'`; `tsc --noEmit`.
+- Commit: `test(platform): cover xstate lifecycle authority`
+
+C4 — diagram/docs/PR finish (Medium)
+- Problem: generated diagram script currently reads `GAME_TRANSITIONS`; comments
+  in admin/docs may still reference table authority.
+- Decision: either make `lifecycle-diagram.ts` read `gameMachine.config.states`
+  or delete the script if the machine itself is enough. If deleted, remove the
+  `lifecycle:diagram` package script too. Prefer keeping it only if small and
+  clear.
+- Decision: update stale admin comments, `CONTEXT.md`, plan Progress, and PR
+  body so reviewers see "XState authority" consistently.
+- Decision: run final security review again after code changes.
+- Files:
+  - `packages/platform/scripts/lifecycle-diagram.ts`
+  - `packages/platform/package.json` (only if script changes)
+  - `apps/demo-game/src/pages/admin/games/[id].tsx`
+  - `CONTEXT.md`
+  - this plan
+- Check: `rg "GameTransitions|transition table|xstate gone|machine deleted"`;
+  full platform checks; PR readback.
+- Commit: `docs(platform): align lifecycle docs with xstate`
 
 ## Finish gate
 - Mandatory final security review subagent ($security-review) over the branch scope.
@@ -139,14 +231,24 @@ S4 — collapse the xstate machine (user: Collapse fully)
       (24 files +3358/-355, 26 commits, head a9d0955). Corrected stale phase-1
       claims (no net xstate dep; machine/GameMachineService deleted; single export).
       Read back: base dev, draft, OPEN.
-- Active: plan complete. See Next Steps.
+- [x] Takeover check 2026-06-17. Handoff reviewed; correct worktree
+      `.claude/worktrees/jolly-benz-6527e7`; branch clean at 10690e4; local
+      tsc 0; platform tests 24/24; PR still draft, Vercel failing only.
+- [x] C0 corrected plan + glossary. Review subagent found current/target
+      contradiction in CONTEXT, stale "no new machines" wording, actionable
+      superseded S4 text, C1/C3 test ownership mismatch, C4 package script gap.
+      Simplification subagent found same core issues plus persisted snapshot
+      wording. Fixed all. Verify: `git diff --check` 0; docs-only diff.
+- [ ] C1 active. Restore XState dependency + machine/service shell.
+- [ ] C2 pending.
+- [ ] C3 pending.
+- [ ] C4 pending.
 
 ## Next Steps
-- Re-run host CI on head a9d0955 (the green build/lint were on 66f57e5; SonarCloud
-  quality-gate + Vercel preview failing — Vercel looks like preview config, not a
-  compile break). Confirm before merge.
-- Mark PR ready-for-review (currently draft) once CI re-runs green.
-- Follow-ups carried in the PR body + chips: cross-admin ownership scoping
-  (task_35b0eb3d), requireAdmin on the 3 setup mutations, previousResults type
-  filter, remove dead jest devDeps (task_696c6e51), Prisma tx hardening (T1-T6),
-  optional GAME_COMPLETED event, resolver-level auth regression test.
+- Finish corrective slices C0-C4.
+- Do not mark PR ready until XState is restored as authority, checks pass, final
+  security review is updated, and PR body/title reflect the whole branch.
+- Keep deferred follow-ups unchanged: cross-admin ownership scoping
+  (`task_35b0eb3d`), requireAdmin on the 3 setup mutations, previousResults type
+  filter, remove dead jest devDeps (`task_696c6e51`), Prisma tx hardening
+  (T1-T6), optional GAME_COMPLETED event, resolver-level auth regression test.
