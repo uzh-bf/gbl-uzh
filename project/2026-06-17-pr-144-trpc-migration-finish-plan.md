@@ -64,6 +64,8 @@ Finish PR #144 after tRPC migration work:
 ## Progress
 
 - 2026-06-17: Plan file created. Next: Slice 1, diagnose CI build timeout.
+- 2026-06-17: Slice 1 active. Feedback loop: local demo-game build, then Docker/workflow comparison.
+- 2026-06-17: Slice 1 fix ready. Evidence: dependency-inclusive `pnpm --filter @gbl-uzh/demo-game... build` passed in devcontainer; no-cache Docker builder stage reproduced stale artifact/cache failure before `.dockerignore` fix, then passed after nested artifact ignores; workflow YAML parsed via Ruby.
 
 ## Slice 1: CI Build Timeout
 

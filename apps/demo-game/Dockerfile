@@ -11,7 +11,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN pnpm config set store-dir $PNPM_HOME/.pnpm-store
 
 
-FROM base as prune
+FROM base AS prune
 WORKDIR /app
 
 COPY . .
