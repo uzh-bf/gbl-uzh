@@ -407,6 +407,9 @@ importers:
       winston:
         specifier: 3.17.0
         version: 3.17.0
+      xstate:
+        specifier: 5.20.1
+        version: 5.20.1
       yup:
         specifier: ^1.6.1
         version: 1.6.1
@@ -10433,6 +10436,9 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+
+  xstate@5.20.1:
+    resolution: {integrity: sha512-i9ZpNnm/XhCOMUxae1suT8PjYNTStZWbhmuKt4xeTPaYG5TS0Fz0i+Ka5yxoNPpaHW3VW6JIowrwFgSTZONxig==}
 
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
@@ -23333,6 +23339,8 @@ snapshots:
       signal-exit: 3.0.7
 
   ws@8.18.3: {}
+
+  xstate@5.20.1: {}
 
   xtend@4.0.2: {}
 

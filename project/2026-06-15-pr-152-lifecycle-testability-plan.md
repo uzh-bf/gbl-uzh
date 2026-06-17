@@ -239,8 +239,14 @@ C4 — diagram/docs/PR finish (Medium)
       superseded S4 text, C1/C3 test ownership mismatch, C4 package script gap.
       Simplification subagent found same core issues plus persisted snapshot
       wording. Fixed all. Verify: `git diff --check` 0; docs-only diff.
-- [ ] C1 active. Restore XState dependency + machine/service shell.
-- [ ] C2 pending.
+- [x] C1 restored XState dependency + machine/service shell. Added
+      `xstate@5.20.1` to package + lockfile by exact blocks; restored
+      `machines/gameMachine.ts` and minimal `GameMachineService` snapshot
+      bridge. Review: lockfile/package exact, no behavior drift; simplification:
+      dropped unused legacy admin adapter, actor helper, exported default
+      context, stale C1/C2 comments, and `AnyStateMachine` cast. Verify:
+      `node_modules/.bin/tsc --noEmit -p tsconfig.json` 0; `git diff --check` 0.
+- [ ] C2 active. Make XState the sole lifecycle authority.
 - [ ] C3 pending.
 - [ ] C4 pending.
 
