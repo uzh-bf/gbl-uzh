@@ -543,9 +543,20 @@ C6E — docs, final review, PR update (Medium)
       `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 34/34;
       `git diff --check` 0; `rg 'nextStatus\(|resolveTargetStatus'`
       shows no `GameService` usage.
+- [x] C6D complete. Added lifecycle coverage tests that generate allowed
+      machine plans from statuses/events and assert `GameService` route keys
+      cover them, work orders have executor coverage, and routing uses
+      `planLifecycleTransition` instead of target-only lookup. Added runtime
+      work-order coverage assertion in `resolveTransitionPlan`. Removed the last
+      logging side effect from pure result computation and added a purity smoke
+      test for compute functions. Review found first coverage draft mirrored
+      constants instead of routes; fixed by generating plans and checking actual
+      route constant usage. Verify: `node_modules/.bin/tsc --noEmit -p
+      tsconfig.json` 0; `node_modules/.bin/tsx --test 'src/**/*.test.ts'`
+      38/38; `git diff --check` 0.
 
 ## Next Steps
-- Continue with C6D. Work one slice at a time: implement, verify, review
+- Continue with C6E. Work one slice at a time: implement, verify, review
   subagent, simplification subagent, commit.
 - Push local commits only when approved. Then update PR #152 body using
   `$df-mr-description-writer` so it reflects whole branch vs `dev`, including C0-C6.

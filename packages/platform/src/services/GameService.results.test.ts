@@ -1,5 +1,6 @@
 import * as DB from '@prisma/client'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import {
   computePeriodEndResults,
@@ -62,6 +63,23 @@ function fakeServices(overrides: any = {}) {
   }
   return { services, calls }
 }
+
+test('compute result functions stay free of runtime side-effect hooks', () => {
+  const source = readFileSync(new URL('./GameService.ts', import.meta.url), 'utf8')
+  const computeStart = source.indexOf('export function computePeriodStartResults')
+  assert.notEqual(computeStart, -1)
+  const computeSource = source.slice(computeStart)
+
+  for (const forbidden of [
+    'ctx.prisma',
+    'updateDBBeforeActivation',
+    'updateDBAfterEnd',
+    'updateDBAfterInitialize',
+    'log.',
+  ]) {
+    assert.equal(computeSource.includes(forbidden), false, forbidden)
+  }
+})
 
 test('computePeriodStartResults: not-started branch generates initial PERIOD_START results at nextPeriodIx', () => {
   const { services } = fakeServices({

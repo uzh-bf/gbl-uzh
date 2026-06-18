@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid'
 import { none, repeat } from 'ramda'
 import * as yup from 'yup'
 import log from '../lib/logger.js'
+import type { LifecycleWorkOrderType } from '../machines/gameMachine.js'
 import {
   CtxWithFacts,
   CtxWithFactsAndSchema,
@@ -16,6 +17,51 @@ import * as EventService from './EventService.js'
 import * as GameMachineService from './GameMachineService.js'
 
 type Context = CtxWithPrisma<PrismaClient>
+
+export const LIFECYCLE_TRANSITION = {
+  scheduledToPreparation: `${DB.GameStatus.SCHEDULED}:ACTIVATE_NEXT_PERIOD:${DB.GameStatus.PREPARATION}`,
+  preparationToRunning: `${DB.GameStatus.PREPARATION}:ACTIVATE_NEXT_SEGMENT:${DB.GameStatus.RUNNING}`,
+  pausedToRunning: `${DB.GameStatus.PAUSED}:ACTIVATE_NEXT_SEGMENT:${DB.GameStatus.RUNNING}`,
+  runningToPaused: `${DB.GameStatus.RUNNING}:ACTIVATE_NEXT_SEGMENT:${DB.GameStatus.PAUSED}`,
+  runningToConsolidation: `${DB.GameStatus.RUNNING}:ACTIVATE_NEXT_PERIOD:${DB.GameStatus.CONSOLIDATION}`,
+  consolidationToResults: `${DB.GameStatus.CONSOLIDATION}:ACTIVATE_NEXT_PERIOD:${DB.GameStatus.RESULTS}`,
+  resultsToPreparation: `${DB.GameStatus.RESULTS}:ACTIVATE_NEXT_PERIOD:${DB.GameStatus.PREPARATION}`,
+  resultsToCompleted: `${DB.GameStatus.RESULTS}:FINISH_GAME:${DB.GameStatus.COMPLETED}`,
+} as const
+
+export const LIFECYCLE_TRANSITION_KEYS = Object.values(LIFECYCLE_TRANSITION)
+
+export const LIFECYCLE_WORK_ORDER_EXECUTORS = {
+  startNextPeriod: 'transition-handler',
+  startNextSegment: 'transition-handler',
+  finishCurrentSegment: 'transition-handler',
+  finishGame: 'transition-handler',
+  runSegmentBeforeActivationHook: 'transition-handler',
+  consolidateCurrentPeriod: 'transition-handler',
+  createPeriodStartResults: 'transition-handler',
+  createPeriodEndResults: 'transition-handler',
+  createSegmentStartResults: 'transition-handler',
+  createSegmentEndResults: 'transition-handler',
+  createPlayerActions: 'transition-handler',
+  createPostCommitPlayerEvents: 'transition-handler',
+  resetPlayerReadiness: 'transition-handler',
+  publishAfterActivateNextPeriod: 'post-commit-publisher',
+  publishAfterActivateNextSegment: 'post-commit-publisher',
+  publishAfterFinishGame: 'post-commit-publisher',
+} satisfies Record<
+  LifecycleWorkOrderType,
+  'transition-handler' | 'post-commit-publisher'
+>
+
+function ensureLifecycleWorkOrdersCovered(
+  plan: GameMachineService.GameLifecycleTransitionPlan
+) {
+  for (const order of plan.workOrders) {
+    if (!(order.type in LIFECYCLE_WORK_ORDER_EXECUTORS)) {
+      throw new Error(`Unhandled lifecycle work order: ${order.type}`)
+    }
+  }
+}
 
 /**
  * Ask the lifecycle rules for a complete transition plan. Returns null — and
@@ -40,6 +86,7 @@ function resolveTransitionPlan(
       gameId,
     })
   }
+  if (plan) ensureLifecycleWorkOrdersCovered(plan)
   return plan
 }
 
@@ -531,7 +578,7 @@ export async function activateNextPeriod(
     // - They should be updated by the game status, e.g. when going to the next
     //   period or segment
     // - Done: the game facts are updated on user interaction in PlayService
-    case `${DB.GameStatus.SCHEDULED}:ACTIVATE_NEXT_PERIOD:${DB.GameStatus.PREPARATION}`: {
+    case LIFECYCLE_TRANSITION.scheduledToPreparation: {
       const { results, actions } = computePeriodStartResults(
         {
           results: undefined,
@@ -604,7 +651,7 @@ export async function activateNextPeriod(
     // RUNNING -> CONSOLIDATION
     // if the final segment is running, go on with consolidation of the period
     // compute the results of the last segment and update the game status
-    case `${DB.GameStatus.RUNNING}:ACTIVATE_NEXT_PERIOD:${DB.GameStatus.CONSOLIDATION}`: {
+    case LIFECYCLE_TRANSITION.runningToConsolidation: {
       // Guard on the *presence* of an active segment, not its truthiness:
       // `!currentSegmentIx` was also true at segment index 0, which wrongly
       // blocked consolidating a period whose only/first segment is active.
@@ -729,7 +776,7 @@ export async function activateNextPeriod(
 
     // CONSOLIDATION -> RESULTS
     // compute period end results and move to the results phase
-    case `${DB.GameStatus.CONSOLIDATION}:ACTIVATE_NEXT_PERIOD:${DB.GameStatus.RESULTS}`: {
+    case LIFECYCLE_TRANSITION.consolidationToResults: {
       if (!game.activePeriod?.activeSegment) return null
 
       const { results, actions, events } = computePeriodEndResults(
@@ -859,7 +906,7 @@ export async function activateNextPeriod(
     // RESULTS -> PREPARATION
     // if the game is in the results phase (between periods)
     // initialize the next period and move to PREPARATION
-    case `${DB.GameStatus.RESULTS}:ACTIVATE_NEXT_PERIOD:${DB.GameStatus.PREPARATION}`: {
+    case LIFECYCLE_TRANSITION.resultsToPreparation: {
       // if there is no next period, return
       if (!game.activePeriod) {
         log.warn('no next period available')
@@ -1050,8 +1097,8 @@ export async function activateNextSegment(
   switch (transitionKey) {
     // PREPARATION -> RUNNING
     // PAUSED -> RUNNING
-    case `${DB.GameStatus.PREPARATION}:ACTIVATE_NEXT_SEGMENT:${DB.GameStatus.RUNNING}`:
-    case `${DB.GameStatus.PAUSED}:ACTIVATE_NEXT_SEGMENT:${DB.GameStatus.RUNNING}`: {
+    case LIFECYCLE_TRANSITION.preparationToRunning:
+    case LIFECYCLE_TRANSITION.pausedToRunning: {
       const { results, actions } = computeSegmentStartResults(game, {
         services,
       })
@@ -1147,7 +1194,7 @@ export async function activateNextSegment(
 
     // RUNNING -> PAUSED
     // compute the segment results of the current segment and set to paused
-    case `${DB.GameStatus.RUNNING}:ACTIVATE_NEXT_SEGMENT:${DB.GameStatus.PAUSED}`: {
+    case LIFECYCLE_TRANSITION.runningToPaused: {
       // return if there is no next segment available
       if (!game.activePeriod?.activeSegment?.nextSegment) {
         return null
@@ -1299,6 +1346,13 @@ export async function finishGame(
   const event = 'FINISH_GAME' as const
   const plan = resolveTransitionPlan(game, event, gameId, 'finishGame')
   if (!plan) return null
+  const transitionKey = lifecycleTransitionKey(plan)
+  if (transitionKey !== LIFECYCLE_TRANSITION.resultsToCompleted) {
+    log.warn(
+      `finishGame called with unhandled lifecycle transition: ${transitionKey} for gameId: ${gameId}`
+    )
+    return null
+  }
 
   const updatedGame = await ctx.prisma.game.update({
     where: {
@@ -1729,8 +1783,6 @@ export function computePeriodEndResults(
         periodIx: activePeriodIx,
         segmentIx: activeSegmentIx,
       })
-
-      log.debug(domainActions)
 
       if (domainActions && domainActions.length > 0) {
         for (const a of domainActions) {
