@@ -18,13 +18,12 @@ import * as GameMachineService from './GameMachineService.js'
 type Context = CtxWithPrisma<PrismaClient>
 
 /**
- * Ask the XState lifecycle machine for the status that `event` leads to from
- * the game's current status. Returns null — and logs — when there is no
- * valid transition, in which case the calling admin action is a no-op. The
- * switch in each transition then only selects side-effects for the (already
- * validated) transition and writes the returned `targetStatus`.
+ * Ask the lifecycle rules for a complete transition plan. Returns null — and
+ * logs — when there is no valid transition, in which case the calling admin
+ * action is a no-op. The switch in each transition then only selects side
+ * effects for the already-validated plan and writes `plan.targetStatus`.
  */
-function resolveTargetStatus(
+function resolveTransitionPlan(
   game: {
     status: DB.GameStatus
     activePeriodIx: number
@@ -34,14 +33,20 @@ function resolveTargetStatus(
   event: GameMachineService.GameEvent,
   gameId: number,
   fnName: string
-): DB.GameStatus | null {
-  const targetStatus = GameMachineService.nextStatus(game, event)
-  if (!targetStatus) {
+): GameMachineService.GameLifecycleTransitionPlan | null {
+  const plan = GameMachineService.planLifecycleTransition(game, event)
+  if (!plan) {
     log.warn(`${fnName}: no valid ${event} from status ${game.status}`, {
       gameId,
     })
   }
-  return targetStatus
+  return plan
+}
+
+function lifecycleTransitionKey(
+  plan: GameMachineService.GameLifecycleTransitionPlan
+) {
+  return `${plan.fromStatus}:${plan.event}:${plan.targetStatus}`
 }
 
 /**
@@ -497,17 +502,19 @@ export async function activateNextPeriod(
   const currentSegmentIx = game.activePeriod?.activeSegmentIx
   const nextPeriodIx = currentPeriodIx + 1
 
-  // Drive the transition from the lifecycle machine (see resolveTargetStatus):
+  // Drive the transition from the lifecycle machine (see resolveTransitionPlan):
   // a null target means no valid transition from here, so this is a no-op. The
-  // switch below only selects side-effects for the validated transition.
+  // switch below only selects side-effects for the validated transition plan.
   const event = 'ACTIVATE_NEXT_PERIOD' as const
-  const targetStatus = resolveTargetStatus(
+  const plan = resolveTransitionPlan(
     game,
     event,
     gameId,
     'activateNextPeriod'
   )
-  if (!targetStatus) return null
+  if (!plan) return null
+  const targetStatus = plan.targetStatus
+  const transitionKey = lifecycleTransitionKey(plan)
 
   // NotificationService.publishGlobalNotification({
   //   type: GlobalNotificationType.PERIOD_ACTIVATED,
@@ -515,7 +522,7 @@ export async function activateNextPeriod(
 
   let finalTransactionResult
   let didUpdate = false
-  switch (game.status) {
+  switch (transitionKey) {
     // SCHEDULED -> PREPARATION
     // if the game is scheduled, initialize period results and move to PREPARATION
 
@@ -524,7 +531,7 @@ export async function activateNextPeriod(
     // - They should be updated by the game status, e.g. when going to the next
     //   period or segment
     // - Done: the game facts are updated on user interaction in PlayService
-    case DB.GameStatus.SCHEDULED: {
+    case `${DB.GameStatus.SCHEDULED}:ACTIVATE_NEXT_PERIOD:${DB.GameStatus.PREPARATION}`: {
       const { results, actions } = computePeriodStartResults(
         {
           results: undefined,
@@ -597,7 +604,7 @@ export async function activateNextPeriod(
     // RUNNING -> CONSOLIDATION
     // if the final segment is running, go on with consolidation of the period
     // compute the results of the last segment and update the game status
-    case DB.GameStatus.RUNNING: {
+    case `${DB.GameStatus.RUNNING}:ACTIVATE_NEXT_PERIOD:${DB.GameStatus.CONSOLIDATION}`: {
       // Guard on the *presence* of an active segment, not its truthiness:
       // `!currentSegmentIx` was also true at segment index 0, which wrongly
       // blocked consolidating a period whose only/first segment is active.
@@ -722,7 +729,7 @@ export async function activateNextPeriod(
 
     // CONSOLIDATION -> RESULTS
     // compute period end results and move to the results phase
-    case DB.GameStatus.CONSOLIDATION: {
+    case `${DB.GameStatus.CONSOLIDATION}:ACTIVATE_NEXT_PERIOD:${DB.GameStatus.RESULTS}`: {
       if (!game.activePeriod?.activeSegment) return null
 
       const { results, actions, events } = computePeriodEndResults(
@@ -852,7 +859,7 @@ export async function activateNextPeriod(
     // RESULTS -> PREPARATION
     // if the game is in the results phase (between periods)
     // initialize the next period and move to PREPARATION
-    case DB.GameStatus.RESULTS: {
+    case `${DB.GameStatus.RESULTS}:ACTIVATE_NEXT_PERIOD:${DB.GameStatus.PREPARATION}`: {
       // if there is no next period, return
       if (!game.activePeriod) {
         log.warn('no next period available')
@@ -948,7 +955,7 @@ export async function activateNextPeriod(
     default:
       // PREPARATION, PAUSED, COMPLETED, etc.
       log.warn(
-        `activateNextPeriod called with unhandled game status: ${game.status} for gameId: ${gameId}`
+        `activateNextPeriod called with unhandled lifecycle transition: ${transitionKey} for gameId: ${gameId}`
       )
       return null
   }
@@ -963,8 +970,8 @@ export async function activateNextPeriod(
     assertMachineTarget('activateNextPeriod', {
       gameId,
       fromStatus: game.status,
-      event,
-      target: targetStatus,
+      event: plan.event,
+      target: plan.targetStatus,
       actual: (committedGame as any)?.status,
     })
 
@@ -1020,17 +1027,19 @@ export async function activateNextSegment(
   const currentSegmentIx = game.activePeriod.activeSegmentIx
   const nextSegmentIx = currentSegmentIx + 1
 
-  // Drive the transition from the lifecycle machine (see resolveTargetStatus):
+  // Drive the transition from the lifecycle machine (see resolveTransitionPlan):
   // null -> no valid transition -> no-op; the switch below only runs the
-  // side-effects for the validated transition.
+  // side-effects for the validated transition plan.
   const event = 'ACTIVATE_NEXT_SEGMENT' as const
-  const targetStatus = resolveTargetStatus(
+  const plan = resolveTransitionPlan(
     game,
     event,
     gameId,
     'activateNextSegment'
   )
-  if (!targetStatus) return null
+  if (!plan) return null
+  const targetStatus = plan.targetStatus
+  const transitionKey = lifecycleTransitionKey(plan)
 
   // NotificationService.publishGlobalNotification({
   //   type: GlobalNotificationType.SEGMENT_ACTIVATED,
@@ -1038,11 +1047,11 @@ export async function activateNextSegment(
 
   let finalTransactionResult
   let didUpdate = false
-  switch (game.status) {
+  switch (transitionKey) {
     // PREPARATION -> RUNNING
     // PAUSED -> RUNNING
-    case DB.GameStatus.PREPARATION:
-    case DB.GameStatus.PAUSED: {
+    case `${DB.GameStatus.PREPARATION}:ACTIVATE_NEXT_SEGMENT:${DB.GameStatus.RUNNING}`:
+    case `${DB.GameStatus.PAUSED}:ACTIVATE_NEXT_SEGMENT:${DB.GameStatus.RUNNING}`: {
       const { results, actions } = computeSegmentStartResults(game, {
         services,
       })
@@ -1138,7 +1147,7 @@ export async function activateNextSegment(
 
     // RUNNING -> PAUSED
     // compute the segment results of the current segment and set to paused
-    case DB.GameStatus.RUNNING: {
+    case `${DB.GameStatus.RUNNING}:ACTIVATE_NEXT_SEGMENT:${DB.GameStatus.PAUSED}`: {
       // return if there is no next segment available
       if (!game.activePeriod?.activeSegment?.nextSegment) {
         return null
@@ -1240,7 +1249,7 @@ export async function activateNextSegment(
 
     default:
       log.warn(
-        `activateNextSegment called with unhandled game status: ${game.status} for gameId: ${gameId}`
+        `activateNextSegment called with unhandled lifecycle transition: ${transitionKey} for gameId: ${gameId}`
       )
       return null
   }
@@ -1248,8 +1257,8 @@ export async function activateNextSegment(
     assertMachineTarget('activateNextSegment', {
       gameId,
       fromStatus: game.status,
-      event,
-      target: targetStatus,
+      event: plan.event,
+      target: plan.targetStatus,
       actual: (finalTransactionResult as any)?.status,
     })
 
@@ -1288,8 +1297,8 @@ export async function finishGame(
   if (!game) return null
 
   const event = 'FINISH_GAME' as const
-  const targetStatus = resolveTargetStatus(game, event, gameId, 'finishGame')
-  if (!targetStatus) return null
+  const plan = resolveTransitionPlan(game, event, gameId, 'finishGame')
+  if (!plan) return null
 
   const updatedGame = await ctx.prisma.game.update({
     where: {
@@ -1299,7 +1308,7 @@ export async function finishGame(
     },
     include: { periods: { include: { segments: true } } },
     data: {
-      status: targetStatus,
+      status: plan.targetStatus,
       version: { increment: 1 },
     },
   })
@@ -1307,8 +1316,8 @@ export async function finishGame(
   assertMachineTarget('finishGame', {
     gameId,
     fromStatus: game.status,
-    event,
-    target: targetStatus,
+    event: plan.event,
+    target: plan.targetStatus,
     actual: updatedGame.status,
   })
 

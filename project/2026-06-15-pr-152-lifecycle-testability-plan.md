@@ -534,9 +534,18 @@ C6E — docs, final review, PR update (Medium)
       Verify: `node_modules/.bin/tsc --noEmit -p tsconfig.json` 0;
       `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 34/34;
       `git diff --check` 0.
+- [x] C6C complete. `GameService` lifecycle calls now resolve full transition
+      plans and route side-effect branches by `from:event:to` key, while
+      transaction internals stay unchanged. Review found no correctness issue;
+      route-key coverage test remains for C6D. Simplification found duplicate
+      key computation; fixed by computing `transitionKey` once per lifecycle fn.
+      Verify: `node_modules/.bin/tsc --noEmit -p tsconfig.json` 0;
+      `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 34/34;
+      `git diff --check` 0; `rg 'nextStatus\(|resolveTargetStatus'`
+      shows no `GameService` usage.
 
 ## Next Steps
-- Continue with C6C. Work one slice at a time: implement, verify, review
+- Continue with C6D. Work one slice at a time: implement, verify, review
   subagent, simplification subagent, commit.
 - Push local commits only when approved. Then update PR #152 body using
   `$df-mr-description-writer` so it reflects whole branch vs `dev`, including C0-C6.
