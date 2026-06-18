@@ -565,10 +565,344 @@ C6E — docs, final review, PR update (Medium)
       resolved. Verify: `node_modules/.bin/tsc --noEmit -p tsconfig.json` 0;
       `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 39/39;
       `git diff --check` 0.
+- [x] C7 demo E2E validation complete. Used isolated disposable Postgres on
+      `localhost:55432` with schema push + seed, not existing local DB reset.
+      Real Next GraphQL endpoint drove admin/player lifecycle. Browser smoke
+      covered player join/welcome/cockpit after setting local
+      `NEXT_PUBLIC_API_URL`. Admin browser UI stayed blocked by external Auth0
+      and browser-cookie API limits, so admin actions used signed local admin
+      JWT through GraphQL. Teardown stopped dev server and disposable DB.
+
+## C7 Demo E2E Validation Plan
+
+### Goal
+- Prove new platform lifecycle logic works through real demo-game admin/player
+  flow, not only unit tests.
+- Validate full chain:
+  `SCHEDULED -> PREPARATION -> RUNNING -> PAUSED -> RUNNING -> CONSOLIDATION -> RESULTS -> PREPARATION -> ... -> RESULTS -> COMPLETED`.
+- Check XState stays pure: machine decides valid transition and emits plain
+  work orders; `GameService` performs DB/event side effects; reducer/calculator
+  services stay pure.
+- Capture enough evidence for PR #152: status timeline, admin/player UI
+  screenshots, GraphQL snapshots, console/network errors.
+
+### Non-Goals
+- No broad Playwright suite in first pass.
+- No load/perf testing.
+- No visual redesign.
+- No ownership/auth hardening unless it blocks this demo path.
+- No change to game-domain formulas unless E2E exposes real wrong output.
+
+### Environment Plan
+- Use correct worktree:
+  `/Users/rschlae/Git/gbl/gbl-uzh/.claude/worktrees/jolly-benz-6527e7`.
+- Start demo app from repo scripts:
+  - Preferred root: `pnpm dev`.
+  - App-scoped fallback: `pnpm --filter @gbl-uzh/demo-game dev`.
+- Use browser verification:
+  - Prefer in-app Browser plugin if available.
+  - Fallback: `npx agent-browser`.
+- DB setup choice before E0:
+  - Clean route: run `pnpm --filter @gbl-uzh/demo-game prisma:setup`.
+    This resets local demo DB, so ask first.
+  - Non-destructive route: keep existing DB, create uniquely named test game,
+    record IDs/tokens, avoid deleting data.
+- Teardown choice after E7:
+  - Clean route: no data teardown needed if DB was disposable/reset for test;
+    record final status/evidence, then stop dev/browser sessions.
+  - Non-destructive route: delete/archive created test game and related records
+    only if app exposes safe cleanup; otherwise record game ID/token and leave
+    data untouched for manual cleanup.
+  - Always stop dev server, close extra browser contexts, and keep only PR
+    evidence files intentionally referenced.
+- Secrets/config:
+  - Use existing local env if app boots.
+  - Use `infisical run ...` only if app requires missing secrets.
+
+### Evidence Format
+- Record one status timeline row per lifecycle action:
+
+| Step | Actor | Trigger | Expected Status | Expected Side Effects | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| E3.1 | Admin | `activateNextPeriod` | `PREPARATION` | active period opens, player events published | screenshot + GraphQL |
+
+- For each slice, capture:
+  - admin page screenshot,
+  - player page screenshot when player-visible state should change,
+  - GraphQL `Game` or `Result` snapshot,
+  - browser console/network error summary.
+
+### E0 Preflight
+- Boot app.
+- Confirm admin route loads.
+- Confirm GraphQL endpoint responds.
+- Confirm seeded/admin auth path is known.
+- Confirm no startup type/runtime errors.
+- Evidence:
+  - local URL,
+  - admin page screenshot,
+  - GraphQL health/query success,
+  - console/network no blocking errors.
+- Stop if auth or app boot fails; diagnose before touching lifecycle.
+
+### E1 Admin Game Setup
+- Create new demo game through admin UI.
+- Add 2 periods.
+- Add at least 2 segments per period.
+- Record:
+  - game ID,
+  - player/team token(s),
+  - period IDs/indices,
+  - segment IDs/indices.
+- Verify initial state:
+  - game status `SCHEDULED`,
+  - no active segment,
+  - first valid lifecycle control is activate next period,
+  - finish control unavailable or no-op.
+- Evidence:
+  - admin setup screenshots,
+  - GraphQL `Game` query snapshot.
+
+### E2 Player Join And Readiness
+- Open join link in separate browser context/session.
+- Complete welcome/profile flow if required.
+- Land on `/play/cockpit`.
+- Verify player sees allowed current state only.
+- Perform minimal player actions needed by demo game:
+  - ready toggle if present,
+  - decision/action input if required,
+  - submit/save if present.
+- Evidence:
+  - player cockpit screenshot,
+  - GraphQL `Self` and `Result` success,
+  - no console/network errors.
+
+### E3 First Period Lifecycle
+- From admin, trigger `activateNextPeriod`.
+  - Expect `SCHEDULED -> PREPARATION`.
+  - Check active period set.
+  - Check readiness reset/work-order effects if visible.
+- Trigger `activateNextSegment`.
+  - Expect `PREPARATION -> RUNNING`.
+  - Check active segment set.
+  - Player cockpit updates after realtime/refetch.
+- Trigger `activateNextSegment`.
+  - Expect `RUNNING -> PAUSED` when another segment exists.
+  - Check result/event side effects run after commit.
+- Trigger `activateNextSegment`.
+  - Expect `PAUSED -> RUNNING`.
+  - Check next segment active.
+- Trigger `activateNextPeriod`.
+  - Expect `RUNNING -> CONSOLIDATION`.
+  - Check period result calculation completes.
+- Trigger `activateNextPeriod`.
+  - Expect `CONSOLIDATION -> RESULTS`.
+  - Check result view loads for admin/player.
+- Evidence:
+  - status timeline rows for each trigger,
+  - GraphQL `Game` snapshots after each trigger,
+  - player result/cockpit screenshots,
+  - no failed lifecycle mutation responses.
+
+### E4 Second Period And Final Results
+- From intermediate `RESULTS`, trigger `activateNextPeriod`.
+  - Expect `RESULTS -> PREPARATION`.
+  - Check next period active.
+- Repeat segment lifecycle for final period:
+  - `PREPARATION -> RUNNING`,
+  - `RUNNING -> PAUSED`,
+  - `PAUSED -> RUNNING`,
+  - `RUNNING -> CONSOLIDATION`,
+  - `CONSOLIDATION -> RESULTS`.
+- Verify final-results edge:
+  - persisted marker may have `activePeriodIx === totalPeriods`,
+  - player result lookup still uses real active period index,
+  - `/play/cockpit` and result query do not crash,
+  - admin result view loads final period.
+- Evidence:
+  - final-period status timeline,
+  - player result screenshot,
+  - GraphQL `Result` response,
+  - no `activePeriodIx` out-of-range errors.
+
+### E5 Finish Game
+- From final `RESULTS`, trigger `finishGame`.
+- Expect `RESULTS -> COMPLETED`.
+- Verify:
+  - finish is unavailable before final results,
+  - finish works at final results,
+  - `COMPLETED` terminal state has no further lifecycle controls,
+  - repeated finish/advance attempt is no-op or rejected without state drift,
+  - admin and player pages still load.
+- Evidence:
+  - completed admin screenshot,
+  - player completed/result screenshot,
+  - GraphQL `Game.status === COMPLETED`,
+  - mutation response for repeated invalid action if tested.
+
+### E6 Negative Correctness Checks
+- Try invalid transitions through UI if controls are visible; otherwise use
+  GraphQL mutation calls.
+- Cases:
+  - finish before final `RESULTS`,
+  - activate next segment before period is active,
+  - activate next period from `PREPARATION`,
+  - activate next period from `PAUSED`,
+  - activate next segment from `COMPLETED`,
+  - double-click one lifecycle button quickly.
+- Expected:
+  - blocked transition returns null/no-op or clear error,
+  - game status/version does not drift,
+  - no duplicate result rows/events that break page load,
+  - UI refetch remains consistent with DB status.
+- Evidence:
+  - before/after GraphQL snapshots,
+  - console/network summary,
+  - status unchanged where blocked.
+
+### E7 Automation Follow-Up
+- If manual E2E passes, decide whether to add automated coverage in same PR or
+  follow-up.
+- Preferred automation shape:
+  - GraphQL/API setup for game/periods/segments,
+  - browser checks only for user-visible admin/player states,
+  - stable selectors for lifecycle buttons if missing,
+  - one golden full-lifecycle test, not many brittle UI-only tests.
+- Do not automate until manual path proves selectors, auth, seed data, and DB
+  reset strategy are stable.
+
+### E8 Teardown And Evidence Closeout
+- Stop dev server.
+- Close player/admin browser sessions/contexts.
+- Clean test data:
+  - If clean DB route was used: leave DB in final tested state unless another
+    reset is explicitly requested.
+  - If non-destructive route was used: use app-supported delete/archive if safe;
+    otherwise record created game ID and skip direct DB deletes.
+- Save evidence paths:
+  - admin screenshots,
+  - player screenshots,
+  - GraphQL/status snapshots,
+  - console/network summary.
+- Run final checks:
+  - `git status --short`,
+  - confirm only intended files changed,
+  - `git diff --check`.
+- Update this plan progress:
+  - mark completed slices,
+  - note DB route used,
+  - note blockers/failures,
+  - link evidence paths.
+
+### Review/Simplification Checklist
+- Keep test path close to user flow; avoid duplicate unit-test assertions.
+- Assert persisted game status after each action.
+- Assert player-facing result view at final `RESULTS`, because C6E fixed that
+  exact edge.
+- Treat GraphQL as source of truth when realtime/refetch timing is noisy.
+- Keep screenshots and snapshots small enough for PR body/comment.
+- If E2E finds a bug, add smallest regression test near owning code first,
+  then rerun relevant manual step.
+
+### C7 Execution Results
+- Date: 2026-06-18.
+- Worktree:
+  `/Users/rschlae/Git/gbl/gbl-uzh/.claude/worktrees/jolly-benz-6527e7`.
+- DB route:
+  - started disposable `postgres:15` container
+    `codex-gbl-e2e-postgres` on `localhost:55432`;
+  - ran schema push + seed against that DB;
+  - did not reset or mutate existing `localhost:5432` DB;
+  - stopped/removing disposable container in teardown.
+- Runtime route:
+  - ran `pnpm install --frozen-lockfile` first because worktree
+    `node_modules` was stale and pointed demo-game at Next 15.2.2;
+  - ran app against Next 16.2.9 with `--webpack`;
+  - rebuilt `@gbl-uzh/platform` dist before clean evidence run so demo-game
+    runtime used current source;
+  - set `NEXT_PUBLIC_API_URL=http://localhost:3000/api/graphql` for browser
+    smoke because `.env.development` points at `https://localhost/api/graphql`.
+- Temp helper:
+  - `/tmp/gbl-pr152-e2e.mjs`;
+  - API-first, no repo test harness added;
+  - useful candidate for formal follow-up E2E.
+
+#### C7 Evidence
+- E0 preflight:
+  - GraphQL endpoint returned `200` with seeded empty `games: []`;
+  - admin browser route could not be fully authenticated without Auth0/cookie
+    injection; signed admin JWT worked through GraphQL context;
+  - original `localhost:5432` was not reachable as direct Postgres
+    (`pg_isready` no response), so disposable DB was used.
+- E1 admin setup:
+  - clean evidence game `3`;
+  - status `SCHEDULED`, version `0`;
+  - 2 periods, 2 segments per period;
+  - player token `uzspmF4L-1jCUXjdivB6a`.
+- E2 player join/readiness:
+  - `loginAsTeam` set player session cookie;
+  - `updateReadyState(true)` succeeded;
+  - `self` showed status `SCHEDULED`;
+  - result query returned no active period/segment and no error.
+- E3 first period:
+  - `SCHEDULED -> PREPARATION` version `1`;
+  - `PREPARATION -> RUNNING` version `2`;
+  - `RUNNING -> PAUSED` version `3`;
+  - `PAUSED -> RUNNING` version `4`;
+  - `RUNNING -> CONSOLIDATION` version `5`;
+  - `CONSOLIDATION -> RESULTS` version `6`;
+  - all persisted statuses matched expected.
+- E4 second/final period:
+  - `RESULTS -> PREPARATION` version `7`;
+  - `PREPARATION -> RUNNING` version `8`;
+  - `RUNNING -> PAUSED` version `9`;
+  - `PAUSED -> RUNNING` version `10`;
+  - `RUNNING -> CONSOLIDATION` version `11`;
+  - `CONSOLIDATION -> RESULTS` version `12`;
+  - final persisted marker `activePeriodIx: 2`, active relation period index
+    `1`;
+  - player result query returned `gameStatus: RESULTS`,
+    `currentPeriodIx: 1`, `currentSegmentIx: 1`,
+    `playerResultType: SEGMENT_END`; no final-results crash.
+- E5 finish:
+  - `RESULTS -> COMPLETED` version `13`;
+  - player result query returned `gameStatus: COMPLETED`,
+    `currentPeriodIx: 1`, `playerResultType: SEGMENT_END`;
+  - repeated finish returned `null`.
+- E6 invalids:
+  - early finish from `SCHEDULED`: `null`;
+  - early segment advance from `SCHEDULED`: `null`;
+  - state stayed `SCHEDULED`, version `0`;
+  - activate next period opened game to `PREPARATION`, version `1`;
+  - activate next period from `PREPARATION`: `null`;
+  - state stayed `PREPARATION`, version `1`;
+  - rapid double `activateNextPeriod`: one fulfilled, one Prisma P2025 error,
+    final state `PREPARATION`, version `1`; no duplicate state advance. Error
+    shape remains deferred Prisma/OCC hardening follow-up.
+- Browser smoke:
+  - `/join/uzspmF4L-1jCUXjdivB6a` reached `/play/welcome`;
+  - "Start Game" reached `/play/cockpit`;
+  - cockpit showed `Current status: COMPLETED`;
+  - dev warnings observed: deprecated `legacyBehavior`, unknown `primaryType`
+    DOM prop, Radix dialog missing description. Not lifecycle blockers.
+
+#### C7 Follow-Up Decision
+- Do not add broad UI automation in this PR.
+- Best follow-up:
+  - formalize `/tmp/gbl-pr152-e2e.mjs` as one checked-in API-first golden E2E;
+  - start isolated Postgres on non-conflicting port;
+  - create local admin user/JWT in setup;
+  - drive admin lifecycle through GraphQL;
+  - add one player browser smoke for join/welcome/cockpit;
+  - set local `NEXT_PUBLIC_API_URL` explicitly;
+  - optionally add stable admin selectors only after Auth0/dev-login strategy is
+    codified.
+- Keep Prisma/OCC graceful-error hardening deferred: rapid double-click does not
+  corrupt state, but one request still surfaces a Prisma P2025 GraphQL error.
 
 ## Next Steps
 - Push local commits only when approved. Then update PR #152 body using
-  `$df-mr-description-writer` so it reflects whole branch vs `dev`, including C0-C6.
+  `$df-mr-description-writer` so it reflects whole branch vs `dev`, including C0-C7.
   Do not mark PR ready until pushed checks pass and PR body/title reflect the
   whole branch.
 - Follow-up design options from C5/C6: expose lifecycle insights in GraphQL so
