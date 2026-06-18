@@ -48,6 +48,26 @@ Correction research (2026-06-17)
   targets without long-lived actors or side effects. Later C5 cleanup uses
   installed `xstate@5.20.1`'s non-deprecated `transition(...)` helper.
 
+Side-effect research addendum (2026-06-17)
+- Context7 re-check attempted for XState; quota exceeded. Fallback: official
+  Stately docs.
+- Evidence: Stately pure transition docs say `transition(machine, state, event)`
+  returns `[nextState, actions]` without creating a live actor or executing side
+  effects. Good fit for backend request handlers.
+  Source: https://stately.ai/docs/pure-transitions
+- Evidence: Stately action docs recommend named action objects with `type` and
+  `params`; inline actions are mainly for prototypes/simple cases. In this PR,
+  action objects should be plain "work orders", not implementations.
+  Source: https://stately.ai/docs/actions
+- Evidence: Stately invoke docs position invoked actors for async work managed
+  by a live actor. That is useful for long-running actor workflows, but not the
+  best fit for Prisma request transactions where DB write order, rollback
+  behavior, and post-commit effects must stay explicit in `GameService`.
+  Source: https://stately.ai/docs/invoke
+- Decision: use XState as a pure rule checker + work-order emitter. Do not put
+  Prisma, EventService, pubsub, async actors, or reducer/service calls inside
+  the machine.
+
 ## Slices
 
 S1 — pure result computation (Strong)
@@ -196,6 +216,169 @@ C5 — XState insights + simplification (Medium)
 - Check: platform `tsc`, full `tsx --test`, stale-ref grep.
 - Commit: `refactor(platform): expose xstate lifecycle insights`
 
+C6 — pure lifecycle work orders (Planned; Strong)
+
+Plain-language target
+- Machine = permission checker. It answers: "Can this admin action happen from
+  this game row?" and "what status comes next?"
+- Work order = plain object. It says "create segment-start results" or
+  "publish period activated". It does not do the work.
+- Calculators = pure result functions and reducer services. They compute facts,
+  result rows, action descriptors, and event descriptors. No `ctx`, no Prisma,
+  no pubsub, no logging side-effect requirement.
+- Executor = `GameService`. It reads the work orders, runs calculators, writes
+  Prisma inside explicit transactions, and publishes only after commit.
+- Rule: XState triggers side effects by returning work orders. It never executes
+  side effects.
+
+Readable code rules
+- Public service names should avoid state-machine jargon where possible:
+  prefer `planLifecycleTransition`, `workOrders`, `allowedEvents`, `nextStatus`.
+- Keep raw XState snapshot/microstep helpers private unless tests need them.
+- Comments should explain lifecycle behavior in game/admin terms first. Mention
+  XState only where maintainers need to know which library provides the rule
+  check.
+- Work-order names should be domain verbs, not library terms:
+  `startNextPeriod`, `finishCurrentSegment`, `createPeriodEndResults`,
+  `resetPlayerReadiness`, `publishPeriodActivated`.
+
+Draft transition work orders
+
+| From + event | To | Work orders |
+| --- | --- | --- |
+| `SCHEDULED` + `ACTIVATE_NEXT_PERIOD` | `PREPARATION` | `startNextPeriod`, `createPeriodStartResults`, `createPlayerActions`, `publishPeriodActivated` |
+| `PREPARATION` + `ACTIVATE_NEXT_SEGMENT` | `RUNNING` | `startNextSegment`, `createSegmentStartResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishSegmentActivated` |
+| `PAUSED` + `ACTIVATE_NEXT_SEGMENT` | `RUNNING` | `startNextSegment`, `createSegmentStartResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishSegmentActivated` |
+| `RUNNING` + `ACTIVATE_NEXT_SEGMENT` | `PAUSED` | `finishCurrentSegment`, `createSegmentEndResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishSegmentActivated` |
+| `RUNNING` + `ACTIVATE_NEXT_PERIOD` | `CONSOLIDATION` | `runSegmentBeforeActivationHook`, `finishCurrentSegment`, `consolidateCurrentPeriod`, `createSegmentEndResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishPeriodActivated` |
+| `CONSOLIDATION` + `ACTIVATE_NEXT_PERIOD` | `RESULTS` | `createPeriodEndResults`, `createPlayerActions`, `createPostCommitPlayerEvents`, `resetPlayerReadiness`, `publishPeriodActivated` |
+| `RESULTS` + `ACTIVATE_NEXT_PERIOD` | `PREPARATION` | `createPeriodStartResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishPeriodActivated` |
+| `RESULTS` + `FINISH_GAME` | `COMPLETED` | `finishGame`, `publishGameStateUpdated` |
+
+Notes on table
+- Work-order names are contracts, not final function names.
+- `createPlayerActions` and `createPostCommitPlayerEvents` consume descriptors
+  returned by pure calculators. They are executor work, not machine work.
+- Existing behavior publishes `PERIOD_ACTIVATED` after every successful
+  `activateNextPeriod` call. Keep that behavior unless product changes it.
+- Post-commit event thunks stay post-commit. Failing achievement/experience
+  events must not roll back an already-committed lifecycle transition.
+
+C6A — machine emits work orders, no DB dependency (Strong)
+- Problem: current machine gives valid next status and insights, but side-effect
+  expectations still live only in the `GameService` switch. Future drift is
+  possible.
+- Decision: define local status literals in `gameMachine.ts` and remove
+  `@prisma/client` import from the machine. Adapter tests keep proving literals
+  exactly match `DB.GameStatus`.
+- Decision: add typed action/work-order descriptors to XState transitions.
+  Use action objects with `type`/small params only. No action implementations,
+  no `invoke`, no actors, no async.
+- Files:
+  - `packages/platform/src/machines/gameMachine.ts`
+  - `packages/platform/src/machines/gameMachine.test.ts`
+  - `packages/platform/src/services/GameMachineService.test.ts`
+- Check:
+  - machine tests assert each transition returns expected work-order sequence
+    from pure `transition(...)`.
+  - grep proves machine has no Prisma client, EventService, pubsub, `invoke`,
+    `fromPromise`, `createActor`, or `ctx.prisma`.
+  - `tsc`; full platform tests.
+- Commit: `refactor(platform): emit lifecycle work orders from xstate`
+
+C6B — adapter returns a plain transition plan (Strong)
+- Problem: `GameService` currently asks only for `nextStatus`, so the lifecycle
+  rule check and side-effect contract are separate.
+- Decision: add `planLifecycleTransition(game, event)`.
+  Return null when not allowed. Return this shape when allowed:
+  `fromStatus`, `event`, `targetStatus`, `workOrders`, `insights`.
+- Decision: keep `nextStatus` as a small wrapper if external callers/tests still
+  need it. Prefer the plan API in new lifecycle code.
+- Decision: make machine-specific helpers internal where feasible:
+  `getGameMachineSnapshot` and raw context builders should not be the primary
+  public surface.
+- Files:
+  - `packages/platform/src/services/GameMachineService.ts`
+  - `packages/platform/src/services/GameMachineService.test.ts`
+  - maybe `packages/platform/src/index.ts` only if public exports change.
+- Check:
+  - invalid transition returns null.
+  - valid transition returns target + work orders.
+  - insights still match C5 behavior.
+  - `tsc`; full platform tests.
+- Commit: `refactor(platform): expose plain lifecycle transition plans`
+
+C6C — execute plans through explicit handlers (Medium)
+- Problem: `activateNextPeriod` / `activateNextSegment` still use large status
+  switches. They work, but the side-effect paths are not mechanically tied to
+  machine transitions.
+- Decision: extract existing switch arms into named handlers keyed by
+  `fromStatus + event + targetStatus`. Keep each handler close to current code;
+  do not redesign transaction internals in the same slice.
+- Decision: add `executeLifecycleTransitionPlan(plan, deps)` as a thin router.
+  It selects the handler, passes `targetStatus`, and returns the committed game
+  row/result needed by existing API behavior.
+- Decision: handler names should read like game operations:
+  `scheduledToPreparation`, `preparationToRunning`, `runningToPaused`,
+  `runningToConsolidation`, `consolidationToResults`,
+  `resultsToPreparation`, `resultsToCompleted`.
+- Decision: executor may inspect work-order types for coverage/assertions, but
+  Prisma writes stay in the named handlers for this first readable version.
+- Files:
+  - `packages/platform/src/services/GameService.ts`
+  - maybe new `packages/platform/src/services/GameLifecycleExecutor.ts` only if
+    `GameService.ts` becomes harder to read. Prefer no new file unless needed.
+- Check:
+  - behavior tests from S1-S3 still green.
+  - no behavior change for returned values or notification timing.
+  - `tsc`; full platform tests.
+- Commit: `refactor(platform): execute lifecycle transitions from plans`
+
+C6D — enforce completeness and purity (Strong)
+- Problem: work orders only help if drift fails tests.
+- Decision: add tests that enumerate all allowed representative transitions and
+  assert:
+  - every transition has at least one work order.
+  - every work-order type has executor coverage.
+  - every executor handler is referenced by exactly one transition key, unless
+    deliberately shared.
+  - `GameService` uses `planLifecycleTransition`, not direct status tables.
+- Decision: add purity guard tests:
+  - machine file must not import Prisma client, EventService, logger, or XState
+    actor/invoke helpers.
+  - compute result tests prove calculators do not accept `ctx` and do not call
+    DB hook services (`updateDBBeforeActivation`, `updateDBAfterEnd`,
+    `updateDBAfterInitialize`).
+- Files:
+  - `packages/platform/src/machines/gameMachine.test.ts`
+  - `packages/platform/src/services/GameMachineService.test.ts`
+  - `packages/platform/src/services/GameService.results.test.ts`
+  - maybe new `packages/platform/src/services/GameLifecycleExecutor.test.ts`.
+- Check:
+  - targeted tests first.
+  - `node_modules/.bin/tsx --test 'src/**/*.test.ts'`.
+  - `node_modules/.bin/tsc --noEmit -p tsconfig.json`.
+- Commit: `test(platform): enforce lifecycle plan coverage`
+
+C6E — docs, final review, PR update (Medium)
+- Problem: once C6 lands, docs and PR text must explain the simple mental model,
+  not state-machine internals.
+- Decision: update `CONTEXT.md` with:
+  "machine decides; work orders describe; calculators compute; executor writes".
+- Decision: update this plan `Progress` after each C6 slice.
+- Decision: run mandatory final security review after code changes.
+- Decision: update PR #152 body via `$df-mr-description-writer` after push
+  approval, covering whole branch vs `dev`.
+- Files:
+  - `CONTEXT.md`
+  - this plan
+  - PR body only after local branch is pushed/approved.
+- Check:
+  - stale-jargon grep for misleading "actions execute in machine" wording.
+  - full platform checks.
+  - final security review.
+- Commit: `docs(project): document lifecycle work-order model`
+
 ## Finish gate
 - Mandatory final security review subagent ($security-review) over the branch scope.
 - Update PR #152 body via `$df-mr-description-writer` (whole branch vs dev).
@@ -322,18 +505,25 @@ C5 — XState insights + simplification (Medium)
       `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 30/30;
       `node_modules/.bin/tsx scripts/lifecycle-diagram.ts` 0;
       `rg getNextSnapshot` no code refs; `git diff --check` 0.
+- [x] C6 planning only. User clarified Prisma and reducer services must stay
+      pure/outside XState; XState should trigger side effects by returning
+      plain work orders. Context7 re-check attempted but quota exceeded; plan
+      grounded in official Stately docs for pure `transition(...)`, action
+      objects, and invoked actor tradeoffs. Added C6A-C6E detailed slices.
+      No code changes yet.
 
 ## Next Steps
-- Finish corrective slices C0-C4.
-- Push local commits when approved. Then update PR #152 body using
-  `$df-mr-description-writer` so it reflects whole branch vs `dev`, including the
-  C0-C4 correction. Do not mark PR ready until pushed checks pass and PR
-  body/title reflect the whole branch.
-- Follow-up design options from C5: expose lifecycle insights in GraphQL so demo
-  admin controls stop duplicating guard logic; add transition-handler coverage
-  tests so every XState event has exactly one GameService side-effect handler;
-  consider a separate player-view state machine for visibility/result-state
-  rules if UI drift continues.
+- If approved, start C6A. Work one slice at a time: implement, verify, review
+  subagent, simplification subagent, commit.
+- Push local commits only when approved. Then update PR #152 body using
+  `$df-mr-description-writer` so it reflects whole branch vs `dev`, including C0-C6.
+  Do not mark PR ready until pushed checks pass and PR body/title reflect the
+  whole branch.
+- Follow-up design options from C5/C6: expose lifecycle insights in GraphQL so
+  demo admin controls stop duplicating guard logic; consider a separate
+  player-view state machine for visibility/result-state rules if UI drift
+  continues; consider Stately/graph tooling only after work-order coverage is
+  stable.
 - Keep deferred follow-ups unchanged: cross-admin ownership scoping
   (`task_35b0eb3d`), requireAdmin on the 3 setup mutations, previousResults type
   filter, remove dead jest devDeps (`task_696c6e51`), Prisma tx hardening
