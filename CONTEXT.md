@@ -18,12 +18,28 @@ architecture vocabulary the lifecycle code is structured around.
 
 - **XState lifecycle authority** — `gameMachine` (`machines/gameMachine.ts`) is
   the single source of truth for which lifecycle event is valid in which state,
-  the guard on each transition, and the resulting target state.
+  the guard on each transition, the resulting target state, and the plain work
+  orders that describe what the server must do after an accepted transition.
+  The machine is intentionally DB-free: no Prisma client, no `EventService`, no
+  pubsub, and no reducer/service calls.
   `GameMachineService` rebuilds an XState snapshot from the persisted game row
   (`game.status` plus derived guard context) and exposes the small server/admin
-  API: `nextStatus`, `canTransition`, `availableEvents`, and
-  `getGameLifecycleState`. Lifecycle methods *ask the machine* for the target;
-  they never hard-code status.
+  API: `planLifecycleTransition`, `getGameLifecycleInsights`, `nextStatus`,
+  `canTransition`, and `availableEvents`.
+
+- **Lifecycle transition plan** — the plain object returned by
+  `GameMachineService.planLifecycleTransition(game, event)`. Invalid events
+  return `null`. Valid events return `{ fromStatus, event, targetStatus,
+  workOrders, insights }`. `GameService` routes side-effect code by
+  `fromStatus:event:targetStatus`, writes Prisma inside explicit transactions,
+  and publishes only after commit.
+
+- **Lifecycle work order** — a plain `{ type }` descriptor emitted by pure
+  XState transition evaluation. Examples: `createPeriodStartResults`,
+  `resetPlayerReadiness`, `publishAfterActivateNextPeriod`. Work orders describe
+  intent only; `GameService` executes the actual DB writes and post-commit
+  effects. Tests assert every allowed machine transition has a route and every
+  work-order type has executor coverage.
 
 - **Lifecycle insight** — `getGameLifecycleInsights` derives tags, phase metadata,
   terminal status, available events, and next target statuses from the same

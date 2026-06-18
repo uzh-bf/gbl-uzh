@@ -402,7 +402,8 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
   // Filter up to the active period (and active segment) - future periods and
   // segments should not be visible to the user. The rule + the -1 sentinel for
   // the result type live in filterVisiblePeriods.
-  const activePeriodIx = currentGame.activePeriodIx
+  // Final RESULTS uses activePeriodIx as a marker; the relation is the period.
+  const activePeriodIx = currentGame.activePeriod.index
   const activeSegmentIx = currentGame.activePeriod.activeSegmentIx
 
   const { filteredPeriods, filteredActiveSegments, resultType } =
@@ -415,7 +416,12 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
   currentGame.periods = filteredPeriods
   currentGame.activePeriod.segments = filteredActiveSegments
   // mirror the filtered active-period segments into the periods array entry
-  currentGame.periods[activePeriodIx]!.segments = filteredActiveSegments
+  const activePeriodInList = currentGame.periods.find(
+    (period) => period.index === activePeriodIx
+  )
+  if (activePeriodInList) {
+    activePeriodInList.segments = filteredActiveSegments
+  }
 
   const previousResults = await ctx.prisma.playerResult.findMany({
     orderBy: {
@@ -436,7 +442,7 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
   const playerResult = await ctx.prisma.playerResult.findUnique({
     where: {
       periodIx_segmentIx_playerId_type: {
-        periodIx: currentGame.activePeriodIx,
+        periodIx: activePeriodIx,
         segmentIx: currentGame.activePeriod.activeSegmentIx,
         playerId: args.playerId,
         type: resultType,

@@ -1,7 +1,7 @@
 import * as DB from '@prisma/client'
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { filterVisiblePeriods } from './PlayService.js'
+import { filterVisiblePeriods, getPlayerResult } from './PlayService.js'
 
 /**
  * The player-visibility rule as a PURE function: plain arrays in, plain data
@@ -67,4 +67,54 @@ test('filterVisiblePeriods: does not mutate its inputs', () => {
   filterVisiblePeriods(inPeriods, { segments: inSegments }, 0, 0)
   assert.equal(inPeriods.length, 2)
   assert.equal(inSegments.length, 2)
+})
+
+test('getPlayerResult: final RESULTS marker does not index past the periods array', async () => {
+  const captured: { playerResultWhere?: any } = {}
+  const game = {
+    id: 1,
+    activePeriodIx: 3,
+    activePeriod: {
+      index: 2,
+      activeSegmentIx: 1,
+      segments: [{ index: 0 }, { index: 1 }],
+    },
+    periods: [
+      { index: 0, segments: [] },
+      { index: 1, segments: [] },
+      { index: 2, segments: [{ index: 0 }, { index: 1 }] },
+    ],
+  }
+  const ctx: any = {
+    prisma: {
+      game: { findUnique: async () => game },
+      playerResult: {
+        findMany: async () => [],
+        findUnique: async (args: any) => {
+          captured.playerResultWhere = args.where
+          return null
+        },
+      },
+      playerAction: { findMany: async () => [] },
+    },
+  }
+
+  const result = await getPlayerResult({ gameId: 1, playerId: 'p1' }, ctx)
+
+  assert.equal(result?.currentGame.periods.length, 3)
+  const finalPeriod = result?.currentGame.periods[2]
+  assert.ok(finalPeriod)
+  assert.deepEqual(
+    finalPeriod.segments.map((segment: any) => segment.index),
+    [0, 1]
+  )
+  assert.deepEqual(
+    captured.playerResultWhere.periodIx_segmentIx_playerId_type,
+    {
+      periodIx: 2,
+      segmentIx: 1,
+      playerId: 'p1',
+      type: DB.PlayerResultType.SEGMENT_END,
+    }
+  )
 })

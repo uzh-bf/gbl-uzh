@@ -554,10 +554,19 @@ C6E — docs, final review, PR update (Medium)
       route constant usage. Verify: `node_modules/.bin/tsc --noEmit -p
       tsconfig.json` 0; `node_modules/.bin/tsx --test 'src/**/*.test.ts'`
       38/38; `git diff --check` 0.
+- [x] C6E complete. `CONTEXT.md` now documents the plain model: machine decides,
+      work orders describe, calculators compute, `GameService` writes/publishes.
+      Final security review found a Minor availability issue in player result
+      lookup after final-period consolidation (`activePeriodIx === periods.length`);
+      fixed `getPlayerResult` to use `activePeriod.index` for player-facing
+      lookup/mirroring and added regression coverage. C6E review/simplification
+      found an unrealistic test fixture and noisy comment; fixed. Final focused
+      security re-check: DONE, no Critical/Important/Minor findings, prior issue
+      resolved. Verify: `node_modules/.bin/tsc --noEmit -p tsconfig.json` 0;
+      `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 39/39;
+      `git diff --check` 0.
 
 ## Next Steps
-- Continue with C6E. Work one slice at a time: implement, verify, review
-  subagent, simplification subagent, commit.
 - Push local commits only when approved. Then update PR #152 body using
   `$df-mr-description-writer` so it reflects whole branch vs `dev`, including C0-C6.
   Do not mark PR ready until pushed checks pass and PR body/title reflect the
