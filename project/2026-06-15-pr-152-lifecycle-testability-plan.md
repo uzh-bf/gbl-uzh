@@ -525,9 +525,18 @@ C6E — docs, final review, PR update (Medium)
       `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 33/33;
       `node_modules/.bin/tsx scripts/lifecycle-diagram.ts` 0;
       forbidden machine grep 0; `git diff --check` 0.
+- [x] C6B complete. Added `planLifecycleTransition(game, event)` returning null
+      when blocked or `{ fromStatus, event, targetStatus, workOrders,
+      insights }` when allowed. `nextStatus` is now a wrapper over the plan for
+      compatibility until C6C moves `GameService`. Review found no correctness
+      issues; simplification found the plan test over-specified insight details,
+      so it now asserts only the plan contract plus a small insight smoke check.
+      Verify: `node_modules/.bin/tsc --noEmit -p tsconfig.json` 0;
+      `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 34/34;
+      `git diff --check` 0.
 
 ## Next Steps
-- Continue with C6B. Work one slice at a time: implement, verify, review
+- Continue with C6C. Work one slice at a time: implement, verify, review
   subagent, simplification subagent, commit.
 - Push local commits only when approved. Then update PR #152 body using
   `$df-mr-description-writer` so it reflects whole branch vs `dev`, including C0-C6.

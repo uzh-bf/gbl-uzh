@@ -9,6 +9,7 @@ import {
   getGameLifecycleInsights,
   getGameMachineSnapshot,
   nextStatus,
+  planLifecycleTransition,
   type GameRowForMachine,
 } from './GameMachineService.js'
 
@@ -111,6 +112,40 @@ test('nextStatus returns the XState target or null', () => {
       'FINISH_GAME'
     ),
     DB.GameStatus.COMPLETED
+  )
+})
+
+test('planLifecycleTransition returns a plain lifecycle plan or null', () => {
+  const runningPlan = planLifecycleTransition(
+    gameRow(DB.GameStatus.RUNNING, {
+      hasActiveSegment: true,
+      hasNextSegment: true,
+    }),
+    'ACTIVATE_NEXT_PERIOD'
+  )
+
+  assert.ok(runningPlan)
+  assert.equal(runningPlan.fromStatus, DB.GameStatus.RUNNING)
+  assert.equal(runningPlan.event, 'ACTIVATE_NEXT_PERIOD')
+  assert.equal(runningPlan.targetStatus, DB.GameStatus.CONSOLIDATION)
+  assert.deepEqual(runningPlan.workOrders, [
+    { type: 'runSegmentBeforeActivationHook' },
+    { type: 'finishCurrentSegment' },
+    { type: 'consolidateCurrentPeriod' },
+    { type: 'createSegmentEndResults' },
+    { type: 'createPlayerActions' },
+    { type: 'resetPlayerReadiness' },
+    { type: 'publishAfterActivateNextPeriod' },
+  ])
+  assert.equal(runningPlan.insights.status, DB.GameStatus.RUNNING)
+  assert.equal(runningPlan.insights.canActivateNextPeriod, true)
+
+  assert.equal(
+    planLifecycleTransition(
+      gameRow(DB.GameStatus.PREPARATION, { segmentCount: 0 }),
+      'ACTIVATE_NEXT_SEGMENT'
+    ),
+    null
   )
 })
 

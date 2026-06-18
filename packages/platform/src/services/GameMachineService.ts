@@ -4,7 +4,9 @@ import {
   GAME_EVENTS,
   GAME_TAGS,
   gameMachine,
+  toLifecycleWorkOrders,
   type GameEvent,
+  type LifecycleWorkOrder,
   type GameStateMeta,
   type GameMachineContext,
   type GameMachineEvent,
@@ -17,6 +19,7 @@ export type {
   GameMachineContext,
   GameStateMeta,
   GameTag,
+  LifecycleWorkOrder,
 } from '../machines/gameMachine.js'
 
 /**
@@ -76,10 +79,7 @@ export function nextStatus(
   game: GameRowForMachine,
   event: GameEvent
 ): DB.GameStatus | null {
-  const snapshot = getGameMachineSnapshot(game)
-  const machineEvent: GameMachineEvent = { type: event }
-  if (!snapshot.can(machineEvent)) return null
-  return transition(gameMachine, snapshot, machineEvent)[0].value as DB.GameStatus
+  return planLifecycleTransition(game, event)?.targetStatus ?? null
 }
 
 export function availableEvents(game: GameRowForMachine): GameEvent[] {
@@ -106,6 +106,33 @@ export interface GameLifecycleInsights extends GameLifecycleState {
   meta: GameStateMeta
   nextStatuses: Partial<Record<GameEvent, DB.GameStatus>>
   isTerminal: boolean
+}
+
+export interface GameLifecycleTransitionPlan {
+  fromStatus: DB.GameStatus
+  event: GameEvent
+  targetStatus: DB.GameStatus
+  workOrders: LifecycleWorkOrder[]
+  insights: GameLifecycleInsights
+}
+
+export function planLifecycleTransition(
+  game: GameRowForMachine,
+  event: GameEvent
+): GameLifecycleTransitionPlan | null {
+  const snapshot = getGameMachineSnapshot(game)
+  const machineEvent: GameMachineEvent = { type: event }
+  if (!snapshot.can(machineEvent)) return null
+
+  const [nextSnapshot, actions] = transition(gameMachine, snapshot, machineEvent)
+
+  return {
+    fromStatus: game.status,
+    event,
+    targetStatus: nextSnapshot.value as DB.GameStatus,
+    workOrders: toLifecycleWorkOrders(actions),
+    insights: getGameLifecycleInsights(game),
+  }
 }
 
 export function getGameLifecycleInsights(
