@@ -1,16 +1,30 @@
-import * as DB from '@prisma/client'
 import { setup } from 'xstate'
 
 /**
  * XState v5 model of the game lifecycle.
  *
- * The state node keys are the `DB.GameStatus` enum values, so a machine state
- * value can be compared directly against `game.status`.
+ * The state node keys intentionally match the persisted game status strings, so
+ * a machine state value can be compared directly against `game.status`.
  *
  * Context is derived from the database row on hydration. The machine defines no
- * actions and never mutates context; service code owns DB writes and side
- * effects.
+ * side-effecting actions and never mutates context; service code owns writes
+ * and external effects.
  */
+
+export const GAME_STATUS = {
+  SCHEDULED: 'SCHEDULED',
+  PREPARATION: 'PREPARATION',
+  RUNNING: 'RUNNING',
+  PAUSED: 'PAUSED',
+  CONSOLIDATION: 'CONSOLIDATION',
+  RESULTS: 'RESULTS',
+  COMPLETED: 'COMPLETED',
+} as const
+
+export const GAME_STATUS_VALUES = Object.values(GAME_STATUS)
+
+export type GameStatusValue =
+  (typeof GAME_STATUS)[keyof typeof GAME_STATUS]
 
 export type GameEvent =
   | 'ACTIVATE_NEXT_PERIOD'
@@ -32,6 +46,32 @@ export interface GameMachineContext {
 }
 
 export type GameMachineEvent = { type: GameEvent }
+
+export const LIFECYCLE_WORK_ORDER_TYPES = [
+  'startNextPeriod',
+  'startNextSegment',
+  'finishCurrentSegment',
+  'finishGame',
+  'runSegmentBeforeActivationHook',
+  'consolidateCurrentPeriod',
+  'createPeriodStartResults',
+  'createPeriodEndResults',
+  'createSegmentStartResults',
+  'createSegmentEndResults',
+  'createPlayerActions',
+  'createPostCommitPlayerEvents',
+  'resetPlayerReadiness',
+  'publishAfterActivateNextPeriod',
+  'publishAfterActivateNextSegment',
+  'publishAfterFinishGame',
+] as const
+
+export type LifecycleWorkOrderType =
+  (typeof LIFECYCLE_WORK_ORDER_TYPES)[number]
+
+export interface LifecycleWorkOrder {
+  type: LifecycleWorkOrderType
+}
 
 export type GameLifecyclePhase =
   | 'setup'
@@ -72,6 +112,25 @@ const DEFAULT_GAME_CONTEXT: GameMachineContext = {
   hasNextSegment: false,
 }
 
+const noopWorkOrderAction = () => {}
+
+const WORK_ORDER_ACTIONS = Object.fromEntries(
+  LIFECYCLE_WORK_ORDER_TYPES.map((type) => [type, noopWorkOrderAction])
+) as Record<LifecycleWorkOrderType, typeof noopWorkOrderAction>
+
+export function toLifecycleWorkOrders(
+  actions: readonly { type: string }[]
+): LifecycleWorkOrder[] {
+  return actions.map((action) => {
+    const type = action.type as LifecycleWorkOrderType
+    if (!LIFECYCLE_WORK_ORDER_TYPES.includes(type)) {
+      throw new Error(`Unknown lifecycle work order: ${action.type}`)
+    }
+
+    return { type }
+  })
+}
+
 export const gameMachine = setup({
   types: {
     context: {} as GameMachineContext,
@@ -79,6 +138,7 @@ export const gameMachine = setup({
     tags: {} as GameTag,
     meta: {} as GameStateMeta,
   },
+  actions: WORK_ORDER_ACTIONS,
   guards: {
     hasSegments: ({ context }) => context.segmentCount > 0,
     hasNextSegment: ({ context }) => context.hasNextSegment,
@@ -91,19 +151,27 @@ export const gameMachine = setup({
 }).createMachine({
   id: 'game',
   context: DEFAULT_GAME_CONTEXT,
-  initial: DB.GameStatus.SCHEDULED,
+  initial: GAME_STATUS.SCHEDULED,
   states: {
-    [DB.GameStatus.SCHEDULED]: {
+    [GAME_STATUS.SCHEDULED]: {
       tags: ['admin-controlled'],
       meta: {
         phase: 'setup',
         label: 'Scheduled',
       },
       on: {
-        ACTIVATE_NEXT_PERIOD: { target: DB.GameStatus.PREPARATION },
+        ACTIVATE_NEXT_PERIOD: {
+          target: GAME_STATUS.PREPARATION,
+          actions: [
+            'startNextPeriod',
+            'createPeriodStartResults',
+            'createPlayerActions',
+            'publishAfterActivateNextPeriod',
+          ],
+        },
       },
     },
-    [DB.GameStatus.PREPARATION]: {
+    [GAME_STATUS.PREPARATION]: {
       tags: ['admin-controlled', 'active-period', 'segment-workflow'],
       meta: {
         phase: 'period-preparation',
@@ -111,12 +179,19 @@ export const gameMachine = setup({
       },
       on: {
         ACTIVATE_NEXT_SEGMENT: {
-          target: DB.GameStatus.RUNNING,
+          target: GAME_STATUS.RUNNING,
           guard: 'hasSegments',
+          actions: [
+            'startNextSegment',
+            'createSegmentStartResults',
+            'createPlayerActions',
+            'resetPlayerReadiness',
+            'publishAfterActivateNextSegment',
+          ],
         },
       },
     },
-    [DB.GameStatus.PAUSED]: {
+    [GAME_STATUS.PAUSED]: {
       tags: ['admin-controlled', 'active-period', 'segment-workflow'],
       meta: {
         phase: 'between-segments',
@@ -124,12 +199,19 @@ export const gameMachine = setup({
       },
       on: {
         ACTIVATE_NEXT_SEGMENT: {
-          target: DB.GameStatus.RUNNING,
+          target: GAME_STATUS.RUNNING,
           guard: 'hasSegments',
+          actions: [
+            'startNextSegment',
+            'createSegmentStartResults',
+            'createPlayerActions',
+            'resetPlayerReadiness',
+            'publishAfterActivateNextSegment',
+          ],
         },
       },
     },
-    [DB.GameStatus.RUNNING]: {
+    [GAME_STATUS.RUNNING]: {
       tags: [
         'admin-controlled',
         'active-period',
@@ -142,16 +224,32 @@ export const gameMachine = setup({
       },
       on: {
         ACTIVATE_NEXT_SEGMENT: {
-          target: DB.GameStatus.PAUSED,
+          target: GAME_STATUS.PAUSED,
           guard: 'hasNextSegment',
+          actions: [
+            'finishCurrentSegment',
+            'createSegmentEndResults',
+            'createPlayerActions',
+            'resetPlayerReadiness',
+            'publishAfterActivateNextSegment',
+          ],
         },
         ACTIVATE_NEXT_PERIOD: {
-          target: DB.GameStatus.CONSOLIDATION,
+          target: GAME_STATUS.CONSOLIDATION,
           guard: 'hasActiveSegment',
+          actions: [
+            'runSegmentBeforeActivationHook',
+            'finishCurrentSegment',
+            'consolidateCurrentPeriod',
+            'createSegmentEndResults',
+            'createPlayerActions',
+            'resetPlayerReadiness',
+            'publishAfterActivateNextPeriod',
+          ],
         },
       },
     },
-    [DB.GameStatus.CONSOLIDATION]: {
+    [GAME_STATUS.CONSOLIDATION]: {
       tags: ['admin-controlled', 'active-period'],
       meta: {
         phase: 'period-consolidation',
@@ -159,12 +257,19 @@ export const gameMachine = setup({
       },
       on: {
         ACTIVATE_NEXT_PERIOD: {
-          target: DB.GameStatus.RESULTS,
+          target: GAME_STATUS.RESULTS,
           guard: 'hasActiveSegment',
+          actions: [
+            'createPeriodEndResults',
+            'createPlayerActions',
+            'createPostCommitPlayerEvents',
+            'resetPlayerReadiness',
+            'publishAfterActivateNextPeriod',
+          ],
         },
       },
     },
-    [DB.GameStatus.RESULTS]: {
+    [GAME_STATUS.RESULTS]: {
       tags: ['admin-controlled', 'results-visible'],
       meta: {
         phase: 'period-results',
@@ -172,16 +277,23 @@ export const gameMachine = setup({
       },
       on: {
         ACTIVATE_NEXT_PERIOD: {
-          target: DB.GameStatus.PREPARATION,
+          target: GAME_STATUS.PREPARATION,
           guard: 'hasNextPeriod',
+          actions: [
+            'createPeriodStartResults',
+            'createPlayerActions',
+            'resetPlayerReadiness',
+            'publishAfterActivateNextPeriod',
+          ],
         },
         FINISH_GAME: {
-          target: DB.GameStatus.COMPLETED,
+          target: GAME_STATUS.COMPLETED,
           guard: 'noNextPeriod',
+          actions: ['finishGame', 'publishAfterFinishGame'],
         },
       },
     },
-    [DB.GameStatus.COMPLETED]: {
+    [GAME_STATUS.COMPLETED]: {
       tags: ['terminal'],
       meta: {
         phase: 'completed',

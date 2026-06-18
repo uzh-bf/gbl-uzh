@@ -240,27 +240,29 @@ Readable code rules
   check.
 - Work-order names should be domain verbs, not library terms:
   `startNextPeriod`, `finishCurrentSegment`, `createPeriodEndResults`,
-  `resetPlayerReadiness`, `publishPeriodActivated`.
+  `resetPlayerReadiness`, `publishAfterActivateNextPeriod`.
 
 Draft transition work orders
 
 | From + event | To | Work orders |
 | --- | --- | --- |
-| `SCHEDULED` + `ACTIVATE_NEXT_PERIOD` | `PREPARATION` | `startNextPeriod`, `createPeriodStartResults`, `createPlayerActions`, `publishPeriodActivated` |
-| `PREPARATION` + `ACTIVATE_NEXT_SEGMENT` | `RUNNING` | `startNextSegment`, `createSegmentStartResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishSegmentActivated` |
-| `PAUSED` + `ACTIVATE_NEXT_SEGMENT` | `RUNNING` | `startNextSegment`, `createSegmentStartResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishSegmentActivated` |
-| `RUNNING` + `ACTIVATE_NEXT_SEGMENT` | `PAUSED` | `finishCurrentSegment`, `createSegmentEndResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishSegmentActivated` |
-| `RUNNING` + `ACTIVATE_NEXT_PERIOD` | `CONSOLIDATION` | `runSegmentBeforeActivationHook`, `finishCurrentSegment`, `consolidateCurrentPeriod`, `createSegmentEndResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishPeriodActivated` |
-| `CONSOLIDATION` + `ACTIVATE_NEXT_PERIOD` | `RESULTS` | `createPeriodEndResults`, `createPlayerActions`, `createPostCommitPlayerEvents`, `resetPlayerReadiness`, `publishPeriodActivated` |
-| `RESULTS` + `ACTIVATE_NEXT_PERIOD` | `PREPARATION` | `createPeriodStartResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishPeriodActivated` |
-| `RESULTS` + `FINISH_GAME` | `COMPLETED` | `finishGame`, `publishGameStateUpdated` |
+| `SCHEDULED` + `ACTIVATE_NEXT_PERIOD` | `PREPARATION` | `startNextPeriod`, `createPeriodStartResults`, `createPlayerActions`, `publishAfterActivateNextPeriod` |
+| `PREPARATION` + `ACTIVATE_NEXT_SEGMENT` | `RUNNING` | `startNextSegment`, `createSegmentStartResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishAfterActivateNextSegment` |
+| `PAUSED` + `ACTIVATE_NEXT_SEGMENT` | `RUNNING` | `startNextSegment`, `createSegmentStartResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishAfterActivateNextSegment` |
+| `RUNNING` + `ACTIVATE_NEXT_SEGMENT` | `PAUSED` | `finishCurrentSegment`, `createSegmentEndResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishAfterActivateNextSegment` |
+| `RUNNING` + `ACTIVATE_NEXT_PERIOD` | `CONSOLIDATION` | `runSegmentBeforeActivationHook`, `finishCurrentSegment`, `consolidateCurrentPeriod`, `createSegmentEndResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishAfterActivateNextPeriod` |
+| `CONSOLIDATION` + `ACTIVATE_NEXT_PERIOD` | `RESULTS` | `createPeriodEndResults`, `createPlayerActions`, `createPostCommitPlayerEvents`, `resetPlayerReadiness`, `publishAfterActivateNextPeriod` |
+| `RESULTS` + `ACTIVATE_NEXT_PERIOD` | `PREPARATION` | `createPeriodStartResults`, `createPlayerActions`, `resetPlayerReadiness`, `publishAfterActivateNextPeriod` |
+| `RESULTS` + `FINISH_GAME` | `COMPLETED` | `finishGame`, `publishAfterFinishGame` |
 
 Notes on table
 - Work-order names are contracts, not final function names.
 - `createPlayerActions` and `createPostCommitPlayerEvents` consume descriptors
   returned by pure calculators. They are executor work, not machine work.
 - Existing behavior publishes `PERIOD_ACTIVATED` after every successful
-  `activateNextPeriod` call. Keep that behavior unless product changes it.
+  `activateNextPeriod` call, even for non-activation target statuses. Work-order
+  names use the admin action (`publishAfterActivateNextPeriod`) so the machine
+  does not overstate product semantics.
 - Post-commit event thunks stay post-commit. Failing achievement/experience
   events must not roll back an already-committed lifecycle transition.
 
@@ -511,9 +513,21 @@ C6E — docs, final review, PR update (Medium)
       grounded in official Stately docs for pure `transition(...)`, action
       objects, and invoked actor tradeoffs. Added C6A-C6E detailed slices.
       No code changes yet.
+- [x] C6A complete. `gameMachine.ts` now owns local persisted-status literals
+      (adapter tests prove exact `DB.GameStatus` parity), emits typed
+      side-effect-free lifecycle work orders from pure `transition(...)`, and
+      has no Prisma/EventService/actor wiring. Review found misleading
+      publish-work-order names and duplicate type/list source; fixed with
+      neutral `publishAfter...` names and const-derived type. Simplification
+      found brittle/noisy tests; fixed with narrower no-Prisma-import check,
+      table-driven work-order cases, and blocked-transition empty-order checks.
+      Verify: `node_modules/.bin/tsc --noEmit -p tsconfig.json` 0;
+      `node_modules/.bin/tsx --test 'src/**/*.test.ts'` 33/33;
+      `node_modules/.bin/tsx scripts/lifecycle-diagram.ts` 0;
+      forbidden machine grep 0; `git diff --check` 0.
 
 ## Next Steps
-- If approved, start C6A. Work one slice at a time: implement, verify, review
+- Continue with C6B. Work one slice at a time: implement, verify, review
   subagent, simplification subagent, commit.
 - Push local commits only when approved. Then update PR #152 body using
   `$df-mr-description-writer` so it reflects whole branch vs `dev`, including C0-C6.
