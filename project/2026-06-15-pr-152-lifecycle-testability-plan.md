@@ -577,10 +577,14 @@ C6E — docs, final review, PR update (Medium)
       overrides from `pnpm-workspace.yaml` the same way pnpm 11 does. Added the
       same overrides to root `package.json` under the legacy `pnpm.overrides`
       field so old pnpm can validate the existing lockfile while pnpm 11 keeps
-      using `pnpm-workspace.yaml`. Verified: `CI=true npx pnpm@9.15.9 install
-      --frozen-lockfile --ignore-scripts` 0; `CI=true /opt/homebrew/bin/pnpm
-      install --frozen-lockfile --ignore-scripts` 0 (pnpm 11 warns that the
-      legacy package field is ignored, as expected).
+      using `pnpm-workspace.yaml`. Second fresh Vercel run then exposed
+      submodule workspace leakage (`apps/escapp/package.json` was seen by
+      Vercel but is not in this lockfile), so `apps/escapp` and `apps/quartz`
+      are now explicitly excluded from pnpm workspace packages. Verified:
+      `CI=true npx pnpm@9.15.9 install --frozen-lockfile --ignore-scripts` 0;
+      `CI=true /opt/homebrew/bin/pnpm install --frozen-lockfile
+      --ignore-scripts` 0 (pnpm 11 warns that the legacy package field is
+      ignored, as expected).
 
 ## C7 Demo E2E Validation Plan
 

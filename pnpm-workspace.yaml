@@ -1,5 +1,8 @@
 packages:
   - 'apps/*'
+  # Vercel initializes submodules; keep external apps out of this workspace lockfile.
+  - '!apps/escapp'
+  - '!apps/quartz'
   - 'packages/*'
   - cypress
 allowBuilds:
