@@ -572,6 +572,15 @@ C6E — docs, final review, PR update (Medium)
       `NEXT_PUBLIC_API_URL`. Admin browser UI stayed blocked by external Auth0
       and browser-cookie API limits, so admin actions used signed local admin
       JWT through GraphQL. Teardown stopped dev server and disposable DB.
+- [x] C8 Vercel install compatibility. After pushing C0-C7, fresh Vercel failed
+      before build because Vercel selected `pnpm@9.15.9`, which does not read
+      overrides from `pnpm-workspace.yaml` the same way pnpm 11 does. Added the
+      same overrides to root `package.json` under the legacy `pnpm.overrides`
+      field so old pnpm can validate the existing lockfile while pnpm 11 keeps
+      using `pnpm-workspace.yaml`. Verified: `CI=true npx pnpm@9.15.9 install
+      --frozen-lockfile --ignore-scripts` 0; `CI=true /opt/homebrew/bin/pnpm
+      install --frozen-lockfile --ignore-scripts` 0 (pnpm 11 warns that the
+      legacy package field is ignored, as expected).
 
 ## C7 Demo E2E Validation Plan
 
