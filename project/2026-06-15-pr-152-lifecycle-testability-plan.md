@@ -580,11 +580,19 @@ C6E — docs, final review, PR update (Medium)
       using `pnpm-workspace.yaml`. Second fresh Vercel run then exposed
       submodule workspace leakage (`apps/escapp/package.json` was seen by
       Vercel but is not in this lockfile), so `apps/escapp` and `apps/quartz`
-      are now explicitly excluded from pnpm workspace packages. Verified:
+      are now explicitly excluded from pnpm workspace packages. Third fresh
+      Vercel run reached the website build and exposed a content filename
+      casing bug (`lives-in-transit` mapped to `Lives In Transit.md` while the
+      Quartz file uses original filename casing); `apps/website/src/lib/util.ts`
+      now resolves the actual markdown filename from the generated slug instead
+      of guessing title case. Verified:
       `CI=true npx pnpm@9.15.9 install --frozen-lockfile --ignore-scripts` 0;
       `CI=true /opt/homebrew/bin/pnpm install --frozen-lockfile
       --ignore-scripts` 0 (pnpm 11 warns that the legacy package field is
-      ignored, as expected).
+      ignored, as expected); `apps/website/node_modules/.bin/prettier --write
+      apps/website/src/lib/util.ts` 0; `git diff --check` 0. Website typecheck
+      remains blocked by pre-existing React type mismatch in
+      `apps/website/src/components/PageHead.tsx`.
 
 ## C7 Demo E2E Validation Plan
 
