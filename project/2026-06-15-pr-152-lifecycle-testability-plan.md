@@ -585,7 +585,10 @@ C6E — docs, final review, PR update (Medium)
       casing bug (`lives-in-transit` mapped to `Lives In Transit.md` while the
       Quartz file uses original filename casing); `apps/website/src/lib/util.ts`
       now resolves the actual markdown filename from the generated slug instead
-      of guessing title case. Verified:
+      of guessing title case. That build then completed but Vercel blocked the
+      deployment because `next@15.1.2` is flagged vulnerable; upgraded website
+      `next` and `eslint-config-next` to exact `15.5.19` (latest 15.x, no major
+      upgrade). Verified:
       `CI=true npx pnpm@9.15.9 install --frozen-lockfile --ignore-scripts` 0;
       `CI=true /opt/homebrew/bin/pnpm install --frozen-lockfile
       --ignore-scripts` 0 (pnpm 11 warns that the legacy package field is
