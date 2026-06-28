@@ -392,6 +392,13 @@ pnpm --filter @gbl-uzh/playwright show-report
   - Plan simplified.
   - Auth strategy updated after verifying `origin/dev` has local OIDC mock.
   - Plan now uses devcontainer/devrouter/OIDC as primary admin login path.
+  - Slice 1 plan commit created on `codex/demo-game-playwright`.
+  - Slice 2 Playwright package skeleton added.
+  - Slice 2 checks:
+    - `pnpm --filter @gbl-uzh/playwright check:ts` passed.
+    - `playwright --version` reports `1.61.1`.
+    - smoke test reached devrouter, but local CLI is `0.0.19` and rejects
+      `.devrouter.yml` `upstream`; local smoke needs devrouter `>=0.0.21`.
 
 ## Handoff Prompt
 
