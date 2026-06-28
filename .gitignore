@@ -14,7 +14,3 @@ yarn-error.log*
 .env.production.local
 
 .turbo/
-
-playwright/.auth/
-playwright/playwright-report/
-playwright/test-results/

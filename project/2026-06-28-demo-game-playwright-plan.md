@@ -200,7 +200,7 @@ Reviewer: opencode, `opencode-go/glm-5.2`, `--variant max`.
     - screenshot `only-on-failure`
     - video `retain-on-failure`
     - reporters: list/html locally, list/html/junit/github in CI.
-  - Add one smoke test against a running app.
+  - Make the first executable browser check the authenticated full-flow spec.
   - Document commands.
 - Check:
   - `pnpm install`
@@ -401,18 +401,24 @@ pnpm --filter @gbl-uzh/playwright show-report
   - Slice 2 checks:
     - `pnpm --filter @gbl-uzh/playwright check:ts` passed.
     - `playwright --version` reports `1.61.1`.
-    - smoke test reached devrouter, but local CLI is `0.0.19` and rejects
-      `.devrouter.yml` `upstream`; local smoke needs devrouter `>=0.0.21`.
+    - initial unauthenticated smoke reached devrouter, but local CLI is
+      `0.0.19` and rejects `.devrouter.yml` `upstream`; local browser runs
+      need devrouter `>=0.0.21`.
   - Slice 3 auth setup started:
     - admin login provider fixed from stale `github` to `auth0`.
     - Playwright setup project added for local OIDC login and storage state.
     - DB seed helper deferred to first full-flow slice to avoid adding Prisma
       as a Playwright package dependency before it is needed.
   - Slice 4 selector hooks added for admin state actions, game detail status,
-    period/segment cards, player login links, player ready state, welcome start,
-    ready switch, decision submit, and report loaded.
+    period/segment cards, player login links, welcome start, ready switch,
+    decision submit, and report loaded.
   - Slice 5 first full-flow spec drafted against 2 players, 1 period, 2
     segments.
+  - Simplification review removed the auth-conflicting standalone smoke test,
+    redundant root ignore rules, and non-assertive admin ready-state selector.
+  - Strict review found that `Button data={{ cy: ... }}` did not render
+    `data-cy`; fixed the shared demo-game button boundary instead of adding
+    one-off selectors to every button call site.
   - Verification blockers:
     - local `dev` CLI is `0.0.19`; branch devrouter config needs `>=0.0.21`.
     - local demo-game `node_modules` is stale/broken; `tsc` cannot resolve app

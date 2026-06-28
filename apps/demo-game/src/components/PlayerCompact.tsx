@@ -26,7 +26,7 @@ function PlayerCompact({ player }: { player: Player }) {
             Login
           </Link>
         </div>
-        <div data-cy="player-ready-state">
+        <div>
           {player.isReady ? (
             <FontAwesomeIcon icon={faCheck} />
           ) : (

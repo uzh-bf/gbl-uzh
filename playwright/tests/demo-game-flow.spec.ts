@@ -80,13 +80,6 @@ async function runSegment(
 
   await submitDecision(playerOnePage, decisions.playerOne)
   await submitDecision(playerTwoPage, decisions.playerTwo)
-  await adminPage.reload()
-  await expect(
-    adminPage.getByTestId('player-0').getByTestId('player-ready-state')
-  ).toBeVisible()
-  await expect(
-    adminPage.getByTestId('player-1').getByTestId('player-ready-state')
-  ).toBeVisible()
   await adminPage.getByTestId('admin-state-action').click()
   await expectGameStatus(adminPage, expectedStatusAfterAdvance)
 }
