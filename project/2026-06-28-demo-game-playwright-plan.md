@@ -129,7 +129,10 @@ Reviewer: opencode, `opencode-go/glm-5.2`, `--variant max`.
 - New package: `playwright/`.
 - Dependency: pinned `@playwright/test@1.61.1`.
 - Main browser: Chromium.
-- Full flow size: 2 players, 1 period, 1 segment.
+- Full flow size: 2 players, 1 period, 2 segments.
+  - Reason: current `activateNextPeriod` has a falsy `activeSegmentIx = 0`
+    guard in RUNNING -> CONSOLIDATION, so a one-segment flow would not exercise
+    the existing UI path reliably without a platform bug fix.
 - Later expansion: 2 periods x 2 segments, then Firefox/WebKit smoke.
 - DB reset/seed outside Playwright:
   - local and CI run app DB setup command before tests.
@@ -264,7 +267,7 @@ Reviewer: opencode, `opencode-go/glm-5.2`, `--variant max`.
   - Add `demo-game-flow.spec.ts`.
   - Use admin storage state.
   - Create unique 2-player game.
-  - Add 1 period with 1 segment.
+  - Add 1 period with 2 segments.
   - Capture player join links from UI.
   - Open two isolated player contexts.
   - Players join and complete welcome form.
@@ -274,7 +277,8 @@ Reviewer: opencode, `opencode-go/glm-5.2`, `--variant max`.
     - Player 2: savings 20, bonds 40, stocks 40.
   - Players mark ready.
   - Admin waits for ready state with reload-capable helper.
-  - Admin advances to segment results / period results as app state allows.
+  - Admin advances through first segment results, second segment, consolidation,
+    and period results.
   - Open report.
   - Assert report loaded and both players visible.
   - Add DB assertions:
@@ -407,6 +411,8 @@ pnpm --filter @gbl-uzh/playwright show-report
   - Slice 4 selector hooks added for admin state actions, game detail status,
     period/segment cards, player login links, player ready state, welcome start,
     ready switch, decision submit, and report loaded.
+  - Slice 5 first full-flow spec drafted against 2 players, 1 period, 2
+    segments.
   - Verification blockers:
     - local `dev` CLI is `0.0.19`; branch devrouter config needs `>=0.0.21`.
     - local demo-game `node_modules` is stale/broken; `tsc` cannot resolve app
