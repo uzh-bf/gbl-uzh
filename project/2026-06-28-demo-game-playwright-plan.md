@@ -399,6 +399,11 @@ pnpm --filter @gbl-uzh/playwright show-report
     - `playwright --version` reports `1.61.1`.
     - smoke test reached devrouter, but local CLI is `0.0.19` and rejects
       `.devrouter.yml` `upstream`; local smoke needs devrouter `>=0.0.21`.
+  - Slice 3 auth setup started:
+    - admin login provider fixed from stale `github` to `auth0`.
+    - Playwright setup project added for local OIDC login and storage state.
+    - DB seed helper deferred to first full-flow slice to avoid adding Prisma
+      as a Playwright package dependency before it is needed.
 
 ## Handoff Prompt
 

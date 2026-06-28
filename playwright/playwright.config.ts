@@ -4,7 +4,9 @@ const isCI = Boolean(process.env.CI)
 const baseURL =
   process.env.PLAYWRIGHT_BASE_URL ?? 'https://demo-game.localhost'
 const baseHostname = new URL(baseURL).hostname
-const ignoreHTTPSErrors = baseHostname === 'localhost' || baseHostname.endsWith('.localhost')
+const ignoreHTTPSErrors =
+  baseHostname === 'localhost' || baseHostname.endsWith('.localhost')
+const adminStorageState = '.auth/admin.json'
 
 export default defineConfig({
   testDir: './tests',
@@ -37,9 +39,16 @@ export default defineConfig({
   },
   projects: [
     {
+      name: 'setup',
+      testMatch: /.*\.setup\.ts/,
+    },
+    {
       name: 'chromium',
+      dependencies: ['setup'],
+      testIgnore: /.*\.setup\.ts/,
       use: {
         ...devices['Desktop Chrome'],
+        storageState: adminStorageState,
       },
     },
   ],
