@@ -404,6 +404,13 @@ pnpm --filter @gbl-uzh/playwright show-report
     - Playwright setup project added for local OIDC login and storage state.
     - DB seed helper deferred to first full-flow slice to avoid adding Prisma
       as a Playwright package dependency before it is needed.
+  - Slice 4 selector hooks added for admin state actions, game detail status,
+    period/segment cards, player login links, player ready state, welcome start,
+    ready switch, decision submit, and report loaded.
+  - Verification blockers:
+    - local `dev` CLI is `0.0.19`; branch devrouter config needs `>=0.0.21`.
+    - local demo-game `node_modules` is stale/broken; `tsc` cannot resolve app
+      dependencies until the workspace install is repaired.
 
 ## Handoff Prompt
 

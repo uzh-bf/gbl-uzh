@@ -184,7 +184,11 @@ function ManageGame() {
         const atLastSegment = activeSegmentIx >= segments.length - 1
         if (!atLastSegment) {
           return (
-            <Button disabled={nextSegmentLoading} onClick={nextSegment}>
+            <Button
+              disabled={nextSegmentLoading}
+              onClick={nextSegment}
+              data={{ cy: 'admin-state-action' }}
+            >
               Next Segment
             </Button>
           )
@@ -192,7 +196,11 @@ function ManageGame() {
         const disabled =
           game.periods.length === 0 || activePeriod.segments.length === 0
         return (
-          <Button disabled={disabled} onClick={nextPeriod}>
+          <Button
+            disabled={disabled}
+            onClick={nextPeriod}
+            data={{ cy: 'admin-state-action' }}
+          >
             Start Period
           </Button>
         )
@@ -202,19 +210,31 @@ function ManageGame() {
           const disabled =
             game.periods.length === 0 || game.periods[0].segments.length === 0
           return (
-            <Button disabled={disabled} onClick={nextPeriod}>
+            <Button
+              disabled={disabled}
+              onClick={nextPeriod}
+              data={{ cy: 'admin-state-action' }}
+            >
               Start Period
             </Button>
           )
         }
-        return <Button onClick={nextPeriod}>Start Segment</Button>
+        return (
+          <Button onClick={nextPeriod} data={{ cy: 'admin-state-action' }}>
+            Start Segment
+          </Button>
+        )
       case GameStatus.Running: {
         const atLastSegment =
           activeSegmentIx >= segments.length - 1 &&
           activePeriod.segmentCount === segments.length
         if (atLastSegment) {
           return (
-            <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+            <Button
+              disabled={nextPeriodLoading}
+              onClick={nextPeriod}
+              data={{ cy: 'admin-state-action' }}
+            >
               Consolidate
             </Button>
           )
@@ -226,6 +246,7 @@ function ManageGame() {
           <Button
             disabled={nextSegmentLoading || disabled}
             onClick={nextSegment}
+            data={{ cy: 'admin-state-action' }}
           >
             Segment Results
           </Button>
@@ -237,6 +258,7 @@ function ManageGame() {
           <Button
             disabled={nextSegmentLoading || atLastSegment}
             onClick={nextSegment}
+            data={{ cy: 'admin-state-action' }}
           >
             Next Segment
           </Button>
@@ -250,14 +272,22 @@ function ManageGame() {
       //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
       case GameStatus.Consolidation:
         return (
-          <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+          <Button
+            disabled={nextPeriodLoading}
+            onClick={nextPeriod}
+            data={{ cy: 'admin-state-action' }}
+          >
             Period Results
           </Button>
         )
       case GameStatus.Results: {
         const anotherPeriod = game.activePeriodIx > game.periods.length - 1
         return (
-          <Button disabled={anotherPeriod} onClick={nextPeriod}>
+          <Button
+            disabled={anotherPeriod}
+            onClick={nextPeriod}
+            data={{ cy: 'admin-state-action' }}
+          >
             Next Period
           </Button>
         )
@@ -265,7 +295,11 @@ function ManageGame() {
 
       case GameStatus.Completed:
         return (
-          <Button disabled onClick={() => null}>
+          <Button
+            disabled
+            onClick={() => null}
+            data={{ cy: 'admin-state-action' }}
+          >
             Completed
           </Button>
         )
@@ -297,7 +331,7 @@ function ManageGame() {
   )
 
   return (
-    <div className="p-4">
+    <div className="p-4" data-cy="game-detail" data-game-status={game.status}>
       <div>
         <div className="mb-4 flex flex-col gap-2 overflow-x-auto md:flex-row">
           {game.periods.map((period, ix) => {
@@ -329,6 +363,7 @@ function ManageGame() {
                 className="flex flex-row gap-2"
                 key={period.id}
                 id={isPeriodActive ? 'active-period' : undefined}
+                data-cy={`period-${ix}`}
               >
                 <div
                   className={twMerge(
@@ -446,6 +481,7 @@ function ManageGame() {
                               isSegmentActive && 'border-green-600 bg-green-100'
                             )}
                             key={ix}
+                            data-cy={`period-${period.index}-segment-${ix}`}
                           >
                             <div className="flex flex-row items-center gap-2">
                               <div>
@@ -797,7 +833,7 @@ function ManageGame() {
       <div className="mt-2 flex flex-row gap-2">
         {getButton()}
         <Link target="_blank" href={`/admin/reports/${game?.id}`}>
-          <Button>Report</Button>
+          <Button data={{ cy: 'open-report' }}>Report</Button>
         </Link>
       </div>
 

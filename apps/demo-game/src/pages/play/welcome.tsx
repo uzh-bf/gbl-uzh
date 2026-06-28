@@ -166,6 +166,7 @@ function Welcome() {
                         <FormikTextField
                           label="Name of bank"
                           name="name"
+                          data={{ cy: 'player-name' }}
                           className={{ label: 'pb-2 font-normal' }}
                         />
                         <FormikSelectField
@@ -209,6 +210,7 @@ function Welcome() {
                       className={{ root: 'mt-4' }}
                       type="submit"
                       disabled={isSubmitting}
+                      data={{ cy: 'welcome-start' }}
                     >
                       {isSubmitting ? 'Loading...' : 'Start Game'}
                     </Button>
