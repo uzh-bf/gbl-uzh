@@ -1071,7 +1071,6 @@ function Cockpit() {
                               !newDecisionForm.isValid ||
                               newDecisionForm.isSubmitting
                             }
-                            data={{ cy: 'decision-submit' }}
                           >
                             Submit
                           </Button>

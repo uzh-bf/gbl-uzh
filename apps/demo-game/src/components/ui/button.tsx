@@ -33,26 +33,17 @@ const buttonVariants = cva(
 )
 
 export interface ButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'data'>,
-    VariantProps<typeof buttonVariants> {
-  data?: {
-    cy?: string
-  }
-}
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {}
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, data, ...props }, ref) => {
-    const dataProps = data?.cy ? { 'data-cy': data.cy } : {}
-
-    return (
-      <button
-        ref={ref}
-        className={twMerge(buttonVariants({ variant, size, className }))}
-        {...props}
-        {...dataProps}
-      />
-    )
-  }
+  ({ className, variant, size, ...props }, ref) => (
+    <button
+      ref={ref}
+      className={twMerge(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  )
 )
 Button.displayName = 'Button'
 

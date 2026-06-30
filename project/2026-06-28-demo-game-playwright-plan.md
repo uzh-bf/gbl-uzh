@@ -409,20 +409,37 @@ pnpm --filter @gbl-uzh/playwright show-report
     - Playwright setup project added for local OIDC login and storage state.
     - DB seed helper deferred to first full-flow slice to avoid adding Prisma
       as a Playwright package dependency before it is needed.
-  - Slice 4 selector hooks added for admin state actions, game detail status,
-    period/segment cards, player login links, welcome start, ready switch,
-    decision submit, and report loaded.
-  - Slice 5 first full-flow spec drafted against 2 players, 1 period, 2
-    segments.
+  - Slice 4 selector hooks added for game detail status, period/segment cards,
+    player login links, ready switch, report loaded, and accessible labels on
+    icon-only period/segment add buttons. The test uses roles and form controls
+    for design-system fields/buttons instead of relying on inert `data` props.
+  - Slice 5 first full-flow spec drafted against 2 players, 2 periods, and 2
+    played segments. The second period is present so the current platform can
+    transition `CONSOLIDATION -> RESULTS`.
   - Simplification review removed the auth-conflicting standalone smoke test,
     redundant root ignore rules, and non-assertive admin ready-state selector.
-  - Strict review found that `Button data={{ cy: ... }}` did not render
-    `data-cy`; fixed the shared demo-game button boundary instead of adding
-    one-off selectors to every button call site.
-  - Verification blockers:
-    - local `dev` CLI is `0.0.19`; branch devrouter config needs `>=0.0.21`.
-    - local demo-game `node_modules` is stale/broken; `tsc` cannot resolve app
-      dependencies until the workspace install is repaired.
+  - 2026-06-30 validation:
+    - Upgraded devrouter validated with CLI `0.0.22` against repo requirement
+      `0.0.21`.
+    - Stopped conflicting local containers for the validation run:
+      `klicker-uzh-reverse_proxy_macos-1`, `klicker-uzh-postgres-1`, and
+      `docker-nginx-1`.
+    - `dev up`, `dev tls install`, and `dev app run app|oidc|db --yes` passed.
+    - `devpod up . --ide none` passed, including install, platform/ui build,
+      Prisma push/seed, and background `next dev`.
+    - `curl -k -I https://demo-game.localhost/admin/login` returned `200`.
+    - OIDC discovery at
+      `https://oidc.demo-game.localhost/default/.well-known/openid-configuration`
+      returned issuer `https://oidc.demo-game.localhost/default`.
+    - `pnpm --filter @gbl-uzh/playwright check:ts` passed.
+    - `pnpm --filter @gbl-uzh/playwright test:run --project=chromium` passed:
+      setup auth plus full demo-game flow, `2 passed`.
+    - `git diff --check` passed.
+  - Remaining non-Playwright blocker:
+    - `docker exec default-gb-68b8e-app-1 ... pnpm -F @gbl-uzh/demo-game
+      check:ts` runs now, but fails on existing app type debt in
+      `PlayerData`, `StoryElements`, generated ops dependency resolution,
+      report numeric types, cockpit Formik errors, and React Markdown JSX types.
 
 ## Handoff Prompt
 

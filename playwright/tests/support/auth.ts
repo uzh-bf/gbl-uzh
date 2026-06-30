@@ -7,5 +7,5 @@ export async function loginAsAdmin(page: Page) {
   await expect(page.getByText('Not signed in')).toBeVisible()
   await page.getByRole('button', { name: 'Sign in' }).click()
   await page.waitForURL('**/admin/games', { timeout: 30_000 })
-  await expect(page.getByTestId('create-game')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Create Game' })).toBeVisible()
 }

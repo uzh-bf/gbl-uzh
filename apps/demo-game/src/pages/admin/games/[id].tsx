@@ -184,11 +184,7 @@ function ManageGame() {
         const atLastSegment = activeSegmentIx >= segments.length - 1
         if (!atLastSegment) {
           return (
-            <Button
-              disabled={nextSegmentLoading}
-              onClick={nextSegment}
-              data={{ cy: 'admin-state-action' }}
-            >
+            <Button disabled={nextSegmentLoading} onClick={nextSegment}>
               Next Segment
             </Button>
           )
@@ -196,11 +192,7 @@ function ManageGame() {
         const disabled =
           game.periods.length === 0 || activePeriod.segments.length === 0
         return (
-          <Button
-            disabled={disabled}
-            onClick={nextPeriod}
-            data={{ cy: 'admin-state-action' }}
-          >
+          <Button disabled={disabled} onClick={nextPeriod}>
             Start Period
           </Button>
         )
@@ -210,31 +202,19 @@ function ManageGame() {
           const disabled =
             game.periods.length === 0 || game.periods[0].segments.length === 0
           return (
-            <Button
-              disabled={disabled}
-              onClick={nextPeriod}
-              data={{ cy: 'admin-state-action' }}
-            >
+            <Button disabled={disabled} onClick={nextPeriod}>
               Start Period
             </Button>
           )
         }
-        return (
-          <Button onClick={nextPeriod} data={{ cy: 'admin-state-action' }}>
-            Start Segment
-          </Button>
-        )
+        return <Button onClick={nextPeriod}>Start Segment</Button>
       case GameStatus.Running: {
         const atLastSegment =
           activeSegmentIx >= segments.length - 1 &&
           activePeriod.segmentCount === segments.length
         if (atLastSegment) {
           return (
-            <Button
-              disabled={nextPeriodLoading}
-              onClick={nextPeriod}
-              data={{ cy: 'admin-state-action' }}
-            >
+            <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
               Consolidate
             </Button>
           )
@@ -246,7 +226,6 @@ function ManageGame() {
           <Button
             disabled={nextSegmentLoading || disabled}
             onClick={nextSegment}
-            data={{ cy: 'admin-state-action' }}
           >
             Segment Results
           </Button>
@@ -258,7 +237,6 @@ function ManageGame() {
           <Button
             disabled={nextSegmentLoading || atLastSegment}
             onClick={nextSegment}
-            data={{ cy: 'admin-state-action' }}
           >
             Next Segment
           </Button>
@@ -272,22 +250,14 @@ function ManageGame() {
       //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
       case GameStatus.Consolidation:
         return (
-          <Button
-            disabled={nextPeriodLoading}
-            onClick={nextPeriod}
-            data={{ cy: 'admin-state-action' }}
-          >
+          <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
             Period Results
           </Button>
         )
       case GameStatus.Results: {
         const anotherPeriod = game.activePeriodIx > game.periods.length - 1
         return (
-          <Button
-            disabled={anotherPeriod}
-            onClick={nextPeriod}
-            data={{ cy: 'admin-state-action' }}
-          >
+          <Button disabled={anotherPeriod} onClick={nextPeriod}>
             Next Period
           </Button>
         )
@@ -295,11 +265,7 @@ function ManageGame() {
 
       case GameStatus.Completed:
         return (
-          <Button
-            disabled
-            onClick={() => null}
-            data={{ cy: 'admin-state-action' }}
-          >
+          <Button disabled onClick={() => null}>
             Completed
           </Button>
         )
@@ -602,6 +568,7 @@ function ManageGame() {
                                     root: 'h-full w-12 font-bold text-gray-500',
                                   }}
                                   onClick={() => setIsSegmentModalOpen(true)}
+                                  aria-label="Add segment"
                                   data={{ cy: 'add-segment' }}
                                 >
                                   <FontAwesomeIcon icon={faPlus} />
@@ -710,6 +677,7 @@ function ManageGame() {
                       disabled={disabled}
                       className={{ root: 'font-bold text-gray-500 md:w-48' }}
                       onClick={() => setIsPeriodModalOpen(true)}
+                      aria-label="Add period"
                       data={{ cy: 'add-period' }}
                     >
                       <FontAwesomeIcon icon={faPlus} />
@@ -833,7 +801,7 @@ function ManageGame() {
       <div className="mt-2 flex flex-row gap-2">
         {getButton()}
         <Link target="_blank" href={`/admin/reports/${game?.id}`}>
-          <Button data={{ cy: 'open-report' }}>Report</Button>
+          <Button>Report</Button>
         </Link>
       </div>
 

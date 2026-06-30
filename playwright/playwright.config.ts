@@ -31,6 +31,7 @@ export default defineConfig({
   use: {
     baseURL,
     ignoreHTTPSErrors,
+    testIdAttribute: 'data-cy',
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
     trace: 'retain-on-failure',

@@ -11,25 +11,35 @@ function absoluteUrl(baseURL: string, href: string) {
   return new URL(href, baseURL).toString()
 }
 
+function input(page: Page, name: string) {
+  return page.locator(`input[name="${name}"]`)
+}
+
 async function createGame(page: Page, name: string) {
   await page.goto('/admin/games')
-  await page.getByTestId('game-name').fill(name)
-  await page.getByTestId('game-player-count').fill('2')
-  await page.getByTestId('create-game').click()
+  await input(page, 'name').fill(name)
+  await input(page, 'playerCount').fill('2')
+  await page.getByRole('button', { name: 'Create Game' }).click()
   await page.getByRole('link', { name: new RegExp(name) }).click()
   await expect(page.getByTestId('game-detail')).toBeVisible()
 }
 
-async function addPeriod(page: Page) {
-  await page.getByTestId('add-period').click()
-  await page.getByTestId('period-name').fill('Period 1')
-  await page.getByTestId('segment-count').fill('2')
-  await page.getByRole('button', { name: 'Submit' }).click()
-  await expect(page.getByTestId('period-0')).toBeVisible()
+async function addPeriod(
+  page: Page,
+  name: string,
+  segmentCount: string,
+  index: number
+) {
+  await page.getByRole('button', { name: 'Add period' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Add Period' })
+  await dialog.getByRole('textbox').nth(0).fill(name)
+  await dialog.getByRole('textbox').nth(1).fill(segmentCount)
+  await dialog.getByRole('button', { name: 'Submit' }).click()
+  await expect(page.getByTestId(`period-${index}`)).toBeVisible()
 }
 
 async function addSegment(page: Page, index: number) {
-  await page.getByTestId('add-segment').click()
+  await page.getByRole('button', { name: 'Add segment' }).click()
   await page.getByRole('button', { name: 'Submit' }).click()
   await expect(page.getByTestId(`period-0-segment-${index}`)).toBeVisible()
 }
@@ -48,10 +58,9 @@ async function joinPlayer(
 
   await page.goto(joinUrl)
   await page.waitForURL('**/play/welcome')
-  await page.getByTestId('player-name').fill(playerName)
-  await page.getByTestId('welcome-start').click()
+  await input(page, 'name').fill(playerName)
+  await page.getByRole('button', { name: 'Start Game' }).click()
   await page.waitForURL('**/play/cockpit')
-  await expect(page.getByTestId('ready-switch')).toBeVisible()
 
   return { context, page }
 }
@@ -60,10 +69,11 @@ async function submitDecision(
   page: Page,
   values: { savings: string; bonds: string; stocks: string }
 ) {
-  await page.getByTestId('Savings-cy').fill(values.savings)
-  await page.getByTestId('Bonds-cy').fill(values.bonds)
-  await page.getByTestId('Stocks-cy').fill(values.stocks)
-  await page.getByTestId('decision-submit').click()
+  const fields = page.getByRole('textbox')
+  await fields.nth(0).fill(values.savings)
+  await fields.nth(1).fill(values.bonds)
+  await fields.nth(2).fill(values.stocks)
+  await page.getByRole('button', { name: 'Submit' }).click()
   await page.getByTestId('ready-switch').click()
 }
 
@@ -71,16 +81,21 @@ async function runSegment(
   adminPage: Page,
   playerOnePage: Page,
   playerTwoPage: Page,
+  adminAction: string,
   expectedStatusAfterAdvance: string
 ) {
   await playerOnePage.reload()
   await playerTwoPage.reload()
-  await expect(playerOnePage.getByTestId('decision-submit')).toBeVisible()
-  await expect(playerTwoPage.getByTestId('decision-submit')).toBeVisible()
+  await expect(
+    playerOnePage.getByRole('button', { name: 'Submit' })
+  ).toBeVisible()
+  await expect(
+    playerTwoPage.getByRole('button', { name: 'Submit' })
+  ).toBeVisible()
 
   await submitDecision(playerOnePage, decisions.playerOne)
   await submitDecision(playerTwoPage, decisions.playerTwo)
-  await adminPage.getByTestId('admin-state-action').click()
+  await adminPage.getByRole('button', { name: adminAction }).click()
   await expectGameStatus(adminPage, expectedStatusAfterAdvance)
 }
 
@@ -95,9 +110,10 @@ test('admin and players complete demo-game flow', async ({
   const gameName = `Playwright demo ${Date.now()}`
 
   await createGame(page, gameName)
-  await addPeriod(page)
+  await addPeriod(page, 'Period 1', '2', 0)
   await addSegment(page, 0)
   await addSegment(page, 1)
+  await addPeriod(page, 'Period 2', '1', 1)
 
   const playerOneHref = await page
     .getByTestId('player-0')
@@ -124,30 +140,46 @@ test('admin and players complete demo-game flow', async ({
     'Playwright Bank Two'
   )
 
-  await page.getByTestId('admin-state-action').click()
+  await page.getByRole('button', { name: 'Start Period' }).click()
   await expectGameStatus(page, 'PREPARATION')
-  await page.getByTestId('admin-state-action').click()
+  await page.getByRole('button', { name: 'Next Segment' }).click()
   await expectGameStatus(page, 'RUNNING')
 
-  await runSegment(page, playerOne.page, playerTwo.page, 'PAUSED')
+  await runSegment(
+    page,
+    playerOne.page,
+    playerTwo.page,
+    'Segment Results',
+    'PAUSED'
+  )
 
-  await page.getByTestId('admin-state-action').click()
+  await page.getByRole('button', { name: 'Next Segment' }).click()
   await expectGameStatus(page, 'RUNNING')
 
-  await runSegment(page, playerOne.page, playerTwo.page, 'CONSOLIDATION')
+  await runSegment(
+    page,
+    playerOne.page,
+    playerTwo.page,
+    'Consolidate',
+    'CONSOLIDATION'
+  )
 
-  await page.getByTestId('admin-state-action').click()
+  await page.getByRole('button', { name: 'Period Results' }).click()
   await expectGameStatus(page, 'RESULTS')
 
   const [reportPage] = await Promise.all([
     page.waitForEvent('popup'),
-    page.getByTestId('open-report').click(),
+    page.getByRole('button', { name: 'Report' }).click(),
   ])
   await expect(reportPage.getByTestId('report-loaded')).toBeVisible({
     timeout: 30_000,
   })
-  await expect(reportPage.getByText('Playwright Bank One')).toBeVisible()
-  await expect(reportPage.getByText('Playwright Bank Two')).toBeVisible()
+  await expect(
+    reportPage.getByRole('columnheader', { name: 'Playwright Bank One' })
+  ).toBeVisible()
+  await expect(
+    reportPage.getByRole('columnheader', { name: 'Playwright Bank Two' })
+  ).toBeVisible()
 
   await playerOne.context.close()
   await playerTwo.context.close()
