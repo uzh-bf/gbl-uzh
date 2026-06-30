@@ -13,7 +13,7 @@ devpod up . --ide none
 for a in app oidc db; do dev app run "$a" --yes; done
 ```
 
-Requires devrouter `>=0.0.21`.
+Requires devrouter `>=0.0.23`.
 
 The default Playwright base URL is `https://demo-game.localhost`.
 

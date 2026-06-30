@@ -5,10 +5,10 @@
 #
 # Usage: `dev up` + `dev tls install` (creates devnet + the mkcert CA), THEN
 # bring the devcontainer up (devnet is external — must pre-exist), then
-# `for a in app oidc db; do dev app run "$a"; done`. Requires devrouter >= 0.0.21.
+# `for a in app oidc db; do dev app run "$a" --yes; done`. Requires devrouter >= 0.0.23.
 version: 1
 devrouter:
-  version: 0.0.21
+  version: 0.0.23
 project:
   name: gbl-uzh-demo-game
 apps:

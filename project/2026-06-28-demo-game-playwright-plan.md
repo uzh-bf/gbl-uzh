@@ -449,6 +449,10 @@ pnpm --filter @gbl-uzh/playwright show-report
     - Made README devrouter app registration non-interactive with `--yes`.
     - Revalidated `check:ts`, `git diff --check`, and Chromium Playwright:
       `2 passed`.
+  - Devrouter upgrade:
+    - CLI and `.devrouter.yml` now target `0.0.23`.
+    - `.devrouter.yml` local setup command uses non-interactive
+      `dev app run "$a" --yes`.
 
 ## Handoff Prompt
 
