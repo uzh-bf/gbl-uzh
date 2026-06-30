@@ -227,6 +227,26 @@ async function assertPlayerPortfolio(page: Page) {
   await expect(page.getByText('Total').first()).toBeVisible()
 }
 
+async function setCountdown(page: Page, seconds: string) {
+  await page.getByTestId('countdown-seconds').getByRole('textbox').fill(seconds)
+  await page.getByRole('button', { name: 'Set Countdown' }).click()
+}
+
+async function assertCountdownVisible(page: Page) {
+  await expect
+    .poll(
+      async () => {
+        await page.reload()
+        return page.getByTestId('countdown').isVisible()
+      },
+      {
+        intervals: [500, 1_000, 2_000],
+        timeout: 30_000,
+      }
+    )
+    .toBe(true)
+}
+
 async function runSegment(
   adminPage: Page,
   sessions: PlayerSession[],
@@ -377,6 +397,8 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
       action: 'Next Segment',
       expectedStatus: 'RUNNING',
     })
+    await setCountdown(page, '120')
+    await assertCountdownVisible(playerSessions[0].page)
     await runSegment(page, playerSessions, {
       segmentIndex: 0,
       adminAction: 'Segment Results',

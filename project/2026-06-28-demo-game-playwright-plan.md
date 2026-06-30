@@ -539,7 +539,7 @@ pnpm --filter @gbl-uzh/playwright show-report
 ### Slice 10: Deferred Focused Follow-Ups
 
 - Countdown:
-  - add after Slice 8 runtime is known.
+  - added inside broad serial test after Slice 8 runtime was known.
   - keep inside one serial test with admin page and at least one player page.
   - assert countdown UI appears.
   - never wait for expiry in CI.
@@ -694,6 +694,26 @@ pnpm --filter @gbl-uzh/playwright show-report
       - Deferred:
         - confirm runtime budget on a real CI runner before treating the 120s
           headroom as final.
+    - Slice 10 countdown smoke started:
+      - Added a 120-second countdown during the first running segment.
+      - Player assertion checks countdown UI appears and does not wait for
+        expiry.
+      - opencode GLM 5.2 max review found no critical issues.
+      - Accepted selector cleanup:
+        - added `countdown-seconds` test wrapper around the admin field.
+        - added `countdown` test id to the countdown widget.
+        - replaced structural SVG selector with a reload-poll on `countdown`.
+        - removed flaky toast assertion; the player countdown is the outcome.
+      - Final opencode GLM 5.2 max review found no critical or important
+        issues and no simplification changes.
+      - Verification:
+        - `CI=true pnpm --filter @gbl-uzh/playwright check:ts` passed.
+        - `git diff --check -- playwright/tests/demo-game-flow.spec.ts
+          project/2026-06-28-demo-game-playwright-plan.md
+          apps/demo-game/src/pages/admin/games/[id].tsx
+          apps/demo-game/src/components/CycleCountDown.tsx` passed.
+        - `CI=true pnpm --filter @gbl-uzh/playwright test:run
+          --project=chromium` passed cleanly: `2 passed (1.3m)`.
     - `COMPLETED` state deferred until final-period platform TODO is fixed.
 
 ## Handoff Prompt

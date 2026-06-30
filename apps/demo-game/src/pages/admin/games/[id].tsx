@@ -837,12 +837,14 @@ function ManageGame() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <FormikNumberField
-                  name="countdownSeconds"
-                  precision={0}
-                  label="Countdown in seconds"
-                  className={{ label: 'pb-2 font-normal' }}
-                />
+                <div data-cy="countdown-seconds">
+                  <FormikNumberField
+                    name="countdownSeconds"
+                    precision={0}
+                    label="Countdown in seconds"
+                    className={{ label: 'pb-2 font-normal' }}
+                  />
+                </div>
                 {/* TODO(JJ): @RS Do we want to show the following? If no we
                   we can remove the refetchQueries.
                 */}
