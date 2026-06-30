@@ -10,25 +10,25 @@ version: 1
 devrouter:
   version: 0.0.23
 project:
-  name: gbl-uzh-demo-game
+  name: demo-game
 apps:
-  # App: https://demo-game.localhost -> the `demo-game-app` devnet alias.
+  # App: https://demo-game.localhost -> the `${WORKSPACE}-app` devnet alias.
   - name: app
     host: demo-game.localhost
     protocol: http
     runtime: proxy
-    upstream: demo-game-app:3000
+    upstream: ${WORKSPACE}-app:3000
 
   # Local OIDC mock — shares the app container's netns, so it is reached on devnet
-  # as `demo-game-app:8090`. Browser + app server both use this host as the
+  # as `${WORKSPACE}-app:8090`. Browser + app server both use this host as the
   # NextAuth issuer (https://oidc.demo-game.localhost/default).
   - name: oidc
     host: oidc.demo-game.localhost
     protocol: http
     runtime: proxy
-    upstream: demo-game-app:8090
+    upstream: ${WORKSPACE}-app:8090
 
-  # Postgres: db.demo-game.localhost:5432 -> `demo-game-db` (SNI). Connect with
+  # Postgres: db.demo-game.localhost:5432 -> `${WORKSPACE}-db` (SNI). Connect with
   # direct-SSL: psql "host=db.demo-game.localhost port=5432 user=prisma
   # password=prisma dbname=prisma sslmode=require sslnegotiation=direct"
   - name: db
@@ -36,4 +36,4 @@ apps:
     protocol: tcp
     tcpProtocol: postgres
     runtime: proxy
-    upstream: demo-game-db:5432
+    upstream: ${WORKSPACE}-db:5432

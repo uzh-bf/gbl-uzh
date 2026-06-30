@@ -453,6 +453,12 @@ pnpm --filter @gbl-uzh/playwright show-report
     - CLI and `.devrouter.yml` now target `0.0.23`.
     - `.devrouter.yml` local setup command uses non-interactive
       `dev app run "$a" --yes`.
+  - Devrouter optimization:
+    - Proxy upstreams now use `${WORKSPACE}` and devcontainer aliases use
+      `${WORKSPACE:-demo-game}` for parallel worktree isolation.
+    - Removed redundant devcontainer JSON overrides and nonstandard route note.
+    - `dev repo devcontainer verify --repo . --json` reports `5 ok`, `0 warn`,
+      `0 error`.
 
 ## Handoff Prompt
 

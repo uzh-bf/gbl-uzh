@@ -3,9 +3,9 @@
 # mock, install/build/seed, the dev server); routing is delegated to devrouter
 # via the shared external `devnet` network (NO published host ports → many
 # projects run at once with zero collisions). app/postgres join devnet with
-# stable aliases; devrouter's Traefik (also on devnet) routes to them BY NAME.
+# workspace-aware aliases; devrouter's Traefik (also on devnet) routes to them BY NAME.
 # The OIDC mock shares the app's netns, so it is reached on devnet as
-# `demo-game-app:8090`. `dev up` must run before the container starts so
+# `${WORKSPACE:-demo-game}-app:8090`. `dev up` must run before the container starts so
 # `devnet` exists (external network). See `.devrouter.yml`.
 services:
   postgres:
@@ -23,7 +23,8 @@ services:
       default: {}
       # devrouter SNI-routes db.demo-game.localhost:5432 to this alias.
       devnet:
-        aliases: [demo-game-db]
+        aliases:
+          - ${WORKSPACE:-demo-game}-db
     volumes:
       - ./docker/init-shadow-db.sql:/docker-entrypoint-initdb.d/01-init-shadow-db.sql:ro
       - pgdata:/var/lib/postgresql/data
@@ -37,13 +38,15 @@ services:
     init: true
     env_file:
       - devcontainer.env
+    environment:
+      WORKSPACE: ${WORKSPACE:-demo-game}
     # No published app/OIDC ports: devrouter routes https://demo-game.localhost
     # and https://oidc.demo-game.localhost over devnet (so many projects coexist
     # with zero host-port collisions). The OIDC mock shares this container's netns,
-    # so devrouter reaches it as `demo-game-app:8090`.
+    # so devrouter reaches it as `${WORKSPACE:-demo-game}-app:8090`.
     #
     # OIDC server-side reachability: the app validates the token issuer against
-    # AUTH0_ISSUER=https://oidc.demo-game.localhost/default and fetches discovery/
+    # AUTH0_ISSUER and fetches discovery/
     # token/jwks from it server-side. So that host must resolve + be reachable from
     # INSIDE this container too — map it to the host gateway (where Traefik listens
     # on :443). The server-side HTTPS fetch trusts the local mkcert CA, mounted
@@ -54,7 +57,8 @@ services:
     networks:
       default: {}
       devnet:
-        aliases: [demo-game-app]
+        aliases:
+          - ${WORKSPACE:-demo-game}-app
     volumes:
       - ..:/workspaces/gbl-uzh:cached
       # Named volumes shadow the host node_modules so Linux-native binaries
@@ -80,7 +84,7 @@ services:
   # Local OIDC provider (Auth0 replacement). Shares the app container's network
   # namespace so the issuer is identical whether reached by the app server
   # (token/jwks) or the host browser (authorize). Routed by devrouter at
-  # https://oidc.demo-game.localhost/default (-> demo-game-app:8090 over devnet).
+  # https://oidc.demo-game.localhost/default (-> ${WORKSPACE:-demo-game}-app:8090 over devnet).
   oidc:
     image: ghcr.io/navikt/mock-oauth2-server:2.1.11
     network_mode: service:app

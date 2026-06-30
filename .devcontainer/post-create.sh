@@ -7,9 +7,13 @@ cd /workspaces/gbl-uzh
 # DevPod lifecycle hooks receive env_file values truncated at '=' (e.g. a URL
 # ...?schema=public arrives as ...?schema), which makes Prisma emit an empty
 # search_path. Re-source the canonical env file so values with '=' are intact.
+runtime_workspace="${WORKSPACE:-}"
 set -a
 . /workspaces/gbl-uzh/.devcontainer/devcontainer.env
 set +a
+if [ -n "$runtime_workspace" ]; then
+  export WORKSPACE="$runtime_workspace"
+fi
 
 # devpod lifecycle hooks run without a TTY. Two pnpm behaviours misbehave there:
 #   - CI=true auto-confirms purging a stale/partial node_modules volume (else
