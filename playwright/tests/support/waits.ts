@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 
-export async function expectGameStatus(page: Page, status: string) {
+export async function expectGameStatusEventually(page: Page, status: string) {
   await expect
     .poll(
       async () => {
@@ -10,6 +10,9 @@ export async function expectGameStatus(page: Page, status: string) {
 
         if (currentStatus !== status) {
           await page.reload()
+          return page
+            .getByTestId('game-detail')
+            .getAttribute('data-game-status')
         }
 
         return currentStatus

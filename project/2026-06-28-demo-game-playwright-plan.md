@@ -467,6 +467,9 @@ pnpm --filter @gbl-uzh/playwright show-report
   - Configure:
     - Period 1: 2 segments.
     - Period 2: 2 segments.
+    - Period 3: 1 unplayed transition sentinel.
+      - Reason: current final-period consolidation connects the next period and
+        stays in `CONSOLIDATION` when no next period exists.
   - During setup, assert:
     - `Start Period` disabled before first segment.
     - `Add period` disabled until Period 1 has all required segments.
@@ -487,8 +490,8 @@ pnpm --filter @gbl-uzh/playwright show-report
     - first segment `RUNNING -> PAUSED`.
     - second segment `RUNNING -> CONSOLIDATION`.
     - final `CONSOLIDATION -> RESULTS`.
-  - Stop at final `RESULTS`. Do not click `Next Period` into incomplete
-    `COMPLETED` behavior.
+  - Stop at Period 2 `RESULTS`. Do not click `Next Period` into the unplayed
+    sentinel period or incomplete `COMPLETED` behavior.
   - For each played segment:
     - all 4 players see decision form.
     - all 4 players submit distinct valid allocations.
@@ -503,7 +506,6 @@ pnpm --filter @gbl-uzh/playwright show-report
     - all 4 team names appear.
     - `Player Decisions` renders.
     - `P1 S1`, `P1 S2`, `P2 S1`, and `P2 S2` appear.
-    - representative decision values appear for each team.
     - `Risk-Return` and `Sharpe Ratio` render.
   - Close all player contexts in `finally`.
 - Check:
@@ -655,6 +657,28 @@ pnpm --filter @gbl-uzh/playwright show-report
       - removed cross-spec state reuse.
       - changed target to 4 teams, 2 periods, and 4 played segments.
       - deferred countdown until runtime/stability are known.
+    - Slice 8 implementation found final-period consolidation still requires a
+      next period record, so the breadth flow uses an unplayed Period 3
+      sentinel while covering 2 played periods.
+    - Slice 8 post-slice review:
+      - opencode GLM 5.2 max review found no critical issues.
+      - Accepted hardening:
+        - close partial player contexts if joining fails.
+        - remove duplicate player reload.
+        - make status reload-poll return post-reload status.
+        - wait for submit button and ready switch before toggling ready.
+        - assert all player cards are visible before extracting join links.
+      - opencode simplification review found no dead helpers.
+    - Slice 8 verification:
+      - `CI=true pnpm --filter @gbl-uzh/playwright check:ts` passed.
+      - `git diff --check -- playwright/tests/demo-game-flow.spec.ts
+        playwright/tests/support/waits.ts
+        project/2026-06-28-demo-game-playwright-plan.md` passed.
+      - `CI=true pnpm --filter @gbl-uzh/playwright test:run
+        --project=chromium` passed: setup auth plus broad demo-game flow,
+        `2 passed (1.6m)`.
+      - `CI=true pnpm exec prettier --check ...` could not run because this
+        workspace does not expose a `prettier` binary through pnpm.
     - `COMPLETED` state deferred until final-period platform TODO is fixed.
 
 ## Handoff Prompt
