@@ -9,6 +9,8 @@ import {
 
 import { expectGameStatusEventually } from './support/waits'
 
+test.setTimeout(120_000)
+
 type DecisionValues = {
   savings: string
   bonds: string

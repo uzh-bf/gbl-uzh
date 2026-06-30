@@ -517,25 +517,24 @@ pnpm --filter @gbl-uzh/playwright show-report
 - Commit:
   - `test(demo-game): cover multi-team multi-period flow`
 
-### Slice 9: Stability Split If Needed
+### Slice 9: Stability Headroom
 
 - Do:
-  - Only run this slice if Slice 8 is too slow or flaky.
-  - Split without cross-spec state:
+  - Keep one broad spec because Slice 8 passes and validates the full story.
+  - Add measured timeout headroom:
+    - local broad-flow runtime: about `1.4m`.
+    - default per-test timeout: `90s`.
+    - file-local timeout: `120s`.
+  - Split later only if CI still shows timeout or flake:
     - `demo-game-breadth.spec.ts`: 4 teams, 2 periods, full status flow.
     - `admin-setup-rules.spec.ts`: lightweight setup guards with its own game.
     - `report.spec.ts`: own game only if report assertions make breadth spec
       unstable.
-  - Keep each spec self-contained:
-    - unique game name.
-    - own periods/segments.
-    - own player contexts.
-    - no dependence on previous spec order.
 - Check:
   - full Chromium suite passes.
   - runtime stays inside configured timeout budget.
 - Commit:
-  - `test(demo-game): split stable e2e coverage`
+  - `test(playwright): add breadth flow timeout headroom`
 
 ### Slice 10: Deferred Focused Follow-Ups
 
@@ -679,6 +678,22 @@ pnpm --filter @gbl-uzh/playwright show-report
         `2 passed (1.6m)`.
       - `CI=true pnpm exec prettier --check ...` could not run because this
         workspace does not expose a `prettier` binary through pnpm.
+    - Slice 9 completed:
+      - Slice 8 broad-flow runtime was about `1.4m`, close to the default `90s`
+        per-test timeout.
+      - Decided to keep one broad story spec and add file-local timeout
+        headroom instead of splitting immediately.
+      - opencode GLM 5.2 max review found no critical issues and no further
+        simplification opportunities.
+      - Verification:
+        - `CI=true pnpm --filter @gbl-uzh/playwright check:ts` passed.
+        - `git diff --check -- playwright/tests/demo-game-flow.spec.ts
+          project/2026-06-28-demo-game-playwright-plan.md` passed.
+        - `CI=true pnpm --filter @gbl-uzh/playwright test:run
+          --project=chromium` passed: `2 passed (1.6m)`.
+      - Deferred:
+        - confirm runtime budget on a real CI runner before treating the 120s
+          headroom as final.
     - `COMPLETED` state deferred until final-period platform TODO is fixed.
 
 ## Handoff Prompt
