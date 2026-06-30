@@ -440,6 +440,15 @@ pnpm --filter @gbl-uzh/playwright show-report
       check:ts` runs now, but fails on existing app type debt in
       `PlayerData`, `StoryElements`, generated ops dependency resolution,
       report numeric types, cockpit Formik errors, and React Markdown JSX types.
+  - Thermo-nuclear code-quality review cleanup:
+    - Removed string casts from player join URL handling and made missing
+      runtime links explicit errors.
+    - Added failure-safe cleanup for manually created player browser contexts.
+    - Kept `FormikNumberField` selectors tightly scoped and documented because
+      the component currently renders visible labels without accessible names.
+    - Made README devrouter app registration non-interactive with `--yes`.
+    - Revalidated `check:ts`, `git diff --check`, and Chromium Playwright:
+      `2 passed`.
 
 ## Handoff Prompt
 

@@ -10,7 +10,7 @@ Run the devcontainer/devrouter stack from the repository root:
 dev up
 dev tls install
 devpod up . --ide none
-for a in app oidc db; do dev app run "$a"; done
+for a in app oidc db; do dev app run "$a" --yes; done
 ```
 
 Requires devrouter `>=0.0.21`.
