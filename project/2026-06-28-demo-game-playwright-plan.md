@@ -383,6 +383,193 @@ pnpm --filter @gbl-uzh/playwright show-report
   - seed verification.
   - final assertions.
 
+## Expansion Plan: Multi-Round Multi-Team Coverage
+
+### Current Suite Review
+
+- Current executable suite:
+  - `playwright/tests/setup/admin-auth.setup.ts`
+  - `playwright/tests/demo-game-flow.spec.ts`
+- Current coverage:
+  - admin OIDC login through local mock.
+  - unique game creation.
+  - 2 players join through real join links.
+  - welcome flow.
+  - 1 played period with 2 played segments.
+  - status path: `SCHEDULED -> PREPARATION -> RUNNING -> PAUSED -> RUNNING -> CONSOLIDATION -> RESULTS`.
+  - report opens and includes both player names.
+- Current config fit:
+  - `workers: 1` and `fullyParallel: false` match shared local DB/app state.
+  - setup project plus `storageState` matches Playwright auth guidance.
+  - failure trace/video/screenshot enabled.
+  - `data-cy` test id attribute matches KlickerUZH pattern.
+- Current gaps:
+  - helpers hardcode 2 players.
+  - helpers hardcode `period-0-segment-*`.
+  - decisions are fixed to `playerOne` and `playerTwo`.
+  - second period exists only as transition support; it is not played.
+  - no 3+ team assertions.
+  - no explicit `RESULTS -> PREPARATION` next-period assertion.
+  - no player cockpit result/history assertions.
+  - no countdown smoke.
+  - no admin setup validation:
+    - disabled start before first segment.
+    - no extra segment beyond `segmentCount`.
+    - cannot add next period before current period is complete.
+  - report assertions check names only, not multi-team data.
+
+### Independent Review
+
+- Reviewer: opencode, `opencode-go/glm-5.2`, `--variant max`.
+- Accepted:
+  - Do not split helper generalization into its own coverage-free slice.
+  - Avoid cross-spec dependence. Every spec creates its own unique game.
+  - Make DB isolation explicit: unique games only, no cleanup/reset inside tests.
+  - Play both periods fully to remove ambiguity around "played" segments.
+  - Stop after final `RESULTS`; keep `COMPLETED` deferred.
+  - Fold admin/player/report assertions into one broad flow before adding more
+    specs.
+  - Rename or document reload-polling status helper before wider reuse.
+  - Defer countdown until core breadth runtime and stability are measured.
+- Rejected:
+  - Claim that `workers: 1` blocks concurrent admin/player pages. Playwright can
+    still use multiple pages/contexts inside one serial test. Countdown remains
+    deferred for flake and scope, not because it is impossible.
+
+### Constraints
+
+- Keep Chromium-only CI until broad flow is stable.
+- Keep serial execution. Shared DB and admin account make parallel tests flaky.
+- Use unique game names. No hidden Playwright DB reset and no cross-spec game
+  reuse.
+- Prefer roles and labels. Add `data-cy` only for repeated/dynamic areas.
+- Defer `COMPLETED` end-game test. `GameService` and admin page still contain
+  final-period TODOs around consolidation/results completion.
+- Defer countdown and broad dice animation testing. First breadth pass covers
+  dice link/static page smoke only.
+- Fix `FormikNumberField` accessible names later so decision fields can move
+  from positional textbox locators to label locators.
+
+### Slice 8: Four-Team Two-Period Breadth Flow
+
+- Do:
+  - Refactor only helpers needed by the new flow:
+    - `createGame({ name, playerCount })`.
+    - `addPeriod(page, { name, segmentCount, index })`.
+    - `addSegment(page, { periodIndex })`.
+    - `joinPlayers(browser, baseURL, players)`.
+    - `submitDecision(page, values)`.
+    - `advanceGame(page, { action, expectedStatus })`.
+  - Rename reload-polling helper to `expectGameStatusEventually` or document the
+    reload behavior at every expanded call site.
+  - Create 4-player game.
+  - Assert 4 player cards and 4 unique join-link `href` values.
+  - Configure:
+    - Period 1: 2 segments.
+    - Period 2: 2 segments.
+  - During setup, assert:
+    - `Start Period` disabled before first segment.
+    - `Add period` disabled until Period 1 has all required segments.
+    - `Add segment` disabled after each period reaches `segmentCount`.
+  - Open one dice page for a configured segment and assert:
+    - month cards render.
+    - `Roll` buttons render.
+    - no dice animation timing assertion.
+  - Join 4 players with unique bank names.
+  - Play Period 1 fully:
+    - `SCHEDULED -> PREPARATION`.
+    - first segment `RUNNING -> PAUSED`.
+    - second segment `RUNNING -> CONSOLIDATION`.
+    - `CONSOLIDATION -> RESULTS`.
+  - Click `Next Period` only after asserting `RESULTS`.
+  - Assert Period 2 starts in `PREPARATION`.
+  - Play Period 2 fully:
+    - first segment `RUNNING -> PAUSED`.
+    - second segment `RUNNING -> CONSOLIDATION`.
+    - final `CONSOLIDATION -> RESULTS`.
+  - Stop at final `RESULTS`. Do not click `Next Period` into incomplete
+    `COMPLETED` behavior.
+  - For each played segment:
+    - all 4 players see decision form.
+    - all 4 players submit distinct valid allocations.
+    - all 4 players mark ready.
+  - At least once after segment results, assert one player sees:
+    - `Assets Overview`.
+    - `Savings`.
+    - `Bonds`.
+    - `Stocks`.
+    - `Total`.
+  - Open final report and assert:
+    - all 4 team names appear.
+    - `Player Decisions` renders.
+    - `P1 S1`, `P1 S2`, `P2 S1`, and `P2 S2` appear.
+    - representative decision values appear for each team.
+    - `Risk-Return` and `Sharpe Ratio` render.
+  - Close all player contexts in `finally`.
+- Check:
+  - measure runtime of this spec.
+  - if one test approaches timeout, raise timeout only with measured evidence
+    or split into isolated specs that each create their own game.
+  - no app code changes except selectors needed for generalized helpers.
+  - `pnpm --filter @gbl-uzh/playwright test:run --project=chromium`
+- Commit:
+  - `test(demo-game): cover multi-team multi-period flow`
+
+### Slice 9: Stability Split If Needed
+
+- Do:
+  - Only run this slice if Slice 8 is too slow or flaky.
+  - Split without cross-spec state:
+    - `demo-game-breadth.spec.ts`: 4 teams, 2 periods, full status flow.
+    - `admin-setup-rules.spec.ts`: lightweight setup guards with its own game.
+    - `report.spec.ts`: own game only if report assertions make breadth spec
+      unstable.
+  - Keep each spec self-contained:
+    - unique game name.
+    - own periods/segments.
+    - own player contexts.
+    - no dependence on previous spec order.
+- Check:
+  - full Chromium suite passes.
+  - runtime stays inside configured timeout budget.
+- Commit:
+  - `test(demo-game): split stable e2e coverage`
+
+### Slice 10: Deferred Focused Follow-Ups
+
+- Countdown:
+  - add after Slice 8 runtime is known.
+  - keep inside one serial test with admin page and at least one player page.
+  - assert countdown UI appears.
+  - never wait for expiry in CI.
+- Invalid decision validation:
+  - verify app behavior first.
+  - add only if UI already enforces invalid sum.
+- `COMPLETED`:
+  - fix platform final-period transition first.
+  - then add explicit final completion E2E.
+- Accessibility:
+  - fix `FormikNumberField` label wiring.
+  - replace positional textbox locators.
+- Browser matrix:
+  - add Firefox/WebKit smoke after Chromium breadth flow is stable.
+
+### Acceptance Criteria
+
+- Suite covers at least:
+  - 4 teams.
+  - 2 periods.
+  - 4 played segments total.
+  - `RESULTS -> PREPARATION` next-period transition.
+  - admin setup guards.
+  - player decision/ready/result states.
+  - multi-team report data.
+- CI remains Chromium-only, serial, and under current timeout budget unless
+  measured runtime says otherwise.
+- No hidden DB reset in Playwright tests.
+- No broad selector churn.
+- `apps/quartz` remains untouched.
+
 ## Progress
 
 - 2026-06-28:
@@ -459,6 +646,16 @@ pnpm --filter @gbl-uzh/playwright show-report
     - Removed redundant devcontainer JSON overrides and nonstandard route note.
     - `dev repo devcontainer verify --repo . --json` reports `5 ok`, `0 warn`,
       `0 error`.
+  - E2E breadth review:
+    - Current suite reviewed against admin, player, report, dice, and
+      Playwright config code.
+    - opencode GLM 5.2 max reviewed the expansion plan.
+    - Review findings integrated:
+      - merged helper refactor into first real coverage slice.
+      - removed cross-spec state reuse.
+      - changed target to 4 teams, 2 periods, and 4 played segments.
+      - deferred countdown until runtime/stability are known.
+    - `COMPLETED` state deferred until final-period platform TODO is fixed.
 
 ## Handoff Prompt
 
