@@ -715,6 +715,22 @@ pnpm --filter @gbl-uzh/playwright show-report
         - `CI=true pnpm --filter @gbl-uzh/playwright test:run
           --project=chromium` passed cleanly: `2 passed (1.3m)`.
     - `COMPLETED` state deferred until final-period platform TODO is fixed.
+    - CI workflow slice:
+      - Added sharded GitHub Actions workflow with Postgres and local OIDC
+        services.
+      - First CI run proved shard `2/2` and merged report upload work.
+      - Shard `1/2` reached the broad-flow timeout on GitHub-hosted runners, so
+        player decision writes were serialized to avoid database transaction
+        conflicts and the file-local timeout was raised to `300s`.
+      - Local validation for this CI fix:
+        - `CI=true npm_config_verify_deps_before_run=false pnpm --filter
+          @gbl-uzh/playwright check:ts` passed.
+        - `CI=true npm_config_verify_deps_before_run=false pnpm --dir
+          playwright exec playwright test --list --project=chromium
+          --shard=1/2` listed setup plus full-flow spec.
+        - `uv run --with pyyaml .../quick_validate.py
+          .agents/skills/gbl-playwright-e2e` passed.
+        - `git diff --check -- .agents playwright .github` passed.
 
 ## Handoff Prompt
 

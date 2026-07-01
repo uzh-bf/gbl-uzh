@@ -75,8 +75,10 @@ claim prettier verification unless the binary exists.
   the uploaded HTML report.
 - Use `PLAYWRIGHT_BASE_URL` only to override default
   `https://demo-game.localhost`.
-- Set file-local timeout only with measured runtime evidence. Current broad flow
-  runs about `1.1m-1.4m`; file-local timeout is `120_000`.
+- Set file-local timeout only with measured runtime evidence. Local broad flow
+  runs about `1.1m-1.6m`, but the GitHub-hosted shard has reached the old
+  `120_000` timeout after CI setup and slower player actions; current file-local
+  timeout is `300_000`.
 
 ## GitHub Actions Rules
 
