@@ -56,7 +56,7 @@ Use `CI=true` for pnpm commands when non-interactive module cleanup can trigger.
 CI=true pnpm --filter @gbl-uzh/playwright check:ts
 CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium
 CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium tests/demo-game-flow.spec.ts
-CI=true npm_config_verify_deps_before_run=false pnpm --filter @gbl-uzh/playwright exec playwright test --list --project=chromium --shard=1/2
+CI=true npm_config_verify_deps_before_run=false pnpm --dir playwright exec playwright test --list --project=chromium --shard=1/2
 git diff --check -- .github .agents playwright apps/demo-game project
 ```
 

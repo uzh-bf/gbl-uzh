@@ -186,7 +186,7 @@ jobs:
             fi
           done
 
-          pnpm --filter @gbl-uzh/playwright exec playwright test \
+          pnpm --dir playwright exec playwright test \
             --project=chromium \
             --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} \
             --pass-with-no-tests
