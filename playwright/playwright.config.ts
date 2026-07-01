@@ -22,7 +22,7 @@ export default defineConfig({
         ['list'],
         ['github'],
         ['junit', { outputFile: 'test-results/junit.xml' }],
-        ['html', { open: 'never', outputFolder: 'playwright-report' }],
+        ['blob', { outputDir: 'blob-report' }],
       ]
     : [
         ['list'],

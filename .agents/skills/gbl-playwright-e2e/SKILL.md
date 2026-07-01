@@ -14,6 +14,7 @@ Playwright docs/skills only for API details; keep repo-specific decisions here.
 - Setup auth: `playwright/tests/setup/admin-auth.setup.ts`
 - Support helpers: `playwright/tests/support/*.ts`
 - Config: `playwright/playwright.config.ts`
+- CI workflow: `.github/workflows/playwright-testing.yml`
 - App under test: `apps/demo-game`
 - Local routing: `.devrouter.yml`
 - Plan/history: `project/2026-06-28-demo-game-playwright-plan.md`
@@ -55,7 +56,8 @@ Use `CI=true` for pnpm commands when non-interactive module cleanup can trigger.
 CI=true pnpm --filter @gbl-uzh/playwright check:ts
 CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium
 CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium tests/demo-game-flow.spec.ts
-git diff --check -- playwright tests apps/demo-game project
+CI=true npm_config_verify_deps_before_run=false pnpm --filter @gbl-uzh/playwright exec playwright test --list --project=chromium --shard=1/2
+git diff --check -- .github .agents playwright apps/demo-game project
 ```
 
 `pnpm exec prettier` is not currently available from this workspace. Do not
@@ -68,10 +70,37 @@ claim prettier verification unless the binary exists.
 - Keep setup project + `storageState` for admin auth.
 - Keep `testIdAttribute: 'data-cy'`.
 - Keep failure artifacts: trace/video/screenshots on failure.
+- Keep CI reporter output mergeable: include the `blob` reporter when
+  `process.env.CI` is set. The GitHub Actions merge job turns blob reports into
+  the uploaded HTML report.
 - Use `PLAYWRIGHT_BASE_URL` only to override default
   `https://demo-game.localhost`.
 - Set file-local timeout only with measured runtime evidence. Current broad flow
   runs about `1.1m-1.4m`; file-local timeout is `120_000`.
+
+## GitHub Actions Rules
+
+Keep `.github/workflows/playwright-testing.yml` close to the Klicker pattern, but
+adapt it to GBL's smaller stack:
+
+- Use the Playwright Docker image matching `playwright/package.json`
+  (`mcr.microsoft.com/playwright:v1.61.1-noble` for Playwright `1.61.1`).
+- Use Node `24` and pnpm `11.6.0`, matching the root package manager metadata.
+- Run Postgres and `ghcr.io/navikt/mock-oauth2-server:2.1.11` as job services.
+- In CI, do not use devrouter/TLS. Use:
+  - `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000`
+  - `NEXTAUTH_URL=http://127.0.0.1:3000`
+  - `AUTH0_ISSUER=http://oidc:8090/default`
+- Build `@gbl-uzh/platform` and `@gbl-uzh/ui` before starting `demo-game`.
+- Prepare Prisma with `prisma:copy`, `prisma:generate`, `prisma:push`, and
+  `prisma:seed`.
+- Start `pnpm --filter @gbl-uzh/demo-game dev` in the background, wait for both
+  OIDC discovery and `/admin/login`, then run the shard.
+- Use matrix shards with `fail-fast: false`, upload one blob report per shard,
+  and merge them in a separate job.
+- Current suite has one real spec file, so two shards means one shard can be
+  empty. Use `--pass-with-no-tests` only for sharded CI; split future breadth
+  coverage into separate spec files before increasing shard count.
 
 ## Auth And Data Rules
 

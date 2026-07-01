@@ -1,5 +1,6 @@
 .vscode/
 node_modules/
+.pnpm-store/
 
 .DS_Store
 *.pem
@@ -14,3 +15,9 @@ yarn-error.log*
 .env.production.local
 
 .turbo/
+
+playwright/.auth/
+playwright/blob-report/
+playwright/playwright-report/
+playwright/test-results/
+service.log
