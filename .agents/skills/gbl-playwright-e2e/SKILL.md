@@ -88,6 +88,8 @@ adapt it to GBL's smaller stack:
 - Use the Playwright Docker image matching `playwright/package.json`
   (`mcr.microsoft.com/playwright:v1.61.1-noble` for Playwright `1.61.1`).
 - Use Node `24` and pnpm `11.6.0`, matching the root package manager metadata.
+- Pin third-party GitHub Actions to a full commit SHA. SonarCloud flags
+  floating third-party action tags such as `pnpm/action-setup@v4`.
 - Run Postgres and `ghcr.io/navikt/mock-oauth2-server:2.1.11` as job services.
 - In CI, do not use devrouter/TLS. Use:
   - `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000`
