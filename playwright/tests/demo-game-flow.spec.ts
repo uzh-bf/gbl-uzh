@@ -263,11 +263,9 @@ async function runSegment(
   await assertPlayerDecisionForm(sessions)
   await assertPlayerPortfolio(sessions[0].page)
 
-  await Promise.all(
-    sessions.map(({ page, plan }) =>
-      submitDecision(page, plan.decisions[segmentIndex])
-    )
-  )
+  for (const { page, plan } of sessions) {
+    await submitDecision(page, plan.decisions[segmentIndex])
+  }
 
   await advanceGame(adminPage, {
     action: adminAction,

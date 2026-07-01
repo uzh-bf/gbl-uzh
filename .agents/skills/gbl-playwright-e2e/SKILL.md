@@ -111,6 +111,8 @@ adapt it to GBL's smaller stack:
 - Use one browser context per player. Close all contexts in `finally`.
 - If joining players in a helper, close already-created contexts on partial
   failure before rethrowing.
+- Submit player decisions sequentially. Concurrent player writes can create
+  Postgres serializable transaction conflicts in CI without increasing coverage.
 - Use unique game names. Do not reset DB inside Playwright setup.
 - Do not make specs depend on prior spec order or prior games.
 
