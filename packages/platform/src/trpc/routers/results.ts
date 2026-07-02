@@ -1,6 +1,7 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import {
+  assertGameOwnership,
   createTRPCRouter,
   playerProcedure,
   protectedProcedure,
@@ -42,11 +43,11 @@ export function createResultsRouter() {
       .input(specificInput)
       .query(async ({ input, ctx }) => {
         // Players may only read results for their own game; admins (reports)
-        // may query any game. Guarded outside try so it is not re-mapped.
-        if (
-          ctx.user.role !== UserRole.ADMIN &&
-          input.gameId !== ctx.user.gameId
-        ) {
+        // may only read results for games they own. Guarded outside try so
+        // NOT_FOUND/FORBIDDEN are not re-mapped to 500 by throwAsTRPCError.
+        if (ctx.user.role === UserRole.ADMIN) {
+          await assertGameOwnership(ctx, input.gameId)
+        } else if (input.gameId !== ctx.user.gameId) {
           throw new TRPCError({ code: 'FORBIDDEN', message: 'Forbidden' })
         }
 

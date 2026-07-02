@@ -1,4 +1,4 @@
-import { adminProcedure, createTRPCRouter } from '../init.js'
+import { adminProcedure, assertGameOwnership, createTRPCRouter } from '../init.js'
 import { gameIdSchema, jsonObjectSchema } from '../schemas.js'
 import {
   toAdminGameDto,
@@ -64,6 +64,7 @@ export function createGameRouter({
     byId: adminProcedure
       .input(byIdInput)
       .query(async ({ input, ctx }) => {
+        await assertGameOwnership(ctx, input.id)
         try {
           const game = await GameService.getGame(input, ctx as any)
 
@@ -95,6 +96,7 @@ export function createGameRouter({
     activateNextPeriod: adminProcedure
       .input(nextPeriodInput)
       .mutation(async ({ input, ctx }) => {
+        await assertGameOwnership(ctx, input.gameId)
         try {
           const game = await GameService.activateNextPeriod(input, ctx as any, {
             services,
@@ -109,6 +111,7 @@ export function createGameRouter({
     activateNextSegment: adminProcedure
       .input(nextPeriodInput)
       .mutation(async ({ input, ctx }) => {
+        await assertGameOwnership(ctx, input.gameId)
         try {
           const game = await GameService.activateNextSegment(input, ctx as any, {
             services,
@@ -123,6 +126,7 @@ export function createGameRouter({
     addCountdown: adminProcedure
       .input(countdownInput)
       .mutation(async ({ input, ctx }) => {
+        await assertGameOwnership(ctx, input.gameId)
         try {
           return await PlayService.addCountdown(input, ctx as any)
         } catch (error) {
@@ -133,6 +137,7 @@ export function createGameRouter({
     toggleSwitch: adminProcedure
       .input(switchInput)
       .mutation(async ({ input, ctx }) => {
+        await assertGameOwnership(ctx, input.gameId)
         try {
           return await PlayService.toggleSwitch(input, ctx as any)
         } catch (error) {

@@ -1,4 +1,4 @@
-import { adminProcedure, createTRPCRouter } from '../init.js'
+import { adminProcedure, assertGameOwnership, createTRPCRouter } from '../init.js'
 import { gameIdSchema, jsonObjectSchema } from '../schemas.js'
 import * as GameService from '../../services/GameService.js'
 import { throwAsTRPCError } from '../errors.js'
@@ -24,6 +24,7 @@ export function createPeriodRouter({
 
   return createTRPCRouter({
     add: adminProcedure.input(addInput).mutation(async ({ input, ctx }) => {
+      await assertGameOwnership(ctx, input.gameId)
       try {
         const period = await GameService.addGamePeriod(
           input as any,
