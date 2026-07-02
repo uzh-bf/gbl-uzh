@@ -15,9 +15,6 @@ const nextConfig: NextConfig = {
   // Next 16 stable React Compiler: auto-memoizes components. Requires React 19
   // (this app runs 19.2.7) and works under Turbopack.
   reactCompiler: true,
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   // Next 16 removed the `eslint` config key (and `next lint`); linting runs
   // standalone via the `lint` script (`eslint .`), not during `next build`.
 
