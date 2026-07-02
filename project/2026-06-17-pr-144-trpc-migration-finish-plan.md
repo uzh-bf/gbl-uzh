@@ -407,3 +407,27 @@ Files: `apps/demo-game/Dockerfile`.
   enforced (`Finished TypeScript in 2.0s`, `Compiled successfully`, 11/11 pages, all
   routes). Type-safety hole fully closed: `typecheck` CI job + `next build` both gate.
   Not committed.
+- 2026-07-02 (later): Verified junior's Playwright work (dev PR #154, commit 66ed4e0)
+  against this branch:
+  - Merged `origin/dev` into the branch (`60f4999`); resolved 2 conflicts
+    (`admin/games/[id].tsx`, `play/cockpit.tsx`) by keeping the tRPC versions and
+    porting the new `data-cy` test hooks (`game-detail`/`data-game-status`,
+    `period-*-segment-*`, `ready-switch`). Auto-merged: `signIn('github')` →
+    `signIn('auth0')` login fix (branch had a dead `github` provider), devcontainer
+    workspace-aware env, Playwright workspace package + CI workflow.
+  - Ran the full Playwright game-flow suite against the tRPC branch in the
+    devcontainer stack (CI-style env: app + mock OIDC on localhost inside the app
+    container). Admin OIDC login, game create (ownership path), 3 periods/4 segments,
+    dice page, 4 players join→welcome→cockpit, decisions, ready, countdown, segment
+    results, consolidation, period results ×2, final report — ALL PASS (3 consecutive
+    green runs). This closes the "authenticated manual smoke" blocking item.
+  - Found + fixed 2 test bugs in the junior suite (`fbdc7d3`): `assertCountdownVisible`
+    polled `isVisible()` (no auto-wait) right after `reload()` — failed although the
+    countdown rendered (screenshot-verified); `advanceGame` clicks could be swallowed
+    by a React re-render between mousedown/mouseup (trace-verified: click dispatched,
+    no tRPC POST; quiescent-page repro works) — now re-clicks until the status flips.
+  - Junior-suite gaps flagged (not fixed here): `post-start.sh` rewrites
+    NEXTAUTH_URL/APP_URL for devrouter workspaces but not AUTH0_ISSUER (namespaced
+    workspaces depend on the primary checkout's OIDC route); CI shards 2 ways for a
+    single test file; the plan/spec did not account for the in-flight tRPC migration
+    (hooks were added to GraphQL pages this branch rewrites).
