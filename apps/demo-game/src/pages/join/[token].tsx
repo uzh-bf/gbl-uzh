@@ -27,15 +27,29 @@ function Join() {
         await loginAsTeamAsync({ token })
         await router.replace('/play/welcome')
       } catch (error) {
+        // Keep `handledToken` set so the effect does not immediately refire the
+        // same failing token (which would loop login attempts against the
+        // server). The error is surfaced below via `loginAsTeam.isError`.
         console.error('Error logging in with join token:', error)
-        handledToken.current = null
       }
     }
 
     void executeAsync()
   }, [isLoginAsTeamPending, loginAsTeamAsync, router, token])
 
-  return null
+  // Previously this always rendered `null`, so an invalid/expired token left the
+  // user on a permanently blank page with no explanation. Surface the state.
+  const message = !token
+    ? 'This join link is invalid.'
+    : loginAsTeam.isError
+      ? 'Could not join the game. The link may be invalid or expired — please ask for a new one.'
+      : 'Joining the game…'
+
+  return (
+    <div className="m-auto flex min-h-screen max-w-md items-center justify-center p-8 text-center text-gray-700">
+      {message}
+    </div>
+  )
 }
 
 export default Join

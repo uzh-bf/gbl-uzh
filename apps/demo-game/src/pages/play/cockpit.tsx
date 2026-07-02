@@ -357,6 +357,7 @@ function Cockpit() {
   const [period, setPeriod] = useState<number | null>(null)
 
   const utils = trpc.useUtils()
+  const { toast } = useToast()
 
   const { data, isLoading, error } = trpc.play.result.useQuery()
 
@@ -366,6 +367,11 @@ function Cockpit() {
     },
     onError: (err) => {
       console.error('Player Cockpit: performAction failed', err)
+      toast({
+        title: 'Could not submit your decision',
+        description: err.message,
+        variant: 'destructive',
+      })
     },
   })
 

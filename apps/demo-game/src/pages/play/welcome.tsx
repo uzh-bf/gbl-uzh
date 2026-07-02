@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from '@uzh-bf/design-system'
 import LogoSelector from '~/components/LogoSelector'
+import { useToast } from '~/components/ui/use-toast'
 import { trpc } from '~/lib/trpc'
 
 const Schema = Yup.object().shape({
@@ -30,6 +31,7 @@ const Schema = Yup.object().shape({
 
 function Welcome() {
   const router = useRouter()
+  const { toast } = useToast()
   const {
     data: player,
     isLoading: isPlayerLoading,
@@ -80,6 +82,12 @@ function Welcome() {
             await router.replace('/play/cockpit')
           } catch (error) {
             console.error('Error updating player data:', error)
+            toast({
+              title: 'Could not save your setup',
+              description:
+                error instanceof Error ? error.message : 'Please try again.',
+              variant: 'destructive',
+            })
           }
         }}
       >

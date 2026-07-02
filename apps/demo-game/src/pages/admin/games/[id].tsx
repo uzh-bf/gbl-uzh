@@ -130,6 +130,13 @@ function ManageGame() {
       scrollToActivePeriod()
       await invalidateGameById()
     },
+    onError: (err) => {
+      toast({
+        title: 'Could not advance the game',
+        description: err.message,
+        variant: 'destructive',
+      })
+    },
   })
 
   const nextSegment = trpc.game.activateNextSegment.useMutation({
@@ -137,17 +144,42 @@ function ManageGame() {
       scrollToActivePeriod()
       await invalidateGameById()
     },
+    onError: (err) => {
+      toast({
+        title: 'Could not advance the game',
+        description: err.message,
+        variant: 'destructive',
+      })
+    },
   })
 
   const addGamePeriod = trpc.period.add.useMutation({
     async onSuccess() {
+      // Close only after the create succeeds. On failure the modal stays open
+      // (via onError) so the admin can retry without losing their input.
+      setIsPeriodModalOpen(false)
       await invalidateGameById()
+    },
+    onError: (err) => {
+      toast({
+        title: 'Could not add the period',
+        description: err.message,
+        variant: 'destructive',
+      })
     },
   })
 
   const addPeriodSegment = trpc.segment.add.useMutation({
     async onSuccess() {
+      setIsSegmentModalOpen(false)
       await invalidateGameById()
+    },
+    onError: (err) => {
+      toast({
+        title: 'Could not add the segment',
+        description: err.message,
+        variant: 'destructive',
+      })
     },
   })
 
@@ -614,8 +646,9 @@ function ManageGame() {
                                   'periodIx',
                                   period.index
                                 )
+                                // Modal is closed by the mutation's onSuccess so
+                                // a failed submit keeps it open and recoverable.
                                 newSegmentForm.handleSubmit()
-                                setIsSegmentModalOpen(false)
                               }}
                               primaryLabel="Submit"
                             >
@@ -720,8 +753,9 @@ function ManageGame() {
                       'newPeriodIx',
                       game.periods.length
                     )
+                    // Modal is closed by the mutation's onSuccess so a failed
+                    // submit keeps it open and recoverable.
                     newPeriodForm.handleSubmit()
-                    setIsPeriodModalOpen(false)
                   }}
                   primaryLabel="Submit"
                 >

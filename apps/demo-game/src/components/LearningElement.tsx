@@ -91,6 +91,13 @@ function LearningElement({ elementId }: { elementId: string | null }) {
         })
       }
     },
+    onError: (err) => {
+      toast({
+        title: 'Could not submit your answer',
+        description: err.message,
+        variant: 'destructive',
+      })
+    },
   })
 
   if (!elementId) return null

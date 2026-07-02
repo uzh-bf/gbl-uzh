@@ -16,7 +16,10 @@ function getOrCreateEventBus(): EventEmitter {
   if (cached) return cached
 
   const instance = new EventEmitter()
-  instance.setMaxListeners(0)
+  // One listener per active SSE subscription. Use a high finite cap (not 0 =
+  // unlimited) so a runaway subscribe loop still trips MaxListenersExceededWarning
+  // as an early leak canary instead of silently growing until memory degrades.
+  instance.setMaxListeners(1000)
   ;(globalThis as Record<symbol, unknown>)[REALTIME_EVENT_BUS_KEY] = instance
   return instance
 }
