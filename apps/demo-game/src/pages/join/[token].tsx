@@ -2,14 +2,15 @@ import { useRouter } from 'next/router'
 import { useEffect, useRef } from 'react'
 import { trpc } from '~/lib/trpc'
 
+function firstParam(value: string | string[] | undefined): string | undefined {
+  if (typeof value === 'string') return value
+  if (Array.isArray(value)) return value[0]
+  return undefined
+}
+
 function Join() {
   const router = useRouter()
-  const token =
-    typeof router.query?.token === 'string'
-      ? router.query.token
-      : Array.isArray(router.query?.token)
-        ? router.query.token[0]
-        : undefined
+  const token = firstParam(router.query?.token)
 
   const loginAsTeam = trpc.auth.loginAsTeam.useMutation()
   const { isPending: isLoginAsTeamPending, mutateAsync: loginAsTeamAsync } =
@@ -39,15 +40,17 @@ function Join() {
 
   // Previously this always rendered `null`, so an invalid/expired token left the
   // user on a permanently blank page with no explanation. Surface the state.
-  const message = !token
-    ? 'This join link is invalid.'
-    : loginAsTeam.isError
-      ? 'Could not join the game. The link may be invalid or expired — please ask for a new one.'
-      : 'Joining the game…'
+  function statusMessage(): string {
+    if (!token) return 'This join link is invalid.'
+    if (loginAsTeam.isError) {
+      return 'Could not join the game. The link may be invalid or expired — please ask for a new one.'
+    }
+    return 'Joining the game…'
+  }
 
   return (
     <div className="m-auto flex min-h-screen max-w-md items-center justify-center p-8 text-center text-gray-700">
-      {message}
+      {statusMessage()}
     </div>
   )
 }

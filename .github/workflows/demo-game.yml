@@ -36,25 +36,10 @@ jobs:
         working-directory: ./apps/demo-game
         run: pnpm run lint
 
-  typecheck:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Use Node 24
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24.x
-
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: true
-
-      # tsc resolves `@gbl-uzh/platform/dist/*` and the generated Prisma client,
-      # so both must exist before typechecking (mirrors the local `dev` prereqs).
+      # Type gate lives in this job (reusing its checkout/install) so it runs
+      # fast, ahead of the slow Docker `build`. tsc resolves
+      # `@gbl-uzh/platform/dist/*` and the generated Prisma client, so both must
+      # exist first (mirrors the local `dev` prereqs).
       - name: Build platform package
         run: pnpm --filter @gbl-uzh/platform build
 
@@ -64,8 +49,6 @@ jobs:
           pnpm run prisma:copy
           pnpm run prisma:generate
 
-      # Real type gate: `next build` runs with `ignoreBuildErrors: true`, so a
-      # broken procedure/DTO/schema would otherwise ship green. This catches it.
       - name: Typecheck demo-game
         working-directory: ./apps/demo-game
         run: pnpm run check:ts
