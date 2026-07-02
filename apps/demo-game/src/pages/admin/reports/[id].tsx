@@ -47,7 +47,8 @@ import {
 import { composeChartData, type ReportPlayerResult } from '~/lib/analysis'
 import { NUM_MONTHS } from '~/lib/constants'
 import { trpc } from '~/lib/trpc'
-import type { RouterOutputs } from '~/server/trpc/router'
+import type { Decisions } from '~/types'
+import type { GameDetail } from '~/types/api'
 
 const colors = [
   'hsl(var(--chart-1))',
@@ -57,7 +58,6 @@ const colors = [
 ]
 
 const labels = ['Savings', 'Bonds', 'Stocks', 'Total Assets']
-type ReportGame = NonNullable<RouterOutputs['game']['byId']>
 type ReportSpecificResult = ReportPlayerResult
 type ReportSpecificResultList = ReportSpecificResult[]
 
@@ -67,14 +67,8 @@ const config = {
   stocks: { label: labels[2], color: colors[2] },
 }
 
-type DecisionFacts = {
-  bank: number
-  bonds: number
-  stocks: number
-}
-
 type PlayerPeriodData = {
-  decisions: DecisionFacts[]
+  decisions: Decisions[]
   name: string
   totalAssets: number[]
   accTotalAssetsReturn: number[]
@@ -134,7 +128,7 @@ function ReportGame() {
     }
   )
 
-  const reportGame = reportGameData as ReportGame | undefined
+  const reportGame = reportGameData as GameDetail | undefined
   const reportSegmentEndResults =
     segmentEndResults as unknown as ReportSpecificResultList
   const reportPeriodEndResults =
@@ -181,7 +175,7 @@ function ReportGame() {
         )
         const dataPerPlayer: Record<string, PlayerPeriodData> = {}
         playerResPerPeriod.forEach((result) => {
-          const decisions = {} as DecisionFacts
+          const decisions = {} as Decisions
           Object.keys(result.facts.decisions).forEach((v) => {
             decisions[v] = Number(result.facts.decisions[v])
           })

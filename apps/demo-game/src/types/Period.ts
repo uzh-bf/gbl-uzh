@@ -22,7 +22,13 @@ export const PeriodFactsSchema = yup.object({
     .required(),
 })
 
-export interface PeriodFacts extends yup.InferType<typeof PeriodFactsSchema> {}
+export interface PeriodFacts extends yup.InferType<typeof PeriodFactsSchema> {
+  // Operator-set trading toggles, surfaced in the admin game view. Optional:
+  // absent on periods created before the toggles existed.
+  spotTradingEnabled?: boolean
+  futuresTradingEnabled?: boolean
+  optionsTradingEnabled?: boolean
+}
 
 // function generateDiceObject() {
 //   return yup.number().positive().integer().max(6).required()
@@ -57,5 +63,7 @@ export const PeriodSegmentFactsSchema = yup.object({})
 export interface PeriodSegmentFacts
   extends yup.InferType<typeof PeriodSegmentFactsSchema> {
   returns: { bank: number; bonds: number; stocks: number }[]
-  diceRolls: { bonds: number; stocks: number }[]
+  // `shared` is the third (shared bonds/stocks) die; written by the reducer,
+  // read in the admin dice view. Optional to stay compatible with older facts.
+  diceRolls: { bonds: number; stocks: number; shared?: number }[]
 }

@@ -51,31 +51,11 @@ import {
   GAP_BONDS,
   GAP_STOCKS,
   INTEREST_BANK,
+  type PeriodFacts,
+  type PeriodSegmentFacts,
   TREND_BONDS,
   TREND_STOCKS,
 } from '~/types/Period'
-
-type PeriodFacts = {
-  spotTradingEnabled?: boolean
-  futuresTradingEnabled?: boolean
-  optionsTradingEnabled?: boolean
-  scenario?: {
-    trendBonds?: number
-    gapBonds?: number
-    trendStocks?: number
-    gapStocks?: number
-    interestBank?: number
-    seed?: number
-  }
-}
-
-type SegmentFacts = {
-  diceRolls?: Array<{
-    bonds?: number
-    stocks?: number
-    shared?: number
-  }>
-}
 
 function scrollToActivePeriod() {
   const anchor = document.querySelector('#active-period')
@@ -485,7 +465,7 @@ function ManageGame() {
                         segmentStatus === STATUS.COMPLETED
 
                       const segmentFacts = segment?.facts as
-                        | SegmentFacts
+                        | PeriodSegmentFacts
                         | undefined
                       const diceBonds = segmentFacts?.diceRolls?.map(
                         (dice) => dice.bonds
@@ -875,7 +855,7 @@ function ManageGame() {
           <div className="mt-2 flex flex-col gap-4">
             {game.players.map((player, ix) => (
               <div key={player.id} data-cy={`player-${ix}`}>
-                <PlayerCompact player={player as any} />
+                <PlayerCompact player={player} />
               </div>
             ))}
           </div>

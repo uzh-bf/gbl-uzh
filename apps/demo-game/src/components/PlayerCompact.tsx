@@ -3,24 +3,21 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import Link from 'next/link'
 
-type CompactPlayer = {
-  name: string
-  role?: string | null
-  token?: string | null
-  isReady: boolean
-  facts?: {
-    avatar?: string
-  } | null
-}
+import type { GameDetail } from '~/types/api'
+
+type CompactPlayer = GameDetail['players'][number]
 
 // TODO(JJ):
 // Move this to ui package when checking with RS, also about Link in ui
 function PlayerCompact({ player }: { player: CompactPlayer }) {
+  // `facts` is JSON (`unknown` in the DTO); narrow to the avatar we read.
+  const avatar = (player.facts as { avatar?: string } | null | undefined)
+    ?.avatar
   return (
     <div className="flex w-4/5 flex-col border-b py-1 last:border-0">
       <div className="flex justify-between">
         <div>{player.name}</div>
-        <img width="20px" src={player.facts?.avatar} />
+        <img width="20px" src={avatar} />
       </div>
       <div className="flex justify-between">
         <div className="flex flex-col justify-between text-sm">

@@ -15,6 +15,8 @@ import {
 } from '@uzh-bf/design-system'
 import { twMerge } from 'tailwind-merge'
 
+import type { Decisions } from '~/types'
+
 interface ObjectProps {
   id: string
   index: number
@@ -23,11 +25,7 @@ interface ObjectProps {
 interface DecisionProps {
   period: ObjectProps
   segment: ObjectProps
-  decisions: {
-    bank: number
-    bonds: number
-    stocks: number
-  }
+  decisions: Decisions
 }
 
 interface DecisionDisplayProps {

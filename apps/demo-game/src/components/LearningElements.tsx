@@ -6,48 +6,23 @@ import { sortBy } from 'ramda'
 
 import { Button, Modal } from '@uzh-bf/design-system'
 import { useMemo, useState } from 'react'
-import type { RouterOutputs } from '~/server/trpc/router'
+import type { LearningElementRef, PlayerResultWithProgress } from '~/types/api'
 
 import LearningElement from './LearningElement'
 
-type PlayerResult = NonNullable<RouterOutputs['play']['result']>
-
-type LearningElementSummary = {
-  id: string
-  title: string
-}
-
-type PeriodWithLearningElements = {
-  segments: {
-    learningElements: LearningElementSummary[]
-  }[]
-}
-
 const EMPTY_COMPLETED_LEARNING_ELEMENT_IDS: string[] = []
-
-type PlayerResultWithProgress = NonNullable<PlayerResult['playerResult']> & {
-  player?: {
-    completedLearningElementIds?: string[]
-  }
-}
-
-export type PlayerResultWithLearningProgress = PlayerResult & {
-  playerResult?: PlayerResultWithProgress | null
-}
 
 function LearningElements({
   playerResult,
 }: {
-  playerResult?: PlayerResultWithLearningProgress
+  playerResult?: PlayerResultWithProgress
 }) {
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const currentGame = playerResult?.currentGame
-  const periods = currentGame?.periods as unknown as
-    | PeriodWithLearningElements[]
-    | undefined
-  const learningElements = currentGame?.activePeriod?.activeSegment
-    ?.learningElements as LearningElementSummary[] | undefined
+  const periods = currentGame?.periods
+  const learningElements =
+    currentGame?.activePeriod?.activeSegment?.learningElements
 
   const completedLearningElementIds =
     playerResult?.playerResult?.player?.completedLearningElementIds ??
@@ -57,9 +32,9 @@ function LearningElements({
     if (completedLearningElementIds.length === 0 || !periods) return []
     const allLearningElements = periods
       .flatMap((period) =>
-        period.segments.flatMap((segment) => segment.learningElements)
+        period.segments.flatMap((segment) => segment.learningElements ?? [])
       )
-      .reduce<Record<string, LearningElementSummary>>((acc, elem) => {
+      .reduce<Record<string, LearningElementRef>>((acc, elem) => {
         acc[elem.id] = elem
         return acc
       }, {})

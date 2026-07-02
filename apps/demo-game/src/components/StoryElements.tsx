@@ -4,26 +4,7 @@ import { sortBy } from 'ramda'
 import { useEffect, useMemo, useState } from 'react'
 import Markdown from 'react-markdown'
 import { trpc } from '~/lib/trpc'
-import type { RouterOutputs } from '~/server/trpc/router'
-
-type PlayerResult = NonNullable<RouterOutputs['play']['result']>
-type PlayerResultWithStoryProgress = PlayerResult & {
-  playerResult?:
-    | (NonNullable<PlayerResult['playerResult']> & {
-        player?: {
-          visitedStoryElementIds?: string[]
-        }
-      })
-    | null
-}
-
-type StoryElement = {
-  id: string
-  type?: string
-  title: string
-  content?: string | null
-  contentRole?: Record<string, string> | null
-}
+import type { PlayerResultWithProgress, StoryElementRef } from '~/types/api'
 
 const EMPTY_VISITED_STORY_ELEMENT_IDS: string[] = []
 
@@ -31,11 +12,11 @@ function StoryElements({
   playerResult,
   playerRole,
 }: {
-  playerResult?: PlayerResultWithStoryProgress
+  playerResult?: PlayerResultWithProgress
   playerRole?: string | null
 }) {
   const [unseenStoryElements, setUnseenStoryElements] = useState<
-    StoryElement[]
+    StoryElementRef[]
   >([])
   const utils = trpc.useUtils()
 
@@ -52,9 +33,9 @@ function StoryElements({
     const activeSegment = playerResult?.currentGame?.activePeriod?.activeSegment
     if (!activeSegment) return []
 
-    return sortBy<StoryElement>(
+    return sortBy<StoryElementRef>(
       (elem) => elem.title,
-      (activeSegment.storyElements ?? []) as StoryElement[]
+      activeSegment.storyElements ?? []
     )
   }, [playerResult?.currentGame?.activePeriod?.activeSegment])
 
@@ -77,8 +58,14 @@ function StoryElements({
     switch (firstElement?.type) {
       case 'GENERIC':
         return firstElement.content ?? ''
-      case 'ROLE_BASED':
-        return firstElement.contentRole?.[playerRole ?? ''] ?? ''
+      case 'ROLE_BASED': {
+        // `contentRole` is JSON (`unknown` in the DTO): a role -> content map.
+        const contentRole = firstElement.contentRole as
+          | Record<string, string>
+          | null
+          | undefined
+        return contentRole?.[playerRole ?? ''] ?? ''
+      }
       default:
         return ''
     }
