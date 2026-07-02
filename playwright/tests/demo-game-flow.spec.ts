@@ -206,7 +206,24 @@ async function advanceGame(
 ) {
   const button = page.getByRole('button', { name: action })
   await expect(button).toBeEnabled()
-  await button.click()
+  // A React re-render (e.g. the query invalidation from the previous step)
+  // can swap the action button's subtree between mousedown and mouseup, which
+  // swallows the click without an error. Re-click until the status flips.
+  await expect(async () => {
+    const status = await page
+      .getByTestId('game-detail')
+      .getAttribute('data-game-status')
+    if (status !== expectedStatus) {
+      await page.getByRole('button', { name: action }).click()
+      await expect
+        .poll(
+          () =>
+            page.getByTestId('game-detail').getAttribute('data-game-status'),
+          { timeout: 3_000 }
+        )
+        .toBe(expectedStatus)
+    }
+  }).toPass({ timeout: 30_000, intervals: [500, 1_000, 2_000] })
   await expectGameStatusEventually(page, expectedStatus)
 }
 
@@ -233,18 +250,11 @@ async function setCountdown(page: Page, seconds: string) {
 }
 
 async function assertCountdownVisible(page: Page) {
-  await expect
-    .poll(
-      async () => {
-        await page.reload()
-        return page.getByTestId('countdown').isVisible()
-      },
-      {
-        intervals: [500, 1_000, 2_000],
-        timeout: 30_000,
-      }
-    )
-    .toBe(true)
+  // `isVisible()` does not auto-wait, so polling it right after `reload()`
+  // races the client-side data fetch and can stay false forever on a slow dev
+  // server. Reload once, then let `toBeVisible` wait for hydration + data.
+  await page.reload()
+  await expect(page.getByTestId('countdown')).toBeVisible({ timeout: 30_000 })
 }
 
 async function runSegment(
