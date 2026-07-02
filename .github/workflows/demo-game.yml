@@ -38,10 +38,13 @@ jobs:
 
       # Type gate lives in this job (reusing its checkout/install) so it runs
       # fast, ahead of the slow Docker `build`. tsc resolves
-      # `@gbl-uzh/platform/dist/*` and the generated Prisma client, so both must
-      # exist first (mirrors the local `dev` prereqs).
-      - name: Build platform package
-        run: pnpm --filter @gbl-uzh/platform build
+      # `@gbl-uzh/platform/dist/*`, `@gbl-uzh/ui/dist/*` and the generated
+      # Prisma client, so all must exist first (mirrors the local `dev`
+      # prereqs and the Playwright workflow).
+      - name: Build workspace packages
+        run: |
+          pnpm --filter @gbl-uzh/platform build
+          pnpm --filter @gbl-uzh/ui build
 
       - name: Generate demo-game Prisma client
         working-directory: ./apps/demo-game
