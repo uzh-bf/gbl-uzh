@@ -364,7 +364,7 @@ function ManageGame() {
     game.activePeriod?.activeSegment?.countdownExpiresAt
 
   return (
-    <div className="p-4">
+    <div className="p-4" data-cy="game-detail" data-game-status={game.status}>
       <div>
         <div className="mb-4 flex flex-col gap-2 overflow-x-auto md:flex-row">
           {game.periods.map((period, ix) => {
@@ -397,6 +397,7 @@ function ManageGame() {
                 className="flex flex-row gap-2"
                 key={period.id}
                 id={isPeriodActive ? 'active-period' : undefined}
+                data-cy={`period-${ix}`}
               >
                 <div
                   className={twMerge(
@@ -516,6 +517,7 @@ function ManageGame() {
                             isSegmentActive && 'border-green-600 bg-green-100'
                           )}
                           key={ix}
+                          data-cy={`period-${period.index}-segment-${ix}`}
                         >
                           <div className="flex flex-row items-center gap-2">
                             <div>
@@ -630,6 +632,7 @@ function ManageGame() {
                                     root: 'h-full w-12 font-bold text-gray-500',
                                   }}
                                   onClick={() => setIsSegmentModalOpen(true)}
+                                  aria-label="Add segment"
                                   data={{ cy: 'add-segment' }}
                                 >
                                   <FontAwesomeIcon icon={faPlus} />
@@ -737,6 +740,7 @@ function ManageGame() {
                       disabled={disabled}
                       className={{ root: 'font-bold text-gray-500 md:w-48' }}
                       onClick={() => setIsPeriodModalOpen(true)}
+                      aria-label="Add period"
                       data={{ cy: 'add-period' }}
                     >
                       <FontAwesomeIcon icon={faPlus} />
@@ -895,12 +899,14 @@ function ManageGame() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <FormikNumberField
-                  name="countdownSeconds"
-                  precision={0}
-                  label="Countdown in seconds"
-                  className={{ label: 'pb-2 font-normal' }}
-                />
+                <div data-cy="countdown-seconds">
+                  <FormikNumberField
+                    name="countdownSeconds"
+                    precision={0}
+                    label="Countdown in seconds"
+                    className={{ label: 'pb-2 font-normal' }}
+                  />
+                </div>
                 {/* TODO(JJ): @RS Do we want to show the following? If no we
                   we can remove the refetchQueries.
                 */}

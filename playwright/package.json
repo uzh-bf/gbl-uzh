@@ -1,0 +1,21 @@
+{
+  "private": true,
+  "name": "@gbl-uzh/playwright",
+  "version": "0.0.0",
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@types/node": "24.13.2",
+    "typescript": "5.6.3"
+  },
+  "scripts": {
+    "check:ts": "tsc --noEmit",
+    "test": "playwright test",
+    "test:run": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "show-report": "playwright show-report"
+  },
+  "volta": {
+    "extends": "../package.json"
+  }
+}

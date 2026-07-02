@@ -1,0 +1,254 @@
+name: Demo Game Playwright
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - apps/demo-game/**
+      - packages/platform/**
+      - packages/ui/**
+      - playwright/**
+      - .github/workflows/playwright-testing.yml
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - turbo.json
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CI: 'true'
+  CYPRESS_INSTALL_BINARY: '0'
+  npm_config_verify_deps_before_run: 'false'
+  DATABASE_URL: postgres://prisma:prisma@postgres:5432/prisma?schema=public
+  SHADOW_DATABASE_URL: postgres://prisma:prisma@postgres:5432/shadow?schema=public
+  NEXTAUTH_SECRET: ci-demo-game-not-a-secret
+  NEXTAUTH_URL: http://127.0.0.1:3000
+  NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+  NEXT_PUBLIC_API_URL: http://127.0.0.1:3000/api/graphql
+  AUTH0_ISSUER: http://oidc:8090/default
+  AUTH0_CLIENT_ID: demo-game-local
+  AUTH0_CLIENT_SECRET: demo-game-local-secret
+  PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+
+jobs:
+  playwright-run:
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2]
+        shardTotal: [2]
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: prisma
+          POSTGRES_PASSWORD: prisma
+          POSTGRES_DB: prisma
+        options: >-
+          --health-cmd "pg_isready -U prisma -d prisma"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+      oidc:
+        image: ghcr.io/navikt/mock-oauth2-server:2.1.11
+        env:
+          SERVER_PORT: '8090'
+          JSON_CONFIG: >-
+            {
+              "interactiveLogin": false,
+              "tokenCallbacks": [
+                {
+                  "issuerId": "default",
+                  "requestMappings": [
+                    {
+                      "requestParam": "grant_type",
+                      "match": "*",
+                      "claims": {
+                        "sub": "dev-admin",
+                        "email": "gbl-dev@df.uzh.ch",
+                        "name": "GBL Dev",
+                        "email_verified": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Define node version
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        with:
+          version: 11.6.0
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Cache turbo build artifacts
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ hashFiles('**/pnpm-lock.yaml', 'turbo.json') }}-${{ github.ref_name }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ hashFiles('**/pnpm-lock.yaml', 'turbo.json') }}-
+            ${{ runner.os }}-turbo-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build demo-game dependencies
+        run: |
+          pnpm --filter @gbl-uzh/platform build
+          pnpm --filter @gbl-uzh/ui build
+
+      - name: Prepare database
+        run: |
+          pnpm --filter @gbl-uzh/demo-game prisma:copy
+          pnpm --filter @gbl-uzh/demo-game prisma:generate
+
+          push_ok=0
+          for attempt in $(seq 1 12); do
+            if pnpm --filter @gbl-uzh/demo-game prisma:push; then
+              push_ok=1
+              break
+            fi
+            echo "prisma push attempt ${attempt} failed; retrying in 5s"
+            sleep 5
+          done
+
+          if [ "$push_ok" != 1 ]; then
+            echo "prisma push never succeeded" >&2
+            exit 1
+          fi
+
+          pnpm --filter @gbl-uzh/demo-game prisma:seed
+
+      - name: Start demo-game and run Playwright shard
+        timeout-minutes: 60
+        run: |
+          pnpm --filter @gbl-uzh/demo-game dev > service.log 2>&1 &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+
+          for url in \
+            "http://oidc:8090/default/.well-known/openid-configuration" \
+            "http://127.0.0.1:3000/admin/login"
+          do
+            ready=0
+            for attempt in $(seq 1 90); do
+              if curl -fsS "$url" >/dev/null; then
+                ready=1
+                break
+              fi
+              echo "waiting for ${url} (${attempt}/90)"
+              sleep 5
+            done
+
+            if [ "$ready" != 1 ]; then
+              echo "service did not become ready: ${url}" >&2
+              tail -n 200 service.log >&2 || true
+              exit 1
+            fi
+          done
+
+          pnpm --dir playwright exec playwright test \
+            --project=chromium \
+            --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} \
+            --pass-with-no-tests
+
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.shardIndex }}
+          path: playwright/blob-report
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-${{ matrix.shardIndex }}-of-${{ matrix.shardTotal }}
+          path: |
+            playwright/test-results
+            service.log
+          retention-days: 7
+          if-no-files-found: ignore
+
+  merge-reports:
+    if: ${{ !cancelled() }}
+    needs: [playwright-run]
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Define node version
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        with:
+          version: 11.6.0
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download blob reports
+        uses: actions/download-artifact@v4
+        with:
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+
+      - name: Merge Playwright reports
+        working-directory: playwright
+        run: pnpm exec playwright merge-reports --reporter html ../all-blob-reports
+
+      - name: Upload merged HTML report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright/playwright-report
+          retention-days: 30

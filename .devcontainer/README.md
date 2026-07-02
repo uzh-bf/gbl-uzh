@@ -9,7 +9,7 @@ host-port collisions** (nothing is published on the host).
 
 ## Prerequisites
 
-devrouter **≥ 0.0.21** (proxy + TCP routing). One-time host setup — must run
+devrouter **≥ 0.0.23** (proxy + TCP routing). One-time host setup — must run
 **before** the container starts, because the stack joins devrouter's external
 `devnet` network and that network must already exist:
 
@@ -26,7 +26,7 @@ devpod provider add docker
 devpod up . --ide none         # builds image, starts DB/OIDC, installs, builds deps, seeds, runs dev
 
 # register the routes (one per app; prints the https URLs)
-for a in app oidc db; do dev app run "$a"; done
+for a in app oidc db; do dev app run "$a" --yes; done
 ```
 
 Open <https://demo-game.localhost>. The dev server auto-starts in the background
@@ -34,17 +34,17 @@ Open <https://demo-game.localhost>. The dev server auto-starts in the background
 
 ## How routing works
 
-The app and Postgres join the external `devnet` network with stable aliases
-(`demo-game-app`, `demo-game-db`). devrouter's Traefik (also on `devnet`) routes
-to them **by name over the network** — no published host ports. The OIDC mock
-shares the app container's netns, so it is reached on `devnet` as
-`demo-game-app:8090`.
+The app and Postgres join the external `devnet` network with workspace-aware
+aliases (`${WORKSPACE:-demo-game}-app`, `${WORKSPACE:-demo-game}-db`).
+devrouter's Traefik (also on `devnet`) routes to them **by name over the
+network** — no published host ports. The OIDC mock shares the app container's
+netns, so it is reached on `devnet` as `${WORKSPACE:-demo-game}-app:8090`.
 
 | What | Host | Upstream (devnet) |
 | --- | --- | --- |
-| App | `https://demo-game.localhost` | `demo-game-app:3000` |
-| OIDC mock | `https://oidc.demo-game.localhost/default` | `demo-game-app:8090` |
-| Postgres | `db.demo-game.localhost:5432` | `demo-game-db:5432` |
+| App | `https://demo-game.localhost` | `${WORKSPACE}-app:3000` |
+| OIDC mock | `https://oidc.demo-game.localhost/default` | `${WORKSPACE}-app:8090` |
+| Postgres | `db.demo-game.localhost:5432` | `${WORKSPACE}-db:5432` |
 
 Connect to the DB with direct-SSL so the TLS ClientHello carries the SNI:
 

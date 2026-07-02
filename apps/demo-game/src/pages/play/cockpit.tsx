@@ -247,20 +247,22 @@ function GameLayout({ children }: { children: ReactNode }) {
           />
           <div className="flex items-center justify-between">
             {selfData && (
-              <Switch
-                className={{
-                  root: 'text-xs font-bold text-gray-600',
-                }}
-                disabled={updateReadyState.isPending}
-                id="isReady"
-                checked={selfData.isReady}
-                label="Ready?"
-                onCheckedChange={async () => {
-                  await updateReadyState.mutateAsync({
-                    isReady: !selfData.isReady,
-                  })
-                }}
-              />
+              <div data-cy="ready-switch">
+                <Switch
+                  className={{
+                    root: 'text-xs font-bold text-gray-600',
+                  }}
+                  disabled={updateReadyState.isPending}
+                  id="isReady"
+                  checked={selfData.isReady}
+                  label="Ready?"
+                  onCheckedChange={async () => {
+                    await updateReadyState.mutateAsync({
+                      isReady: !selfData.isReady,
+                    })
+                  }}
+                />
+              </div>
             )}
 
             {countdownDurationMs !== null && expiresAtDate !== null && (

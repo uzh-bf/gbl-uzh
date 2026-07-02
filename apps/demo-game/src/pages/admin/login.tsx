@@ -18,7 +18,7 @@ function Login() {
       Not signed in <br />
       <Button
         onClick={() =>
-          signIn('github', {
+          signIn('auth0', {
             callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/admin/games`,
           })
         }

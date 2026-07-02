@@ -50,7 +50,11 @@ export const CycleCountdown: React.FC<CycleCountdownProps> = ({
   const strokeDashoffset = circumference * (1 - progress)
 
   return (
-    <div style={{ width: 100, height: 100 }} className={`${className}`}>
+    <div
+      style={{ width: 100, height: 100 }}
+      className={`${className}`}
+      data-cy="countdown"
+    >
       <svg width="100" height="100">
         <circle
           cx="50"

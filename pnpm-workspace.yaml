@@ -4,6 +4,7 @@ packages:
   - '!apps/quartz'
   - 'packages/*'
   - cypress
+  - playwright
 allowBuilds:
   '@parcel/watcher': true
   '@prisma/client': true
