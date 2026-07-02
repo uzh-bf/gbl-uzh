@@ -21,6 +21,7 @@ function PlayerCompact({ player }: { player: Player }) {
             href={`/join/${player.token}`}
             target="_blank"
             className="text-red-400"
+            data-cy="player-login-link"
           >
             Login
           </Link>

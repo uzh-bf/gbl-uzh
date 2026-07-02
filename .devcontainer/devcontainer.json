@@ -3,9 +3,7 @@
   "dockerComposeFile": ["docker-compose.yml"],
   "service": "app",
   "workspaceFolder": "/workspaces/gbl-uzh",
-  "overrideCommand": false,
   "runServices": ["app", "postgres", "oidc"],
-  "_ports": "Nothing is published on the host: the app, postgres and the OIDC sidecar are reached through devrouter over the shared `devnet` network (https://demo-game.localhost, db.demo-game.localhost:5432, etc.). Run `dev up` before bringing the container up so `devnet` exists, then register each app: `for a in app oidc db; do dev app run \"$a\"; done`. No devpod forwardPorts needed.",
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "postStartCommand": "bash .devcontainer/post-start.sh",
   "customizations": {
