@@ -227,3 +227,183 @@ Commit boundary:
 1. Commit and push CI follow-up fixes.
 2. Monitor new commit checks until pass/fail.
 3. If green, refresh PR finish notes; if red, diagnose the next failing check.
+
+## Review Remediation (2026-07-02)
+
+Source: 5-agent parallel review of branch `codex/trpc-migration-work-packages` vs `origin/dev`
+(server kernel+security, GraphQL→tRPC parity, client UX/cache, realtime, rollout/perf).
+All findings cross-checked against code before scheduling. CI green on head `edc8fc3`
+(lint, build, Vercel, SonarCloud all pass).
+
+Baseline verified before edits: clean-dist `pnpm -F @gbl-uzh/platform build` passes;
+`pnpm -F @gbl-uzh/demo-game exec tsc --noEmit` exit 0. (Local rollup failure on stale
+`dist/tsconfig.tsbuildinfo` was an incremental-cache artifact, not a code defect — CI
+builds clean because Docker starts with no `dist`.)
+
+### Context correction to the raw review
+
+- `AdminPlayerDto.token` is NOT dropped: admin UI legitimately renders `/join/${token}`
+  join links (`PlayerCompact.tsx:29`). Correct fix for the token exposure is game
+  ownership scoping so an admin only ever sees tokens for games they own — not removing
+  the field.
+- The IDOR/token exposure is inherited and STRICTLY BETTER than `origin/dev`: old
+  GraphQL `game(id)` had zero auth and returned every player token to any caller. The
+  migration already tightened to `adminProcedure`; this slice finishes the job with
+  owner scoping. Verified `ctx.user.sub === Game.ownerId` (authOptions sets
+  `session.user.sub = token.sub`; `createGame` connects `owner:{id: ctx.user.sub}`).
+- `getGames`/`getGame` are admin-only (sole callers = admin tRPC router), so scoping
+  them in the service cannot regress player flows.
+
+### Slice R1 — Admin game ownership scoping (security, fix-now)
+
+Problem: `adminProcedure` proves "is admin", never "owns this game". Any authenticated
+admin can enumerate gameIds and read/mutate another admin's game (incl. player login
+tokens via `game.byId`, and results via `results.specific` admin branch).
+
+Do:
+- `GameService.getGames`: add `where: { ownerId: ctx.user.sub }`.
+- `GameService.getGame`: `findUnique`→`findFirst`, add `ownerId: ctx.user.sub` to where.
+- New exported `assertGameOwnership(ctx, gameId)` in `trpc/init.ts` — `findFirst` by
+  `{ id, ownerId: user.sub }`, throw `NOT_FOUND` on miss (don't leak existence).
+- Call the guard at the top of every admin gameId-taking mutation:
+  `game.{activateNextPeriod,activateNextSegment,addCountdown,toggleSwitch}`,
+  `period.add`, `segment.add`.
+- `results.specific`: replace the blanket `role === ADMIN` bypass with
+  `assertGameOwnership` for the admin branch (player branch unchanged).
+
+Files: `packages/platform/src/services/GameService.ts`, `packages/platform/src/trpc/init.ts`,
+`packages/platform/src/trpc/routers/{game,period,segment,results}.ts`.
+
+Check: `pnpm -F @gbl-uzh/platform build`; `pnpm -F @gbl-uzh/demo-game exec tsc --noEmit`;
+manual reasoning that admin-A cannot read admin-B's game.
+
+### Slice R2 — Server error visibility (fix-now)
+
+Problem: `createNextApiHandler` has no `onError`; prod server exceptions are unlogged.
+
+Do: add `onError` logging `path`/`type`/full error server-side (platform `log`), gate
+verbose console on non-production. Client message stays genericized by existing
+`errorFormatter`.
+
+Files: `apps/demo-game/src/pages/api/trpc/[trpc].ts`.
+
+### Slice R3 — CI type-check gate (blocker, fix-now)
+
+Problem: no `tsc` gate in CI; `next build` has `ignoreBuildErrors:true`; zero tests.
+Broken procedure/DTO can ship green.
+
+Do: add a `pnpm run check:ts` step to `demo-game.yml` (baseline tsc already green).
+Also remove `typescript.ignoreBuildErrors` from `next.config.ts` so `next build` (and
+therefore the Docker `build` job) enforces types too — the react-markdown@8 JSX shim
+(`react-jsx-compat.d.ts`) already makes the full build type-clean, so no errors surface.
+Result: two independent type gates (fast `typecheck` job + `next build`). Test coverage
+tracked as a follow-up (see Deferred).
+
+Files: `.github/workflows/demo-game.yml`, `apps/demo-game/next.config.ts`.
+
+Verification: `pnpm -F @gbl-uzh/demo-game run build` exit 0 — `Running TypeScript /
+Finished TypeScript in 2.0s`, `Compiled successfully`, 11/11 static pages, all 13 routes
+(incl. dynamic `/api/trpc/[trpc]`, `/api/auth/[...nextauth]`). Standalone `server.js`
+emitted. (Locally the nested-worktree second `pnpm-workspace.yaml` makes Next infer the
+main-repo root and nest the standalone path — CI/Docker builds in a single `turbo prune`
+checkout with one lockfile, so the root infers correctly; the green CI `build` image
+proves this.)
+
+### Slice R4 — Realtime listener-leak canary (fix-now, 1-line)
+
+Problem: `eventBus.setMaxListeners(0)` silences Node leak detection entirely.
+
+Do: set a high finite cap so `MaxListenersExceededWarning` still fires as an early canary.
+
+Files: `packages/platform/src/lib/realtime.ts`.
+
+### Slice R5 — Client mutation error UX (focused, fix-now)
+
+Problem: ~2/3 of migrated mutations swallow failures with `console.error` — silent
+failure with no user feedback. Mostly inherited from Apollo, but call sites are already
+touched by the migration.
+
+Do (highest-impact only):
+- `join/[token].tsx`: render an error state on `loginAsTeam` failure instead of blank `null`.
+- `play/cockpit.tsx` `performAction`: `onError` toast (trading decision submit).
+- `play/welcome.tsx` `updatePlayerData`: `onError` toast.
+- `components/LearningElement.tsx` `attempt`: `onError` toast.
+- `admin/games/[id].tsx`: `onError` toast on `activateNextPeriod`/`activateNextSegment`;
+  await `mutateAsync` before closing the Add Period / Add Segment modals so a failed
+  create keeps the modal open + recoverable (currently modal closes fire-and-forget).
+
+Files: those five. Reuse each file's existing `toast(...)` pattern; no new deps.
+
+### Slice R6 — Dockerfile frozen lockfile (blocker, evaluate-then-act)
+
+Problem: prod image builds with `--no-frozen-lockfile` (self-labeled HACK) →
+non-reproducible deps.
+
+Do: test whether `turbo prune --docker` output installs under `--frozen-lockfile`
+locally. If it does, flip both Dockerfile install steps to `--frozen-lockfile`. If the
+pruned lockfile is incompatible (the original reason for the HACK), keep the HACK but
+replace the vague comment with the concrete blocker + tracking note. Do NOT flip blind
+and risk turning the green `build` check red.
+
+Files: `apps/demo-game/Dockerfile`.
+
+### Deferred (documented, not implemented this pass)
+
+- Platform package `exports` map splitting server (`trpc/*`, services, prisma) from
+  client-safe utils. No live browser leak today (demo-game uses deep subpaths only);
+  latent risk. Risky to rush without breaking existing `@gbl-uzh/platform/dist/*`
+  imports — schedule as its own slice.
+- `decision` query has no tRPC procedure. Dead client-side even on `origin/dev`. Needs a
+  product decision (reintroduce consolidation-decision read UI, or delete the dead
+  `getPlayerDecision` + cockpit render stubs). Not a runtime regression.
+- `auth.loginAsTeam` rate limiting — needs a shared limiter (infra); out of this PR.
+- `results.ts:12` DTO: verify whether `currentGame` period/segment `facts` returned to
+  players contain operator-only params (potential info leak) or the withhold comment is
+  just misleading. Needs domain confirmation.
+- `ctx as any` / `input as any` casts across routers — typed-adapter refactor; larger,
+  own slice.
+- Pre-existing, out of scope: `EventService.receiveEvent` N+1, unbounded `game.list`,
+  single-replica realtime fan-out (no Redis-backed bus), no SSE reconnect replay. All
+  identical in `origin/dev`; fine at current `replicas: 1`.
+- Automated test suite for tRPC procedures/DTOs (jest currently `--passWithNoTests`).
+  Type gates now exist (typecheck job + `next build`), but there is still no behavioral
+  coverage. Own slice.
+
+### Progress (R-slices)
+
+- 2026-07-02: Plan extended. Baseline green (platform build clean-dist, demo-game tsc
+  exit 0). Executing R1–R5 now; R6 evaluate.
+- 2026-07-02: R1–R6 implemented.
+  - R1: `assertGameOwnership(ctx, gameId)` added to `init.ts` (findFirst by
+    `{id, ownerId: user.sub}` → NOT_FOUND). `getGames`/`getGame` scoped by `ownerId` in
+    service. Guard wired into game.{activateNextPeriod,activateNextSegment,addCountdown,
+    toggleSwitch}, period.add, segment.add, results.specific(admin). Verified every admin
+    gameId path is covered; `game.byId` returns null (→no leak) for non-owners.
+  - R2: `onError` logging (winston `log.error` + dev console) in `[trpc].ts`.
+  - R3: new `typecheck` job in demo-game.yml (platform build + prisma generate + `tsc`).
+    Verified tsc passes without a committed `next-env.d.ts` (CI-safe).
+  - R4: `setMaxListeners(0)`→`1000` in realtime.ts.
+  - R5: mutation error UX — join page renders loading/error instead of blank `null`;
+    onError toasts on performAction, welcome updatePlayerData, learning attempt,
+    activateNextPeriod/Segment, add period/segment; Add Period/Segment modals now close
+    from mutation `onSuccess` (stay open + recoverable on failure).
+  - R6: verified turbo-pruned lockfile + root lockfile both install under
+    `--frozen-lockfile`; flipped both Dockerfile installs off the `--no-frozen-lockfile`
+    HACK.
+  - Verification: `pnpm -F @gbl-uzh/platform build` exit 0; demo-game `tsc --noEmit`
+    exit 0; demo-game `lint` exit 0 (14 pre-existing warnings, no new). Not committed.
+- 2026-07-02: Independent diff review (cavecrew-reviewer) — 2 findings, both fixed:
+  - join/[token].tsx: dropped `handledToken.current = null` on error (was an infinite
+    login-retry loop the old blank page hid; now `loginAsTeam.isError` shows the error
+    without refiring the same token).
+  - game.byId: added `assertGameOwnership(ctx, input.id)` so a non-owned game returns
+    NOT_FOUND (consistent with all other admin routes) instead of a null 200 that left
+    the admin detail page stuck on "loading…". Reviewer confirmed all guard placements
+    sit outside try (no 500 remap), ownerId/user.sub scoping consistent across
+    create/getGames/getGame/guard, modal-close wiring correct, `log` import server-only.
+  - Re-verified: platform build + demo-game tsc + lint all exit 0. Not committed.
+- 2026-07-02: Removed `typescript.ignoreBuildErrors` from `next.config.ts` (user
+  request). Full `pnpm -F @gbl-uzh/demo-game run build` exit 0 with TypeScript now
+  enforced (`Finished TypeScript in 2.0s`, `Compiled successfully`, 11/11 pages, all
+  routes). Type-safety hole fully closed: `typecheck` CI job + `next build` both gate.
+  Not committed.
