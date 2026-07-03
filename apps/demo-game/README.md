@@ -6,14 +6,15 @@ This is a step by step explanation on how to implement a game using the uzh-gbl-
 
 ### Authentication
 
-Admin login uses the NextAuth Auth0 provider.
+Admin login uses the NextAuth Auth0 provider in the app code.
 
-For the devcontainer/devrouter setup, no real Auth0 application is needed. The
-committed devcontainer environment points `AUTH0_ISSUER` at the local
-`mock-oauth2-server` sidecar, so admin login works through the routed local OIDC
-mock at `https://oidc.demo-game.localhost/default`.
+Local development through devcontainer/devrouter uses mocked OIDC, not real
+Auth0. The committed devcontainer environment points `AUTH0_ISSUER` at the local
+`mock-oauth2-server` sidecar, so admin login works through the routed local mock
+issuer at `https://oidc.demo-game.localhost/default`.
 
-For a manual local setup without the devcontainer:
+Only use a real Auth0 application for a manual local setup without the
+devcontainer/devrouter mock:
 
 1. Duplicate ``.env.local.template`` and rename it to ``.env.local``.
 2. Create an Auth0 application and configure:
