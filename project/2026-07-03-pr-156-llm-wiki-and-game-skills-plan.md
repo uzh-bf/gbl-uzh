@@ -29,7 +29,7 @@
   - Platform owns: DB writes, transitions, XP/level/achievement engine (EventService), learning/story elements, ready flag, countdown, pub/sub (SSE).
   - Synchronous model: one status per game, all players advance together, ready flag advisory only.
   - Frontend: per game. Player cockpit = one mega query + status switch; realtime = subscription as poke -> refetch. Admin pages: games list, game detail (state machine buttons), reports.
-  - UI pkg `@gbl-uzh/ui` v0.4.13: 12 exports (Button, Layout, Logo, NavBar, PlayerDisplay, ProbabilityChart, StorageOverview, Timeline, TimelineAdmin, TimelineEntry, TradingForm, XpBar). Achievement + SegmentEntry internal-only (used by exported components), ListItem dead (commented out). Early stage, unstable. NOT published to npm (platform IS, on v* tags) -> supported new-game path today = work inside monorepo clone/fork with workspace deps.
+  - UI pkg `@gbl-uzh/ui` v0.4.13: 12 exports (Button, Layout, Logo, NavBar, PlayerDisplay, ProbabilityChart, StorageOverview, Timeline, TimelineAdmin, TimelineEntry, TradingForm, XpBar). Achievement + SegmentEntry internal-only (used by exported components), ListItem dead (commented out). Early stage, unstable. NOT published to npm (platform IS, on v\* tags) -> supported new-game path today = work inside monorepo clone/fork with workspace deps.
   - Design system @uzh-bf/design-system 4.1.6, Tailwind v4 CSS-only config, Formik+Yup is form pattern.
   - tRPC branch `codex/trpc-migration-work-packages`: complete rewrite, `createPlatformRouter({services, schemas})` factory, RouterOutputs types, SSE subscriptions via EventEmitter, GraphQL fully removed. Not merged (1 ahead / 53 behind dev).
   - Auth: admin OIDC (Auth0 prod, mock-oauth2 in devcontainer), players passwordless via `/join/[token]` links.
@@ -96,12 +96,22 @@ Plus: AGENTS.md pointer section; root README.md link to docs/; short stale-notic
 - [x] Slice 3 wiki dev guide (74c2c455) — fact-check DONE: no criticals; fixed script names (check/check:ts, no typecheck), PlayerDisplay flat props, Timeline vs TimelineEntry props, SegmentEntry rendered by TimelineAdmin, tRPC router order, spelled out event enums. Simplify: 3 accepted edits (ui table statuses, gaps trailing sentence, GraphQL idiom).
 - [x] Slice 4 skills (1ae28a4d) — review subagent DONE_WITH_CONCERNS: fixed Critical data-testid claim (Button emits data-cy/data-test; playwright testIdAttribute=data-cy), pnpm --filter form, isDirty TODO caveat, FormikMultiSelectField path. Links + frontmatter verified.
 - [x] Slice 5 pointers + finish (3b6ba7b4 + final commit) — security review subagent: CLEAN all 4 categories (no secrets/PII; loginAsTeam rate-limit gap judged non-amplifying, code public). Final branch review (codex, independent): DONE_WITH_CONCERNS, no criticals; accepted: plan Progress refresh, README Node 18+ -> 24+, "two key components" -> list wording. Spot-checks passed.
+- [x] Slice 6 OKF adoption (2098f224) — review subagent verified clause-by-clause against fetched spec: conformant, zero body-content loss on conversion; embedded checker proven to flag injected broken links.
+- [x] Slice 7 generic/repo skill split (this commit) — external skill fabricioctelles/skills:okf-open-knowledge-format reviewed; generic `llm-wiki-okf` skill created at user level (outside repo); `gbl-wiki-maintenance` rewritten as repo-specific extension. Evidence: global validate.sh passes on docs/ (9 files conformant, exit 0) and fails correctly on synthetic bad bundle (E1/E2/E3/W2, exit 3).
 
 ## Slice 6 (added 2026-07-03, user request)
 
 - Goal: wiki adopts Open Knowledge Format (OKF v0.1, Google Cloud spec, github.com/GoogleCloudPlatform/knowledge-catalog) + new `gbl-wiki-maintenance` skill documenting the format and the update workflow.
 - Done: concepts renamed to stable kebab-case names (numbered prefixes dropped; reading order lives in index), frontmatter (type/title/description/tags/timestamp) on all 7 concepts, `index.md` (okf_version 0.1, grouped bullet index) replaces README.md, `log.md` added, all inbound links rewritten (4 skills, AGENTS.md, README.md, demo-game README). House deviation documented in skill: relative links instead of bundle-absolute `/` links (GitHub rendering).
 - Verify: prettier, OKF conformance + link check script (embedded in skill), review subagent.
+
+## Slice 7 (added 2026-07-03, user request)
+
+- Goal: review external skill skills.sh/fabricioctelles/okf-open-knowledge-format; split generic OKF knowledge out of `gbl-wiki-maintenance` into a globally installed generic skill; keep the repo skill as the repo-specific extension.
+- External review verdict: incorporated frontmatter quick-reference (incl. `resource`), terminology, body-heading conventions (# Schema/# Examples/# Citations), create/enrich/convert workflows, guardrails, E/W validation taxonomy, adapted validate.sh (portability fix + broken-link warnings), spec/conversion/examples references. Skipped: Google Cloud Knowledge Catalog/kcmd enterprise section, Portuguese install-prompt flow, output-format presentation rules. okflint existence verified (GitHub 200, PyPI 200) — mentioned as optional.
+- Repo change (in this PR): `gbl-wiki-maintenance` format section rewritten — points to generic skill/spec for fundamentals, keeps only house rules (stable names, always-set frontmatter fields, relative-links deviation, path:Symbol, reserved files, broken-links-as-errors tightening); trigger map/workflow/validation unchanged.
+- Outside repo (not in PR): `~/.claude/skills/llm-wiki-okf/` — SKILL.md + references (spec-v01, conversion, examples incl. codebase-wiki example) + scripts/validate.sh (Apache-2.0 attribution to fabricioctelles/skills).
+- Verify: prettier on changed skill, OKF checker still green, review subagent on diff.
 
 ## Next Steps (post-merge candidates)
 

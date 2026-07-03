@@ -1,6 +1,6 @@
 ---
 name: gbl-wiki-maintenance
-description: Keep the GBL platform wiki (docs/) accurate and conformant with the Open Knowledge Format - when to update it, how to fact-check against code, frontmatter/index/log conventions, and validation. Use whenever a change touches packages/platform, packages/ui, apps/demo-game behavior, or when doc-code drift is noticed.
+description: Keep the GBL platform wiki (docs/) accurate and conformant with the Open Knowledge Format - the repo-specific extension of generic OKF/LLM-wiki practice - when to update it, how to fact-check against code, house conventions, and validation. Use whenever a change touches packages/platform, packages/ui, apps/demo-game behavior, or when doc-code drift is noticed.
 ---
 
 # GBL Wiki Maintenance
@@ -15,16 +15,16 @@ The wiki in `docs/` is the ground truth AI agents use to build games on this pla
 - **tRPC migration merges to `dev`** (standing item): rewrite [api-layer](../../../docs/api-layer.md) — GraphQL section deleted, tRPC becomes current; also update `gbl-new-game-app` + `gbl-frontend-game-ui` skills and the `generateBaseMutations` reference in [developing-a-game](../../../docs/developing-a-game.md)
 - Wiki also has documented caveats that expire: `COMPLETED` unreachable, `GameFacts.update` unwired, `@gbl-uzh/ui` unpublished/placeholder `Button`, demo game as sole reference. If a change invalidates one, remove it everywhere (grep the claim).
 
-## Format: Open Knowledge Format (OKF) v0.1
+## Format: OKF v0.1, with house rules
 
-The wiki is an OKF bundle ([spec](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)) — a directory of markdown concepts readable by any agent, no tooling required. House rules as adopted here:
+The wiki is an [Open Knowledge Format (OKF) v0.1](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) bundle. For format fundamentals (terminology, frontmatter semantics, reserved files, creating and converting bundles, guardrails), use a generic OKF/LLM-wiki skill if you have one installed (e.g. `llm-wiki-okf`); otherwise the spec covers them. This skill pins down only what is repo-specific:
 
-- **One concept per file**; the file path is the concept's identity. Names are stable kebab-case nouns (`game-model.md`), no numbering — reading order lives in the index.
-- **Frontmatter** on every concept (YAML between `---`): required `type` (short kind string, e.g. `Data Model`, `State Machine`, `Development Guide`); we also always set `title`, `description` (one sentence), `tags` (list), `timestamp` (ISO 8601). Unknown extra keys are allowed; never remove ones you don't recognize.
-- **Reserved files** — never concepts: `docs/index.md` (grouped bullet index, `* [Title](url) - description`; only file allowed frontmatter-wise to carry just `okf_version: '0.1'`) and `docs/log.md` (change log, newest-first `## YYYY-MM-DD` sections with `**Update**`/`**Creation**` entries).
-- **Links** are ordinary markdown links = untyped relationship edges; the surrounding prose carries the meaning. House deviation from the spec's recommendation: we use _relative_ links (not bundle-absolute `/...`) so GitHub rendering works; keep it consistent.
+- **Stable names**: one concept per file; the path is the concept's identity. Kebab-case nouns (`game-model.md`), no numeric prefixes — reading order lives in `docs/index.md`.
+- **Frontmatter**: required `type` (short kind string, e.g. `Data Model`, `State Machine`, `Development Guide`); we also always set `title`, `description` (one sentence, reused by the index), `tags` (list), `timestamp` (ISO 8601). Preserve keys you don't recognize.
+- **Links**: house deviation from the spec's bundle-absolute preference — use _relative_ links so GitHub rendering works; keep it consistent.
 - **Code references** as `path:Symbol` (file plus exported function/type), not line numbers — they survive drift.
-- Conformance = every non-reserved `.md` in `docs/` parses frontmatter with non-empty `type`. Consumers must stay permissive (tolerate unknown types, broken links) — but we still fix broken links, see validation.
+- **Reserved files**: `docs/index.md` (grouped bullets `* [Title](url) - description`; the only file carrying frontmatter limited to `okf_version: '0.1'`) and `docs/log.md` (newest-first `## YYYY-MM-DD` sections with `**Update**`/`**Creation**` entries).
+- **Stricter than spec**: OKF permits broken links (not-yet-written knowledge); here they are validation errors, because agents follow wiki links blindly.
 
 ## Update workflow
 
