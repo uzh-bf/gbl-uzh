@@ -4,16 +4,27 @@ This is a step by step explanation on how to implement a game using the uzh-gbl-
 
 ## Getting started
 
-### Github authentification:
+### Authentication
 
-1. Duplicate ``.env.local.template`` and rename it to ``.env.local``
-2. On github navigate to settings -> developer settings -> Github Apps -> New Github app. Then use the following settings:
-    - Homepage URL: http://localhost:3000/
-    - Callback URL: http://localhost:3000/api/auth/callback/github
-    - Disable webhooks
-3. Then in your app settings copy the Client ID key which looks somethings like  Iv1.1234... and paste it to .env.local after GITHUB_ID=
-4. Click generate a new client secret and paste it to GITHUB_SECRET=
-5. Generate a new cryptographically safe string and paste it to NEXTAUTH_SECRET= (You can use any string you want but it is recommended to use a cryptographically safe string)
+Admin login uses the NextAuth Auth0 provider.
+
+For the devcontainer/devrouter setup, no real Auth0 application is needed. The
+committed devcontainer environment points `AUTH0_ISSUER` at the local
+`mock-oauth2-server` sidecar, so admin login works through the routed local OIDC
+mock at `https://oidc.demo-game.localhost/default`.
+
+For a manual local setup without the devcontainer:
+
+1. Duplicate ``.env.local.template`` and rename it to ``.env.local``.
+2. Create an Auth0 application and configure:
+    - Application login URL: http://localhost:3000/admin/login
+    - Allowed callback URL: http://localhost:3000/api/auth/callback/auth0
+    - Allowed logout URL: http://localhost:3000/
+3. Copy the Auth0 client ID to `AUTH0_CLIENT_ID=`.
+4. Copy the Auth0 client secret to `AUTH0_CLIENT_SECRET=`.
+5. Copy the Auth0 issuer URL to `AUTH0_ISSUER=`.
+6. Generate a cryptographically safe string and paste it to `NEXTAUTH_SECRET=`
+   (for example with `openssl rand -base64 32`).
 
 
 ### Dependencies
