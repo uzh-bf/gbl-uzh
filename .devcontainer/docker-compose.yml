@@ -45,15 +45,8 @@ services:
     # with zero host-port collisions). The OIDC mock shares this container's netns,
     # so devrouter reaches it as `${WORKSPACE:-demo-game}-app:8090`.
     #
-    # OIDC server-side reachability: the app validates the token issuer against
-    # AUTH0_ISSUER and fetches discovery/
-    # token/jwks from it server-side. So that host must resolve + be reachable from
-    # INSIDE this container too — map it to the host gateway (where Traefik listens
-    # on :443). The server-side HTTPS fetch trusts the local mkcert CA, mounted
-    # read-only and pointed to by NODE_EXTRA_CA_CERTS (devcontainer.env). Browser +
-    # server thus use the SAME issuer host over verified TLS → consistent `iss`.
-    extra_hosts:
-      - 'oidc.demo-game.localhost:host-gateway'
+    # post-start.sh maps the active OIDC issuer host to devrouter's Traefik
+    # address on devnet so browser + server use the same issuer URL.
     networks:
       default: {}
       devnet:

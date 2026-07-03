@@ -16,12 +16,30 @@ fi
 
 if [ "${WORKSPACE:-demo-game}" = "demo-game" ]; then
   app_host="demo-game.localhost"
+  oidc_host="oidc.demo-game.localhost"
 else
   app_host="demo-game.${WORKSPACE}.localhost"
+  oidc_host="oidc.demo-game.${WORKSPACE}.localhost"
 fi
 export NEXTAUTH_URL="https://${app_host}"
 export NEXT_PUBLIC_APP_URL="https://${app_host}"
-export NEXT_PUBLIC_API_URL="https://${app_host}/api/graphql"
+export NEXT_PUBLIC_API_URL="https://${app_host}/api/trpc"
+export AUTH0_ISSUER="https://${oidc_host}/default"
+
+# Node honors /etc/hosts for .localhost names; map the active OIDC issuer to
+# Traefik on devnet so server-side discovery/token/jwks requests match browser
+# URLs. Docker's host-gateway is not reliable under the DevPod Docker provider.
+traefik_ip="$(getent hosts devrouter-traefik | awk 'NR == 1 { print $1 }')"
+if [ -n "$traefik_ip" ]; then
+  hosts_tmp="$(mktemp)"
+  grep -v -E '[[:space:]]oidc\.demo-game(\.[^[:space:]]+)?\.localhost$' /etc/hosts >"$hosts_tmp" || true
+  cat "$hosts_tmp" >/etc/hosts
+  printf '%s\t%s\n' "$traefik_ip" 'oidc.demo-game.localhost' >>/etc/hosts
+  if [ "$oidc_host" != "oidc.demo-game.localhost" ]; then
+    printf '%s\t%s\n' "$traefik_ip" "$oidc_host" >>/etc/hosts
+  fi
+  rm -f "$hosts_tmp"
+fi
 
 # No-TTY pnpm hardening (see post-create.sh): keep the dev server from aborting on
 # a node_modules purge or hanging on an implicit verify-deps install. post-create
