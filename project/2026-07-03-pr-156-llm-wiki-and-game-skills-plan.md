@@ -2,9 +2,9 @@
 
 ## Identity
 
-- Plan: `project/2026-07-03-llm-wiki-and-game-skills-plan.md`
+- Plan: `project/2026-07-03-pr-156-llm-wiki-and-game-skills-plan.md`
 - Branch: `claude/wonderful-dewdney-b7b7c6` -> target `dev`
-- PR: none yet (rename plan when known)
+- PR: https://github.com/uzh-bf/gbl-uzh/pull/156 (draft)
 
 ## Goal
 
