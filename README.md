@@ -10,7 +10,7 @@ For more details on our future plans, have a look at our [Roadmap](https://www.g
 
 ## Project Components
 
-The `gbl-uzh` project consists of two key components:
+The `gbl-uzh` project consists of the following key components:
 
 - The `GBL Website` (located in the `apps/website` directory), a Next.js web application that summarizes all of the outputs of our project on a single site. The `GBL Website` is hosted publicly on <https://www.gbl.uzh.ch>.
 - The `GBL Knowledge Base` (located in the `kb` directory as a Git submodule), an [Obsidian](https://obsidian.md/) knowledge graph that contains the knowledge on gamification and game-based learning that we gather and curate throughout this and other projects. The knowledge base also serves as a Content Management System (CMS) for the `GBL Website`. The `GBL Knowledge Base` is publicly accessible on <https://www.gbl.uzh.ch/kb>.
@@ -20,7 +20,7 @@ The `gbl-uzh` project consists of two key components:
 ## Requirements
 
 - Docker / Podman
-- Node.js 18+ / PNPM
+- Node.js 24+ / PNPM
 
 ## Contributing
 

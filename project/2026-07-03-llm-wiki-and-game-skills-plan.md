@@ -94,8 +94,8 @@ Plus: AGENTS.md pointer section; root README.md link to docs/; short stale-notic
 - [x] Slice 1 plan commit (d789a3f3)
 - [x] Slice 2 wiki concepts (bc9cd7ce) — fact-check subagent DONE_WITH_CONCERNS: all 13 load-bearing claims verified, 3 precision fixes applied (Game.version scope, LEVEL_UP condition, isReady SCHEDULED edge). Simplify subagent: accepted README section merge, glossary Decision row fix, walkthrough compression, 04 filler cuts; deferred coordination-mechanics reorder + 04 ASCII loop removal (self-contained pages for LLM readers).
 - [x] Slice 3 wiki dev guide (74c2c455) — fact-check DONE: no criticals; fixed script names (check/check:ts, no typecheck), PlayerDisplay flat props, Timeline vs TimelineEntry props, SegmentEntry rendered by TimelineAdmin, tRPC router order, spelled out event enums. Simplify: 3 accepted edits (ui table statuses, gaps trailing sentence, GraphQL idiom).
-- [ ] Slice 4 skills (written; review subagent running)
-- [ ] Slice 5 pointers + finish (README/AGENTS.md/demo-game README edits staged uncommitted; security review + final branch review + PR pending)
+- [x] Slice 4 skills (1ae28a4d) — review subagent DONE_WITH_CONCERNS: fixed Critical data-testid claim (Button emits data-cy/data-test; playwright testIdAttribute=data-cy), pnpm --filter form, isDirty TODO caveat, FormikMultiSelectField path. Links + frontmatter verified.
+- [x] Slice 5 pointers + finish (3b6ba7b4 + final commit) — security review subagent: CLEAN all 4 categories (no secrets/PII; loginAsTeam rate-limit gap judged non-amplifying, code public). Final branch review (codex, independent): DONE_WITH_CONCERNS, no criticals; accepted: plan Progress refresh, README Node 18+ -> 24+, "two key components" -> list wording. Spot-checks passed.
 
 ## Next Steps (post-merge candidates)
 
