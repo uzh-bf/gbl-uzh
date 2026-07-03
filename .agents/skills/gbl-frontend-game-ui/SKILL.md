@@ -5,7 +5,7 @@ description: Build the frontend of a GBL platform game - player cockpit with sta
 
 # GBL Frontend Game UI
 
-Each game builds its own Next.js frontend (Pages Router in the reference game); the platform provides no pages. Reference: `apps/demo-game/src/pages/`. Concepts: [docs/05-developing-a-game.md](../../../docs/05-developing-a-game.md) (routes + cockpit pattern), [docs/06-ui-components.md](../../../docs/06-ui-components.md) (component sources), [docs/03-game-lifecycle.md](../../../docs/03-game-lifecycle.md) (which view per status).
+Each game builds its own Next.js frontend (Pages Router in the reference game); the platform provides no pages. Reference: `apps/demo-game/src/pages/`. Concepts: [docs/developing-a-game.md](../../../docs/developing-a-game.md) (routes + cockpit pattern), [docs/ui-components.md](../../../docs/ui-components.md) (component sources), [docs/game-lifecycle.md](../../../docs/game-lifecycle.md) (which view per status).
 
 ## Route checklist
 
@@ -18,7 +18,7 @@ One page, four layers — keep this shape:
 1. **One aggregate query** for everything the player sees (result + game + active period/segment + content + self).
 2. **Realtime = poke, then refetch.** Subscribe to global events; on `PERIOD_ACTIVATED` / `SEGMENT_ACTIVATED` / `COUNTDOWN_UPDATED` (filtered by your game id) refetch/invalidate the aggregate query. Never render data out of the event payload.
 3. **Shared chrome** in a `GameLayout` wrapper: nav + player display + Ready toggle + countdown widget + learning-element sidebar + blocking story-element popups.
-4. **Body = `switch (game.status)`**: `RUNNING` → decision form; `PAUSED`/`CONSOLIDATION` → read-only segment results; `RESULTS` → period report; other statuses → placeholders. Full per-status expectations: [docs/03-game-lifecycle.md](../../../docs/03-game-lifecycle.md).
+4. **Body = `switch (game.status)`**: `RUNNING` → decision form; `PAUSED`/`CONSOLIDATION` → read-only segment results; `RESULTS` → period report; other statuses → placeholders. Full per-status expectations: [docs/game-lifecycle.md](../../../docs/game-lifecycle.md).
 
 The decision form validates with a yup schema mirroring the constraints your `Actions.apply` reducer enforces server-side, and submits via the perform-action mutation.
 
@@ -32,13 +32,13 @@ The decision form validates with a yup schema mirroring the constraints your `Ac
 Priority order:
 
 1. **`@uzh-bf/design-system`** (v4): `Card` family, `Button`, `Modal`, `Switch`, `Progress`, `ShadcnTable*` (alias to `Table`...), `ChartContainer`, and the Formik fields (`FormikTextField`, `FormikNumberField`, `FormikSelectField`). Form pattern is **Formik + yup** — do not introduce react-hook-form.
-2. **`@gbl-uzh/ui`**: `Layout`, `NavBar`, `Logo`, `PlayerDisplay`, `XpBar`, `Timeline` — see the [inventory with statuses](../../../docs/06-ui-components.md) first; its `Button` is a placeholder (use the design system's) and `TimelineAdmin` is a stub.
+2. **`@gbl-uzh/ui`**: `Layout`, `NavBar`, `Logo`, `PlayerDisplay`, `XpBar`, `Timeline` — see the [inventory with statuses](../../../docs/ui-components.md) first; its `Button` is a placeholder (use the design system's) and `TimelineAdmin` is a stub.
 3. **Copy from `apps/demo-game/src/components/`** when neither has it: `StoryElements`, `LearningElements`, `CycleCountDown`, `MultiSelect` (and `FormikMultiSelectField` in `components/fields/`), local shadcn-style primitives in `components/ui/`.
 4. **recharts** directly for game charts.
 
 ## Styling setup
 
-Tailwind v4, CSS-only config. Copy `apps/demo-game/src/globals.css` + `postcss.config.js` and keep its gotchas intact (relative `node_modules` import of the design-system CSS, no own preflight, `.aspect-video` patch, `--theme-color-*` custom properties). Details: [docs/06-ui-components.md](../../../docs/06-ui-components.md).
+Tailwind v4, CSS-only config. Copy `apps/demo-game/src/globals.css` + `postcss.config.js` and keep its gotchas intact (relative `node_modules` import of the design-system CSS, no own preflight, `.aspect-video` patch, `--theme-color-*` custom properties). Details: [docs/ui-components.md](../../../docs/ui-components.md).
 
 ## Conventions + verify
 

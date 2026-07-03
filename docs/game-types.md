@@ -1,3 +1,14 @@
+---
+type: Design Guide
+title: What Kinds of Games Work Here
+description: Which game shapes fit the synchronous round-based engine, which do not, and a fit checklist for new ideas.
+tags:
+  - game-design
+  - fit
+  - patterns
+timestamp: "2026-07-03T00:00:00Z"
+---
+
 # What Kinds of Games Work Here
 
 The platform is an engine for **synchronous, round-based, facilitator-led games with computed feedback between rounds**. If a game idea can be expressed as "teams make decisions each round, something is computed, everyone looks at the results together, repeat", it fits. If it needs per-player pacing, real-time interaction, or branching level structure, it does not — see the anti-list below.
@@ -47,4 +58,4 @@ Work through these before designing (the `gbl-game-design` skill automates this)
 6. Which parts are narrative/quiz content (seedable, no code) vs. computation (game code)?
 7. Does anything require per-player pacing, real-time interaction, or branching? If yes, redesign or pick a different engine.
 
-Then continue with [05-developing-a-game.md](05-developing-a-game.md).
+Then continue with [developing-a-game.md](developing-a-game.md).

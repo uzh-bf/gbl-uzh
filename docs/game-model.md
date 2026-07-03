@@ -1,3 +1,14 @@
+---
+type: Data Model
+title: Game Model
+description: Entities and facts: games, periods, segments, players, results ledger, decisions, gamification, and learning content.
+tags:
+  - prisma
+  - data-model
+  - facts
+timestamp: '2026-07-03T00:00:00Z'
+---
+
 # Game Model (Data Model)
 
 Source of truth: `packages/platform/public/schema.prisma`. Game apps do not write their own copy — a build step (`apps/demo-game/prisma/copy.ts`) copies the published platform schema into the app as `prisma/schema/platform.prisma`, next to a game-specific `specific.prisma` extension file (currently an unused stub in the demo game).
@@ -11,7 +22,7 @@ Game (status, facts, activePeriodIx/activePeriodId, version, owner)
 ```
 
 - **Ordering** is by an `index` int per level (`@@unique([gameId, index])` for periods; unique per game+period+index for segments) plus explicit linked-list pointers (`previousPeriod`/`nextPeriodId`, `previousSegment`/`nextSegmentId`).
-- **Progress pointers**: `Game.activePeriodId` + `Game.activePeriodIx` (default `-1` = none yet) and `Period.activeSegmentId` + `Period.activeSegmentIx`. These are advanced only by the state-machine transitions in `GameService` ([03-game-lifecycle.md](03-game-lifecycle.md)), never derived.
+- **Progress pointers**: `Game.activePeriodId` + `Game.activePeriodIx` (default `-1` = none yet) and `Period.activeSegmentId` + `Period.activeSegmentIx`. These are advanced only by the state-machine transitions in `GameService` ([game-lifecycle.md](game-lifecycle.md)), never derived.
 - `Period.segmentCount` is the _planned_ number of segments, set when the period is created; the admin UI blocks adding more segments once reached, and "last segment" checks compare `activeSegmentIx` against it.
 - `PeriodSegment.countdownExpiresAt` / `countdownDurationMs` back the optional per-segment countdown timer.
 - `Game.version` increments on admin-driven game updates (status transitions, countdown, switch toggle) — not on player actions. Do not use it as an optimistic-concurrency token for player input.

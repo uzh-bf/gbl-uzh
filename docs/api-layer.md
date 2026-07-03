@@ -1,3 +1,15 @@
+---
+type: API Overview
+title: API Layer and Realtime
+description: Transport-independent API semantics, the current GraphQL layer, and the upcoming tRPC architecture with realtime events.
+tags:
+  - api
+  - graphql
+  - trpc
+  - realtime
+timestamp: "2026-07-03T00:00:00Z"
+---
+
 # API Layer and Realtime
 
 The platform owns the entire client↔server transport; a game app only plugs its `services` object and facts schemas into a platform-provided builder and hosts one API route. **The transport is being replaced**: today (branch `dev`) it is GraphQL; a completed tRPC rewrite exists on the branch `codex/trpc-migration-work-packages` and is intended to replace GraphQL entirely.

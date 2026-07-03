@@ -1,6 +1,18 @@
+---
+type: Development Guide
+title: Developing a Game
+description: How to build a game: scaffolding by copying the demo game, the six-module Services contract, frontend routes, and verification.
+tags:
+  - services
+  - backend
+  - frontend
+  - scaffolding
+timestamp: '2026-07-03T00:00:00Z'
+---
+
 # Developing a Game
 
-How to build a new game on the platform. Read [02-game-model.md](02-game-model.md) and [03-game-lifecycle.md](03-game-lifecycle.md) first — this page assumes their vocabulary. Related skills: `gbl-new-game-app` (scaffolding), `gbl-backend-computations` (backend), `gbl-frontend-game-ui` (frontend).
+How to build a new game on the platform. Read [game-model.md](game-model.md) and [game-lifecycle.md](game-lifecycle.md) first — this page assumes their vocabulary. Related skills: `gbl-new-game-app` (scaffolding), `gbl-backend-computations` (backend), `gbl-frontend-game-ui` (frontend).
 
 ## Scaffolding a new game app
 
@@ -28,7 +40,7 @@ export * as SegmentResult from "./SegmentResultService";
 
 Each hook is a mostly-pure function `(facts, payload) => OutputFacts` — it receives the current facts plus a payload the platform assembled from the DB, and returns new facts (plus optional side-channel outputs). The platform owns all persistence and transactions around it.
 
-| Module          | Hooks                        | Called when ([lifecycle](03-game-lifecycle.md))              | Typical job                                                                                        |
+| Module          | Hooks                        | Called when ([lifecycle](game-lifecycle.md))                 | Typical job                                                                                        |
 | --------------- | ---------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
 | `Period`        | `initialize`, `consolidate`  | Admin adds a period; period is consolidated                  | Derive period facts from admin input; roll up period facts at the end                              |
 | `Segment`       | `initialize`                 | Admin adds a segment                                         | Precompute the segment's environment (randomness, events) — at authoring time, not activation      |
@@ -55,11 +67,11 @@ Define TypeScript types + yup schemas for `GameFacts`, `PeriodFacts`, `PeriodSeg
 
 ### Wiring it together
 
-The `services` object, yup schemas, and facts input types are passed into the platform's API builder, which exposes all queries/mutations/subscriptions. What that builder looks like depends on the transport — GraphQL today, tRPC after the migration. See [07-api-layer.md](07-api-layer.md); reference: `apps/demo-game/src/graphql/index.ts` (`generateBaseMutations({ services, schemas, inputTypes })`).
+The `services` object, yup schemas, and facts input types are passed into the platform's API builder, which exposes all queries/mutations/subscriptions. What that builder looks like depends on the transport — GraphQL today, tRPC after the migration. See [api-layer.md](api-layer.md); reference: `apps/demo-game/src/graphql/index.ts` (`generateBaseMutations({ services, schemas, inputTypes })`).
 
 ## Frontend: built per game
 
-There is no generic frontend — each game builds its own Next.js pages (Pages Router in the reference game), reusing components from [`@gbl-uzh/ui` and the design system](06-ui-components.md). The demo game's route set is the template:
+There is no generic frontend — each game builds its own Next.js pages (Pages Router in the reference game), reusing components from [`@gbl-uzh/ui` and the design system](ui-components.md). The demo game's route set is the template:
 
 | Route                 | Purpose                                                                                                                                             |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -76,7 +88,7 @@ The cockpit pattern (from `apps/demo-game/src/pages/play/cockpit.tsx`):
 1. A `GameLayout` wrapper fetches **one aggregate query** (player result + previous results + current game with active period/segment + attached content + self).
 2. It subscribes to global events and, on `PERIOD_ACTIVATED` / `SEGMENT_ACTIVATED` / `COUNTDOWN_UPDATED`, **refetches that query** — events are a poke, never a data source.
 3. The layout renders the shared chrome: nav, player display, Ready toggle, countdown widget, learning-element sidebar, blocking story-element popups.
-4. The page body is a `switch (game.status)`: decision form under `RUNNING`, read-only results under `PAUSED`/`CONSOLIDATION`, period report under `RESULTS`, placeholders otherwise ([03-game-lifecycle.md](03-game-lifecycle.md) lists the expected view per status).
+4. The page body is a `switch (game.status)`: decision form under `RUNNING`, read-only results under `PAUSED`/`CONSOLIDATION`, period report under `RESULTS`, placeholders otherwise ([game-lifecycle.md](game-lifecycle.md) lists the expected view per status).
 
 Your game-specific work is almost entirely: the decision form (validate with yup: same constraints as your `Actions.apply`), the results/report visualizations (the demo game uses recharts), and the admin authoring forms for your period/segment facts.
 

@@ -5,7 +5,7 @@ description: Implement the backend of a GBL platform game - the six-module Servi
 
 # GBL Backend Computations
 
-A game's backend is one `Services` object with six modules of mostly-pure functions; the platform calls them at fixed lifecycle points and owns all persistence. Contract: `packages/platform/src/types.ts:Services`. Reference: `apps/demo-game/src/services/`. Concepts: [docs/05-developing-a-game.md](../../../docs/05-developing-a-game.md), lifecycle timing: [docs/03-game-lifecycle.md](../../../docs/03-game-lifecycle.md).
+A game's backend is one `Services` object with six modules of mostly-pure functions; the platform calls them at fixed lifecycle points and owns all persistence. Contract: `packages/platform/src/types.ts:Services`. Reference: `apps/demo-game/src/services/`. Concepts: [docs/developing-a-game.md](../../../docs/developing-a-game.md), lifecycle timing: [docs/game-lifecycle.md](../../../docs/game-lifecycle.md).
 
 ## Module cheat sheet
 
@@ -42,5 +42,5 @@ Define types and yup schemas for `GameFacts`, `PeriodFacts`, `PeriodSegmentFacts
 ## Verify
 
 1. `pnpm --filter @gbl-uzh/<game> run check` — keep the package's lint + `check:ts` green.
-2. Run the app locally and click through one full period as admin + one player ([docs/05-developing-a-game.md](../../../docs/05-developing-a-game.md) → local dev). Check computed numbers at each `SEGMENT_END` / `PERIOD_END` against a hand calculation.
+2. Run the app locally and click through one full period as admin + one player ([docs/developing-a-game.md](../../../docs/developing-a-game.md) → local dev). Check computed numbers at each `SEGMENT_END` / `PERIOD_END` against a hand calculation.
 3. Adapt `playwright/tests/demo-game-flow.spec.ts` for automated lifecycle coverage.

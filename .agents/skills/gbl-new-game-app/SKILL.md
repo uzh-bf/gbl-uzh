@@ -5,7 +5,7 @@ description: Scaffold a new GBL platform game app inside this monorepo by copyin
 
 # GBL New Game App
 
-There is no generator; a new game starts as a copy of the reference game inside a clone/fork of this monorepo (the packages are not consumable standalone — `@gbl-uzh/ui` is unpublished). Background: [docs/01-platform-overview.md](../../../docs/01-platform-overview.md), [docs/05-developing-a-game.md](../../../docs/05-developing-a-game.md).
+There is no generator; a new game starts as a copy of the reference game inside a clone/fork of this monorepo (the packages are not consumable standalone — `@gbl-uzh/ui` is unpublished). Background: [docs/platform-overview.md](../../../docs/platform-overview.md), [docs/developing-a-game.md](../../../docs/developing-a-game.md).
 
 Design the game FIRST (`gbl-game-design` skill) — the scaffold asks for your facts shapes immediately.
 
@@ -34,7 +34,7 @@ First-run verification (do this before writing any new feature):
 
 1. Sign in at `/admin/login`, create a game with 2 players.
 2. Add one period + one segment; open a player join link from the game detail page in a second browser context.
-3. Drive one full loop: Start Period → Next Segment → submit a player decision → Segment Results → Consolidate → Period Results ([docs/03-game-lifecycle.md](../../../docs/03-game-lifecycle.md)).
+3. Drive one full loop: Start Period → Next Segment → submit a player decision → Segment Results → Consolidate → Period Results ([docs/game-lifecycle.md](../../../docs/game-lifecycle.md)).
 4. Confirm the player screen updates on each admin transition without manual reload (realtime works).
 
 ## Pitfalls
@@ -42,4 +42,4 @@ First-run verification (do this before writing any new feature):
 - Do not edit `platform.prisma`; schema changes for your game go in `specific.prisma`, platform-level changes go in `packages/platform/public/schema.prisma` (affects every game).
 - Do not add a second React or pin different versions of shared deps — check `pnpm-workspace.yaml` overrides before touching dependency versions.
 - Keep the demo game intact as the working reference; never repurpose it in place.
-- The copied `src/graphql/` (or `src/server/trpc/` after the migration — see [docs/07-api-layer.md](../../../docs/07-api-layer.md)) is wiring, not game logic: adjust the injected `services`/schemas, don't rewrite the transport.
+- The copied `src/graphql/` (or `src/server/trpc/` after the migration — see [docs/api-layer.md](../../../docs/api-layer.md)) is wiring, not game logic: adjust the injected `services`/schemas, don't rewrite the transport.

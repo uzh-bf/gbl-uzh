@@ -97,6 +97,12 @@ Plus: AGENTS.md pointer section; root README.md link to docs/; short stale-notic
 - [x] Slice 4 skills (1ae28a4d) — review subagent DONE_WITH_CONCERNS: fixed Critical data-testid claim (Button emits data-cy/data-test; playwright testIdAttribute=data-cy), pnpm --filter form, isDirty TODO caveat, FormikMultiSelectField path. Links + frontmatter verified.
 - [x] Slice 5 pointers + finish (3b6ba7b4 + final commit) — security review subagent: CLEAN all 4 categories (no secrets/PII; loginAsTeam rate-limit gap judged non-amplifying, code public). Final branch review (codex, independent): DONE_WITH_CONCERNS, no criticals; accepted: plan Progress refresh, README Node 18+ -> 24+, "two key components" -> list wording. Spot-checks passed.
 
+## Slice 6 (added 2026-07-03, user request)
+
+- Goal: wiki adopts Open Knowledge Format (OKF v0.1, Google Cloud spec, github.com/GoogleCloudPlatform/knowledge-catalog) + new `gbl-wiki-maintenance` skill documenting the format and the update workflow.
+- Done: concepts renamed to stable kebab-case names (numbered prefixes dropped; reading order lives in index), frontmatter (type/title/description/tags/timestamp) on all 7 concepts, `index.md` (okf_version 0.1, grouped bullet index) replaces README.md, `log.md` added, all inbound links rewritten (4 skills, AGENTS.md, README.md, demo-game README). House deviation documented in skill: relative links instead of bundle-absolute `/` links (GitHub rendering).
+- Verify: prettier, OKF conformance + link check script (embedded in skill), review subagent.
+
 ## Next Steps (post-merge candidates)
 
 - Publish @gbl-uzh/ui or mark internal; fill ui gaps list.

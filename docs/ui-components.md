@@ -1,3 +1,15 @@
+---
+type: Component Inventory
+title: UI Building Blocks
+description: Reusable UI for game frontends: @gbl-uzh/ui inventory, @uzh-bf/design-system usage, Tailwind v4 wiring, and known gaps.
+tags:
+  - ui
+  - design-system
+  - tailwind
+  - components
+timestamp: '2026-07-03T00:00:00Z'
+---
+
 # UI Building Blocks
 
 Two component sources for game frontends: the game-specific library `@gbl-uzh/ui` (`packages/ui`) and the general-purpose UZH design system `@uzh-bf/design-system` (external npm package). Games also use plain [recharts](https://recharts.org) for charts and Formik + yup for forms.

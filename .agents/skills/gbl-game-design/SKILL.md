@@ -5,7 +5,7 @@ description: Design a learning game for the GBL platform - check platform fit, m
 
 # GBL Game Design
 
-Turn a game idea into a design that maps cleanly onto the platform's engine. Ground truth: [docs/04-game-types.md](../../../docs/04-game-types.md) (what fits) and [docs/02-game-model.md](../../../docs/02-game-model.md) (vocabulary). Do not skip the fit check — ideas that need per-player pacing, real-time interaction, or branching structure cannot be built on this engine.
+Turn a game idea into a design that maps cleanly onto the platform's engine. Ground truth: [docs/game-types.md](../../../docs/game-types.md) (what fits) and [docs/game-model.md](../../../docs/game-model.md) (vocabulary). Do not skip the fit check — ideas that need per-player pacing, real-time interaction, or branching structure cannot be built on this engine.
 
 ## Step 1: Fit check
 

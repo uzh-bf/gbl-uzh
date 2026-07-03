@@ -1,6 +1,17 @@
+---
+type: State Machine
+title: Game Lifecycle
+description: The shared game state machine, admin-driven transitions, per-status player views, and the end-to-end flow.
+tags:
+  - lifecycle
+  - state-machine
+  - admin
+timestamp: "2026-07-03T00:00:00Z"
+---
+
 # Game Lifecycle
 
-The whole game runs on **one shared state machine per game** (`Game.status` plus the active period/segment pointers from [02-game-model.md](02-game-model.md)). Every transition is triggered by an admin clicking one button; it applies to all players at once. This is what "synchronous" means on this platform — there is no per-player pacing.
+The whole game runs on **one shared state machine per game** (`Game.status` plus the active period/segment pointers from [game-model.md](game-model.md)). Every transition is triggered by an admin clicking one button; it applies to all players at once. This is what "synchronous" means on this platform — there is no per-player pacing.
 
 Engine: `packages/platform/src/services/GameService.ts` — two driver mutations, `activateNextPeriod` and `activateNextSegment`, each a `switch` over the current status.
 
@@ -22,7 +33,7 @@ stateDiagram-v2
 
 ## Transition table
 
-Button labels from the admin cockpit (`apps/demo-game/src/pages/admin/games/[id].tsx:getButton`); computations are what the platform runs during the transition, calling the game's hooks ([05-developing-a-game.md](05-developing-a-game.md)).
+Button labels from the admin cockpit (`apps/demo-game/src/pages/admin/games/[id].tsx:getButton`); computations are what the platform runs during the transition, calling the game's hooks ([developing-a-game.md](developing-a-game.md)).
 
 | From → To               | Admin button      | Mutation              | Platform work and game hooks called                                                                                                                                               |
 | ----------------------- | ----------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -58,7 +69,7 @@ Independent of status: story elements attached to a newly activated segment appe
 
 - **Ready flag** — players toggle "Ready" after acting (`updateReadyState`). The admin UI plays a sound and shows "All players are ready!" but the platform never blocks or auto-advances on it.
 - **Countdown** — the admin can set a countdown on the active segment (`addCountdown`); players see a ticking widget and warning toasts. When it expires **nothing happens automatically** — the admin still clicks the button. Treat it as social pressure, not enforcement.
-- **Realtime** — every transition publishes a global event (`PERIOD_ACTIVATED`, `SEGMENT_ACTIVATED`, `COUNTDOWN_UPDATED`, ...). Clients use these purely as a signal to refetch their queries — no payload is trusted. See [07-api-layer.md](07-api-layer.md).
+- **Realtime** — every transition publishes a global event (`PERIOD_ACTIVATED`, `SEGMENT_ACTIVATED`, `COUNTDOWN_UPDATED`, ...). Clients use these purely as a signal to refetch their queries — no payload is trusted. See [api-layer.md](api-layer.md).
 
 ## End-to-end walkthrough
 
