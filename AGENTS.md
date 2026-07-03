@@ -23,3 +23,7 @@ Quick validation sequence:
 - `dev app ls --repo .`
 - `dev app run <host-app> --repo . --yes`
 - `dev ls`
+
+## GBL Platform Wiki
+
+LLM-facing documentation for building learning games on the GBL platform lives in `docs/` — start at `docs/README.md`. Before working on `packages/platform`, `packages/ui`, or a game app, read the relevant wiki page. Game-building skills: `.agents/skills/gbl-game-design`, `gbl-new-game-app`, `gbl-backend-computations`, `gbl-frontend-game-ui`.
