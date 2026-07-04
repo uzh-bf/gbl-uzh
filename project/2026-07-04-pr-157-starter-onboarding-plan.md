@@ -130,10 +130,17 @@ Source: Workflow run `wf_cedf340c-958` (5 parallel audit agents + live-testing c
   - Important: getting-started claimed "Works on Windows" while Windows is an untested manual-verification item. Fixed: "For Windows 10/11 and macOS."
   - Minor: two files said "only Docker + VS Code" omitting the Dev Containers extension. Fixed in .devcontainer/README.md + apps/demo-game/README.md.
 
-## Next Steps / Manual Verification (expected at end)
+## Finish State
 
-- Windows end-to-end test (Docker Desktop + WSL2 + clone-in-volume) — cannot be done from this machine.
-- VS Code GUI: config picker shows both configs, "GBL Starter" clearly selectable; clone-in-volume works with compose-based config.
-- Decide picker vs default-flip after seeing validation UX.
+- PR #157 created (draft) then **marked ready for review** and handed off for testing (commit `270e4431`). CI green on head (lint/build/both Playwright shards/merge-reports/SonarCloud); Vercel fails pre-existing/unrelated (same on `dev` + #156, no app-code change) — noted in body Failed/Warning.
+- Tester handoff checklist posted as a PR comment: (1) non-engineer VS Code GUI click-through, (2) maintainer devrouter regression run, (3) Windows E2E follow-up. Testers must open branch `claude/starter-onboarding` (starter config not on `dev` until merge).
+- Do not merge without Roland's explicit approval.
+
+## Next Steps / Manual Verification (owned by tester before merge)
+
+- Non-engineer flow: VS Code config picker shows both configs, "GBL Starter" selectable; clone-in-volume + published-ports app reachable; one-click admin login; in-container `claude` runs.
+- Maintainer regression: existing devrouter `.devcontainer/` flow still works after shared-script parameterization.
+- Windows end-to-end (Docker Desktop + WSL2 + clone-in-volume) — cannot be done from this machine.
+- Decide picker vs default-flip after seeing real-user UX.
 - Follow-up: CI job running `devcontainer build` for `.devcontainer/**` changes.
-- Cleanup of merged PR #156 worktree/branch still pending separate approval.
+- Cleanup of merged PR #156 worktree/branch still pending separate approval; `stash@{0}` (critic-agent test artifacts) disposition pending.
