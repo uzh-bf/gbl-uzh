@@ -114,6 +114,11 @@ Plus: AGENTS.md pointer section; root README.md link to docs/; short stale-notic
 - Outside repo (not in PR): `~/.claude/skills/llm-wiki-okf/` — SKILL.md + references (spec-v01, conversion, examples incl. codebase-wiki example) + scripts/validate.sh (Apache-2.0 attribution to fabricioctelles/skills).
 - Verify: prettier on changed skill, OKF checker still green, review subagent on diff.
 
+## Merge
+
+- 2026-07-04: user gave explicit merge approval ("so lets merge this work"), which also resolves the one open "Blocking Before Merge" checklist item (maintainer skim of `docs/game-types.md` positioning) — user is the maintainer and the merge instruction stands as that sign-off.
+- Squash-merged into `dev` (repo convention; PR titles use conventional-commit form for this reason). Remote branch deletion on merge is a repo-wide setting (`delete_branch_on_merge: true`), not an agent-initiated deletion.
+
 ## Next Steps (post-merge candidates)
 
 - Publish @gbl-uzh/ui or mark internal; fill ui gaps list.
