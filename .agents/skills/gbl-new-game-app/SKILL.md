@@ -5,6 +5,8 @@ description: Scaffold a new GBL platform game app inside this monorepo by copyin
 
 # GBL New Game App
 
+App unreachable or environment broken? Run the `gbl-environment-doctor` skill before scaffolding.
+
 There is no generator; a new game starts as a copy of the reference game inside a clone/fork of this monorepo (the packages are not consumable standalone — `@gbl-uzh/ui` is unpublished). Background: [docs/platform-overview.md](../../../docs/platform-overview.md), [docs/developing-a-game.md](../../../docs/developing-a-game.md).
 
 Design the game FIRST (`gbl-game-design` skill) — the scaffold asks for your facts shapes immediately.
