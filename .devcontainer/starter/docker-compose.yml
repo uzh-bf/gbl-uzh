@@ -53,6 +53,8 @@ services:
       - node_modules_website:/workspaces/gbl-uzh/apps/website/node_modules
       - node_modules_advisor:/workspaces/gbl-uzh/apps/advisor/node_modules
       - node_modules_cypress:/workspaces/gbl-uzh/cypress/node_modules
+      # Claude Code sign-in + settings survive container rebuilds.
+      - claude_config:/root/.claude
     command: sleep infinity
     depends_on:
       postgres:
@@ -95,6 +97,7 @@ services:
 
 volumes:
   pgdata:
+  claude_config:
   node_modules_root:
   node_modules_demo_game:
   node_modules_platform:

@@ -6,6 +6,9 @@
   "runServices": ["app", "postgres", "oidc"],
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "postStartCommand": "bash .devcontainer/post-start.sh",
+  "features": {
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+  },
   "portsAttributes": {
     "3000": {
       "label": "Demo Game",
@@ -22,7 +25,8 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "Prisma.prisma",
-        "GraphQL.vscode-graphql"
+        "GraphQL.vscode-graphql",
+        "anthropic.claude-code"
       ]
     }
   }
