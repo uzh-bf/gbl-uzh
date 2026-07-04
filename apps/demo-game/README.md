@@ -34,7 +34,7 @@ devcontainer/devrouter mock:
 
 Use a devcontainer — everything (Postgres, mock OIDC login, install/build/seed, dev server) is automatic:
 
-- **Starter configuration** (`.devcontainer/starter/`) — only Docker + VS Code needed; walkthrough in [`docs/getting-started.md`](../../docs/getting-started.md).
+- **Starter configuration** (`.devcontainer/starter/`) — only Docker + VS Code with the Dev Containers extension; walkthrough in [`docs/getting-started.md`](../../docs/getting-started.md).
 - **devrouter configuration** (`.devcontainer/`) — multi-project routing for maintainers; see [`.devcontainer/README.md`](../../.devcontainer/README.md).
 
 If the environment misbehaves, use the `gbl-environment-doctor` skill (`.agents/skills/gbl-environment-doctor/`).

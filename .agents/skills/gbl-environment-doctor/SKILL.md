@@ -13,16 +13,16 @@ Most "bugs" a first-time user hits are environment problems, not code problems. 
 echo "${GBL_DEV_MODE:-devrouter}"
 ```
 
-- `starter` (the "GBL Starter" devcontainer): app at `http://localhost:3000`, OIDC mock at `http://localhost:8090/default`. Ports are published on the host's loopback; no extra tooling.
-- anything else: the devrouter config. **Never assume `https://demo-game.localhost`** - worktree checkouts register `demo-game.<worktree-slug>.localhost` instead. Derive the real URLs on the HOST with `dev ls` / `dev app ls` (see the `devrouter` skill).
+- `starter` (the "GBL Starter" devcontainer): app at `http://localhost:3000`, OIDC mock at `http://localhost:8090/default` - the same URLs inside the container and in the host browser.
+- anything else: the devrouter config. **Never assume `https://demo-game.localhost`** - worktree checkouts register `demo-game.<worktree-slug>.localhost` instead. Derive the real URLs on the HOST with `dev ls` / `dev app ls` (see the `devrouter` skill). The routed https URL resolves only on the HOST; inside the container the app is always plain `http://localhost:3000`.
 
-Set `APP_URL` and `ISSUER` accordingly for the checks below.
+Set `ISSUER` accordingly for the checks below; `APP_URL` below means the URL the human's browser uses.
 
 ## Step 1: Health checks, in order
 
 1. **In the container?** `[ -d /workspaces/gbl-uzh ]` - if not, you are on the host; work in the devcontainer terminal instead.
 2. **Dev server process**: `pgrep -f "next dev" || echo DOWN`. If DOWN: `bash .devcontainer/post-start.sh` (safe to re-run; skips if already running). Always check the log: `tail -50 /tmp/dev.log`.
-3. **App responds**: `curl -s -o /dev/null -w '%{http_code}' "$APP_URL"` -> expect `200`. The first compile after a start takes 30-60s - retry before concluding failure.
+3. **App responds (in-container)**: `curl -s -o /dev/null -w '%{http_code}' http://localhost:3000` -> expect `200` in BOTH modes (`next dev` listens on 3000 inside the container). The first compile after a start takes 30-60s - retry before concluding failure. Devrouter mode only: additionally curl the routed `$APP_URL` from the HOST - a 404 there while the in-container check is 200 means routes are not registered (see signatures).
 4. **OIDC discovery**: `curl -s "$ISSUER/.well-known/openid-configuration"` -> JSON whose `issuer` field matches `$AUTH0_ISSUER` **exactly** (the mock echoes the request Host, so `localhost` vs `127.0.0.1` matters).
 5. **Database + seed**:
 

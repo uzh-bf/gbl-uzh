@@ -123,6 +123,13 @@ Source: Workflow run `wf_cedf340c-958` (5 parallel audit agents + live-testing c
   - Minor "footgun deletion = scope creep, cut" -> REJECTED with rationale (agents repeatedly hit these; user-approved; isolated commit).
   - Minor "no CI guard for starter devcontainer" -> DEFERRED to Follow-Up (devcontainer build job on .devcontainer/** changes).
 
+## Final Branch Review
+
+- Reviewer: Codex CLI (read-only, whole branch vs origin/dev, 2026-07-04). Verdict: DONE_WITH_CONCERNS, no Criticals. Dispositions (all fixed in the same follow-up commit):
+  - Important: doctor skill curled `$APP_URL` from inside the container -> false-fails healthy devrouter setups (routed host resolves only on the HOST). Fixed: check 3 now curls in-container `http://localhost:3000` in both modes + separate host-side routed-URL check for devrouter.
+  - Important: getting-started claimed "Works on Windows" while Windows is an untested manual-verification item. Fixed: "For Windows 10/11 and macOS."
+  - Minor: two files said "only Docker + VS Code" omitting the Dev Containers extension. Fixed in .devcontainer/README.md + apps/demo-game/README.md.
+
 ## Next Steps / Manual Verification (expected at end)
 
 - Windows end-to-end test (Docker Desktop + WSL2 + clone-in-volume) — cannot be done from this machine.

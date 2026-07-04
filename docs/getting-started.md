@@ -16,7 +16,7 @@ This guide gets you from nothing to a running learning-game platform on your own
 
 You do not need to know Git, terminals, or programming. Expect the first-time setup to take about half an hour, most of it waiting.
 
-Works on **Windows 10/11** and **macOS**.
+For **Windows 10/11** and **macOS**.
 
 ## What you need (three free installs)
 

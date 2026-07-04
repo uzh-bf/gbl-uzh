@@ -11,7 +11,8 @@ host-port collisions** (nothing is published on the host).
 > This README documents the **devrouter** configuration (multi-project routing,
 > host tooling required). First time here, or just building a game? Use the
 > **starter** configuration instead (`starter/` in this directory): only Docker +
-> VS Code needed, ports published on localhost, Claude Code preinstalled.
+> VS Code (with the Dev Containers extension) needed, ports published on
+> localhost, Claude Code preinstalled.
 > Walkthrough: [`docs/getting-started.md`](../docs/getting-started.md).
 
 ## Prerequisites
