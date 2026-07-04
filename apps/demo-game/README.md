@@ -1,5 +1,8 @@
 # GAME
 
+> [!NOTE]
+> Parts of this README are outdated (local setup below uses a stale docker-compose/npm flow; the reducer terminology predates the current `Services` contract). The maintained documentation for building games on the platform is the wiki at [`docs/`](../../docs/index.md); the current local dev setup is [`.devcontainer/README.md`](../../.devcontainer/README.md).
+
 This is a step by step explanation on how to implement a game using the uzh-gbl-platform packag along with the demo-game as a starer template.
 
 ## Getting started
