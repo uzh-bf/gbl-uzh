@@ -101,8 +101,8 @@ Source: Workflow run `wf_cedf340c-958` (5 parallel audit agents + live-testing c
 
 ## Progress
 
-- [ ] S1 .gitattributes
-- [ ] S2 starter devcontainer (tracer: published-port http login is go/no-go)
+- [x] S1 .gitattributes — attributes verified via `git check-attr`, zero churn; commit `b6126252`. (Trivial slice: covered by plan review, no separate subagents.)
+- [x] S2 starter devcontainer — TRACER PASSED: live stack under project `gbl-starter-check`: post-create 86s on fresh volumes (seed hard-fail added; seed.ts verified idempotent/upserts), app 200 at ~106s, OIDC discovery ok, FULL admin login via curl cookie jar -> session `gbl-dev@df.uzh.ch` role ADMIN over plain http/localhost. `docker compose config` valid both files; `bash -n` clean; devcontainer CLI `read-configuration` resolves starter config. Review subagent: no Critical/Important (maintainer parity confirmed; portsAttributes applies to published ports per spec; note: default `overrideCommand` collides harmlessly with `command: sleep infinity` — watch in S3). Simplify subagent: clean; 2 comment improvements applied (GBL_ENV_FILE purpose, JSON_CONFIG keep-in-sync notes both compose files). Test stack left running for S3/S5 checks; teardown in S7.
 - [ ] S3 Claude Code preinstall
 - [ ] S4 getting-started page
 - [ ] S5 gbl-environment-doctor skill

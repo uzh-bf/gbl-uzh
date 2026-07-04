@@ -1,0 +1,29 @@
+{
+  "name": "GBL Starter — build a game (start here)",
+  "dockerComposeFile": ["docker-compose.yml"],
+  "service": "app",
+  "workspaceFolder": "/workspaces/gbl-uzh",
+  "runServices": ["app", "postgres", "oidc"],
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postStartCommand": "bash .devcontainer/post-start.sh",
+  "portsAttributes": {
+    "3000": {
+      "label": "Demo Game",
+      "onAutoForward": "openBrowser"
+    },
+    "8090": {
+      "label": "Login service (mock OIDC)",
+      "onAutoForward": "silent"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "Prisma.prisma",
+        "GraphQL.vscode-graphql"
+      ]
+    }
+  }
+}

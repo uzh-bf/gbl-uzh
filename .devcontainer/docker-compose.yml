@@ -94,6 +94,7 @@ services:
       SERVER_PORT: '8090'
       # interactiveLogin=false -> one-click auto-login as the fixed dev admin.
       # Constant `sub` keeps the same User/Account across restarts.
+      # Keep JSON_CONFIG identical to the oidc service in starter/docker-compose.yml.
       JSON_CONFIG: >-
         {
           "interactiveLogin": false,
