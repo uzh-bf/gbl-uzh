@@ -5,6 +5,8 @@ description: Design a learning game for the GBL platform - check platform fit, m
 
 # GBL Game Design
 
+If the local environment is broken or the app is unreachable, fix it first with the `gbl-environment-doctor` skill — design work is fine, but building/verifying is not.
+
 Turn a game idea into a design that maps cleanly onto the platform's engine. Ground truth: [docs/game-types.md](../../../docs/game-types.md) (what fits) and [docs/game-model.md](../../../docs/game-model.md) (vocabulary). Do not skip the fit check — ideas that need per-player pacing, real-time interaction, or branching structure cannot be built on this engine.
 
 ## Step 1: Fit check

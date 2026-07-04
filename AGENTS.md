@@ -1,7 +1,9 @@
 <!-- intent-skills:start -->
+
 ## Skill Loading
 
 Before substantial work:
+
 - Skill check: run `npx @tanstack/intent@latest list`, or use skills already listed in context.
 - Skill guidance: if one local skill clearly matches the task, run `npx @tanstack/intent@latest load <package>#<skill>` and follow the returned `SKILL.md`.
 - Monorepos: when working across packages, run the skill check from the workspace root and prefer the local skill for the package being changed.
@@ -9,6 +11,7 @@ Before substantial work:
 <!-- intent-skills:end -->
 
 <!-- devrouter -->
+
 ## devrouter
 
 This repository uses [devrouter](https://github.com/rschlaefli/devrouter) for local dev routing.
@@ -18,6 +21,7 @@ Full reference (config schema, docker requirements, env injection, commands):
 `.agents/skills/devrouter/SKILL.md`
 
 Quick validation sequence:
+
 - `dev up`
 - `dev tls install` (required when repo defines tcp/postgres apps)
 - `dev app ls --repo .`
@@ -26,4 +30,4 @@ Quick validation sequence:
 
 ## GBL Platform Wiki
 
-LLM-facing documentation for building learning games on the GBL platform lives in `docs/` — an Open Knowledge Format bundle, start at `docs/index.md`. Before working on `packages/platform`, `packages/ui`, or a game app, read the relevant wiki page. Game-building skills: `.agents/skills/gbl-game-design`, `gbl-new-game-app`, `gbl-backend-computations`, `gbl-frontend-game-ui`. When a change touches documented behavior, update the wiki in the same PR via `.agents/skills/gbl-wiki-maintenance`.
+LLM-facing documentation for building learning games on the GBL platform lives in `docs/` — an Open Knowledge Format bundle, start at `docs/index.md`. Before working on `packages/platform`, `packages/ui`, or a game app, read the relevant wiki page. Game-building skills: `.agents/skills/gbl-game-design`, `gbl-new-game-app`, `gbl-backend-computations`, `gbl-frontend-game-ui`. When a change touches documented behavior, update the wiki in the same PR via `.agents/skills/gbl-wiki-maintenance`. Human-facing onboarding (starter devcontainer, non-technical users) is `docs/getting-started.md`. If the local environment misbehaves (app unreachable, login broken, empty DB), run `.agents/skills/gbl-environment-doctor` before debugging code.

@@ -8,6 +8,7 @@ An [Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-cata
 
 ## Concepts (reading order)
 
+- [Getting Started (No Coding Experience Needed)](getting-started.md) - How to get the GBL platform running on your own computer and build a learning game together with an AI assistant — without writing code yourself
 - [Platform Overview](platform-overview.md) - What the platform is, monorepo layout, what the platform owns vs. what a game owns
 - [Game Model](game-model.md) - Data model: games, periods, segments, players, facts, results, decisions, content
 - [Game Lifecycle](game-lifecycle.md) - The game state machine, admin controls, and the full end-to-end flow

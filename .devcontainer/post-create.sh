@@ -7,9 +7,10 @@ cd /workspaces/gbl-uzh
 # DevPod lifecycle hooks receive env_file values truncated at '=' (e.g. a URL
 # ...?schema=public arrives as ...?schema), which makes Prisma emit an empty
 # search_path. Re-source the canonical env file so values with '=' are intact.
+# The starter config points GBL_ENV_FILE at its own env file.
 runtime_workspace="${WORKSPACE:-}"
 set -a
-. /workspaces/gbl-uzh/.devcontainer/devcontainer.env
+. "${GBL_ENV_FILE:-/workspaces/gbl-uzh/.devcontainer/devcontainer.env}"
 set +a
 if [ -n "$runtime_workspace" ]; then
   export WORKSPACE="$runtime_workspace"
@@ -55,11 +56,18 @@ if [ "$push_ok" != 1 ]; then
   exit 1
 fi
 
-echo "[post-create] Seeding reference data (best effort)..."
+# Seed is idempotent (upserts), so failing hard is safe on rebuilds — and a
+# silently empty database looks like a broken app to a first-time user.
+echo "[post-create] Seeding reference data (retrying through DB warmup)..."
+seed_ok=0
 for attempt in $(seq 1 5); do
-  if pnpm -F @gbl-uzh/demo-game prisma:seed; then break; fi
+  if pnpm -F @gbl-uzh/demo-game prisma:seed; then seed_ok=1; break; fi
   echo "[post-create] seed attempt ${attempt} failed; retrying in 5s..."
   sleep 5
 done
+if [ "$seed_ok" != 1 ]; then
+  echo "[post-create] ERROR: prisma seed never succeeded" >&2
+  exit 1
+fi
 
 echo "[post-create] Done."

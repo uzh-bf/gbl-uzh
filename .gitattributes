@@ -1,0 +1,6 @@
+# Devcontainer lifecycle scripts and sourced env files must stay LF: a CRLF
+# checkout (Windows git default autocrlf=true) breaks bash inside the Linux
+# container ("set: pipefail: invalid option name") and injects \r into env values.
+*.sh text eol=lf
+*.env text eol=lf
+*.sql text eol=lf

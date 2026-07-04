@@ -74,7 +74,8 @@ services:
       - node_modules_cypress:/workspaces/gbl-uzh/cypress/node_modules
       # Local mkcert root CA (created by `dev tls install`), so the app trusts the
       # https://oidc.demo-game.localhost cert server-side. Override
-      # DEVROUTER_MKCERT_CAROOT on non-macOS (Linux mkcert: ~/.local/share/mkcert).
+      # DEVROUTER_MKCERT_CAROOT on non-macOS (Linux: ~/.local/share/mkcert,
+      # Windows: %LOCALAPPDATA%\mkcert).
       - '${DEVROUTER_MKCERT_CAROOT:-${HOME}/Library/Application Support/mkcert}/rootCA.pem:/etc/devrouter/mkcert-rootCA.pem:ro'
     command: sleep infinity
     depends_on:
@@ -94,6 +95,7 @@ services:
       SERVER_PORT: '8090'
       # interactiveLogin=false -> one-click auto-login as the fixed dev admin.
       # Constant `sub` keeps the same User/Account across restarts.
+      # Keep JSON_CONFIG identical to the oidc service in starter/docker-compose.yml.
       JSON_CONFIG: >-
         {
           "interactiveLogin": false,

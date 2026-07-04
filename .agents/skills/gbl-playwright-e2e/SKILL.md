@@ -5,6 +5,8 @@ description: Create, run, debug, review, and extend Playwright E2E tests for the
 
 # GBL Playwright E2E
 
+Local stack unhealthy (app 404/refused, login broken, empty DB)? Run the `gbl-environment-doctor` skill first.
+
 Use this skill for GBL `apps/demo-game` Playwright work. Combine with generic
 Playwright docs/skills only for API details; keep repo-specific decisions here.
 
