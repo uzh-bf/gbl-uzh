@@ -1,7 +1,7 @@
 # GAME
 
 > [!NOTE]
-> Parts of this README are outdated (local setup below uses a stale docker-compose/npm flow; the reducer terminology predates the current `Services` contract). The maintained documentation for building games on the platform is the wiki at [`docs/`](../../docs/index.md); the current local dev setup is [`.devcontainer/README.md`](../../.devcontainer/README.md). New to all of this? Start at [`docs/getting-started.md`](../../docs/getting-started.md).
+> Parts of this README are outdated (the reducer terminology below predates the current `Services` contract). The maintained documentation for building games on the platform is the wiki at [`docs/`](../../docs/index.md); local dev setup is covered by the devcontainer configs (see below). New to all of this? Start at [`docs/getting-started.md`](../../docs/getting-started.md).
 
 This is a step by step explanation on how to implement a game using the uzh-gbl-platform packag along with the demo-game as a starer template.
 
@@ -30,50 +30,14 @@ devcontainer/devrouter mock:
 6. Generate a cryptographically safe string and paste it to `NEXTAUTH_SECRET=`
    (for example with `openssl rand -base64 32`).
 
-### Dependencies
+### Local development
 
-#### Linux based systems
+Use a devcontainer — everything (Postgres, mock OIDC login, install/build/seed, dev server) is automatic:
 
-- Install docker
-- Install node.js
-- execute `npm install` in a terminal from the root directory of the code. `package.json` should be located inside the root.
+- **Starter configuration** (`.devcontainer/starter/`) — only Docker + VS Code needed; walkthrough in [`docs/getting-started.md`](../../docs/getting-started.md).
+- **devrouter configuration** (`.devcontainer/`) — multi-project routing for maintainers; see [`.devcontainer/README.md`](../../.devcontainer/README.md).
 
-#### Windows
-
-- Install docker desktop
-- Install node.js
-- execute `npm install` in a terminal from the root directory of the code. `package.json` should be located inside the root.
-
-### Starting the application locally
-
-#### Linux based systems
-
-- `sudo service docker start && sudo docker compose up`
-
-In a new terminal:
-
-- `npm run dev`
-
-#### Windows
-
-- Open docker desktop and make sure it is working
-- `docker compose up`
-
-In a new terminal:
-
-- `npm run dev`
-
-### Troubleshooting
-
-- **Reseting the database**
-
-  - `npm run prisma:reset` Reset the database
-  - `npm run prisma:generate` Generate files (schemas) to `prisma/generated`
-  - `npm run prisma:push` Push the schema to the database
-
-- **Login token expired**: Sometimes the login token expires. To fix this, navigate to `<url>/admin/login` and then login again. Try to delete the cookies for the page an refresh the page.
-
-- **npm packages**: Sometimes the npm packages are not installed correctly. To fix this, run `npm install` in the root directory of the code.
+If the environment misbehaves, use the `gbl-environment-doctor` skill (`.agents/skills/gbl-environment-doctor/`).
 
 ---
 
