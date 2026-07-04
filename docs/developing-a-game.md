@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: '2026-07-03T00:00:00Z'
+timestamp: '2026-07-04T00:00:00Z'
 ---
 
 # Developing a Game
@@ -22,7 +22,7 @@ There is no generator. The supported path is copying the reference game inside a
 2. Keep the Prisma setup as-is: `prisma/copy.ts` copies the platform schema to `prisma/schema/platform.prisma` on every build/dev run (never edit that file); `prisma/schema/specific.prisma` is yours for game-specific tables (the demo game's is an unused stub).
 3. Replace the game logic: `src/services/` (computations, below), `src/types/` (facts shapes + yup schemas), `prisma/seed.ts` (levels/content), and the pages under `src/pages/`.
 4. The workspace glob `apps/*` picks the package up automatically; run from the repo root with turbo or from the app directory.
-5. Local dev environment: the devcontainer/devrouter flow in `.devcontainer/README.md` is the accurate, current setup (Postgres + a mock OIDC server replacing Auth0, one-click admin login as a fixed dev admin — no real Auth0 tenant needed). The `docker compose`/`npm install` instructions in `apps/demo-game/README.md` are stale. Outside the devcontainer you need real OIDC credentials via `.env.local.template`.
+5. Local dev environment: two devcontainer configurations, both with Postgres + a mock OIDC server replacing Auth0 (one-click admin login as a fixed dev admin — no real Auth0 tenant needed). The **starter** config (`.devcontainer/starter/`, published localhost ports, zero host tooling; walkthrough in [getting-started](getting-started.md)) and the **devrouter** config (`.devcontainer/README.md`, multi-project routing for maintainers). If the environment misbehaves, use the `gbl-environment-doctor` skill. Outside a devcontainer you need real OIDC credentials via `.env.local.template`.
 
 ## Backend: the `Services` contract
 

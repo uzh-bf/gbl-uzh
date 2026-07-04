@@ -17,10 +17,14 @@ The `gbl-uzh` project consists of the following key components:
 - The `GBL Advisor` (located in the `apps/advisor` directory), an advisory wizard for getting started in the space of Game-Based Learning as a teacher. The advisor is built on the Twinery text-based serious game engine.
 - The `GBL Platform` (located in the `packages/platform` directory), a code framework for building round-based simulations with Next.js and React. Documentation for building games on the platform (written for humans and AI coding agents) lives in [`docs/`](docs/index.md), with matching agent skills in `.agents/skills/`.
 
+## Getting Started
+
+Want to build a learning game on the platform? [docs/getting-started.md](docs/getting-started.md) takes you from zero to a running local environment with an AI assistant that does the technical work — no coding experience needed. The same starter devcontainer also gives developers a zero-setup environment; the devrouter-based configuration for running many projects side by side is described in [.devcontainer/README.md](.devcontainer/README.md).
+
 ## Requirements
 
-- Docker / Podman
-- Node.js 24+ / PNPM
+- Building a game with the starter devcontainer: only Docker Desktop, VS Code, and the Dev Containers extension — see [Getting Started](docs/getting-started.md).
+- Working on the codebase outside a devcontainer: Docker / Podman, Node.js 24+, PNPM.
 
 ## Contributing
 
