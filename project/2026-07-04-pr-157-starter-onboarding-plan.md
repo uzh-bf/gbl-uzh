@@ -2,9 +2,9 @@
 
 ## Identity
 
-- Plan: `project/2026-07-04-starter-onboarding-plan.md`
+- Plan: `project/2026-07-04-pr-157-starter-onboarding-plan.md`
 - Branch: `claude/starter-onboarding` -> target `dev`
-- PR: none yet (rename plan when ID known)
+- PR: uzh-bf/gbl-uzh #157 (draft, base `dev`)
 - History: builds on `project/2026-07-03-pr-156-llm-wiki-and-game-skills-plan.md` (merged PR #156: OKF wiki + gbl-* skills)
 
 ## Goal
