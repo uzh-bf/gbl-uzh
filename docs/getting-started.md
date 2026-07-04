@@ -38,7 +38,7 @@ You will also want a [Claude](https://claude.ai) account for the built-in AI ass
    ```
 
 4. When VS Code asks **which configuration** to use, pick **GBL Starter — build a game (start here)**.
-5. Wait. The first start downloads and prepares everything (roughly 10–20 minutes depending on your internet connection — later starts take seconds). You can click "show log" in the corner notification to watch it work; a wall of text is normal.
+5. Wait. The first start downloads and prepares everything (typically 5–15 minutes depending on your internet connection — later starts take seconds). You can click "show log" in the corner notification to watch it work; a wall of text is normal.
 6. When it finishes, your browser opens the demo game at **http://localhost:3000** (if it doesn't: in VS Code open the **Ports** panel at the bottom, find **Demo Game**, and click the globe icon). The very first page can take up to a minute to appear while the app warms up.
 
 ## Log in as the game admin
