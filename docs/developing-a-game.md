@@ -12,7 +12,7 @@ timestamp: '2026-07-04T00:00:00Z'
 
 # Developing a Game
 
-How to build a new game on the platform. Read [game-model.md](game-model.md) and [game-lifecycle.md](game-lifecycle.md) first — this page assumes their vocabulary. Related skills: `gbl-new-game-app` (scaffolding), `gbl-backend-computations` (backend), `gbl-frontend-game-ui` (frontend).
+How to build a new game on the platform. Read [game-model.md](game-model.md) and [game-lifecycle.md](game-lifecycle.md) first — this page assumes their vocabulary. For mechanical and didactical patterns (e.g. formative feedback, roles, seeded randomness), see [game-patterns.md](game-patterns.md). Related skills: `gbl-new-game-app` (scaffolding), `gbl-backend-computations` (backend), `gbl-frontend-game-ui` (frontend).
 
 ## Scaffolding a new game app
 

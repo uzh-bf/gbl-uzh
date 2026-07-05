@@ -27,6 +27,15 @@ The decision form validates with a yup schema mirroring the constraints your `Ac
 - `/admin/games/[id]`: the advance button is a `switch (game.status)` producing one label + mutation per state (copy `getButton` from the demo game); add-period and add-segment modals expose **your** period/segment facts fields (Formik + yup); include the player list with join links and the countdown form.
 - `/admin/reports/[id]`: query result rows of type `SEGMENT_END` / `PERIOD_END` and chart per-player metrics; aggregation happens client-side.
 
+## Formative Feedback & Results Analysis
+
+In `PAUSED`, `CONSOLIDATION`, or `RESULTS` phases, build a structured debriefing view:
+- **Map decisions to outcomes:** Use design system cards/tables and Recharts to visualize intermediate calculations (e.g. allocation -> market share).
+- **Explain the "why":** Add explanatory messages/warnings based on the result facts.
+- **Role-specific views:** Conditionally render content using `playerRole`.
+
+See [docs/game-patterns.md](../../../docs/game-patterns.md) for pattern details.
+
 ## Components: where to get what
 
 Priority order:

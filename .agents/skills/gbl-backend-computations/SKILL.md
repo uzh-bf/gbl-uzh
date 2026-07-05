@@ -24,12 +24,13 @@ Every hook: `(facts, payload) => OutputFacts`. Payloads carry what you need (`ga
 
 ## Idioms (follow the reference implementation)
 
-- Transform with immer: `return produce(basefacts, draft => { ... })`. Never mutate inputs.
-- `Actions.apply` returns `{ result, isDirty }` — the platform persists only when `isDirty` is true. Compute `isDirty` by comparing against the incoming state. (Marked `TODO` for platform-side removal in `packages/platform/src/types.ts` — check before relying on it long-term.)
-- Reject invalid player input by throwing a plain `Error` (e.g. when the allocation does not sum to 100) — mirror the same constraints in the frontend form's yup schema.
-- Deterministic randomness only: seeded helpers `diceRoll`, `computeScenarioOutcome` from `@gbl-uzh/platform/dist/lib/util`; derive the seed from period facts + segment index.
-- Side channels in any hook's return: `events` (drive achievements), `notifications`/`globalNotification` (client toasts), `actions` (extra audit rows), `updatedPeriodFacts`/`updatedSegmentFacts` (from the action reducer).
-- Escape hatch only when facts blobs are not enough: optional `updateDBAfterInitialize` / `updateDBBeforeActivation` / `updateDBAfterEnd` / `updateDBAfterApply` receive the open Prisma transaction (use with tables you added in `prisma/schema/specific.prisma`).
+- **Transform with immer:** `return produce(basefacts, draft => { ... })`. Never mutate inputs.
+- **Asymmetric Role Resolution:** Check `playerRole` in `Actions.apply` if inputs are role-specific. Combine roles in `SegmentResultService.end` or `PeriodResultService.end` using `otherPlayersSegmentEndResults` (e.g., matching Buyer bids with Seller asks as in `derivatives-game`).
+- **Deterministic Randomness:** Never use `Math.random()`. Use seeded helpers (`diceRoll`, `computeScenarioOutcome` from `@gbl-uzh/platform/dist/lib/util`) with a seed derived from period facts and segment index (e.g., `seed + segmentIndex`).
+- **`Actions.apply` returns `{ result, isDirty }`:** the platform persists only when `isDirty` is true. Compute `isDirty` by comparing against the incoming state. (Marked `TODO` for platform-side removal in `packages/platform/src/types.ts` — check before relying on it long-term.)
+- **Reject invalid player input:** throw a plain `Error` (e.g. when the allocation does not sum to 100) — mirror the same constraints in the frontend form's yup schema.
+- **Side channels in any hook's return:** `events` (drive achievements), `notifications`/`globalNotification` (client toasts), `actions` (extra audit rows), `updatedPeriodFacts`/`updatedSegmentFacts` (from the action reducer).
+- **Escape hatch only when facts blobs are not enough:** optional `updateDBAfterInitialize` / `updateDBBeforeActivation` / `updateDBAfterEnd` / `updateDBAfterApply` receive the open Prisma transaction (use with tables you added in `prisma/schema/specific.prisma`).
 
 ## Facts types + validation
 

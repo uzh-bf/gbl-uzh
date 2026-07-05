@@ -32,19 +32,21 @@ Fill this table — it is the core design artifact:
 | Period facts (admin-set) | scenario parameters the facilitator configures when adding a period                          |
 | Player state             | what carries across segments/periods (e.g. capital, inventory) — lives in result facts       |
 | Segment outcome          | formula: decisions + environment → new player state                                          |
-| Period report            | what the debrief needs: metrics, comparisons, charts                                         |
-| Roles (optional)         | symmetric teams, or per-role info/computations (note: engine-supported, no worked example)   |
+| Period report            | what the debrief needs: metrics, comparisons, charts. Design for **formative feedback** (map decisions to outcome, e.g. financial statements). See [docs/game-patterns.md](../../../docs/game-patterns.md). |
+| Roles (optional)         | asymmetric roles (e.g. Buyer vs Seller in derivatives-game) or specialized team roles to create positive interdependence. |
 | Content overlays         | story elements (narrative popups, per segment) and learning elements (MC quizzes) with texts |
 | Gamification             | XP/levels ladder; achievements as event + condition + reward triples                         |
 
-## Step 3: Sanity-check the computation
+## Step 3: Sanity-check the computation & didactical patterns
 
 For the segment outcome and period report, write the math/logic in prose first and check:
 
-- Inputs available at `SegmentResult.end`: the player's decisions (stored by the action reducer), segment facts, period facts, game facts, player role.
-- Inputs available at `PeriodResult.end`: the player's final segment results, **other players' segment-end results** (enables competitive/market computations), consolidation decisions, XP/level.
-- Randomness must be seedable (same seed → same environment) — plan a seed parameter in period facts.
+- **Asymmetric Roles:** Interdependent outcomes combining decisions from multiple roles (e.g., Buyer/Seller).
+- **Formative Feedback:** Store detailed intermediate metrics (revenue breakdown, errors) in results for debrief dashboards.
+- **Seeded Randomness:** Use `PeriodFacts` seeds for deterministic environment generation (no `Math.random()`).
+- **Inputs available at `SegmentResult.end`:** player decisions (from Action reducer), segment facts, period facts, game facts, player role.
+- **Inputs available at `PeriodResult.end`:** the player's final segment results, **other players' segment-end results** (enables competitive/market computations), consolidation decisions, XP/level.
 
 ## Step 4: Output
 
-Produce a short design doc with: the fit-check verdict, the mapping table, computation prose, the list of periods/segments for a first session, and seed content (level ladder, story/learning element texts, achievements). Hand off to `gbl-new-game-app` (scaffold), then `gbl-backend-computations` and `gbl-frontend-game-ui`.
+Produce a short design doc with: the fit-check verdict, the mapping table, computation prose (including didactical patterns and roles), the list of periods/segments for a first session, and seed content (level ladder, story/learning element texts, achievements). Hand off to `gbl-new-game-app` (scaffold), then `gbl-backend-computations` and `gbl-frontend-game-ui`.
