@@ -10,7 +10,7 @@ interface Props {
     level: number
     xp: number
     xpMax: number
-    achievements: any[]
+    achievements: unknown[]
     imgPathAvatar?: string
     imgPathLocation?: string
     onClick: () => void

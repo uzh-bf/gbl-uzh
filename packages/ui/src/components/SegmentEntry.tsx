@@ -7,8 +7,8 @@ interface Props {
   segment: {
     id: number
     index: number
-    storyElements: any[]
-    learningElements: any[]
+    storyElements: unknown[]
+    learningElements: unknown[]
   }
 }
 

@@ -18,7 +18,7 @@ interface PlayerDataProps {
       name: string
       descpription: string
       image: string
-      reward?: any
+      reward?: { xp?: number } | null
     }
   }[]
   imgPathAvatar?: string
@@ -62,7 +62,7 @@ function PlayerDisplay({
             <Achievement
               key={achievement.achievement.id}
               name={achievement.achievement.name}
-              xpReward={achievement.achievement.reward.xp}
+              xpReward={achievement.achievement.reward?.xp ?? 0}
               count={achievement.count}
               image={achievement.achievement.image}
             />

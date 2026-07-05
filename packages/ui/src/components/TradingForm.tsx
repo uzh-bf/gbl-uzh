@@ -1,10 +1,9 @@
-import { Button, FormikNumberField } from '@uzh-bf/design-system'
-import { Form, Formik } from 'formik'
+import { Button } from '@uzh-bf/design-system'
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-
-// TODO(JJ):
-// - UserNotification as child?
-// - Name is currently Trading -> input spotPrice, how to name?
+import ReusableFormField from './ReusableFormField'
+import { Form } from './ui/form'
 
 function optionalValueToCHFString(value: number, digits = 2) {
   return value?.toLocaleString('de-CH', {
@@ -18,7 +17,7 @@ interface Props {
   price: number
   nameButtonBuy: string
   nameButtonSell: string
-  onSubmit: (values: any, helpers: any) => Promise<void>
+  onSubmit: (values: { volume: number; modifier: number }) => Promise<void>
   max: number
   unitName?: string
   disableButtonBuy?: boolean
@@ -35,76 +34,74 @@ function TradingForm({
   disableButtonBuy = false,
   disableButtonSell = false,
 }: Props) {
+  const schema = yup.object({
+    modifier: yup.number().required(),
+    volume: yup
+      .number()
+      .typeError('Volume must be a number')
+      .min(0, 'Volume must be greater than 0')
+      .max(max, 'Volume must be smaller equal than ' + max)
+      .required('Volume is required'),
+  })
+
+  const form = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      modifier: 1,
+      volume: 0,
+    },
+    mode: 'onChange'
+  })
+
   return (
     <div className="flex w-max gap-4 rounded border p-8">
-      <Formik
-        initialValues={{
-          modifier: 1,
-          volume: 0,
-        }}
-        isInitialValid={false}
-        validationSchema={yup.object({
-          volume: yup
-            .number()
-            .min(0, 'Volume must be greater than 0')
-            .max(max, 'Volume must be smaller equal than ' + max)
-            .required('Volume is required'),
-        })}
-        onSubmit={onSubmit}
-      >
-        {(tradeInterface) => (
-          <Form className="">
-            <FormikNumberField
-              placeholder="0"
-              label="Volume"
-              name="volume"
-              required
-            />
-            <div className="mt-2">
-              Trading {tradeInterface.values.volume} {unitName} for{' '}
-              {optionalValueToCHFString(tradeInterface.values.volume * price)}
-            </div>
+      <Form {...form}>
+        <form className="" onSubmit={form.handleSubmit((values) => onSubmit(values))}>
+          <ReusableFormField
+            control={form.control}
+            name="volume"
+            label="Volume"
+            type="number"
+            placeholder="0"
+            required
+          />
+          <div className="mt-2">
+            Trading {form.watch('volume') || 0} {unitName} for{' '}
+            {optionalValueToCHFString((form.watch('volume') || 0) * price)}
+          </div>
 
-            {/* {!sufficientFunds && !sufficientStorage && (
-              <UserNotification
-                type="errornotificationType"
-                message="You do not have the funds or goods to trade this volume."
-              />
-            )} */}
-
-            <div className="mt-2 flex flex-row gap-2">
-              <Button
-                disabled={
-                  tradeInterface.isSubmitting ||
-                  !tradeInterface.isValid ||
-                  disableButtonBuy
-                }
-                type="button"
-                onClick={async () => {
-                  await tradeInterface.setFieldValue('modifier', 1)
-                  tradeInterface.handleSubmit()
-                }}
-              >
-                {nameButtonBuy}
-              </Button>
-              <Button
-                disabled={
-                  tradeInterface.isSubmitting ||
-                  !tradeInterface.isValid ||
-                  disableButtonSell
-                }
-                type="button"
-                onClick={async () => {
-                  await tradeInterface.setFieldValue('modifier', -1)
-                  tradeInterface.handleSubmit()
-                }}
-              >
-                {nameButtonSell}
-              </Button>
-            </div>
-          </Form>
-        )}
-      </Formik>
+          <div className="mt-2 flex flex-row gap-2">
+            <Button
+              disabled={
+                form.formState.isSubmitting ||
+                !form.formState.isValid ||
+                disableButtonBuy
+              }
+              type="button"
+              onClick={async () => {
+                form.setValue('modifier', 1)
+                await form.handleSubmit((values) => onSubmit(values))()
+              }}
+            >
+              {nameButtonBuy}
+            </Button>
+            <Button
+              disabled={
+                form.formState.isSubmitting ||
+                !form.formState.isValid ||
+                disableButtonSell
+              }
+              type="button"
+              onClick={async () => {
+                form.setValue('modifier', -1)
+                await form.handleSubmit((values) => onSubmit(values))()
+              }}
+            >
+              {nameButtonSell}
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   )
 }
