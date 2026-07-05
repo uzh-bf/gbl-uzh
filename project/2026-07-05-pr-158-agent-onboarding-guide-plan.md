@@ -2,9 +2,9 @@
 
 ## Identity
 
-- Plan: `project/2026-07-05-agent-onboarding-guide-plan.md`
+- Plan: `project/2026-07-05-pr-158-agent-onboarding-guide-plan.md`
 - Branch: `claude/agent-onboarding-guide` -> target `dev`
-- PR: none yet (rename when known)
+- PR: uzh-bf/gbl-uzh #158 (draft, base `dev`)
 - History: builds on PR #157 (`project/2026-07-04-pr-157-starter-onboarding-plan.md` — starter devcontainer + `getting-started.md` + `gbl-environment-doctor`)
 
 ## Goal
