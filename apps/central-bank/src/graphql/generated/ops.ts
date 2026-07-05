@@ -249,12 +249,13 @@ export type PeriodFactsInput = {
 };
 
 export type PeriodFactsScenarioInput = {
-  gapBonds?: InputMaybe<Scalars['Float']['input']>;
-  gapStocks?: InputMaybe<Scalars['Float']['input']>;
-  interestBank?: InputMaybe<Scalars['Float']['input']>;
+  initialGrowth?: InputMaybe<Scalars['Float']['input']>;
+  initialInflation?: InputMaybe<Scalars['Float']['input']>;
+  initialUnemployment?: InputMaybe<Scalars['Float']['input']>;
+  lambda?: InputMaybe<Scalars['Float']['input']>;
+  naturalUnemployment?: InputMaybe<Scalars['Float']['input']>;
   seed?: InputMaybe<Scalars['Int']['input']>;
-  trendBonds?: InputMaybe<Scalars['Float']['input']>;
-  trendStocks?: InputMaybe<Scalars['Float']['input']>;
+  targetInflation?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type PeriodSegment = {
@@ -272,9 +273,11 @@ export type PeriodSegment = {
 };
 
 export type PeriodSegmentFactsInput = {
-  bankPercentage?: InputMaybe<Scalars['Float']['input']>;
-  bondsPercentage?: InputMaybe<Scalars['Float']['input']>;
-  stockPercentage?: InputMaybe<Scalars['Float']['input']>;
+  demandShock?: InputMaybe<Scalars['Float']['input']>;
+  eventName?: InputMaybe<Scalars['String']['input']>;
+  roll?: InputMaybe<Scalars['Int']['input']>;
+  shock?: InputMaybe<Scalars['Float']['input']>;
+  supplyShock?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type Player = {
