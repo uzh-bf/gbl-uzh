@@ -32,12 +32,11 @@ Instead:
 
 ## What you install
 
-Just **Docker Desktop** — <https://www.docker.com/products/docker-desktop/>.
+Just a **Docker-compatible container runtime** (plus `git` to clone). You do **not** need VS Code, Node, pnpm, or the platform toolchain on your host.
 
-- **Windows:** accept **WSL 2** when the installer offers it (restart if asked). Run the agent's shell commands from **PowerShell** or a **WSL** terminal — either can reach Docker.
-- **macOS:** pick the Apple Silicon or Intel build.
-
-You do **not** need VS Code, Node, pnpm, or the platform toolchain on your host — only Docker (plus `git` to clone).
+- **Windows:** install **[Rancher Desktop](https://rancherdesktop.io/)** and select the **dockerd (moby)** engine during setup. Accept **WSL 2** when the installer offers it (restart if asked). Run the agent's shell commands from **PowerShell** or a **WSL** terminal — either can reach Docker.
+- **macOS:** install **[OrbStack](https://orbstack.dev/)** or **[Rancher Desktop](https://rancherdesktop.io/)** (with the **dockerd (moby)** engine).
+- _Already have Docker Desktop?_ That works too — any runtime providing `docker` and `docker compose` is fine.
 
 ## Bring the platform up (headless, Docker only)
 
@@ -82,6 +81,13 @@ docker compose -p gbl exec app curl -s -o /dev/null -w '%{http_code}\n' http://l
 
 - **Follow the game-building skills** (they assume this platform and read the wiki themselves): `gbl-game-design` (first, before any code) → `gbl-new-game-app` (scaffold) → `gbl-backend-computations` → `gbl-frontend-game-ui`, with `gbl-playwright-e2e` for tests. See [developing-a-game.md](developing-a-game.md) and the [agent skills](../.agents/skills/). One caveat: `gbl-playwright-e2e`'s "Local Stack" section is for the devrouter/DevPod setup — in this Docker-only mode the app is already at `http://localhost:3000`, so skip that section and run Playwright inside the container (the skill now says as much).
 - **If anything breaks** (app won't load, login fails, empty admin UI): run the `gbl-environment-doctor` skill first, before debugging code. Its checks are meant to run inside the container, so prefix them with `docker compose -p gbl exec app …` as above. The mode is `starter`; the app is always `http://localhost:3000`.
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `EACCES` error mentioning `pnpm.cjs` under `.volta/` when running `pnpm run dev` or `pnpm run build` | `npm-run-all` (`run-s`) cannot spawn the Volta-shimmed pnpm on the host | Run commands **inside the container** via the `docker compose exec` prefix (the container has a normal pnpm). If you must run on the host, execute the sub-commands from the `run-s` sequence directly (e.g. `pnpm run generate && pnpm run build:nexus && pnpm run build:ts` instead of `pnpm run build`). |
+| `127.0.0.1` vs `localhost` cookie / OIDC errors | NextAuth state cookies are domain-scoped; `127.0.0.1` ≠ `localhost` | Always use `http://localhost:3000` in the browser and in `PLAYWRIGHT_BASE_URL`. |
 
 ## Stop, restart, reset
 

@@ -54,8 +54,8 @@ Set `ISSUER` accordingly for the checks below; `APP_URL` below means the URL the
 
 Relay these in plain language (they run OUTSIDE the container):
 
-- **Docker Desktop is not running** - nothing works without the whale icon running. Ask them to start it, then retry.
-- **Windows: "WSL 2 installation is incomplete"** - enable the Windows features "Windows Subsystem for Linux" and "Virtual Machine Platform", reboot, then run `wsl --update` in an admin PowerShell. Reference: <https://learn.microsoft.com/windows/wsl/install>. If it persists, hardware virtualization is likely off in BIOS/UEFI.
+- **Container runtime is not running** — nothing works without Docker. Ask them to start their runtime (OrbStack, Rancher Desktop, or Docker Desktop), then retry. OrbStack shows a menubar icon; Rancher Desktop shows a tray icon.
+- **Windows: "WSL 2 installation is incomplete"** — enable the Windows features "Windows Subsystem for Linux" and "Virtual Machine Platform", reboot, then run `wsl --update` in an admin PowerShell. Reference: <https://learn.microsoft.com/windows/wsl/install>. If it persists, hardware virtualization is likely off in BIOS/UEFI.
 - **Container needs a rebuild** (config changed, or the box is wedged): in VS Code press F1 -> "Dev Containers: Rebuild Container".
 
 The human-facing walkthrough (installs, cloning, first login) is [docs/getting-started.md](../../../docs/getting-started.md) - point users there rather than dictating terminal commands to them.

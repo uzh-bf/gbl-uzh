@@ -124,6 +124,12 @@ adapt it to GBL's smaller stack:
 - Use unique game names. Do not reset DB inside Playwright setup.
 - Do not make specs depend on prior spec order or prior games.
 
+> [!IMPORTANT]
+> **`localhost` vs `127.0.0.1` matters.** NextAuth state cookies are scoped to the exact hostname. If `NEXTAUTH_URL` is `http://localhost:3000` but Playwright navigates to `http://127.0.0.1:3000`, the OAuth callback will fail with `STATE_COOKIE_MISSING`. Always set `PLAYWRIGHT_BASE_URL=http://localhost:3000` — matching `NEXTAUTH_URL` exactly.
+
+> [!TIP]
+> **Segment facts validation schemas must allow empty/partial input.** When the admin clicks "Add Segment", the platform submits `{}` as the initial facts before calling `SegmentService.initialize`. If your yup schema marks fields as `.required()`, the mutation silently fails. Make segment-facts schema fields `.optional()` (or `.nullable()`) and let `SegmentService.initialize` fill them.
+
 ## GBL Game Flow Rules
 
 Current stable broad flow:

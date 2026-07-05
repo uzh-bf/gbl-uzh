@@ -8,7 +8,7 @@ Work in three phases: **set up the platform**, **build the game**, **write the f
 
 The full reference is `docs/building-with-an-agent.md` (you'll have it once cloned). Essentials:
 
-1. **Ensure Docker Desktop is installed and running.** If not, ask the user to install it from <https://www.docker.com/products/docker-desktop/> (on **Windows**: accept **WSL 2**, restart if asked) and start it. You can't click through the installer or Windows security prompts for them — guide them, then confirm with `docker version`.
+1. **Ensure a Docker-compatible runtime is installed and running.** Recommended: **[Rancher Desktop](https://rancherdesktop.io/)** on Windows (select the **dockerd/moby** engine), **[OrbStack](https://orbstack.dev/)** or **[Rancher Desktop](https://rancherdesktop.io/)** on macOS. Docker Desktop also works. If nothing is installed, ask the user to install one of these and start it. You can't click through the installer or Windows security prompts for them — guide them, then confirm with `docker version`.
 2. **Clone the repo onto their disk** (a normal clone, so you can read and edit the code) and bring the stack up headlessly:
 
    ```bash
