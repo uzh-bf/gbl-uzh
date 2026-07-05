@@ -59,3 +59,17 @@ This document outlines successful didactical and mechanical patterns from existi
    Always use the platform's seeded randomness helpers (`diceRoll`, `computeScenarioOutcome`) which are based on Mersenne-Twister. Never use `Math.random()`. This ensures that if the server crashes or the segment is re-evaluated, the exact same random environment is generated.
 
 *Reference:* The scenario outcome generation across our simulation portfolio.
+
+## Consolidation-Phase Decisions (Period-End Planning)
+
+**The Problem:** Some decisions do not fit within the high-frequency rhythm of segment actions. Instead, they require a macro, period-level view (e.g. strategic investments, profit distribution, or structural planning) after segment outcomes are known.
+
+**The Pattern:** Utilize the `CONSOLIDATION` phase to capture long-term strategic decisions using the platform's `PlayerDecision` entity. 
+
+**How to Implement:**
+1. **Frontend (`/play/cockpit`):**
+   When `game.status` is `CONSOLIDATION`, render a dedicated decision form (e.g., investment choices, factory expansion) that saves decisions via the `saveDecisions` mutation (using `PlayerDecision` with type `CONSOLIDATION`).
+2. **Backend (`PeriodResultService.end`):**
+   The platform passes these inputs as `consolidationDecisions` (along with all `segmentEndResults` and `otherPlayersSegmentEndResults`) to the `PeriodResult.end` hook. Use this hook to resolve the macro consequences (e.g., applying factory purchases to the player's capital facts for the next period).
+
+*Reference:* End-of-year capital investments (e.g., investing into factories) in `business-game`.

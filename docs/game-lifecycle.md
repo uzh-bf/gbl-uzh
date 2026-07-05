@@ -60,7 +60,7 @@ The player cockpit is a single page that switches on `game.status` (`apps/demo-g
 | SCHEDULED              | "Game is scheduled" placeholder                                                         |
 | PREPARATION            | Header only — waiting while the admin sets up                                           |
 | RUNNING                | The decision form (game-specific), plus a Ready toggle                                  |
-| PAUSED / CONSOLIDATION | Read-only segment results: tables + charts of what just happened; waiting for the admin |
+| PAUSED / CONSOLIDATION | Read-only segment results OR active period consolidation forms (e.g. investing in factories, setting dividends for the period) |
 | RESULTS                | Period-end report: aggregate charts across the period(s)                                |
 
 Independent of status: story elements attached to a newly activated segment appear as blocking popups until acknowledged; learning elements sit in a sidebar list; achievements/level-ups arrive as notifications.
