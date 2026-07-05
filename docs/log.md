@@ -1,5 +1,10 @@
 # Log
 
+## 2026-07-05
+
+- **Creation**: `building-with-an-agent.md` - the external-agent onboarding path: point a host coding agent (Claude Desktop / Codex, Windows or macOS) at a normal `git clone`, bring the starter stack up headlessly with Docker only (no VS Code, no volume-clone), and run repo commands via `docker compose exec`. Bring-up commands verified end-to-end (app 200 on host `localhost:3000`, OIDC issuer match).
+- **Update**: `getting-started.md` - added a cross-pointer to the external-agent path; `index.md` - added the new page to the reading order and completed the agent-skills list (`gbl-playwright-e2e`, `gbl-environment-doctor`).
+
 ## 2026-07-04
 
 - **Creation**: `getting-started.md` - plain-language onboarding for non-technical game builders (Docker Desktop + VS Code + Dev Containers extension, the "GBL Starter" devcontainer configuration with published localhost ports and preinstalled Claude Code, one-click mock login, first prompts, health-check escalation).

@@ -9,6 +9,7 @@ An [Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-cata
 ## Concepts (reading order)
 
 - [Getting Started (No Coding Experience Needed)](getting-started.md) - How to get the GBL platform running on your own computer and build a learning game together with an AI assistant — without writing code yourself
+- [Building a Game with Your Own Coding Agent](building-with-an-agent.md) - The alternative onboarding: point an external host coding agent (Claude Desktop, Codex, …) at the repo, bring it up with Docker only, no VS Code
 - [Platform Overview](platform-overview.md) - What the platform is, monorepo layout, what the platform owns vs. what a game owns
 - [Game Model](game-model.md) - Data model: games, periods, segments, players, facts, results, decisions, content
 - [Game Lifecycle](game-lifecycle.md) - The game state machine, admin controls, and the full end-to-end flow
@@ -19,7 +20,7 @@ An [Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-cata
 
 ## Related resources
 
-- [Agent skills](../.agents/skills/) - `gbl-game-design`, `gbl-new-game-app`, `gbl-backend-computations`, `gbl-frontend-game-ui`, `gbl-wiki-maintenance`
+- [Agent skills](../.agents/skills/) - `gbl-game-design`, `gbl-new-game-app`, `gbl-backend-computations`, `gbl-frontend-game-ui`, `gbl-playwright-e2e`, `gbl-environment-doctor`, `gbl-wiki-maintenance`
 - [Reference game](../apps/demo-game/) - the single worked implementation all pages cite
 - [E2E flow spec](../playwright/tests/demo-game-flow.spec.ts) - executable ground truth for the lifecycle
 

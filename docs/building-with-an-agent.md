@@ -1,0 +1,95 @@
+---
+type: Getting Started Guide
+title: Building a Game with Your Own Coding Agent
+description: Point an external coding agent (Claude Desktop, Codex, Claude Code on your host) at this repo on Windows or macOS, bring the platform up with Docker only, and build a game — no VS Code required.
+tags:
+  - onboarding
+  - agent
+  - devcontainer
+  - docker
+timestamp: "2026-07-05T00:00:00Z"
+---
+
+# Building a Game with Your Own Coding Agent
+
+There are two ways to get from nothing to a running game:
+
+- **[getting-started.md](getting-started.md)** — you drive VS Code yourself, and Claude Code runs _inside_ the devcontainer. Best for a guided, click-through setup.
+- **This page** — you point your _own_ coding agent (Claude Desktop, the Codex app, Claude Code in a host terminal, …) at the repo, and it drives setup and building for you. Best if you already have an agent and want it to do the work.
+
+This page is written so you can hand it — or the first-game brief that links here — straight to that agent.
+
+## The one thing that's different: a host clone, not a volume clone
+
+Your agent runs on your computer (the "host"), so it can only see and edit files that live on your computer's disk. That rules out VS Code's "Clone Repository in **Container Volume**" — that hides the code inside Docker, where a host agent can't reach it.
+
+Instead:
+
+1. **Clone the repo normally, onto your disk** (`git clone`).
+2. Bring up the **starter devcontainer**, which **bind-mounts your host clone** into the container.
+3. Your agent **edits the source files in your host clone**; the container runs them and serves the app on **http://localhost:3000**.
+4. Your agent **runs repo commands inside the container** (the toolchain and `node_modules` live there, not on your host).
+
+## What you install
+
+Just **Docker Desktop** — <https://www.docker.com/products/docker-desktop/>.
+
+- **Windows:** accept **WSL 2** when the installer offers it (restart if asked). Run the agent's shell commands from **PowerShell** or a **WSL** terminal — either can reach Docker.
+- **macOS:** pick the Apple Silicon or Intel build.
+
+You do **not** need VS Code, Node, pnpm, or the platform toolchain on your host — only Docker (plus `git` to clone).
+
+## Bring the platform up (headless, Docker only)
+
+Clone and start the stack. Replace `gbl` with any project name you like, but keep it the same across all commands.
+
+```bash
+git clone https://github.com/uzh-bf/gbl-uzh
+cd gbl-uzh
+
+# 1. Build + start Postgres, the app container, and the OIDC mock login
+docker compose -f .devcontainer/starter/docker-compose.yml -p gbl up -d --build
+
+# 2. Install deps, build shared packages, create + seed the database (~1-2 min)
+docker compose -p gbl exec app bash /workspaces/gbl-uzh/.devcontainer/post-create.sh
+
+# 3. Start the dev server (the first page compiles in ~30-60s)
+docker compose -p gbl exec app bash /workspaces/gbl-uzh/.devcontainer/post-start.sh
+```
+
+> **Shortcut if you have Node on your host:** `npx -y @devcontainers/cli up --workspace-folder . --config .devcontainer/starter/devcontainer.json` does steps 1–3 in one command (it runs the same setup hooks). The three Docker commands above need only Docker.
+
+## Check it works
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' http://localhost:3000        # -> 200
+```
+
+Open **http://localhost:3000** in your browser, then **http://localhost:3000/admin/login** and click the login button — no password; you're the demo admin `gbl-dev@df.uzh.ch`. (Players join a game through a per-game link and never need accounts.)
+
+## How your agent works from here
+
+- **Edit code** in your host clone. Changes are live in the container immediately (bind mount) and the dev server hot-reloads.
+- **Run repo commands inside the container.** Whenever a skill or the docs tell you to run something (`pnpm …`, `prisma …`, a health check), run it in the container:
+
+  ```bash
+  docker compose -p gbl exec app bash -lc 'cd /workspaces/gbl-uzh && <the command>'
+  ```
+
+  Do **not** run `pnpm install` on your host — `node_modules` live in the container's volumes so the Linux-native binaries stay correct.
+
+- **Follow the game-building skills** (they assume this platform and read the wiki themselves): `gbl-game-design` (first, before any code) → `gbl-new-game-app` (scaffold) → `gbl-backend-computations` → `gbl-frontend-game-ui`, with `gbl-playwright-e2e` for tests. See [developing-a-game.md](developing-a-game.md) and the [agent skills](../.agents/skills/).
+- **If anything breaks** (app won't load, login fails, empty admin UI): run the `gbl-environment-doctor` skill first, before debugging code. Its checks are meant to run inside the container, so prefix them with `docker compose -p gbl exec app …` as above. The mode is `starter`; the app is always `http://localhost:3000`.
+
+## Stop, restart, reset
+
+```bash
+docker compose -p gbl stop        # pause (keeps data)
+docker compose -p gbl up -d       # resume, then re-run post-start.sh for the dev server
+docker compose -p gbl down        # remove containers (keeps the database volume)
+docker compose -p gbl down -v     # full reset (also wipes the database)
+```
+
+## A first game to build
+
+For a concrete, self-contained brief you can hand to your agent — set up the platform, build a "Central Bank" monetary-policy game with the skills, and report back on how well they guided it — see [`project/2026-07-05-central-bank-first-game-brief.md`](../project/2026-07-05-central-bank-first-game-brief.md).
