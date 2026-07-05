@@ -19,7 +19,7 @@ The full reference is `docs/building-with-an-agent.md` (you'll have it once clon
    docker compose -p gbl exec app bash /workspaces/gbl-uzh/.devcontainer/post-start.sh
    ```
 
-3. **Verify:** `curl -s -o /dev/null -w '%{http_code}' http://localhost:3000` returns `200`. Have the user open <http://localhost:3000> and log in at <http://localhost:3000/admin/login> — one click, no password; they become admin `gbl-dev@df.uzh.ch`.
+3. **Verify:** `docker compose -p gbl exec app curl -s -o /dev/null -w '%{http_code}' http://localhost:3000` returns `200` (curl runs inside the container, so it works from PowerShell too). Have the user open <http://localhost:3000> and log in at <http://localhost:3000/admin/login> — one click, no password; they become admin `gbl-dev@df.uzh.ch`.
 4. **From now on:** edit game code in the host clone (those are the files you can see and edit); run **every** repo command inside the container with `docker compose -p gbl exec app bash -lc 'cd /workspaces/gbl-uzh && <command>'`. Never run `pnpm install` on the host.
 5. If anything is off (app won't load, login fails, empty admin UI), invoke the **`gbl-environment-doctor`** skill (run its checks via the exec prefix) before debugging code.
 
@@ -53,7 +53,7 @@ Actually invoke/read each skill and the docs it points to rather than working fr
 3. **`gbl-new-game-app`** — scaffold by copying `apps/demo-game` (e.g. `apps/central-bank`), fix the package name, install, point it at a fresh DB. Run the skill's first-run browser verification before writing any new feature.
 4. **`gbl-backend-computations`** — implement the six-module `Services` contract: new facts types + yup schemas (`src/types/`), the macro response model in the segment/period result computation (replacing the demo's asset-return math), `Actions.apply` validation for the rate, and seed data (the `PlayerLevel` ladder is mandatory). Hand-verify the numbers for one round.
 5. **`gbl-frontend-game-ui`** — build the cockpit: the RUNNING decision form (rate input + current economy state + target), the CONSOLIDATION/RESULTS views (inflation / unemployment vs. target charts), and the **leaderboard** — expected to be genuinely new work, since the platform has no leaderboard today. Reuse `@uzh-bf/design-system` and `@gbl-uzh/ui` components first.
-6. **`gbl-playwright-e2e`** — adapt the demo-game lifecycle spec to the new decision + assertions and get one multi-player full-lifecycle run green.
+6. **`gbl-playwright-e2e`** — adapt the demo-game lifecycle spec to the new decision + assertions and get one multi-player full-lifecycle run green. **Skip the skill's "Local Stack" section** (it's for the devrouter/DevPod setup) — here the app is already at `http://localhost:3000`; run Playwright inside the container via the exec prefix, installing browsers once with `... exec app bash -lc 'cd /workspaces/gbl-uzh && pnpm exec playwright install --with-deps chromium'`.
 7. **`gbl-wiki-maintenance`** — you probably will **not** need this (a new game app doesn't change shared `packages/platform` / `packages/ui` behavior). If you feel pulled to edit `docs/`, note why.
 
 Throughout: **verify in a real browser** (log in as admin, create the game, join as one or two players via the join links, drive a full period → segment → consolidation → results loop) — not just static checks.

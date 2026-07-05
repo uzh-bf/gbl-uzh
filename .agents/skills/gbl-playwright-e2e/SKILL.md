@@ -23,7 +23,9 @@ Playwright docs/skills only for API details; keep repo-specific decisions here.
 
 ## Local Stack
 
-Run from repo root:
+**Starter / Docker-only mode first** (`GBL_DEV_MODE=starter`, i.e. the app is published on `http://localhost:3000` — the getting-started / building-with-an-agent path): **skip this entire section.** There is no devrouter, DevPod, or `demo-game.localhost`; the app is already at `http://localhost:3000`. Run Playwright **inside the container** (prefix with `docker compose -p <name> exec app ...` when driving from the host), install browsers once with `pnpm exec playwright install --with-deps chromium`, and point tests at `http://localhost:3000` (override `PLAYWRIGHT_BASE_URL` if the config defaults elsewhere). Everything below is the devrouter/DevPod maintainer stack only.
+
+Run from repo root (devrouter/DevPod stack):
 
 ```bash
 dev up

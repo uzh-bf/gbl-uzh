@@ -61,11 +61,13 @@ docker compose -p gbl exec app bash /workspaces/gbl-uzh/.devcontainer/post-start
 
 ## Check it works
 
-```bash
-curl -s -o /dev/null -w '%{http_code}\n' http://localhost:3000        # -> 200
-```
+Open **http://localhost:3000** in your browser — you should see the demo game. Then open **http://localhost:3000/admin/login** and click the login button — no password; you're the demo admin `gbl-dev@df.uzh.ch`. (Players join a game through a per-game link and never need accounts.)
 
-Open **http://localhost:3000** in your browser, then **http://localhost:3000/admin/login** and click the login button — no password; you're the demo admin `gbl-dev@df.uzh.ch`. (Players join a game through a per-game link and never need accounts.)
+For a scripted check, curl _inside the container_ (works from PowerShell, WSL, or macOS — unlike a host `curl`, which PowerShell rewrites):
+
+```bash
+docker compose -p gbl exec app curl -s -o /dev/null -w '%{http_code}\n' http://localhost:3000   # -> 200
+```
 
 ## How your agent works from here
 
@@ -78,7 +80,7 @@ Open **http://localhost:3000** in your browser, then **http://localhost:3000/adm
 
   Do **not** run `pnpm install` on your host — `node_modules` live in the container's volumes so the Linux-native binaries stay correct.
 
-- **Follow the game-building skills** (they assume this platform and read the wiki themselves): `gbl-game-design` (first, before any code) → `gbl-new-game-app` (scaffold) → `gbl-backend-computations` → `gbl-frontend-game-ui`, with `gbl-playwright-e2e` for tests. See [developing-a-game.md](developing-a-game.md) and the [agent skills](../.agents/skills/).
+- **Follow the game-building skills** (they assume this platform and read the wiki themselves): `gbl-game-design` (first, before any code) → `gbl-new-game-app` (scaffold) → `gbl-backend-computations` → `gbl-frontend-game-ui`, with `gbl-playwright-e2e` for tests. See [developing-a-game.md](developing-a-game.md) and the [agent skills](../.agents/skills/). One caveat: `gbl-playwright-e2e`'s "Local Stack" section is for the devrouter/DevPod setup — in this Docker-only mode the app is already at `http://localhost:3000`, so skip that section and run Playwright inside the container (the skill now says as much).
 - **If anything breaks** (app won't load, login fails, empty admin UI): run the `gbl-environment-doctor` skill first, before debugging code. Its checks are meant to run inside the container, so prefix them with `docker compose -p gbl exec app …` as above. The mode is `starter`; the app is always `http://localhost:3000`.
 
 ## Stop, restart, reset

@@ -40,8 +40,13 @@ Headless bring-up proven on this checkout (the bind-mount `../..` = a host-clone
 
 ## Progress
 
-- S1 done — plan committed.
+- S1 done — plan committed (`bcb955d4`).
+- S2 done — `docs/building-with-an-agent.md` + index/log/getting-started/AGENTS pointers; prettier + OKF checker pass (`c45a55d8`).
+- S3 done — `project/2026-07-05-central-bank-first-game-brief.md` (same commit `c45a55d8`, cross-linked from the doc).
+- S4 done — review subagent (DONE_WITH_CONCERNS). Integrated: Critical (host `curl` breaks in PowerShell -> in-container `docker compose exec app curl` + browser-first verify, in doc + brief); Important (`gbl-playwright-e2e` "Local Stack" assumes devrouter -> added starter/Docker-only note to the skill + caveats in doc + brief step 6). Minors accepted-as-is: redundant `cd` (harmless, explicit), Node-shortcut framing (gated). Plan bookkeeping updated (this section).
 
 ## Next Steps
 
-- Fill at end.
+- Draft PR to `dev` via `df-mr-description-writer`; rename plan to `pr-<id>` after.
+- Follow-up (out of scope here): consider making the starter config the default picker entry, or renaming the devrouter config away from `gbl-uzh-demo-game`, so a non-technical VS Code user cannot pick the wrong one.
+- Real dogfood run of the brief will surface further skill/doc gaps.
