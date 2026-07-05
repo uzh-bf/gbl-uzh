@@ -21,7 +21,7 @@ import { twMerge } from 'tailwind-merge'
 
 import PlayerCompact from '~/components/PlayerCompact'
 
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import {
   STATUS,
   computePeriodStatus,
@@ -34,9 +34,11 @@ import {
   AddCountdownDocument,
   AddGamePeriodDocument,
   AddPeriodSegmentDocument,
+  FinishGameDocument,
   Game,
   GameDocument,
   GameStatus,
+  GlobalEventsDocument,
   LearningElementsDocument,
   Player,
   StoryElementsDocument,
@@ -68,16 +70,44 @@ import {
   TREND_STOCKS,
 } from '~/types/Period'
 
+// Global event types that should trigger an admin refetch. Module-level so it
+// is not rebuilt on every subscription callback.
+const RELEVANT_EVENT_TYPES = new Set([
+  'GAME_STATE_UPDATED',
+  'PERIOD_ACTIVATED',
+  'SEGMENT_ACTIVATED',
+  'COUNTDOWN_UPDATED',
+  'SWITCH_TOGGLED',
+])
+
 function ManageGame() {
   const router = useRouter()
 
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
 
-  const { data, error, loading } = useQuery(GameDocument, {
+  const { data, error, loading, refetch } = useQuery(GameDocument, {
     variables: { id: Number(router.query.id) },
-    pollInterval: 15000,
     skip: !router.query.id,
+  })
+
+  // Realtime: refetch the game whenever a relevant lifecycle event is published
+  // for this game (admin-triggered transitions, countdowns, switches). Replaces
+  // the previous 15s poll.
+  useSubscription(GlobalEventsDocument, {
+    skip: !router.query.id,
+    onData: ({ data: subData }) => {
+      const event = subData?.data?.eventsGlobal
+      if (!event || event.facts?.gameId !== Number(router.query.id)) return
+      if (event.type && RELEVANT_EVENT_TYPES.has(event.type)) {
+        refetch().catch((err) => {
+          console.error('Admin: failed to refetch game after event:', err)
+        })
+      }
+    },
+    onError: (err) => {
+      console.error('Admin: GlobalEvents subscription error:', err)
+    },
   })
 
   const {
@@ -107,6 +137,8 @@ function ManageGame() {
   const [activateNextSegment, { loading: nextSegmentLoading }] = useMutation(
     ActivateNextSegmentDocument
   )
+  const [finishGame, { loading: finishGameLoading }] =
+    useMutation(FinishGameDocument)
   const [addGamePeriod, { loading: addGamePeriodLoading }] = useMutation(
     AddGamePeriodDocument,
     {
@@ -147,6 +179,14 @@ function ManageGame() {
 
   const nextSegment = () =>
     activateNextSegment({
+      variables: {
+        gameId: Number(router.query.id),
+      },
+      refetchQueries: [GameDocument],
+    })
+
+  const endGame = () =>
+    finishGame({
       variables: {
         gameId: Number(router.query.id),
       },
@@ -255,9 +295,22 @@ function ManageGame() {
           </Button>
         )
       case GameStatus.Results: {
-        const anotherPeriod = game.activePeriodIx > game.periods.length - 1
+        // `activePeriodIx` is advanced early (at consolidation). While it still
+        // points at an existing period, RESULTS -> PREPARATION starts that
+        // period ("Next Period"). Once it reaches `periods.length` (the final
+        // period's consolidation advanced past the last period), the only move
+        // is FINISH_GAME -> COMPLETED ("Finish Game"). Mirrors the server-side
+        // XState guards.
+        const isFinished = (game.activePeriodIx ?? 0) >= game.periods.length
+        if (isFinished) {
+          return (
+            <Button disabled={finishGameLoading} onClick={endGame}>
+              Finish Game
+            </Button>
+          )
+        }
         return (
-          <Button disabled={anotherPeriod} onClick={nextPeriod}>
+          <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
             Next Period
           </Button>
         )

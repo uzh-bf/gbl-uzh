@@ -6,6 +6,31 @@ import wikiLinkPlugin from 'remark-wiki-link'
 
 const PREFIX = '../quartz/content/'
 
+export function slugFromContentFilename(filename: string) {
+  return filename
+    .replace(/\.md?$/, '')
+    .replace(/\s/g, '-')
+    .toLowerCase()
+}
+
+export function findContentFilenameForSlug(filenames: string[], slug: string) {
+  return filenames.find(
+    (filename) =>
+      /\.md?$/.test(filename) && slugFromContentFilename(filename) === slug
+  )
+}
+
+function getContentPath(dir_name: string, slug: string) {
+  const dirPath = path.join(process.cwd(), `${PREFIX}/${dir_name}/`)
+  const filename = findContentFilenameForSlug(fs.readdirSync(dirPath), slug)
+
+  if (!filename) {
+    throw new Error(`No markdown file found for slug "${slug}" in ${dir_name}`)
+  }
+
+  return path.join(dirPath, filename)
+}
+
 const wikiPlugin: any = [
   wikiLinkPlugin,
   {
@@ -19,21 +44,7 @@ const wikiPlugin: any = [
 
 export function getStaticProps(dir_name: string) {
   return async ({ params }: any) => {
-    // slugs come in like "portfolio-management-game"
-    // but we want to read from files like "Portfolio Management Game.md"
-    const filenameTitleCase = params.slug
-      .trim()
-      .replace(/-/g, ' ')
-      .toLowerCase()
-      // all independent words should begin with a capital character
-      .replace(/\w\S*/g, (w: any) =>
-        w.replace(/^\w/, (c: any) => c.toUpperCase())
-      )
-
-    const mdxPath = path.join(
-      process.cwd(),
-      `${PREFIX}/${dir_name}/${filenameTitleCase}.md`
-    )
+    const mdxPath = getContentPath(dir_name, params.slug.trim().toLowerCase())
     const source = fs.readFileSync(mdxPath)
     const mdxSource = await serialize(source, {
       parseFrontmatter: true,
@@ -52,12 +63,7 @@ export function getStaticPaths(dir_name: string) {
     const paths = fs
       .readdirSync(path.join(process.cwd(), `${PREFIX}/${dir_name}/`))
       .filter((p) => /\.md?$/.test(p))
-      .map((p) =>
-        p
-          .replace(/\.md?$/, '')
-          .replace(/\s/g, '-')
-          .toLowerCase()
-      )
+      .map(slugFromContentFilename)
       .map((slug) => ({ params: { slug } }))
 
     return { paths, fallback: false }

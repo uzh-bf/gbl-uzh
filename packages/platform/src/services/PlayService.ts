@@ -39,7 +39,9 @@ export async function performAction<ActionTypes>(
   let globalNotificationToPublish
 
   // All reads and writes are now in a single atomic transaction.
-  const res = ctx.prisma.$transaction(
+  // NOTE: must be awaited so that the notification variables below are
+  // populated (the transaction callback assigns them) before we publish.
+  const res = await ctx.prisma.$transaction(
     async (tx) => {
       const previousResult = await tx.playerResult.findUnique({
         where: {
@@ -223,22 +225,30 @@ export async function performActionWithRetry<ActionTypes>(
   maxRetries: number = 3
 ) {
   let retries = 0
+  let lastError: unknown
   while (retries < maxRetries) {
     try {
       return await performAction(args, ctx, { services })
     } catch (error: any) {
       if (
-        error.isPrismaError &&
+        error instanceof DB.Prisma.PrismaClientKnownRequestError &&
         (error.code === 'P2025' || error.code === 'P2034')
       ) {
+        lastError = error
         retries++
         // Wait a bit before retrying
         await new Promise((res) => setTimeout(res, 50 + Math.random() * 50))
+        continue
       }
       throw error // Re-throw if it's not a concurrency issue
     }
   }
-  throw new Error('Failed to perform action after multiple retries')
+  // keep the underlying Prisma error as the cause so the concurrency code that
+  // exhausted the retries is not lost when this surfaces to the caller
+  throw new Error(
+    `Failed to perform action after ${maxRetries} retries`,
+    { cause: lastError }
+  )
 }
 
 interface SaveDecisionsArgs {
@@ -312,6 +322,40 @@ interface GetPlayerResultArgs {
   playerId: string
 }
 
+/**
+ * Pure visibility rule for `getPlayerResult`: what a player may see at their
+ * current period/segment. Future periods (index > activePeriodIx) and future
+ * segments of the active period (index > activeSegmentIx) are filtered out, and
+ * the result type to fetch is resolved — PERIOD_START only before the very first
+ * segment of the first period (the `activeSegmentIx === -1` sentinel), otherwise
+ * SEGMENT_END. Plain arrays in, plain data out, no mutation — so the rule and
+ * the `-1` sentinel live in one testable place. Generic over the element types
+ * so the rich Prisma rows pass through unchanged at the call site. See
+ * CONTEXT.md ("visibility filter").
+ */
+export function filterVisiblePeriods<
+  P extends { index: number },
+  S extends { index: number }
+>(
+  periods: P[],
+  activePeriod: { segments: S[] },
+  activePeriodIx: number,
+  activeSegmentIx: number
+): { filteredPeriods: P[]; filteredActiveSegments: S[]; resultType: DB.PlayerResultType } {
+  const filteredPeriods = periods.filter(
+    (period) => period.index <= activePeriodIx
+  )
+  const filteredActiveSegments = activePeriod.segments.filter(
+    (segment) => segment.index <= activeSegmentIx
+  )
+  const resultType =
+    activePeriodIx === 0 && activeSegmentIx === -1
+      ? DB.PlayerResultType.PERIOD_START
+      : DB.PlayerResultType.SEGMENT_END
+
+  return { filteredPeriods, filteredActiveSegments, resultType }
+}
+
 export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
   const currentGame = await ctx.prisma.game.findUnique({
     where: {
@@ -355,20 +399,29 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
   // segmentCount from DB is used as-is (not overwritten with segments.length)
   // so the timeline can correctly forecast remaining segments
 
-  // We filter up to the active period (and active segment) - future periods
-  // should not be visible to the user
-  const activePeriodIx = currentGame.activePeriodIx
-  currentGame.periods = currentGame.periods.filter(
-    (period) => period.index <= activePeriodIx
-  )
+  // Filter up to the active period (and active segment) - future periods and
+  // segments should not be visible to the user. The rule + the -1 sentinel for
+  // the result type live in filterVisiblePeriods.
+  // Final RESULTS uses activePeriodIx as a marker; the relation is the period.
+  const activePeriodIx = currentGame.activePeriod.index
   const activeSegmentIx = currentGame.activePeriod.activeSegmentIx
 
-  currentGame.activePeriod.segments = currentGame.activePeriod.segments.filter(
-    (segment) => segment.index <= activeSegmentIx
+  const { filteredPeriods, filteredActiveSegments, resultType } =
+    filterVisiblePeriods(
+      currentGame.periods,
+      currentGame.activePeriod,
+      activePeriodIx,
+      activeSegmentIx
+    )
+  currentGame.periods = filteredPeriods
+  currentGame.activePeriod.segments = filteredActiveSegments
+  // mirror the filtered active-period segments into the periods array entry
+  const activePeriodInList = currentGame.periods.find(
+    (period) => period.index === activePeriodIx
   )
-
-  currentGame.periods[activePeriodIx]!.segments =
-    currentGame.activePeriod.segments
+  if (activePeriodInList) {
+    activePeriodInList.segments = filteredActiveSegments
+  }
 
   const previousResults = await ctx.prisma.playerResult.findMany({
     orderBy: {
@@ -389,13 +442,10 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
   const playerResult = await ctx.prisma.playerResult.findUnique({
     where: {
       periodIx_segmentIx_playerId_type: {
-        periodIx: currentGame.activePeriodIx,
+        periodIx: activePeriodIx,
         segmentIx: currentGame.activePeriod.activeSegmentIx,
         playerId: args.playerId,
-        type:
-          activePeriodIx === 0 && activeSegmentIx === -1
-            ? DB.PlayerResultType.PERIOD_START
-            : DB.PlayerResultType.SEGMENT_END,
+        type: resultType,
       },
     },
     include: {

@@ -11,7 +11,8 @@
   "dependencies": {
     "nanoid": "5.0.8",
     "random-js": "2.1.0",
-    "winston": "3.17.0"
+    "winston": "3.17.0",
+    "xstate": "5.20.1"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "~15.3.0",
@@ -54,7 +55,9 @@
     "build:nexus": "tsx src/nexus.ts",
     "build:ts": "cross-env NODE_ENV=production rollup -c",
     "dev": "cross-env NODE_ENV=development rollup -c --watch",
-    "generate": "prisma generate"
+    "generate": "prisma generate",
+    "test": "tsx --test 'src/**/*.test.ts'",
+    "lifecycle:diagram": "tsx scripts/lifecycle-diagram.ts"
   },
   "engines": {
     "node": ">=24"

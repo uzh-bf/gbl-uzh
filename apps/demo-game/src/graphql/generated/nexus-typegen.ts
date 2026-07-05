@@ -333,6 +333,7 @@ export interface NexusGenFieldTypes {
     addPeriodSegment: NexusGenRootTypes['PeriodSegment'] | null; // PeriodSegment
     attemptLearningElement: NexusGenRootTypes['LearningElementAttempt'] | null; // LearningElementAttempt
     createGame: NexusGenRootTypes['Game'] | null; // Game
+    finishGame: NexusGenRootTypes['Game'] | null; // Game
     loginAsTeam: NexusGenRootTypes['Player'] | null; // Player
     logoutAsTeam: boolean | null; // Boolean
     markStoryElement: NexusGenRootTypes['Player'] | null; // Player
@@ -528,6 +529,7 @@ export interface NexusGenFieldTypeNames {
     addPeriodSegment: 'PeriodSegment'
     attemptLearningElement: 'LearningElementAttempt'
     createGame: 'Game'
+    finishGame: 'Game'
     loginAsTeam: 'Player'
     logoutAsTeam: 'Boolean'
     markStoryElement: 'Player'
@@ -682,6 +684,9 @@ export interface NexusGenArgTypes {
       facts: NexusGenInputs['GameFactsInput']; // GameFactsInput!
       name: string; // String!
       playerCount: number; // Int!
+    }
+    finishGame: { // args
+      gameId: number; // Int!
     }
     loginAsTeam: { // args
       token: string; // String!
