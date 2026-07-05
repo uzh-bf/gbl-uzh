@@ -7,7 +7,7 @@ tags:
   - starter
   - devcontainer
   - non-technical
-timestamp: "2026-07-04T00:00:00Z"
+timestamp: "2026-07-05T00:00:00Z"
 ---
 
 # Getting Started (No Coding Experience Needed)
@@ -17,6 +17,8 @@ This guide gets you from nothing to a running learning-game platform on your own
 You do not need to know Git, terminals, or programming. Expect the first-time setup to take about half an hour, most of it waiting.
 
 For **Windows 10/11** and **macOS**.
+
+> Already have your own coding agent (Claude Desktop, the Codex app, Claude Code in a terminal) and want it to drive the setup instead of doing it in VS Code yourself? Follow [building-with-an-agent.md](building-with-an-agent.md) — it needs only Docker (no VS Code).
 
 ## What you need (three free installs)
 
