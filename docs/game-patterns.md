@@ -73,3 +73,14 @@ This document outlines successful didactical and mechanical patterns from existi
    The platform passes these inputs as `consolidationDecisions` (along with all `segmentEndResults` and `otherPlayersSegmentEndResults`) to the `PeriodResult.end` hook. Use this hook to resolve the macro consequences (e.g., applying factory purchases to the player's capital facts for the next period).
 
 *Reference:* End-of-year capital investments (e.g., investing into factories) in `business-game`.
+
+## Preparation-Phase Decisions (Dormant Platform Feature)
+
+> [!WARNING]  
+> While the DB schema (`PlayerDecision`) and mutation (`saveDecisions`) support a `PREPARATION` decision type in theory, **this feature is currently unwired in the platform engine and does not work out of the box.**
+> 
+> Specifically:
+> 1. `PlayService.getPlayerDecision` is hardcoded to only fetch `CONSOLIDATION` decisions.
+> 2. The `PREPARATION -> RUNNING` transition (`activateNextSegment`) does not query period decisions and does not pass them to `SegmentResult.initialize`.
+> 
+> If a future game requires "begin of year" planning decisions, the platform's query layers and lifecycle hooks must first be extended to fetch and supply `PREPARATION` decisions to `SegmentResult.initialize`.
