@@ -3,7 +3,7 @@ import { Achievement } from './Achievement'
 // import { XpBar } from './XpBar'
 import { Button } from '@uzh-bf/design-system'
 
-interface PlayerDataProps {
+export interface PlayerDisplayProps {
   name?: string
   color?: string
   // xp?: number
@@ -40,7 +40,7 @@ function PlayerDisplay({
   imgPathAvatar,
   imgPathLocation,
   onClick,
-}: PlayerDataProps) {
+}: PlayerDisplayProps) {
   return (
     <div>
       <div className="flex flex-col gap-2">

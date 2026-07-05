@@ -20,7 +20,7 @@ interface ReusableFormFieldProps<TFieldValues extends FieldValues>
   isInt?: boolean
 }
 
-export default function ReusableFormField<TFieldValues extends FieldValues>({
+export function ReusableFormField<TFieldValues extends FieldValues>({
   control,
   name,
   label,

@@ -2,7 +2,7 @@ import { Button } from '@uzh-bf/design-system'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import ReusableFormField from './ReusableFormField'
+import { ReusableFormField } from './ReusableFormField'
 import { Form } from './ui/form'
 
 function optionalValueToCHFString(value: number, digits = 2) {
