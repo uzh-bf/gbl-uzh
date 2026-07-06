@@ -11,7 +11,7 @@ export const composeChartData = (dataPerPeriod: any, key: string) => {
   dataPerPeriod.forEach((periodData, periodIndex) => {
     if (Object.keys(periodData).length === 0) return
 
-    const players = Object.values(periodData)
+    const players = Object.values(periodData) as any[]
     const num = players.length > 0 ? players[0][key].length : NUM_MONTHS
 
     for (let i = 0; i < num; i++) {

@@ -13,7 +13,7 @@ interface Props {
     achievements: unknown[]
     imgPathAvatar?: string
     imgPathLocation?: string
-    onClick: () => void
+    onClick?: () => void
   }
   children?: React.ReactNode
   sidebar?: React.ReactNode

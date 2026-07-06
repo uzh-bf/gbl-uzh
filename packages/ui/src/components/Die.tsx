@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
-import ReactDice, { ReactDiceRef } from 'react-dice-complete'
+import { useEffect, useRef, useState } from 'react'
+import type { ReactDiceRef } from 'react-dice-complete'
 
 interface DieProps {
   die: number
@@ -29,29 +29,47 @@ const Die = ({
   rollDone,
 }: DieProps) => {
   const ref = useRef<ReactDiceRef>(null)
+  const [ReactDiceComponent, setReactDiceComponent] = useState<any>(null)
 
   useEffect(() => {
-    if (roll && ref.current && typeof ref.current.rollAll === 'function') {
+    import('react-dice-complete').then((mod) => {
+      setReactDiceComponent(() => mod.default)
+    })
+  }, [])
+
+  useEffect(() => {
+    if (ReactDiceComponent && roll && ref.current && typeof ref.current.rollAll === 'function') {
       ref.current.rollAll([die])
-    } else {
-      console.warn('rollAll method is not available on ref.current')
     }
-  }, [roll, die])
+  }, [roll, die, ReactDiceComponent])
 
   return (
-    <div className="flex flex-col items-center justify-center">
-      <ReactDice
-        numDice={1}
-        ref={ref}
-        defaultRoll={defaultRoll}
-        faceColor={faceColor}
-        dotColor={dotColor ?? 'white'}
-        dieSize={dieSize}
-        margin={margin}
-        rollTime={2}
-        disableIndividual
-        rollDone={rollDone ?? emptyRollDoneFn}
-      />
+    <div className="flex flex-col items-center justify-center min-h-[40px]">
+      {ReactDiceComponent ? (
+        <ReactDiceComponent
+          numDice={1}
+          ref={ref}
+          defaultRoll={defaultRoll}
+          faceColor={faceColor}
+          dotColor={dotColor ?? 'white'}
+          dieSize={dieSize}
+          margin={margin}
+          rollTime={2}
+          disableIndividual
+          rollDone={rollDone ?? emptyRollDoneFn}
+        />
+      ) : (
+        <div 
+          style={{ 
+            width: dieSize, 
+            height: dieSize, 
+            backgroundColor: faceColor, 
+            borderRadius: '4px',
+            margin: margin 
+          }} 
+          className="animate-pulse"
+        />
+      )}
       {label && <span className="text-sm">{label}</span>}
     </div>
   )
@@ -60,3 +78,4 @@ const Die = ({
 Die.displayName = 'Die'
 
 export default Die
+

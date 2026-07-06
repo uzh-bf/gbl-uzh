@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from '@uzh-bf/design-system'
 
-const Die = dynamic(() => import('~/components/Die'), {
+const Die = dynamic(() => import('@gbl-uzh/ui').then((mod) => mod.Die), {
   ssr: false,
 })
 

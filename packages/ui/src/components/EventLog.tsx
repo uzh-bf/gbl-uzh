@@ -19,7 +19,7 @@ export interface EventLogProps<T = Record<string, unknown>> {
   rowClassName?: (row: T) => string
 }
 
-export function EventLog({
+export function EventLog<T = Record<string, unknown>>({
   title,
   description,
   columns,
@@ -27,7 +27,7 @@ export function EventLog({
   maxHeightClass = 'max-h-[300px]',
   className = '',
   rowClassName,
-}: EventLogProps) {
+}: EventLogProps<T>) {
   return (
     <Card className={cn('w-full', className)}>
       <CardHeader className="pb-3">

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { DataGrid, Column, RowsChangeData } from 'react-data-grid'
-import 'react-data-grid/lib/styles.css'
 
 export interface GenericDataGridProps<TRow, TSummaryRow = unknown> {
   columns: readonly Column<TRow, TSummaryRow>[]

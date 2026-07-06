@@ -14,10 +14,10 @@ export interface PlayerDisplayProps {
     id: number
     count: number
     achievement: {
-      id: number
+      id: string | number
       name: string
-      descpription: string
-      image: string
+      description: string
+      image?: string | null
       reward?: { xp?: number } | null
     }
   }[]
@@ -64,7 +64,7 @@ function PlayerDisplay({
               name={achievement.achievement.name}
               xpReward={achievement.achievement.reward?.xp ?? 0}
               count={achievement.count}
-              image={achievement.achievement.image}
+              image={achievement.achievement.image ?? ''}
             />
           ))}
         </div>

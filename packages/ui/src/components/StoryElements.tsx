@@ -7,8 +7,8 @@ export interface StoryElementData {
   id: string
   title: string
   type: string
-  content: string
-  contentRole?: Record<string, string>
+  content?: string | null
+  contentRole?: Record<string, string> | null
 }
 
 interface StoryElementsProps {
@@ -45,7 +45,7 @@ function StoryElements({
     const firstElement = unseenStoryElements[0]
     switch (firstElement?.type) {
       case 'GENERIC':
-        return firstElement.content
+        return firstElement.content ?? ''
       case 'ROLE_BASED':
         return playerRole && firstElement.contentRole
           ? firstElement.contentRole[playerRole] ?? ''

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface CycleCountdownProps {
   expiresAt: Date
@@ -27,11 +27,20 @@ export function CycleCountdown({
 
   const [secondsLeft, setSecondsLeft] = useState<number>(getSecondsLeft)
 
+  // Store callbacks in refs so the interval is not torn down and recreated
+  // when the parent re-renders with new inline closure identities.
+  const onUpdateRef = useRef(onUpdate)
+  const onExpireRef = useRef(onExpire)
+  useEffect(() => {
+    onUpdateRef.current = onUpdate
+    onExpireRef.current = onExpire
+  })
+
   useEffect(() => {
     const tick = () => {
       const remaining = Math.max(0, Math.floor((expiresAt.getTime() - Date.now()) / 1000))
       setSecondsLeft(remaining)
-      onUpdate?.(remaining)
+      onUpdateRef.current?.(remaining)
       return remaining <= 0
     }
 
@@ -39,18 +48,18 @@ export function CycleCountdown({
       const isExpired = tick()
       if (isExpired) {
         clearInterval(intervalId)
-        onExpire?.()
+        onExpireRef.current?.()
       }
     }, 1000)
 
     const isExpired = tick() // run immediately
     if (isExpired) {
       clearInterval(intervalId)
-      onExpire?.()
+      onExpireRef.current?.()
     }
 
     return () => clearInterval(intervalId)
-  }, [expiresAt, onUpdate, onExpire])
+  }, [expiresAt])
 
   const progress = secondsLeft / totalDuration
   const strokeDashoffset = circumference * (1 - progress)
