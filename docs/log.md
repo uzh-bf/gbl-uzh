@@ -1,5 +1,11 @@
 # Log
 
+## 2026-07-06
+
+- **Creation**: `deploying-a-game.md` - the easy staging deploy path: a Vercel deployment of one game app backed by a Neon serverless Postgres, CLI-first (`neonctl` + `vercel`), distinct from the k8s production path (`deploy/`). Covers the monorepo build-order gotcha (`prisma/copy.ts` needs `@gbl-uzh/platform` built first), pooled vs direct Neon connection strings, the env-var matrix, and the Auth0/OIDC reality (mock OIDC is local-only).
+- **Update**: `developing-a-game.md` - added a "Decontaminate the copy" warning to the scaffolding section (demo-game residue hit-list) and a deploy pointer in the verification loop; `index.md` - added the new page to the reading order and `gbl-deploy-staging` to the skills list.
+- **Companion skill updates** (not part of the docs bundle, done in the same pass): new `gbl-deploy-staging` skill; `gbl-new-game-app` gained a decontamination checklist + definition of done; `gbl-playwright-e2e` promoted the starter/Docker path to default, added a spec-adaptation checklist, the fast-submit `toBeEnabled()` idiom, and a prominent sentinel-period callout; `gbl-wiki-maintenance` gained a deployment trigger.
+
 ## 2026-07-05
 
 - **Creation**: `building-with-an-agent.md` - the external-agent onboarding path: point a host coding agent (Claude Desktop / Codex, Windows or macOS) at a normal `git clone`, bring the starter stack up headlessly with Docker only (no VS Code, no volume-clone), and run repo commands via `docker compose exec`. Bring-up commands verified end-to-end (app 200 on host `localhost:3000`, OIDC issuer match).

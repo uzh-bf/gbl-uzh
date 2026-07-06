@@ -1,13 +1,14 @@
 ---
 name: gbl-playwright-e2e
-description: Create, run, debug, review, and extend Playwright E2E tests for the GBL demo-game app. Use when working in playwright/tests, Playwright config/CI, local devrouter/devcontainer browser validation, multi-player game flows, OIDC mock auth, report/dice/countdown assertions, flaky Playwright failures, or GBL Cypress-to-Playwright coverage planning.
+description: Create, run, debug, review, and extend Playwright E2E tests for GBL games (the demo-game suite and specs adapted for new game apps). Use when working in playwright/tests, Playwright config/CI, local devrouter/devcontainer browser validation, multi-player game flows, OIDC mock auth, report/dice/countdown assertions, flaky Playwright failures, or GBL Cypress-to-Playwright coverage planning.
 ---
 
 # GBL Playwright E2E
 
 Local stack unhealthy (app 404/refused, login broken, empty DB)? Run the `gbl-environment-doctor` skill first.
 
-Use this skill for GBL `apps/demo-game` Playwright work. Combine with generic
+Use this skill for GBL Playwright work, whether you are extending the demo-game
+suite or adapting it for a new game (`apps/<game>`). Combine with generic
 Playwright docs/skills only for API details; keep repo-specific decisions here.
 
 ## Repo Map
@@ -23,9 +24,25 @@ Playwright docs/skills only for API details; keep repo-specific decisions here.
 
 ## Local Stack
 
-**Starter / Docker-only mode first** (`GBL_DEV_MODE=starter`, i.e. the app is published on `http://localhost:3000` — the getting-started / building-with-an-agent path): **skip this entire section.** There is no devrouter, DevPod, or `demo-game.localhost`; the app is already at `http://localhost:3000`. Run Playwright **inside the container** (prefix with `docker compose -p <name> exec app ...` when driving from the host), install browsers once with `pnpm exec playwright install --with-deps chromium`, and point tests at `http://localhost:3000` (override `PLAYWRIGHT_BASE_URL` if the config defaults elsewhere). Everything below is the devrouter/DevPod maintainer stack only.
+There are two local stacks. Use the one that matches how the app is running. **The game-building skills (`gbl-new-game-app`, etc.) assume the starter path.**
 
-Run from repo root (devrouter/DevPod stack):
+### Starter / Docker-only (default for game-building agents)
+
+The getting-started / building-with-an-agent path: the app is published on `http://localhost:3000`, there is no devrouter, DevPod, or `<game>.localhost`. Run Playwright **inside the container**, prefixing every command with the exec container:
+
+```bash
+# Install browsers once per container (the binary persists in the container volume)
+docker compose -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && pnpm --filter @gbl-uzh/playwright exec playwright install --with-deps chromium'
+
+# Run the suite
+docker compose -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium'
+```
+
+Point tests at `http://localhost:3000` - set `PLAYWRIGHT_BASE_URL=http://localhost:3000` if the config defaults elsewhere. Everything below is the devrouter/DevPod maintainer stack only.
+
+### devrouter / DevPod (maintainer stack)
+
+Run from repo root:
 
 ```bash
 dev up
@@ -130,6 +147,9 @@ adapt it to GBL's smaller stack:
 > [!TIP]
 > **Segment facts validation schemas must allow empty/partial input.** When the admin clicks "Add Segment", the platform submits `{}` as the initial facts before calling `SegmentService.initialize`. If your yup schema marks fields as `.required()`, the mutation silently fails. Make segment-facts schema fields `.optional()` (or `.nullable()`) and let `SegmentService.initialize` fill them.
 
+> [!TIP]
+> **After clicking submit, assert `toBeEnabled()`, not `toBeDisabled()`.** GraphQL mutations resolve fast; by the time Playwright checks, the button has already re-enabled. Asserting `toBeDisabled()` flakes. The stable idiom is: click submit, then `await expect(submitButton).toBeEnabled()` to confirm the mutation finished processing, then assert the next durable UI state (e.g. the "Set Ready" button appears).
+
 ## GBL Game Flow Rules
 
 Current stable broad flow:
@@ -144,11 +164,8 @@ Current stable broad flow:
 - Countdown smoke.
 - Final report smoke.
 
-Known platform constraint:
-
-- Final-period `CONSOLIDATION -> RESULTS` still expects a next period record.
-  Use an unplayed sentinel period when testing two fully played periods. Do not
-  test `COMPLETED` until the platform final-period transition is fixed.
+> [!WARNING]
+> **The final-period `CONSOLIDATION -> RESULTS` transition requires a next period record.** Always add one **unplayed sentinel period** after your last played period. Without it, the transition hangs or errors. Do not test `COMPLETED` until the platform final-period transition is fixed. This bit the first dogfood game build - plan the sentinel period into your spec from the start.
 
 State transitions worth asserting:
 
@@ -186,6 +203,19 @@ Return the post-reload status in the same poll cycle.
   in CI.
 - Player cockpit: assert form/result states (`Submit`, `Assets Overview`,
   `Savings`, `Bonds`, `Stocks`, `Total`) rather than chart pixels.
+
+## Adapting the demo-game spec to your game
+
+The demo-game spec (`playwright/tests/demo-game-flow.spec.ts`) is the template for any GBL game's lifecycle test. Copy it to `playwright/tests/<game>-flow.spec.ts` and adapt with this checklist - it is intentionally small so a full multi-player lifecycle run stays achievable:
+
+- **Decision form**: swap the demo's allocation inputs (`bank` / `bonds` / `stocks` summing to 100) for your game's single decision. Update the input locator (e.g. `getByPlaceholder`, `input[name=...]`), the yup validation values, and the submit button name. Mirror the constraints your `Actions.apply` reducer enforces.
+- **Player plan**: replace the `decisions` array with your game's per-segment decision values (e.g. `[{ rate: '6.0' }, { rate: '5.5' }]`).
+- **Dashboard assertions**: replace demo-game metric labels (`Assets Overview`, `Savings`, `Bonds`, `Stocks`, `Total`) with your game's (`Current Inflation`, `Unemployment`, `GDP Growth`, `Cumulative Loss`). Assert durable headings, not chart pixels or transient numbers.
+- **Keep the sentinel period** (see the WARNING above). Add one unplayed period after your last played period.
+- **Keep the admin flow**: `createGame` -> `addPeriod` -> `addSegment` (per period) -> join players -> advance transitions. The state-transition sequence is game-agnostic.
+- **Keep `expectGameStatusEventually`** (or equivalent reload-aware polling) for admin status assertions - UI data lags mutations.
+- **Segment count via stable child content**: count real segments by a child that only exists after `SegmentService.initialize` (e.g. `text=Roll:`), not by placeholder card count.
+- **One browser context per player**, close in `finally`, submit decisions sequentially.
 
 ## Debug Loop
 
