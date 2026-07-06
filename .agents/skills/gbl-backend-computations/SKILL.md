@@ -38,6 +38,9 @@ Every hook: `(facts, payload) => OutputFacts`. Payloads carry what you need (`ga
 
 Define types and yup schemas for `GameFacts`, `PeriodFacts`, `PeriodSegmentFacts`, `PlayerFacts` in `src/types/` (copy the demo game's file layout). The schemas gate admin inputs at the API boundary — the DB accepts any JSON, so schemas are the only validation.
 
+> [!WARNING]
+> **Server-computed segment facts must be `.optional()` in the schema.** The admin "Add segment" action submits `{}` as the initial facts; `SegmentService.initialize` fills the computed fields (e.g. `shock`, `roll`) afterwards. If your `PeriodSegmentFacts` schema marks those fields `.required()`, `schema.validateSync({})` throws and the mutation silently aborts — the segment never appears in the admin UI (no error surfaces). Mark server-filled fields `.optional()`/`.nullable()`; reserve `.required()` for facts the admin actually provides. (This is the same trap the `gbl-playwright-e2e` skill warns about from the test side.)
+
 > [!TIP]
 > **Create a safe `parseFacts<T>()` helper early.** The `facts` column is `JsonValue` — it may be `null`, a raw object, or a double-stringified JSON string. Wrap every facts read in a helper like:
 > ```ts
@@ -47,7 +50,7 @@ Define types and yup schemas for `GameFacts`, `PeriodFacts`, `PeriodSegmentFacts
 >   catch { return fallback; }
 > }
 > ```
-> Use it in admin reports, cockpit views, and result services. Without it, uninitialised periods/segments will crash the UI with `JSON.parse(null)`.
+> Use it in admin reports, cockpit views, and result services. Without it, calling `JSON.parse` on a value that is already a parsed object throws `"[object Object]" is not valid JSON`, and a `null`/`undefined` facts value dereferences downstream and crashes the view.
 
 ## Seed
 

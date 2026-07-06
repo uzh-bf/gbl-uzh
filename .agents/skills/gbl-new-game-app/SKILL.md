@@ -62,6 +62,9 @@ Before calling the scaffold complete, verify all of:
 - The `/` route renders your game, not demo-game content.
 - If you keep a progress tracker (e.g. `task.md`), update it. A stale checklist that says "results view not done" when it is done is a real review hazard.
 
+> [!WARNING]
+> **Throwaway game (dogfood/experiment you will NOT commit to the target branch)? Clean up when you remove it.** `apps/<game>/.gitignore` (which ignores `.next/`, `next-env.d.ts`, `tsconfig.tsbuildinfo`) only exists next to committed source. Once you delete the source but leave the built app on disk, those artifacts are no longer ignored, so a later `git add -A` would stage the whole `.next/` (webpack caches included) plus any stray root tracker like `task.md`. Run `rm -rf apps/<game>` and delete the tracker before staging, and confirm with `git status` that nothing under the removed app remains.
+
 ## Pitfalls
 
 - Do not edit `platform.prisma`; schema changes for your game go in `specific.prisma`, platform-level changes go in `packages/platform/public/schema.prisma` (affects every game).
