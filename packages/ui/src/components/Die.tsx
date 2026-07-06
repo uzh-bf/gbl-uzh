@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactDiceRef } from 'react-dice-complete'
+import type * as ReactDiceModule from 'react-dice-complete'
 
 interface DieProps {
   die: number
@@ -10,11 +11,8 @@ interface DieProps {
   dieSize?: number
   margin?: number
   label?: string
+  rollTime?: number
   rollDone?: (totalValue: number, values: number[]) => void
-}
-
-const emptyRollDoneFn = () => {
-  // console.log('emptyRollDoneFn')
 }
 
 const Die = ({
@@ -26,10 +24,13 @@ const Die = ({
   dieSize,
   margin,
   label,
+  rollTime = 2,
   rollDone,
 }: DieProps) => {
   const ref = useRef<ReactDiceRef>(null)
-  const [ReactDiceComponent, setReactDiceComponent] = useState<any>(null)
+  const [ReactDiceComponent, setReactDiceComponent] = useState<
+    typeof ReactDiceModule.default | null
+  >(null)
 
   useEffect(() => {
     import('react-dice-complete').then((mod) => {
@@ -54,9 +55,9 @@ const Die = ({
           dotColor={dotColor ?? 'white'}
           dieSize={dieSize}
           margin={margin}
-          rollTime={2}
+          rollTime={rollTime}
           disableIndividual
-          rollDone={rollDone ?? emptyRollDoneFn}
+          rollDone={rollDone ?? (() => {})}
         />
       ) : (
         <div 

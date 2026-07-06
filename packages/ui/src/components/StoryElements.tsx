@@ -1,12 +1,14 @@
 import { Modal, Progress } from '@uzh-bf/design-system'
 import { sortBy } from 'ramda'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import Markdown from 'react-markdown'
+
+export type StoryElementType = 'GENERIC' | 'ROLE_BASED'
 
 export interface StoryElementData {
   id: string
   title: string
-  type: string
+  type: StoryElementType
   content?: string | null
   contentRole?: Record<string, string> | null
 }
@@ -24,25 +26,25 @@ function StoryElements({
   playerRole,
   onMarkElementVisited,
 }: StoryElementsProps) {
-  const [unseenStoryElements, setUnseenStoryElements] = useState<StoryElementData[]>([])
+  const [dismissedCount, setDismissedCount] = useState(0)
 
   const sortedElements = useMemo(() => {
     return sortBy((elem) => elem.title, activeStoryElements || [])
   }, [activeStoryElements])
 
-  useEffect(() => {
-    if (sortedElements.length > 0) {
-      const unseen = sortedElements.filter(
-        (elem) => !visitedStoryElementIds?.includes(elem.id)
-      )
-      setUnseenStoryElements(unseen)
-    }
+  const unseenStoryElements = useMemo(() => {
+    if (sortedElements.length === 0) return []
+    return sortedElements.filter(
+      (elem) => !visitedStoryElementIds?.includes(elem.id)
+    )
   }, [sortedElements, visitedStoryElementIds])
 
-  const content: string = (() => {
-    if (unseenStoryElements.length === 0) return ''
+  const visibleElements = unseenStoryElements.slice(dismissedCount)
 
-    const firstElement = unseenStoryElements[0]
+  const content: string = useMemo(() => {
+    if (visibleElements.length === 0) return ''
+
+    const firstElement = visibleElements[0]
     switch (firstElement?.type) {
       case 'GENERIC':
         return firstElement.content ?? ''
@@ -53,27 +55,32 @@ function StoryElements({
       default:
         return ''
     }
-  })()
+  }, [visibleElements, playerRole])
+
+  const handleClose = () => {
+    setDismissedCount((c) => c + 1)
+  }
+
+  const handlePrimaryAction = async () => {
+    if (visibleElements.length > 0) {
+      await onMarkElementVisited(visibleElements[0].id)
+    }
+    setDismissedCount((c) => c + 1)
+  }
 
   return (
     <Modal
       className={{ content: 'max-w-4xl overflow-y-auto' }}
-      open={unseenStoryElements.length > 0}
-      onClose={() => {
-        setUnseenStoryElements((elem) => elem.slice(1))
-      }}
-      onPrimaryAction={async () => {
-        if (unseenStoryElements.length > 0) {
-          await onMarkElementVisited(unseenStoryElements[0].id)
-        }
-      }}
+      open={visibleElements.length > 0}
+      onClose={handleClose}
+      onPrimaryAction={handlePrimaryAction}
       primaryLabel="Continue"
-      title={unseenStoryElements[0]?.title}
+      title={visibleElements[0]?.title}
     >
       <div>
         <Progress
           max={sortedElements.length}
-          value={sortedElements.length - unseenStoryElements.length + 1}
+          value={sortedElements.length - unseenStoryElements.length + dismissedCount + 1}
           formatter={(value) => String(value)}
         />
       </div>

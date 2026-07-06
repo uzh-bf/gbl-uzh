@@ -17,6 +17,8 @@ export interface EventLogProps<T = Record<string, unknown>> {
   maxHeightClass?: string
   className?: string
   rowClassName?: (row: T) => string
+  getRowKey?: (row: T, index: number) => string | number
+  emptyText?: string
 }
 
 export function EventLog<T = Record<string, unknown>>({
@@ -27,6 +29,8 @@ export function EventLog<T = Record<string, unknown>>({
   maxHeightClass = 'max-h-[300px]',
   className = '',
   rowClassName,
+  getRowKey,
+  emptyText = 'No entries available.',
 }: EventLogProps<T>) {
   return (
     <Card className={cn('w-full', className)}>
@@ -38,7 +42,7 @@ export function EventLog<T = Record<string, unknown>>({
         <div className={cn('overflow-y-auto border-t border-slate-100', maxHeightClass)}>
           {data.length === 0 ? (
             <div className="p-8 text-center text-sm text-slate-500 italic">
-              No entries available.
+              {emptyText}
             </div>
           ) : (
             <table className="w-full border-collapse text-left text-sm text-slate-600">
@@ -60,9 +64,10 @@ export function EventLog<T = Record<string, unknown>>({
               <tbody className="divide-y divide-slate-100">
                 {data.map((row, rIdx) => {
                   const customRowClass = rowClassName ? rowClassName(row) : ''
+                  const key = getRowKey ? getRowKey(row, rIdx) : rIdx
                   return (
                     <tr
-                      key={rIdx}
+                      key={key}
                       className={cn(
                         'hover:bg-slate-50/50 transition-colors',
                         customRowClass

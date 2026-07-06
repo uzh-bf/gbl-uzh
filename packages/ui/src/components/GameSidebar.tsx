@@ -33,16 +33,7 @@ export const GameSidebar: React.FC<GameSidebarProps> = ({
     <div className={className} id="sidebar">
       <Card className="mb-4 shadow-sm border-slate-200">
         <CardContent className="flex flex-col gap-4 p-4">
-          <PlayerDisplay
-            name={playerInfo.name}
-            color={playerInfo.color}
-            location={playerInfo.location}
-            level={playerInfo.level}
-            achievements={playerInfo.achievements}
-            imgPathAvatar={playerInfo.imgPathAvatar}
-            imgPathLocation={playerInfo.imgPathLocation}
-            onClick={playerInfo.onClick}
-          />
+          <PlayerDisplay {...playerInfo} />
           {(readySwitch || countdown) && (
             <div className="flex items-center justify-between border-t border-slate-100 pt-3">
               {readySwitch && (

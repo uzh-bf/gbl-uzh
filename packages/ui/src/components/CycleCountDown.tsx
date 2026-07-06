@@ -6,6 +6,10 @@ interface CycleCountdownProps {
   onExpire?: () => void
   onUpdate?: (secondsLeft: number) => void
   formatter?: (secondsLeft: number) => string
+  size?: number
+  trackColor?: string
+  progressColor?: string
+  textColor?: string
   className?: string
 }
 
@@ -15,10 +19,14 @@ export function CycleCountdown({
   formatter = (value) => `${value}s`,
   onExpire,
   onUpdate,
+  size = 100,
+  trackColor = '#e5e7eb',
+  progressColor = '#10b981',
+  textColor = '#374151',
   className = '',
 }: CycleCountdownProps) {
-  const radius = 30
-  const strokeWidth = 4
+  const radius = size * 0.3
+  const strokeWidth = size * 0.04
   const normalizedRadius = radius - strokeWidth / 2
   const circumference = normalizedRadius * 2 * Math.PI
 
@@ -66,25 +74,25 @@ export function CycleCountdown({
 
   return (
     <div
-      style={{ width: 100, height: 100 }}
+      style={{ width: size, height: size }}
       className={`${className}`}
       data-cy="countdown"
     >
-      <svg width="100" height="100">
+      <svg width={size} height={size}>
         <circle
-          cx="50"
-          cy="50"
+          cx="50%"
+          cy="50%"
           r={normalizedRadius}
           fill="transparent"
-          stroke="#e5e7eb"
+          stroke={trackColor}
           strokeWidth={strokeWidth}
         />
         <circle
-          cx="50"
-          cy="50"
+          cx="50%"
+          cy="50%"
           r={normalizedRadius}
           fill="transparent"
-          stroke="#10b981"
+          stroke={progressColor}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
@@ -100,8 +108,8 @@ export function CycleCountdown({
           y="50%"
           textAnchor="middle"
           dominantBaseline="middle"
-          fontSize="16"
-          fill="#374151"
+          fontSize={size * 0.16}
+          fill={textColor}
         >
           {formatter(secondsLeft)}
         </text>

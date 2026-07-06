@@ -8,11 +8,13 @@ export interface LearningElementOption {
   content: string
 }
 
+export type LearningElementState = 'SOLVED' | 'ATTEMPTED' | 'UNATTEMPTED'
+
 export interface LearningElementDisplayProps {
   title: string
   question: string
-  options: readonly LearningElementOption[] | LearningElementOption[]
-  state: 'SOLVED' | 'ATTEMPTED' | 'UNATTEMPTED' | string
+  options: readonly LearningElementOption[]
+  state: LearningElementState
   pointsText?: string
   feedback?: string | null
   motivation?: string | null
@@ -20,6 +22,10 @@ export interface LearningElementDisplayProps {
   onOptionClick: (index: number) => void
   onSubmit: () => void
   submitButtonText?: string
+  submittingText?: string
+  tryAgainText?: string
+  explanationLabel?: string
+  motivationLabel?: string
   loading?: boolean
   returnButton?: React.ReactNode
 }
@@ -29,13 +35,17 @@ export const LearningElementDisplay: React.FC<LearningElementDisplayProps> = ({
   question,
   options,
   state,
-  pointsText = 'Awards 20XP',
+  pointsText,
   feedback,
   motivation,
   activeElements,
   onOptionClick,
   onSubmit,
   submitButtonText = 'Submit',
+  submittingText = 'Submitting...',
+  tryAgainText = 'Try Again',
+  explanationLabel = 'Explanation',
+  motivationLabel = 'Why is it relevant?',
   loading = false,
   returnButton,
 }) => {
@@ -78,7 +88,7 @@ export const LearningElementDisplay: React.FC<LearningElementDisplayProps> = ({
             <div className="flex gap-4 rounded-lg bg-slate-50 p-4 border border-slate-100">
               <Info className="h-5 w-5 mt-0.5 text-slate-400 shrink-0" />
               <div>
-                <div className="mb-1 text-sm font-semibold text-slate-800">Explanation</div>
+                <div className="mb-1 text-sm font-semibold text-slate-800">{explanationLabel}</div>
                 <div className="prose prose-sm prose-slate text-slate-600">
                   <Markdown>{feedback}</Markdown>
                 </div>
@@ -89,7 +99,7 @@ export const LearningElementDisplay: React.FC<LearningElementDisplayProps> = ({
             <div className="flex gap-4 rounded-lg bg-amber-50/50 p-4 border border-amber-100/50">
               <Gem className="h-5 w-5 mt-0.5 text-amber-500 shrink-0" />
               <div>
-                <div className="mb-1 text-sm font-semibold text-slate-800">Why is it relevant?</div>
+                <div className="mb-1 text-sm font-semibold text-slate-800">{motivationLabel}</div>
                 <div className="prose prose-sm prose-slate text-slate-600">
                   <Markdown>{motivation}</Markdown>
                 </div>
@@ -136,7 +146,7 @@ export const LearningElementDisplay: React.FC<LearningElementDisplayProps> = ({
             disabled={activeElements.length === 0 || loading}
             onClick={onSubmit}
           >
-            {loading ? 'Submitting...' : state === 'ATTEMPTED' ? 'Try Again' : submitButtonText}
+            {loading ? submittingText : state === 'ATTEMPTED' ? tryAgainText : submitButtonText}
           </Button>
         )}
       </div>

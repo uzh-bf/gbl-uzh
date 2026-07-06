@@ -18,6 +18,16 @@ import {
 } from 'src/graphql/generated/ops'
 import { AVATARS, COLORS, LOCATIONS } from 'src/lib/constants'
 
+const LOGO_SELECTOR_COLORS_MAP = Object.entries(COLORS).reduce((acc, [k, v]) => {
+  let ringClass = 'ring-slate-500'
+  if (k === 'Red') ringClass = 'ring-orange-500'
+  if (k === 'Green') ringClass = 'ring-lime-500'
+  if (k === 'Yellow') ringClass = 'ring-yellow-500'
+  if (k === 'Blue') ringClass = 'ring-blue-500'
+  acc[k] = { bg: v, ring: ringClass }
+  return acc
+}, {} as Record<string, { bg: string; ring: string }>)
+
 function Welcome() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -109,17 +119,6 @@ function Welcome() {
       setIsSubmitting(false)
     }
   }
-
-  // Map simple color keys to their tailwind classes for the LogoSelector config
-  const logoSelectorColorsMap = Object.entries(COLORS).reduce((acc, [k, v]) => {
-    let ringClass = 'ring-slate-500'
-    if (k === 'Red') ringClass = 'ring-orange-500'
-    if (k === 'Green') ringClass = 'ring-lime-500'
-    if (k === 'Yellow') ringClass = 'ring-yellow-500'
-    if (k === 'Blue') ringClass = 'ring-blue-500'
-    acc[k] = { bg: v, ring: ringClass }
-    return acc
-  }, {} as Record<string, { bg: string; ring: string }>)
 
   return (
     <div className="m-auto w-full max-w-4xl p-8">
@@ -221,10 +220,11 @@ function Welcome() {
                         render={({ field }) => (
                           <LogoSelector
                             avatarOptions={Object.values(AVATARS)}
-                            colorsMap={logoSelectorColorsMap}
+                            colorsMap={LOGO_SELECTOR_COLORS_MAP}
                             color={watchColor}
                             value={field.value}
                             onChange={field.onChange}
+                            fallbackSrc="/avatars/avatar_placeholder.png"
                           />
                         )}
                       />

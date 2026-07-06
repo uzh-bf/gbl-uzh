@@ -710,7 +710,7 @@ function ManageGame() {
                                       options={storyElementsAll}
                                       value={field.value}
                                       onChange={field.onChange}
-                                      placeholderCmdSearch="Search story elements..."
+                                      searchPlaceholder="Search story elements..."
                                     />
                                   )}
                                 />
@@ -725,7 +725,7 @@ function ManageGame() {
                                       options={learningElementsAll}
                                       value={field.value}
                                       onChange={field.onChange}
-                                      placeholderCmdSearch="Search learning elements..."
+                                      searchPlaceholder="Search learning elements..."
                                     />
                                   )}
                                 />

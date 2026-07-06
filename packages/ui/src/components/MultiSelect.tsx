@@ -15,14 +15,18 @@ interface MultiSelectProps {
   options: { value: string; label: string }[]
   value: string[]
   onChange: (value: string[]) => void
-  placeholderCmdSearch: string
+  searchPlaceholder?: string
+  placeholder?: string
+  emptyText?: string
 }
 
 export function MultiSelect({
   options,
   value,
   onChange,
-  placeholderCmdSearch,
+  searchPlaceholder = 'Search...',
+  placeholder = 'Select options...',
+  emptyText = 'No results found.',
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false)
   const containerRef = React.useRef<HTMLDivElement>(null)
@@ -70,15 +74,15 @@ export function MultiSelect({
                   {options.find((option) => option.value === val)?.label}
                 </div>
               ))
-            : 'Select options...'}
+            : placeholder}
         </div>
         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
       {open && (
         <Command className="absolute z-10 mt-1 h-fit border bg-white">
-          <CommandInput placeholder={placeholderCmdSearch} />
+          <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>{emptyText}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem

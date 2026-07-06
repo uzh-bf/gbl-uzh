@@ -5,8 +5,9 @@ export interface LogoSelectorProps {
   value: string
   onChange: (value: string) => void
   color: string
-  avatarOptions: readonly string[] | string[]
+  avatarOptions: readonly string[]
   colorsMap: Record<string, { bg: string; ring: string }>
+  fallbackSrc?: string
   label?: string
   className?: string
 }
@@ -14,7 +15,7 @@ export interface LogoSelectorProps {
 export const LogoSelector = React.forwardRef<
   HTMLDivElement,
   LogoSelectorProps & React.HTMLAttributes<HTMLDivElement>
->(({ value, onChange, color, avatarOptions, colorsMap, label, className, ...props }, ref) => {
+>(({ value, onChange, color, avatarOptions, colorsMap, fallbackSrc, label, className, ...props }, ref) => {
   const colorConfig = colorsMap[color] || { bg: 'bg-slate-200', ring: 'ring-slate-500' }
 
   return (
@@ -39,7 +40,9 @@ export const LogoSelector = React.forwardRef<
               alt="Avatar option"
               className="h-full w-full object-contain p-1"
               onError={(e) => {
-                ;(e.target as HTMLImageElement).src = '/avatars/avatar_placeholder.png'
+                if (fallbackSrc) {
+                  ;(e.target as HTMLImageElement).src = fallbackSrc
+                }
               }}
             />
             {value === avatarPath && (

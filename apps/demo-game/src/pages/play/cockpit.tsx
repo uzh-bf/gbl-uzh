@@ -413,7 +413,7 @@ function Cockpit() {
 
       const activeSegmentIx = currentGame.activePeriod.activeSegment.index
       const indexArr = Array.from({ length: numMonthsInTable }, (_, i) => i - 1)
-      indexArr.map((i) => {
+      indexArr.forEach((i) => {
         const index = (i + activeSegmentIx * numMonthsPerSegment) % numMonths
 
         const strNum = String(i + 1)

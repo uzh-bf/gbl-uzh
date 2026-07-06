@@ -3,6 +3,7 @@ import {
   GameSidebar,
   LearningActivitiesList,
   LearningElementDisplay,
+  type LearningElementState,
   Layout,
   StoryElements,
 } from '@gbl-uzh/ui'
@@ -30,7 +31,7 @@ const tabs = [
   { name: 'Cockpit', href: '/play/cockpit' },
 ]
 
-type LearningState = 'SOLVED' | 'ATTEMPTED' | 'UNATTEMPTED' | null
+type LearningState = LearningElementState | null
 
 function GameLayout({ children }: { children: React.ReactNode }) {
   const { data, refetch: refetchResult } = useQuery(ResultDocument, {
@@ -134,6 +135,33 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     setCountdownNotifications({ '60': false, '180': false })
   }, [strExpiresAt, countdownDurationMs])
 
+  const completedLearningElementIds =
+    data?.result?.playerResult?.player?.completedLearningElementIds ?? []
+  const allPeriods = data?.result?.currentGame?.periods ?? []
+  const currentLearningElements =
+    data?.result?.currentGame?.activePeriod?.activeSegment?.learningElements ?? []
+
+  const completedLearningElements = useMemo(() => {
+    const seen = new Set<string>()
+    return allPeriods
+      .flatMap((period: any) =>
+        (period.segments || []).flatMap((segment: any) => segment.learningElements || [])
+      )
+      .filter((elem: any) => completedLearningElementIds.includes(elem.id))
+      .filter((elem: any) => {
+        if (seen.has(elem.id)) return false
+        seen.add(elem.id)
+        return true
+      })
+  }, [allPeriods, completedLearningElementIds])
+
+  const openLearningElements = useMemo(
+    () => (currentLearningElements || []).filter(
+      (elem: any) => !completedLearningElementIds.includes(elem.id)
+    ),
+    [currentLearningElements, completedLearningElementIds]
+  )
+
   if (!data?.self || !data?.result?.currentGame) {
     return null
   }
@@ -149,30 +177,6 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     imgPathAvatar: data.self.facts.avatar,
     imgPathLocation: `/locations/${data.self.facts.location}.svg`,
   }
-
-  const completedLearningElementIds =
-    data?.result?.playerResult?.player?.completedLearningElementIds ?? []
-  const allPeriods = data?.result?.currentGame?.periods ?? []
-  const currentLearningElements =
-    data?.result?.currentGame?.activePeriod?.activeSegment?.learningElements ?? []
-
-  const completedLearningElements = allPeriods
-    .flatMap((period: any) =>
-      (period.segments || []).flatMap((segment: any) => segment.learningElements || [])
-    )
-    .filter((elem: any) => completedLearningElementIds.includes(elem.id))
-    .reduce((acc: any[], current: any) => {
-      const x = acc.find((item) => item.id === current.id)
-      if (!x) {
-        return acc.concat([current])
-      } else {
-        return acc
-      }
-    }, [])
-
-  const openLearningElements = (currentLearningElements || []).filter(
-    (elem: any) => !completedLearningElementIds.includes(elem.id)
-  )
 
   const sidebar = (
     <GameSidebar
@@ -220,7 +224,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
                   }
                 })
               },
-              onExpire: () => console.log('Countdown expired'),
+              onExpire: () => {},
             }
           : undefined
       }
@@ -290,6 +294,11 @@ function GameLayout({ children }: { children: React.ReactNode }) {
             question={learningElementData.learningElement.element.question}
             options={learningElementData.learningElement.element.options}
             state={learningElementState || 'UNATTEMPTED'}
+            pointsText={
+              learningElementData.learningElement.element.reward
+                ? `Awards ${learningElementData.learningElement.element.reward}XP`
+                : undefined
+            }
             feedback={learningElementData.learningElement.element.feedback}
             motivation={learningElementData.learningElement.element.motivation}
             activeElements={activeLearningOptions}
