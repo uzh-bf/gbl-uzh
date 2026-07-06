@@ -143,6 +143,7 @@ function PageHead() {
               root: twMerge('text-xl md:hidden', isOpen && 'text-uzh-red-100'),
             }}
             onClick={() => setOpen(!isOpen)}
+            aria-label="Toggle navigation menu"
           >
             <Button.Icon>
               <FontAwesomeIcon icon={faBars} />
