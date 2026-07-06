@@ -28,6 +28,15 @@ Design the game FIRST (`gbl-game-design` skill) — the scaffold asks for your f
    - Branding: `public/` assets, app name in layout/nav.
 6. Auth env: copy `.env.local.template`; local dev works without a real OIDC tenant via the devcontainer's mock OIDC server (see `.devcontainer/README.md`); production needs real Auth0/OIDC credentials + `NEXTAUTH_SECRET`.
 
+## Starter-mode (Docker-only) specifics
+
+If you run the starter stack (`.devcontainer/starter/`, app on `http://localhost:3000`), four things the checklist above doesn't cover:
+
+1. **Add a `node_modules` volume for the new app** in `.devcontainer/starter/docker-compose.yml` (copy the `node_modules_demo_game` pattern, then `docker compose -p <name> up -d` to recreate). Without it the new app's `node_modules` land on the host bind mount — slow on Windows/macOS and wrong-OS binaries.
+2. **`DATABASE_URL` from `starter.env` is container env and beats your app's `.env`.** "Point DATABASE_URL at a fresh database" only works if you `export DATABASE_URL=...` explicitly for every prisma command AND the dev-server start. Create the DB first: `docker compose -p <name> exec postgres psql -U prisma -d prisma -c 'CREATE DATABASE <game>;'`
+3. **Port 3000 is single-tenant.** `post-start.sh` starts the demo-game dev server on every container start — kill it (`pkill -f next-server` inside the container) before starting your game's dev server on 3000. Only one game app runs at a time.
+4. **A fresh database has no admin.** The dev admin `User`+`Account` rows are created on first OIDC login — sign in once via `/admin/login` in a browser before any admin API/seed work that references the owner.
+
 ## Local dev + first run
 
 Preferred: the devcontainer/devrouter flow (`.devcontainer/README.md`) — brings up Postgres + mock OIDC and seeds automatically; admin login is one click as a fixed dev admin. Manual alternative: own Postgres + real OIDC creds, then `prisma migrate dev`/`db push` + seed, then the package's `dev` script.

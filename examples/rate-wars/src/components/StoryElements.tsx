@@ -1,0 +1,116 @@
+import { useMutation } from '@apollo/client'
+import { Modal, Progress } from '@uzh-bf/design-system'
+import Image from 'next/image'
+import { sortBy } from 'ramda'
+import { useEffect, useMemo, useState } from 'react'
+import Markdown from 'react-markdown'
+import { MarkStoryElementDocument } from 'src/graphql/generated/ops'
+
+interface Props {
+  playerState: any
+  player: any
+}
+
+// TODO(JJ): Check if we should fetch the story elements in the component
+function StoryElements({ playerState, player }: Props) {
+  const [unseenStoryElements, setUnseenStoryElements] = useState<any[]>([])
+
+  const activeStoryElements = useMemo(() => {
+    if (
+      !playerState?.data ||
+      !playerState?.data?.result?.currentGame?.activePeriod?.activeSegment
+    )
+      return []
+    return sortBy(
+      (elem: any) => elem.title,
+      playerState?.data?.result?.currentGame?.activePeriod?.activeSegment
+        ?.storyElements ?? []
+    )
+  }, [playerState?.data])
+
+  const visitedStoryElements =
+    playerState?.data?.result?.playerResult?.player.visitedStoryElementIds
+
+  useEffect(() => {
+    if (activeStoryElements?.length > 0) {
+      const unseenStoryElements = activeStoryElements.filter(
+        (elem) => !visitedStoryElements?.includes(elem.id)
+      )
+      setUnseenStoryElements(unseenStoryElements)
+    }
+  }, [activeStoryElements, playerState, visitedStoryElements])
+
+  const [markStoryElement, { loading }] = useMutation(MarkStoryElementDocument)
+
+  const content: string = (() => {
+    if (unseenStoryElements.length === 0) return ''
+
+    const firstElement = unseenStoryElements[0]
+    switch (firstElement?.type) {
+      case 'GENERIC':
+        return firstElement.content
+      case 'ROLE_BASED':
+        return firstElement.contentRole?.[player.role] ?? ''
+      default:
+        return ''
+    }
+  })()
+
+  return (
+    <Modal
+      className={{ content: 'max-w-4xl overflow-y-auto' }}
+      open={unseenStoryElements.length > 0}
+      onClose={() => {
+        setUnseenStoryElements((elem) => elem.slice(1))
+      }}
+      onPrimaryAction={() => {
+        markStoryElement({
+          variables: {
+            elementId: unseenStoryElements[0]?.id,
+          },
+          // optimisticResponse: {
+          //   markStoryElement: {
+          //     id: unseenStoryElements[0]?.id,
+          //     visitedStoryElementIds: [unseenStoryElements[0]?.id],
+          //     __typename: 'Player',
+          //   },
+          // },
+        })
+      }}
+      primaryLabel="Continue"
+      title={unseenStoryElements[0]?.title}
+    >
+      <div>
+        <Progress
+          max={activeStoryElements?.length}
+          value={activeStoryElements?.length - unseenStoryElements?.length + 1}
+          formatter={(value) => String(value)}
+        />
+      </div>
+
+      <div className="prose prose-img:max-w-xs prose-img:rounded mt-4 max-w-none">
+        <Markdown
+          components={{
+            img: ({ node, ...props }) => {
+              return (
+                <Image
+                  {...props}
+                  src={(props as any).src ?? ''}
+                  width={250}
+                  height={250}
+                  alt="Visual representation of the story element"
+                  className="mt-4 rounded-lg"
+                  style={{ maxWidth: '100%' }}
+                />
+              )
+            },
+          }}
+        >
+          {content}
+        </Markdown>
+      </div>
+    </Modal>
+  )
+}
+
+export default StoryElements

@@ -347,10 +347,29 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
           },
         },
       },
+      // co-players for leaderboards: safe fields only — the login token and
+      // other sensitive columns must never reach another player's client
+      players: {
+        select: {
+          id: true,
+          name: true,
+          facts: true,
+        },
+      },
     },
   })
 
-  if (!currentGame?.activePeriod) return null
+  if (!currentGame) return null
+
+  if (!currentGame.activePeriod) {
+    if (currentGame.status !== DB.GameStatus.RESULTS) return null
+    const lastPeriod = currentGame.periods[currentGame.periods.length - 1]
+    if (!lastPeriod) return null
+    currentGame.activePeriod = lastPeriod as any
+    currentGame.activePeriodIx = lastPeriod.index
+  }
+
+  if (!currentGame.activePeriod) return null
 
   // segmentCount from DB is used as-is (not overwritten with segments.length)
   // so the timeline can correctly forecast remaining segments

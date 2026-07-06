@@ -12,9 +12,19 @@ timestamp: '2026-07-04T00:00:00Z'
 
 # Developing a Game
 
-How to build a new game on the platform. Read [game-model.md](game-model.md) and [game-lifecycle.md](game-lifecycle.md) first — this page assumes their vocabulary. For mechanical and didactical patterns (e.g. formative feedback, roles, seeded randomness), see [game-patterns.md](game-patterns.md). Related skills: `gbl-new-game-app` (scaffolding), `gbl-backend-computations` (backend), `gbl-frontend-game-ui` (frontend).
+How to build a new game on the platform. Read [game-model.md](game-model.md) and [game-lifecycle.md](game-lifecycle.md) first — this page assumes their vocabulary. For mechanical and didactical patterns (e.g. formative feedback, roles, seeded randomness), see [game-patterns.md](game-patterns.md). Related skills: `gbl-game-design` (design), `gbl-new-game-app` (scaffolding), `gbl-backend-computations` (backend), `gbl-frontend-game-ui` (frontend).
 
-## Scaffolding a new game app
+## 1. Game Design (before you code)
+
+Before writing any code or scaffolding an app, use the `gbl-game-design` skill to map out the game. The game development process must explicitly include:
+
+- **Overall narrative and storyline**: establishing the premise and the narrative arc across periods (e.g. baseline, crisis, recovery).
+- **Welcome page customization**: designing the `/play/welcome` page where the player first lands to read the introductory story and customize their identity (team name, avatar).
+- **Decision and mechanics design**: grounding the gameplay in theory. Ensure the information needed to deduce a sound decision (forecasts, predictions, probabilities) is surfaced to the player, so success is based on applying theory, not just luck.
+- **Content overlays**: creating learning elements (quizzes/reflections) and story elements (narrative popups) that support the game's mechanics and story.
+- **Two chart layers**: planning tactical charts for the `PAUSED` screen (relevant for immediate feedback during play) and historical/comparative charts for the `RESULTS` screen (between periods) to allow the game master to draw didactical conclusions in class.
+
+## 2. Scaffolding a new game app
 
 There is no generator. The supported path is copying the reference game inside a monorepo clone/fork:
 
@@ -71,7 +81,7 @@ The `services` object, yup schemas, and facts input types are passed into the pl
 
 ## Frontend: built per game
 
-There is no generic frontend — each game builds its own Next.js pages (Pages Router in the reference game), reusing components from [`@gbl-uzh/ui` and the design system](ui-components.md). The demo game's route set is the template:
+There is no generic frontend — each game builds its own Next.js pages (Pages Router in the reference game), reusing components from [`@gbl-uzh/ui and the design system`](ui-components.md). The demo game's route set is the template:
 
 | Route                 | Purpose                                                                                                                                             |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -89,6 +99,9 @@ The cockpit pattern (from `apps/demo-game/src/pages/play/cockpit.tsx`):
 2. It subscribes to global events and, on `PERIOD_ACTIVATED` / `SEGMENT_ACTIVATED` / `COUNTDOWN_UPDATED`, **refetches that query** — events are a poke, never a data source.
 3. The layout renders the shared chrome: nav, player display, Ready toggle, countdown widget, learning-element sidebar, blocking story-element popups.
 4. The page body is a `switch (game.status)`: decision form under `RUNNING`, read-only results under `PAUSED`/`CONSOLIDATION`, period report under `RESULTS`, placeholders otherwise ([game-lifecycle.md](game-lifecycle.md) lists the expected view per status).
+
+> [!WARNING]
+> **Prisma enum trap:** `@prisma/client` exports runtime enum objects (`GameStatus`, etc.) that Next.js strips from client bundles. Code like `DB.GameStatus.RESULTS` will be `undefined` in the browser. In the cockpit `switch` and any shared utility reachable from the frontend, compare against string literals (`'RUNNING'`, `'PAUSED'`, etc.) or the GraphQL-generated enum from `src/graphql/generated/ops.ts`. Use `import type` for Prisma imports in shared files.
 
 Your game-specific work is almost entirely: the decision form (validate with yup: same constraints as your `Actions.apply`), the results/report visualizations (the demo game uses recharts), and the admin authoring forms for your period/segment facts.
 

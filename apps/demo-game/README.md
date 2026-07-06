@@ -1,7 +1,6 @@
-# GAME
-
-> [!NOTE]
-> Parts of this README are outdated (the reducer terminology below predates the current `Services` contract). The maintained documentation for building games on the platform is the wiki at [`docs/`](../../docs/index.md); local dev setup is covered by the devcontainer configs (see below). New to all of this? Start at [`docs/getting-started.md`](../../docs/getting-started.md).
+> [!WARNING]
+> This README's setup and reducer documentation is **legacy and outdated**.
+> For the current ground truth, follow the [LLM Wiki](../../docs/index.md) (particularly [Developing a Game](../../docs/developing-a-game.md)).
 
 This is a step by step explanation on how to implement a game using the uzh-gbl-platform packag along with the demo-game as a starer template.
 

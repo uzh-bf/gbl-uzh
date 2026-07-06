@@ -26,7 +26,7 @@ import {
   STATUS,
   computePeriodStatus,
   computeSegmentStatus,
-} from '@gbl-uzh/platform/dist/lib/util'
+} from '@gbl-uzh/ui'
 import { useCallback, useEffect, useState } from 'react'
 import {
   ActivateNextPeriodDocument,

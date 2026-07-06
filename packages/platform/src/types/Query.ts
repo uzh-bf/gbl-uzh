@@ -14,6 +14,12 @@ export function generateBaseQueries() {
       t.list.nonNull.field('games', {
         type: 'Game',
         async resolve(_, args, ctx) {
+          // admin-only: the Game type exposes player login tokens
+          if (
+            ctx.user?.role !== DB.UserRole.ADMIN &&
+            ctx.user?.role !== DB.UserRole.MASTER
+          )
+            return null
           return GameService.getGames(args, ctx)
         },
       })
@@ -24,6 +30,12 @@ export function generateBaseQueries() {
           id: intArg(),
         },
         async resolve(_, args, ctx) {
+          // admin-only: the Game type exposes player login tokens
+          if (
+            ctx.user?.role !== DB.UserRole.ADMIN &&
+            ctx.user?.role !== DB.UserRole.MASTER
+          )
+            return null
           return GameService.getGame(args, ctx)
         },
       })

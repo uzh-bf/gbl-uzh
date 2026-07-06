@@ -114,7 +114,7 @@ adapt it to GBL's smaller stack:
 
 - Admin auth uses local OIDC mock via real browser login; storage state lives in
   `playwright/.auth/admin.json` and must not be committed.
-- Player auth uses real join links from admin UI. Do not mint player JWTs in
+- Player auth uses real join links from admin UI. Do not make player JWTs in
   tests unless OIDC/join flow is unavailable.
 - Use one browser context per player. Close all contexts in `finally`.
 - If joining players in a helper, close already-created contexts on partial
@@ -124,25 +124,43 @@ adapt it to GBL's smaller stack:
 - Use unique game names. Do not reset DB inside Playwright setup.
 - Do not make specs depend on prior spec order or prior games.
 
+> [!IMPORTANT]
+> **`localhost` vs `127.0.0.1` matters.** NextAuth state cookies are scoped to the exact hostname. If `NEXTAUTH_URL` is `http://localhost:3000` but Playwright navigates to `http://127.0.0.1:3000`, the OAuth callback will fail with `STATE_COOKIE_MISSING`. Always set `PLAYWRIGHT_BASE_URL=http://localhost:3000` — matching `NEXTAUTH_URL` exactly.
+
+> [!TIP]
+> **Segment facts validation schemas must allow empty/partial input.** When the admin clicks "Add Segment", the platform submits `{}` as the initial facts before calling `SegmentService.initialize`. If your yup schema marks fields as `.required()`, the mutation silently fails. Make segment-facts schema fields `.optional()` (or `.nullable()`) and let `SegmentService.initialize` fill them.
+
 ## GBL Game Flow Rules
 
-Current stable broad flow:
+Current stable broad flow (demo game):
 
 - 4 teams.
 - 2 played periods.
 - 4 played segments.
-- 1 unplayed sentinel period.
 - Admin setup guards.
 - Dice page smoke.
 - Player decision/ready/result states.
 - Countdown smoke.
 - Final report smoke.
 
-Known platform constraint:
+Platform notes:
 
-- Final-period `CONSOLIDATION -> RESULTS` still expects a next period record.
-  Use an unplayed sentinel period when testing two fully played periods. Do not
-  test `COMPLETED` until the platform final-period transition is fixed.
+- Final-period `CONSOLIDATION -> RESULTS` works without a next period since
+  the `GameService` consolidation fix (the pointer is disconnected instead of
+  connecting a missing record) — the old "unplayed sentinel period" workaround
+  is obsolete; `playwright/tests/rate-wars-flow.spec.ts` asserts the fixed
+  behavior. `COMPLETED` is still never set — do not test it.
+- One app per stack: specs assume THEIR app is the one serving
+  `PLAYWRIGHT_BASE_URL`. The demo spec needs `apps/demo-game` on :3000, the
+  rate-wars spec needs `examples/rate-wars`. Run the matching spec file, not the
+  whole suite, when a different game app is up.
+- Reload-polling: give each reload time to hydrate before deciding the
+  predicate failed (dev-server first paint can take several seconds — use
+  `locator.waitFor({ timeout: 10_000 }).then(() => true).catch(() => false)`
+  inside the poll instead of a bare `isVisible()`).
+- The design-system `Card` does not forward a raw `data-cy` attribute — anchor
+  results/leaderboard assertions on visible headline text, or add the test id
+  to a plain wrapper `div`.
 
 State transitions worth asserting:
 
