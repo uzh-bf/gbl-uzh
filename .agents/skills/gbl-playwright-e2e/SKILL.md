@@ -149,7 +149,6 @@ adapt it to GBL's smaller stack:
 
 > [!TIP]
 > **After clicking submit, assert `toBeEnabled()`, not `toBeDisabled()`.** GraphQL mutations resolve fast; by the time Playwright checks, the button has already re-enabled. Asserting `toBeDisabled()` flakes. The stable idiom is: click submit, then `await expect(submitButton).toBeEnabled()` to confirm the mutation finished processing, then assert the next durable UI state (e.g. the "Set Ready" button appears).
-
 ## GBL Game Flow Rules
 
 Current stable broad flow:

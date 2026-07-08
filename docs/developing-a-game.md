@@ -102,7 +102,8 @@ The cockpit pattern (from `apps/demo-game/src/pages/play/cockpit.tsx`):
 3. The layout renders the shared chrome: nav, player display, Ready toggle, countdown widget, learning-element sidebar, blocking story-element popups.
 4. The page body is a `switch (game.status)`: decision form under `RUNNING`, read-only results under `PAUSED`/`CONSOLIDATION`, period report under `RESULTS`, placeholders otherwise ([game-lifecycle.md](game-lifecycle.md) lists the expected view per status).
 
-> **WARNING:** Prisma enum trap: `@prisma/client` exports runtime enum objects (`GameStatus`, etc.) that Next.js strips from client bundles. Code like `DB.GameStatus.RESULTS` will be `undefined` in the browser. In the cockpit `switch` and any shared utility reachable from the frontend, compare against string literals (`'RUNNING'`, `'PAUSED'`, etc.) or the GraphQL-generated enum from `src/graphql/generated/ops.ts`. Use `import type` for Prisma imports in shared files.
+> [!WARNING]
+> **Prisma enum trap:** `@prisma/client` exports runtime enum objects (`GameStatus`, etc.) that Next.js strips from client bundles. Code like `DB.GameStatus.RESULTS` will be `undefined` in the browser. In the cockpit `switch` and any shared utility reachable from the frontend, compare against string literals (`'RUNNING'`, `'PAUSED'`, etc.) or the GraphQL-generated enum from `src/graphql/generated/ops.ts`. Use `import type` for Prisma imports in shared files.
 
 Your game-specific work is almost entirely: the decision form (validate with yup: same constraints as your `Actions.apply`), the results/report visualizations (the demo game uses recharts), and the admin authoring forms for your period/segment facts.
 
