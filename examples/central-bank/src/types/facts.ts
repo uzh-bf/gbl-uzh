@@ -28,8 +28,6 @@ export type ResultFacts = {
   spilloverInflation?: number;
   spilloverUnemployment?: number;
   spilloverGrowth?: number;
-  exchangeRateIndex?: number;
-  tradeBalance?: number;
 };
 
 export type OutputResultFacts = OutputFacts<ResultFacts, any, any>;

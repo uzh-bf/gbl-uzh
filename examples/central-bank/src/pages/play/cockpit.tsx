@@ -17,6 +17,7 @@ import {
 import { CycleCountdown } from "~/components/CycleCountDown";
 import StoryElements from "~/components/StoryElements";
 import LearningElements from "~/components/LearningElements";
+import { DEFAULT_RATE, NEUTRAL_RATE, TREND_GROWTH } from "~/settings/Constants";
 import dayjs from "dayjs";
 import { Form, Formik } from "formik";
 import { useEffect, useMemo, useState } from "react";
@@ -95,6 +96,137 @@ function MetricCard({
         {children}
       </CardContent>
     </Card>
+  );
+}
+
+function renderDeviationMeter(val: number, target: number, range: number) {
+  const diff = val - target;
+  const percentage = Math.min(100, Math.max(0, 50 + (diff / range) * 50));
+  return (
+    <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-1.5 mt-3 relative">
+      <div className="absolute top-0 bottom-0 left-[40%] right-[40%] bg-green-200/50 dark:bg-green-950/20 rounded-sm"></div>
+      <div className="absolute top-[-3px] h-3 w-0.5 bg-gray-400 dark:bg-gray-600 left-[50%]"></div>
+      <div
+        className={`absolute top-[-3px] h-3 w-3 rounded-full border-2 border-white dark:border-gray-900 transition-all duration-300 ${
+          Math.abs(diff) > range * 0.5 ? "bg-red-500" : "bg-green-500"
+        }`}
+        style={{ left: `calc(${percentage}% - 6px)` }}
+      ></div>
+    </div>
+  );
+}
+
+function NewsflashBanner({ activeSegmentFacts }: { activeSegmentFacts: any }) {
+  if (!activeSegmentFacts?.eventName) return null;
+  const isCalm = activeSegmentFacts.eventName === "Calm markets";
+
+  return (
+    <Card
+      className={
+        isCalm
+          ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800"
+          : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
+      }
+    >
+      <CardHeader className="pb-2">
+        <CardTitle
+          className={`text-lg font-bold flex items-center gap-2 ${
+            isCalm
+              ? "text-emerald-800 dark:text-emerald-300"
+              : "text-amber-800 dark:text-amber-300"
+          }`}
+        >
+          {isCalm
+            ? "Market Situation"
+            : `Breaking News: ${activeSegmentFacts.eventName}`}
+        </CardTitle>
+        <CardDescription>
+          {isCalm
+            ? "No major external shocks affecting the economy."
+            : "An external macroeconomic event is unfolding."}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm">
+          {isCalm
+            ? "The economy is running on its baseline trend. Shocks are at 0%."
+            : `Macroeconomic shock detected: supply shock is ${
+                activeSegmentFacts.supplyShock > 0
+                  ? `+${activeSegmentFacts.supplyShock}`
+                  : activeSegmentFacts.supplyShock
+              }% and demand shock is ${
+                activeSegmentFacts.demandShock > 0
+                  ? `+${activeSegmentFacts.demandShock}`
+                  : activeSegmentFacts.demandShock
+              }%. Adjust your interest rate accordingly to steer the economy!`}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function MetricsSummary({
+  resultFacts,
+  scenario,
+}: {
+  resultFacts: any;
+  scenario: any;
+}) {
+  return (
+    <div className="flex flex-wrap gap-4">
+      <MetricCard
+        title="Current Inflation"
+        value={`${(resultFacts.inflation ?? DEFAULT_RATE).toFixed(1)}%`}
+        subtext={`Target: ${scenario.targetInflation.toFixed(1)}%`}
+        colorClass={
+          Math.abs(
+            (resultFacts.inflation ?? DEFAULT_RATE) - scenario.targetInflation
+          ) > 2
+            ? "text-red-500"
+            : "text-green-500"
+        }
+      >
+        {renderDeviationMeter(
+          resultFacts.inflation ?? DEFAULT_RATE,
+          scenario.targetInflation,
+          DEFAULT_RATE
+        )}
+      </MetricCard>
+      <MetricCard
+        title="Unemployment"
+        value={`${(resultFacts.unemployment ?? DEFAULT_RATE).toFixed(1)}%`}
+        subtext={`Natural Rate: ${scenario.naturalUnemployment.toFixed(1)}%`}
+        colorClass={
+          Math.abs(
+            (resultFacts.unemployment ?? DEFAULT_RATE) -
+              scenario.naturalUnemployment
+          ) > 1.5
+            ? "text-red-500"
+            : "text-green-500"
+        }
+      >
+        {renderDeviationMeter(
+          resultFacts.unemployment ?? DEFAULT_RATE,
+          scenario.naturalUnemployment,
+          3.0
+        )}
+      </MetricCard>
+      <MetricCard
+        title="GDP Growth"
+        value={`${(resultFacts.growth ?? 3.0).toFixed(1)}%`}
+        subtext="Target: ~2.0-3.0%"
+        colorClass={
+          (resultFacts.growth ?? 3.0) < 0 ? "text-red-500" : "text-green-500"
+        }
+      >
+        {renderDeviationMeter(resultFacts.growth ?? 3.0, 2.5, 5.0)}
+      </MetricCard>
+      <MetricCard
+        title="Cumulative Loss"
+        value={(resultFacts.cumulativePenalty ?? 0).toFixed(2)}
+        subtext="Target: 0.0 (Perfect Mandate)"
+      />
+    </div>
   );
 }
 
@@ -484,7 +616,7 @@ export default function Cockpit() {
                 f = {};
               }
             }
-            return f.decisions?.rate ?? 4.0;
+            return f.decisions?.rate ?? DEFAULT_RATE;
           }),
       };
     });
@@ -502,29 +634,12 @@ export default function Cockpit() {
     for (let i = 0; i < segCount; i++) {
       const point: any = { round: `R${i + 1}` };
       comparativeData.forEach((team) => {
-        point[team.name] = team.history[i] ?? 4.0;
+        point[team.name] = team.history[i] ?? DEFAULT_RATE;
       });
       chartPoints.push(point);
     }
     return chartPoints;
   }, [comparativeData, currentGame]);
-
-  const renderDeviationMeter = (val: number, target: number, range: number) => {
-    const diff = val - target;
-    const percentage = Math.min(100, Math.max(0, 50 + (diff / range) * 50));
-    return (
-      <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-1.5 mt-3 relative">
-        <div className="absolute top-0 bottom-0 left-[40%] right-[40%] bg-green-200/50 dark:bg-green-950/20 rounded-sm"></div>
-        <div className="absolute top-[-3px] h-3 w-0.5 bg-gray-400 dark:bg-gray-600 left-[50%]"></div>
-        <div
-          className={`absolute top-[-3px] h-3 w-3 rounded-full border-2 border-white dark:border-gray-900 transition-all duration-300 ${
-            Math.abs(diff) > range * 0.5 ? "bg-red-500" : "bg-green-500"
-          }`}
-          style={{ left: `calc(${percentage}% - 6px)` }}
-        ></div>
-      </div>
-    );
-  };
 
   if (!playerDataResult?.result) {
     return (
@@ -578,13 +693,15 @@ export default function Cockpit() {
       );
 
     case "RUNNING": {
-      const currentRate = resultFacts.decisions?.rate ?? 4.0;
+      const currentRate = resultFacts.decisions?.rate ?? DEFAULT_RATE;
       const inflation = resultFacts.inflation ?? 4.0;
       const growth = resultFacts.growth ?? 3.0;
       const targetInflation = scenario.targetInflation ?? 2.0;
 
       const taylorRate =
-        4.0 + 1.5 * (inflation - targetInflation) + 0.5 * (growth - 2.5);
+        NEUTRAL_RATE +
+        1.5 * (inflation - targetInflation) +
+        0.5 * (growth - TREND_GROWTH);
       const recommendedRate = Math.min(
         15,
         Math.max(0, parseFloat(taylorRate.toFixed(2)))
@@ -604,118 +721,10 @@ export default function Cockpit() {
             <GameHeader currentGame={currentGame} />
 
             {/* Event Newsflash Banner */}
-            {activeSegmentFacts.eventName && (
-              <Card
-                className={
-                  activeSegmentFacts.eventName === "Calm markets"
-                    ? "border-emerald-100 bg-emerald-50/20 dark:border-emerald-950/20 dark:bg-emerald-950/5"
-                    : "border-amber-200 bg-amber-50/40 dark:border-amber-900/30 dark:bg-amber-950/10"
-                }
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    {activeSegmentFacts.eventName !== "Calm markets" && (
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                      </span>
-                    )}
-                    <CardTitle
-                      className={`text-xs font-bold uppercase tracking-wider ${
-                        activeSegmentFacts.eventName === "Calm markets"
-                          ? "text-emerald-700 dark:text-emerald-400"
-                          : "text-amber-800 dark:text-amber-400"
-                      }`}
-                    >
-                      {activeSegmentFacts.eventName === "Calm markets"
-                        ? "Market Conditions: Stable"
-                        : `Breaking News: ${activeSegmentFacts.eventName}`}
-                    </CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p
-                    className={`text-sm ${
-                      activeSegmentFacts.eventName === "Calm markets"
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-amber-700 dark:text-amber-300"
-                    }`}
-                  >
-                    {activeSegmentFacts.eventName === "Calm markets"
-                      ? "No major economic events are reported this round. Adjust your rates to maintain steady progress toward target values."
-                      : `The economy has experienced a shock. Supply shock is ${
-                          activeSegmentFacts.supplyShock > 0
-                            ? `+${activeSegmentFacts.supplyShock}`
-                            : activeSegmentFacts.supplyShock
-                        }% and demand shock is ${
-                          activeSegmentFacts.demandShock > 0
-                            ? `+${activeSegmentFacts.demandShock}`
-                            : activeSegmentFacts.demandShock
-                        }%. Adjust your interest rate accordingly to steer the economy!`}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+            <NewsflashBanner activeSegmentFacts={activeSegmentFacts} />
 
             {/* Current Metrics */}
-            <div className="flex flex-wrap gap-4">
-              <MetricCard
-                title="Current Inflation"
-                value={`${(resultFacts.inflation ?? 4.0).toFixed(1)}%`}
-                subtext={`Target: ${scenario.targetInflation.toFixed(1)}%`}
-                colorClass={
-                  Math.abs(
-                    (resultFacts.inflation ?? 4.0) - scenario.targetInflation
-                  ) > 2
-                    ? "text-red-500"
-                    : "text-green-500"
-                }
-              >
-                {renderDeviationMeter(
-                  resultFacts.inflation ?? 4.0,
-                  scenario.targetInflation,
-                  4.0
-                )}
-              </MetricCard>
-              <MetricCard
-                title="Unemployment"
-                value={`${(resultFacts.unemployment ?? 4.0).toFixed(1)}%`}
-                subtext={`Natural Rate: ${scenario.naturalUnemployment.toFixed(
-                  1
-                )}%`}
-                colorClass={
-                  Math.abs(
-                    (resultFacts.unemployment ?? 4.0) -
-                      scenario.naturalUnemployment
-                  ) > 1.5
-                    ? "text-red-500"
-                    : "text-green-500"
-                }
-              >
-                {renderDeviationMeter(
-                  resultFacts.unemployment ?? 4.0,
-                  scenario.naturalUnemployment,
-                  3.0
-                )}
-              </MetricCard>
-              <MetricCard
-                title="GDP Growth"
-                value={`${(resultFacts.growth ?? 3.0).toFixed(1)}%`}
-                subtext="Target: ~2.0-3.0%"
-                colorClass={
-                  (resultFacts.growth ?? 3.0) < 0
-                    ? "text-red-500"
-                    : "text-green-500"
-                }
-              >
-                {renderDeviationMeter(resultFacts.growth ?? 3.0, 2.5, 5.0)}
-              </MetricCard>
-              <MetricCard
-                title="Cumulative Loss"
-                value={(resultFacts.cumulativePenalty ?? 0).toFixed(2)}
-                subtext="Target: 0.0 (Perfect Mandate)"
-              />
-            </div>
+            <MetricsSummary resultFacts={resultFacts} scenario={scenario} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Decision Form */}
@@ -834,8 +843,9 @@ export default function Cockpit() {
                         The Taylor Rule aims to balance inflation and growth:
                       </p>
                       <div className="font-mono bg-muted p-1.5 rounded text-[10px] select-all">
-                        Rate = 4.0 + 1.5 * (Inflation -{" "}
-                        {targetInflation.toFixed(1)}) + 0.5 * (Growth - 2.5)
+                        Rate = {NEUTRAL_RATE.toFixed(1)} + 1.5 * (Inflation -{" "}
+                        {targetInflation.toFixed(1)}) + 0.5 * (Growth -{" "}
+                        {TREND_GROWTH.toFixed(1)})
                       </div>
                       <ul className="list-disc pl-4 space-y-1">
                         <li>
@@ -889,118 +899,10 @@ export default function Cockpit() {
             <GameHeader currentGame={currentGame} />
 
             {/* Event Newsflash Banner (Keep visible during results review) */}
-            {activeSegmentFacts.eventName && (
-              <Card
-                className={
-                  activeSegmentFacts.eventName === "Calm markets"
-                    ? "border-emerald-100 bg-emerald-50/20 dark:border-emerald-950/20 dark:bg-emerald-950/5"
-                    : "border-amber-200 bg-amber-50/40 dark:border-amber-900/30 dark:bg-amber-950/10"
-                }
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    {activeSegmentFacts.eventName !== "Calm markets" && (
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                      </span>
-                    )}
-                    <CardTitle
-                      className={`text-xs font-bold uppercase tracking-wider ${
-                        activeSegmentFacts.eventName === "Calm markets"
-                          ? "text-emerald-700 dark:text-emerald-400"
-                          : "text-amber-800 dark:text-amber-400"
-                      }`}
-                    >
-                      {activeSegmentFacts.eventName === "Calm markets"
-                        ? "Market Conditions: Stable"
-                        : `Breaking News: ${activeSegmentFacts.eventName}`}
-                    </CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p
-                    className={`text-sm ${
-                      activeSegmentFacts.eventName === "Calm markets"
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-amber-700 dark:text-amber-300"
-                    }`}
-                  >
-                    {activeSegmentFacts.eventName === "Calm markets"
-                      ? "No major economic events occurred this segment. The market remained stable."
-                      : `The economy experienced a shock this segment. Supply shock was ${
-                          activeSegmentFacts.supplyShock > 0
-                            ? `+${activeSegmentFacts.supplyShock}`
-                            : activeSegmentFacts.supplyShock
-                        }% and demand shock was ${
-                          activeSegmentFacts.demandShock > 0
-                            ? `+${activeSegmentFacts.demandShock}`
-                            : activeSegmentFacts.demandShock
-                        }%.`}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+            <NewsflashBanner activeSegmentFacts={activeSegmentFacts} />
 
             {/* Current Metrics */}
-            <div className="flex flex-wrap gap-4">
-              <MetricCard
-                title="Current Inflation"
-                value={`${(resultFacts.inflation ?? 4.0).toFixed(1)}%`}
-                subtext={`Target: ${scenario.targetInflation.toFixed(1)}%`}
-                colorClass={
-                  Math.abs(
-                    (resultFacts.inflation ?? 4.0) - scenario.targetInflation
-                  ) > 2
-                    ? "text-red-500"
-                    : "text-green-500"
-                }
-              >
-                {renderDeviationMeter(
-                  resultFacts.inflation ?? 4.0,
-                  scenario.targetInflation,
-                  4.0
-                )}
-              </MetricCard>
-              <MetricCard
-                title="Unemployment"
-                value={`${(resultFacts.unemployment ?? 4.0).toFixed(1)}%`}
-                subtext={`Natural Rate: ${scenario.naturalUnemployment.toFixed(
-                  1
-                )}%`}
-                colorClass={
-                  Math.abs(
-                    (resultFacts.unemployment ?? 4.0) -
-                      scenario.naturalUnemployment
-                  ) > 1.5
-                    ? "text-red-500"
-                    : "text-green-500"
-                }
-              >
-                {renderDeviationMeter(
-                  resultFacts.unemployment ?? 4.0,
-                  scenario.naturalUnemployment,
-                  3.0
-                )}
-              </MetricCard>
-              <MetricCard
-                title="GDP Growth"
-                value={`${(resultFacts.growth ?? 3.0).toFixed(1)}%`}
-                subtext="Target: ~2.0-3.0%"
-                colorClass={
-                  (resultFacts.growth ?? 3.0) < 0
-                    ? "text-red-500"
-                    : "text-green-500"
-                }
-              >
-                {renderDeviationMeter(resultFacts.growth ?? 3.0, 2.5, 5.0)}
-              </MetricCard>
-              <MetricCard
-                title="Cumulative Loss"
-                value={(resultFacts.cumulativePenalty ?? 0).toFixed(2)}
-                subtext="Target: 0.0 (Perfect Mandate)"
-              />
-            </div>
+            <MetricsSummary resultFacts={resultFacts} scenario={scenario} />
 
             {/* Tactical Charts (Only own history, no spillovers or team comparisons yet) */}
             <div className="grid grid-cols-1 gap-6">
@@ -1029,118 +931,10 @@ export default function Cockpit() {
             <GameHeader currentGame={currentGame} />
 
             {/* Event Newsflash Banner (Keep visible during results review) */}
-            {activeSegmentFacts.eventName && (
-              <Card
-                className={
-                  activeSegmentFacts.eventName === "Calm markets"
-                    ? "border-emerald-100 bg-emerald-50/20 dark:border-emerald-950/20 dark:bg-emerald-950/5"
-                    : "border-amber-200 bg-amber-50/40 dark:border-amber-900/30 dark:bg-amber-950/10"
-                }
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    {activeSegmentFacts.eventName !== "Calm markets" && (
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                      </span>
-                    )}
-                    <CardTitle
-                      className={`text-xs font-bold uppercase tracking-wider ${
-                        activeSegmentFacts.eventName === "Calm markets"
-                          ? "text-emerald-700 dark:text-emerald-400"
-                          : "text-amber-800 dark:text-amber-400"
-                      }`}
-                    >
-                      {activeSegmentFacts.eventName === "Calm markets"
-                        ? "Market Conditions: Stable"
-                        : `Breaking News: ${activeSegmentFacts.eventName}`}
-                    </CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p
-                    className={`text-sm ${
-                      activeSegmentFacts.eventName === "Calm markets"
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-amber-700 dark:text-amber-300"
-                    }`}
-                  >
-                    {activeSegmentFacts.eventName === "Calm markets"
-                      ? "No major economic events occurred this segment. The market remained stable."
-                      : `The economy experienced a shock this segment. Supply shock was ${
-                          activeSegmentFacts.supplyShock > 0
-                            ? `+${activeSegmentFacts.supplyShock}`
-                            : activeSegmentFacts.supplyShock
-                        }% and demand shock was ${
-                          activeSegmentFacts.demandShock > 0
-                            ? `+${activeSegmentFacts.demandShock}`
-                            : activeSegmentFacts.demandShock
-                        }%.`}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+            <NewsflashBanner activeSegmentFacts={activeSegmentFacts} />
 
             {/* Current Metrics */}
-            <div className="flex flex-wrap gap-4">
-              <MetricCard
-                title="Current Inflation"
-                value={`${(resultFacts.inflation ?? 4.0).toFixed(1)}%`}
-                subtext={`Target: ${scenario.targetInflation.toFixed(1)}%`}
-                colorClass={
-                  Math.abs(
-                    (resultFacts.inflation ?? 4.0) - scenario.targetInflation
-                  ) > 2
-                    ? "text-red-500"
-                    : "text-green-500"
-                }
-              >
-                {renderDeviationMeter(
-                  resultFacts.inflation ?? 4.0,
-                  scenario.targetInflation,
-                  4.0
-                )}
-              </MetricCard>
-              <MetricCard
-                title="Unemployment"
-                value={`${(resultFacts.unemployment ?? 4.0).toFixed(1)}%`}
-                subtext={`Natural Rate: ${scenario.naturalUnemployment.toFixed(
-                  1
-                )}%`}
-                colorClass={
-                  Math.abs(
-                    (resultFacts.unemployment ?? 4.0) -
-                      scenario.naturalUnemployment
-                  ) > 1.5
-                    ? "text-red-500"
-                    : "text-green-500"
-                }
-              >
-                {renderDeviationMeter(
-                  resultFacts.unemployment ?? 4.0,
-                  scenario.naturalUnemployment,
-                  3.0
-                )}
-              </MetricCard>
-              <MetricCard
-                title="GDP Growth"
-                value={`${(resultFacts.growth ?? 3.0).toFixed(1)}%`}
-                subtext="Target: ~2.0-3.0%"
-                colorClass={
-                  (resultFacts.growth ?? 3.0) < 0
-                    ? "text-red-500"
-                    : "text-green-500"
-                }
-              >
-                {renderDeviationMeter(resultFacts.growth ?? 3.0, 2.5, 5.0)}
-              </MetricCard>
-              <MetricCard
-                title="Cumulative Loss"
-                value={(resultFacts.cumulativePenalty ?? 0).toFixed(2)}
-                subtext="Target: 0.0 (Perfect Mandate)"
-              />
-            </div>
+            <MetricsSummary resultFacts={resultFacts} scenario={scenario} />
 
             {/* International Trade Spillover Report (visible if spillovers calculated) */}
             {resultFacts.exchangeRateIndex !== undefined && (

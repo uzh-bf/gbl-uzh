@@ -1,7 +1,7 @@
 import { OutputFacts, PayloadSegmentResult } from "@gbl-uzh/platform";
 import { debugLog } from "@gbl-uzh/platform/dist/lib/util";
 import { produce } from "immer";
-import { PlayerRole } from "../settings/Constants";
+import { DEFAULT_RATE, NEUTRAL_RATE, PlayerRole } from "../settings/Constants";
 import { GameFacts } from "../types/Game";
 import type { PeriodFacts, PeriodSegmentFacts } from "../types/Period";
 import { OutputResultFacts, ResultFacts } from "../types/facts";
@@ -78,9 +78,11 @@ export function end(
       const scenario = payload.periodFacts.scenario;
       const segmentIx = payload.segmentIx;
 
-      // Fetch the interest rate decision set by the player (defaulting to 4.0% if not set)
+      // Fetch the interest rate decision set by the player (defaulting to DEFAULT_RATE if not set)
       const R =
-        facts.decisions?.rate !== undefined ? facts.decisions.rate : 4.0;
+        facts.decisions?.rate !== undefined
+          ? facts.decisions.rate
+          : DEFAULT_RATE;
 
       const supplyShock =
         segmentFacts.supplyShock !== undefined ? segmentFacts.supplyShock : 0.0;
@@ -89,10 +91,10 @@ export function end(
       const eventName = segmentFacts.eventName || "Calm markets";
 
       // Economic model formulas using separate supply and demand shocks
-      let growth = 3.0 - 0.5 * (R - 4.0) + demandShock;
-      let inflation = facts.inflation - 0.4 * (R - 4.0) + supplyShock;
+      let growth = 3.0 - 0.5 * (R - NEUTRAL_RATE) + demandShock;
+      let inflation = facts.inflation - 0.4 * (R - NEUTRAL_RATE) + supplyShock;
       let unemployment =
-        facts.unemployment + 0.3 * (R - 4.0) - 0.2 * demandShock;
+        facts.unemployment + 0.3 * (R - NEUTRAL_RATE) - 0.2 * demandShock;
 
       // Clamping values to keep them in realistic boundaries
       growth = parseFloat(Math.min(10, Math.max(-10, growth)).toFixed(2));

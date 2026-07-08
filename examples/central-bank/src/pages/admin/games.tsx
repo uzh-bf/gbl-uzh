@@ -65,9 +65,7 @@ function Games() {
         initialValues={{
           name: "",
           playerCount: 1,
-          facts: {
-            myInt: 1,
-          },
+          facts: {},
         }}
         onSubmit={async (variables, { resetForm }) => {
           await createGame({

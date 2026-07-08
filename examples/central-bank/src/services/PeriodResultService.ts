@@ -127,11 +127,6 @@ export function end(
         Math.min(20, Math.max(1, unemployment)).toFixed(2)
       );
 
-      // Exchange Rate Index (neutral = 100. Higher own rate appreciates domestic currency)
-      const exchangeRateIndex = parseFloat((100.0 - 5.0 * deltaR).toFixed(2));
-      // Trade Balance (currency appreciation hurts exports/trade balance)
-      const tradeBalance = parseFloat((0.5 * deltaR).toFixed(2));
-
       // Recalculate loss penalty
       const scenario = payload.periodFacts.scenario;
       let penalty =
@@ -166,8 +161,6 @@ export function end(
       draft.resultFacts.spilloverInflation = spilloverInflation;
       draft.resultFacts.spilloverUnemployment = spilloverUnemployment;
       draft.resultFacts.spilloverGrowth = spilloverGrowth;
-      draft.resultFacts.exchangeRateIndex = exchangeRateIndex;
-      draft.resultFacts.tradeBalance = tradeBalance;
       draft.resultFacts.penalty = penalty;
       draft.resultFacts.cumulativePenalty = cumulativePenalty;
       draft.resultFacts.history = history;
