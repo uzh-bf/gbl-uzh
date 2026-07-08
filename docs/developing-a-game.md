@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: '2026-07-04T00:00:00Z'
+timestamp: "2026-07-06T00:00:00Z"
 ---
 
 # Developing a Game
@@ -33,6 +33,8 @@ There is no generator. The supported path is copying the reference game inside a
 3. Replace the game logic: `src/services/` (computations, below), `src/types/` (facts shapes + yup schemas), `prisma/seed.ts` (levels/content), and the pages under `src/pages/`.
 4. The workspace glob `apps/*` picks the package up automatically; run from the repo root with turbo or from the app directory.
 5. Local dev environment: two devcontainer configurations, both with Postgres + a mock OIDC server replacing Auth0 (one-click admin login as a fixed dev admin — no real Auth0 tenant needed). The **starter** config (`.devcontainer/starter/`, published localhost ports, zero host tooling; walkthrough in [getting-started](getting-started.md)) and the **devrouter** config (`.devcontainer/README.md`, multi-project routing for maintainers). If the environment misbehaves, use the `gbl-environment-doctor` skill. Outside a devcontainer you need real OIDC credentials via `.env.local.template`.
+
+> **WARNING:** Decontaminate the copy. `cp -R apps/demo-game apps/<your-game>` also copies the demo game's domain logic, and the build will not fail on residue you leave behind. After step 3, hunt down demo-game leftovers: `.env.production` URLs still pointing at `demo-game.stg.env.bf-app.ch`, the `src/pages/index.tsx` trading showcase, dead `src/lib/analysis.ts` portfolio code, demo time constants (`MONTHS`/`NUM_MONTHS`), and the `GameFacts.myInt` stub. The full hit-list and a "definition of done" are in the `gbl-new-game-app` skill. Grep your `src/` for `assetsWithReturns`, `spotPrice`, `bank`/`bonds`/`stocks` — any hit is residue.
 
 ## Backend: the `Services` contract
 
@@ -110,3 +112,4 @@ Your game-specific work is almost entirely: the decision form (validate with yup
 - Run the app locally (devcontainer flow above) and click through the full lifecycle as admin + one player — the fastest end-to-end check.
 - `playwright/tests/demo-game-flow.spec.ts` shows how to automate exactly that loop (admin auth setup, multi-player contexts, status assertions via `data-game-status`); adapt it for your game.
 - Keep the copied package's `check` script green (`pnpm run check` = lint + `check:ts`; there is no `typecheck` script); the facts types are your main defense against silent data corruption.
+- Ready to share a URL? See [deploying-a-game.md](deploying-a-game.md) for the easy Vercel + Neon staging path (the `gbl-deploy-staging` skill drives it from the CLI).

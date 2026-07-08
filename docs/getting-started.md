@@ -38,7 +38,7 @@ You will also want a [Claude](https://claude.ai) account for the built-in AI ass
 
 ## Get the platform running
 
-1. **Start Docker Desktop** and wait until its whale icon says it is running.
+1. **Start your container runtime** (Rancher Desktop, OrbStack, or Docker Desktop — whichever you installed above) and wait until its tray/menu-bar icon says it is running.
 2. In VS Code, press **F1** (or `Ctrl+Shift+P`, on Mac `Cmd+Shift+P`), type **clone repository in container volume**, and choose **Dev Containers: Clone Repository in Container Volume…**
 3. Paste this address and press Enter:
 
@@ -78,7 +78,7 @@ Tell your assistant:
 
 It will diagnose and repair the setup for you. Only three things it cannot do for you:
 
-- **Start Docker Desktop** — if the whale icon isn't running, nothing works. Start it and try again.
+- **Start your container runtime** — if Rancher Desktop / OrbStack / Docker Desktop isn't running, nothing works. Start it and try again.
 - **Approve Windows/WSL 2 prompts** — click through them, restart if asked.
 - **Rebuild the box** — if the assistant asks you to "rebuild the container": press **F1** in VS Code → **Dev Containers: Rebuild Container**.
 

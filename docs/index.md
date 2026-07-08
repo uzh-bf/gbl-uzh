@@ -17,10 +17,11 @@ An [Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-cata
 - [Developing a Game](developing-a-game.md) - Backend computations, frontend pages, scaffolding, local dev
 - [UI Building Blocks](ui-components.md) - `@gbl-uzh/ui` and `@uzh-bf/design-system` usage, gaps
 - [API Layer and Realtime](api-layer.md) - GraphQL today, the tRPC migration, realtime events
+- [Deploying a Game to Staging](deploying-a-game.md) - The easy Vercel + Neon path to a shareable staging URL (CLI-first), distinct from the k8s production path
 
 ## Related resources
 
-- [Agent skills](../.agents/skills/) - `gbl-game-design`, `gbl-new-game-app`, `gbl-backend-computations`, `gbl-frontend-game-ui`, `gbl-playwright-e2e`, `gbl-environment-doctor`, `gbl-wiki-maintenance`
+- [Agent skills](../.agents/skills/) - `gbl-game-design`, `gbl-new-game-app`, `gbl-backend-computations`, `gbl-frontend-game-ui`, `gbl-playwright-e2e`, `gbl-deploy-staging`, `gbl-environment-doctor`, `gbl-wiki-maintenance`
 - [Reference game](../apps/demo-game/) - the single worked implementation all pages cite
 - [E2E flow spec](../playwright/tests/demo-game-flow.spec.ts) - executable ground truth for the lifecycle
 

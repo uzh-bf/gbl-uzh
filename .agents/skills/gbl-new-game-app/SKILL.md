@@ -28,6 +28,20 @@ Design the game FIRST (`gbl-game-design` skill) — the scaffold asks for your f
    - Branding: `public/` assets, app name in layout/nav.
 6. Auth env: copy `.env.local.template`; local dev works without a real OIDC tenant via the devcontainer's mock OIDC server (see `.devcontainer/README.md`); production needs real Auth0/OIDC credentials + `NEXTAUTH_SECRET`.
 
+## Decontaminate the copy
+
+`cp -R apps/demo-game apps/<game>` copies the demo game's domain logic too. Step 5 above tells you what to *replace*; this section is the hit-list of demo-game residue that is easy to miss because it does not fail the build. Run through it after step 5, before first run. Every item here is a real defect found in the first dogfood game build.
+
+- **`.env.production` + `.env.production.prd`**: still point `NEXT_PUBLIC_*` and `NEXTAUTH_URL` at `demo-game.stg.env.bf-app.ch`. Rewrite them to your game's domain, or empty them and set env vars at deploy time. See `gbl-deploy-staging` / [docs/deploying-a-game.md](../../../docs/deploying-a-game.md).
+- **`src/pages/index.tsx`**: the app's `/` route. In the demo game this is a trading/portfolio showcase (`StorageOverview`, `TradingForm`, `ProbabilityChart`, "hello world"). Replace it with a game landing page or a redirect to `/play/welcome`.
+- **`src/lib/analysis.ts`**: demo-game portfolio analytics (`assetsWithReturns`, `accBankBenchmarkReturn`, `totalAssetsReturn`, `sharpeRatio`). Unused in any other game. Delete it.
+- **`src/lib/constants.ts`**: demo-game time constants `MONTHS`, `NUM_MONTHS`, `NUM_MONTHS_PER_SEGMENT` (12-month portfolio cycle). Delete them if nothing else uses them; keep `LOCATIONS`, `COLORS`, `AVATARS`.
+- **`GameFactsService.ts` + `src/types/Game.ts`**: the demo stubs increment a meaningless `myInt` counter. Replace `GameFacts` with your game's facts (or an empty schema) and stub `update` accordingly (`gbl-backend-computations` skill).
+- **Grep the whole `src/` tree for demo-game vocabulary**: `assetsWithReturns`, `spotPrice`, `futuresPrice`, `cashBalance`, `storageAmount`, `bank` / `bonds` / `stocks` (as allocation fields). Any hit is residue to remove or replace.
+
+> [!TIP]
+> **Also clean unused imports.** A copied file often imports types it no longer uses (e.g. `PlayerResult` in a result service that switched to `any`). `pnpm --filter @gbl-uzh/<game> run check` (lint + `check:ts`) surfaces these - do not skip it.
+
 ## Local dev + first run
 
 Preferred: the devcontainer/devrouter flow (`.devcontainer/README.md`) — brings up Postgres + mock OIDC and seeds automatically; admin login is one click as a fixed dev admin. Manual alternative: own Postgres + real OIDC creds, then `prisma migrate dev`/`db push` + seed, then the package's `dev` script.
@@ -38,6 +52,18 @@ First-run verification (do this before writing any new feature):
 2. Add one period + one segment; open a player join link from the game detail page in a second browser context.
 3. Drive one full loop: Start Period → Next Segment → submit a player decision → Segment Results → Consolidate → Period Results ([docs/game-lifecycle.md](../../../docs/game-lifecycle.md)).
 4. Confirm the player screen updates on each admin transition without manual reload (realtime works).
+
+## Definition of done
+
+Before calling the scaffold complete, verify all of:
+
+- `pnpm --filter @gbl-uzh/<game> run check` is green (lint + `check:ts`; no unused imports, no demo-game types).
+- No residue grep hits from the decontamination list above (`rg "assetsWithReturns|spotPrice|futuresPrice|cashBalance|storageAmount" apps/<game>/src` returns nothing; `bank`/`bonds`/`stocks` only appear if they are your game's actual concepts).
+- The `/` route renders your game, not demo-game content.
+- If you keep a progress tracker (e.g. `task.md`), update it. A stale checklist that says "results view not done" when it is done is a real review hazard.
+
+> [!WARNING]
+> **Throwaway game (dogfood/experiment you will NOT commit to the target branch)? Clean up when you remove it.** `apps/<game>/.gitignore` (which ignores `.next/`, `next-env.d.ts`, `tsconfig.tsbuildinfo`) only exists next to committed source. Once you delete the source but leave the built app on disk, those artifacts are no longer ignored, so a later `git add -A` would stage the whole `.next/` (webpack caches included) plus any stray root tracker like `task.md`. Run `rm -rf apps/<game>` and delete the tracker before staging, and confirm with `git status` that nothing under the removed app remains.
 
 ## Pitfalls
 
