@@ -29,7 +29,7 @@ function StoryElements({ playerState, player }: Props) {
   }, [playerState?.data])
 
   const visitedStoryElements =
-    playerState?.data?.result?.playerResult?.player.visitedStoryElementIds
+    playerState?.data?.result?.playerResult?.player?.visitedStoryElementIds
 
   useEffect(() => {
     if (activeStoryElements?.length > 0) {

@@ -11,10 +11,15 @@ function Join() {
   useEffect(() => {
     if (router.query?.token) {
       const executeAsync = async () => {
-        await loginAsTeam({
-          variables: { token: router.query.token as string },
-        })
-        router.push('/play/welcome')
+        try {
+          await loginAsTeam({
+            variables: { token: router.query.token as string },
+          })
+          router.push('/play/welcome')
+        } catch (err) {
+          console.error('Failed to join game:', err)
+          router.push('/?error=invalid-token')
+        }
       }
       executeAsync()
     }
