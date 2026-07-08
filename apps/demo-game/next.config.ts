@@ -36,6 +36,7 @@ const appApolloDir = path.dirname(
 const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
+  allowedDevOrigins: ['127.0.0.1'],
   typescript: {
     ignoreBuildErrors: true,
   },

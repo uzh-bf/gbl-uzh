@@ -73,6 +73,14 @@ Both are selected by the admin in the add-segment dialog and attached to specifi
 > [!TIP]
 > **Always guard `JSON.parse` on facts data.** Facts may be `null`, `undefined`, a plain object, or a double-stringified JSON string depending on the game state. Use a `parseFacts(raw, defaultValue)` wrapper (see `gbl-backend-computations` skill) in every component that reads `team.facts`, `period.facts`, or `segment.facts`. Without this, early game states (before initialisation) will crash the admin reports and player cockpit.
 
+## Formative Feedback & Results Analysis
+
+In `PAUSED`, `CONSOLIDATION`, or `RESULTS` phases, build a structured debriefing view:
+- **Map decisions to outcomes:** Use design system cards/tables and Recharts to visualize intermediate calculations (e.g. allocation -> market share).
+- **Explain the "why":** Add explanatory messages/warnings based on the result facts.
+- **Role-specific views:** Conditionally render content using `playerRole`.
+
+See [docs/game-patterns.md](../../../docs/game-patterns.md) for pattern details.
 ## Components: where to get what
 
 Priority order:
@@ -86,7 +94,13 @@ Priority order:
 
 Tailwind v4, CSS-only config. Copy `apps/demo-game/src/globals.css` + `postcss.config.js` and keep its gotchas intact (relative `node_modules` import of the design-system CSS, no own preflight, `.aspect-video` patch, `--theme-color-*` custom properties). Details: [docs/ui-components.md](../../../docs/ui-components.md).
 
+## Leaderboards / cross-team views
+
+The player's aggregate `result` query exposes a **token-free** co-player list at `currentGame.players` (`id`, `name`, `facts` — `PlayService.ts:getPlayerResult`) — use it to resolve display names for leaderboards. Result facts from computations carry only `playerId`s. Do NOT reach for the `game`/`games` queries from player pages: they are ADMIN/MASTER-only because the full `Player` type exposes login tokens.
+
 ## Conventions + verify
 
-- Test selectors: design-system `Button data={{ cy: '...', test: '...' }}` renders `data-cy` and `data-test` attributes (there is no `data-testid`); Playwright is configured with `testIdAttribute: 'data-cy'` (`playwright/playwright.config.ts`), so `getByTestId` matches `data-cy`. The game-detail page exposes `data-game-status` for lifecycle assertions.
-- Verify in a real browser through the full lifecycle (admin + one player window): decisions submit, realtime refresh fires on transitions, story popups block, charts render. Automate with an adapted `playwright/tests/demo-game-flow.spec.ts`.
+- Test selectors: design-system `Button data={{ cy: '...', test: '...' }}` renders `data-cy` and `data-test` attributes (there is no `data-testid`); Playwright is configured with `testIdAttribute: 'data-cy'` (`playwright/playwright.config.ts`), so `getByTestId` matches `data-cy`. The game-detail page exposes `data-game-status` for lifecycle assertions. The design-system `Card` does **not** forward a raw `data-cy` attribute — put test ids on plain wrapper `div`s or anchor tests on visible headline text.
+- Verify in a real browser through the full lifecycle (admin + one player window): decisions submit, realtime refresh fires on transitions, story popups block, charts render. Automate with an adapted `playwright/tests/demo-game-flow.spec.ts` (or `rate-wars-flow.spec.ts` for a single-segment-per-period game).
+- One browser profile = one session: player login overwrites the admin's `next-auth.session-token` cookie (`AccountService.ts:loginAsTeam`). Use separate browser contexts/profiles for admin and players when verifying manually.
+- Windows + Docker bind mounts do not deliver file-watch events into the container — the dev server does NOT hot-reload on host edits; restart the app's dev server (or set `WATCHPACK_POLLING=true` and `CHOKIDAR_USEPOLLING=true`) after changes.
