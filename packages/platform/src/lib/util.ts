@@ -50,7 +50,6 @@ export function withPercentChange(value: number, percentChange: number) {
   return value * (1 + percentChange)
 }
 
-
 export async function withRetry<T>(
   fn: () => Promise<T>,
   retries = 3

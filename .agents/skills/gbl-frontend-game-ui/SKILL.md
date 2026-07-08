@@ -81,7 +81,6 @@ In `PAUSED`, `CONSOLIDATION`, or `RESULTS` phases, build a structured debriefing
 - **Role-specific views:** Conditionally render content using `playerRole`.
 
 See [docs/game-patterns.md](../../../docs/game-patterns.md) for pattern details.
-
 ## Components: where to get what
 
 Priority order:

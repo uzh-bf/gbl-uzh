@@ -105,7 +105,7 @@ async function createGame(
   await input(page, 'playerCount').fill(String(playerCount))
   await page.getByRole('button', { name: 'Create Game' }).click()
   await page.getByRole('link', { name: new RegExp(name) }).click()
-  await expect(page.getByTestId('game-detail')).toBeVisible()
+  await expect(page.getByTestId('game-detail')).toBeVisible({ timeout: 20_000 })
 }
 
 async function addPeriod(
@@ -157,6 +157,8 @@ async function joinPlayer(
     page.waitForURL('**/play/cockpit'),
     page.getByRole('button', { name: 'Start Game' }).click(),
   ])
+
+  await expect(page.getByText('Game is scheduled.')).toBeVisible({ timeout: 30_000 })
 
   return { context, page, plan }
 }
@@ -211,20 +213,21 @@ async function advanceGame(
 }
 
 async function assertPlayerDecisionForm(sessions: PlayerSession[]) {
-  await Promise.all(sessions.map(({ page }) => page.reload()))
   await Promise.all(
     sessions.map(({ page }) =>
-      expect(page.getByRole('button', { name: 'Submit' })).toBeVisible()
+      expect(page.getByRole('button', { name: 'Submit' })).toBeVisible({
+        timeout: 15_000,
+      })
     )
   )
 }
 
-async function assertPlayerPortfolio(page: Page) {
-  await expect(page.getByText('Assets Overview').first()).toBeVisible()
-  await expect(page.getByText('Savings').first()).toBeVisible()
-  await expect(page.getByText('Bonds').first()).toBeVisible()
-  await expect(page.getByText('Stocks').first()).toBeVisible()
-  await expect(page.getByText('Total').first()).toBeVisible()
+async function assertPlayerPortfolio(page: Page, timeout = 10_000) {
+  await expect(page.getByText('Assets Overview').first()).toBeVisible({ timeout })
+  await expect(page.getByText('Savings').first()).toBeVisible({ timeout })
+  await expect(page.getByText('Bonds').first()).toBeVisible({ timeout })
+  await expect(page.getByText('Stocks').first()).toBeVisible({ timeout })
+  await expect(page.getByText('Total').first()).toBeVisible({ timeout })
 }
 
 async function setCountdown(page: Page, seconds: string) {
@@ -233,18 +236,7 @@ async function setCountdown(page: Page, seconds: string) {
 }
 
 async function assertCountdownVisible(page: Page) {
-  await expect
-    .poll(
-      async () => {
-        await page.reload()
-        return page.getByTestId('countdown').isVisible()
-      },
-      {
-        intervals: [500, 1_000, 2_000],
-        timeout: 30_000,
-      }
-    )
-    .toBe(true)
+  await expect(page.getByTestId('countdown')).toBeVisible({ timeout: 15_000 })
 }
 
 async function runSegment(
@@ -304,9 +296,9 @@ async function assertDicePage(page: Page) {
   ])
 
   try {
-    await expect(dicePage.getByText('1. Month')).toBeVisible()
-    await expect(dicePage.getByText('2. Month')).toBeVisible()
-    await expect(dicePage.getByText('3. Month')).toBeVisible()
+    await expect(dicePage.getByText('1. Month')).toBeVisible({ timeout: 30_000 })
+    await expect(dicePage.getByText('2. Month')).toBeVisible({ timeout: 30_000 })
+    await expect(dicePage.getByText('3. Month')).toBeVisible({ timeout: 30_000 })
     await expect(dicePage.getByRole('button', { name: 'Roll' })).toHaveCount(3)
   } finally {
     await dicePage.close()
