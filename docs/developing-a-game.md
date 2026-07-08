@@ -12,7 +12,7 @@ timestamp: "2026-07-06T00:00:00Z"
 
 # Developing a Game
 
-How to build a new game on the platform. Read [game-model.md](game-model.md) and [game-lifecycle.md](game-lifecycle.md) first — this page assumes their vocabulary. Related skills: `gbl-game-design` (design), `gbl-new-game-app` (scaffolding), `gbl-backend-computations` (backend), `gbl-frontend-game-ui` (frontend).
+How to build a new game on the platform. Read [game-model.md](game-model.md) and [game-lifecycle.md](game-lifecycle.md) first — this page assumes their vocabulary. For mechanical and didactical patterns (e.g. formative feedback, roles, seeded randomness), see [game-patterns.md](game-patterns.md). Related skills: `gbl-game-design` (design), `gbl-new-game-app` (scaffolding), `gbl-backend-computations` (backend), `gbl-frontend-game-ui` (frontend).
 
 ## 1. Game Design (before you code)
 
@@ -83,7 +83,7 @@ The `services` object, yup schemas, and facts input types are passed into the pl
 
 ## Frontend: built per game
 
-There is no generic frontend — each game builds its own Next.js pages (Pages Router in the reference game), reusing components from [`@gbl-uzh/ui` and the design system](ui-components.md). The demo game's route set is the template:
+There is no generic frontend — each game builds its own Next.js pages (Pages Router in the reference game), reusing components from [`@gbl-uzh/ui and the design system`](ui-components.md). The demo game's route set is the template:
 
 | Route                 | Purpose                                                                                                                                             |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |

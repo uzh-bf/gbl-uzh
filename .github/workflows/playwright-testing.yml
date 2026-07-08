@@ -53,8 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shardIndex: [1, 2]
-        shardTotal: [2]
+        game: [demo-game, rate-wars]
     services:
       postgres:
         image: postgres:15
@@ -138,12 +137,12 @@ jobs:
 
       - name: Prepare database
         run: |
-          pnpm --filter @gbl-uzh/demo-game prisma:copy
-          pnpm --filter @gbl-uzh/demo-game prisma:generate
+          pnpm --filter @gbl-uzh/${{ matrix.game }} prisma:copy
+          pnpm --filter @gbl-uzh/${{ matrix.game }} prisma:generate
 
           push_ok=0
           for attempt in $(seq 1 12); do
-            if pnpm --filter @gbl-uzh/demo-game prisma:push; then
+            if pnpm --filter @gbl-uzh/${{ matrix.game }} prisma:push; then
               push_ok=1
               break
             fi
@@ -156,12 +155,12 @@ jobs:
             exit 1
           fi
 
-          pnpm --filter @gbl-uzh/demo-game prisma:seed
+          pnpm --filter @gbl-uzh/${{ matrix.game }} prisma:seed
 
-      - name: Start demo-game and run Playwright shard
+      - name: Start ${{ matrix.game }} and run Playwright
         timeout-minutes: 60
         run: |
-          pnpm --filter @gbl-uzh/demo-game dev > service.log 2>&1 &
+          pnpm --filter @gbl-uzh/${{ matrix.game }} dev > service.log 2>&1 &
           app_pid=$!
           trap 'kill "$app_pid" 2>/dev/null || true' EXIT
 
@@ -188,14 +187,14 @@ jobs:
 
           pnpm --dir playwright exec playwright test \
             --project=chromium \
-            --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} \
+            tests/${{ matrix.game }}-flow.spec.ts \
             --pass-with-no-tests
 
       - name: Upload blob report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: blob-report-${{ matrix.shardIndex }}
+          name: blob-report-${{ matrix.game }}
           path: playwright/blob-report
           retention-days: 1
           if-no-files-found: ignore
@@ -204,7 +203,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-artifacts-${{ matrix.shardIndex }}-of-${{ matrix.shardTotal }}
+          name: playwright-artifacts-${{ matrix.game }}
           path: |
             playwright/test-results
             service.log

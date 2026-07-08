@@ -21,6 +21,9 @@ The engine supports exactly one shape: **synchronous, facilitator-led, round-bas
 
 ## Step 2: Map the idea onto the structure
 
+> [!IMPORTANT]
+> **Decide first: does one round's computation need OTHER teams' decisions?** Cross-player data (`otherPlayersSegmentEndResults`) is available **only at `PeriodResult.end`** — never at segment close. If your rounds are competitive (markets, price wars, shared pools), each round must be a **period** (typically with a single segment); segments-as-rounds only work for games where every team's outcome depends solely on its own decisions plus the environment. This is the single most structural choice in the mapping table — getting it wrong means rewriting the backend.
+
 Fill this table — it is the core design artifact:
 
 | Concept                  | Your game                                                                                    |
@@ -32,8 +35,8 @@ Fill this table — it is the core design artifact:
 | Period facts (admin-set) | scenario parameters the facilitator configures when adding a period                          |
 | Player state             | what carries across segments/periods (e.g. capital, inventory) — lives in result facts       |
 | Segment outcome          | formula: decisions + environment → new player state                                          |
-| Period report            | what the debrief needs: metrics, comparisons, charts                                         |
-| Roles (optional)         | symmetric teams, or per-role info/computations (note: engine-supported, no worked example)   |
+| Period report            | what the debrief needs: metrics, comparisons, charts. Design for **formative feedback** (map decisions to outcome, e.g. financial statements). See [docs/game-patterns.md](../../../docs/game-patterns.md). |
+| Roles (optional)         | asymmetric roles (e.g. Buyer vs Seller in derivatives-game) or specialized team roles to create positive interdependence. |
 | Content overlays         | story elements (narrative popups, per segment) and learning elements (MC quizzes) with texts |
 | Gamification             | XP/levels ladder; achievements as event + condition + reward triples                         |
 
@@ -78,15 +81,18 @@ Content overlays are the learning-integration layer. Plan them alongside the nar
 - **Learning elements** (sidebar quizzes): optional, one per segment. Write MC questions that test understanding of the theory behind the mechanic. Seed as `LearningElement` rows with question text, options, and correct answer index.
 - **Welcome page text**: the introductory story shown on `/play/welcome` when the team first joins. This is the first impression — make it set the stage clearly.
 
-## Step 7: Sanity-check the computation
+## Step 7: Sanity-check the computation & didactical patterns
 
 For the segment outcome and period report, write the math/logic in prose first and check:
 
-- Inputs available at `SegmentResult.end`: the player's decisions (stored by the action reducer), segment facts, period facts, game facts, player role.
-- Inputs available at `PeriodResult.end`: the player's final segment results, **other players' segment-end results** (enables competitive/market computations), consolidation decisions, XP/level.
+- **Asymmetric Roles:** Interdependent outcomes combining decisions from multiple roles (e.g., Buyer/Seller).
+- **Formative Feedback:** Store detailed intermediate metrics (revenue breakdown, errors) in results for debrief dashboards.
+- **Seeded Randomness:** Use `PeriodFacts` seeds for deterministic environment generation (no `Math.random()`).
+- **Inputs available at `SegmentResult.end`:** player decisions (from Action reducer), segment facts, period facts, game facts, player role.
+- **Inputs available at `PeriodResult.end`:** the player's final segment results, **other players' segment-end results** (enables competitive/market computations), consolidation decisions, XP/level.
 - Randomness must be seedable (same seed → same environment) — plan a seed parameter in period facts.
 - The computation should expose enough intermediate values (forecasts, indicators, trends) for the cockpit to surface actionable information (Step 4).
 
 ## Step 8: Output
 
-Produce a short design doc with: the fit-check verdict, the mapping table, the narrative arc (premise + welcome text + per-segment story beats), the theory grounding per decision, computation prose, the two chart-layer designs (PAUSED vs RESULTS), the list of periods/segments for a first session, and seed content (level ladder, story/learning element texts, achievements). Hand off to `gbl-new-game-app` (scaffold), then `gbl-backend-computations` and `gbl-frontend-game-ui`.
+Produce a short design doc with: the fit-check verdict, the mapping table, the narrative arc (premise + welcome text + per-segment story beats), the theory grounding per decision, computation prose (including didactical patterns and roles), the two chart-layer designs (PAUSED vs RESULTS), the list of periods/segments for a first session, and seed content (level ladder, story/learning element texts, achievements). Hand off to `gbl-new-game-app` (scaffold), then `gbl-backend-computations` and `gbl-frontend-game-ui`.

@@ -21,6 +21,11 @@ query Result {
       id
       status
       nextAutoContinueAt
+      players {
+        id
+        name
+        facts
+      }
       periods {
         ...PeriodData
         segmentCount
