@@ -583,8 +583,12 @@ export default function Cockpit() {
       const growth = resultFacts.growth ?? 3.0;
       const targetInflation = scenario.targetInflation ?? 2.0;
 
-      const taylorRate = 4.0 + 1.5 * (inflation - targetInflation) + 0.5 * (growth - 2.5);
-      const recommendedRate = Math.min(15, Math.max(0, parseFloat(taylorRate.toFixed(2))));
+      const taylorRate =
+        4.0 + 1.5 * (inflation - targetInflation) + 0.5 * (growth - 2.5);
+      const recommendedRate = Math.min(
+        15,
+        Math.max(0, parseFloat(taylorRate.toFixed(2)))
+      );
 
       const schema = yup.object({
         rate: yup
@@ -631,7 +635,7 @@ export default function Cockpit() {
                 </CardHeader>
                 <CardContent>
                   <p
-                     className={`text-sm ${
+                    className={`text-sm ${
                       activeSegmentFacts.eventName === "Calm markets"
                         ? "text-emerald-600 dark:text-emerald-400"
                         : "text-amber-700 dark:text-amber-300"
@@ -720,8 +724,9 @@ export default function Cockpit() {
                   <CardHeader>
                     <CardTitle>Set Policy Interest Rate</CardTitle>
                     <CardDescription>
-                      Adjust the interest rate to steer the economy. Higher rates
-                      cool inflation but slow growth and increase unemployment.
+                      Adjust the interest rate to steer the economy. Higher
+                      rates cool inflation but slow growth and increase
+                      unemployment.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -784,7 +789,9 @@ export default function Cockpit() {
                               <span className="text-blue-500 font-semibold">
                                 Dovish (0%)
                               </span>
-                              <span className="text-gray-400">Neutral (4%)</span>
+                              <span className="text-gray-400">
+                                Neutral (4%)
+                              </span>
                               <span className="text-red-500 font-semibold">
                                 Hawkish (15%)
                               </span>
@@ -827,7 +834,8 @@ export default function Cockpit() {
                         The Taylor Rule aims to balance inflation and growth:
                       </p>
                       <div className="font-mono bg-muted p-1.5 rounded text-[10px] select-all">
-                        Rate = 4.0 + 1.5 * (Inflation - {targetInflation.toFixed(1)}) + 0.5 * (Growth - 2.5)
+                        Rate = 4.0 + 1.5 * (Inflation -{" "}
+                        {targetInflation.toFixed(1)}) + 0.5 * (Growth - 2.5)
                       </div>
                       <ul className="list-disc pl-4 space-y-1">
                         <li>
@@ -835,7 +843,8 @@ export default function Cockpit() {
                           <span className="font-semibold text-foreground">
                             {(inflation - targetInflation).toFixed(2)}%
                           </span>{" "}
-                          {inflation > targetInflation ? "above" : "below"} target.
+                          {inflation > targetInflation ? "above" : "below"}{" "}
+                          target.
                         </li>
                         <li>
                           Output Gap (GDP):{" "}
@@ -846,7 +855,8 @@ export default function Cockpit() {
                         </li>
                       </ul>
                       <p className="text-[10px] italic pt-1 border-t text-muted-foreground/80">
-                        *Note: Shocks and spillovers are unpredictable and will cause deviation from this target.
+                        *Note: Shocks and spillovers are unpredictable and will
+                        cause deviation from this target.
                       </p>
                     </div>
                   </CardContent>
@@ -998,7 +1008,8 @@ export default function Cockpit() {
                 <CardHeader>
                   <CardTitle>Your Economic History</CardTitle>
                   <CardDescription>
-                    Historical path of your economic metrics across segments in this policy cycle.
+                    Historical path of your economic metrics across segments in
+                    this policy cycle.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

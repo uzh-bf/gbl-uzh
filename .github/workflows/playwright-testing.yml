@@ -53,7 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        game: [demo-game, rate-wars]
+        game: [demo-game, rate-wars, central-bank]
     services:
       postgres:
         image: postgres:15
