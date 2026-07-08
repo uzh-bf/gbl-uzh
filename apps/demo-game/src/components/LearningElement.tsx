@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { LearningElementState } from '@gbl-uzh/platform'
 import { Button } from '@uzh-bf/design-system'
 import { without } from 'ramda'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Markdown from 'react-markdown'
 import {
   AttemptLearningElementDocument,
@@ -22,9 +22,14 @@ function LearningElement({ elementId }: { elementId: string }) {
 
   const [elementState, setElementState] = useState(null)
 
-  useEffect(() => {
+  // Reset the current selection whenever the rendered element changes. Done as
+  // a render-phase reset (tracking the previous prop) rather than an effect, so
+  // it complies with react-hooks/set-state-in-effect and applies before paint.
+  const [prevElementId, setPrevElementId] = useState(elementId)
+  if (prevElementId !== elementId) {
+    setPrevElementId(elementId)
     setActiveElements([])
-  }, [elementId])
+  }
 
   const { toast } = useToast()
 

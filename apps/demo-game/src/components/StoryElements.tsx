@@ -36,6 +36,9 @@ function StoryElements({ playerState, player }: Props) {
       const unseenStoryElements = activeStoryElements.filter(
         (elem) => !visitedStoryElements?.includes(elem.id)
       )
+      // Seeds a local queue that the modal then consumes via slice(1) on close,
+      // so it is not derivable from props and cannot move to render phase.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUnseenStoryElements(unseenStoryElements)
     }
   }, [activeStoryElements, playerState, visitedStoryElements])

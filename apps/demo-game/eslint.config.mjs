@@ -9,17 +9,6 @@ import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
 const eslintConfig = [
   ...nextCoreWebVitals,
   {
-    // eslint-config-next 16 promotes `react-hooks/set-state-in-effect` to an
-    // error. It flags 4 pre-existing setState-in-effect patterns (cockpit,
-    // StoryElements, LearningElement) that predate this toolchain upgrade;
-    // reworking those effects is a behavior-sensitive change out of scope here
-    // (this PR is toolchain/config only). Keep them visible as warnings and fix
-    // as follow-up lint debt rather than block the new lint baseline.
-    rules: {
-      'react-hooks/set-state-in-effect': 'warn',
-    },
-  },
-  {
     // An object with only `ignores` sets global ignores. Mirrors the old
     // `ignorePatterns` (build output + generated GraphQL); node_modules is
     // ignored by flat config out of the box.
