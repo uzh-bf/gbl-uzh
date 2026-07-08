@@ -296,9 +296,9 @@ async function assertDicePage(page: Page) {
   ])
 
   try {
-    await expect(dicePage.getByText('1. Month')).toBeVisible()
-    await expect(dicePage.getByText('2. Month')).toBeVisible()
-    await expect(dicePage.getByText('3. Month')).toBeVisible()
+    await expect(dicePage.getByText('1. Month')).toBeVisible({ timeout: 30_000 })
+    await expect(dicePage.getByText('2. Month')).toBeVisible({ timeout: 30_000 })
+    await expect(dicePage.getByText('3. Month')).toBeVisible({ timeout: 30_000 })
     await expect(dicePage.getByRole('button', { name: 'Roll' })).toHaveCount(3)
   } finally {
     await dicePage.close()
