@@ -18,18 +18,18 @@ function StoryElements({ playerState, player }: Props) {
   const activeStoryElements = useMemo(() => {
     if (
       !playerState?.data ||
-      !playerState?.data?.result.currentGame.activePeriod.activeSegment
+      !playerState?.data?.result?.currentGame?.activePeriod?.activeSegment
     )
       return []
     return sortBy(
       (elem) => elem.title,
-      playerState?.data?.result.currentGame.activePeriod.activeSegment
+      playerState?.data?.result?.currentGame?.activePeriod?.activeSegment
         ?.storyElements
     )
   }, [playerState?.data])
 
   const visitedStoryElements =
-    playerState?.data?.result?.playerResult?.player.visitedStoryElementIds
+    playerState?.data?.result?.playerResult?.player?.visitedStoryElementIds
 
   useEffect(() => {
     if (activeStoryElements?.length > 0) {
