@@ -350,7 +350,14 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
     },
   })
 
-  if (!currentGame?.activePeriod) return null
+  if (!currentGame?.activePeriod) {
+    return {
+      currentGame,
+      playerResult: null,
+      previousResults: [],
+      transactions: [],
+    }
+  }
 
   // segmentCount from DB is used as-is (not overwritten with segments.length)
   // so the timeline can correctly forecast remaining segments
