@@ -9,7 +9,17 @@ Each game builds its own Next.js frontend (Pages Router in the reference game); 
 
 ## Route checklist
 
-Boilerplate (copy from demo game, adjust branding): `/join/[token]`, `/play/welcome`, `/admin/login`, `/admin/games`, `_app.tsx`, the API route(s). Game-specific (your real work): `/play/cockpit`, `/admin/games/[id]` authoring forms, `/admin/reports/[id]` charts.
+Boilerplate (copy from demo game, adjust branding): `/join/[token]`, `/admin/login`, `/admin/games`, `_app.tsx`, the API route(s). Game-specific (your real work): `/play/welcome`, `/play/cockpit`, `/admin/games/[id]` authoring forms, `/admin/reports/[id]` charts.
+
+## The welcome page (`/play/welcome`)
+
+This is the player's **first impression** of the game. When a team clicks the join link, they land here. It must do three things:
+
+1. **Set the scene**: display the game's introductory story text — who is the player, what is the world state, what is at stake. This text should come from the game design's narrative arc.
+2. **Let the team customise their identity**: team name (required), and optionally an avatar, a motto, or role-specific details. These write into `Player.facts` and persist across the session.
+3. **Transition to the cockpit**: after submitting, redirect to `/play/cockpit`. The welcome page should only show once per team.
+
+Copy the structure from the demo game's `pages/play/welcome.tsx` and customise the form fields and story text for your game.
 
 ## The cockpit pattern (player screen)
 
@@ -18,14 +28,50 @@ One page, four layers — keep this shape:
 1. **One aggregate query** for everything the player sees (result + game + active period/segment + content + self).
 2. **Realtime = poke, then refetch.** Subscribe to global events; on `PERIOD_ACTIVATED` / `SEGMENT_ACTIVATED` / `COUNTDOWN_UPDATED` (filtered by your game id) refetch/invalidate the aggregate query. Never render data out of the event payload.
 3. **Shared chrome** in a `GameLayout` wrapper: nav + player display + Ready toggle + countdown widget + learning-element sidebar + blocking story-element popups.
-4. **Body = `switch (game.status)`**: `RUNNING` → decision form; `PAUSED`/`CONSOLIDATION` → read-only segment results; `RESULTS` → period report; other statuses → placeholders. Full per-status expectations: [docs/game-lifecycle.md](../../../docs/game-lifecycle.md).
+4. **Body = `switch (game.status)`**: `RUNNING` → decision form; `PAUSED`/`CONSOLIDATION` → read-only segment results; `RESULTS` → period report; other statuses → placeholders. Full per-status expectations: [docs/game-lifecycle.md](../../../docs/game-lifecycle.md). **Important:** narrative context from the `RUNNING` state (event banners, shock descriptions, scenario headlines) must persist into `PAUSED`/`CONSOLIDATION`/`RESULTS` — players need to see *what happened* while reviewing *why* their numbers moved. Extract the event display into a shared component rendered across all post-decision states.
 
-The decision form validates with a yup schema mirroring the constraints your `Actions.apply` reducer enforces server-side, and submits via the perform-action mutation.
+> [!WARNING]
+> **Do not import `@prisma/client` in frontend code — not even indirectly.** If a shared utility (e.g. from `@gbl-uzh/platform`) uses Prisma enums like `DB.GameStatus`, those will be `undefined` in the browser and crash. Compare game status against string literals (`'RUNNING'`, `'PAUSED'`, `'RESULTS'`, etc.) or the generated GraphQL enum (`GameStatus` from `src/graphql/generated/ops.ts`).
+
+The decision form validates with a yup schema mirroring the constraints your `Actions.apply` reducer enforces server-side, and submits via the perform-action mutation. **Ensure the decision screen surfaces enough information** (forecasts, trend indicators, current state, target values) for the player to make a theory-informed decision — not guess randomly.
+
+## The two chart layers (PAUSED vs RESULTS)
+
+The platform's lifecycle creates two distinct review moments. Design each chart set for its purpose:
+
+### PAUSED screen (after each segment, during a period)
+Quick tactical feedback while play continues. Show:
+- Current-segment outcomes (decision vs result)
+- Deviation from targets or benchmarks
+- Key metric snapshot (e.g. "your inflation is 4.2%, target is 2%")
+
+Keep it focused — players need to absorb and decide again quickly. Use 1–3 simple charts.
+
+### RESULTS screen (after a full period, facilitator-led debrief)
+Deep didactical discussion — this is what the game master projects in class. Show:
+- **Full history**: all segments of the period as time series (e.g. line chart of inflation, unemployment, growth across segments)
+- **Cross-team comparisons**: how each team's strategy played out relative to others (bar charts, rankings, league tables)
+- **Cumulative metrics**: total penalty scores, aggregate performance, trend analysis
+- **Reference lines**: targets, benchmarks, theoretical optima — so the facilitator can say "Team A was consistently above the inflation target because…"
+
+Design the RESULTS screen to enable the facilitator to draw **didactical conclusions**. Label axes clearly, add reference lines, and include enough comparative data for a meaningful classroom discussion.
+
+## Content overlays: story and learning elements
+
+The platform supports two types of content overlays that integrate learning into gameplay:
+
+- **Story elements** (blocking narrative popups): shown at segment activation, before the player decides. They contextualise the round ("A supply shock has hit the market…") and build the game's narrative arc. Seeded as `StoryElement` rows per segment. Rendered by the `StoryElements` component (copy from demo game) — it blocks interaction until dismissed.
+- **Learning elements** (sidebar quizzes): optional MC questions or reflection prompts shown alongside the cockpit. They reinforce the theory behind the game mechanic ("According to the Phillips Curve, what happens to unemployment when inflation rises?"). Seeded as `LearningElement` rows. Rendered by the `LearningElements` component in the sidebar.
+
+Both are selected by the admin in the add-segment dialog and attached to specific segments. Plan the content in the game design phase (`gbl-game-design` Step 6) and seed it in `prisma/seed.ts`.
 
 ## Admin pages
 
 - `/admin/games/[id]`: the advance button is a `switch (game.status)` producing one label + mutation per state (copy `getButton` from the demo game); add-period and add-segment modals expose **your** period/segment facts fields (Formik + yup); include the player list with join links and the countdown form.
 - `/admin/reports/[id]`: query result rows of type `SEGMENT_END` / `PERIOD_END` and chart per-player metrics; aggregation happens client-side.
+
+> [!TIP]
+> **Always guard `JSON.parse` on facts data.** Facts may be `null`, `undefined`, a plain object, or a double-stringified JSON string depending on the game state. Use a `parseFacts(raw, defaultValue)` wrapper (see `gbl-backend-computations` skill) in every component that reads `team.facts`, `period.facts`, or `segment.facts`. Without this, early game states (before initialisation) will crash the admin reports and player cockpit.
 
 ## Components: where to get what
 

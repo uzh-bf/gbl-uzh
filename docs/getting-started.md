@@ -20,12 +20,19 @@ For **Windows 10/11** and **macOS**.
 
 > Already have your own coding agent (Claude Desktop, the Codex app, Claude Code in a terminal) and want it to drive the setup instead of doing it in VS Code yourself? Follow [building-with-an-agent.md](building-with-an-agent.md) — it needs only Docker (no VS Code).
 
-## What you need (three free installs)
+## What you need (one install)
 
-1. **Docker Desktop** — runs the platform in an isolated box on your computer. Download from [docker.com](https://www.docker.com/products/docker-desktop/) and install with the default settings.
-   - _Windows:_ the installer may prompt for **WSL 2** — accept it (and restart if asked). If Docker complains about WSL 2 later, your AI assistant can walk you through the fix.
-2. **Visual Studio Code (VS Code)** — the window you will work in. Download from [code.visualstudio.com](https://code.visualstudio.com/).
-3. **The "Dev Containers" extension for VS Code** — lets VS Code work inside the Docker box. In VS Code, click the Extensions icon in the left sidebar (four squares), search for **Dev Containers**, and click **Install** on the one by Microsoft.
+1. **A Docker-compatible container runtime** — runs the platform in an isolated box on your computer.
+   - _Windows:_ install **[Rancher Desktop](https://rancherdesktop.io/)** and select the **dockerd (moby)** engine during setup. The installer may prompt for **WSL 2** — accept it (and restart if asked). If it complains about WSL 2 later, your AI assistant can walk you through the fix.
+   - _macOS:_ install **[OrbStack](https://orbstack.dev/)** or **[Rancher Desktop](https://rancherdesktop.io/)** (with the **dockerd (moby)** engine). Either provides the `docker` and `docker compose` commands the platform needs.
+   - _Already have Docker Desktop?_ That works too — any runtime that provides `docker compose` is fine.
+
+## Optional: if you want to browse or edit code yourself
+
+- **[Visual Studio Code](https://code.visualstudio.com/)** — a free editor with built-in container support.
+- **The "Dev Containers" extension for VS Code** — lets VS Code work inside the Docker box. In VS Code, click the Extensions icon in the left sidebar (four squares), search for **Dev Containers**, and click **Install** on the one by Microsoft.
+
+These are not required — your AI assistant edits the code for you. But if you want to look at or tweak files yourself, VS Code with Dev Containers is the easiest way.
 
 You will also want a [Claude](https://claude.ai) account for the built-in AI assistant (Claude Code comes preinstalled). Any other AI coding assistant works too — this repository guides them automatically.
 
