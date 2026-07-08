@@ -19,7 +19,7 @@ export function generateBaseQueries() {
             ctx.user?.role !== DB.UserRole.ADMIN &&
             ctx.user?.role !== DB.UserRole.MASTER
           )
-            return null
+            return []
           return GameService.getGames(args, ctx)
         },
       })

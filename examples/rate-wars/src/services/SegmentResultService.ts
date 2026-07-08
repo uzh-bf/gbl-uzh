@@ -72,8 +72,9 @@ export function end(
   }
 
   const resultFacts = produce(basefacts, (draft: OutputResultFacts) => {
+    const decisions = facts.decisions ?? { depositRate: 0, loanRate: 0 }
     draft.resultFacts.spread =
-      facts.decisions.loanRate - facts.decisions.depositRate
+      decisions.loanRate - decisions.depositRate
   })
 
   debugLog('SegmentResultEnd', facts, payload, resultFacts)

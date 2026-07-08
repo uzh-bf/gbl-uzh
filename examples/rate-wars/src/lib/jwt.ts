@@ -7,7 +7,11 @@ import type {
 
 export async function decode({ token, secret }: JWTDecodeParams) {
   if (!token) return null
-  return JWT.verify(token, secret) as DefaultJWT
+  try {
+    return JWT.verify(token, secret) as DefaultJWT
+  } catch {
+    return null
+  }
 }
 
 export async function encode({ token, secret }: JWTEncodeParams) {
