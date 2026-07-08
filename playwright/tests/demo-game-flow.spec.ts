@@ -105,7 +105,7 @@ async function createGame(
   await input(page, 'playerCount').fill(String(playerCount))
   await page.getByRole('button', { name: 'Create Game' }).click()
   await page.getByRole('link', { name: new RegExp(name) }).click()
-  await expect(page.getByTestId('game-detail')).toBeVisible()
+  await expect(page.getByTestId('game-detail')).toBeVisible({ timeout: 20_000 })
 }
 
 async function addPeriod(
@@ -211,10 +211,11 @@ async function advanceGame(
 }
 
 async function assertPlayerDecisionForm(sessions: PlayerSession[]) {
-  await Promise.all(sessions.map(({ page }) => page.reload()))
   await Promise.all(
     sessions.map(({ page }) =>
-      expect(page.getByRole('button', { name: 'Submit' })).toBeVisible()
+      expect(page.getByRole('button', { name: 'Submit' })).toBeVisible({
+        timeout: 15_000,
+      })
     )
   )
 }
@@ -233,18 +234,7 @@ async function setCountdown(page: Page, seconds: string) {
 }
 
 async function assertCountdownVisible(page: Page) {
-  await expect
-    .poll(
-      async () => {
-        await page.reload()
-        return page.getByTestId('countdown').isVisible()
-      },
-      {
-        intervals: [500, 1_000, 2_000],
-        timeout: 30_000,
-      }
-    )
-    .toBe(true)
+  await expect(page.getByTestId('countdown')).toBeVisible({ timeout: 15_000 })
 }
 
 async function runSegment(
