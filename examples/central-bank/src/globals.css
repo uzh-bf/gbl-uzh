@@ -1,0 +1,60 @@
+/*
+ * Tailwind v4 entry for the demo-game app.
+ *
+ * Preflight/base is intentionally NOT emitted from this app build (mirrors the
+ * old Tailwind v3 `corePlugins.preflight: false`). The single preflight reset
+ * ships from the design system's compiled `@layer base`, imported below.
+ */
+@layer theme, base, components, utilities;
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'tw-animate-css';
+/*
+ * design-system v4 ships a restrictive package `exports` map that does not
+ * expose the compiled CSS, so the bare specifier
+ * `@uzh-bf/design-system/dist/design-system.css` fails to resolve. Reach the
+ * file directly through node_modules until v5 exports it. Path is relative to
+ * this stylesheet (src/), resolves through the pnpm symlink.
+ */
+@import '../node_modules/@uzh-bf/design-system/dist/design-system.css';
+@import '@gbl-uzh/ui/dist/style.css';
+
+@plugin '@tailwindcss/typography';
+
+@source './**/*.{ts,tsx}';
+
+/*
+ * design-system v4's ChartContainer sizes its recharts ResponsiveContainer with
+ * the `aspect-video` utility, which is missing from the shipped design-system.css
+ * (a DS packaging gap) and never appears literally in this app's source — so
+ * Tailwind v4 never emits it and charts collapse to zero height. Define it in the
+ * utilities layer so it always ships and stays overridable.
+ */
+@layer utilities {
+  .aspect-video {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+html {
+  font-size: 14px;
+}
+
+/*
+ * UZH brand theming. The design system v4 already ships these exact values as
+ * defaults; the explicit overrides are kept for M1 so branding is pinned to the
+ * app regardless of design-system default drift.
+ */
+:root {
+  --theme-color-primary: #0028a5;
+  --theme-color-primary-80: #3353b7;
+  --theme-color-primary-60: #667ec9;
+  --theme-color-primary-40: #99a9db;
+  --theme-color-primary-20: #ccd4ed;
+  --theme-color-secondary: #dc6027;
+  --theme-color-secondary-80: #e38052;
+  --theme-color-secondary-60: #eaa07d;
+  --theme-color-secondary-40: #f1bfa9;
+  --theme-color-secondary-20: #f8dfd4;
+}
