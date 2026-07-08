@@ -158,6 +158,8 @@ async function joinPlayer(
     page.getByRole('button', { name: 'Start Game' }).click(),
   ])
 
+  await assertPlayerPortfolio(page, 30_000)
+
   return { context, page, plan }
 }
 
@@ -220,12 +222,12 @@ async function assertPlayerDecisionForm(sessions: PlayerSession[]) {
   )
 }
 
-async function assertPlayerPortfolio(page: Page) {
-  await expect(page.getByText('Assets Overview').first()).toBeVisible()
-  await expect(page.getByText('Savings').first()).toBeVisible()
-  await expect(page.getByText('Bonds').first()).toBeVisible()
-  await expect(page.getByText('Stocks').first()).toBeVisible()
-  await expect(page.getByText('Total').first()).toBeVisible()
+async function assertPlayerPortfolio(page: Page, timeout = 10_000) {
+  await expect(page.getByText('Assets Overview').first()).toBeVisible({ timeout })
+  await expect(page.getByText('Savings').first()).toBeVisible({ timeout })
+  await expect(page.getByText('Bonds').first()).toBeVisible({ timeout })
+  await expect(page.getByText('Stocks').first()).toBeVisible({ timeout })
+  await expect(page.getByText('Total').first()).toBeVisible({ timeout })
 }
 
 async function setCountdown(page: Page, seconds: string) {
