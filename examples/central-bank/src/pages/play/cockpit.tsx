@@ -1,6 +1,14 @@
 import { useMutation, useQuery, useSubscription } from "@apollo/client";
-import { Layout, PlayerDisplay } from "@gbl-uzh/ui";
-import { Button, FormikNumberField } from "@uzh-bf/design-system";
+import {
+  Layout,
+  PlayerDisplay,
+  StoryElements,
+  CycleCountdown,
+  LearningActivitiesList,
+  LearningElementDisplay,
+  type LearningElementState,
+} from "@gbl-uzh/ui";
+import { Button, FormikNumberField, Modal } from "@uzh-bf/design-system";
 import {
   Card,
   CardContent,
@@ -14,9 +22,6 @@ import {
   ShadcnTableHeader as TableHeader,
   ShadcnTableRow as TableRow,
 } from "@uzh-bf/design-system";
-import { CycleCountdown } from "~/components/CycleCountDown";
-import StoryElements from "~/components/StoryElements";
-import LearningElements from "~/components/LearningElements";
 import { DEFAULT_RATE, NEUTRAL_RATE, TREND_GROWTH } from "~/settings/Constants";
 import dayjs from "dayjs";
 import { Form, Formik } from "formik";
@@ -33,6 +38,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import { sortBy } from "ramda";
 import * as yup from "yup";
 import { useToast } from "../../components/ui/use-toast";
 
@@ -42,6 +48,9 @@ import {
   ResultDocument,
   ResultsDocument,
   UpdateReadyStateDocument,
+  AttemptLearningElementDocument,
+  LearningElementDocument,
+  MarkStoryElementDocument,
 } from "src/graphql/generated/ops";
 
 enum BaseGlobalNotificationType {
@@ -238,6 +247,97 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument);
   const { toast } = useToast();
 
+  const [activeLearningId, setActiveLearningId] = useState<string | null>(null);
+  const [learningElementState, setLearningElementState] = useState<LearningElementState | null>(null);
+  const [activeLearningOptions, setActiveLearningOptions] = useState<number[]>([]);
+
+  const { data: learningElementData, loading: learningElementLoading } = useQuery(
+    LearningElementDocument,
+    {
+      variables: { id: activeLearningId ?? "" },
+      skip: !activeLearningId,
+    }
+  );
+
+  useEffect(() => {
+    if (learningElementData?.learningElement) {
+      setLearningElementState(learningElementData.learningElement.state as LearningElementState);
+      try {
+        if (learningElementData.learningElement.solution) {
+          setActiveLearningOptions(JSON.parse(learningElementData.learningElement.solution));
+        } else {
+          setActiveLearningOptions([]);
+        }
+      } catch {
+        setActiveLearningOptions([]);
+      }
+    } else {
+      setLearningElementState(null);
+      setActiveLearningOptions([]);
+    }
+  }, [learningElementData, activeLearningId]);
+
+  const [attemptLearningElement, { loading: attemptingLearning }] = useMutation(
+    AttemptLearningElementDocument,
+    {
+      refetchQueries: [ResultDocument, LearningElementDocument],
+    }
+  );
+
+  const [markStoryElement] = useMutation(MarkStoryElementDocument, {
+    refetchQueries: [ResultDocument],
+  });
+
+  const handleAttemptLearning = async () => {
+    if (!activeLearningId) return;
+    try {
+      const result = await attemptLearningElement({
+        variables: {
+          elementId: activeLearningId,
+          selection: JSON.stringify(activeLearningOptions),
+        },
+      });
+      const resData = result.data?.attemptLearningElement;
+      if (resData) {
+        if (resData.pointsAchieved === resData.pointsMax) {
+          setLearningElementState("SOLVED");
+        } else {
+          setLearningElementState("ATTEMPTED");
+          toast({
+            title: "Wrong answer",
+            description: "Try again!",
+          });
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const periods = data?.result?.currentGame?.periods || [];
+  const learningElements = data?.result?.currentGame?.activePeriod?.activeSegment?.learningElements || [];
+  const completedLearningElementIds = data?.result?.playerResult?.player?.completedLearningElementIds || [];
+
+  const completedLearningElements = useMemo(() => {
+    if (completedLearningElementIds.length === 0 || !periods) return [];
+    const allLearningElements = periods
+      .flatMap((period: any) =>
+        (period.segments || []).flatMap((segment: any) => segment.learningElements || [])
+      )
+      .reduce((acc: any, elem: any) => {
+        if (elem) acc[elem.id] = elem;
+        return acc;
+      }, {});
+    return completedLearningElementIds
+      .map((id: string) => allLearningElements[id])
+      .filter(Boolean);
+  }, [periods, completedLearningElementIds]);
+
+  const openLearningElements = useMemo(() => {
+    const sorted = sortBy((elem: any) => elem.title, learningElements);
+    return sorted.filter((elem: any) => !completedLearningElementIds.includes(elem.id));
+  }, [learningElements, completedLearningElementIds]);
+
   const currentGameId = parseInt(data?.result?.currentGame?.id);
 
   useSubscription(GlobalEventsDocument, {
@@ -349,7 +449,11 @@ function GameLayout({ children }: { children: React.ReactNode }) {
                 totalDuration={countdownDurationMs / 1000}
               />
             )}
-            <LearningElements />
+            <LearningActivitiesList
+              openElements={openLearningElements}
+              completedElements={completedLearningElements}
+              onElementClick={(id) => setActiveLearningId(id)}
+            />
           </div>
         </CardContent>
       </Card>
@@ -361,12 +465,56 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     { name: "Cockpit", href: "/play/cockpit" },
   ];
 
+  const activeSegment = data?.result?.currentGame?.activePeriod?.activeSegment;
+
   return (
     <>
-      <StoryElements playerState={data} player={self} />
+      <StoryElements
+        activeStoryElements={(activeSegment?.storyElements as any[]) || []}
+        visitedStoryElementIds={data?.result?.playerResult?.player?.visitedStoryElementIds || []}
+        playerRole={self?.role}
+        onMarkElementVisited={async (elementId) => {
+          await markStoryElement({
+            variables: { elementId },
+          });
+        }}
+      />
       <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
         <div className="flex-1 space-y-6">{children}</div>
       </Layout>
+      <Modal
+        className={{ content: "max-w-4xl overflow-y-auto" }}
+        open={!!activeLearningId}
+        onClose={() => setActiveLearningId(null)}
+        title="Learning Activity"
+      >
+        {learningElementData?.learningElement && (
+          <LearningElementDisplay
+            title={learningElementData.learningElement.element.title}
+            question={learningElementData.learningElement.element.question}
+            options={learningElementData.learningElement.element.options}
+            state={learningElementState || "UNATTEMPTED"}
+            pointsText={
+              learningElementData.learningElement.element.reward
+                ? `Awards ${learningElementData.learningElement.element.reward}XP`
+                : undefined
+            }
+            feedback={learningElementData.learningElement.element.feedback}
+            motivation={learningElementData.learningElement.element.motivation}
+            activeElements={activeLearningOptions}
+            onOptionClick={(ix) => {
+              setActiveLearningOptions((prev) => {
+                if (prev.includes(ix)) {
+                  return prev.filter((x) => x !== ix);
+                }
+                return [ix];
+              });
+            }}
+            onSubmit={handleAttemptLearning}
+            loading={attemptingLearning}
+          />
+        )}
+      </Modal>
     </>
   );
 }

@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@apollo/client";
 import { COLORS } from "@gbl-uzh/platform/src/lib/constants";
-import { Logo } from "@gbl-uzh/ui";
+import { Logo, LogoSelector } from "@gbl-uzh/ui";
 import {
   Button,
   FormikSelectField,
@@ -13,9 +13,18 @@ import {
   SelfDocument,
   UpdatePlayerDataDocument,
 } from "src/graphql/generated/ops";
-import { LOCATIONS } from "src/lib/constants";
+import { LOCATIONS, AVATARS } from "src/lib/constants";
 import * as Yup from "yup";
-import LogoSelector from "~/components/LogoSelector";
+
+const LOGO_SELECTOR_COLORS_MAP = Object.entries(COLORS).reduce((acc, [k, v]) => {
+  let ringClass = "ring-slate-500";
+  if (k === "Red") ringClass = "ring-orange-500";
+  if (k === "Green") ringClass = "ring-lime-500";
+  if (k === "Yellow") ringClass = "ring-yellow-500";
+  if (k === "Blue") ringClass = "ring-blue-500";
+  acc[k] = { bg: v, ring: ringClass };
+  return acc;
+}, {} as Record<string, { bg: string; ring: string }>);
 
 import {
   Card,
@@ -107,7 +116,7 @@ function Welcome() {
           router.replace("/play/cockpit");
         }}
       >
-        {({ values, errors, touched }) => (
+        {({ values, errors, touched, setFieldValue }) => (
           <Card className="flex w-full flex-col">
             <CardHeader>
               <CardTitle>Welcome to the {gameName}!</CardTitle>
@@ -187,10 +196,14 @@ function Welcome() {
                           }}
                         />
                         <LogoSelector
+                          avatarOptions={Object.values(AVATARS)}
+                          colorsMap={LOGO_SELECTOR_COLORS_MAP}
+                          color={values.color}
+                          value={values.imgPathAvatar}
+                          onChange={(val) => setFieldValue("imgPathAvatar", val)}
+                          fallbackSrc="/avatars/avatar_placeholder.png"
                           label="Avatar"
                           className="w-48 pb-2 text-sm text-gray-600"
-                          color={values.color}
-                          name="imgPathAvatar"
                         />
 
                         <FormikSelectField

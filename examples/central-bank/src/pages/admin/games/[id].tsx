@@ -19,10 +19,13 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { twMerge } from "tailwind-merge";
 
-import PlayerCompact from "~/components/PlayerCompact";
-
 import { useMutation, useQuery } from "@apollo/client";
-import { STATUS, computePeriodStatus, computeSegmentStatus } from "@gbl-uzh/ui";
+import {
+  STATUS,
+  computePeriodStatus,
+  computeSegmentStatus,
+  PlayerCompact,
+} from "@gbl-uzh/ui";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivateNextPeriodDocument,

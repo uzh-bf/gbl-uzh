@@ -37,4 +37,6 @@ export * from '~/components/LogoSelector'
 export * from '~/components/LearningElementDisplay'
 export * from '~/components/LearningActivitiesList'
 export * from '~/components/GameSidebar'
+export * from '~/components/PlayerCompact'
 export * from '~/lib/status'
+
