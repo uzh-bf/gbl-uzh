@@ -158,7 +158,7 @@ async function joinPlayer(
     page.getByRole('button', { name: 'Start Game' }).click(),
   ])
 
-  await assertPlayerPortfolio(page, 30_000)
+  await expect(page.getByText('Game is scheduled.')).toBeVisible({ timeout: 30_000 })
 
   return { context, page, plan }
 }
