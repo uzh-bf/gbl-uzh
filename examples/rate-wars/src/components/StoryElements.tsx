@@ -40,7 +40,7 @@ function StoryElements({ playerState, player }: Props) {
     }
   }, [activeStoryElements, playerState, visitedStoryElements])
 
-  const [markStoryElement, { loading }] = useMutation(MarkStoryElementDocument)
+  const [markStoryElement] = useMutation(MarkStoryElementDocument)
 
   const content: string = (() => {
     if (unseenStoryElements.length === 0) return ''

@@ -1,7 +1,5 @@
 import * as Avatar from '@radix-ui/react-avatar'
 import { useField } from 'formik'
-import { range } from 'ramda'
-import { useContext } from 'react'
 // import { PlayerContext } from 'src/components/layouts/GameLayout'
 import { COLORS, AVATARS } from 'src/lib/constants'
 // import { PlayerRole } from 'src/types/app'

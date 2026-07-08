@@ -34,7 +34,7 @@ function Achievement({
 // top-level GraphQL fields
 function PlayerData({
   achievements,
-}: Pick<Player, 'achievements' | 'name'>) {
+}: Pick<Player, 'achievements'>) {
   const router = useRouter()
 
   return (

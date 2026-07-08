@@ -1,11 +1,10 @@
 import { faLightbulb as faLightbulbRegular } from '@fortawesome/free-regular-svg-icons'
 import { faLightbulb as faLightbulbSolid } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { H3 } from '@uzh-bf/design-system'
+import { Button, H3, Modal } from '@uzh-bf/design-system'
 import { sortBy } from 'ramda'
 
 import { useQuery } from '@apollo/client'
-import { Button, Modal } from '@uzh-bf/design-system'
 import { useMemo, useState } from 'react'
 import {
   LearningElement as LearningElementType,
