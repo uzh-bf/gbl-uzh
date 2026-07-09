@@ -39,4 +39,4 @@ export * from '~/components/LearningActivitiesList'
 export * from '~/components/GameSidebar'
 export * from '~/components/PlayerCompact'
 export * from '~/lib/status'
-
+export * from '~/hooks/useLearningActivities'

@@ -6,6 +6,7 @@ import {
   type LearningElementState,
   Layout,
   StoryElements,
+  useLearningActivities,
 } from '@gbl-uzh/ui'
 import { Button, Modal } from '@uzh-bf/design-system'
 import dayjs from 'dayjs'
@@ -43,49 +44,41 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     refetchQueries: [ResultDocument],
   })
 
-  const [activeLearningId, setActiveLearningId] = useState<string | null>(null)
-  const [learningElementState, setLearningElementState] = useState<LearningState>(null)
-  const [activeLearningOptions, setActiveLearningOptions] = useState<number[]>([])
-
-  const { data: learningElementData, loading: learningElementLoading } = useQuery(
-    LearningElementDocument,
-    {
-      variables: { id: activeLearningId ?? '' },
-      skip: !activeLearningId,
-    }
-  )
-
-  useEffect(() => {
-    if (learningElementData?.learningElement) {
-      setLearningElementState(learningElementData.learningElement.state as LearningState)
-      try {
-        if (learningElementData.learningElement.solution) {
-          setActiveLearningOptions(JSON.parse(learningElementData.learningElement.solution))
-        } else {
-          setActiveLearningOptions([])
-        }
-      } catch {
-        setActiveLearningOptions([])
-      }
-    } else {
-      setLearningElementState(null)
-      setActiveLearningOptions([])
-    }
-  }, [learningElementData, activeLearningId])
-
-  const [attemptLearningElement, { loading: attemptingLearning }] = useMutation(
-    AttemptLearningElementDocument,
-    {
-      refetchQueries: [ResultDocument, LearningElementDocument],
-    }
-  )
+  const { toast } = useToast()
 
   const [countdownNotifications, setCountdownNotifications] = useState({
     '60': false,
     '180': false,
   })
 
-  const { toast } = useToast()
+  const completedLearningElementIds =
+    data?.result?.playerResult?.player?.completedLearningElementIds ?? []
+  const allPeriods = data?.result?.currentGame?.periods ?? []
+  const currentLearningElements =
+    data?.result?.currentGame?.activePeriod?.activeSegment?.learningElements ?? []
+
+  const {
+    activeLearningId,
+    setActiveLearningId,
+    learningElementState,
+    setLearningElementState,
+    activeLearningOptions,
+    setActiveLearningOptions,
+    learningElementData,
+    learningElementLoading,
+    attemptingLearning,
+    handleAttemptLearning,
+    completedLearningElements,
+    openLearningElements,
+  } = useLearningActivities({
+    learningElementDocument: LearningElementDocument,
+    attemptLearningElementDocument: AttemptLearningElementDocument,
+    resultDocument: ResultDocument,
+    completedLearningElementIds,
+    activeSegmentLearningElements: currentLearningElements,
+    allPeriods,
+    toast,
+  })
 
   const currentGameId = parseInt(data?.result?.currentGame?.id)
 
@@ -135,32 +128,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     setCountdownNotifications({ '60': false, '180': false })
   }, [strExpiresAt, countdownDurationMs])
 
-  const completedLearningElementIds =
-    data?.result?.playerResult?.player?.completedLearningElementIds ?? []
-  const allPeriods = data?.result?.currentGame?.periods ?? []
-  const currentLearningElements =
-    data?.result?.currentGame?.activePeriod?.activeSegment?.learningElements ?? []
 
-  const completedLearningElements = useMemo(() => {
-    const seen = new Set<string>()
-    return allPeriods
-      .flatMap((period: any) =>
-        (period.segments || []).flatMap((segment: any) => segment.learningElements || [])
-      )
-      .filter((elem: any) => completedLearningElementIds.includes(elem.id))
-      .filter((elem: any) => {
-        if (seen.has(elem.id)) return false
-        seen.add(elem.id)
-        return true
-      })
-  }, [allPeriods, completedLearningElementIds])
-
-  const openLearningElements = useMemo(
-    () => (currentLearningElements || []).filter(
-      (elem: any) => !completedLearningElementIds.includes(elem.id)
-    ),
-    [currentLearningElements, completedLearningElementIds]
-  )
 
   if (!data?.self || !data?.result?.currentGame) {
     return null
@@ -239,31 +207,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
 
   const activeSegment = data?.result?.currentGame?.activePeriod?.activeSegment
 
-  const handleAttemptLearning = async () => {
-    if (!activeLearningId) return
-    try {
-      const result = await attemptLearningElement({
-        variables: {
-          elementId: activeLearningId,
-          selection: JSON.stringify(activeLearningOptions),
-        },
-      })
-      const resData = result.data?.attemptLearningElement
-      if (resData) {
-        if (resData.pointsAchieved === resData.pointsMax) {
-          setLearningElementState('SOLVED')
-        } else {
-          setLearningElementState('ATTEMPTED')
-          toast({
-            title: 'Wrong answer',
-            description: 'Try again!',
-          })
-        }
-      }
-    } catch (e) {
-      console.error(e)
-    }
-  }
+
 
   return (
     <>

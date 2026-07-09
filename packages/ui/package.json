@@ -20,6 +20,7 @@
     "@typescript-eslint/parser": "~7.15.0",
     "@uzh-bf/design-system": "~4.1.6",
     "@vitejs/plugin-react-swc": "~3.7.1",
+    "@apollo/client": "3.11.10",
     "class-variance-authority": "0.7.1",
     "cmdk": "1.0.4",
     "eslint": "~8.57.1",
@@ -35,6 +36,7 @@
     "vite-plugin-externalize-deps": "~0.8.0"
   },
   "peerDependencies": {
+    "@apollo/client": "^3.11.10",
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",

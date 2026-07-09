@@ -7,6 +7,7 @@ import {
   LearningActivitiesList,
   LearningElementDisplay,
   type LearningElementState,
+  useLearningActivities,
 } from "@gbl-uzh/ui";
 import { Button, FormikNumberField, Modal } from "@uzh-bf/design-system";
 import {
@@ -247,96 +248,42 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument);
   const { toast } = useToast();
 
-  const [activeLearningId, setActiveLearningId] = useState<string | null>(null);
-  const [learningElementState, setLearningElementState] = useState<LearningElementState | null>(null);
-  const [activeLearningOptions, setActiveLearningOptions] = useState<number[]>([]);
+  const completedLearningElementIds = data?.result?.playerResult?.player?.completedLearningElementIds || [];
+  const periods = data?.result?.currentGame?.periods || [];
+  const learningElements = data?.result?.currentGame?.activePeriod?.activeSegment?.learningElements || [];
 
-  const { data: learningElementData, loading: learningElementLoading } = useQuery(
-    LearningElementDocument,
-    {
-      variables: { id: activeLearningId ?? "" },
-      skip: !activeLearningId,
-    }
-  );
+  const {
+    activeLearningId,
+    setActiveLearningId,
+    learningElementState,
+    setLearningElementState,
+    activeLearningOptions,
+    setActiveLearningOptions,
+    learningElementData,
+    learningElementLoading,
+    attemptingLearning,
+    handleAttemptLearning,
+    completedLearningElements,
+    openLearningElements: hookOpenLearningElements,
+  } = useLearningActivities({
+    learningElementDocument: LearningElementDocument,
+    attemptLearningElementDocument: AttemptLearningElementDocument,
+    resultDocument: ResultDocument,
+    completedLearningElementIds,
+    activeSegmentLearningElements: learningElements,
+    allPeriods: periods,
+    toast,
+  });
 
-  useEffect(() => {
-    if (learningElementData?.learningElement) {
-      setLearningElementState(learningElementData.learningElement.state as LearningElementState);
-      try {
-        if (learningElementData.learningElement.solution) {
-          setActiveLearningOptions(JSON.parse(learningElementData.learningElement.solution));
-        } else {
-          setActiveLearningOptions([]);
-        }
-      } catch {
-        setActiveLearningOptions([]);
-      }
-    } else {
-      setLearningElementState(null);
-      setActiveLearningOptions([]);
-    }
-  }, [learningElementData, activeLearningId]);
-
-  const [attemptLearningElement, { loading: attemptingLearning }] = useMutation(
-    AttemptLearningElementDocument,
-    {
-      refetchQueries: [ResultDocument, LearningElementDocument],
-    }
-  );
+  const openLearningElements = useMemo(() => {
+    return sortBy((elem: any) => elem.title, hookOpenLearningElements);
+  }, [hookOpenLearningElements]);
 
   const [markStoryElement] = useMutation(MarkStoryElementDocument, {
     refetchQueries: [ResultDocument],
   });
 
-  const handleAttemptLearning = async () => {
-    if (!activeLearningId) return;
-    try {
-      const result = await attemptLearningElement({
-        variables: {
-          elementId: activeLearningId,
-          selection: JSON.stringify(activeLearningOptions),
-        },
-      });
-      const resData = result.data?.attemptLearningElement;
-      if (resData) {
-        if (resData.pointsAchieved === resData.pointsMax) {
-          setLearningElementState("SOLVED");
-        } else {
-          setLearningElementState("ATTEMPTED");
-          toast({
-            title: "Wrong answer",
-            description: "Try again!",
-          });
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
-  const periods = data?.result?.currentGame?.periods || [];
-  const learningElements = data?.result?.currentGame?.activePeriod?.activeSegment?.learningElements || [];
-  const completedLearningElementIds = data?.result?.playerResult?.player?.completedLearningElementIds || [];
-
-  const completedLearningElements = useMemo(() => {
-    if (completedLearningElementIds.length === 0 || !periods) return [];
-    const allLearningElements = periods
-      .flatMap((period: any) =>
-        (period.segments || []).flatMap((segment: any) => segment.learningElements || [])
-      )
-      .reduce((acc: any, elem: any) => {
-        if (elem) acc[elem.id] = elem;
-        return acc;
-      }, {});
-    return completedLearningElementIds
-      .map((id: string) => allLearningElements[id])
-      .filter(Boolean);
-  }, [periods, completedLearningElementIds]);
-
-  const openLearningElements = useMemo(() => {
-    const sorted = sortBy((elem: any) => elem.title, learningElements);
-    return sorted.filter((elem: any) => !completedLearningElementIds.includes(elem.id));
-  }, [learningElements, completedLearningElementIds]);
 
   const currentGameId = parseInt(data?.result?.currentGame?.id);
 

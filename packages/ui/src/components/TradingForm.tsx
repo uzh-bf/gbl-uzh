@@ -35,7 +35,6 @@ function TradingForm({
   disableButtonSell = false,
 }: Props) {
   const schema = yup.object({
-    modifier: yup.number().required(),
     volume: yup
       .number()
       .typeError('Volume must be a number')
@@ -47,7 +46,6 @@ function TradingForm({
   const form = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      modifier: 1,
       volume: 0,
     },
     mode: 'onChange'
@@ -56,7 +54,7 @@ function TradingForm({
   return (
     <div className="flex w-max gap-4 rounded border p-8">
       <Form {...form}>
-        <form className="" onSubmit={form.handleSubmit((values) => onSubmit(values))}>
+        <form className="" onSubmit={form.handleSubmit((values) => onSubmit({ ...values, modifier: 1 }))}>
           <ReusableFormField
             control={form.control}
             name="volume"
@@ -79,8 +77,7 @@ function TradingForm({
               }
               type="button"
               onClick={async () => {
-                form.setValue('modifier', 1)
-                await form.handleSubmit((values) => onSubmit(values))()
+                await form.handleSubmit((values) => onSubmit({ ...values, modifier: 1 }))()
               }}
             >
               {nameButtonBuy}
@@ -93,8 +90,7 @@ function TradingForm({
               }
               type="button"
               onClick={async () => {
-                form.setValue('modifier', -1)
-                await form.handleSubmit((values) => onSubmit(values))()
+                await form.handleSubmit((values) => onSubmit({ ...values, modifier: -1 }))()
               }}
             >
               {nameButtonSell}
