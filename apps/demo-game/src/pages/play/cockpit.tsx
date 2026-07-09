@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { EventLog, ProbabilityChart, ReusableFormField } from '@gbl-uzh/ui'
+import { EventLog, ProbabilityChart, ReusableFormField, Form } from '@gbl-uzh/ui'
 import { Button } from '@uzh-bf/design-system'
 import {
   Card,
@@ -145,13 +145,14 @@ function Cockpit() {
     }
   )
 
-  const { register, handleSubmit, watch, control, reset, formState: { errors, isSubmitting } } = useForm({
+  const form = useForm({
     defaultValues: {
       savings: 0,
       bonds: 0,
       stocks: 0,
     }
   })
+  const { register, handleSubmit, watch, control, reset, formState: { errors, isSubmitting } } = form
 
   const watchSavings = watch('savings')
   const watchBonds = watch('bonds')
@@ -825,69 +826,71 @@ function Cockpit() {
                 </Card>
 
                 <div className="mt-8">
-                  <form
-                    onSubmit={handleSubmit(async (values) => {
-                      const savings = parseInt(String(values.savings), 10)
-                      const bonds = parseInt(String(values.bonds), 10)
-                      const stocks = parseInt(String(values.stocks), 10)
+                  <Form {...form}>
+                    <form
+                      onSubmit={handleSubmit(async (values) => {
+                        const savings = parseInt(String(values.savings), 10)
+                        const bonds = parseInt(String(values.bonds), 10)
+                        const stocks = parseInt(String(values.stocks), 10)
 
-                      await performAction({
-                        variables: {
-                          type: '',
-                          payload: JSON.stringify({
-                            bank: savings,
-                            bonds,
-                            stocks,
-                          }),
-                        },
-                      })
-                    })}
-                  >
-                    <div className="mb-4 flex gap-4">
-                      <div className="w-24">
-                        <ReusableFormField
-                          control={control}
-                          name="savings"
-                          label="Savings"
-                          type="number"
-                          min={0}
-                          max={100}
-                        />
-                      </div>
-                      <div className="w-24">
-                        <ReusableFormField
-                          control={control}
-                          name="bonds"
-                          label="Bonds"
-                          type="number"
-                          min={0}
-                          max={100}
-                        />
-                      </div>
-                      <div className="w-24">
-                        <ReusableFormField
-                          control={control}
-                          name="stocks"
-                          label="Stocks"
-                          type="number"
-                          min={0}
-                          max={100}
-                        />
-                      </div>
-                    </div>
-                    {!isSumValid && (
-                      <div className="text-red-500 text-sm mb-4">
-                        The sum of the input values must be{' '}
-                        <span className="font-bold">100</span>! (Current: {sum}%)
-                      </div>
-                    )}
-                    <Button
-                      type="submit"
-                      disabled={!isSumValid || isSubmitting}
+                        await performAction({
+                          variables: {
+                            type: '',
+                            payload: JSON.stringify({
+                              bank: savings,
+                              bonds,
+                              stocks,
+                            }),
+                          },
+                        })
+                      })}
                     >
-                      Submit
-                    </Button>
-                  </form>
+                      <div className="mb-4 flex gap-4">
+                        <div className="w-24">
+                          <ReusableFormField
+                            control={control}
+                            name="savings"
+                            label="Savings"
+                            type="number"
+                            min={0}
+                            max={100}
+                          />
+                        </div>
+                        <div className="w-24">
+                          <ReusableFormField
+                            control={control}
+                            name="bonds"
+                            label="Bonds"
+                            type="number"
+                            min={0}
+                            max={100}
+                          />
+                        </div>
+                        <div className="w-24">
+                          <ReusableFormField
+                            control={control}
+                            name="stocks"
+                            label="Stocks"
+                            type="number"
+                            min={0}
+                            max={100}
+                          />
+                        </div>
+                      </div>
+                      {!isSumValid && (
+                        <div className="text-red-500 text-sm mb-4">
+                          The sum of the input values must be{' '}
+                          <span className="font-bold">100</span>! (Current: {sum}%)
+                        </div>
+                      )}
+                      <Button
+                        type="submit"
+                        disabled={!isSumValid || isSubmitting}
+                      >
+                        Submit
+                      </Button>
+                    </form>
+                  </Form>
                 </div>
               </CardContent>
               <CardFooter className="text-slate-500">
