@@ -35,16 +35,23 @@ fi
 export CI=true
 export npm_config_verify_deps_before_run=false
 
+target_package="@gbl-uzh/demo-game"
+if [[ "${WORKSPACE:-}" =~ "central-bank" ]]; then
+  target_package="@gbl-uzh/central-bank"
+elif [[ "${WORKSPACE:-}" =~ "rate-wars" ]]; then
+  target_package="@gbl-uzh/rate-wars"
+fi
+
 if pgrep -f "next dev" >/dev/null 2>&1; then
   echo "[post-start] Dev server already running."
   exit 0
 fi
 
-echo "[post-start] Starting demo-game dev server in the background (logs: /tmp/dev.log)..."
+echo "[post-start] Starting ${target_package} dev server in the background (logs: /tmp/dev.log)..."
 # Fully detach: new session (setsid) AND redirect the whole command's fds to the
 # log / /dev/null. Redirecting only the inner process leaves the wrapper holding
 # DevPod's agent pipe open, which hangs `devpod up` until the server exits.
-setsid bash -c 'pnpm -F @gbl-uzh/demo-game dev' >/tmp/dev.log 2>&1 </dev/null &
+setsid bash -c "pnpm -F ${target_package} dev" >/tmp/dev.log 2>&1 </dev/null &
 disown 2>/dev/null || true
 
 if [ "${GBL_DEV_MODE:-}" = "starter" ]; then

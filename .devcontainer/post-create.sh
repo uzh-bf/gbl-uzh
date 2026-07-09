@@ -37,9 +37,16 @@ echo "[post-create] Building workspace deps (platform, ui) so demo-game can impo
 pnpm -F @gbl-uzh/platform build
 pnpm -F @gbl-uzh/ui build
 
-echo "[post-create] Copying platform Prisma schema + generating client..."
-pnpm -F @gbl-uzh/demo-game prisma:copy
-pnpm -F @gbl-uzh/demo-game prisma:generate
+target_package="@gbl-uzh/demo-game"
+if [[ "${WORKSPACE:-}" =~ "central-bank" ]]; then
+  target_package="@gbl-uzh/central-bank"
+elif [[ "${WORKSPACE:-}" =~ "rate-wars" ]]; then
+  target_package="@gbl-uzh/rate-wars"
+fi
+
+echo "[post-create] Copying platform Prisma schema + generating client for ${target_package}..."
+pnpm -F "$target_package" prisma:copy
+pnpm -F "$target_package" prisma:generate
 
 # A brand-new Postgres volume has a short warmup window where the Prisma engine
 # emits an empty search_path (error 42601) even though pg_isready is healthy.
@@ -47,7 +54,7 @@ pnpm -F @gbl-uzh/demo-game prisma:generate
 echo "[post-create] Pushing schema to the database (retrying through DB warmup)..."
 push_ok=0
 for attempt in $(seq 1 12); do
-  if pnpm -F @gbl-uzh/demo-game prisma:push; then push_ok=1; break; fi
+  if pnpm -F "$target_package" prisma:push; then push_ok=1; break; fi
   echo "[post-create] push attempt ${attempt} failed; retrying in 5s..."
   sleep 5
 done
@@ -61,7 +68,7 @@ fi
 echo "[post-create] Seeding reference data (retrying through DB warmup)..."
 seed_ok=0
 for attempt in $(seq 1 5); do
-  if pnpm -F @gbl-uzh/demo-game prisma:seed; then seed_ok=1; break; fi
+  if pnpm -F "$target_package" prisma:seed; then seed_ok=1; break; fi
   echo "[post-create] seed attempt ${attempt} failed; retrying in 5s..."
   sleep 5
 done
