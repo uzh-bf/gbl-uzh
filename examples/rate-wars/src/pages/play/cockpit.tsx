@@ -784,7 +784,7 @@ function Cockpit() {
       ]
 
       const equityConfig = {
-        equity: { label: 'Equity', color: 'hsl(var(--chart-1))' },
+        equity: { label: 'Equity', color: 'var(--chart-1)' },
       }
 
       return (
@@ -851,7 +851,7 @@ function Cockpit() {
                       <Line
                         type="natural"
                         dataKey="equity"
-                        stroke="hsl(var(--chart-1))"
+                        stroke="var(--chart-1)"
                         strokeWidth={2}
                       />
                       <CartesianGrid vertical={false} />

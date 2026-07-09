@@ -85,9 +85,9 @@ const Forecast = () => {
 
   if (!diceBonds || !diceShared || !diceStocks) return <div>Loading...</div>
   const colors = [
-    'hsl(var(--chart-4))',
-    'hsl(var(--chart-5))',
-    'hsl(var(--chart-2))',
+    'var(--chart-4)',
+    'var(--chart-5)',
+    'var(--chart-2)',
   ]
 
   return (
