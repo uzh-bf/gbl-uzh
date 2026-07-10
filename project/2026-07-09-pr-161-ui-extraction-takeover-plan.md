@@ -1025,7 +1025,10 @@ PR update:
 - [x] Website patch verification: pnpm 11 and pnpm 9 frozen installs pass; the Next 15.5.19 production export builds all 32 pages; package/lockfile correctness and simplification reviews are clean.
 - [x] Security patch pushed at `58466f2`; GitHub Actions and Vercel started against the exact head SHA.
 - [x] Terminal Vercel result: pnpm 9 install and all 32 static pages pass; deployment then rejects vulnerable `next-mdx-remote@4.4.1` and requires `6.0.0+`.
-- [ ] Major-upgrade gate: obtain user approval before changing `next-mdx-remote` from 4.4.1 to 6.x.
+- [x] Major-upgrade gate approved by the user; `next-mdx-remote` is pinned to `6.0.0`.
+- [x] MDX 3 compatibility diagnosis: `remark-wiki-link@1` fails while plain serialization passes, so the companion plugin is pinned to `2.0.1`.
+- [x] Legacy multiline frontmatter remains parsed by the existing `gray-matter` boundary before MDX serialization; this avoids the stricter MDX 3 YAML parser while preserving returned frontmatter.
+- [x] MDX 6 verification: pnpm 9 frozen install and Next 15.5.19 production export pass all 32 pages with wiki links and legacy workflow frontmatter.
 - [x] Real Demo Game browser verification passed through devrouter/DevPod: welcome at 1440x900 and 390x844, authenticated add-period form, and running player cockpit/trading at 1440x900.
 - [x] Browser evidence captured under `project/screenshots/pr-161/`: desktop/mobile welcome, typed add-period form, and player cockpit.
 - [ ] Seeded local Demo data has no open learning activities, so modal interaction remains covered by component/build/Playwright evidence rather than the local screenshot set.
@@ -1038,7 +1041,7 @@ PR update:
 
 ### Next action
 
-Obtain approval for screenshot export and the `next-mdx-remote` major upgrade before final push/readback.
+Commit the approved MDX 6 migration, push full local HEAD with screenshots, then read terminal CI/Sonar/Vercel state.
 
 ## Independent plan review
 
@@ -1063,6 +1066,6 @@ Obtain approval for screenshot export and the `next-mdx-remote` major upgrade be
 
 ## Next Steps
 
-1. Obtain explicit approval to push committed screenshots and to upgrade `next-mdx-remote` across a major version.
+1. Commit the approved MDX 6 migration.
 2. Push, read terminal CI/Sonar/Vercel state, and resolve only evidence-backed failures.
 3. Run final thermo-nuclear and independent branch reviews, update the PR body, and request user ready-state approval.
