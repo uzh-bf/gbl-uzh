@@ -1021,10 +1021,13 @@ PR update:
 - [x] Admin-field correctness and simplification reviews pass after restoring browser number normalization and truncating only GraphQL integer inputs at their mutation boundary.
 - [x] Admin-field verification: focused ESLint has no errors (two pre-existing hook warnings) and the Demo Game production build passes.
 - [x] Branch whitespace cleanup removes the confirmed trailing spaces and missing final newline in touched UI files plus the extra `.gitignore` EOF line; UI lint and both whitespace checks pass.
+- [x] Website Next.js security patch pins `next` and `eslint-config-next` to `15.5.19`, matching the previously proven same-repository Vercel fix without crossing a major-version boundary.
+- [x] Website patch verification: pnpm 11 and pnpm 9 frozen installs pass; the Next 15.5.19 production export builds all 32 pages; package/lockfile correctness and simplification reviews are clean.
+- [ ] Push the security patch and read the terminal Vercel result; stop for approval if the next blocker requires the planned `next-mdx-remote` major upgrade.
 
 ### Next action
 
-Commit the branch whitespace cleanup, then fix the Vercel Next.js security gate.
+Commit and push the Vercel Next.js security patch, then read the new deployment result.
 
 ## Independent plan review
 
