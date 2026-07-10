@@ -838,7 +838,7 @@ PR update:
 - [x] Opengrep reviewed.
 - [x] Security review handled/deferred explicitly.
 - [x] Thermo-nuclear review handled/deferred explicitly.
-- [ ] Independent final branch review handled/deferred explicitly.
+- [x] Independent final branch review handled/deferred explicitly.
 - [ ] Screenshots attached to PR.
 - [ ] PR body matches current commits/diff/checks.
 - [ ] No unresolved review comments.
@@ -861,9 +861,9 @@ PR update:
 
 ### Status
 
-- Current: S11 final fixes active. Build/lint and Central Bank/Rate Wars Playwright pass; Demo Playwright, Sonar duplication, and Vercel require one final code push/readback.
-- Implementation: P0, F0, S1-S10 complete; S11 fixes and browser evidence complete at the current local HEAD.
-- Branch mutations this takeover: all current commits and the final fix slice reviewed; no user-owned artifacts changed.
+- Current: implementation and final reviews complete. Current-head GitHub Actions, Sonar, and Vercel readback remain active.
+- Implementation: P0, F0, S1-S11 complete at the current HEAD.
+- Branch mutations this takeover: all current commits reviewed; no user-owned artifacts changed.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -1043,7 +1043,7 @@ PR update:
 
 ### Next action
 
-Commit and push the final published-package metadata fix, then read terminal CI/Sonar/Vercel state.
+Read terminal CI/Sonar/Vercel state, update the PR body, then request user ready-state approval.
 
 ## Independent plan review
 
@@ -1068,6 +1068,6 @@ Commit and push the final published-package metadata fix, then read terminal CI/
 
 ## Next Steps
 
-1. Commit and push the final published-package metadata fix.
-2. Read terminal CI/Sonar/Vercel state and resolve only evidence-backed failures.
-3. Run the final independent branch review, update the PR body, and request user ready-state approval.
+1. Read terminal CI/Sonar/Vercel state and resolve only evidence-backed failures.
+2. Update and read back the whole-branch PR body with screenshots and current evidence.
+3. Request user ready-state approval. Do not merge without explicit approval.
