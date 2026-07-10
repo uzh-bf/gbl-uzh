@@ -1,23 +1,77 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation, type DocumentNode, type TypedDocumentNode } from '@apollo/client'
 
-export type LearningState = 'UNOPENED' | 'OPENED' | 'ATTEMPTED' | 'SOLVED' | null
+export type LearningState = 'ATTEMPTED' | 'SOLVED' | null
 
-export interface UseLearningActivitiesProps {
-  learningElementDocument: DocumentNode | TypedDocumentNode<any, any>
-  attemptLearningElementDocument: DocumentNode | TypedDocumentNode<any, any>
-  resultDocument: DocumentNode | TypedDocumentNode<any, any>
-  completedLearningElementIds: string[]
-  activeSegmentLearningElements: Array<{ id: string; reward: number; isOptional: boolean; title?: string }>
-  allPeriods: Array<{
-    segments?: Array<{
-      learningElements?: Array<{ id: string }>
-    }>
-  }>
+interface LearningElementQueryData {
+  learningElement?: {
+    id?: string | null
+    state?: string | null
+    solution?: string | null
+  } | null
+}
+
+interface LearningElementQueryVariables {
+  id: string
+}
+
+interface AttemptLearningElementData {
+  attemptLearningElement?: {
+    pointsAchieved?: number | null
+    pointsMax?: number | null
+  } | null
+}
+
+interface AttemptLearningElementVariables {
+  elementId: string
+  selection: string
+}
+
+interface LearningActivityListItem {
+  id: string
+  title: string
+}
+
+export interface UseLearningActivitiesProps<
+  TLearningElementData extends LearningElementQueryData,
+> {
+  learningElementDocument: TypedDocumentNode<
+    TLearningElementData,
+    LearningElementQueryVariables
+  >
+  attemptLearningElementDocument: TypedDocumentNode<
+    AttemptLearningElementData,
+    AttemptLearningElementVariables
+  >
+  resultDocument: DocumentNode
+  completedLearningElementIds: readonly string[]
+  activeSegmentLearningElements: readonly LearningActivityListItem[]
+  allPeriods: readonly {
+    segments?: readonly {
+      learningElements?: readonly LearningActivityListItem[]
+    }[]
+  }[]
   toast: (options: { title: string; description: string }) => void
 }
 
-export function useLearningActivities({
+function normalizeLearningState(state: string | null | undefined): LearningState {
+  return state === 'SOLVED' || state === 'ATTEMPTED' ? state : null
+}
+
+function parseLearningOptions(solution: string | null | undefined): number[] {
+  if (!solution) return []
+
+  try {
+    const parsed: unknown = JSON.parse(solution)
+    return Array.isArray(parsed) && parsed.every(Number.isInteger) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+export function useLearningActivities<
+  TLearningElementData extends LearningElementQueryData,
+>({
   learningElementDocument,
   attemptLearningElementDocument,
   resultDocument,
@@ -25,35 +79,28 @@ export function useLearningActivities({
   activeSegmentLearningElements,
   allPeriods,
   toast,
-}: UseLearningActivitiesProps) {
+}: UseLearningActivitiesProps<TLearningElementData>) {
   const [activeLearningId, setActiveLearningId] = useState<string | null>(null)
   const [learningElementState, setLearningElementState] = useState<LearningState>(null)
   const [activeLearningOptions, setActiveLearningOptions] = useState<number[]>([])
 
-  const { data: learningElementData, loading: learningElementLoading } = useQuery(
-    learningElementDocument,
-    {
-      variables: { id: activeLearningId ?? '' },
-      skip: !activeLearningId,
-    }
-  )
+  const { data: learningElementData, loading: learningElementLoading } = useQuery<
+    TLearningElementData,
+    LearningElementQueryVariables
+  >(learningElementDocument, {
+    variables: { id: activeLearningId ?? '' },
+    skip: !activeLearningId,
+  })
 
   useEffect(() => {
-    if (learningElementData?.learningElement) {
-      setLearningElementState(learningElementData.learningElement.state as LearningState)
-      try {
-        if (learningElementData.learningElement.solution) {
-          setActiveLearningOptions(JSON.parse(learningElementData.learningElement.solution))
-        } else {
-          setActiveLearningOptions([])
-        }
-      } catch {
-        setActiveLearningOptions([])
-      }
-    } else {
-      setLearningElementState(null)
-      setActiveLearningOptions([])
-    }
+    const learningElement = learningElementData?.learningElement
+    const isActiveLearningElement = learningElement?.id === activeLearningId
+    setLearningElementState(
+      normalizeLearningState(isActiveLearningElement ? learningElement.state : null)
+    )
+    setActiveLearningOptions(
+      parseLearningOptions(isActiveLearningElement ? learningElement.solution : null)
+    )
   }, [learningElementData, activeLearningId])
 
   const [attemptLearningElement, { loading: attemptingLearning }] = useMutation(
@@ -74,7 +121,11 @@ export function useLearningActivities({
       })
       const resData = result.data?.attemptLearningElement
       if (resData) {
-        if (resData.pointsAchieved === resData.pointsMax) {
+        if (
+          typeof resData.pointsAchieved === 'number' &&
+          typeof resData.pointsMax === 'number' &&
+          resData.pointsAchieved === resData.pointsMax
+        ) {
           setLearningElementState('SOLVED')
         } else {
           setLearningElementState('ATTEMPTED')
@@ -84,29 +135,30 @@ export function useLearningActivities({
           })
         }
       }
-    } catch (e) {
-      console.error(e)
+    } catch (error) {
+      console.error(error)
     }
   }
 
   const completedLearningElements = useMemo(() => {
     const seen = new Set<string>()
     return allPeriods
-      .flatMap((period: any) =>
-        (period.segments || []).flatMap((segment: any) => segment.learningElements || [])
+      .flatMap((period) =>
+        (period.segments ?? []).flatMap((segment) => segment.learningElements ?? [])
       )
-      .filter((elem: any) => completedLearningElementIds.includes(elem.id))
-      .filter((elem: any) => {
-        if (seen.has(elem.id)) return false
-        seen.add(elem.id)
+      .filter((element) => completedLearningElementIds.includes(element.id))
+      .filter((element) => {
+        if (seen.has(element.id)) return false
+        seen.add(element.id)
         return true
       })
   }, [allPeriods, completedLearningElementIds])
 
   const openLearningElements = useMemo(
-    () => (activeSegmentLearningElements || []).filter(
-      (elem: any) => !completedLearningElementIds.includes(elem.id)
-    ),
+    () =>
+      activeSegmentLearningElements.filter(
+        (element) => !completedLearningElementIds.includes(element.id)
+      ),
     [activeSegmentLearningElements, completedLearningElementIds]
   )
 
@@ -114,7 +166,6 @@ export function useLearningActivities({
     activeLearningId,
     setActiveLearningId,
     learningElementState,
-    setLearningElementState,
     activeLearningOptions,
     setActiveLearningOptions,
     learningElementData,

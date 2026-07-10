@@ -251,7 +251,6 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     activeLearningId,
     setActiveLearningId,
     learningElementState,
-    setLearningElementState,
     activeLearningOptions,
     setActiveLearningOptions,
     learningElementData,
@@ -421,7 +420,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
         onClose={() => setActiveLearningId(null)}
         title="Learning Activity"
       >
-        {learningElementData?.learningElement && (
+        {learningElementData?.learningElement?.element && (
           <LearningElementDisplay
             title={learningElementData.learningElement.element.title}
             question={learningElementData.learningElement.element.question}

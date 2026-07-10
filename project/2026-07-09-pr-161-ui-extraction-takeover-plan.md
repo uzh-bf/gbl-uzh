@@ -860,9 +860,9 @@ PR update:
 
 ### Status
 
-- Current: S5 verified; slice commit next. S6 follows after push/CI readback.
-- Implementation: P0, F0, S1, S2, S3, S4, and S5 complete.
-- Branch mutations this takeover: P0-S4 commits plus the focused S5 global-event predicate diff.
+- Current: S6 complete locally and ready to commit; S7 follows after CI readback.
+- Implementation: P0, F0, S1, S2, S3, S4, S5, and S6 complete.
+- Branch mutations this takeover: P0-S5 commits plus the focused S6 typed-hook diff.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -937,13 +937,25 @@ PR update:
 - [x] Full demo lifecycle passes 2/2, exercising period/segment/countdown subscription refreshes.
 - [x] S5 correctness review found no functional defects.
 - [x] S5 simplification review found no abstraction issue; Rate Wars CRLF finding integrated.
-- [ ] UI lint remains red only on S6 explicit-`any` debt.
-- [ ] Three game `check` scripts remain red on pre-existing formatter incompatibility and planned type debt; production builds pass.
+- [x] UI lint passes after removal of the S6 explicit-`any` debt.
+- [ ] Full game `check` scripts retain pre-existing formatter incompatibility and planned S7/report type debt; production builds pass.
 - [ ] Demo app full TypeScript check remains red on the branch's known S5-S7 migration debt.
+- [x] Current Apollo typed-document guidance confirmed that generated `TypedDocumentNode` results and variables should drive hook inference.
+- [x] The learning hook now constrains only the query and mutation fields it reads while preserving each generated query's complete result type for consumers.
+- [x] Explicit `any` transforms are removed; malformed/non-integer solution JSON falls back to no selected answers.
+- [x] Query results are matched to the active learning ID, unknown server states map to `UNATTEMPTED`, and nullable activity content no longer crashes consumers.
+- [x] Missing attempt scores cannot compare equal and falsely solve an activity; numeric `0 === 0` remains valid.
+- [x] Completed-item dedupe and ordering, open-item ordering, empty periods, wrong-answer toast, and solved/attempted transitions are preserved.
+- [x] UI lint and UI build/type declarations pass; Central Bank `check:ts` passes.
+- [x] Demo and Rate Wars `check:ts` contain no S6 errors; remaining failures belong to existing report debt and S7 TradingForm/form-state debt.
+- [x] Demo Game and Rate Wars production builds pass; Central Bank passes with a non-secret local `NEXT_PUBLIC_API_URL` after its Google Font fetch was allowed.
+- [x] Full demo flow passed cleanly before review fixes; after fixes it passed on retry with one unrelated dice-popup timeout recorded as an existing flake.
+- [x] S6 correctness review findings integrated: missing-score equality, nullable nested element, and stale response matching.
+- [x] S6 simplification findings integrated: mutation-result generic removed and active-ID dependency made purposeful.
 
 ### Next action
 
-Commit S5, push, and read Playwright/Sonar movement. Then start S6 typed learning-hook work.
+Commit and push S6, read CI movement, then verify S7 TradingForm submission behavior.
 
 ## Independent plan review
 
@@ -968,7 +980,7 @@ Commit S5, push, and read Playwright/Sonar movement. Then start S6 typed learnin
 
 ## Next Steps
 
-1. Commit and push S5; read Playwright/Sonar movement.
-2. Execute S6 typed learning-hook contract.
+1. Execute S6 typed learning-hook contract.
+2. Push S6 and read lint/type/Playwright movement.
 3. Continue one reviewed, verified commit per slice through S10.
 4. Restart S11 verification after the final code SHA changes.
