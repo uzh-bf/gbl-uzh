@@ -828,12 +828,12 @@ PR update:
 - [ ] Demo, Central Bank, Rate Wars builds pass.
 - [ ] Demo, Central Bank, Rate Wars Playwright flows pass.
 - [ ] New-code duplication <= 3%.
-- [ ] pnpm 9.15.9 frozen install passes.
-- [ ] pnpm 11.6.0 frozen install passes.
+- [x] pnpm 9.15.9 frozen install passes.
+- [x] pnpm 11.6.0 frozen install passes.
 - [ ] `.npmrc` does not globally disable release-age policy unless explicitly approved.
 - [ ] Vercel preview passes.
 - [ ] Parallel devrouter workspaces verified with distinct routes and correct game targets.
-- [ ] Local app/OIDC/DB health verified.
+- [x] Local app/OIDC/DB health verified.
 - [ ] `git diff --check` clean.
 - [ ] Opengrep reviewed.
 - [ ] Security review handled/deferred explicitly.
@@ -1023,11 +1023,17 @@ PR update:
 - [x] Branch whitespace cleanup removes the confirmed trailing spaces and missing final newline in touched UI files plus the extra `.gitignore` EOF line; UI lint and both whitespace checks pass.
 - [x] Website Next.js security patch pins `next` and `eslint-config-next` to `15.5.19`, matching the previously proven same-repository Vercel fix without crossing a major-version boundary.
 - [x] Website patch verification: pnpm 11 and pnpm 9 frozen installs pass; the Next 15.5.19 production export builds all 32 pages; package/lockfile correctness and simplification reviews are clean.
-- [ ] Push the security patch and read the terminal Vercel result; stop for approval if the next blocker requires the planned `next-mdx-remote` major upgrade.
+- [x] Security patch pushed at `58466f2`; GitHub Actions and Vercel started against the exact head SHA.
+- [ ] Read the terminal Vercel result; stop for approval if the next blocker requires the planned `next-mdx-remote` major upgrade.
+- [x] Real Demo Game browser verification passed through devrouter/DevPod: welcome at 1440x900 and 390x844, authenticated add-period form, and running player cockpit/trading at 1440x900.
+- [x] Browser evidence captured under `project/screenshots/pr-161/`: desktop/mobile welcome, typed add-period form, and player cockpit.
+- [ ] Seeded local Demo data has no open learning activities, so modal interaction remains covered by component/build/Playwright evidence rather than the local screenshot set.
+- [ ] Central Bank and Rate Wars local screenshots require changing the single selected devcontainer target; keep this as a documented manual gate unless CI fails or reviewer evidence requires a target rebuild.
+- [ ] Local dev console retains baseline Next HMR, legacy Link, duplicate-key, forwarded `primaryType`, and dialog-description warnings; none blocked the verified flows, but final review must classify them against `origin/dev`.
 
 ### Next action
 
-Commit and push the Vercel Next.js security patch, then read the new deployment result.
+Commit and push browser evidence, read the new Vercel/CI result, then rerun final strict and independent reviews.
 
 ## Independent plan review
 
