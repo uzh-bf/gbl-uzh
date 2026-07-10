@@ -1014,10 +1014,13 @@ PR update:
 - [x] Typed shared-seam fix centralizes deterministic learning-list ordering, removes four branch-added `any` casts, and validates the selected role-content JSON value before access.
 - [x] Typed-seam verification: UI lint/build and Central Bank typecheck pass; Rate Wars reports only its existing index arithmetic errors, with no cockpit/shared-seam error.
 - [x] Typed-seam correctness and simplification reviews pass; readonly generated inputs are not mutated and ordering matches prior Ramda semantics.
+- [x] Central Bank and Rate Wars app-specific `GameLayout` components moved out of their cockpit pages without introducing a generic cross-game adapter.
+- [x] Layout extraction verification: Central Bank typecheck and both production builds pass; Rate Wars typecheck retains only two existing index arithmetic errors; CRLF is preserved.
+- [x] Layout correctness and simplification reviews pass after removing copied dead state/destructures; Central cockpit shrinks by about 190 lines and Rate Wars by about 220.
 
 ### Next action
 
-Commit the typed learning/story boundary, then move example layouts into focused component files.
+Commit the reviewed example layout extraction, then replace duplicated untyped demo admin fields with one typed app-local field.
 
 ## Independent plan review
 
