@@ -1008,10 +1008,13 @@ PR update:
 - [x] Story queue review covers two-item async refetch, X-dismiss, identical/overlapping next-segment IDs, mutation failure, and progress bounds; correctness and simplification reviewers pass.
 - [x] Story queue verification: UI lint/build and CRLF-aware diff check pass. No component-test harness exists; real two-story browser proof remains in final evidence.
 - [ ] Thermo review found four P1 maintainability blockers: speculative primitive exports, giant embedded example layouts, shared-seam `any` casts, and duplicated untyped admin fields.
+- [x] Final branch review found packed UI declarations referenced undeclared low-level packages; zero-consumer primitive and `LearningElementDisplay` exports are removed while the only primitive consumer, `Form`, remains explicit.
+- [x] UI-surface verification: UI lint/build pass; packed declarations import only declared peers; 65 named imports across 15 consumer files resolve with no missing-export errors.
+- [x] UI-surface correctness and simplification reviews pass; removed facade names did not exist on `origin/dev` and have no tracked branch consumer.
 
 ### Next action
 
-Commit and push the reviewed story queue fix, then address each validated thermo finding in focused commits before restarting final verification.
+Commit the reviewed UI facade, then centralize typed learning/story boundaries before moving example layouts.
 
 ## Independent plan review
 
