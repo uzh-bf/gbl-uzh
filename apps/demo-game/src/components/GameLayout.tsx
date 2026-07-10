@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import {
   GameSidebar,
+  getCountdownNotification,
   LearningActivityModal,
   LearningActivitiesList,
   Layout,
@@ -152,27 +153,20 @@ function GameLayout({ children }: { children: React.ReactNode }) {
               expiresAt: expiresAtDate,
               totalDuration: countdownDurationMs / 1000,
               onUpdate: (secondsLeft) => {
-                const minutesRemainingThreshold = [1, 3]
-                minutesRemainingThreshold.forEach((minute) => {
-                  const secondsThreshold = minute * 60
-                  if (
-                    secondsLeft <= secondsThreshold &&
-                    secondsLeft > secondsThreshold - 1
-                  ) {
-                    const secondsKey = String(secondsThreshold)
-                    if (!countdownNotifications[secondsKey]) {
-                      const friendlyMinutes = Math.ceil(secondsLeft / 60)
-                      toast({
-                        title: 'Countdown Update',
-                        description: `Less than ${friendlyMinutes} min remaining! Please press ready.`,
-                      })
-                      setCountdownNotifications((prevState) => ({
-                        ...prevState,
-                        [secondsKey]: true,
-                      }))
-                    }
-                  }
+                const notification = getCountdownNotification(
+                  secondsLeft,
+                  countdownNotifications
+                )
+                if (!notification) return
+
+                toast({
+                  title: 'Countdown Update',
+                  description: `Less than ${notification.friendlyMinutes} min remaining! Please press ready.`,
                 })
+                setCountdownNotifications((prevState) => ({
+                  ...prevState,
+                  [notification.secondsKey]: true,
+                }))
               },
               onExpire: () => {},
             }

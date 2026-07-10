@@ -36,6 +36,8 @@ export function AdminInputField<TFieldValues extends FieldValues>({
   testId,
   minMessage,
 }: AdminInputFieldProps<TFieldValues>) {
+  const errorId = `${name}-error`
+
   return (
     <div className="flex w-full flex-col gap-1">
       <div className="flex items-center gap-1.5 pb-1">
@@ -65,8 +67,14 @@ export function AdminInputField<TFieldValues extends FieldValues>({
         )}
         className="w-full rounded border border-slate-300 bg-white p-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
         data-cy={testId ?? name}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? errorId : undefined}
       />
-      {error && <span className="text-xs text-red-500">{error.message}</span>}
+      {error && (
+        <span id={errorId} role="alert" className="text-xs text-red-500">
+          {error.message}
+        </span>
+      )}
     </div>
   )
 }

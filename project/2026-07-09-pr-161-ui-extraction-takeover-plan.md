@@ -819,13 +819,13 @@ PR update:
 
 ## Acceptance criteria
 
-- [ ] Plan reviewed, approved, committed alone.
-- [ ] Every new `@gbl-uzh/ui` export has current consumer or explicit stable-contract rationale.
-- [ ] Zero-consumer speculative components/deps removed or explicitly approved.
-- [ ] Shared hook contains no avoidable `any` boundary.
-- [ ] TradingForm buy/sell modifiers submitted atomically.
-- [ ] Numeric fields expose correct accessible role/name.
-- [ ] Demo, Central Bank, Rate Wars builds pass.
+- [x] Plan reviewed, approved, committed alone.
+- [x] Every new `@gbl-uzh/ui` export has current consumer or explicit stable-contract rationale.
+- [x] Zero-consumer speculative components/deps removed or explicitly approved.
+- [x] Shared hook contains no avoidable `any` boundary.
+- [x] TradingForm buy/sell modifiers submitted atomically.
+- [x] Numeric fields expose correct accessible role/name.
+- [x] Demo, Central Bank, Rate Wars builds pass.
 - [ ] Demo, Central Bank, Rate Wars Playwright flows pass.
 - [ ] New-code duplication <= 3%.
 - [x] pnpm 9.15.9 frozen install passes.
@@ -834,9 +834,9 @@ PR update:
 - [ ] Vercel preview passes.
 - [ ] Parallel devrouter workspaces verified with distinct routes and correct game targets.
 - [x] Local app/OIDC/DB health verified.
-- [ ] `git diff --check` clean.
-- [ ] Opengrep reviewed.
-- [ ] Security review handled/deferred explicitly.
+- [x] `git diff --check` clean.
+- [x] Opengrep reviewed.
+- [x] Security review handled/deferred explicitly.
 - [ ] Thermo-nuclear review handled/deferred explicitly.
 - [ ] Independent final branch review handled/deferred explicitly.
 - [ ] Screenshots attached to PR.
@@ -861,9 +861,9 @@ PR update:
 
 ### Status
 
-- Current: S11 active. GitHub Actions green; focused Sonar duplication and Vercel content-checkout fixes in progress.
-- Implementation: P0, F0, S1-S10 complete and pushed through `5620460`; S11 verification/fixes active.
-- Branch mutations this takeover: P0-S10 commits through `5620460`; no user-owned artifacts changed.
+- Current: S11 final fixes active. Build/lint and Central Bank/Rate Wars Playwright pass; Demo Playwright, Sonar duplication, and Vercel require one final code push/readback.
+- Implementation: P0, F0, S1-S10 complete; S11 fixes and browser evidence complete at the current local HEAD.
+- Branch mutations this takeover: all current commits and the final fix slice reviewed; no user-owned artifacts changed.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -1024,16 +1024,21 @@ PR update:
 - [x] Website Next.js security patch pins `next` and `eslint-config-next` to `15.5.19`, matching the previously proven same-repository Vercel fix without crossing a major-version boundary.
 - [x] Website patch verification: pnpm 11 and pnpm 9 frozen installs pass; the Next 15.5.19 production export builds all 32 pages; package/lockfile correctness and simplification reviews are clean.
 - [x] Security patch pushed at `58466f2`; GitHub Actions and Vercel started against the exact head SHA.
-- [ ] Read the terminal Vercel result; stop for approval if the next blocker requires the planned `next-mdx-remote` major upgrade.
+- [x] Terminal Vercel result: pnpm 9 install and all 32 static pages pass; deployment then rejects vulnerable `next-mdx-remote@4.4.1` and requires `6.0.0+`.
+- [ ] Major-upgrade gate: obtain user approval before changing `next-mdx-remote` from 4.4.1 to 6.x.
 - [x] Real Demo Game browser verification passed through devrouter/DevPod: welcome at 1440x900 and 390x844, authenticated add-period form, and running player cockpit/trading at 1440x900.
 - [x] Browser evidence captured under `project/screenshots/pr-161/`: desktop/mobile welcome, typed add-period form, and player cockpit.
 - [ ] Seeded local Demo data has no open learning activities, so modal interaction remains covered by component/build/Playwright evidence rather than the local screenshot set.
 - [ ] Central Bank and Rate Wars local screenshots require changing the single selected devcontainer target; keep this as a documented manual gate unless CI fails or reviewer evidence requires a target rebuild.
-- [ ] Local dev console retains baseline Next HMR, legacy Link, duplicate-key, forwarded `primaryType`, and dialog-description warnings; none blocked the verified flows, but final review must classify them against `origin/dev`.
+- [x] Local dev console retains Next HMR, legacy Link, duplicate-key, forwarded `primaryType`, and dialog-description warnings; none blocked the verified flows.
+- [x] Console audit classified all recorded warnings as baseline/framework/upstream. Duplicate storage keys and dialog descriptions remain follow-up debt, not branch regressions.
+- [x] Failed Demo Playwright readback traced to one stale `periodName` fill after removal of a field absent from the GraphQL mutation; focused local flow passes 3/3 after test cleanup.
+- [x] Sonar readback is 111 duplicated lines over 3,671 new lines (3.0237%); shared countdown-threshold selection removes a 21-line duplicate block without merging app-specific layouts.
+- [x] Final independent review findings fixed: dangling reusable-field descriptions and unassociated admin errors now expose valid assistive-technology relationships.
 
 ### Next action
 
-Commit and push browser evidence, read the new Vercel/CI result, then rerun final strict and independent reviews.
+Obtain approval for screenshot export and the `next-mdx-remote` major upgrade before final push/readback.
 
 ## Independent plan review
 
@@ -1058,7 +1063,6 @@ Commit and push browser evidence, read the new Vercel/CI result, then rerun fina
 
 ## Next Steps
 
-1. Execute S6 typed learning-hook contract.
-2. Push S6 and read lint/type/Playwright movement.
-3. Continue one reviewed, verified commit per slice through S10.
-4. Restart S11 verification after the final code SHA changes.
+1. Obtain explicit approval to push committed screenshots and to upgrade `next-mdx-remote` across a major version.
+2. Push, read terminal CI/Sonar/Vercel state, and resolve only evidence-backed failures.
+3. Run final thermo-nuclear and independent branch reviews, update the PR body, and request user ready-state approval.

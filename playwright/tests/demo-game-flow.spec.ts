@@ -110,15 +110,10 @@ async function createGame(
 
 async function addPeriod(
   page: Page,
-  {
-    name,
-    segmentCount,
-    index,
-  }: { name: string; segmentCount: string; index: number }
+  { segmentCount, index }: { segmentCount: string; index: number }
 ) {
   await page.getByRole('button', { name: 'Add period' }).click()
   const dialog = page.getByRole('dialog', { name: 'Add Period' })
-  await input(dialog, 'periodName').fill(name)
   await dialog
     .getByRole('spinbutton', { name: 'Number of segments' })
     .fill(segmentCount)
@@ -351,7 +346,7 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
 
   const joinUrls = await assertUniqueJoinUrls(page, appBaseURL, players.length)
 
-  await addPeriod(page, { name: 'Period 1', segmentCount: '2', index: 0 })
+  await addPeriod(page, { segmentCount: '2', index: 0 })
   await expect(page.getByRole('button', { name: 'Start Period' })).toBeDisabled()
   await expect(page.getByRole('button', { name: 'Add period' })).toBeDisabled()
   await addSegment(page, { periodIndex: 0 })
@@ -362,7 +357,7 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
 
   await assertDicePage(page)
 
-  await addPeriod(page, { name: 'Period 2', segmentCount: '2', index: 1 })
+  await addPeriod(page, { segmentCount: '2', index: 1 })
   await expect(page.getByRole('button', { name: 'Add period' })).toBeDisabled()
   await addSegment(page, { periodIndex: 1 })
   await expect(page.getByRole('button', { name: 'Add period' })).toBeDisabled()
@@ -370,7 +365,7 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
   await expect(page.getByRole('button', { name: 'Add segment' })).toBeDisabled()
   // TODO: remove sentinel when final-period consolidation no longer connects
   // the next period.
-  await addPeriod(page, { name: 'Period 3', segmentCount: '1', index: 2 })
+  await addPeriod(page, { segmentCount: '1', index: 2 })
 
   const playerSessions: PlayerSession[] = []
 
