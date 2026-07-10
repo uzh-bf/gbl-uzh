@@ -34,7 +34,13 @@ const Die = ({
 
   useEffect(() => {
     import('react-dice-complete').then((mod) => {
-      setReactDiceComponent(() => mod.default)
+      const moduleDefault = mod.default as
+        | typeof ReactDiceModule.default
+        | { default: typeof ReactDiceModule.default }
+
+      setReactDiceComponent(() =>
+        'default' in moduleDefault ? moduleDefault.default : moduleDefault
+      )
     })
   }, [])
 
@@ -79,4 +85,3 @@ const Die = ({
 Die.displayName = 'Die'
 
 export default Die
-

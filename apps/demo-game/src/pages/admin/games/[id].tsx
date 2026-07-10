@@ -95,10 +95,11 @@ function AdminInputField({
   return (
     <div className="flex flex-col gap-1 w-full">
       <div className="flex items-center gap-1.5 pb-1">
-        <label className="text-sm font-medium text-slate-700">{label}</label>
+        <label htmlFor={name} className="text-sm font-medium text-slate-700">{label}</label>
         {tooltip && <HelpTooltip content={tooltip} />}
       </div>
       <input
+        id={name}
         type={type}
         placeholder={placeholder}
         min={min}

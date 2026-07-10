@@ -860,9 +860,9 @@ PR update:
 
 ### Status
 
-- Current: P0 reviewed plan approved; standalone commit next.
-- Implementation: not started.
-- Branch mutations this takeover: plan file only.
+- Current: S1 verified; slice commit next. S2 follows after push/CI readback.
+- Implementation: P0, F0, and S1 complete.
+- Branch mutations this takeover: P0 commit plus the focused S1 code/test diff.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -881,11 +881,24 @@ PR update:
 - [x] Independent plan review complete.
 - [x] Accepted plan findings integrated.
 - [x] User approves final plan.
-- [ ] Plan committed alone.
+- [x] Plan committed alone as `f730ca8`.
+- [x] Existing primary DevPod workspace restarted without cleanup.
+- [x] Host app and OIDC routes return 200; issuer is `https://oidc.demo-game.localhost/default`.
+- [x] In-container app returns 200; demo DB contains four `PlayerLevel` rows.
+- [x] Real admin OIDC Playwright setup passes.
+- [x] Period and countdown labels now expose matching accessible numeric controls.
+- [x] Demo Playwright selectors use stable role/name contracts, not DOM positions.
+- [x] `react-dice-complete` UMD double-default interop normalized at the shared `Die` boundary.
+- [x] `@gbl-uzh/ui` build passes.
+- [x] Playwright TypeScript check passes.
+- [x] Full demo flow passes: 2/2 in 43.9 seconds.
+- [x] S1 correctness review found no defects; React 19 peer mismatch recorded as pre-existing limitation.
+- [x] S1 simplification review complete; unsafe `any`, non-semantic selector, and speculative ID-prefix suggestions deferred.
+- [ ] Demo app full TypeScript check remains red on the branch's known S5-S7 migration debt.
 
 ### Next action
 
-Commit P0 alone. Then run F0 before implementation.
+Commit S1, push, and read focused CI. Then start S2 consumer mapping.
 
 ## Independent plan review
 
@@ -910,7 +923,7 @@ Commit P0 alone. Then run F0 before implementation.
 
 ## Next Steps
 
-1. User approves plan.
-2. Commit P0 only.
-3. Run F0. Stop for cleanup approval before mutations.
-4. Execute S1. Stop after review, simplification, verification, commit; report before S2.
+1. Commit and push S1; read focused CI.
+2. Execute S2 used-surface reduction.
+3. Continue one reviewed, verified commit per slice through S10.
+4. Restart S11 verification after the final code SHA changes.

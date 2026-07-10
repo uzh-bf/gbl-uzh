@@ -118,10 +118,10 @@ async function addPeriod(
 ) {
   await page.getByRole('button', { name: 'Add period' }).click()
   const dialog = page.getByRole('dialog', { name: 'Add Period' })
-  const fields = dialog.getByRole('textbox')
   await input(dialog, 'periodName').fill(name)
-  // FormikNumberField currently renders visible labels without accessible names.
-  await fields.nth(1).fill(segmentCount)
+  await dialog
+    .getByRole('spinbutton', { name: 'Number of segments' })
+    .fill(segmentCount)
   await dialog.getByRole('button', { name: 'Submit' }).click()
   await expect(page.getByTestId(`period-${index}`)).toBeVisible()
 }
@@ -184,12 +184,10 @@ async function joinPlayers(
 }
 
 async function submitDecision(page: Page, values: DecisionValues) {
-  // FormikNumberField currently renders visible labels without accessible names.
-  const fields = page.getByRole('textbox')
   const submitButton = page.getByRole('button', { name: 'Submit' })
-  await fields.nth(0).fill(values.savings)
-  await fields.nth(1).fill(values.bonds)
-  await fields.nth(2).fill(values.stocks)
+  await page.getByRole('spinbutton', { name: 'Savings' }).fill(values.savings)
+  await page.getByRole('spinbutton', { name: 'Bonds' }).fill(values.bonds)
+  await page.getByRole('spinbutton', { name: 'Stocks' }).fill(values.stocks)
   await submitButton.click()
   await expect(submitButton).toBeEnabled()
   await expect(page.getByTestId('ready-switch')).toBeVisible()
@@ -231,7 +229,9 @@ async function assertPlayerPortfolio(page: Page, timeout = 10_000) {
 }
 
 async function setCountdown(page: Page, seconds: string) {
-  await page.getByTestId('countdown-seconds').getByRole('textbox').fill(seconds)
+  await page
+    .getByRole('spinbutton', { name: 'Countdown in seconds' })
+    .fill(seconds)
   await page.getByRole('button', { name: 'Set Countdown' }).click()
 }
 
