@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import {
   Layout,
+  shouldRefetchGameResult,
   PlayerDisplay,
   StoryElements,
   CycleCountdown,
@@ -58,12 +59,6 @@ import {
 import { Form, Formik } from 'formik'
 import * as yup from 'yup'
 import { useToast } from '../../components/ui/use-toast'
-
-enum BaseGlobalNotificationType {
-  PERIOD_ACTIVATED = 'PERIOD_ACTIVATED',
-  SEGMENT_ACTIVATED = 'SEGMENT_ACTIVATED',
-  COUNTDOWN_UPDATED = 'COUNTDOWN_UPDATED',
-}
 
 function GameHeader({ currentGame }) {
   return (
@@ -132,12 +127,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     onData: ({ data: subData }) => {
       if (subData?.data?.eventsGlobal) {
         const event = subData.data.eventsGlobal
-        if (
-          (event.type === BaseGlobalNotificationType.COUNTDOWN_UPDATED ||
-            event?.type === BaseGlobalNotificationType.PERIOD_ACTIVATED ||
-            event?.type === BaseGlobalNotificationType.SEGMENT_ACTIVATED) &&
-          event?.facts?.gameId === currentGameId
-        ) {
+        if (shouldRefetchGameResult(event, currentGameId)) {
           refetchResult()
         }
       }

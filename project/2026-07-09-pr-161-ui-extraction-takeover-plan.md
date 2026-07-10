@@ -860,9 +860,9 @@ PR update:
 
 ### Status
 
-- Current: S4 verified; slice commit next. S5 follows after push/Sonar readback.
-- Implementation: P0, F0, S1, S2, S3, and S4 complete.
-- Branch mutations this takeover: P0-S3 commits plus the focused S4 logo-selector diff.
+- Current: S5 verified; slice commit next. S6 follows after push/CI readback.
+- Implementation: P0, F0, S1, S2, S3, S4, and S5 complete.
+- Branch mutations this takeover: P0-S4 commits plus the focused S5 global-event predicate diff.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -926,13 +926,24 @@ PR update:
 - [ ] Post-simplification local browser rerun blocked by desktop approval quota; require three green GitHub Playwright jobs after push.
 - [x] S4 correctness review found no defects; tracked consumers complete.
 - [x] S4 simplification finding integrated; public helper/type/barrel export removed.
+- [x] S4 CI: lint, Central Bank Playwright, and Rate Wars Playwright pass at readback.
+- [ ] S4 demo Playwright/build pending at readback; local full demo flow passes.
+- [ ] S4 Sonar remains red at 4.4% new-code duplication; S5 removes the remaining repeated event predicates.
+- [x] S5 browser-safe `shouldRefetchGameResult` owns the three shared refresh event strings and strict game-ID match.
+- [x] Direct platform enum import rejected because frontend platform imports can pull Prisma runtime code into the browser.
+- [x] Countdown toasts and sidebar assembly remain local because behavior differs across games.
+- [x] Predicate truth table covers all three accepted types plus null, unknown, and wrong-game cases.
+- [x] UI build and all three fresh production Next builds pass.
+- [x] Full demo lifecycle passes 2/2, exercising period/segment/countdown subscription refreshes.
+- [x] S5 correctness review found no functional defects.
+- [x] S5 simplification review found no abstraction issue; Rate Wars CRLF finding integrated.
 - [ ] UI lint remains red only on S6 explicit-`any` debt.
 - [ ] Three game `check` scripts remain red on pre-existing formatter incompatibility and planned type debt; production builds pass.
 - [ ] Demo app full TypeScript check remains red on the branch's known S5-S7 migration debt.
 
 ### Next action
 
-Commit S4, push, and require the three matching Playwright jobs before closing browser evidence. Then start S5.
+Commit S5, push, and read Playwright/Sonar movement. Then start S6 typed learning-hook work.
 
 ## Independent plan review
 
@@ -957,7 +968,7 @@ Commit S4, push, and require the three matching Playwright jobs before closing b
 
 ## Next Steps
 
-1. Commit and push S4; read Playwright and Sonar movement.
-2. Execute S5 cockpit notification invariant sharing.
+1. Commit and push S5; read Playwright/Sonar movement.
+2. Execute S6 typed learning-hook contract.
 3. Continue one reviewed, verified commit per slice through S10.
 4. Restart S11 verification after the final code SHA changes.

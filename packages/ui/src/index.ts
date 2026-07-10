@@ -1,5 +1,6 @@
 import '~/globals.css'
 export * from '~/lib/utils'
+export * from '~/lib/global-events'
 export * from '~/components/Layout'
 export * from '~/components/Logo'
 export * from '~/components/NavBar'
