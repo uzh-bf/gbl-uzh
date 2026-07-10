@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Runs once when the dev container is created. Installs deps, builds the
-# workspace packages demo-game imports, and prepares the database.
+# Runs once when the dev container is created. Installs deps, builds shared
+# workspace packages, and prepares the selected game's database.
 set -euo pipefail
 cd /workspaces/gbl-uzh
 
@@ -9,12 +9,18 @@ cd /workspaces/gbl-uzh
 # search_path. Re-source the canonical env file so values with '=' are intact.
 # The starter config points GBL_ENV_FILE at its own env file.
 runtime_workspace="${WORKSPACE:-}"
+runtime_game_target="${GBL_GAME_TARGET:-}"
 set -a
 . "${GBL_ENV_FILE:-/workspaces/gbl-uzh/.devcontainer/devcontainer.env}"
 set +a
 if [ -n "$runtime_workspace" ]; then
   export WORKSPACE="$runtime_workspace"
 fi
+if [ -n "$runtime_game_target" ]; then
+  export GBL_GAME_TARGET="$runtime_game_target"
+fi
+. .devcontainer/game-target.sh
+resolve_gbl_game_target
 
 # devpod lifecycle hooks run without a TTY. Two pnpm behaviours misbehave there:
 #   - CI=true auto-confirms purging a stale/partial node_modules volume (else
@@ -33,20 +39,13 @@ echo "[post-create] Installing dependencies (pnpm, full workspace)..."
 export CYPRESS_INSTALL_BINARY=0
 pnpm install --no-frozen-lockfile
 
-echo "[post-create] Building workspace deps (platform, ui) so demo-game can import their dist..."
+echo "[post-create] Building shared workspace deps (platform, ui)..."
 pnpm -F @gbl-uzh/platform build
 pnpm -F @gbl-uzh/ui build
 
-target_package="@gbl-uzh/demo-game"
-if [[ "${WORKSPACE:-}" =~ "central-bank" ]]; then
-  target_package="@gbl-uzh/central-bank"
-elif [[ "${WORKSPACE:-}" =~ "rate-wars" ]]; then
-  target_package="@gbl-uzh/rate-wars"
-fi
-
-echo "[post-create] Copying platform Prisma schema + generating client for ${target_package}..."
-pnpm -F "$target_package" prisma:copy
-pnpm -F "$target_package" prisma:generate
+echo "[post-create] Copying platform Prisma schema + generating client for ${GBL_GAME_PACKAGE}..."
+pnpm -F "$GBL_GAME_PACKAGE" prisma:copy
+pnpm -F "$GBL_GAME_PACKAGE" prisma:generate
 
 # A brand-new Postgres volume has a short warmup window where the Prisma engine
 # emits an empty search_path (error 42601) even though pg_isready is healthy.
@@ -54,7 +53,7 @@ pnpm -F "$target_package" prisma:generate
 echo "[post-create] Pushing schema to the database (retrying through DB warmup)..."
 push_ok=0
 for attempt in $(seq 1 12); do
-  if pnpm -F "$target_package" prisma:push; then push_ok=1; break; fi
+  if pnpm -F "$GBL_GAME_PACKAGE" prisma:push; then push_ok=1; break; fi
   echo "[post-create] push attempt ${attempt} failed; retrying in 5s..."
   sleep 5
 done
@@ -68,7 +67,7 @@ fi
 echo "[post-create] Seeding reference data (retrying through DB warmup)..."
 seed_ok=0
 for attempt in $(seq 1 5); do
-  if pnpm -F "$target_package" prisma:seed; then seed_ok=1; break; fi
+  if pnpm -F "$GBL_GAME_PACKAGE" prisma:seed; then seed_ok=1; break; fi
   echo "[post-create] seed attempt ${attempt} failed; retrying in 5s..."
   sleep 5
 done

@@ -861,9 +861,9 @@ PR update:
 
 ### Status
 
-- Current: focused S9 Vercel submodule fix verified and ready to commit; S10 follows after deployment readback.
-- Implementation: P0, F0, S1, S2, S3, S4, S5, S6, S7, S8, and initial S9 complete; the S9 deployment follow-up remains uncommitted.
-- Branch mutations this takeover: P0-S9 commits through `9fec29e`; no user-owned artifacts changed.
+- Current: S10 explicit target contract verified locally and ready to commit; S9 Vercel deployment readback pending.
+- Implementation: P0, F0, S1-S9 complete and pushed through `0a8c0dd`; S10 is locally complete and uncommitted.
+- Branch mutations this takeover: P0-S9 commits through `0a8c0dd`; no user-owned artifacts changed.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -984,11 +984,19 @@ PR update:
 - [x] Vercel then fails because its checkout omits tracked `apps/quartz` content (`Lives In Transit.md`); local website build succeeds with the initialized submodule.
 - [x] Independent review corrected the Vercel config scope: the project root is `apps/website`, so `apps/website/vercel.json` initializes only `apps/quartz` and runs only the website build.
 - [x] The exact website-scoped submodule command and production website build pass locally; Vercel Git access to `uzh-bf/gbl-knowledge` remains to be verified on the preview.
-- [ ] Focused S9 Vercel configuration change awaits push and deployment readback.
+- [x] Focused S9 Vercel configuration committed and pushed as `0a8c0dd`; Vercel deployment readback pending.
+- [x] S10 maps `demo`, `central-bank`, and `rate-wars` explicitly to one package resolver shared by post-create and post-start.
+- [x] S10 keeps `WORKSPACE` only for routing/container identity and preserves an explicit runtime target across env-file loading.
+- [x] The same resolved package drives Prisma copy/generate/push/seed and the dev server; unknown targets fail before lifecycle work.
+- [x] Both devcontainer configurations now shadow every selectable game's `node_modules`, including the review-found Central Bank starter mount.
+- [x] Correct-server detection accepts Volta/Corepack `pnpm` command paths; a foreign `next dev` is rejected rather than mistaken for the selected target.
+- [x] S10 correctness and simplification reviews completed; the two accepted P1 findings and the unrelated Markdown-callout regression were fixed and rechecked.
+- [x] S10 shell syntax, resolver allowed/rejection matrix, both Compose configurations, devrouter configuration, and OKF documentation validation pass locally.
+- [ ] S10 concurrent full workspace proof is a manual gate: six pre-existing orphaned routes are user-owned and lifecycle teardown needs explicit approval.
 
 ### Next action
 
-Commit the reviewed Vercel submodule configuration, push and read its deployment, then complete S10's explicit target contract.
+Commit the reviewed S10 target contract, read the S9 Vercel deployment, then begin S11 final verification.
 
 ## Independent plan review
 

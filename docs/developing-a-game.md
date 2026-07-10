@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: "2026-07-06T00:00:00Z"
+timestamp: "2026-07-10T00:00:00Z"
 ---
 
 # Developing a Game
@@ -32,7 +32,7 @@ There is no generator. The supported path is copying the reference game inside a
 2. Keep the Prisma setup as-is: `prisma/copy.ts` copies the platform schema to `prisma/schema/platform.prisma` on every build/dev run (never edit that file); `prisma/schema/specific.prisma` is yours for game-specific tables (the demo game's is an unused stub).
 3. Replace the game logic: `src/services/` (computations, below), `src/types/` (facts shapes + yup schemas), `prisma/seed.ts` (levels/content), and the pages under `src/pages/`.
 4. The workspace glob `apps/*` picks the package up automatically; run from the repo root with turbo or from the app directory.
-5. Local dev environment: two devcontainer configurations, both with Postgres + a mock OIDC server replacing Auth0 (one-click admin login as a fixed dev admin — no real Auth0 tenant needed). The **starter** config (`.devcontainer/starter/`, published localhost ports, zero host tooling; walkthrough in [getting-started](getting-started.md)) and the **devrouter** config (`.devcontainer/README.md`, multi-project routing for maintainers). If the environment misbehaves, use the `gbl-environment-doctor` skill. Outside a devcontainer you need real OIDC credentials via `.env.local.template`.
+5. Local dev environment: two devcontainer configurations, both with Postgres + a mock OIDC server replacing Auth0 (one-click admin login as a fixed dev admin — no real Auth0 tenant needed). The **starter** config (`.devcontainer/starter/`, published localhost ports, zero host tooling; walkthrough in [getting-started](getting-started.md)) and the **devrouter** config (`.devcontainer/README.md`, multi-project routing for maintainers). `GBL_GAME_TARGET` selects the package, Prisma setup, seed, and dev server through `.devcontainer/game-target.sh:resolve_gbl_game_target`; `WORKSPACE` only controls route/container isolation. The current resolver accepts `demo`, `central-bank`, and `rate-wars` and rejects unknown targets before setup. If the environment misbehaves, use the `gbl-environment-doctor` skill. Outside a devcontainer you need real OIDC credentials via `.env.local.template`.
 
 > **WARNING:** Decontaminate the copy. `cp -R apps/demo-game apps/<your-game>` also copies the demo game's domain logic, and the build will not fail on residue you leave behind. After step 3, hunt down demo-game leftovers: `.env.production` URLs still pointing at `demo-game.stg.env.bf-app.ch`, the `src/pages/index.tsx` trading showcase, dead `src/lib/analysis.ts` portfolio code, demo time constants (`MONTHS`/`NUM_MONTHS`), and the `GameFacts.myInt` stub. The full hit-list and a "definition of done" are in the `gbl-new-game-app` skill. Grep your `src/` for `assetsWithReturns`, `spotPrice`, `bank`/`bonds`/`stocks` — any hit is residue.
 
