@@ -16,16 +16,6 @@ import {
 import { LOCATIONS, AVATARS } from "src/lib/constants";
 import * as Yup from "yup";
 
-const LOGO_SELECTOR_COLORS_MAP = Object.entries(COLORS).reduce((acc, [k, v]) => {
-  let ringClass = "ring-slate-500";
-  if (k === "Red") ringClass = "ring-orange-500";
-  if (k === "Green") ringClass = "ring-lime-500";
-  if (k === "Yellow") ringClass = "ring-yellow-500";
-  if (k === "Blue") ringClass = "ring-blue-500";
-  acc[k] = { bg: v, ring: ringClass };
-  return acc;
-}, {} as Record<string, { bg: string; ring: string }>);
-
 import {
   Card,
   CardContent,
@@ -197,7 +187,7 @@ function Welcome() {
                         />
                         <LogoSelector
                           avatarOptions={Object.values(AVATARS)}
-                          colorsMap={LOGO_SELECTOR_COLORS_MAP}
+                          colors={COLORS}
                           color={values.color}
                           value={values.imgPathAvatar}
                           onChange={(val) => setFieldValue("imgPathAvatar", val)}

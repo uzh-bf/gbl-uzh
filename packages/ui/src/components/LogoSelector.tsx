@@ -1,12 +1,19 @@
 import React from 'react'
 import { cn } from '~/lib/utils'
 
+const RING_CLASS_BY_COLOR: Record<string, string> = {
+  Red: 'ring-orange-500',
+  Green: 'ring-lime-500',
+  Yellow: 'ring-yellow-500',
+  Blue: 'ring-blue-500',
+}
+
 export interface LogoSelectorProps {
   value: string
   onChange: (value: string) => void
   color: string
   avatarOptions: readonly string[]
-  colorsMap: Record<string, { bg: string; ring: string }>
+  colors: Record<string, string>
   fallbackSrc?: string
   label?: string
   className?: string
@@ -15,8 +22,11 @@ export interface LogoSelectorProps {
 export const LogoSelector = React.forwardRef<
   HTMLDivElement,
   LogoSelectorProps & React.HTMLAttributes<HTMLDivElement>
->(({ value, onChange, color, avatarOptions, colorsMap, fallbackSrc, label, className, ...props }, ref) => {
-  const colorConfig = colorsMap[color] || { bg: 'bg-slate-200', ring: 'ring-slate-500' }
+>(({ value, onChange, color, avatarOptions, colors, fallbackSrc, label, className, ...props }, ref) => {
+  const colorConfig = {
+    bg: colors[color] ?? 'bg-slate-200',
+    ring: RING_CLASS_BY_COLOR[color] ?? 'ring-slate-500',
+  }
 
   return (
     <div ref={ref} className={cn('space-y-2', className)} {...props}>
@@ -41,7 +51,7 @@ export const LogoSelector = React.forwardRef<
               className="h-full w-full object-contain p-1"
               onError={(e) => {
                 if (fallbackSrc) {
-                  ;(e.target as HTMLImageElement).src = fallbackSrc
+                  e.currentTarget.src = fallbackSrc
                 }
               }}
             />

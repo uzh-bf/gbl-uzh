@@ -860,9 +860,9 @@ PR update:
 
 ### Status
 
-- Current: S3 verified; slice commit next. S4 follows after push/Sonar readback.
-- Implementation: P0, F0, S1, S2, and S3 complete.
-- Branch mutations this takeover: P0-S2 commits plus the focused S3 primitive deletion/peer diff.
+- Current: S4 verified; slice commit next. S5 follows after push/Sonar readback.
+- Implementation: P0, F0, S1, S2, S3, and S4 complete.
+- Branch mutations this takeover: P0-S3 commits plus the focused S4 logo-selector diff.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -915,13 +915,24 @@ PR update:
 - [x] Demo Game, Central Bank, and Rate Wars production builds pass with peer externalization.
 - [x] S3 correctness review found no defects or dangling imports.
 - [x] S3 simplification review otherwise clean; stale-lock finding rejected by authoritative frozen install.
-- [ ] UI lint remains red only on one S4 semicolon and S6 explicit-`any` debt.
+- [x] S3 CI: lint and all three Playwright jobs pass; Sonar duplication falls from 13.2% to 4.3%.
+- [ ] S3 build remains pending at readback; Vercel remains red for S9.
+- [x] S4 `LogoSelector` accepts each game's raw `COLORS` map and derives the selected ring/background internally.
+- [x] Three duplicate eager reducers removed; per-game colors, avatars, fallbacks, forms, and submits preserved.
+- [x] Image fallback now uses typed `currentTarget`; prior `no-extra-semi` lint defect removed.
+- [x] UI build passes; all required ring/background utilities appear in generated CSS.
+- [x] Demo Game, Central Bank, and Rate Wars fresh production Next builds pass after final simplification.
+- [x] Full demo browser flow passed 2/2 immediately before the final API simplification.
+- [ ] Post-simplification local browser rerun blocked by desktop approval quota; require three green GitHub Playwright jobs after push.
+- [x] S4 correctness review found no defects; tracked consumers complete.
+- [x] S4 simplification finding integrated; public helper/type/barrel export removed.
+- [ ] UI lint remains red only on S6 explicit-`any` debt.
 - [ ] Three game `check` scripts remain red on pre-existing formatter incompatibility and planned type debt; production builds pass.
 - [ ] Demo app full TypeScript check remains red on the branch's known S5-S7 migration debt.
 
 ### Next action
 
-Commit S3, push, and read Sonar duplication movement. Then start S4 logo-color sharing.
+Commit S4, push, and require the three matching Playwright jobs before closing browser evidence. Then start S5.
 
 ## Independent plan review
 
@@ -946,7 +957,7 @@ Commit S3, push, and read Sonar duplication movement. Then start S4 logo-color s
 
 ## Next Steps
 
-1. Commit and push S3; read Sonar duplication movement.
-2. Execute S4 logo-color sharing.
+1. Commit and push S4; read Playwright and Sonar movement.
+2. Execute S5 cockpit notification invariant sharing.
 3. Continue one reviewed, verified commit per slice through S10.
 4. Restart S11 verification after the final code SHA changes.
