@@ -1,15 +1,14 @@
 import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import {
   GameSidebar,
+  LearningActivityModal,
   LearningActivitiesList,
-  LearningElementDisplay,
-  type LearningElementState,
   Layout,
   shouldRefetchGameResult,
   StoryElements,
   useLearningActivities,
 } from '@gbl-uzh/ui'
-import { Button, Modal } from '@uzh-bf/design-system'
+import { Button } from '@uzh-bf/design-system'
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -26,8 +25,6 @@ const tabs = [
   { name: 'Welcome', href: '/play/welcome' },
   { name: 'Cockpit', href: '/play/cockpit' },
 ]
-
-type LearningState = LearningElementState | null
 
 function GameLayout({ children }: { children: React.ReactNode }) {
   const { data, refetch: refetchResult } = useQuery(ResultDocument, {
@@ -211,44 +208,19 @@ function GameLayout({ children }: { children: React.ReactNode }) {
       <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
         {children}
       </Layout>
-      <Modal
-        className={{ content: 'max-w-4xl overflow-y-auto' }}
+      <LearningActivityModal
         open={!!activeLearningId}
         onClose={() => setActiveLearningId(null)}
-        title="Learning Activity"
-      >
-        {learningElementData?.learningElement?.element && (
-          <LearningElementDisplay
-            title={learningElementData.learningElement.element.title}
-            question={learningElementData.learningElement.element.question}
-            options={learningElementData.learningElement.element.options}
-            state={learningElementState || 'UNATTEMPTED'}
-            pointsText={
-              learningElementData.learningElement.element.reward
-                ? `Awards ${learningElementData.learningElement.element.reward}XP`
-                : undefined
-            }
-            feedback={learningElementData.learningElement.element.feedback}
-            motivation={learningElementData.learningElement.element.motivation}
-            activeElements={activeLearningOptions}
-            onOptionClick={(idx) => {
-              setActiveLearningOptions((prev) => {
-                if (prev.includes(idx)) {
-                  return prev.filter((i) => i !== idx)
-                }
-                return [idx]
-              })
-            }}
-            onSubmit={handleAttemptLearning}
-            loading={attemptingLearning || learningElementLoading}
-            returnButton={
-              <Button onClick={() => setActiveLearningId(null)}>
-                Close
-              </Button>
-            }
-          />
-        )}
-      </Modal>
+        element={learningElementData?.learningElement?.element}
+        state={learningElementState}
+        activeElements={activeLearningOptions}
+        setActiveElements={setActiveLearningOptions}
+        onSubmit={handleAttemptLearning}
+        loading={attemptingLearning || learningElementLoading}
+        returnButton={
+          <Button onClick={() => setActiveLearningId(null)}>Close</Button>
+        }
+      />
     </>
   )
 }

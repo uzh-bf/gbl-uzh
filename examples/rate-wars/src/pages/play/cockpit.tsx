@@ -5,16 +5,14 @@ import {
   PlayerDisplay,
   StoryElements,
   CycleCountdown,
+  LearningActivityModal,
   LearningActivitiesList,
-  LearningElementDisplay,
-  type LearningElementState,
   useLearningActivities,
 } from '@gbl-uzh/ui'
 import {
   Button,
   FormikNumberField,
   Switch,
-  Modal,
 } from '@uzh-bf/design-system'
 import {
   Card,
@@ -277,39 +275,16 @@ function GameLayout({ children }: { children: React.ReactNode }) {
       <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
         {children}
       </Layout>
-      <Modal
-        className={{ content: 'max-w-4xl overflow-y-auto' }}
+      <LearningActivityModal
         open={!!activeLearningId}
         onClose={() => setActiveLearningId(null)}
-        title="Learning Activity"
-      >
-        {learningElementData?.learningElement?.element && (
-          <LearningElementDisplay
-            title={learningElementData.learningElement.element.title}
-            question={learningElementData.learningElement.element.question}
-            options={learningElementData.learningElement.element.options}
-            state={learningElementState || 'UNATTEMPTED'}
-            pointsText={
-              learningElementData.learningElement.element.reward
-                ? `Awards ${learningElementData.learningElement.element.reward}XP`
-                : undefined
-            }
-            feedback={learningElementData.learningElement.element.feedback}
-            motivation={learningElementData.learningElement.element.motivation}
-            activeElements={activeLearningOptions}
-            onOptionClick={(ix) => {
-              setActiveLearningOptions((prev) => {
-                if (prev.includes(ix)) {
-                  return prev.filter((x) => x !== ix)
-                }
-                return [ix]
-              })
-            }}
-            onSubmit={handleAttemptLearning}
-            loading={attemptingLearning}
-          />
-        )}
-      </Modal>
+        element={learningElementData?.learningElement?.element}
+        state={learningElementState}
+        activeElements={activeLearningOptions}
+        setActiveElements={setActiveLearningOptions}
+        onSubmit={handleAttemptLearning}
+        loading={attemptingLearning}
+      />
     </>
   )
 }

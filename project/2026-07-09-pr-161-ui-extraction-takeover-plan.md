@@ -861,9 +861,9 @@ PR update:
 
 ### Status
 
-- Current: S10 explicit target contract verified locally and ready to commit; S9 Vercel deployment readback pending.
-- Implementation: P0, F0, S1-S9 complete and pushed through `0a8c0dd`; S10 is locally complete and uncommitted.
-- Branch mutations this takeover: P0-S9 commits through `0a8c0dd`; no user-owned artifacts changed.
+- Current: S11 active. GitHub Actions green; focused Sonar duplication and Vercel content-checkout fixes in progress.
+- Implementation: P0, F0, S1-S10 complete and pushed through `5620460`; S11 verification/fixes active.
+- Branch mutations this takeover: P0-S10 commits through `5620460`; no user-owned artifacts changed.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -993,10 +993,16 @@ PR update:
 - [x] S10 correctness and simplification reviews completed; the two accepted P1 findings and the unrelated Markdown-callout regression were fixed and rechecked.
 - [x] S10 shell syntax, resolver allowed/rejection matrix, both Compose configurations, devrouter configuration, and OKF documentation validation pass locally.
 - [ ] S10 concurrent full workspace proof is a manual gate: six pre-existing orphaned routes are user-owned and lifecycle teardown needs explicit approval.
+- [x] S10 committed and pushed as `5620460`; GitHub build, lint, and all three Playwright jobs pass.
+- [x] S11 Sonar readback: sole failing gate is new-code duplication at 4.2% (`138/3303` lines); at least 39 duplicated lines must be removed.
+- [x] S11 Vercel readback: pnpm 9 install passes and the public Quartz submodule exists; Linux prerender exposes Title Case reconstruction (`Lives In Transit.md`) mismatching the tracked `Lives in Transit.md` filename.
+- [x] S11 shared `LearningActivityModal` replaces the repeated modal/display/selection block in all three games without leaking generated GraphQL types into the UI package.
+- [x] S11 Sonar-fix verification: UI lint/build and all three production game builds pass; Central Bank uses a non-secret local `NEXT_PUBLIC_API_URL` for prerender.
+- [x] S11 Sonar-fix correctness review found no defects; simplification review findings were integrated by preserving functional selection updates and each example's prior loading behavior.
 
 ### Next action
 
-Commit the reviewed S10 target contract, read the S9 Vercel deployment, then begin S11 final verification.
+Commit and push the reviewed shared-modal fix, confirm Sonar <= 3%, then resolve Vercel slugs against exact tracked filenames.
 
 ## Independent plan review
 
