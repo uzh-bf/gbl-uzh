@@ -41,7 +41,7 @@ export const LogoSelector = React.forwardRef<
               className="h-full w-full object-contain p-1"
               onError={(e) => {
                 if (fallbackSrc) {
-                  ;(e.target as HTMLImageElement).src = fallbackSrc
+                  (e.target as HTMLImageElement).src = fallbackSrc
                 }
               }}
             />

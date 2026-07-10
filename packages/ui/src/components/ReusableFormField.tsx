@@ -1,5 +1,5 @@
 import React from 'react' // Import React for InputHTMLAttributes
-import { Control, FieldValues, Path } from 'react-hook-form'
+import { Control, FieldValues, Path, RegisterOptions } from 'react-hook-form'
 import {
   FormControl,
   FormField,
@@ -18,12 +18,19 @@ interface ReusableFormFieldProps<TFieldValues extends FieldValues>
   name: Path<TFieldValues> // Use Path for type safety on field names
   label: string
   isInt?: boolean
+  // Validation rules forwarded to react-hook-form's Controller. HTML `min`/`max`
+  // attributes alone are not enforced on submit, so pass real rules here.
+  rules?: Omit<
+    RegisterOptions<TFieldValues, Path<TFieldValues>>,
+    'valueAsNumber' | 'valueAsDate' | 'setValueAs' | 'disabled'
+  >
 }
 
 export function ReusableFormField<TFieldValues extends FieldValues>({
   control,
   name,
   label,
+  rules,
   isInt = true,
   type = 'text', // Default type to 'text'
   ...inputProps // Pass any other standard input attributes like placeholder etc.
@@ -32,6 +39,7 @@ export function ReusableFormField<TFieldValues extends FieldValues>({
     <FormField
       control={control}
       name={name}
+      rules={rules}
       render={({ field }) => (
         <FormItem>
           <FormLabel>{label}</FormLabel>

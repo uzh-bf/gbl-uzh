@@ -24,7 +24,6 @@ export interface RiskScenarioChartProps {
   var95?: number
   es95?: number
   height?: number
-  currencySymbol?: string
 }
 
 interface CustomScenarioTooltipProps {

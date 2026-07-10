@@ -26,7 +26,10 @@ function StoryElements({
   playerRole,
   onMarkElementVisited,
 }: StoryElementsProps) {
-  const [dismissedCount, setDismissedCount] = useState(0)
+  // Track dismissed elements by id (not a positional offset): the unseen list is
+  // derived from server props and shrinks when an element is marked visited, so a
+  // positional counter would double-advance and silently skip elements.
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(() => new Set())
 
   const sortedElements = useMemo(() => {
     return sortBy((elem) => elem.title, activeStoryElements || [])
@@ -39,7 +42,10 @@ function StoryElements({
     )
   }, [sortedElements, visitedStoryElementIds])
 
-  const visibleElements = unseenStoryElements.slice(dismissedCount)
+  const visibleElements = useMemo(
+    () => unseenStoryElements.filter((elem) => !dismissedIds.has(elem.id)),
+    [unseenStoryElements, dismissedIds]
+  )
 
   const content: string = useMemo(() => {
     if (visibleElements.length === 0) return ''
@@ -57,15 +63,27 @@ function StoryElements({
     }
   }, [visibleElements, playerRole])
 
+  const dismissCurrent = (id: string) => {
+    setDismissedIds((prev) => {
+      const next = new Set(prev)
+      next.add(id)
+      return next
+    })
+  }
+
   const handleClose = () => {
-    setDismissedCount((c) => c + 1)
+    const current = visibleElements[0]
+    if (current) dismissCurrent(current.id)
   }
 
   const handlePrimaryAction = async () => {
-    if (visibleElements.length > 0) {
-      await onMarkElementVisited(visibleElements[0].id)
-    }
-    setDismissedCount((c) => c + 1)
+    const current = visibleElements[0]
+    if (!current) return
+    await onMarkElementVisited(current.id)
+    // Marking visited removes the element from unseenStoryElements after the
+    // refetch; dismissing by id as well advances immediately without waiting and
+    // is idempotent (filtering the same id twice cannot skip a different element).
+    dismissCurrent(current.id)
   }
 
   return (
@@ -80,7 +98,7 @@ function StoryElements({
       <div>
         <Progress
           max={sortedElements.length}
-          value={sortedElements.length - unseenStoryElements.length + dismissedCount + 1}
+          value={sortedElements.length - visibleElements.length + 1}
           formatter={(value) => String(value)}
         />
       </div>
