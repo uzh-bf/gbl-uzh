@@ -26,7 +26,9 @@ function StoryElements({
   playerRole,
   onMarkElementVisited,
 }: StoryElementsProps) {
-  const [dismissedCount, setDismissedCount] = useState(0)
+  const [dismissedElementIds, setDismissedElementIds] = useState<Set<string>>(
+    () => new Set()
+  )
 
   const sortedElements = useMemo(() => {
     return sortBy((elem) => elem.title, activeStoryElements || [])
@@ -35,11 +37,13 @@ function StoryElements({
   const unseenStoryElements = useMemo(() => {
     if (sortedElements.length === 0) return []
     return sortedElements.filter(
-      (elem) => !visitedStoryElementIds?.includes(elem.id)
+      (elem) =>
+        !visitedStoryElementIds?.includes(elem.id) &&
+        !dismissedElementIds.has(elem.id)
     )
-  }, [sortedElements, visitedStoryElementIds])
+  }, [dismissedElementIds, sortedElements, visitedStoryElementIds])
 
-  const visibleElements = unseenStoryElements.slice(dismissedCount)
+  const visibleElements = unseenStoryElements
 
   const content: string = useMemo(() => {
     if (visibleElements.length === 0) return ''
@@ -57,15 +61,25 @@ function StoryElements({
     }
   }, [visibleElements, playerRole])
 
+  const dismissElement = (elementId: string) => {
+    setDismissedElementIds((current) => {
+      const next = new Set(current)
+      next.add(elementId)
+      return next
+    })
+  }
+
   const handleClose = () => {
-    setDismissedCount((c) => c + 1)
+    const visibleElement = visibleElements[0]
+    if (visibleElement) dismissElement(visibleElement.id)
   }
 
   const handlePrimaryAction = async () => {
-    if (visibleElements.length > 0) {
-      await onMarkElementVisited(visibleElements[0].id)
-    }
-    setDismissedCount((c) => c + 1)
+    const visibleElement = visibleElements[0]
+    if (!visibleElement) return
+
+    await onMarkElementVisited(visibleElement.id)
+    dismissElement(visibleElement.id)
   }
 
   return (
@@ -80,7 +94,10 @@ function StoryElements({
       <div>
         <Progress
           max={sortedElements.length}
-          value={sortedElements.length - unseenStoryElements.length + dismissedCount + 1}
+          value={Math.min(
+            sortedElements.length,
+            sortedElements.length - unseenStoryElements.length + 1
+          )}
           formatter={(value) => String(value)}
         />
       </div>

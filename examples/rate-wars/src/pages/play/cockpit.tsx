@@ -263,6 +263,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <StoryElements
+        key={activeSegment?.id}
         activeStoryElements={(activeSegment?.storyElements as any[]) || []}
         visitedStoryElementIds={data?.result?.playerResult?.player?.visitedStoryElementIds || []}
         playerRole={player.role}

@@ -1004,10 +1004,14 @@ PR update:
 - [x] S11 website production build prerenders all 32 pages, including `lives-in-transit`; focused Prettier and `git diff --check` pass.
 - [x] S11 Vercel-fix correctness and simplification reviews found no remaining defects; traversal is prevented because only a directory-listed exact filename enters the read path.
 - [ ] Website aggregate `check` retains unrelated baseline failures: ESLint 9 lacks flat config, full format check lists four untouched files, and TypeScript reports the existing React type-instance split in `PageHead.tsx`.
+- [x] Final independent review found a story queue skip when visited refetch and positional dismissal combine; queue now tracks dismissed IDs and each active segment remounts its queue state.
+- [x] Story queue review covers two-item async refetch, X-dismiss, identical/overlapping next-segment IDs, mutation failure, and progress bounds; correctness and simplification reviewers pass.
+- [x] Story queue verification: UI lint/build and CRLF-aware diff check pass. No component-test harness exists; real two-story browser proof remains in final evidence.
+- [ ] Thermo review found four P1 maintainability blockers: speculative primitive exports, giant embedded example layouts, shared-seam `any` casts, and duplicated untyped admin fields.
 
 ### Next action
 
-Commit and push the reviewed exact-filename fix, then read Sonar and Vercel terminal results before restarting final verification.
+Commit and push the reviewed story queue fix, then address each validated thermo finding in focused commits before restarting final verification.
 
 ## Independent plan review
 
