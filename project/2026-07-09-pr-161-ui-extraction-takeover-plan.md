@@ -860,9 +860,9 @@ PR update:
 
 ### Status
 
-- Current: S2 verified; slice commit next. S3 follows after push/CI readback.
-- Implementation: P0, F0, S1, and S2 complete.
-- Branch mutations this takeover: P0 and S1 commits plus the focused S2 deletion/dependency diff.
+- Current: S3 verified; slice commit next. S4 follows after push/Sonar readback.
+- Implementation: P0, F0, S1, S2, and S3 complete.
+- Branch mutations this takeover: P0-S2 commits plus the focused S3 primitive deletion/peer diff.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -904,11 +904,24 @@ PR update:
 - [x] Demo Game, Central Bank, and Rate Wars production builds pass.
 - [x] S2 correctness review found no defects or dangling tracked consumers.
 - [x] S2 simplification review finding integrated; all three game-level grid dependencies removed.
+- [x] S2 CI lint passes; Central Bank Playwright passes at readback.
+- [ ] S2 Sonar remains red at 13.2% new-code duplication; S3 removes the six largest identical primitive copies.
+- [x] S3 comparison proves six app-local command/dialog files are behavior-identical and unused.
+- [x] Canonical Radix dialog focus, Escape, portal, and focus-return behavior preserved.
+- [x] Canonical cmdk combobox, arrow-key, and selection behavior preserved.
+- [x] Shared runtime peers for Radix Dialog, cmdk, and Lucide declared explicitly.
+- [x] pnpm 11.6.0 frozen install passes after peer declarations; lockfile correctly has no peer-only delta.
+- [x] UI bundle shrank from 254.24 kB to 182.77 kB; UI build passes.
+- [x] Demo Game, Central Bank, and Rate Wars production builds pass with peer externalization.
+- [x] S3 correctness review found no defects or dangling imports.
+- [x] S3 simplification review otherwise clean; stale-lock finding rejected by authoritative frozen install.
+- [ ] UI lint remains red only on one S4 semicolon and S6 explicit-`any` debt.
+- [ ] Three game `check` scripts remain red on pre-existing formatter incompatibility and planned type debt; production builds pass.
 - [ ] Demo app full TypeScript check remains red on the branch's known S5-S7 migration debt.
 
 ### Next action
 
-Commit S2, push, and read focused CI. Then start S3 primitive canonicalization.
+Commit S3, push, and read Sonar duplication movement. Then start S4 logo-color sharing.
 
 ## Independent plan review
 
@@ -933,7 +946,7 @@ Commit S2, push, and read focused CI. Then start S3 primitive canonicalization.
 
 ## Next Steps
 
-1. Commit and push S2; read focused CI.
-2. Execute S3 command/dialog canonicalization.
+1. Commit and push S3; read Sonar duplication movement.
+2. Execute S4 logo-color sharing.
 3. Continue one reviewed, verified commit per slice through S10.
 4. Restart S11 verification after the final code SHA changes.
