@@ -11,8 +11,8 @@ export function HelpTooltip({ content, className }: HelpTooltipProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <HelpCircle 
-          className={cn("h-4 w-4 text-muted-foreground cursor-help", className)} 
+        <HelpCircle
+          className={cn('h-4 w-4 text-muted-foreground cursor-help', className)}
           aria-label="Help information"
         />
       </TooltipTrigger>

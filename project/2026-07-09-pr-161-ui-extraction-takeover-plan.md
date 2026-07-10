@@ -1020,10 +1020,11 @@ PR update:
 - [x] Typed demo admin-field fix: one app-local generic field serves create-game, period, and countdown forms; period values use an explicit numeric model.
 - [x] Admin-field correctness and simplification reviews pass after restoring browser number normalization and truncating only GraphQL integer inputs at their mutation boundary.
 - [x] Admin-field verification: focused ESLint has no errors (two pre-existing hook warnings) and the Demo Game production build passes.
+- [x] Branch whitespace cleanup removes the confirmed trailing spaces and missing final newline in touched UI files plus the extra `.gitignore` EOF line; UI lint and both whitespace checks pass.
 
 ### Next action
 
-Commit the typed demo admin field, then fix branch whitespace and the Vercel Next.js security gate.
+Commit the branch whitespace cleanup, then fix the Vercel Next.js security gate.
 
 ## Independent plan review
 

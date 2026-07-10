@@ -66,14 +66,14 @@ const Die = ({
           rollDone={rollDone ?? (() => {})}
         />
       ) : (
-        <div 
-          style={{ 
-            width: dieSize, 
-            height: dieSize, 
-            backgroundColor: faceColor, 
+        <div
+          style={{
+            width: dieSize,
+            height: dieSize,
+            backgroundColor: faceColor,
             borderRadius: '4px',
-            margin: margin 
-          }} 
+            margin: margin,
+          }}
           className="animate-pulse"
         />
       )}
