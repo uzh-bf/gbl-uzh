@@ -6,6 +6,19 @@ import wikiLinkPlugin from 'remark-wiki-link'
 
 const PREFIX = '../quartz/content/'
 
+function markdownFilenameToSlug(filename: string) {
+  return filename
+    .replace(/\.md?$/, '')
+    .replace(/\s/g, '-')
+    .toLowerCase()
+}
+
+function getMarkdownFilenames(dirName: string) {
+  return fs
+    .readdirSync(path.join(process.cwd(), `${PREFIX}/${dirName}/`))
+    .filter((filename) => /\.md?$/.test(filename))
+}
+
 const wikiPlugin: any = [
   wikiLinkPlugin,
   {
@@ -19,20 +32,17 @@ const wikiPlugin: any = [
 
 export function getStaticProps(dir_name: string) {
   return async ({ params }: any) => {
-    // slugs come in like "portfolio-management-game"
-    // but we want to read from files like "Portfolio Management Game.md"
-    const filenameTitleCase = params.slug
-      .trim()
-      .replace(/-/g, ' ')
-      .toLowerCase()
-      // all independent words should begin with a capital character
-      .replace(/\w\S*/g, (w: any) =>
-        w.replace(/^\w/, (c: any) => c.toUpperCase())
-      )
+    const filename = getMarkdownFilenames(dir_name).find(
+      (candidate) => markdownFilenameToSlug(candidate) === params.slug
+    )
+
+    if (!filename) {
+      throw new Error(`No markdown file found for ${dir_name}/${params.slug}`)
+    }
 
     const mdxPath = path.join(
       process.cwd(),
-      `${PREFIX}/${dir_name}/${filenameTitleCase}.md`
+      `${PREFIX}/${dir_name}/${filename}`
     )
     const source = fs.readFileSync(mdxPath)
     const mdxSource = await serialize(source, {
@@ -49,15 +59,8 @@ export function getStaticProps(dir_name: string) {
 
 export function getStaticPaths(dir_name: string) {
   return async () => {
-    const paths = fs
-      .readdirSync(path.join(process.cwd(), `${PREFIX}/${dir_name}/`))
-      .filter((p) => /\.md?$/.test(p))
-      .map((p) =>
-        p
-          .replace(/\.md?$/, '')
-          .replace(/\s/g, '-')
-          .toLowerCase()
-      )
+    const paths = getMarkdownFilenames(dir_name)
+      .map(markdownFilenameToSlug)
       .map((slug) => ({ params: { slug } }))
 
     return { paths, fallback: false }

@@ -981,9 +981,9 @@ PR update:
 - [x] Deleted the `.npmrc` `minimum-release-age=0` supply-chain bypass; npm no longer reports an unknown configuration key.
 - [x] S9 correctness and simplification reviews found no defects; duplicated overrides must remain synchronized, and no deliberate non-zero release-age policy is configured yet.
 - [x] The next Vercel deployment passes pnpm 9 frozen install and reaches the website prerender.
-- [x] Vercel then fails because its checkout omits tracked `apps/quartz` content (`Lives In Transit.md`); local website build succeeds with the initialized submodule.
+- [x] Vercel reaches website prerender; the initial missing-submodule hypothesis was disproven by later logs showing populated Quartz content and a case-mismatched filename lookup.
 - [x] Independent review corrected the Vercel config scope: the project root is `apps/website`, so `apps/website/vercel.json` initializes only `apps/quartz` and runs only the website build.
-- [x] The exact website-scoped submodule command and production website build pass locally; Vercel Git access to `uzh-bf/gbl-knowledge` remains to be verified on the preview.
+- [x] The exact website-scoped submodule command and production website build pass locally; later preview logs show the public HTTPS submodule was already populated before the custom command.
 - [x] Focused S9 Vercel configuration committed and pushed as `0a8c0dd`; Vercel deployment readback pending.
 - [x] S10 maps `demo`, `central-bank`, and `rate-wars` explicitly to one package resolver shared by post-create and post-start.
 - [x] S10 keeps `WORKSPACE` only for routing/container identity and preserves an explicit runtime target across env-file loading.
@@ -999,10 +999,15 @@ PR update:
 - [x] S11 shared `LearningActivityModal` replaces the repeated modal/display/selection block in all three games without leaking generated GraphQL types into the UI package.
 - [x] S11 Sonar-fix verification: UI lint/build and all three production game builds pass; Central Bank uses a non-secret local `NEXT_PUBLIC_API_URL` for prerender.
 - [x] S11 Sonar-fix correctness review found no defects; simplification review findings were integrated by preserving functional selection updates and each example's prior loading behavior.
+- [x] S11 Vercel fix resolves each generated slug against the exact directory-listed markdown filename; 14 games and 8 use-cases round-trip uniquely with zero collisions.
+- [x] S11 Vercel fix removes the redundant custom build command because live logs show Vercel populated the public HTTPS submodule before `git submodule update` no-oped.
+- [x] S11 website production build prerenders all 32 pages, including `lives-in-transit`; focused Prettier and `git diff --check` pass.
+- [x] S11 Vercel-fix correctness and simplification reviews found no remaining defects; traversal is prevented because only a directory-listed exact filename enters the read path.
+- [ ] Website aggregate `check` retains unrelated baseline failures: ESLint 9 lacks flat config, full format check lists four untouched files, and TypeScript reports the existing React type-instance split in `PageHead.tsx`.
 
 ### Next action
 
-Commit and push the reviewed shared-modal fix, confirm Sonar <= 3%, then resolve Vercel slugs against exact tracked filenames.
+Commit and push the reviewed exact-filename fix, then read Sonar and Vercel terminal results before restarting final verification.
 
 ## Independent plan review
 

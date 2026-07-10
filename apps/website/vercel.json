@@ -1,4 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "git -C ../.. submodule update --init --recursive apps/quartz && pnpm build"
-}
