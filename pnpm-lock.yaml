@@ -138,9 +138,6 @@ importers:
       react:
         specifier: 19.2.7
         version: 19.2.7
-      react-data-grid:
-        specifier: 7.0.0-beta.59
-        version: 7.0.0-beta.59(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react-dice-complete:
         specifier: 2.2.0
         version: 2.2.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -805,9 +802,6 @@ importers:
       react:
         specifier: 19.2.7
         version: 19.2.7
-      react-data-grid:
-        specifier: 7.0.0-beta.59
-        version: 7.0.0-beta.59(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react-dice-complete:
         specifier: 2.2.0
         version: 2.2.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -1022,9 +1016,6 @@ importers:
       react:
         specifier: 19.2.7
         version: 19.2.7
-      react-data-grid:
-        specifier: 7.0.0-beta.59
-        version: 7.0.0-beta.59(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react-dice-complete:
         specifier: 2.2.0
         version: 2.2.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -1258,9 +1249,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      formik:
-        specifier: ^2.4.6
-        version: 2.4.6(@types/react@19.2.17)(react@18.3.1)
       next:
         specifier: ^16.2.9
         version: 16.2.9(@playwright/test@1.61.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.101.0)
@@ -1270,9 +1258,6 @@ importers:
       react:
         specifier: ^18.3.1 || ^19.0.0
         version: 18.3.1
-      react-data-grid:
-        specifier: ^7.0.0-beta.20
-        version: 7.0.0-beta.59(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dice-complete:
         specifier: ^2.2.0
         version: 2.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -11952,12 +11937,6 @@ packages:
     peerDependencies:
       react: '>= 15'
       react-dom: '>= 15'
-
-  react-data-grid@7.0.0-beta.59:
-    resolution: {integrity: sha512-iAp/UYWjfmXYFsyKDtGDMP1IvhwtQSjCP6G/wFEbMNuumWGOEZF8Ut1S2Bp4XxVpOrBkEVKXn+QC3rs14AcB7A==}
-    peerDependencies:
-      react: ^19.2
-      react-dom: ^19.2
 
   react-day-picker@8.10.1:
     resolution: {integrity: sha512-TMx7fNbhLk15eqcMt+7Z7S2KF7mfTId/XJDjKE8f+IUcFn0l08/kI4FiYTL/0yuOLmEcbR4Fwe3GJf/NiiMnPA==}
@@ -27994,16 +27973,6 @@ snapshots:
   react-countdown@2.3.6(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
     dependencies:
       prop-types: 15.8.1
-      react: 19.2.7
-      react-dom: 19.2.7(react@19.2.7)
-
-  react-data-grid@7.0.0-beta.59(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-
-  react-data-grid@7.0.0-beta.59(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
-    dependencies:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
 

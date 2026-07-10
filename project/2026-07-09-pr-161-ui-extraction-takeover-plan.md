@@ -860,9 +860,9 @@ PR update:
 
 ### Status
 
-- Current: S1 verified; slice commit next. S2 follows after push/CI readback.
-- Implementation: P0, F0, and S1 complete.
-- Branch mutations this takeover: P0 commit plus the focused S1 code/test diff.
+- Current: S2 verified; slice commit next. S3 follows after push/CI readback.
+- Implementation: P0, F0, S1, and S2 complete.
+- Branch mutations this takeover: P0 and S1 commits plus the focused S2 deletion/dependency diff.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -894,11 +894,21 @@ PR update:
 - [x] Full demo flow passes: 2/2 in 43.9 seconds.
 - [x] S1 correctness review found no defects; React 19 peer mismatch recorded as pre-existing limitation.
 - [x] S1 simplification review complete; unsafe `any`, non-semantic selector, and speculative ID-prefix suggestions deferred.
+- [x] S1 CI: lint and all three matching Playwright jobs pass.
+- [ ] S1 CI: build still pending at readback; Sonar duplication and Vercel remain red for S3-S5 and S9.
+- [x] S2 consumer map proves eight new public components have no tracked consumer.
+- [x] Eight zero-use files and exports removed without replacement abstraction.
+- [x] Unused UI `formik` peer and all four `react-data-grid` declarations removed.
+- [x] pnpm 11.6.0 frozen install passes; lockfile loses the package entirely.
+- [x] UI bundle shrank from 288.58 kB to 254.24 kB; UI build passes.
+- [x] Demo Game, Central Bank, and Rate Wars production builds pass.
+- [x] S2 correctness review found no defects or dangling tracked consumers.
+- [x] S2 simplification review finding integrated; all three game-level grid dependencies removed.
 - [ ] Demo app full TypeScript check remains red on the branch's known S5-S7 migration debt.
 
 ### Next action
 
-Commit S1, push, and read focused CI. Then start S2 consumer mapping.
+Commit S2, push, and read focused CI. Then start S3 primitive canonicalization.
 
 ## Independent plan review
 
@@ -923,7 +933,7 @@ Commit S1, push, and read focused CI. Then start S2 consumer mapping.
 
 ## Next Steps
 
-1. Commit and push S1; read focused CI.
-2. Execute S2 used-surface reduction.
+1. Commit and push S2; read focused CI.
+2. Execute S3 command/dialog canonicalization.
 3. Continue one reviewed, verified commit per slice through S10.
 4. Restart S11 verification after the final code SHA changes.
