@@ -131,6 +131,12 @@ const months = [
 ]
 const numMonths = months.length
 
+type PortfolioFormValues = {
+  savings: number
+  bonds: number
+  stocks: number
+}
+
 function Cockpit() {
   const [period, setPeriod] = useState<number>(null)
 
@@ -145,7 +151,7 @@ function Cockpit() {
     }
   )
 
-  const form = useForm({
+  const form = useForm<PortfolioFormValues>({
     defaultValues: {
       savings: 0,
       bonds: 0,
@@ -826,7 +832,7 @@ function Cockpit() {
                 </Card>
 
                 <div className="mt-8">
-                  <Form {...form}>
+                  <Form<PortfolioFormValues> {...form}>
                     <form
                       onSubmit={handleSubmit(async (values) => {
                         const savings = parseInt(String(values.savings), 10)

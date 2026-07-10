@@ -489,13 +489,34 @@ test('trading actions submit one validated modifier and reset after success', as
   const volume = page.getByRole('spinbutton', { name: 'Volume' })
   const buy = page.getByRole('button', { name: 'Buy' })
   const sell = page.getByRole('button', { name: 'Sell' })
+  const volumeId = await volume.getAttribute('id')
+
+  if (!volumeId) {
+    throw new Error('Volume input must expose an ID for its label')
+  }
+
+  await expect(page.locator(`label[for="${volumeId}"]`)).toHaveText('Volume')
 
   await volume.fill('-1')
   await expect(buy).toBeDisabled()
   await expect(sell).toBeDisabled()
+  await expect(volume).toHaveAttribute('aria-invalid', 'true')
+  const errorId = await volume.getAttribute('aria-errormessage')
+
+  if (!errorId) {
+    throw new Error('Invalid volume input must reference its error message')
+  }
+
+  await expect(volume).toHaveAttribute(
+    'aria-describedby',
+    new RegExp(`(^|\\s)${errorId}(\\s|$)`)
+  )
+  await expect(page.locator(`[id="${errorId}"]`)).toHaveRole('alert')
   await expect.poll(() => tradeSubmissions(page)).toEqual([])
 
   await volume.fill('2')
+  await expect(volume).not.toHaveAttribute('aria-invalid')
+  await expect(volume).not.toHaveAttribute('aria-errormessage')
   await volume.press('Enter')
   await expect.poll(() => tradeSubmissions(page)).toEqual([])
 
@@ -504,6 +525,11 @@ test('trading actions submit one validated modifier and reset after success', as
     { volume: 2, modifier: 1 },
   ])
   await expect(volume).toHaveValue('0')
+
+  await volume.fill('')
+  await expect(volume).toHaveValue('')
+  await expect(buy).toBeDisabled()
+  await expect(sell).toBeDisabled()
 
   await volume.fill('3')
   await sell.click()

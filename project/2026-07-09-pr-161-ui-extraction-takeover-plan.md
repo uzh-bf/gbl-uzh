@@ -860,9 +860,9 @@ PR update:
 
 ### Status
 
-- Current: S7 complete locally and ready to commit; S8 follows after CI readback.
-- Implementation: P0, F0, S1, S2, S3, S4, S5, S6, and S7 complete.
-- Branch mutations this takeover: P0-S6 commits plus the focused S7 TradingForm diff and regression.
+- Current: S8 complete locally and ready to commit; S9 follows after CI readback.
+- Implementation: P0, F0, S1, S2, S3, S4, S5, S6, S7, and S8 complete.
+- Branch mutations this takeover: P0-S7 commits plus the focused S8 reusable-field and package-boundary diff.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -963,10 +963,20 @@ PR update:
 - [x] Exact CI-selected demo Playwright file passes 3/3, including the full lifecycle and TradingForm regression.
 - [x] S7 correctness review has no remaining findings after the CI-selection fix.
 - [x] S7 simplification review accepts the handler structure; console interception remains an explicit E2E seam because the demo callback has no durable external effect and no component-test harness exists.
+- [x] Accessibility-compliance guidance applied to reusable label, invalid-state, error-reference, and live-error semantics.
+- [x] Reusable field props now exclude controlled/ID attributes, thread React Hook Form context/transformed-value generics, and preserve empty numeric input plus integer/float conversion.
+- [x] Form contexts now fail clearly outside their providers; `aria-invalid`, `aria-errormessage`, described-by error IDs, and alert roles form one stable error contract.
+- [x] The UI package declares its React Hook Form runtime imports as peers and pins React 19 only for local development while retaining the published React 18-or-19 peer range.
+- [x] Aligning the UI development peer set removes the duplicate React 18 React Hook Form type instance and its lockfile snapshots; the Demo reusable-field/Form type errors are gone.
+- [x] Demo portfolio form values are explicit at `useForm` and `Form` boundaries.
+- [x] Frozen pnpm 11.6.0 install, UI lint/build/declarations, Playwright TypeScript, and all three production app builds pass.
+- [x] Focused browser proof covers label-to-input ID, numeric role/name, invalid/error references, error alert, valid cleanup, empty clearing, and integer submission.
+- [x] Exact CI-selected demo Playwright file passes 3/3 after S8.
+- [x] S8 correctness and simplification reviews found no defects; residual limits are no dedicated SSR hydration or React 18 consumer test and no current float consumer.
 
 ### Next action
 
-Commit and push S7, read CI movement, then repair S8 reusable-field accessibility and form typing.
+Commit and push S8, read CI movement, then restore pnpm 9 and Vercel compatibility in S9.
 
 ## Independent plan review
 
