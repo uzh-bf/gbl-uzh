@@ -860,9 +860,9 @@ PR update:
 
 ### Status
 
-- Current: S8 complete locally and ready to commit; S9 follows after CI readback.
-- Implementation: P0, F0, S1, S2, S3, S4, S5, S6, S7, and S8 complete.
-- Branch mutations this takeover: P0-S7 commits plus the focused S8 reusable-field and package-boundary diff.
+- Current: S9 complete locally and ready to commit; S10 follows after Vercel readback.
+- Implementation: P0, F0, S1, S2, S3, S4, S5, S6, S7, S8, and S9 complete.
+- Branch mutations this takeover: P0-S8 commits plus the focused S9 pnpm 9 compatibility diff.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -973,10 +973,16 @@ PR update:
 - [x] Focused browser proof covers label-to-input ID, numeric role/name, invalid/error references, error alert, valid cleanup, empty clearing, and integer submission.
 - [x] Exact CI-selected demo Playwright file passes 3/3 after S8.
 - [x] S8 correctness and simplification reviews found no defects; residual limits are no dedicated SSR hydration or React 18 consumer test and no current float consumer.
+- [x] Current pnpm guidance confirms workspace overrides are the pnpm 11 source of truth; pnpm 11 no longer reads `package.json#pnpm` settings.
+- [x] Local pnpm 9.15.9 reproduced Vercel's frozen lockfile configuration mismatch before the S9 change.
+- [x] Root package overrides now mirror the three workspace overrides exactly as the pnpm 9 compatibility bridge; pnpm 11 continues to ignore that block and use the workspace file.
+- [x] Frozen installs pass with pnpm 9.15.9 and pinned pnpm 11.6.0; no effective override changed, so the lockfile remains untouched.
+- [x] Deleted the `.npmrc` `minimum-release-age=0` supply-chain bypass; npm no longer reports an unknown configuration key.
+- [x] S9 correctness and simplification reviews found no defects; duplicated overrides must remain synchronized, and no deliberate non-zero release-age policy is configured yet.
 
 ### Next action
 
-Commit and push S8, read CI movement, then restore pnpm 9 and Vercel compatibility in S9.
+Commit and push S9, inspect the Vercel deployment for its next blocker, then verify S10's explicit devcontainer game target.
 
 ## Independent plan review
 
