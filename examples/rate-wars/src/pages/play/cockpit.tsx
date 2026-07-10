@@ -43,7 +43,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { sortBy } from 'ramda'
 
 import {
   GlobalEventsDocument,
@@ -96,7 +95,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     attemptingLearning,
     handleAttemptLearning,
     completedLearningElements,
-    openLearningElements: hookOpenLearningElements,
+    openLearningElements,
   } = useLearningActivities({
     learningElementDocument: LearningElementDocument,
     attemptLearningElementDocument: AttemptLearningElementDocument,
@@ -106,10 +105,6 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     allPeriods: periods,
     toast,
   })
-
-  const openLearningElements = useMemo(() => {
-    return sortBy((elem: any) => elem.title, hookOpenLearningElements)
-  }, [hookOpenLearningElements])
 
   const [markStoryElement] = useMutation(MarkStoryElementDocument, {
     refetchQueries: [ResultDocument],
@@ -264,7 +259,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     <>
       <StoryElements
         key={activeSegment?.id}
-        activeStoryElements={(activeSegment?.storyElements as any[]) || []}
+        activeStoryElements={activeSegment?.storyElements || []}
         visitedStoryElementIds={data?.result?.playerResult?.player?.visitedStoryElementIds || []}
         playerRole={player.role}
         onMarkElementVisited={async (elementId) => {

@@ -1011,10 +1011,13 @@ PR update:
 - [x] Final branch review found packed UI declarations referenced undeclared low-level packages; zero-consumer primitive and `LearningElementDisplay` exports are removed while the only primitive consumer, `Form`, remains explicit.
 - [x] UI-surface verification: UI lint/build pass; packed declarations import only declared peers; 65 named imports across 15 consumer files resolve with no missing-export errors.
 - [x] UI-surface correctness and simplification reviews pass; removed facade names did not exist on `origin/dev` and have no tracked branch consumer.
+- [x] Typed shared-seam fix centralizes deterministic learning-list ordering, removes four branch-added `any` casts, and validates the selected role-content JSON value before access.
+- [x] Typed-seam verification: UI lint/build and Central Bank typecheck pass; Rate Wars reports only its existing index arithmetic errors, with no cockpit/shared-seam error.
+- [x] Typed-seam correctness and simplification reviews pass; readonly generated inputs are not mutated and ordering matches prior Ramda semantics.
 
 ### Next action
 
-Commit the reviewed UI facade, then centralize typed learning/story boundaries before moving example layouts.
+Commit the typed learning/story boundary, then move example layouts into focused component files.
 
 ## Independent plan review
 

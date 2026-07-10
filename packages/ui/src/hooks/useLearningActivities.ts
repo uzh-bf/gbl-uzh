@@ -32,6 +32,13 @@ interface LearningActivityListItem {
   title: string
 }
 
+function compareLearningTitles(
+  left: LearningActivityListItem,
+  right: LearningActivityListItem
+) {
+  return left.title < right.title ? -1 : left.title > right.title ? 1 : 0
+}
+
 export interface UseLearningActivitiesProps<
   TLearningElementData extends LearningElementQueryData,
 > {
@@ -152,13 +159,14 @@ export function useLearningActivities<
         seen.add(element.id)
         return true
       })
+      .sort(compareLearningTitles)
   }, [allPeriods, completedLearningElementIds])
 
   const openLearningElements = useMemo(
     () =>
       activeSegmentLearningElements.filter(
         (element) => !completedLearningElementIds.includes(element.id)
-      ),
+      ).sort(compareLearningTitles),
     [activeSegmentLearningElements, completedLearningElementIds]
   )
 

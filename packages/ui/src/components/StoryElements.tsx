@@ -10,12 +10,12 @@ export interface StoryElementData {
   title: string
   type: StoryElementType
   content?: string | null
-  contentRole?: Record<string, string> | null
+  contentRole?: Readonly<Record<string, unknown>> | null
 }
 
 interface StoryElementsProps {
-  activeStoryElements: StoryElementData[]
-  visitedStoryElementIds: string[]
+  activeStoryElements: readonly StoryElementData[]
+  visitedStoryElementIds: readonly string[]
   playerRole?: string
   onMarkElementVisited: (elementId: string) => Promise<void>
 }
@@ -52,10 +52,12 @@ function StoryElements({
     switch (firstElement?.type) {
       case 'GENERIC':
         return firstElement.content ?? ''
-      case 'ROLE_BASED':
-        return playerRole && firstElement.contentRole
-          ? firstElement.contentRole[playerRole] ?? ''
-          : ''
+      case 'ROLE_BASED': {
+        const roleContent = playerRole
+          ? firstElement.contentRole?.[playerRole]
+          : undefined
+        return typeof roleContent === 'string' ? roleContent : ''
+      }
       default:
         return ''
     }
