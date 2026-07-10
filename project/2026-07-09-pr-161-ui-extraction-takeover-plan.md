@@ -837,7 +837,7 @@ PR update:
 - [x] `git diff --check` clean.
 - [x] Opengrep reviewed.
 - [x] Security review handled/deferred explicitly.
-- [ ] Thermo-nuclear review handled/deferred explicitly.
+- [x] Thermo-nuclear review handled/deferred explicitly.
 - [ ] Independent final branch review handled/deferred explicitly.
 - [ ] Screenshots attached to PR.
 - [ ] PR body matches current commits/diff/checks.
@@ -1029,6 +1029,8 @@ PR update:
 - [x] MDX 3 compatibility diagnosis: `remark-wiki-link@1` fails while plain serialization passes, so the companion plugin is pinned to `2.0.1`.
 - [x] Legacy multiline frontmatter remains parsed by the existing `gray-matter` boundary before MDX serialization; this avoids the stricter MDX 3 YAML parser while preserving returned frontmatter.
 - [x] MDX 6 verification: pnpm 9 frozen install and Next 15.5.19 production export pass all 32 pages with wiki links and legacy workflow frontmatter.
+- [x] Final thermo review found four exported UI runtime imports declared only as development dependencies; all four now remain development dependencies and are also explicit peer contracts.
+- [x] Published UI verification: frozen install, UI lint/build, package pack, and packed import-to-metadata inspection pass with no undeclared runtime import.
 - [x] Real Demo Game browser verification passed through devrouter/DevPod: welcome at 1440x900 and 390x844, authenticated add-period form, and running player cockpit/trading at 1440x900.
 - [x] Browser evidence captured under `project/screenshots/pr-161/`: desktop/mobile welcome, typed add-period form, and player cockpit.
 - [ ] Seeded local Demo data has no open learning activities, so modal interaction remains covered by component/build/Playwright evidence rather than the local screenshot set.
@@ -1041,7 +1043,7 @@ PR update:
 
 ### Next action
 
-Commit the approved MDX 6 migration, push full local HEAD with screenshots, then read terminal CI/Sonar/Vercel state.
+Commit and push the final published-package metadata fix, then read terminal CI/Sonar/Vercel state.
 
 ## Independent plan review
 
@@ -1066,6 +1068,6 @@ Commit the approved MDX 6 migration, push full local HEAD with screenshots, then
 
 ## Next Steps
 
-1. Commit the approved MDX 6 migration.
-2. Push, read terminal CI/Sonar/Vercel state, and resolve only evidence-backed failures.
-3. Run final thermo-nuclear and independent branch reviews, update the PR body, and request user ready-state approval.
+1. Commit and push the final published-package metadata fix.
+2. Read terminal CI/Sonar/Vercel state and resolve only evidence-backed failures.
+3. Run the final independent branch review, update the PR body, and request user ready-state approval.
