@@ -654,7 +654,7 @@ Files:
 - `pnpm-workspace.yaml`
 - `.npmrc`
 - `pnpm-lock.yaml`
-- Vercel config only if current project needs explicit Corepack selection
+- `apps/website/vercel.json` only when current checkout evidence needs submodule initialization
 
 Do:
 
@@ -666,6 +666,7 @@ Do:
 - Regenerate lockfile with pinned repo pnpm `11.6.0`.
 - Do not upgrade major packages.
 - Expect chained Vercel blockers; rerun until deployment reaches build/result.
+- If the checkout omits the tracked website-content submodule, initialize it in the project build command before Turbo runs.
 
 Check:
 
@@ -860,9 +861,9 @@ PR update:
 
 ### Status
 
-- Current: S9 complete locally and ready to commit; S10 follows after Vercel readback.
-- Implementation: P0, F0, S1, S2, S3, S4, S5, S6, S7, S8, and S9 complete.
-- Branch mutations this takeover: P0-S8 commits plus the focused S9 pnpm 9 compatibility diff.
+- Current: focused S9 Vercel submodule fix verified and ready to commit; S10 follows after deployment readback.
+- Implementation: P0, F0, S1, S2, S3, S4, S5, S6, S7, S8, and initial S9 complete; the S9 deployment follow-up remains uncommitted.
+- Branch mutations this takeover: P0-S9 commits through `9fec29e`; no user-owned artifacts changed.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -979,10 +980,15 @@ PR update:
 - [x] Frozen installs pass with pnpm 9.15.9 and pinned pnpm 11.6.0; no effective override changed, so the lockfile remains untouched.
 - [x] Deleted the `.npmrc` `minimum-release-age=0` supply-chain bypass; npm no longer reports an unknown configuration key.
 - [x] S9 correctness and simplification reviews found no defects; duplicated overrides must remain synchronized, and no deliberate non-zero release-age policy is configured yet.
+- [x] The next Vercel deployment passes pnpm 9 frozen install and reaches the website prerender.
+- [x] Vercel then fails because its checkout omits tracked `apps/quartz` content (`Lives In Transit.md`); local website build succeeds with the initialized submodule.
+- [x] Independent review corrected the Vercel config scope: the project root is `apps/website`, so `apps/website/vercel.json` initializes only `apps/quartz` and runs only the website build.
+- [x] The exact website-scoped submodule command and production website build pass locally; Vercel Git access to `uzh-bf/gbl-knowledge` remains to be verified on the preview.
+- [ ] Focused S9 Vercel configuration change awaits push and deployment readback.
 
 ### Next action
 
-Commit and push S9, inspect the Vercel deployment for its next blocker, then verify S10's explicit devcontainer game target.
+Commit the reviewed Vercel submodule configuration, push and read its deployment, then complete S10's explicit target contract.
 
 ## Independent plan review
 
