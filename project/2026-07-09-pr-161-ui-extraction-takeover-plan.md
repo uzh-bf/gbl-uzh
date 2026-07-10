@@ -1017,10 +1017,13 @@ PR update:
 - [x] Central Bank and Rate Wars app-specific `GameLayout` components moved out of their cockpit pages without introducing a generic cross-game adapter.
 - [x] Layout extraction verification: Central Bank typecheck and both production builds pass; Rate Wars typecheck retains only two existing index arithmetic errors; CRLF is preserved.
 - [x] Layout correctness and simplification reviews pass after removing copied dead state/destructures; Central cockpit shrinks by about 190 lines and Rate Wars by about 220.
+- [x] Typed demo admin-field fix: one app-local generic field serves create-game, period, and countdown forms; period values use an explicit numeric model.
+- [x] Admin-field correctness and simplification reviews pass after restoring browser number normalization and truncating only GraphQL integer inputs at their mutation boundary.
+- [x] Admin-field verification: focused ESLint has no errors (two pre-existing hook warnings) and the Demo Game production build passes.
 
 ### Next action
 
-Commit the reviewed example layout extraction, then replace duplicated untyped demo admin fields with one typed app-local field.
+Commit the typed demo admin field, then fix branch whitespace and the Vercel Next.js security gate.
 
 ## Independent plan review
 

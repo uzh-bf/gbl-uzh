@@ -12,8 +12,8 @@ import {
   H4,
   Modal,
 } from '@uzh-bf/design-system'
-import { useForm, Controller } from 'react-hook-form'
-import { MultiSelect, HelpTooltip } from '@gbl-uzh/ui'
+import { Controller, useForm } from 'react-hook-form'
+import { MultiSelect } from '@gbl-uzh/ui'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
@@ -56,6 +56,7 @@ import {
 } from '@uzh-bf/design-system'
 
 import { useToast } from '~/components/ui/use-toast'
+import { AdminInputField } from '~/components/fields/AdminInputField'
 import {
   DEFAULT_SEED,
   GAP_BONDS,
@@ -65,58 +66,14 @@ import {
   TREND_STOCKS,
 } from '~/types/Period'
 
-interface AdminInputFieldProps {
-  label: string
-  name: string
-  type?: string
-  placeholder?: string
-  tooltip?: string
-  required?: string | boolean
-  min?: number
-  max?: number
-  step?: number
-  register: any
-  error?: any
-}
-
-function AdminInputField({
-  label,
-  name,
-  type = 'text',
-  placeholder,
-  tooltip,
-  required,
-  min,
-  max,
-  step,
-  register,
-  error,
-}: AdminInputFieldProps) {
-  return (
-    <div className="flex flex-col gap-1 w-full">
-      <div className="flex items-center gap-1.5 pb-1">
-        <label htmlFor={name} className="text-sm font-medium text-slate-700">{label}</label>
-        {tooltip && <HelpTooltip content={tooltip} />}
-      </div>
-      <input
-        id={name}
-        type={type}
-        placeholder={placeholder}
-        min={min}
-        max={max}
-        step={step}
-        {...register(name, {
-          required: required ? (typeof required === 'string' ? required : 'Required') : false,
-          valueAsNumber: type === 'number',
-        })}
-        className="w-full rounded border border-slate-300 p-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-500"
-        data-cy={name}
-      />
-      {error && (
-        <span className="text-xs text-red-500">{error.message}</span>
-      )}
-    </div>
-  )
+interface PeriodFormValues {
+  segmentCount: number
+  seed: number
+  interestBank: number
+  trendBonds: number
+  gapBonds: number
+  trendStocks: number
+  gapStocks: number
 }
 
 function ManageGame() {
@@ -142,19 +99,16 @@ function ManageGame() {
     register: registerPeriod,
     handleSubmit: handlePeriodSubmit,
     reset: resetPeriod,
-    setValue: setPeriodValue,
     formState: { errors: errorsPeriod },
-  } = useForm({
+  } = useForm<PeriodFormValues>({
     defaultValues: {
-      newPeriodIx: -1,
-      periodName: 'Game Period',
-      segmentCount: '4',
-      seed: DEFAULT_SEED.toString(),
-      interestBank: INTEREST_BANK.toString(),
-      trendBonds: TREND_BONDS.toString(),
-      gapBonds: GAP_BONDS.toString(),
-      trendStocks: TREND_STOCKS.toString(),
-      gapStocks: GAP_STOCKS.toString(),
+      segmentCount: 4,
+      seed: DEFAULT_SEED,
+      interestBank: INTEREST_BANK,
+      trendBonds: TREND_BONDS,
+      gapBonds: GAP_BONDS,
+      trendStocks: TREND_STOCKS,
+      gapStocks: GAP_STOCKS,
     },
   })
 
@@ -185,29 +139,21 @@ function ManageGame() {
     resetSegment()
   }
 
-  const onPeriodSubmit = async (values: any) => {
-    const segmentCount = parseInt(String(values.segmentCount), 10)
-    const seed = parseInt(String(values.seed), 10)
-    const interestBank = parseFloat(String(values.interestBank))
-    const trendBonds = parseFloat(String(values.trendBonds))
-    const gapBonds = parseFloat(String(values.gapBonds))
-    const trendStocks = parseFloat(String(values.trendStocks))
-    const gapStocks = parseFloat(String(values.gapStocks))
-
+  const onPeriodSubmit = async (values: PeriodFormValues) => {
     await addGamePeriod({
       variables: {
         gameId: Number(router.query.id),
         facts: {
           scenario: {
-            seed,
-            interestBank,
-            trendBonds,
-            gapBonds,
-            trendStocks,
-            gapStocks,
+            seed: Math.trunc(values.seed),
+            interestBank: values.interestBank,
+            trendBonds: values.trendBonds,
+            gapBonds: values.gapBonds,
+            trendStocks: values.trendStocks,
+            gapStocks: values.gapStocks,
           },
         },
-        segmentCount: segmentCount,
+        segmentCount: Math.trunc(values.segmentCount),
       },
     })
     resetPeriod()
@@ -778,19 +724,12 @@ function ManageGame() {
                 }}
                 secondaryLabel="Discard"
                 onPrimaryAction={() => {
-                  setPeriodValue('newPeriodIx', game.periods.length)
                   handlePeriodSubmit(onPeriodSubmit)()
                   setIsPeriodModalOpen(false)
                 }}
                 primaryLabel="Submit"
               >
                 <div className="flex w-1/2 flex-col gap-2">
-                  <AdminInputField
-                    name="periodName"
-                    label="Period Name"
-                    register={registerPeriod}
-                    error={errorsPeriod.periodName}
-                  />
                   <AdminInputField
                     label="Number of segments"
                     name="segmentCount"

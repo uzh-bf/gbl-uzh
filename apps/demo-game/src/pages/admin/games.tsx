@@ -9,6 +9,12 @@ import {
   GameDataFragmentDoc,
   GamesDocument,
 } from 'src/graphql/generated/ops'
+import { AdminInputField } from '~/components/fields/AdminInputField'
+
+interface CreateGameFormValues {
+  name: string
+  playerCount: number
+}
 
 function Games() {
   const router = useRouter()
@@ -42,7 +48,7 @@ function Games() {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm({
+  } = useForm<CreateGameFormValues>({
     defaultValues: {
       name: '',
       playerCount: 1,
@@ -57,7 +63,7 @@ function Games() {
     return <div>{error.message}</div>
   }
 
-  const onSubmit = async (values: { name: string; playerCount: number }) => {
+  const onSubmit = async (values: CreateGameFormValues) => {
     try {
       await createGame({
         variables: {
@@ -93,40 +99,34 @@ function Games() {
         onSubmit={handleSubmit(onSubmit)}
         className="rounded border p-4 flex flex-col gap-4 max-w-md my-4"
       >
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-slate-700">Name</label>
-          <input
-            {...register('name', { required: 'Required' })}
-            className="w-full rounded border border-slate-300 p-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-500"
-            data-cy="game-name"
-            placeholder="Game Name"
-          />
-          {errors.name && (
-            <span className="text-xs text-red-500">{errors.name.message}</span>
-          )}
-        </div>
+        <AdminInputField
+          label="Name"
+          name="name"
+          register={register}
+          error={errors.name}
+          required
+          placeholder="Game Name"
+          testId="game-name"
+        />
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-slate-700">Player Count</label>
-          <input
-            type="number"
-            min={1}
-            step={1}
-            {...register('playerCount', {
-              required: 'Required',
-              min: { value: 1, message: 'Must be at least 1' },
-            })}
-            className="w-full rounded border border-slate-300 p-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-500"
-            data-cy="game-player-count"
-          />
-          {errors.playerCount && (
-            <span className="text-xs text-red-500">
-              {errors.playerCount.message}
-            </span>
-          )}
-        </div>
+        <AdminInputField
+          label="Player Count"
+          name="playerCount"
+          type="number"
+          register={register}
+          error={errors.playerCount}
+          required
+          min={1}
+          step={1}
+          testId="game-player-count"
+          minMessage="Must be at least 1"
+        />
 
-        <Button type="submit" data={{ cy: 'create-game' }} className={{ root: 'w-max' }}>
+        <Button
+          type="submit"
+          data={{ cy: 'create-game' }}
+          className={{ root: 'w-max' }}
+        >
           Create Game
         </Button>
       </form>
