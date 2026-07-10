@@ -114,6 +114,7 @@ function Games() {
             step={1}
             {...register('playerCount', {
               required: 'Required',
+              valueAsNumber: true,
               min: { value: 1, message: 'Must be at least 1' },
             })}
             className="w-full rounded border border-slate-300 p-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-500"
