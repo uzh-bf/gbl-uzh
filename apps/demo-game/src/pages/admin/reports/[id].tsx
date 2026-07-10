@@ -53,11 +53,16 @@ import {
 import { composeChartData } from '~/lib/analysis'
 import { NUM_MONTHS } from '~/lib/constants'
 
+// TODO(JJ): Maybe add a random color generator, because we have unkown many teams
 const colors = [
   'hsl(var(--chart-1))',
   'hsl(var(--chart-2))',
   'hsl(var(--chart-3))',
   'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
+  '#2b463c',
+  '#688f4f',
+  '#b1d182',
 ]
 
 const labels = ['Savings', 'Bonds', 'Stocks', 'Total Assets']
@@ -138,6 +143,38 @@ function ReportGame() {
       return acc
     }, {})
 
+    const absolutePerformanceConfig = {
+      ...playerConfig,
+      bankBenchmark: {
+        label: 'Savings B',
+        color: colors[4],
+      },
+      bondsBenchmark: {
+        label: 'Bonds B',
+        color: colors[5],
+      },
+      stocksBenchmark: {
+        label: 'Stocks B',
+        color: colors[6],
+      },
+    }
+
+    const accReturnConfig = {
+      ...playerConfig,
+      accBankBenchmarkReturn: {
+        label: 'Savings B',
+        color: colors[4],
+      },
+      accBondsBenchmarkReturn: {
+        label: 'Bonds B',
+        color: colors[5],
+      },
+      accStocksBenchmarkReturn: {
+        label: 'Stocks B',
+        color: colors[6],
+      },
+    }
+
     const computeDataPerPeriod = () => {
       if (!previousSegmentResults || previousSegmentResults.length === 0)
         return []
@@ -190,12 +227,87 @@ function ReportGame() {
       return output
     }
 
+    const getBenchmarksPerPeriod = () => {
+      if (!previousSegmentResults || previousSegmentResults.length === 0)
+        return []
+      let output = []
+      // The benchmarks are saved for all results, we only need it once for each segment
+      const player = game.players[0]
+      for (let i = 0; i < numPeriods; i++) {
+        const playerResPerPeriod = previousSegmentResults.filter(
+          (result) =>
+            result.period.index === i && result.player.id === player.id
+        )
+        const dataBenchmark = {
+          bankBenchmark: [],
+          bondsBenchmark: [],
+          stocksBenchmark: [],
+          accBankBenchmarkReturn: [],
+          accBondsBenchmarkReturn: [],
+          accStocksBenchmarkReturn: [],
+        }
+
+        playerResPerPeriod.map((result) => {
+          const assetsWithReturns = result.facts.assetsWithReturns.filter(
+            (_, ix) => ix > 0
+          )
+          Object.keys(dataBenchmark).map((key) => {
+            dataBenchmark[key].push(...assetsWithReturns.map((a) => a[key]))
+          })
+        })
+        output.push(dataBenchmark)
+      }
+      return output
+    }
+
+    const benchmarksPerPeriod = getBenchmarksPerPeriod()
+    const benchmarksFlat = Object.keys(benchmarksPerPeriod[0]).reduce(
+      (acc, key) => {
+        acc[key] = benchmarksPerPeriod.flatMap((p) => p[key])
+        return acc
+      },
+      {}
+    )
+
     const dataPerPeriod = computeDataPerPeriod()
-    const dataTotalAssets = composeChartData(dataPerPeriod, 'totalAssets')
+    const dataTotalAssets = composeChartData(dataPerPeriod, 'totalAssets').map(
+      (d, ix) => {
+        return {
+          ...d,
+          ...Object.keys(benchmarksFlat)
+            .filter(
+              (key) =>
+                key === 'bankBenchmark' ||
+                key === 'bondsBenchmark' ||
+                key === 'stocksBenchmark'
+            )
+            .reduce((acc, key) => {
+              acc[key] = benchmarksFlat[key][ix]
+              return acc
+            }, {}),
+        }
+      }
+    )
+
     const dataAccTotalAssetsReturn = composeChartData(
       dataPerPeriod,
       'accTotalAssetsReturn'
-    )
+    ).map((d, ix) => {
+      return {
+        ...d,
+        ...Object.keys(benchmarksFlat)
+          .filter(
+            (key) =>
+              key === 'accBankBenchmarkReturn' ||
+              key === 'accBondsBenchmarkReturn' ||
+              key === 'accStocksBenchmarkReturn'
+          )
+          .reduce((acc, key) => {
+            acc[key] = benchmarksFlat[key][ix]
+            return acc
+          }, {}),
+      }
+    })
 
     const segmentResultsPerPlayer = game.players.map((player) => {
       return previousSegmentResults
@@ -210,35 +322,30 @@ function ReportGame() {
         })
     })
 
-    const segmentResultPerPlayerAvg = segmentResultsPerPlayer.map((arr) => {
-      const result = Array(arr[0].length).fill(0)
-      arr.forEach((val) => {
-        val.forEach((v, i) => {
-          result[i] += v / arr.length
-        })
-      })
-      return result
-    })
+    const segmentResultPerSegmentAvg = segmentResultsPerPlayer[0].map(
+      (_, i) => {
+        const numSegments = segmentResultsPerPlayer[0][i].length
+        const sumPerSegment = segmentResultsPerPlayer
+          .reduce(
+            (sum, player) => sum.map((val, idx) => val + player[i][idx]),
+            Array(numSegments).fill(0)
+          )
+          .map((sum) => sum / segmentResultsPerPlayer.length)
 
-    const computeTotalDecisionAvg = () => {
-      const result = Array(segmentResultPerPlayerAvg[0].length).fill(0)
-      segmentResultPerPlayerAvg.forEach((val) => {
-        val.forEach((v, i) => {
-          result[i] += v / segmentResultPerPlayerAvg.length
-        })
-      })
-      return result
-    }
-    const totalDecisionAvg = computeTotalDecisionAvg()
+        return sumPerSegment
+      }
+    )
 
     return {
       game,
       playerConfig,
+      absolutePerformanceConfig,
+      accReturnConfig,
       initialCapital,
       dataPerPeriod,
       dataTotalAssets,
       dataAccTotalAssetsReturn,
-      totalDecisionAvg,
+      segmentResultPerSegmentAvg,
     }
   }, [
     data,
@@ -328,27 +435,30 @@ function ReportGame() {
   const {
     game,
     playerConfig,
+    absolutePerformanceConfig,
+    accReturnConfig,
     initialCapital,
     dataPerPeriod,
     dataTotalAssets,
     dataAccTotalAssetsReturn,
-    totalDecisionAvg,
+    segmentResultPerSegmentAvg,
   } = memoizedData
 
   const { riskReturnPerPeriod, sharpeRatioPerPeriod, configSharpeRatio } =
     memoizedDataPeriod
 
-  const dataAvg = [
-    {
-      bank: totalDecisionAvg[0],
-    },
-    {
-      bonds: totalDecisionAvg[1],
-    },
-    {
-      stocks: totalDecisionAvg[2],
-    },
-  ]
+  const decisionKeys = ['bank', 'bonds', 'stocks']
+  const dataAvg = segmentResultPerSegmentAvg.map((values, segmentIx) => {
+    const period = ~~(segmentIx / game.activePeriodIx) + 1
+    const segment = (segmentIx % game.activePeriodIx) + 1
+    return {
+      periodSegment: 'P' + period + ' S' + segment,
+      ...values.reduce((acc, value, decisionIx) => {
+        acc[decisionKeys[decisionIx]] = value
+        return acc
+      }, {}),
+    }
+  })
 
   return (
     <div className="container mx-auto p-4" data-cy="report-loaded">
@@ -359,7 +469,10 @@ function ReportGame() {
             <CardDescription>Assets over time.</CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
-            <ChartContainer config={playerConfig} className="h-[300px] w-full">
+            <ChartContainer
+              config={absolutePerformanceConfig}
+              className="h-[300px] w-full"
+            >
               <LineChart data={dataTotalAssets} accessibilityLayer>
                 <ChartTooltip
                   cursor={false}
@@ -382,13 +495,13 @@ function ReportGame() {
                     </div>,
                   ]}
                 />
-                {Object.keys(playerConfig).map((key) => {
+                {Object.keys(absolutePerformanceConfig).map((key) => {
                   return (
                     <Line
                       key={key}
                       type="natural"
                       dataKey={key}
-                      stroke={playerConfig[key].color}
+                      stroke={absolutePerformanceConfig[key].color}
                       dot={false}
                       strokeWidth={2}
                     />
@@ -442,7 +555,10 @@ function ReportGame() {
             </Select>
           </CardHeader>
           <CardContent className="flex-grow">
-            <ChartContainer config={playerConfig} className="h-[300px] w-full">
+            <ChartContainer
+              config={accReturnConfig}
+              className="h-[300px] w-full"
+            >
               <AreaChart
                 data={
                   currPeriod === 0
@@ -475,14 +591,15 @@ function ReportGame() {
                     </div>,
                   ]}
                 />
-                {Object.keys(playerConfig).map((key) => {
+                {Object.keys(accReturnConfig).map((key) => {
+                  const color = accReturnConfig[key].color
                   return (
                     <Area
                       key={key}
                       dataKey={key}
-                      fill={playerConfig[key].color}
+                      fill={color}
                       fillOpacity={0.4}
-                      stroke={playerConfig[key].color}
+                      stroke={color}
                       type="natural"
                     />
                   )
@@ -555,24 +672,28 @@ function ReportGame() {
                 <TableBody>
                   {dataPerPeriod.map((dataPerPlayer, periodIndex) => {
                     return (
-                      <TableRow key={periodIndex}>
+                      <TableRow key={'p-' + periodIndex}>
                         <TableCell className="align-top font-medium">
                           {Object.values(dataPerPlayer)[0]?.decisions.map(
-                            (d, segmentIx) => {
+                            (_, segmentIx) => {
                               return (
-                                <div key={segmentIx} className="min-w-12 ">
+                                <div
+                                  key={'p-s-' + segmentIx}
+                                  className="min-w-12 "
+                                >
                                   P{periodIndex + 1} S{segmentIx + 1}
                                 </div>
                               )
                             }
                           )}
                         </TableCell>
-                        {Object.values(dataPerPlayer).map((d, dIx) => {
-                          const decisions = d.decisions
+                        {game.players.map((player, playerIx) => {
+                          const decisions =
+                            dataPerPlayer?.[player.id]?.decisions ?? []
 
                           return (
                             <TableCell
-                              key={'player-decisions-' + dIx}
+                              key={'player-decisions-' + playerIx}
                               className="align-top font-medium"
                             >
                               {decisions.map((decision, segmentIx) => {
@@ -601,13 +722,15 @@ function ReportGame() {
 
         <Card className="flex h-full w-full flex-col">
           <CardHeader>
-            <CardTitle>Avg Decisions</CardTitle>
-            <CardDescription>Average decisions over players.</CardDescription>
+            <CardTitle>Average Decisions</CardTitle>
+            <CardDescription>
+              Average decisions per segment over players.
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
             <ChartContainer config={config} className="h-[300px] w-full">
               <BarChart data={dataAvg}>
-                {Object.keys(config).map((key, ix, arr) => {
+                {Object.keys(config).map((key) => {
                   return (
                     <Bar
                       key={key}
@@ -615,21 +738,12 @@ function ReportGame() {
                       dataKey={key}
                       fill={config[key].color}
                       radius={4}
-                    >
-                      {ix === arr.length - 1 && (
-                        <LabelList
-                          position="top"
-                          className="fill-foreground"
-                          fontSize={12}
-                          formatter={(v) => `${(v * 100).toFixed(1)}%`}
-                        />
-                      )}
-                    </Bar>
+                    />
                   )
                 })}
                 <CartesianGrid vertical={false} />
                 <XAxis
-                  dataKey="period"
+                  dataKey="periodSegment"
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
@@ -639,9 +753,30 @@ function ReportGame() {
                   axisLine={false}
                   tickMargin={8}
                   tickFormatter={(v) => `${(v * 100).toFixed(1)}%`}
-                  domain={['auto', (dataMax) => dataMax * 1.1]}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
+                <ChartTooltip
+                  cursor={false}
+                  formatter={(value, name, item) => [
+                    <div
+                      key={name}
+                      className="flex w-full items-center justify-between gap-x-2"
+                    >
+                      <div className="flex items-center gap-x-1">
+                        <div
+                          className="h-[8px] w-[8px] rounded-sm"
+                          style={{ background: item.color }}
+                        />
+                        <span className="text-xs text-gray-600">
+                          {name === 'bank' ? 'savings' : name}
+                        </span>
+                      </div>
+                      <span className="font-bold text-black">
+                        {(value * 100).toFixed(2)}%
+                      </span>
+                    </div>,
+                  ]}
+                />
               </BarChart>
             </ChartContainer>
           </CardContent>
