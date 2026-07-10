@@ -48,13 +48,19 @@ function TradingForm({
     defaultValues: {
       volume: 0,
     },
-    mode: 'onChange'
+    mode: 'onChange',
   })
+
+  const submitTrade = (modifier: 1 | -1) =>
+    form.handleSubmit(async (values) => {
+      await onSubmit({ ...values, modifier })
+      form.reset()
+    })
 
   return (
     <div className="flex w-max gap-4 rounded border p-8">
       <Form {...form}>
-        <form className="" onSubmit={form.handleSubmit((values) => onSubmit({ ...values, modifier: 1 }))}>
+        <form onSubmit={(event) => event.preventDefault()}>
           <ReusableFormField
             control={form.control}
             name="volume"
@@ -76,9 +82,7 @@ function TradingForm({
                 disableButtonBuy
               }
               type="button"
-              onClick={async () => {
-                await form.handleSubmit((values) => onSubmit({ ...values, modifier: 1 }))()
-              }}
+              onClick={submitTrade(1)}
             >
               {nameButtonBuy}
             </Button>
@@ -89,9 +93,7 @@ function TradingForm({
                 disableButtonSell
               }
               type="button"
-              onClick={async () => {
-                await form.handleSubmit((values) => onSubmit({ ...values, modifier: -1 }))()
-              }}
+              onClick={submitTrade(-1)}
             >
               {nameButtonSell}
             </Button>

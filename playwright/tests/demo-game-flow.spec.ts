@@ -442,3 +442,74 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
     await Promise.all(playerSessions.map(({ context }) => context.close()))
   }
 })
+
+type TradeSubmission = {
+  volume: number
+  modifier: number
+}
+
+async function tradeSubmissions(page: Page) {
+  return page.evaluate(
+    () =>
+      (
+        window as typeof window & {
+          __tradingFormSubmissions: TradeSubmission[]
+        }
+      ).__tradingFormSubmissions
+  )
+}
+
+test('trading actions submit one validated modifier and reset after success', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const submissions: TradeSubmission[] = []
+    Object.defineProperty(window, '__tradingFormSubmissions', {
+      value: submissions,
+    })
+
+    const originalLog = console.log
+    console.log = (...args) => {
+      const [value] = args
+      if (
+        args.length === 1 &&
+        typeof value === 'object' &&
+        value !== null &&
+        'volume' in value &&
+        'modifier' in value
+      ) {
+        submissions.push(value as TradeSubmission)
+      }
+      originalLog(...args)
+    }
+  })
+
+  await page.goto('/')
+
+  const volume = page.getByRole('spinbutton', { name: 'Volume' })
+  const buy = page.getByRole('button', { name: 'Buy' })
+  const sell = page.getByRole('button', { name: 'Sell' })
+
+  await volume.fill('-1')
+  await expect(buy).toBeDisabled()
+  await expect(sell).toBeDisabled()
+  await expect.poll(() => tradeSubmissions(page)).toEqual([])
+
+  await volume.fill('2')
+  await volume.press('Enter')
+  await expect.poll(() => tradeSubmissions(page)).toEqual([])
+
+  await buy.click()
+  await expect.poll(() => tradeSubmissions(page)).toEqual([
+    { volume: 2, modifier: 1 },
+  ])
+  await expect(volume).toHaveValue('0')
+
+  await volume.fill('3')
+  await sell.click()
+  await expect.poll(() => tradeSubmissions(page)).toEqual([
+    { volume: 2, modifier: 1 },
+    { volume: 3, modifier: -1 },
+  ])
+  await expect(volume).toHaveValue('0')
+})

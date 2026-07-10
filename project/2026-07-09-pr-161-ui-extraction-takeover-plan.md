@@ -860,9 +860,9 @@ PR update:
 
 ### Status
 
-- Current: S6 complete locally and ready to commit; S7 follows after CI readback.
-- Implementation: P0, F0, S1, S2, S3, S4, S5, and S6 complete.
-- Branch mutations this takeover: P0-S5 commits plus the focused S6 typed-hook diff.
+- Current: S7 complete locally and ready to commit; S8 follows after CI readback.
+- Implementation: P0, F0, S1, S2, S3, S4, S5, S6, and S7 complete.
+- Branch mutations this takeover: P0-S6 commits plus the focused S7 TradingForm diff and regression.
 - User-owned untracked artifacts: preserved.
 
 ### Evidence collected
@@ -952,10 +952,21 @@ PR update:
 - [x] Full demo flow passed cleanly before review fixes; after fixes it passed on retry with one unrelated dice-popup timeout recorded as an existing flake.
 - [x] S6 correctness review findings integrated: missing-score equality, nullable nested element, and stale response matching.
 - [x] S6 simplification findings integrated: mutation-result generic removed and active-ID dependency made purposeful.
+- [x] Current React Hook Form guidance confirms `handleSubmit` should own validated values while the selected trade action stays in an external closure.
+- [x] Buy and Sell now invoke one shared typed submission factory with modifiers `1` and `-1`; the form has no implicit default trade.
+- [x] Successful callbacks reset the shared form; rejected callbacks retain the entered volume and React Hook Form owns `isSubmitting` for the awaited call.
+- [x] Stale Formik helper arguments and consumer-owned reset calls are removed from Demo Game and Rate Wars.
+- [x] Focused browser coverage proves invalid volume disables both actions, Enter submits nothing, each action emits exactly once with the correct modifier, and success resets to zero.
+- [x] The focused regression was moved into the exact `demo-game-flow.spec.ts` path selected by CI after independent review caught an unselected standalone spec.
+- [x] UI lint/build and Playwright TypeScript pass; Demo Game and Rate Wars production builds pass.
+- [x] Demo and Rate Wars `check:ts` no longer report TradingForm callback errors; remaining failures are planned S8/report/domain typing debt.
+- [x] Exact CI-selected demo Playwright file passes 3/3, including the full lifecycle and TradingForm regression.
+- [x] S7 correctness review has no remaining findings after the CI-selection fix.
+- [x] S7 simplification review accepts the handler structure; console interception remains an explicit E2E seam because the demo callback has no durable external effect and no component-test harness exists.
 
 ### Next action
 
-Commit and push S6, read CI movement, then verify S7 TradingForm submission behavior.
+Commit and push S7, read CI movement, then repair S8 reusable-field accessibility and form typing.
 
 ## Independent plan review
 
