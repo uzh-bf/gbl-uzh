@@ -1114,9 +1114,18 @@ Make `@gbl-uzh/ui` safe to publish to public npm and install from a packed artif
 
 ### Progress
 
-- Status: PLAN APPROVED.
-- Active: plan-only commit.
-- Next: execute S12 publishable package contract.
+- Status: EXECUTING.
+- Active: S13 version and release automation.
+- Next: implement and verify tag-based UI publication workflow.
+
+S12 evidence:
+
+- [x] Public ESM root, stable CSS, compatibility CSS, types, and package metadata exports defined.
+- [x] Public npm registry/access metadata and fresh-build `prepack` guard defined.
+- [x] Durable verifier packs outside workspace, checks all JS chunks with TypeScript preprocessing, rejects browser-incompatible built-ins and undeclared runtime packages, and resolves root/CSS/types from a temporary installed package.
+- [x] Frozen install, UI lint, lifecycle pack/build, verifier, and whitespace checks pass.
+- [x] Gemini correctness review findings integrated: safe failed-resolution error, dynamic import coverage, built-in rejection, realpath isolation, cross-platform type paths, all-chunk scan, Bundler plus NodeNext resolution.
+- [x] Simplification review dynamic-import finding integrated through `ts.preProcessFile`; optional metadata and explicit tar contents checks retained as useful publication evidence.
 
 ### S12. Publishable package contract
 
