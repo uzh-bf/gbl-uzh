@@ -1071,3 +1071,182 @@ Read terminal CI/Sonar/Vercel state, update the PR body, then request user ready
 1. Read terminal CI/Sonar/Vercel state and resolve only evidence-backed failures.
 2. Update and read back the whole-branch PR body with screenshots and current evidence.
 3. Request user ready-state approval. Do not merge without explicit approval.
+
+## Publication-ready extension (2026-07-11)
+
+### Goal
+
+Make `@gbl-uzh/ui` safe to publish to public npm and install from a packed artifact in another Next.js game.
+
+### Non-goals
+
+- Publish package now.
+- Create npm credentials or trusted-publisher settings.
+- Redesign components or split package into multiple entrypoints.
+- Stabilize every component API for a 1.0 release.
+- Merge or mark PR ready without user approval.
+
+### Evidence
+
+- Package build and tarball creation pass.
+- Packed artifact contains `dist/index.js`, `dist/index.d.ts`, `dist/style.css`, and metadata.
+- Packed runtime imports are declared as dependencies or peers.
+- Standard ESM consumer resolution fails because package has neither `exports` nor `main`.
+- Public npm registry has no visible `@gbl-uzh/ui` package.
+- Only `@gbl-uzh/platform` has tag-based publish automation.
+- `.versionrc.js` does not bump `packages/ui/package.json`.
+- Wiki explicitly classifies UI package as workspace-internal.
+- Official npm guidance: scoped public packages need explicit public access; `publishConfig` can pin access and registry.
+- Official Node guidance: new packages should define `exports`; `main` remains useful for legacy resolution.
+- Official npm guidance: trusted publishing uses GitHub OIDC and automatic provenance, but package must exist before trust can be configured.
+
+### Decisions
+
+- Registry: public npm, matching `@gbl-uzh/platform`.
+- Module format: ESM-only. No unneeded CommonJS build.
+- Root export: JS plus TypeScript declaration mapping.
+- CSS exports: stable `@gbl-uzh/ui/style.css` plus compatibility export for existing `@gbl-uzh/ui/dist/style.css` consumers.
+- Build guard: package `prepack` builds fresh `dist` before any pack/publish.
+- Versioning: add UI package to existing standard-version bump set; next repo release aligns UI with root/platform version.
+- Automation: dedicated tag-triggered UI publish workflow using GitHub-hosted Node 24, npm 11+, OIDC, public access, and package verification.
+- Bootstrap: document one manual first publish, then configure npm trusted publisher for `publish-ui.yml`; no long-lived token added to repo.
+- Consumer proof: packed tarball, clean temporary consumer install/resolution, CSS subpath resolution, declaration resolution, and existing game builds.
+
+### Progress
+
+- Status: PLAN APPROVED.
+- Active: plan-only commit.
+- Next: execute S12 publishable package contract.
+
+### S12. Publishable package contract
+
+Do:
+
+- Add package description, repository directory metadata, homepage, bugs URL, Node engine, `main`, `module`, `types`, `exports`, and public npm `publishConfig`.
+- Export root ESM/types, stable CSS subpath, compatibility CSS subpath, and package metadata.
+- Add `prepack` build guard.
+- Add durable package verifier that creates a tarball with lifecycle scripts disabled, extracts it outside the monorepo, resolves root plus both CSS paths from a temporary consumer, verifies declarations, and compares static runtime imports against dependency/peer metadata.
+
+Files:
+
+- `packages/ui/package.json`
+- `packages/ui/scripts/verify-package.mjs`
+
+Check:
+
+- Frozen install.
+- UI lint/build.
+- `pnpm --filter @gbl-uzh/ui pack` from clean `dist` path.
+- Package verifier passes.
+- Temporary external consumer resolves root, types, and both CSS paths from tarball.
+
+Review:
+
+- Independent correctness review.
+- Separate simplification review.
+
+Commit:
+
+- `build(ui): define public package contract`
+
+### S13. Version and release automation
+
+Do:
+
+- Add `packages/ui/package.json` to standard-version bump files.
+- Add dedicated `publish-ui.yml` for `v*` tags.
+- Verify tag version equals UI package version before publish.
+- Install frozen dependencies, run UI lint and package verification, then publish public package through npm OIDC.
+- Keep first-publish bootstrap external and documented; do not add an npm token.
+
+Files:
+
+- `.versionrc.js`
+- `.github/workflows/publish-ui.yml`
+
+Check:
+
+- Parse workflow.
+- Run release dry-run without mutating tracked files.
+- Simulate tag/package version guard for matching and mismatching values.
+- Run workflow command sequence locally through publish dry-run only.
+
+Review:
+
+- Independent correctness/security review.
+- Separate simplification review.
+
+Commit:
+
+- `ci(ui): add public package release workflow`
+
+### S14. External consumer contract and wiki
+
+Do:
+
+- Replace workspace-internal warning with current public-package workflow and bootstrap state.
+- Document install command, required peers, root import, stable CSS import, version/tag behavior, and first-publish/trusted-publisher steps.
+- Refresh UI inventory claims against current exports; remove stale placeholder/copy guidance invalidated by PR #161.
+- Add dated wiki log entry.
+- Run packed artifact through clean temporary Next/Vite-compatible consumer build using installed tarball, not workspace link.
+
+Files:
+
+- `docs/platform-overview.md`
+- `docs/ui-components.md`
+- `docs/developing-a-game.md`
+- `docs/log.md`
+
+Check:
+
+- OKF frontmatter/link validation.
+- Documentation formatting.
+- Grep stale unpublished/workspace-only claims.
+- External consumer build passes against tarball.
+- Final UI lint/build/package verification.
+- Current game production builds and hosted CI readback.
+
+Review:
+
+- Wiki fact-check review.
+- Mandatory security review.
+- Thermo maintainability review.
+- Gemini 3.5 Flash High whole-extension review.
+
+Commit:
+
+- `docs(ui): document public package consumption`
+
+### Manual gate after merge
+
+1. Run first public publish as authorized npm scope maintainer with 2FA.
+2. Configure npm trusted publisher for `uzh-bf/gbl-uzh`, workflow `publish-ui.yml`, publish permission.
+3. Restrict token publishing after OIDC path succeeds.
+4. Create next normal repository release tag; verify npm provenance and external install.
+
+### Completion gate
+
+- All slices committed separately.
+- Packed tarball resolves without workspace metadata.
+- Clean consumer installs artifact and builds.
+- Release workflow validates exact tag/package version.
+- Docs match code and workflow.
+- Security, strict maintainability, and independent final reviews have no unresolved P0-P2 finding.
+- PR body updated; PR remains draft until explicit user approval.
+
+### Independent extension-plan review
+
+- Reviewer: Gemini 3.5 Flash High through Antigravity.
+- Verdict: `REVISE`.
+- Accepted:
+  - Add UI lint to release workflow.
+  - Make verifier mechanics explicit: pack, extract outside workspace, resolve root/CSS, verify declarations and runtime externals.
+- Already present in draft:
+  - Root `main`/`exports`, stable plus compatibility CSS paths.
+  - UI standard-version bump entry.
+  - Tag/package version guard.
+- Rejected:
+  - Add `--provenance`: current npm trusted publishing automatically emits provenance and discovers OIDC without this flag.
+  - Add broad `postbump` install/stage hook: pnpm workspace importer metadata does not encode package version, so adding UI to standard-version does not require lockfile mutation; unrelated release behavior stays out of scope.
+  - Modify platform publish workflow: UI readiness does not require altering established platform release path.
+- Revised verdict: approved after accepted changes; no unresolved plan blocker.
