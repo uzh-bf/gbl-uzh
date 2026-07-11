@@ -1,0 +1,59 @@
+name: Release UI Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Build, verify, and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Use Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+
+      - name: Use pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use npm 11
+        run: npm install --global npm@11.13.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify release version
+        working-directory: packages/ui
+        run: |
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          if [ "v${PACKAGE_VERSION}" != "${GITHUB_REF_NAME}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match @gbl-uzh/ui@${PACKAGE_VERSION}."
+            exit 1
+          fi
+
+      - name: Lint
+        working-directory: packages/ui
+        run: pnpm run lint
+
+      - name: Build
+        working-directory: packages/ui
+        run: pnpm run build
+
+      - name: Verify package artifact
+        working-directory: packages/ui
+        run: pnpm run verify:package
+
+      - name: Publish
+        working-directory: packages/ui
+        run: npm publish

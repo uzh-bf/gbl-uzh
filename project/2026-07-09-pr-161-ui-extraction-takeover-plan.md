@@ -1115,8 +1115,18 @@ Make `@gbl-uzh/ui` safe to publish to public npm and install from a packed artif
 ### Progress
 
 - Status: EXECUTING.
-- Active: S13 version and release automation.
-- Next: implement and verify tag-based UI publication workflow.
+- Active: S14 external consumer contract and wiki.
+- Next: prove tarball consumption, update wiki, run final reviews.
+
+S13 evidence:
+
+- [x] Standard-version dry-run bumps UI from `0.4.13` to next repository release `0.4.52` with root/platform packages.
+- [x] Dedicated `v*` UI workflow uses GitHub-hosted Node 24, pinned npm 11.13.0, repo-pinned pnpm, frozen install, exact tag/version guard, lint, build, artifact verification, and OIDC publish.
+- [x] Matching guard accepts `v0.4.13`; mismatching guard rejects `v9.9.9`.
+- [x] Workflow YAML parses; npm publish dry-run executes `prepack`, builds, and reports public npm target without publishing.
+- [x] Npm repository URL normalization warning fixed in focused commit `1720d96`.
+- [x] Gemini correctness/security review approves workflow and trusted-publishing setup.
+- [x] Simplification review npm-minimum finding fixed with explicit npm pin; deliberate double build retained so verification and publish lifecycle each enforce a fresh artifact.
 
 S12 evidence:
 
