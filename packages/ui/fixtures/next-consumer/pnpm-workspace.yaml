@@ -1,0 +1,15 @@
+packages:
+  - .
+
+allowBuilds:
+  sharp: true
+
+blockExoticSubdeps: true
+minimumReleaseAge: 10080
+peerDependencyRules:
+  allowedVersions:
+    "react-dice-complete>react": "19"
+    "react-dice-complete>react-dom": "19"
+    "react-remove-scroll>@types/react": "19"
+    "react-remove-scroll>react": "19"
+trustPolicy: no-downgrade

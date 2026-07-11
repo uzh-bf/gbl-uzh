@@ -9,32 +9,39 @@ import {
 import { mkdir, mkdtemp } from 'node:fs/promises'
 import { isBuiltin } from 'node:module'
 import { tmpdir } from 'node:os'
-import { dirname, join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
 
-const packageRoot = dirname(fileURLToPath(new URL('../package.json', import.meta.url)))
+const packageRoot = dirname(
+  fileURLToPath(new URL('../package.json', import.meta.url))
+)
 const temporaryRoot = await mkdtemp(join(tmpdir(), 'gbl-ui-package-'))
+const outputOptionIndex = process.argv.indexOf('--output')
+const outputOptionValue = process.argv[outputOptionIndex + 1]
+
+if (outputOptionIndex !== -1 && !outputOptionValue) {
+  throw new Error('--output requires a directory')
+}
+
+const outputRoot =
+  outputOptionIndex === -1 ? temporaryRoot : resolve(outputOptionValue)
 
 function assert(condition, message) {
   if (!condition) throw new Error(message)
 }
 
 function dependencyName(specifier) {
-  if (specifier.startsWith('@')) return specifier.split('/').slice(0, 2).join('/')
+  if (specifier.startsWith('@'))
+    return specifier.split('/').slice(0, 2).join('/')
   return specifier.split('/')[0]
 }
 
 try {
+  await mkdir(outputRoot, { recursive: true })
   const packOutput = execFileSync(
     'npm',
-    [
-      'pack',
-      '--ignore-scripts',
-      '--json',
-      '--pack-destination',
-      temporaryRoot,
-    ],
+    ['pack', '--ignore-scripts', '--json', '--pack-destination', outputRoot],
     {
       cwd: packageRoot,
       encoding: 'utf8',
@@ -45,16 +52,21 @@ try {
     }
   )
   const [packResult] = JSON.parse(packOutput)
-  const archivePath = join(temporaryRoot, packResult.filename)
+  const archivePath = join(outputRoot, packResult.filename)
   const packedFiles = new Set(packResult.files.map(({ path }) => path))
 
   for (const expectedFile of [
+    'LICENSE.md',
+    'README.md',
     'package.json',
     'dist/index.js',
     'dist/index.d.ts',
     'dist/style.css',
   ]) {
-    assert(packedFiles.has(expectedFile), `Packed artifact misses ${expectedFile}`)
+    assert(
+      packedFiles.has(expectedFile),
+      `Packed artifact misses ${expectedFile}`
+    )
   }
 
   const extractedRoot = join(temporaryRoot, 'extracted')
@@ -67,19 +79,26 @@ try {
   )
   const rootExport = packageJson.exports?.['.']
 
-  assert(packageJson.main === './dist/index.js', 'main must target dist/index.js')
-  assert(packageJson.types === './dist/index.d.ts', 'types must target declarations')
-  assert(rootExport?.import === './dist/index.js', 'root import export is invalid')
-  assert(rootExport?.types === './dist/index.d.ts', 'root types export is invalid')
+  assert(
+    packageJson.main === './dist/index.js',
+    'main must target dist/index.js'
+  )
+  assert(
+    packageJson.types === './dist/index.d.ts',
+    'types must target declarations'
+  )
+  assert(
+    rootExport?.import === './dist/index.js',
+    'root import export is invalid'
+  )
+  assert(
+    rootExport?.types === './dist/index.d.ts',
+    'root types export is invalid'
+  )
   assert(
     packageJson.exports?.['./style.css'] === './dist/style.css',
     'stable CSS export is invalid'
   )
-  assert(
-    packageJson.exports?.['./dist/style.css'] === './dist/style.css',
-    'compatibility CSS export is invalid'
-  )
-
   for (const relativePath of [
     rootExport.import,
     rootExport.types,
@@ -113,7 +132,9 @@ try {
 
   assert(
     nodeBuiltins.length === 0,
-    `Node built-ins are not allowed in browser bundle: ${nodeBuiltins.join(', ')}`
+    `Node built-ins are not allowed in browser bundle: ${nodeBuiltins.join(
+      ', '
+    )}`
   )
 
   const undeclaredRuntimePackages = [
@@ -130,6 +151,19 @@ try {
     `Undeclared runtime packages: ${undeclaredRuntimePackages.join(', ')}`
   )
 
+  const runtimePackages = new Set(runtimeSpecifiers.map(dependencyName))
+  const allowedRuntimeCompanions = new Set(['react-dom'])
+  const staleRuntimeDeclarations = [...declaredRuntimePackages].filter(
+    (name) => !runtimePackages.has(name) && !allowedRuntimeCompanions.has(name)
+  )
+
+  assert(
+    staleRuntimeDeclarations.length === 0,
+    `Declared runtime packages are unused: ${staleRuntimeDeclarations.join(
+      ', '
+    )}`
+  )
+
   const consumerRoot = join(temporaryRoot, 'consumer')
   const installedPackageRoot = join(consumerRoot, 'node_modules/@gbl-uzh/ui')
   await mkdir(dirname(installedPackageRoot), { recursive: true })
@@ -143,7 +177,6 @@ try {
       [
         "console.log(import.meta.resolve('@gbl-uzh/ui'))",
         "console.log(import.meta.resolve('@gbl-uzh/ui/style.css'))",
-        "console.log(import.meta.resolve('@gbl-uzh/ui/dist/style.css'))",
       ].join(';'),
     ],
     { cwd: consumerRoot, encoding: 'utf8' }
@@ -183,16 +216,27 @@ try {
       options,
       ts.sys
     ).resolvedModule
-    const normalizedTypePath = typeResolution?.resolvedFileName.replace(/\\/g, '/')
+    const normalizedTypePath = typeResolution?.resolvedFileName.replace(
+      /\\/g,
+      '/'
+    )
 
     assert(
       normalizedTypePath?.endsWith('/dist/index.d.ts'),
-      `${name} resolved an unexpected declaration: ${normalizedTypePath ?? 'none'}`
+      `${name} resolved an unexpected declaration: ${
+        normalizedTypePath ?? 'none'
+      }`
     )
   }
 
   console.log(
-    `Verified ${packageJson.name}@${packageJson.version}: ${packedFiles.size} packed files, ${runtimeSpecifiers.length} runtime imports, root/CSS/types resolve.`
+    `Verified ${packageJson.name}@${packageJson.version}: ${
+      packedFiles.size
+    } packed files, ${
+      runtimeSpecifiers.length
+    } runtime imports, root/CSS/types resolve.${
+      outputOptionIndex === -1 ? '' : ` Artifact: ${archivePath}`
+    }`
   )
 } finally {
   rmSync(temporaryRoot, { recursive: true, force: true })
