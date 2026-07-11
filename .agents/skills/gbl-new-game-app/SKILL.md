@@ -7,7 +7,7 @@ description: Scaffold a new GBL platform game app inside this monorepo by copyin
 
 App unreachable or environment broken? Run the `gbl-environment-doctor` skill before scaffolding.
 
-There is no generator; a new game starts as a copy of the reference game inside a clone/fork of this monorepo (the packages are not consumable standalone — `@gbl-uzh/ui` is unpublished). Background: [docs/platform-overview.md](../../../docs/platform-overview.md), [docs/developing-a-game.md](../../../docs/developing-a-game.md).
+There is no generator; the complete supported scaffold starts as a copy of the reference game inside a clone/fork of this monorepo. `@gbl-uzh/ui` also has a verified public-package contract for external games after its one-time npm bootstrap, but package installation does not replace the app, database, auth, and platform scaffolding described here. Background: [docs/platform-overview.md](../../../docs/platform-overview.md), [docs/developing-a-game.md](../../../docs/developing-a-game.md).
 
 Design the game FIRST (`gbl-game-design` skill) — the scaffold asks for your facts shapes immediately.
 
@@ -39,7 +39,7 @@ If you run the starter stack (`.devcontainer/starter/`, app on `http://localhost
 
 ## Decontaminate the copy
 
-`cp -R apps/demo-game apps/<game>` copies the demo game's domain logic too. Step 5 above tells you what to *replace*; this section is the hit-list of demo-game residue that is easy to miss because it does not fail the build. Run through it after step 5, before first run. Every item here is a real defect found in the first dogfood game build.
+`cp -R apps/demo-game apps/<game>` copies the demo game's domain logic too. Step 5 above tells you what to _replace_; this section is the hit-list of demo-game residue that is easy to miss because it does not fail the build. Run through it after step 5, before first run. Every item here is a real defect found in the first dogfood game build.
 
 - **`.env.production` + `.env.production.prd`**: still point `NEXT_PUBLIC_*` and `NEXTAUTH_URL` at `demo-game.stg.env.bf-app.ch`. Rewrite them to your game's domain, or empty them and set env vars at deploy time. See `gbl-deploy-staging` / [docs/deploying-a-game.md](../../../docs/deploying-a-game.md).
 - **`src/pages/index.tsx`**: the app's `/` route. In the demo game this is a trading/portfolio showcase (`StorageOverview`, `TradingForm`, `ProbabilityChart`, "hello world"). Replace it with a game landing page or a redirect to `/play/welcome`.
@@ -48,8 +48,7 @@ If you run the starter stack (`.devcontainer/starter/`, app on `http://localhost
 - **`GameFactsService.ts` + `src/types/Game.ts`**: the demo stubs increment a meaningless `myInt` counter. Replace `GameFacts` with your game's facts (or an empty schema) and stub `update` accordingly (`gbl-backend-computations` skill).
 - **Grep the whole `src/` tree for demo-game vocabulary**: `assetsWithReturns`, `spotPrice`, `futuresPrice`, `cashBalance`, `storageAmount`, `bank` / `bonds` / `stocks` (as allocation fields). Any hit is residue to remove or replace.
 
-> [!TIP]
-> **Also clean unused imports.** A copied file often imports types it no longer uses (e.g. `PlayerResult` in a result service that switched to `any`). `pnpm --filter @gbl-uzh/<game> run check` (lint + `check:ts`) surfaces these - do not skip it.
+> [!TIP] > **Also clean unused imports.** A copied file often imports types it no longer uses (e.g. `PlayerResult` in a result service that switched to `any`). `pnpm --filter @gbl-uzh/<game> run check` (lint + `check:ts`) surfaces these - do not skip it.
 
 ## Local dev + first run
 
@@ -72,6 +71,7 @@ Before calling the scaffold complete, verify all of:
 - If you keep a progress tracker (e.g. `task.md`), update it. A stale checklist that says "results view not done" when it is done is a real review hazard.
 
 > [!WARNING]
+>
 > **Throwaway game (dogfood/experiment you will NOT commit to the target branch)? Clean up when you remove it.** `apps/<game>/.gitignore` (which ignores `.next/`, `next-env.d.ts`, `tsconfig.tsbuildinfo`) only exists next to committed source. Once you delete the source but leave the built app on disk, those artifacts are no longer ignored, so a later `git add -A` would stage the whole `.next/` (webpack caches included) plus any stray root tracker like `task.md`. Run `rm -rf apps/<game>` and delete the tracker before staging, and confirm with `git status` that nothing under the removed app remains.
 
 ## Pitfalls

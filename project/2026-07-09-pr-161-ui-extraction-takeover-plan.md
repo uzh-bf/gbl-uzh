@@ -1105,7 +1105,7 @@ Make `@gbl-uzh/ui` safe to publish to public npm and install from a packed artif
 - Registry: public npm, matching `@gbl-uzh/platform`.
 - Module format: ESM-only. No unneeded CommonJS build.
 - Root export: JS plus TypeScript declaration mapping.
-- CSS exports: stable `@gbl-uzh/ui/style.css` plus compatibility export for existing `@gbl-uzh/ui/dist/style.css` consumers.
+- CSS export: stable `@gbl-uzh/ui/style.css`; no unpublished deep-path compatibility alias.
 - Build guard: package `prepack` builds fresh `dist` before any pack/publish.
 - Versioning: add UI package to existing standard-version bump set; next repo release aligns UI with root/platform version.
 - Automation: dedicated tag-triggered UI publish workflow using GitHub-hosted Node 24, npm 11+, OIDC, public access, and package verification.
@@ -1115,8 +1115,8 @@ Make `@gbl-uzh/ui` safe to publish to public npm and install from a packed artif
 ### Progress
 
 - Status: EXECUTING.
-- Active: S14 external consumer contract and wiki.
-- Next: prove tarball consumption, update wiki, run final reviews.
+- Active: S14 final verification, commit, push, and hosted CI readback.
+- Next: close Gemini findings, commit the final slice, push, and monitor PR checks.
 
 S13 evidence:
 
@@ -1126,25 +1126,37 @@ S13 evidence:
 - [x] Workflow YAML parses; npm publish dry-run executes `prepack`, builds, and reports public npm target without publishing.
 - [x] Npm repository URL normalization warning fixed in focused commit `1720d96`.
 - [x] Gemini correctness/security review approves workflow and trusted-publishing setup.
-- [x] Simplification review npm-minimum finding fixed with explicit npm pin; deliberate double build retained so verification and publish lifecycle each enforce a fresh artifact.
+- [x] Simplification review npm-minimum finding fixed with explicit npm pin.
+- [x] Security review findings fixed: the no-OIDC verify job uploads the exact checked tarball before running the unlocked consumer; a fresh OIDC-only publish job downloads the digest-validated artifact and publishes it with lifecycle scripts disabled.
 
 S12 evidence:
 
-- [x] Public ESM root, stable CSS, compatibility CSS, types, and package metadata exports defined.
+- [x] Public ESM root, stable CSS, types, and package metadata exports defined.
 - [x] Public npm registry/access metadata and fresh-build `prepack` guard defined.
 - [x] Durable verifier packs outside workspace, checks all JS chunks with TypeScript preprocessing, rejects browser-incompatible built-ins and undeclared runtime packages, and resolves root/CSS/types from a temporary installed package.
 - [x] Frozen install, UI lint, lifecycle pack/build, verifier, and whitespace checks pass.
 - [x] Gemini correctness review findings integrated: safe failed-resolution error, dynamic import coverage, built-in rejection, realpath isolation, cross-platform type paths, all-chunk scan, Bundler plus NodeNext resolution.
 - [x] Simplification review dynamic-import finding integrated through `ts.preProcessFile`; optional metadata and explicit tar contents checks retained as useful publication evidence.
 
+S14 evidence:
+
+- [x] Package peer surface reduced to application-owned shared contexts; implementation libraries moved to runtime dependencies and unused avatar dependency removed.
+- [x] Apollo compatibility is explicit: broad `^3.11.10` peer supports React 18 workspace games, while the strict React 19 fixture pins tested Apollo `3.14.1`.
+- [x] Durable disposable App Router fixture installs the tarball with strict peer checks, explicit package-scoped React 19 exceptions for two legacy upstream libraries, and a reviewed Sharp build allowlist.
+- [x] External Next 16.2.9 production build passes root import, stable CSS import, TypeScript, and static generation.
+- [x] Demo Game, Central Bank, and Rate Wars production builds pass with `@gbl-uzh/ui/style.css`.
+- [x] OKF frontmatter/link validation, deterministic formatting, stale-claim grep, frozen install, UI lint/build/verifier, npm public publish dry-run, whitespace check, and scoped Opengrep pass.
+- [x] Wiki fact-check, final security review, and thermo maintainability review pass with no unresolved P0-P2 findings.
+- [x] Gemini 3.5 Flash High complete review initially returned `REVISE`; after commit `a64062c`, explicit Apollo compatibility guidance, and verification of the official pnpm action tag SHA, the same review conversation returned `PASS` with no unresolved P0-P2 findings.
+
 ### S12. Publishable package contract
 
 Do:
 
 - Add package description, repository directory metadata, homepage, bugs URL, Node engine, `main`, `module`, `types`, `exports`, and public npm `publishConfig`.
-- Export root ESM/types, stable CSS subpath, compatibility CSS subpath, and package metadata.
+- Export root ESM/types, stable CSS subpath, and package metadata.
 - Add `prepack` build guard.
-- Add durable package verifier that creates a tarball with lifecycle scripts disabled, extracts it outside the monorepo, resolves root plus both CSS paths from a temporary consumer, verifies declarations, and compares static runtime imports against dependency/peer metadata.
+- Add durable package verifier that creates a tarball with lifecycle scripts disabled, extracts it outside the monorepo, resolves root plus the stable CSS path from a temporary consumer, verifies declarations, and compares static runtime imports against dependency/peer metadata.
 
 Files:
 
@@ -1157,7 +1169,7 @@ Check:
 - UI lint/build.
 - `pnpm --filter @gbl-uzh/ui pack` from clean `dist` path.
 - Package verifier passes.
-- Temporary external consumer resolves root, types, and both CSS paths from tarball.
+- Temporary external consumer resolves root, types, and stable CSS path from tarball.
 
 Review:
 
@@ -1207,7 +1219,7 @@ Do:
 - Document install command, required peers, root import, stable CSS import, version/tag behavior, and first-publish/trusted-publisher steps.
 - Refresh UI inventory claims against current exports; remove stale placeholder/copy guidance invalidated by PR #161.
 - Add dated wiki log entry.
-- Run packed artifact through clean temporary Next/Vite-compatible consumer build using installed tarball, not workspace link.
+- Run packed artifact through a clean temporary Next.js App Router consumer build using the installed tarball, not a workspace link.
 
 Files:
 
@@ -1261,7 +1273,7 @@ Commit:
   - Add UI lint to release workflow.
   - Make verifier mechanics explicit: pack, extract outside workspace, resolve root/CSS, verify declarations and runtime externals.
 - Already present in draft:
-  - Root `main`/`exports`, stable plus compatibility CSS paths.
+  - Root `main`/`exports` and CSS path; compatibility alias was later removed because no public version exists yet.
   - UI standard-version bump entry.
   - Tag/package version guard.
 - Rejected:

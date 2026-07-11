@@ -18,7 +18,7 @@
  * this stylesheet (src/), resolves through the pnpm symlink.
  */
 @import '../node_modules/@uzh-bf/design-system/dist/design-system.css';
-@import '@gbl-uzh/ui/dist/style.css';
+@import '@gbl-uzh/ui/style.css';
 
 @plugin '@tailwindcss/typography';
 

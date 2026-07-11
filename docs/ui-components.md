@@ -7,36 +7,58 @@ tags:
   - design-system
   - tailwind
   - components
-timestamp: '2026-07-03T00:00:00Z'
+timestamp: '2026-07-11T00:00:00Z'
 ---
 
 # UI Building Blocks
 
 Two component sources for game frontends: the game-specific library `@gbl-uzh/ui` (`packages/ui`) and the general-purpose UZH design system `@uzh-bf/design-system` (external npm package). Games also use plain [recharts](https://recharts.org) for charts and Formik + yup for forms.
 
-**Maturity warning:** `@gbl-uzh/ui` is early-stage and unstable (many `TODO(JJ)` markers, unused peer deps, one placeholder component). Expect to copy/adapt as much as you import. Improving this library is an explicit project goal.
+**Maturity warning:** `@gbl-uzh/ui` remains pre-1.0. Its exported package contract is verified and shared by three games, but `TimelineAdmin` is still a stub and `ProbabilityChart` remains demo-game flavored. Treat minor releases as potentially breaking until a stable 1.0 API is declared.
+
+## Distribution and installation
+
+`packages/ui/package.json` defines an ESM-only public package with TypeScript declarations and a stable CSS subpath. `.github/workflows/publish-ui.yml` verifies and publishes the package on repository `v*` tags. The next standard-version release raises the current UI version from `0.4.13` to the root/platform release version.
+
+The package needs one manual public-npm bootstrap before trusted publishing can be configured. Until that happens, `pnpm add @gbl-uzh/ui` returns npm `404`; workspace consumers continue using `workspace:*`.
+
+After the bootstrap publication:
+
+```bash
+pnpm add @gbl-uzh/ui
+```
+
+Declare compatible application-level peers such as `next`, `react`, `react-dom`, `@apollo/client`, `react-hook-form`, and `@uzh-bf/design-system` directly in the game. Resolve any remaining peer warnings against `@gbl-uzh/ui`'s published `peerDependencies` instead of installing arbitrary latest versions.
+
+The React 18 reference games use Apollo Client 3.11. The strict external React 19 fixture uses Apollo Client 3.14.1; use 3.14.1 or newer when pairing this package with React 19.
+
+Import components from the package root and the utilities-only stylesheet from the stable CSS subpath:
+
+```tsx
+import { GameSidebar, Layout, StoryElements } from "@gbl-uzh/ui";
+```
+
+```css
+@import "@gbl-uzh/ui/style.css";
+```
+
+App Router modules importing this hook-based UI bundle must be client components (`'use client'`); the reference games use the Pages Router and need no extra boundary.
 
 ## `@gbl-uzh/ui` inventory
 
-Vite-built ESM library; source `packages/ui/src/components/`. All named exports via `packages/ui/src/index.ts`:
+Vite-built ESM library; source `packages/ui/src/components/`. Selected exports from `packages/ui/src/index.ts`:
 
-| Component                    | Purpose                                                                           | Key props                                                                                                                  | Status                                           |
-| ---------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| `Layout`                     | Page shell: `NavBar` + content + optional sidebar                                 | `tabs: {name, href}[]`, `playerInfo`, `sidebar`, `children`                                                                | —                                                |
-| `NavBar`                     | Top navigation with player badge (name, level, avatar)                            | `tabs`, `playerName`, `playerLevel`, `playerColor?`, `playerHref?`                                                         | —                                                |
-| `Logo`                       | Player avatar/identity block (color, location, level)                             | `color?`, `name?`, `imgPathAvatar?`, `location?`, `level?`                                                                 | —                                                |
-| `PlayerDisplay`              | Sidebar player card: identity + achievements list                                 | flat: `name?`, `color?`, `level`, `location?`, `achievements?`, `onClick?` (xp props are commented out)                    | Renders internal `Achievement` items             |
-| `XpBar`                      | XP progress bar (wraps design-system `Progress`)                                  | `value`, `max`                                                                                                             | —                                                |
-| `Timeline` / `TimelineEntry` | Period/segment progress visualization for players                                 | `Timeline`: `periods`, `activePeriodIx`, `activeSegmentIx`; `TimelineEntry`: `entryStatus: PAST\|CURRENT\|FUTURE`, indices | —                                                |
-| `TimelineAdmin`              | Admin-side timeline                                                               | none — **hardcoded demo data inside**                                                                                      | Stub (renders internal `SegmentEntry`)           |
-| `ProbabilityChart`           | Recharts-based probability/outcome distribution chart (demo game's dice forecast) | data series props                                                                                                          | Demo-game flavored                               |
-| `TradingForm`                | Formik buy/sell form with amount + price                                          | `price`, `max`, `onSubmit`, `nameButtonBuy/Sell`, `unitName?`                                                              | Usable for trading-style games                   |
-| `StorageOverview`            | Simple used/total capacity display                                                | `storageUsed`, `storageTotal`, `icon`                                                                                      | Generic                                          |
-| `Button`                     | **Placeholder** — renders a hardcoded "hello world" button                        | `className?`                                                                                                               | Do not use; take `Button` from the design system |
+| Area                   | Exports                                                                                              | Status                                                                                |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Shell and identity     | `Layout`, `NavBar`, `Logo`, `LogoSelector`, `PlayerDisplay`, `PlayerCompact`, `GameSidebar`, `XpBar` | The package is consumed by all three games; use of individual exports varies          |
+| Lifecycle display      | `Timeline`, `TimelineEntry`, `CycleCountdown`, status helpers                                        | Player timeline/countdown usable; `TimelineAdmin` remains a hardcoded stub            |
+| Narrative and learning | `StoryElements`, `LearningActivitiesList`, `LearningActivityModal`, `useLearningActivities`          | Shared typed flow; games supply generated GraphQL documents and app-specific adapters |
+| Forms and controls     | `TradingForm`, `ReusableFormField`, `Form`, `MultiSelect`, `HelpTooltip`                             | React Hook Form for shared reusable fields; app authoring forms may still use Formik  |
+| Data and game widgets  | `EventLog`, `ProbabilityChart`, `StorageOverview`, `Die`                                             | `ProbabilityChart` and `Die` remain reference-game flavored                           |
 
-Internal only (not exported): `Achievement`, `SegmentEntry`. Dead: `ListItem` (fully commented out).
+Other public exports include `cn`, number formatters, status helpers, and global-event helpers. Internal components include `Achievement`, `SegmentEntry`, `LearningElementDisplay`, and the underlying UI primitives used by exported components. `ListItem` is fully commented out.
 
-CSS: the package ships a Tailwind v4 **utilities-only** stylesheet (no preflight — it assumes the consuming app already loads a base). Consumers must import it explicitly by deep path: `@import '@gbl-uzh/ui/dist/style.css'` (see `apps/demo-game/src/globals.css`).
+CSS: the package ships a Tailwind v4 **utilities-only** stylesheet (no preflight; the consuming app supplies a base). Consumers import `@gbl-uzh/ui/style.css` explicitly; see `apps/demo-game/src/globals.css`.
 
 ## `@uzh-bf/design-system` usage
 
@@ -60,7 +82,7 @@ Copy the demo game's setup (`apps/demo-game/src/globals.css`, `postcss.config.js
 
 Known holes, confirmed by how the demo game works around them (candidates for library improvement):
 
-- **No multi-select** in the design system — the demo game builds `MultiSelect` + a `FormikMultiSelectField` wrapper on radix `Command` (`apps/demo-game/src/components/`).
+- **No multi-select** in the design system. Use the shared UI package's `MultiSelect`; games can keep a thin Formik adapter when needed.
 - **Local shadcn-style fallbacks** coexist with the design system in `apps/demo-game/src/components/ui/` (`select`, `dialog`, `popover`, `command`, `toast`/`toaster`, `button`) — e.g. the cockpit uses the local `Select`, and `_app.tsx` uses the local `Toaster`.
 - **No chart components** beyond `ProbabilityChart` — games assemble recharts (`LineChart`, `BarChart`, `AreaChart`, scatter) by hand; only `ChartContainer` is shared.
-- **`@gbl-uzh/ui` gaps**: no usable `Button`, no admin timeline, no decision-form scaffold, no results-table component — the demo game implements these inline (`DecisionsDisplay`, `PlayerCompact`, `CycleCountDown`, `LogoSelector`, `StoryElements`, `LearningElements` in `apps/demo-game/src/components/` are all app-local and reasonable copy sources for a new game).
+- **`@gbl-uzh/ui` gaps**: use `Button` from the design system; the package still lacks a usable admin timeline, generic decision-form scaffold, and results-table component. Keep game-specific layouts, decisions, charts, and GraphQL adapters in the game.

@@ -6,7 +6,7 @@ tags:
   - architecture
   - monorepo
   - packages
-timestamp: "2026-07-03T00:00:00Z"
+timestamp: "2026-07-11T00:00:00Z"
 ---
 
 # Platform Overview
@@ -17,21 +17,18 @@ The GBL platform is a framework for browser-based, **facilitator-led, synchronou
 
 pnpm workspace + turborepo (`pnpm-workspace.yaml`, `turbo.json`):
 
-| Path                                         | Package              | Role                                                                                                                   |
-| -------------------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `packages/platform`                          | `@gbl-uzh/platform`  | The game engine: Prisma schema, game/play/account/event services, API wiring, realtime pub/sub                         |
-| `packages/ui`                                | `@gbl-uzh/ui`        | Shared game UI components (layout, nav, timeline, XP bar, ...) — early stage, see [ui-components.md](ui-components.md) |
-| `apps/demo-game`                             | `@gbl-uzh/demo-game` | Reference game (investment simulation). The only app consuming `@gbl-uzh/platform` and `@gbl-uzh/ui`                   |
-| `apps/website`                               | `@gbl-uzh/website`   | Marketing/knowledge site for gbl.uzh.ch — not built on the platform                                                    |
-| `apps/escapp`, `apps/quartz`, `apps/advisor` | —                    | Unrelated tools/submodules — not built on the platform                                                                 |
+| Path                                          | Package              | Role                                                                                                                         |
+| --------------------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `packages/platform`                           | `@gbl-uzh/platform`  | The game engine: Prisma schema, game/play/account/event services, API wiring, realtime pub/sub                               |
+| `packages/ui`                                 | `@gbl-uzh/ui`        | Shared game UI components and orchestration hooks; pre-1.0 public package contract, see [ui-components.md](ui-components.md) |
+| `apps/demo-game`                              | `@gbl-uzh/demo-game` | Reference investment-simulation game and primary implementation example                                                      |
+| `examples/central-bank`, `examples/rate-wars` | game apps            | Additional games consuming the shared platform and UI packages                                                               |
+| `apps/website`                                | `@gbl-uzh/website`   | Marketing/knowledge site for gbl.uzh.ch; not built on the platform                                                           |
+| `apps/escapp`, `apps/quartz`, `apps/advisor`  | other                | Unrelated tools and submodules; not built on the platform                                                                    |
 
-Distribution status:
+Distribution status: `@gbl-uzh/platform` is published to public npm on `v*` tags. `@gbl-uzh/ui` is publication-ready but awaits its one-time public npm bootstrap; workspace games consume both through `workspace:*`. See [UI Building Blocks](ui-components.md#distribution-and-installation) for the canonical UI package status and release flow.
 
-- `@gbl-uzh/platform` **is published to public npm** on every `v*` tag (`.github/workflows/publish-platform.yml`).
-- `@gbl-uzh/ui` has **no publish workflow** and its version has drifted from the monorepo version — treat it as workspace-internal.
-- `apps/demo-game` consumes both via `workspace:*`.
-
-**Practical consequence:** the supported way to build a new game today is inside a clone/fork of this monorepo as a new `apps/<your-game>` workspace package. Building against the npm package alone is untested and would lose `@gbl-uzh/ui`. There is no scaffolding CLI; you copy `apps/demo-game` (see [developing-a-game.md](developing-a-game.md)).
+**Practical consequence:** copying `apps/demo-game` inside this monorepo remains the complete scaffolding path. After the first UI package publication, an external Next.js game can install both public packages; see [developing-a-game.md](developing-a-game.md). There is no scaffolding CLI.
 
 ## Division of responsibility
 
