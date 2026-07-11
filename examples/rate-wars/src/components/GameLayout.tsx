@@ -12,7 +12,7 @@ import {
 } from '@gbl-uzh/ui'
 import { Card, CardContent, Switch } from '@uzh-bf/design-system'
 import dayjs from 'dayjs'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   AttemptLearningElementDocument,
   GlobalEventsDocument,
@@ -38,6 +38,7 @@ export default function GameLayout({
     '60': false,
     '180': false,
   })
+  const previousCountdownSeconds = useRef<number | null>(null)
 
   const { toast } = useToast()
 
@@ -104,6 +105,7 @@ export default function GameLayout({
 
     const dateExpiresAt = dayjs(strExpiresAt)
     const secondsRemaining = dateExpiresAt.diff(dayjs(), 's')
+    previousCountdownSeconds.current = secondsRemaining
 
     if (secondsRemaining > 0) {
       toast({
@@ -170,8 +172,13 @@ export default function GameLayout({
                 expiresAt={expiresAtDate}
                 totalDuration={countdownDurationMs / 1000}
                 onUpdate={(secondsLeft) => {
+                  const previousSecondsLeft = previousCountdownSeconds.current
+                  previousCountdownSeconds.current = secondsLeft
+                  if (previousSecondsLeft === null) return
+
                   const notification = getCountdownNotification(
                     secondsLeft,
+                    previousSecondsLeft,
                     countdownNotifications
                   )
                   if (!notification) return

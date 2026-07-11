@@ -38,7 +38,7 @@ function TradingForm({
     volume: yup
       .number()
       .typeError('Volume must be a number')
-      .min(0, 'Volume must be greater than 0')
+      .moreThan(0, 'Volume must be greater than 0')
       .max(max, 'Volume must be smaller equal than ' + max)
       .required('Volume is required'),
   })

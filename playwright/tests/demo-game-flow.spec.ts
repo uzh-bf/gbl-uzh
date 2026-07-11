@@ -492,6 +492,11 @@ test('trading actions submit one validated modifier and reset after success', as
 
   await expect(page.locator(`label[for="${volumeId}"]`)).toHaveText('Volume')
 
+  await expect(volume).toHaveValue('0')
+  await expect(buy).toBeDisabled()
+  await expect(sell).toBeDisabled()
+  await expect.poll(() => tradeSubmissions(page)).toEqual([])
+
   await volume.fill('-1')
   await expect(buy).toBeDisabled()
   await expect(sell).toBeDisabled()

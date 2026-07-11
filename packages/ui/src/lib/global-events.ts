@@ -8,12 +8,13 @@ const COUNTDOWN_NOTIFICATION_THRESHOLDS = [60, 180]
 
 export function getCountdownNotification(
   secondsLeft: number,
+  previousSecondsLeft: number,
   notifications: Readonly<Record<string, boolean>>
 ): { secondsKey: string; friendlyMinutes: number } | null {
   const secondsThreshold = COUNTDOWN_NOTIFICATION_THRESHOLDS.find(
     (threshold) =>
+      previousSecondsLeft > threshold &&
       secondsLeft <= threshold &&
-      secondsLeft > threshold - 1 &&
       !notifications[String(threshold)]
   )
 
@@ -21,7 +22,7 @@ export function getCountdownNotification(
     ? null
     : {
         secondsKey: String(secondsThreshold),
-        friendlyMinutes: Math.ceil(secondsLeft / 60),
+        friendlyMinutes: secondsThreshold / 60,
       }
 }
 
