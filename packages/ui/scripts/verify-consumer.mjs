@@ -1,5 +1,11 @@
 import { execFileSync } from 'node:child_process'
-import { cpSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  cpSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { mkdtemp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
@@ -21,6 +27,15 @@ const packageArchive = isAbsolute(packageOptionValue)
   : resolve(process.cwd(), packageOptionValue)
 const temporaryRoot = await mkdtemp(join(tmpdir(), 'gbl-ui-consumer-'))
 const consumerRoot = join(temporaryRoot, 'consumer')
+const packageManagerCli = process.env.npm_execpath
+
+if (!packageManagerCli || !isAbsolute(packageManagerCli)) {
+  throw new Error(
+    'Run verify:consumer through pnpm so npm_execpath is an absolute pnpm CLI path'
+  )
+}
+
+const pnpmCli = realpathSync(packageManagerCli)
 
 try {
   cpSync(fixtureRoot, consumerRoot, { recursive: true })
@@ -37,11 +52,11 @@ try {
   }
 
   execFileSync(
-    'pnpm',
-    ['install', '--lockfile=false', '--strict-peer-dependencies'],
+    process.execPath,
+    [pnpmCli, 'install', '--lockfile=false', '--strict-peer-dependencies'],
     { cwd: consumerRoot, env: environment, stdio: 'inherit' }
   )
-  execFileSync('pnpm', ['run', 'build'], {
+  execFileSync(process.execPath, [pnpmCli, 'run', 'build'], {
     cwd: consumerRoot,
     env: environment,
     stdio: 'inherit',

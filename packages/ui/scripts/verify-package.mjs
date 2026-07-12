@@ -16,6 +16,28 @@ import ts from 'typescript'
 const packageRoot = dirname(
   fileURLToPath(new URL('../package.json', import.meta.url))
 )
+const npmCliCandidates = [
+  join(
+    dirname(process.execPath),
+    '..',
+    'lib',
+    'node_modules',
+    'npm',
+    'bin',
+    'npm-cli.js'
+  ),
+  join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js'),
+]
+const npmCli = npmCliCandidates.find(existsSync)
+const tarExecutable = '/usr/bin/tar'
+
+if (!npmCli) {
+  throw new Error(`Cannot find npm CLI beside Node: ${process.execPath}`)
+}
+if (!existsSync(tarExecutable)) {
+  throw new Error(`Cannot find tar at ${tarExecutable}`)
+}
+
 const temporaryRoot = await mkdtemp(join(tmpdir(), 'gbl-ui-package-'))
 const outputOptionIndex = process.argv.indexOf('--output')
 const outputOptionValue = process.argv[outputOptionIndex + 1]
@@ -40,8 +62,15 @@ function dependencyName(specifier) {
 try {
   await mkdir(outputRoot, { recursive: true })
   const packOutput = execFileSync(
-    'npm',
-    ['pack', '--ignore-scripts', '--json', '--pack-destination', outputRoot],
+    process.execPath,
+    [
+      npmCli,
+      'pack',
+      '--ignore-scripts',
+      '--json',
+      '--pack-destination',
+      outputRoot,
+    ],
     {
       cwd: packageRoot,
       encoding: 'utf8',
@@ -71,7 +100,7 @@ try {
 
   const extractedRoot = join(temporaryRoot, 'extracted')
   await mkdir(extractedRoot)
-  execFileSync('tar', ['-xzf', archivePath, '-C', extractedRoot])
+  execFileSync(tarExecutable, ['-xzf', archivePath, '-C', extractedRoot])
 
   const extractedPackageRoot = join(extractedRoot, 'package')
   const packageJson = JSON.parse(
@@ -194,7 +223,8 @@ try {
   )
 
   const consumerSource = join(consumerRoot, 'index.ts')
-  for (const [name, options] of [
+  /** @type {ReadonlyArray<[string, ts.CompilerOptions]>} */
+  const resolutionModes = [
     [
       'Bundler',
       {
@@ -209,14 +239,16 @@ try {
         moduleResolution: ts.ModuleResolutionKind.NodeNext,
       },
     ],
-  ]) {
+  ]
+
+  for (const [name, options] of resolutionModes) {
     const typeResolution = ts.resolveModuleName(
       '@gbl-uzh/ui',
       consumerSource,
       options,
       ts.sys
     ).resolvedModule
-    const normalizedTypePath = typeResolution?.resolvedFileName.replace(
+    const normalizedTypePath = typeResolution?.resolvedFileName.replaceAll(
       /\\/g,
       '/'
     )
