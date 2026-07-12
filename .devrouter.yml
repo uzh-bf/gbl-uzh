@@ -1,6 +1,6 @@
 # Proxy-only, routed over devnet by container name (NO published host ports): the
 # devcontainer owns the environment (toolchain, Postgres, the local OIDC mock,
-# install/build/seed, the dev server); devrouter's Traefik fronts everything on
+# install/build/seed, the selected `GBL_GAME_TARGET` dev server); devrouter's Traefik fronts everything on
 # the shared :443 / :5432. Many projects coexist with zero port collisions.
 #
 # Usage: `dev up` + `dev tls install` (creates devnet + the mkcert CA), THEN
@@ -8,7 +8,7 @@
 # `for a in app oidc db; do dev app run "$a" --yes; done`. Requires devrouter >= 0.0.23.
 version: 1
 devrouter:
-  version: 0.0.23
+  version: 0.0.25
 project:
   name: demo-game
 apps:

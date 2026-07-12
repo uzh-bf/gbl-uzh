@@ -1,5 +1,4 @@
-import { useMutation, useQuery, useSubscription } from "@apollo/client";
-import { Layout, PlayerDisplay } from "@gbl-uzh/ui";
+import { useMutation, useQuery } from "@apollo/client";
 import { Button, FormikNumberField } from "@uzh-bf/design-system";
 import {
   Card,
@@ -14,13 +13,9 @@ import {
   ShadcnTableHeader as TableHeader,
   ShadcnTableRow as TableRow,
 } from "@uzh-bf/design-system";
-import { CycleCountdown } from "~/components/CycleCountDown";
-import StoryElements from "~/components/StoryElements";
-import LearningElements from "~/components/LearningElements";
 import { DEFAULT_RATE, NEUTRAL_RATE, TREND_GROWTH } from "~/settings/Constants";
-import dayjs from "dayjs";
 import { Form, Formik } from "formik";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import {
   CartesianGrid,
   Legend,
@@ -34,21 +29,14 @@ import {
   Bar,
 } from "recharts";
 import * as yup from "yup";
+import GameLayout from "../../components/GameLayout";
 import { useToast } from "../../components/ui/use-toast";
 
 import {
-  GlobalEventsDocument,
   PerformActionDocument,
   ResultDocument,
   ResultsDocument,
-  UpdateReadyStateDocument,
 } from "src/graphql/generated/ops";
-
-enum BaseGlobalNotificationType {
-  PERIOD_ACTIVATED = "PERIOD_ACTIVATED",
-  SEGMENT_ACTIVATED = "SEGMENT_ACTIVATED",
-  COUNTDOWN_UPDATED = "COUNTDOWN_UPDATED",
-}
 
 function GameHeader({ currentGame }) {
   return (
@@ -69,7 +57,6 @@ function GameHeader({ currentGame }) {
     </div>
   );
 }
-
 function MetricCard({
   title,
   value,
@@ -227,147 +214,6 @@ function MetricsSummary({
         subtext="Target: 0.0 (Perfect Mandate)"
       />
     </div>
-  );
-}
-
-function GameLayout({ children }: { children: React.ReactNode }) {
-  const { data, refetch: refetchResult } = useQuery(ResultDocument, {
-    fetchPolicy: "cache-and-network",
-  });
-
-  const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument);
-  const { toast } = useToast();
-
-  const currentGameId = parseInt(data?.result?.currentGame?.id);
-
-  useSubscription(GlobalEventsDocument, {
-    skip: !currentGameId,
-    onData: ({ data: subData }) => {
-      if (subData?.data?.eventsGlobal) {
-        const event = subData.data.eventsGlobal;
-        if (
-          event.type === BaseGlobalNotificationType.COUNTDOWN_UPDATED &&
-          event.facts?.gameId === currentGameId
-        ) {
-          refetchResult();
-        } else if (
-          (event?.type === BaseGlobalNotificationType.PERIOD_ACTIVATED ||
-            event?.type === BaseGlobalNotificationType.SEGMENT_ACTIVATED) &&
-          event?.facts?.gameId === currentGameId
-        ) {
-          refetchResult();
-        }
-      }
-    },
-    onError: (err) => {
-      console.error("Player Cockpit: Subscription error:", err);
-    },
-  });
-
-  const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
-    ?.countdownExpiresAt as string | null;
-  const countdownDurationMs = data?.result?.currentGame?.activePeriod
-    ?.activeSegment?.countdownDurationMs as number | null;
-
-  const expiresAtDate = useMemo(() => {
-    return strExpiresAt ? dayjs(strExpiresAt).toDate() : null;
-  }, [strExpiresAt]);
-
-  const self = data?.self;
-
-  if (!data?.result) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
-
-  const isReady = self?.isReady ?? false;
-
-  const playerInfo = {
-    name: self?.name || "",
-    color: self?.facts?.color || "White",
-    location: self?.facts?.location || "ZH",
-    level: self?.level?.index ?? 0,
-    xp: self?.experience ?? 0,
-    xpMax: self?.experienceToNext ?? 100,
-    achievements: (self?.achievements || []) as any,
-    imgPathAvatar: self?.facts?.avatar || "",
-    imgPathLocation: self?.facts?.location
-      ? `/locations/${self.facts.location}.svg`
-      : "",
-    onClick: () => {},
-  };
-
-  const sidebar = (
-    <div id="sidebar" className="flex flex-col justify-between w-80">
-      <Card className="mb-4">
-        <CardContent className="pt-6 space-y-4">
-          <PlayerDisplay
-            name={playerInfo.name}
-            color={playerInfo.color}
-            location={playerInfo.location}
-            level={playerInfo.level}
-            achievements={playerInfo.achievements}
-            imgPathAvatar={playerInfo.imgPathAvatar}
-            imgPathLocation={playerInfo.imgPathLocation}
-            onClick={playerInfo.onClick}
-          />
-          <div className="flex items-center justify-between border-t pt-4">
-            {self && (
-              <div data-cy="ready-switch" className="flex items-center gap-2">
-                <span className="text-sm font-medium">Ready?</span>
-                <Button
-                  variant={isReady ? "success" : "default"}
-                  disabled={loading}
-                  onClick={async () => {
-                    try {
-                      await updateReadyState({
-                        variables: {
-                          isReady: !isReady,
-                        },
-                      });
-                      refetchResult();
-                    } catch (e: any) {
-                      toast({
-                        title: "Error updating ready state",
-                        description: e.message,
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                >
-                  {isReady ? "Ready" : "Set Ready"}
-                </Button>
-              </div>
-            )}
-
-            {countdownDurationMs !== null && expiresAtDate !== null && (
-              <CycleCountdown
-                expiresAt={expiresAtDate}
-                totalDuration={countdownDurationMs / 1000}
-              />
-            )}
-            <LearningElements />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  const tabs = [
-    { name: "Welcome", href: "/play/welcome" },
-    { name: "Cockpit", href: "/play/cockpit" },
-  ];
-
-  return (
-    <>
-      <StoryElements playerState={data} player={self} />
-      <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
-        <div className="flex-1 space-y-6">{children}</div>
-      </Layout>
-    </>
   );
 }
 

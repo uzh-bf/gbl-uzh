@@ -1,6 +1,6 @@
 # Dev container
 
-Self-contained local environment for the **gbl-uzh demo-game**. No Infisical, no
+Self-contained local environment for the **gbl-uzh demo-game** by default. No Infisical, no
 external Auth0 — clone, route through devrouter, and run. The devcontainer owns
 the whole stack (toolchain, Postgres, the local OIDC mock, install + build +
 seed, the dev server); [devrouter](https://github.com/rschlaefli/devrouter)
@@ -44,6 +44,28 @@ for a in app oidc db; do dev app run "$a" --yes; done
 
 Open <https://demo-game.localhost>. The dev server auto-starts in the background
 (`tail -f /tmp/dev.log` for output).
+
+## Select a game target
+
+`WORKSPACE` names the routed host and container aliases. `GBL_GAME_TARGET`
+separately selects the package used consistently for Prisma copy/generate/push,
+seed, and the dev server. It defaults to `demo`; the supported values are:
+
+| Target | Package |
+| --- | --- |
+| `demo` | `@gbl-uzh/demo-game` |
+| `central-bank` | `@gbl-uzh/central-bank` |
+| `rate-wars` | `@gbl-uzh/rate-wars` |
+
+Pass an explicit target when creating the DevPod workspace, for example:
+
+```bash
+devpod up . --ide none --workspace-env GBL_GAME_TARGET=central-bank
+```
+
+The target does not derive from a branch or workspace name, and it does not
+change the routed hostname. Use a distinct `WORKSPACE` when you need an isolated
+route and database volume. Unknown targets fail before any Prisma command runs.
 
 ## How routing works
 

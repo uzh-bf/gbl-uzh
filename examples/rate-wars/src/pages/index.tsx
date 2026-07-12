@@ -183,7 +183,7 @@ export default function Home() {
           nameButtonBuy="Buy"
           nameButtonSell="Sell"
           max={10}
-          onSubmit={async (values, helpers) => {
+          onSubmit={async (values) => {
             console.log(values)
             // await performAction({
             //   variables: {
@@ -193,7 +193,6 @@ export default function Home() {
             //     }),
             //   },
             // })
-            helpers.resetForm()
           }}
         />
         <TimelineAdmin />

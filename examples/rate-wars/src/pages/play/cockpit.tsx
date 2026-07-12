@@ -1,9 +1,7 @@
-import { useMutation, useQuery, useSubscription } from '@apollo/client'
-import { Layout, PlayerDisplay } from '@gbl-uzh/ui'
+import { useMutation, useQuery } from '@apollo/client'
 import {
   Button,
   FormikNumberField,
-  Switch,
 } from '@uzh-bf/design-system'
 import {
   Card,
@@ -25,10 +23,6 @@ import {
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
 
-import { CycleCountdown } from '~/components/CycleCountDown'
-
-import dayjs from 'dayjs'
-import { useEffect, useMemo, useState } from 'react'
 import {
   CartesianGrid,
   Line,
@@ -38,22 +32,12 @@ import {
 } from 'recharts'
 
 import {
-  GlobalEventsDocument,
   PerformActionDocument,
   ResultDocument,
-  UpdateReadyStateDocument,
 } from 'src/graphql/generated/ops'
-import LearningElements from '~/components/LearningElements'
-import StoryElements from '~/components/StoryElements'
 import { Form, Formik } from 'formik'
 import * as yup from 'yup'
-import { useToast } from '../../components/ui/use-toast'
-
-enum BaseGlobalNotificationType {
-  PERIOD_ACTIVATED = 'PERIOD_ACTIVATED',
-  SEGMENT_ACTIVATED = 'SEGMENT_ACTIVATED',
-  COUNTDOWN_UPDATED = 'COUNTDOWN_UPDATED',
-}
+import GameLayout from '../../components/GameLayout'
 
 function GameHeader({ currentGame }) {
   return (
@@ -63,177 +47,6 @@ function GameHeader({ currentGame }) {
     </div>
   )
 }
-
-function GameLayout({ children }: { children: React.ReactNode }) {
-  const { data, refetch: refetchResult } = useQuery(ResultDocument, {
-    fetchPolicy: 'cache-and-network',
-  })
-
-  const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument)
-
-  const [countdownNotifications, setCountdownNotifications] = useState({
-    '60': false,
-    '180': false,
-  })
-
-  const { toast } = useToast()
-
-  const currentGameId = parseInt(data?.result?.currentGame?.id)
-
-  useSubscription(GlobalEventsDocument, {
-    skip: !currentGameId,
-    onData: ({ data: subData }) => {
-      if (subData?.data?.eventsGlobal) {
-        const event = subData.data.eventsGlobal
-        if (
-          (event.type === BaseGlobalNotificationType.COUNTDOWN_UPDATED ||
-            event?.type === BaseGlobalNotificationType.PERIOD_ACTIVATED ||
-            event?.type === BaseGlobalNotificationType.SEGMENT_ACTIVATED) &&
-          event?.facts?.gameId === currentGameId
-        ) {
-          refetchResult()
-        }
-      }
-    },
-    onError: (err) => {
-      console.error('Player Cockpit: Subscription error:', err)
-    },
-  })
-
-  const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
-    ?.countdownExpiresAt as string | null
-  const countdownDurationMs = data?.result?.currentGame?.activePeriod
-    ?.activeSegment?.countdownDurationMs as number | null
-
-  const expiresAtDate = useMemo(() => {
-    return strExpiresAt ? dayjs(strExpiresAt).toDate() : null
-  }, [strExpiresAt])
-
-  useEffect(() => {
-    if (!strExpiresAt) return
-
-    const dateExpiresAt = dayjs(strExpiresAt)
-    const secondsRemaining = dateExpiresAt.diff(dayjs(), 's')
-
-    if (secondsRemaining > 0) {
-      toast({
-        title: 'Countdown set/updated!',
-        description: `${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
-      })
-    }
-
-    setCountdownNotifications({ '60': false, '180': false })
-  }, [strExpiresAt, countdownDurationMs])
-
-  if (!data?.self) return null
-
-  const playerInfo = {
-    name: data.self.name,
-    color: data.self.facts?.color,
-    location: data.self.facts?.location,
-    level: data.self.level?.index ?? 0,
-    xp: data.self.experience,
-    xpMax: data.self.experienceToNext,
-    achievements: data.self.achievements,
-    imgPathAvatar: data.self.facts?.avatar,
-    imgPathLocation: `/locations/${data.self.facts?.location}.svg`,
-    onClick: () => {},
-  }
-  const playerState = {
-    data,
-  }
-  const player = {
-    role: data.self.role,
-  }
-
-  const sidebar = (
-    <div id="sidebar" className="flex flex-col justify-between">
-      <Card className="mb-4">
-        <CardContent>
-          <PlayerDisplay
-            name={playerInfo.name}
-            color={playerInfo.color}
-            location={playerInfo.location}
-            level={playerInfo.level}
-            achievements={playerInfo.achievements as any}
-            imgPathAvatar={playerInfo.imgPathAvatar}
-            imgPathLocation={playerInfo.imgPathLocation}
-            onClick={playerInfo.onClick}
-          />
-          <div className="flex items-center justify-between">
-            {data?.self && (
-              <div data-cy="ready-switch">
-                <Switch
-                  className={{
-                    root: 'text-xs font-bold text-gray-600',
-                  }}
-                  disabled={!data.self || loading}
-                  id="isReady"
-                  checked={data.self.isReady}
-                  label="Ready?"
-                  onCheckedChange={async () => {
-                    await updateReadyState({
-                      variables: {
-                        isReady: !data.self.isReady,
-                      },
-                    })
-                  }}
-                />
-              </div>
-            )}
-
-            {countdownDurationMs !== null && expiresAtDate !== null && (
-              <CycleCountdown
-                expiresAt={expiresAtDate}
-                totalDuration={countdownDurationMs / 1000}
-                onUpdate={(secondsLeft) => {
-                  const minutesRemainingThreshold = [1, 3]
-                  minutesRemainingThreshold.forEach((minute) => {
-                    const secondsThreshold = minute * 60
-                    if (
-                      secondsLeft <= secondsThreshold &&
-                      secondsLeft > secondsThreshold - 1
-                    ) {
-                      const secondsKey = String(secondsThreshold)
-                      if (!countdownNotifications[secondsKey]) {
-                        const friendlyMinutes = Math.ceil(secondsLeft / 60)
-                        toast({
-                          title: 'Countdown Update',
-                          description: `Less than ${friendlyMinutes} min remaining! Please press ready.`,
-                        })
-                        setCountdownNotifications((prevState) => ({
-                          ...prevState,
-                          [secondsKey]: true,
-                        }))
-                      }
-                    }
-                  })
-                }}
-                onExpire={() => console.log('Countdown expired')}
-                className="text-xs font-bold text-gray-600"
-              />
-            )}
-          </div>
-          <LearningElements />
-        </CardContent>
-      </Card>
-    </div>
-  )
-
-  return (
-    <>
-      <StoryElements playerState={playerState} player={player} />
-      <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
-        {children}
-      </Layout>
-    </>
-  )
-}
-
-const tabs = [
-  { name: 'Welcome', href: '/play/welcome' },
-  { name: 'Cockpit', href: '/play/cockpit' },
-]
 
 const chf = (v: number | undefined | null) =>
   typeof v === 'number' ? `${v.toFixed(2)} CHF` : '—'
@@ -636,7 +449,7 @@ function Cockpit() {
       ]
 
       const equityConfig = {
-        equity: { label: 'Equity', color: 'hsl(var(--chart-1))' },
+        equity: { label: 'Equity', color: 'var(--chart-1)' },
       }
 
       return (
@@ -703,7 +516,7 @@ function Cockpit() {
                       <Line
                         type="natural"
                         dataKey="equity"
-                        stroke="hsl(var(--chart-1))"
+                        stroke="var(--chart-1)"
                         strokeWidth={2}
                       />
                       <CartesianGrid vertical={false} />

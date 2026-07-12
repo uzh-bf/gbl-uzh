@@ -14,7 +14,7 @@ The wiki in `docs/` is the ground truth AI agents use to build games on this pla
 - `apps/demo-game` structural changes (routes, services layout, seed, auth flow) → [developing-a-game](../../../docs/developing-a-game.md), skills referencing demo-game paths
 - **tRPC migration merges to `dev`** (standing item): rewrite [api-layer](../../../docs/api-layer.md) — GraphQL section deleted, tRPC becomes current; also update `gbl-new-game-app` + `gbl-frontend-game-ui` skills and the `generateBaseMutations` reference in [developing-a-game](../../../docs/developing-a-game.md)
 - **Deployment setup changes**: Vercel/Neon env vars or `deploy/` k8s path changes, Prisma `binaryTargets`, auth-provider wiring (`authOptions.ts`), or the `prisma/copy.ts` build-order → [deploying-a-game](../../../docs/deploying-a-game.md); if the easy staging path or the production path moves, update the corresponding section and the `gbl-deploy-staging` skill
-- Wiki also has documented caveats that expire: `COMPLETED` unreachable, `GameFacts.update` unwired, `@gbl-uzh/ui` unpublished/placeholder `Button`, demo game as sole reference. If a change invalidates one, remove it everywhere (grep the claim).
+- Wiki also has documented caveats that expire: `COMPLETED` unreachable, `GameFacts.update` unwired, UI first-publish bootstrap pending, and demo game as primary reference. If a change invalidates one, remove it everywhere (grep the claim).
 
 ## Format: OKF v0.1, with house rules
 

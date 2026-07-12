@@ -1,5 +1,5 @@
 import { useField } from 'formik'
-import { MultiSelect } from '~/components/MultiSelect'
+import { MultiSelect } from '@gbl-uzh/ui'
 
 interface MultiSelectFieldProps {
   name: string
@@ -19,9 +19,9 @@ export const FormikMultiSelectField = ({
     <div className="flex flex-col gap-2">
       <span className="text-sm font-normal text-gray-700">{label}</span>
       <MultiSelect
-        {...field}
         options={options}
-        placeholderCmdSearch={placeholderCmdSearch}
+        value={field.value || []}
+        searchPlaceholder={placeholderCmdSearch}
         onChange={(value) => {
           helpers.setValue(value)
         }}

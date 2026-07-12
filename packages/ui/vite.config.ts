@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     dts({ rollupTypes: true }),
     externalizeDeps({
-      deps: false,
+      deps: true,
       peerDeps: true,
     }) as Plugin,
   ],

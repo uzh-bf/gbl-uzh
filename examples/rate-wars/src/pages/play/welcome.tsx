@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { COLORS } from '@gbl-uzh/platform/src/lib/constants'
-import { Logo } from '@gbl-uzh/ui'
+import { Logo, LogoSelector } from '@gbl-uzh/ui'
 import {
   Button,
   FormikSelectField,
@@ -13,9 +13,8 @@ import {
   SelfDocument,
   UpdatePlayerDataDocument,
 } from 'src/graphql/generated/ops'
-import { LOCATIONS } from 'src/lib/constants'
+import { LOCATIONS, AVATARS } from 'src/lib/constants'
 import * as Yup from 'yup'
-import LogoSelector from '~/components/LogoSelector'
 
 import {
   Card,
@@ -115,7 +114,7 @@ function Welcome() {
           router.replace('/play/cockpit')
         }}
       >
-        {({ values, errors, touched }) => (
+        {({ values, errors, touched, setFieldValue }) => (
           <Card className="flex w-full flex-col">
             <CardHeader>
               <CardTitle>Welcome to the {gameName}!</CardTitle>
@@ -193,10 +192,14 @@ function Welcome() {
                           }}
                         />
                         <LogoSelector
+                          avatarOptions={Object.values(AVATARS)}
+                          colors={COLORS}
+                          color={values.color}
+                          value={values.imgPathAvatar}
+                          onChange={(val) => setFieldValue('imgPathAvatar', val)}
+                          fallbackSrc="/avatars/avatar_placeholder.png"
                           label="Avatar"
                           className="w-48 pb-2 text-sm text-gray-600"
-                          color={values.color}
-                          name="imgPathAvatar"
                         />
 
                         <FormikSelectField

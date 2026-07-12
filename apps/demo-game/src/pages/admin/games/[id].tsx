@@ -8,24 +8,22 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Button,
-  FormikNumberField,
-  FormikTextField,
   H3,
   H4,
   Modal,
 } from '@uzh-bf/design-system'
-import { Form, Formik } from 'formik'
+import { Controller, useForm } from 'react-hook-form'
+import { MultiSelect } from '@gbl-uzh/ui'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
-
-import PlayerCompact from '~/components/PlayerCompact'
 
 import { useMutation, useQuery } from '@apollo/client'
 import {
   STATUS,
   computePeriodStatus,
   computeSegmentStatus,
+  PlayerCompact,
 } from '@gbl-uzh/ui'
 import { useCallback, useEffect, useState } from 'react'
 import {
@@ -57,8 +55,8 @@ import {
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
 
-import { FormikMultiSelectField } from '~/components/fields/FormikMultiSelectField'
 import { useToast } from '~/components/ui/use-toast'
+import { AdminInputField } from '~/components/fields/AdminInputField'
 import {
   DEFAULT_SEED,
   GAP_BONDS,
@@ -68,11 +66,107 @@ import {
   TREND_STOCKS,
 } from '~/types/Period'
 
+interface PeriodFormValues {
+  segmentCount: number
+  seed: number
+  interestBank: number
+  trendBonds: number
+  gapBonds: number
+  trendStocks: number
+  gapStocks: number
+}
+
 function ManageGame() {
   const router = useRouter()
 
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
+
+  const {
+    control: segmentControl,
+    handleSubmit: handleSegmentSubmit,
+    reset: resetSegment,
+    setValue: setSegmentValue,
+  } = useForm({
+    defaultValues: {
+      periodIx: -1,
+      storyElements: [] as string[],
+      learningElements: [] as string[],
+    },
+  })
+
+  const {
+    register: registerPeriod,
+    handleSubmit: handlePeriodSubmit,
+    reset: resetPeriod,
+    formState: { errors: errorsPeriod },
+  } = useForm<PeriodFormValues>({
+    defaultValues: {
+      segmentCount: 4,
+      seed: DEFAULT_SEED,
+      interestBank: INTEREST_BANK,
+      trendBonds: TREND_BONDS,
+      gapBonds: GAP_BONDS,
+      trendStocks: TREND_STOCKS,
+      gapStocks: GAP_STOCKS,
+    },
+  })
+
+  const {
+    register: registerCountdown,
+    handleSubmit: handleCountdownSubmit,
+    formState: { errors: errorsCountdown },
+  } = useForm({
+    defaultValues: {
+      countdownSeconds: 300,
+    },
+  })
+
+  const onSegmentSubmit = async (values: {
+    periodIx: number
+    storyElements: string[]
+    learningElements: string[]
+  }) => {
+    await addPeriodSegment({
+      variables: {
+        gameId: Number(router.query.id),
+        periodIx: values.periodIx,
+        facts: {},
+        storyElements: values.storyElements,
+        learningElements: values.learningElements,
+      },
+    })
+    resetSegment()
+  }
+
+  const onPeriodSubmit = async (values: PeriodFormValues) => {
+    await addGamePeriod({
+      variables: {
+        gameId: Number(router.query.id),
+        facts: {
+          scenario: {
+            seed: Math.trunc(values.seed),
+            interestBank: values.interestBank,
+            trendBonds: values.trendBonds,
+            gapBonds: values.gapBonds,
+            trendStocks: values.trendStocks,
+            gapStocks: values.gapStocks,
+          },
+        },
+        segmentCount: Math.trunc(values.segmentCount),
+      },
+    })
+    resetPeriod()
+  }
+
+  const onCountdownSubmit = (values: { countdownSeconds: number }) => {
+    addCountdown({
+      variables: {
+        gameId: Number(router.query.id),
+        seconds: Number(values.countdownSeconds),
+      },
+    })
+  }
 
   const { data, error, loading } = useQuery(GameDocument, {
     variables: { id: Number(router.query.id) },
@@ -510,104 +604,82 @@ function ManageGame() {
                       }
                     )}
                     {!isPeriodCompleted && game.periods.length - 1 === ix && (
-                      <Formik
-                        initialValues={{
-                          periodIx: -1,
-                          storyElements: [],
-                          learningElements: [],
-                        }}
-                        onSubmit={async (variables, { resetForm }) => {
-                          await addPeriodSegment({
-                            variables: {
-                              gameId: Number(router.query.id),
-                              periodIx: variables.periodIx,
-                              facts: {},
-                              storyElements: variables.storyElements,
-                              learningElements: variables.learningElements,
-                            },
-                          })
-                          resetForm()
-                        }}
-                      >
-                        {(newSegmentForm) => {
-                          if (storyElementsLoading) {
-                            return <div>Loading story elements...</div>
-                          }
-                          if (storyElementsError) {
-                            return (
-                              <div>
-                                Error loading story elements:{' '}
-                                {storyElementsError.message}
-                              </div>
-                            )
-                          }
-
-                          if (learningElementsLoading) {
-                            return <div>Loading learning elements...</div>
-                          }
-                          if (learningElementsError) {
-                            return (
-                              <div>
-                                Error loading learning elements:{' '}
-                                {learningElementsError.message}
-                              </div>
-                            )
-                          }
-
-                          return (
-                            <Modal
-                              open={isSegmentModalOpen}
-                              onClose={() => setIsSegmentModalOpen(false)}
-                              trigger={
-                                <Button
-                                  disabled={
-                                    period.segmentCount ===
-                                    period.segments.length
-                                  }
-                                  className={{
-                                    root: 'h-full w-12 font-bold text-gray-500',
-                                  }}
-                                  onClick={() => setIsSegmentModalOpen(true)}
-                                  aria-label="Add segment"
-                                  data={{ cy: 'add-segment' }}
-                                >
-                                  <FontAwesomeIcon icon={faPlus} />
-                                </Button>
-                              }
-                              title="Add Segment"
-                              onSecondaryAction={() => {
-                                newSegmentForm.resetForm()
-                                setIsSegmentModalOpen(false)
-                              }}
-                              secondaryLabel="Discard"
-                              onPrimaryAction={async () => {
-                                await newSegmentForm.setFieldValue(
-                                  'periodIx',
-                                  period.index
-                                )
-                                newSegmentForm.handleSubmit()
-                                setIsSegmentModalOpen(false)
-                              }}
-                              primaryLabel="Submit"
-                            >
-                              <div className="flex w-1/2 flex-col gap-2">
-                                <FormikMultiSelectField
+                      <>
+                        {storyElementsLoading || learningElementsLoading ? (
+                          <div>Loading...</div>
+                        ) : storyElementsError || learningElementsError ? (
+                          <div>
+                            Error loading elements:{' '}
+                            {storyElementsError?.message || learningElementsError?.message}
+                          </div>
+                        ) : (
+                          <Modal
+                            open={isSegmentModalOpen}
+                            onClose={() => setIsSegmentModalOpen(false)}
+                            trigger={
+                              <Button
+                                disabled={
+                                  period.segmentCount ===
+                                  period.segments.length
+                                }
+                                className={{
+                                  root: 'h-full w-12 font-bold text-gray-500',
+                                }}
+                                onClick={() => setIsSegmentModalOpen(true)}
+                                aria-label="Add segment"
+                                data={{ cy: 'add-segment' }}
+                              >
+                                <FontAwesomeIcon icon={faPlus} />
+                              </Button>
+                            }
+                            title="Add Segment"
+                            onSecondaryAction={() => {
+                              resetSegment()
+                              setIsSegmentModalOpen(false)
+                            }}
+                            secondaryLabel="Discard"
+                            onPrimaryAction={() => {
+                              setSegmentValue('periodIx', period.index)
+                              handleSegmentSubmit(onSegmentSubmit)()
+                              setIsSegmentModalOpen(false)
+                            }}
+                            primaryLabel="Submit"
+                          >
+                            <div className="flex w-1/2 flex-col gap-2">
+                              <div className="flex flex-col gap-2">
+                                <span className="text-sm font-normal text-gray-700">Story Elements</span>
+                                <Controller
+                                  control={segmentControl}
                                   name="storyElements"
-                                  label="Story Elements"
-                                  options={storyElementsAll}
-                                  placeholderCmdSearch="Search story elements..."
-                                />
-                                <FormikMultiSelectField
-                                  name="learningElements"
-                                  label="Learning Elements"
-                                  options={learningElementsAll}
-                                  placeholderCmdSearch="Search learning elements..."
+                                  render={({ field }) => (
+                                    <MultiSelect
+                                      options={storyElementsAll}
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      searchPlaceholder="Search story elements..."
+                                    />
+                                  )}
                                 />
                               </div>
-                            </Modal>
-                          )
-                        }}
-                      </Formik>
+                              <div className="flex flex-col gap-2">
+                                <span className="text-sm font-normal text-gray-700">Learning Elements</span>
+                                <Controller
+                                  control={segmentControl}
+                                  name="learningElements"
+                                  render={({ field }) => (
+                                    <MultiSelect
+                                      options={learningElementsAll}
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      searchPlaceholder="Search learning elements..."
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          </Modal>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -624,178 +696,134 @@ function ManageGame() {
             )
           })}
 
-          <Formik
-            initialValues={{
-              periodName: 'Game Period',
-              segmentCount: '4',
-              seed: DEFAULT_SEED.toString(),
-              interestBank: INTEREST_BANK.toString(),
-              trendBonds: TREND_BONDS.toString(),
-              gapBonds: GAP_BONDS.toString(),
-              trendStocks: TREND_STOCKS.toString(),
-              gapStocks: GAP_STOCKS.toString(),
-            }}
-            onSubmit={async (variables, { resetForm }) => {
-              const segmentCount: number = parseInt(variables.segmentCount)
-              const seed = parseInt(variables.seed)
-              const interestBank = parseFloat(variables.interestBank)
-              const trendBonds = parseFloat(variables.trendBonds)
-              const gapBonds = parseFloat(variables.gapBonds)
-              const trendStocks = parseFloat(variables.trendStocks)
-              const gapStocks = parseFloat(variables.gapStocks)
-              await addGamePeriod({
-                variables: {
-                  gameId: Number(router.query.id),
-                  facts: {
-                    scenario: {
-                      seed,
-                      interestBank,
-                      trendBonds,
-                      gapBonds,
-                      trendStocks,
-                      gapStocks,
-                    },
-                  },
-                  segmentCount: segmentCount,
-                },
-              })
-              resetForm()
-            }}
-          >
-            {(newPeriodForm) => {
-              const lastPeriod = game.periods[game.periods.length - 1]
-              const disabled =
-                lastPeriod &&
-                lastPeriod.segmentCount !== lastPeriod.segments.length
+          {(() => {
+            const lastPeriod = game.periods[game.periods.length - 1]
+            const disabled =
+              lastPeriod &&
+              lastPeriod.segmentCount !== lastPeriod.segments.length
 
-              return (
-                <Modal
-                  open={isPeriodModalOpen}
-                  onClose={() => setIsPeriodModalOpen(false)}
-                  trigger={
-                    <Button
-                      disabled={disabled}
-                      className={{ root: 'font-bold text-gray-500 md:w-48' }}
-                      onClick={() => setIsPeriodModalOpen(true)}
-                      aria-label="Add period"
-                      data={{ cy: 'add-period' }}
-                    >
-                      <FontAwesomeIcon icon={faPlus} />
-                    </Button>
-                  }
-                  title="Add Period"
-                  onSecondaryAction={() => {
-                    newPeriodForm.resetForm()
-                    setIsPeriodModalOpen(false)
-                  }}
-                  secondaryLabel="Discard"
-                  onPrimaryAction={async () => {
-                    await newPeriodForm.setFieldValue(
-                      'newPeriodIx',
-                      game.periods.length
-                    )
-                    newPeriodForm.handleSubmit()
-                    setIsPeriodModalOpen(false)
-                  }}
-                  primaryLabel="Submit"
-                >
+            return (
+              <Modal
+                open={isPeriodModalOpen}
+                onClose={() => setIsPeriodModalOpen(false)}
+                trigger={
+                  <Button
+                    disabled={disabled}
+                    className={{ root: 'font-bold text-gray-500 md:w-48' }}
+                    onClick={() => setIsPeriodModalOpen(true)}
+                    aria-label="Add period"
+                    data={{ cy: 'add-period' }}
+                  >
+                    <FontAwesomeIcon icon={faPlus} />
+                  </Button>
+                }
+                title="Add Period"
+                onSecondaryAction={() => {
+                  resetPeriod()
+                  setIsPeriodModalOpen(false)
+                }}
+                secondaryLabel="Discard"
+                onPrimaryAction={() => {
+                  handlePeriodSubmit(onPeriodSubmit)()
+                  setIsPeriodModalOpen(false)
+                }}
+                primaryLabel="Submit"
+              >
+                <div className="flex w-1/2 flex-col gap-2">
+                  <AdminInputField
+                    label="Number of segments"
+                    name="segmentCount"
+                    type="number"
+                    tooltip={
+                      'One period corresponds to one year. The number of segments is used to compute the number of months in the period.'
+                    }
+                    required
+                    register={registerPeriod}
+                    error={errorsPeriod.segmentCount}
+                  />
+                </div>
+                <div className="mt-4">
+                  <H3>Scenario Parameters</H3>
                   <div className="flex w-1/2 flex-col gap-2">
-                    <FormikTextField
-                      name="periodName"
-                      label="Period Name"
-                      data={{ cy: 'period-name' }}
-                      className={{ label: 'pb-2 font-normal' }}
-                    />
-                    <FormikNumberField
-                      placeholder={newPeriodForm.values.segmentCount}
-                      label="Number of segments"
-                      name="segmentCount"
-                      tooltip={
-                        'One period corresponds to one year. The number of segments is used to compute the number of months in the period.'
-                      }
+                    <AdminInputField
+                      label="Seed"
+                      name="seed"
+                      type="number"
+                      tooltip={'Seed ....'}
                       required
-                      data={{ cy: 'segment-count' }}
-                      className={{ label: 'pb-2 font-normal' }}
+                      register={registerPeriod}
+                      error={errorsPeriod.seed}
                     />
                   </div>
-                  <div className="mt-4">
-                    <H3>Scenario Parameters</H3>
-                    <div className="flex w-1/2 flex-col gap-2">
-                      <FormikNumberField
-                        placeholder={newPeriodForm.values.seed}
-                        label="Seed"
-                        name="seed"
-                        tooltip={'Seed ....'}
-                        required
-                        data={{ cy: 'seed' }}
-                        className={{ label: 'pb-2 font-normal' }}
-                      />
-                    </div>
+                </div>
+                <div className="mt-4">
+                  <H4>Bank</H4>
+                  <div className="flex w-1/2 flex-col gap-2">
+                    <AdminInputField
+                      label="Saving Interest"
+                      name="interestBank"
+                      type="number"
+                      step={0.0001}
+                      tooltip={'Saving interest ....'}
+                      required
+                      register={registerPeriod}
+                      error={errorsPeriod.interestBank}
+                    />
                   </div>
-                  <div className="mt-4">
-                    <H4>Bank</H4>
-                    <div className="flex w-1/2 flex-col gap-2">
-                      <FormikNumberField
-                        placeholder={newPeriodForm.values.interestBank}
-                        label="Saving Interest"
-                        name="interestBank"
-                        tooltip={'Saving interest ....'}
-                        required
-                        data={{ cy: 'saving-interest' }}
-                        className={{ label: 'pb-2 font-normal' }}
-                      />
-                    </div>
+                </div>
+                <div className="mt-4">
+                  <H4>Bonds</H4>
+                  <div className="flex w-1/2 gap-2">
+                    <AdminInputField
+                      label="Trend"
+                      name="trendBonds"
+                      type="number"
+                      step={0.0001}
+                      tooltip={'Trend is the expectation value.'}
+                      required
+                      register={registerPeriod}
+                      error={errorsPeriod.trendBonds}
+                    />
+                    <AdminInputField
+                      label="Gap"
+                      name="gapBonds"
+                      type="number"
+                      step={0.0001}
+                      tooltip={'TODO.'}
+                      required
+                      register={registerPeriod}
+                      error={errorsPeriod.gapBonds}
+                    />
                   </div>
-                  <div className="mt-4">
-                    <H4>Bonds</H4>
-                    <div className="flex w-1/2 gap-2">
-                      <FormikNumberField
-                        placeholder={newPeriodForm.values.trendBonds}
-                        label="Trend"
-                        name="trendBonds"
-                        tooltip={'Trend is the expectation value.'}
-                        required
-                        data={{ cy: 'trend-bonds' }}
-                        className={{ label: 'pb-2 font-normal' }}
-                      />
-                      <FormikNumberField
-                        placeholder={newPeriodForm.values.gapBonds}
-                        label="Gap"
-                        name="gapBonds"
-                        tooltip={'TODO.'}
-                        required
-                        data={{ cy: 'gap-bonds' }}
-                        className={{ label: 'pb-2 font-normal' }}
-                      />
-                    </div>
+                </div>
+                <div className="mt-4">
+                  <H4>Stocks</H4>
+                  <div className="flex w-1/2 gap-2">
+                    <AdminInputField
+                      label="Trend"
+                      name="trendStocks"
+                      type="number"
+                      step={0.0001}
+                      tooltip={'Trend is the expectation value.'}
+                      required
+                      register={registerPeriod}
+                      error={errorsPeriod.trendStocks}
+                    />
+                    <AdminInputField
+                      label="Gap"
+                      name="gapStocks"
+                      type="number"
+                      step={0.0001}
+                      tooltip={'TODO.'}
+                      required
+                      register={registerPeriod}
+                      error={errorsPeriod.gapStocks}
+                    />
                   </div>
-                  <div className="mt-4">
-                    <H4>Stocks</H4>
-                    <div className="flex w-1/2 gap-2">
-                      <FormikNumberField
-                        placeholder={newPeriodForm.values.trendStocks}
-                        label="Trend"
-                        name="trendStocks"
-                        tooltip={'Trend is the expectation value.'}
-                        required
-                        data={{ cy: 'trend-stocks' }}
-                        className={{ label: 'pb-2 font-normal' }}
-                      />
-                      <FormikNumberField
-                        placeholder={newPeriodForm.values.gapStocks}
-                        label="Gap"
-                        name="gapStocks"
-                        tooltip={'TODO.'}
-                        required
-                        data={{ cy: 'gap-stocks' }}
-                        className={{ label: 'pb-2 font-normal' }}
-                      />
-                    </div>
-                  </div>
-                </Modal>
-              )
-            }}
-          </Formik>
+                </div>
+              </Modal>
+            )
+          })()}
         </div>
       </div>
       <div className="mt-2 flex flex-row gap-2">
@@ -817,45 +845,35 @@ function ManageGame() {
           </div>
         </div>
 
-        <Formik
-          initialValues={{ countdownSeconds: 300 }}
-          onSubmit={(values) =>
-            addCountdown({
-              variables: {
-                gameId: Number(router.query.id),
-                seconds: Number(values.countdownSeconds),
-              },
-            })
-          }
-        >
-          <Form>
-            <Card className="flex flex-col">
-              <CardHeader>
-                <CardTitle>Countdown</CardTitle>
-                <CardDescription>
-                  Set a countdown for the segment.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div data-cy="countdown-seconds">
-                  <FormikNumberField
-                    name="countdownSeconds"
-                    precision={0}
-                    label="Countdown in seconds"
-                    className={{ label: 'pb-2 font-normal' }}
-                  />
-                </div>
-                {/* TODO(JJ): @RS Do we want to show the following? If no we
-                  we can remove the refetchQueries.
-                */}
-                {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
-              </CardContent>
-              <CardFooter>
-                <Button type="submit">Set Countdown</Button>
-              </CardFooter>
-            </Card>
-          </Form>
-        </Formik>
+        <form onSubmit={handleCountdownSubmit(onCountdownSubmit)}>
+          <Card className="flex flex-col">
+            <CardHeader>
+              <CardTitle>Countdown</CardTitle>
+              <CardDescription>
+                Set a countdown for the segment.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div data-cy="countdown-seconds">
+                <AdminInputField
+                  label="Countdown in seconds"
+                  name="countdownSeconds"
+                  type="number"
+                  register={registerCountdown}
+                  error={errorsCountdown.countdownSeconds}
+                  required
+                />
+              </div>
+              {/* TODO(JJ): @RS Do we want to show the following? If no we
+                we can remove the refetchQueries.
+              */}
+              {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
+            </CardContent>
+            <CardFooter>
+              <Button type="submit">Set Countdown</Button>
+            </CardFooter>
+          </Card>
+        </form>
       </div>
     </div>
   )

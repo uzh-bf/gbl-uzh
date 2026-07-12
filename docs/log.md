@@ -1,5 +1,13 @@
 # Log
 
+## 2026-07-11
+
+- **Update**: `platform-overview.md`, `ui-components.md`, and `developing-a-game.md` - documented the verified public package contract, stable CSS export, external Next.js consumption, release/version workflow, and one-time npm trusted-publishing bootstrap for `@gbl-uzh/ui`.
+
+## 2026-07-10
+
+- **Update**: `developing-a-game.md` - documented the explicit devcontainer game-target contract: `GBL_GAME_TARGET` selects the supported game package and Prisma lifecycle, while `WORKSPACE` remains solely the routing/container identity.
+
 ## 2026-07-06
 
 - **Creation**: `deploying-a-game.md` - the easy staging deploy path: a Vercel deployment of one game app backed by a Neon serverless Postgres, CLI-first (`neonctl` + `vercel`), distinct from the k8s production path (`deploy/`). Covers the monorepo build-order gotcha (`prisma/copy.ts` needs `@gbl-uzh/platform` built first), pooled vs direct Neon connection strings, the env-var matrix, and the Auth0/OIDC reality (mock OIDC is local-only).

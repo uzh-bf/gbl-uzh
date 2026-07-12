@@ -110,18 +110,13 @@ async function createGame(
 
 async function addPeriod(
   page: Page,
-  {
-    name,
-    segmentCount,
-    index,
-  }: { name: string; segmentCount: string; index: number }
+  { segmentCount, index }: { segmentCount: string; index: number }
 ) {
   await page.getByRole('button', { name: 'Add period' }).click()
   const dialog = page.getByRole('dialog', { name: 'Add Period' })
-  const fields = dialog.getByRole('textbox')
-  await input(dialog, 'periodName').fill(name)
-  // FormikNumberField currently renders visible labels without accessible names.
-  await fields.nth(1).fill(segmentCount)
+  await dialog
+    .getByRole('spinbutton', { name: 'Number of segments' })
+    .fill(segmentCount)
   await dialog.getByRole('button', { name: 'Submit' }).click()
   await expect(page.getByTestId(`period-${index}`)).toBeVisible()
 }
@@ -184,12 +179,10 @@ async function joinPlayers(
 }
 
 async function submitDecision(page: Page, values: DecisionValues) {
-  // FormikNumberField currently renders visible labels without accessible names.
-  const fields = page.getByRole('textbox')
   const submitButton = page.getByRole('button', { name: 'Submit' })
-  await fields.nth(0).fill(values.savings)
-  await fields.nth(1).fill(values.bonds)
-  await fields.nth(2).fill(values.stocks)
+  await page.getByRole('spinbutton', { name: 'Savings' }).fill(values.savings)
+  await page.getByRole('spinbutton', { name: 'Bonds' }).fill(values.bonds)
+  await page.getByRole('spinbutton', { name: 'Stocks' }).fill(values.stocks)
   await submitButton.click()
   await expect(submitButton).toBeEnabled()
   await expect(page.getByTestId('ready-switch')).toBeVisible()
@@ -231,7 +224,9 @@ async function assertPlayerPortfolio(page: Page, timeout = 10_000) {
 }
 
 async function setCountdown(page: Page, seconds: string) {
-  await page.getByTestId('countdown-seconds').getByRole('textbox').fill(seconds)
+  await page
+    .getByRole('spinbutton', { name: 'Countdown in seconds' })
+    .fill(seconds)
   await page.getByRole('button', { name: 'Set Countdown' }).click()
 }
 
@@ -351,7 +346,7 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
 
   const joinUrls = await assertUniqueJoinUrls(page, appBaseURL, players.length)
 
-  await addPeriod(page, { name: 'Period 1', segmentCount: '2', index: 0 })
+  await addPeriod(page, { segmentCount: '2', index: 0 })
   await expect(page.getByRole('button', { name: 'Start Period' })).toBeDisabled()
   await expect(page.getByRole('button', { name: 'Add period' })).toBeDisabled()
   await addSegment(page, { periodIndex: 0 })
@@ -362,7 +357,7 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
 
   await assertDicePage(page)
 
-  await addPeriod(page, { name: 'Period 2', segmentCount: '2', index: 1 })
+  await addPeriod(page, { segmentCount: '2', index: 1 })
   await expect(page.getByRole('button', { name: 'Add period' })).toBeDisabled()
   await addSegment(page, { periodIndex: 1 })
   await expect(page.getByRole('button', { name: 'Add period' })).toBeDisabled()
@@ -370,7 +365,7 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
   await expect(page.getByRole('button', { name: 'Add segment' })).toBeDisabled()
   // TODO: remove sentinel when final-period consolidation no longer connects
   // the next period.
-  await addPeriod(page, { name: 'Period 3', segmentCount: '1', index: 2 })
+  await addPeriod(page, { segmentCount: '1', index: 2 })
 
   const playerSessions: PlayerSession[] = []
 
@@ -441,4 +436,106 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
   } finally {
     await Promise.all(playerSessions.map(({ context }) => context.close()))
   }
+})
+
+type TradeSubmission = {
+  volume: number
+  modifier: number
+}
+
+async function tradeSubmissions(page: Page) {
+  return page.evaluate(
+    () =>
+      (
+        window as typeof window & {
+          __tradingFormSubmissions: TradeSubmission[]
+        }
+      ).__tradingFormSubmissions
+  )
+}
+
+test('trading actions submit one validated modifier and reset after success', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const submissions: TradeSubmission[] = []
+    Object.defineProperty(window, '__tradingFormSubmissions', {
+      value: submissions,
+    })
+
+    const originalLog = console.log
+    console.log = (...args) => {
+      const [value] = args
+      if (
+        args.length === 1 &&
+        typeof value === 'object' &&
+        value !== null &&
+        'volume' in value &&
+        'modifier' in value
+      ) {
+        submissions.push(value as TradeSubmission)
+      }
+      originalLog(...args)
+    }
+  })
+
+  await page.goto('/')
+
+  const volume = page.getByRole('spinbutton', { name: 'Volume' })
+  const buy = page.getByRole('button', { name: 'Buy' })
+  const sell = page.getByRole('button', { name: 'Sell' })
+  const volumeId = await volume.getAttribute('id')
+
+  if (!volumeId) {
+    throw new Error('Volume input must expose an ID for its label')
+  }
+
+  await expect(page.locator(`label[for="${volumeId}"]`)).toHaveText('Volume')
+
+  await expect(volume).toHaveValue('0')
+  await expect(buy).toBeDisabled()
+  await expect(sell).toBeDisabled()
+  await expect.poll(() => tradeSubmissions(page)).toEqual([])
+
+  await volume.fill('-1')
+  await expect(buy).toBeDisabled()
+  await expect(sell).toBeDisabled()
+  await expect(volume).toHaveAttribute('aria-invalid', 'true')
+  const errorId = await volume.getAttribute('aria-errormessage')
+
+  if (!errorId) {
+    throw new Error('Invalid volume input must reference its error message')
+  }
+
+  await expect(volume).toHaveAttribute(
+    'aria-describedby',
+    new RegExp(`(^|\\s)${errorId}(\\s|$)`)
+  )
+  await expect(page.locator(`[id="${errorId}"]`)).toHaveRole('alert')
+  await expect.poll(() => tradeSubmissions(page)).toEqual([])
+
+  await volume.fill('2')
+  await expect(volume).not.toHaveAttribute('aria-invalid')
+  await expect(volume).not.toHaveAttribute('aria-errormessage')
+  await volume.press('Enter')
+  await expect.poll(() => tradeSubmissions(page)).toEqual([])
+
+  await buy.click()
+  await expect.poll(() => tradeSubmissions(page)).toEqual([
+    { volume: 2, modifier: 1 },
+  ])
+  await expect(volume).toHaveValue('0')
+
+  await volume.fill('')
+  await expect(volume).toHaveValue('')
+  await expect(buy).toBeDisabled()
+  await expect(sell).toBeDisabled()
+
+  await volume.fill('3')
+  await sell.click()
+  await expect.poll(() => tradeSubmissions(page)).toEqual([
+    { volume: 2, modifier: 1 },
+    { volume: 3, modifier: -1 },
+  ])
+  await expect(volume).toHaveValue('0')
 })
