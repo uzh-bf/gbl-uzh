@@ -1114,9 +1114,9 @@ Make `@gbl-uzh/ui` safe to publish to public npm and install from a packed artif
 
 ### Progress
 
-- Status: EXECUTING.
-- Active: S14 final verification, commit, push, and hosted CI readback.
-- Next: close Gemini findings, commit the final slice, push, and monitor PR checks.
+- Status: COMPLETE.
+- Active: None.
+- Next: explicit maintainer approval, merge, then the documented manual npm bootstrap gate.
 
 S13 evidence:
 
@@ -1148,6 +1148,9 @@ S14 evidence:
 - [x] OKF frontmatter/link validation, deterministic formatting, stale-claim grep, frozen install, UI lint/build/verifier, npm public publish dry-run, whitespace check, and scoped Opengrep pass.
 - [x] Wiki fact-check, final security review, and thermo maintainability review pass with no unresolved P0-P2 findings.
 - [x] Gemini 3.5 Flash High complete review initially returned `REVISE`; after commit `a64062c`, explicit Apollo compatibility guidance, and verification of the official pnpm action tag SHA, the same review conversation returned `PASS` with no unresolved P0-P2 findings.
+- [x] Sonar's new-code security gate initially failed on workflow permission scope and PATH-based verifier process launches; commit `2886720` narrowed permissions and switched to validated absolute executables. Final Sonar quality gate passes.
+- [x] The publish workflow uses official `pnpm/action-setup` v6 at immutable commit `0ebf471`, whose action runtime is Node 24.
+- [x] Final code head `7760d51` passes Docker build, lint, Vercel, SonarCloud analysis and quality gate, merged Playwright report, and Demo Game, Central Bank, and Rate Wars Playwright jobs.
 
 ### S12. Publishable package contract
 
