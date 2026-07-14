@@ -41,21 +41,11 @@ fi
 export CI=true
 export npm_config_verify_deps_before_run=false
 
-if pgrep -f "pnpm.*-F ${GBL_GAME_PACKAGE} dev" >/dev/null 2>&1; then
-  echo "[post-start] ${GBL_GAME_PACKAGE} dev server already running."
-  exit 0
-fi
-if pgrep -f "next dev" >/dev/null 2>&1; then
-  echo "[post-start] Another Next dev server is already using this container; expected ${GBL_GAME_PACKAGE}." >&2
-  exit 1
-fi
-
-echo "[post-start] Starting ${GBL_GAME_PACKAGE} dev server in the background (logs: /tmp/dev.log)..."
-# Fully detach: new session (setsid) AND redirect the whole command's fds to the
-# log / /dev/null. Redirecting only the inner process leaves the wrapper holding
-# DevPod's agent pipe open, which hangs `devpod up` until the server exits.
-setsid bash -c "pnpm -F ${GBL_GAME_PACKAGE} dev" >/tmp/dev.log 2>&1 </dev/null &
-disown 2>/dev/null || true
+devrouter-process ensure \
+  --name game \
+  --match 'pnpm(\.cjs)? .*dev' \
+  --log /tmp/dev.log \
+  -- bash -lc "exec pnpm -F '${GBL_GAME_PACKAGE}' dev"
 
 if [ "${GBL_DEV_MODE:-}" = "starter" ]; then
   printf '[post-start] App      -> %s      (first compile ~30-60s)\n' "$NEXTAUTH_URL"
