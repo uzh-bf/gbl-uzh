@@ -27,12 +27,15 @@ resolve_gbl_game_target
 if [ "${GBL_DEV_MODE:-}" != "starter" ]; then
   if [ "${WORKSPACE:-demo-game}" = "demo-game" ]; then
     app_host="demo-game.localhost"
+    oidc_host="oidc.demo-game.localhost"
   else
     app_host="demo-game.${WORKSPACE}.localhost"
+    oidc_host="oidc.demo-game.${WORKSPACE}.localhost"
   fi
   export NEXTAUTH_URL="https://${app_host}"
   export NEXT_PUBLIC_APP_URL="https://${app_host}"
   export NEXT_PUBLIC_API_URL="https://${app_host}/api/graphql"
+  export AUTH0_ISSUER="https://${oidc_host}/default"
 fi
 
 # No-TTY pnpm hardening (see post-create.sh): keep the dev server from aborting on
