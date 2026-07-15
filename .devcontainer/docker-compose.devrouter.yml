@@ -1,0 +1,12 @@
+# devrouter-managed: do not edit manually
+# A linked worktree's .git file points at the host repository's common Git
+# directory. workspace ensure sets this absolute path before DevPod starts.
+services:
+  app:
+    environment:
+      WORKSPACE: ${WORKSPACE:-}
+      DEVROUTER_WORKSPACE: ${DEVROUTER_WORKSPACE:-}
+    volumes:
+      - type: bind
+        source: ${DEVROUTER_GIT_COMMON_DIR}
+        target: ${DEVROUTER_GIT_COMMON_DIR}

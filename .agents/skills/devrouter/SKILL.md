@@ -127,13 +127,15 @@ Config-level `envMap` on dependency references aliases per-dep vars to app-expec
 
 ## Workspace isolation (parallel git worktrees / agents)
 
-Run several worktrees of one repo in parallel without host/route collisions. A **workspace token** is a single identity spanning three layers: the devpod workspace id (`devpod up --id <ws>`), the routes devrouter registers, and the `${WORKSPACE}` placeholder in `.devrouter.yml` upstreams + the devcontainer compose network alias.
+Run several worktrees of one repo in parallel without host/route collisions. A **workspace token** spans the DevPod id, devrouter routes, `${WORKSPACE}` proxy upstreams, and devcontainer aliases.
 
-- **Token resolution** (precedence): `--workspace <slug>` flag > `DEVROUTER_WORKSPACE` env var > auto-derived from a linked git worktree branch (sanitized: lowercase, non-alphanumeric → `-`, capped at 32 chars) > none. The primary checkout resolves to no token and routes exactly as before (back-compatible).
+- **Identity**: each managed linked worktree stores a local token in Git metadata plus a durable owner record in the repository's Git common directory. The record survives linked-worktree removal and binds the exact path to its DevPod ID. First use reuses an exact-path DevPod or derives a sanitized branch/path slug. Later flags or `DEVROUTER_WORKSPACE` may repeat the identity but cannot rename it. Ambiguous identities fail closed. The primary checkout remains non-namespaced.
 - **When active**: hosts auto-namespace (`web.localhost` → `web.<ws>.localhost`), `${WORKSPACE}` in `upstream` is substituted with the token, and the docker `router` key is suffixed per workspace. The runtime config is computed in memory only — the committed `.devrouter.yml` is never rewritten.
 - **TLS**: namespaced hosts (`web.<ws>.localhost`) are not covered by the `*.localhost` wildcard; devrouter auto-extends the mkcert cert SANs for active hosts when TLS is enabled.
-- **devcontainer integration**: the devcontainer compose service exposes a devnet alias `${WORKSPACE}-app` (default `WORKSPACE=<project>` in `devcontainer.env`); the proxy app uses `upstream: ${WORKSPACE}-app:<port>`. Workspace `feat-a` → alias `feat-a-app`, host `app.feat-a.localhost`.
-- **Lifecycle**: `devrouter workspace up <branch>` (create worktree + devpod + routes), `devrouter workspace ls` (list worktrees/tokens/route counts), `devrouter workspace down <workspace|branch>` (free routes by state-file workspace tag + stop devpod + remove worktree). `devrouter doctor` reports orphaned workspace proxy routes whose worktree dir was removed without `devrouter workspace down`.
+- **devcontainer integration**: managed scaffolds list the base compose file, then `${localEnv:DEVCONTAINER_COMPOSE_OVERLAY:docker-compose.default.yml}`; custom repositories may keep another default overlay. Selecting `.devcontainer/docker-compose.devrouter.yml` for linked worktrees must pass `WORKSPACE` and `DEVROUTER_WORKSPACE` across the combined base/overlay config and bind-mount `${DEVROUTER_GIT_COMMON_DIR}` to the same absolute app-container path. The app exposes `${WORKSPACE}-app`; the proxy uses `upstream: ${WORKSPACE}-app:<port>`.
+- **Lifecycle**: `workspace up` creates and starts a worktree; `workspace ensure .` starts/reconciles an existing linked worktree; `workspace ls` reports owner/Git/DevPod/route state; `workspace stop` stops DevPod/routes but keeps checkout, record, and data; full `workspace down` deletes runtime/routes and removes only a clean, unlocked worktree, then its record; `down --keep-worktree` keeps checkout and record. Dirty or locked full down fails before side effects.
+- **Cleanup**: owner status is `present`, `missing`, `locked`, or `conflict`. `workspace gc` is a dry-run report; `--yes` deletes only exact ledger-owned missing/prunable resources and their records. GC never removes Git worktrees, branches, or prune state. Git has no worktree-removal hook.
+- **Boundary**: workspace commands require Git. Normal config, app, status, and doctor flows remain usable from a `.devrouter.yml` folder without `.git`.
 
 ## Secret manager interop (Infisical/Doppler)
 
@@ -202,9 +204,12 @@ Run several worktrees of one repo in parallel without host/route collisions. A *
 - `devrouter app run <name> [--env <env>] [--workspace <slug>]`: run app with dependency lifecycle (--env overrides SM defaultEnv; --workspace overrides the per-workspace token)
 - `devrouter app exec <name> [--shell] [--env <env>] [--workspace <slug>] -- <cmd>`: one-shot command with resolved dep env
 - `devrouter app rm <name> [--keep-config]`: remove app entry (`--keep-config` frees only the live route/hostname, leaves `.devrouter.yml` untouched)
-- `devrouter workspace up <branch> [--path <dir>] [--no-devpod] [--open]`: create a worktree + devpod + namespaced routes
-- `devrouter workspace ls [--json]`: list git worktrees with workspace token + route count
-- `devrouter workspace down <workspace|branch> [--keep-worktree] [--keep-devpod]`: free routes + stop devpod + remove worktree
+- `devrouter workspace up <branch> [--path <dir>] [--no-devpod] [--open]`: create a worktree and start/prove it unless create-only mode is requested
+- `devrouter workspace ensure [path] [--open]`: start/reconcile and prove an existing linked worktree environment
+- `devrouter workspace ls [--json]`: list ownership, Git, DevPod, route, path, and branch evidence
+- `devrouter workspace stop <workspace|branch>`: stop DevPod and routes; preserve checkout, owner record, and data
+- `devrouter workspace down <workspace|branch> [--keep-worktree]`: delete runtime/routes and optionally remove the clean worktree and record
+- `devrouter workspace gc [--json] [--yes]`: report missing owners by default; apply exact eligible cleanup with `--yes`
 
 ## Validation workflow
 
@@ -216,10 +221,10 @@ For devcontainer onboarding:
 4. `devrouter repo devcontainer write --repo . --dry-run --json`
 5. `devrouter repo devcontainer write --repo . --yes`
 6. `devrouter repo devcontainer verify --repo . --json`
-7. Start the devcontainer, for example `devpod up .`
+7. In a linked worktree, start and prove the devcontainer with `devrouter workspace ensure .` (use `devpod up .` for a primary checkout)
 8. `devrouter repo devcontainer verify --repo . --live --yes --json`
 
-For existing host/docker runtime apps:
+For host/docker runtime apps only:
 
 1. `devrouter setup --repo . --yes`
 2. `devrouter doctor --repo .`

@@ -5,10 +5,10 @@
 #
 # Usage: `dev up` + `dev tls install` (creates devnet + the mkcert CA), THEN
 # bring the devcontainer up (devnet is external — must pre-exist), then
-# `for a in app oidc db; do dev app run "$a" --yes; done`. Requires devrouter >= 0.0.23.
+# `for a in app oidc db; do dev app run "$a" --yes; done`. Requires devrouter >= 0.0.31.
 version: 1
 devrouter:
-  version: 0.0.25
+  version: 0.0.31
 project:
   name: demo-game
 apps:
@@ -19,14 +19,13 @@ apps:
     runtime: proxy
     upstream: ${WORKSPACE}-app:3000
 
-  # Local OIDC mock — shares the app container's netns, so it is reached on devnet
-  # as `${WORKSPACE}-app:8090`. Browser + app server both use this host as the
-  # NextAuth issuer (https://oidc.demo-game.localhost/default).
+  # Local OIDC mock — owns a workspace-scoped devnet alias so app recreation does
+  # not break the issuer. Browser + app server both use the routed host.
   - name: oidc
     host: oidc.demo-game.localhost
     protocol: http
     runtime: proxy
-    upstream: ${WORKSPACE}-app:8090
+    upstream: ${WORKSPACE}-oidc:8090
 
   # Postgres: db.demo-game.localhost:5432 -> `${WORKSPACE}-db` (SNI). Connect with
   # direct-SSL: psql "host=db.demo-game.localhost port=5432 user=prisma
