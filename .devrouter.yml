@@ -8,7 +8,7 @@
 # `for a in app oidc db; do dev app run "$a" --yes; done`. Requires devrouter >= 0.0.23.
 version: 1
 devrouter:
-  version: 0.0.30
+  version: 0.0.31
 project:
   name: demo-game
 apps:
