@@ -17,9 +17,10 @@ host-port collisions** (nothing is published on the host).
 
 ## Prerequisites
 
-devrouter **≥ 0.0.23** (proxy + TCP routing). One-time host setup — must run
-**before** the container starts, because the stack joins devrouter's external
-`devnet` network and that network must already exist:
+devrouter **≥ 0.0.31** (proxy + TCP routing and managed workspace cleanup).
+One-time host setup — must run **before** the container starts, because the
+stack joins devrouter's external `devnet` network and that network must already
+exist:
 
 ```bash
 dev up && dev tls install   # Traefik + the shared `devnet` + mkcert CA (needs 80/443/5432 free)

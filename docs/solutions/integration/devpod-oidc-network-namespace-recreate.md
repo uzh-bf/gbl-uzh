@@ -59,7 +59,7 @@ the managed game process (`.devcontainer/post-start.sh:27`). Starter mode keeps
 its existing shared-namespace topology because the rewrite is explicitly
 guarded from starter execution (`.devcontainer/starter/docker-compose.yml:66`).
 
-The game process itself remains owned by the exact devrouter 0.0.30 helper
+The game process itself remains owned by the exact devrouter 0.0.31 helper
 (`.devcontainer/Dockerfile:21`) and starts through one
 `devrouter-process ensure` call (`.devcontainer/post-start.sh:47`).
 
