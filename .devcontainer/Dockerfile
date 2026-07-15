@@ -19,11 +19,11 @@ RUN apt-get update \
 RUN npm install -g pnpm@11.6.0
 
 # Install only the process-lifecycle helper from the exact devrouter release.
-RUN npm pack --silent '@devrouter/cli@0.0.30' \
-    && tar -xzf 'devrouter-cli-0.0.30.tgz' --strip-components=2 \
+RUN npm pack --silent '@devrouter/cli@0.0.31' \
+    && tar -xzf 'devrouter-cli-0.0.31.tgz' --strip-components=2 \
         -C /usr/local/bin package/bin/devrouter-process \
     && chmod +x /usr/local/bin/devrouter-process \
-    && rm 'devrouter-cli-0.0.30.tgz'
+    && rm 'devrouter-cli-0.0.31.tgz'
 
 # Keep the pnpm store inside the image (not on the bind-mounted workspace), so
 # it neither pollutes the repo nor fights the host's store.
