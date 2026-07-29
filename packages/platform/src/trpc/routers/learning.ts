@@ -14,7 +14,6 @@ import {
   toLearningElementListDto,
   toLearningElementStateDto,
 } from '../dto/learning.js'
-import { throwAsTRPCError } from '../errors.js'
 
 const byIdInput = z.object({ id: idSchema })
 
@@ -29,33 +28,23 @@ function normalizeSelection(selection: string | number[]) {
 export function createLearningRouter() {
   return createTRPCRouter({
     list: protectedProcedure.query(async ({ ctx }) => {
-      try {
-        const elements = await GameService.getLearningElements({}, ctx as any)
+      const elements = await GameService.getLearningElements({}, ctx as any)
 
-        return (elements ?? [])
-          .map((element: any) => toLearningElementListDto(element))
-          .filter(
-            (element): element is LearningElementListDto => element !== null
-          )
-      } catch (error) {
-        throwAsTRPCError(error)
-      }
+      return (elements ?? [])
+        .map((element: any) => toLearningElementListDto(element))
+        .filter(
+          (element): element is LearningElementListDto => element !== null
+        )
     }),
 
-    byId: playerProcedure
-      .input(byIdInput)
-      .query(async ({ input, ctx }) => {
-        try {
-          const state = await PlayService.getLearningElement(
-            { id: input.id },
-            ctx as any
-          )
+    byId: playerProcedure.input(byIdInput).query(async ({ input, ctx }) => {
+      const state = await PlayService.getLearningElement(
+        { id: input.id },
+        ctx as any
+      )
 
-          return toLearningElementStateDto(state as any)
-        } catch (error) {
-          throwAsTRPCError(error)
-        }
-      }),
+      return toLearningElementStateDto(state as any)
+    }),
 
     attempt: playerProcedure
       .input(
@@ -78,6 +67,9 @@ export function createLearningRouter() {
 
           return toLearningElementAttemptDto(attempt as any)
         } catch (error) {
+          // The service JSON.parses the stored/submitted selection; a
+          // SyntaxError therefore signals a malformed player payload, not a
+          // server fault. Everything else is mapped by the shared middleware.
           if (error instanceof SyntaxError) {
             throw new TRPCError({
               code: 'BAD_REQUEST',
@@ -85,24 +77,20 @@ export function createLearningRouter() {
             })
           }
 
-          throwAsTRPCError(error)
+          throw error
         }
       }),
 
     questAchievements: playerProcedure.query(async ({ ctx }) => {
-      try {
-        const achievements = await ctx.prisma.achievement.findMany({
-          where: {
-            id: {
-              notIn: ['LEARNING_ELEMENT_SOLVED'],
-            },
+      const achievements = await ctx.prisma.achievement.findMany({
+        where: {
+          id: {
+            notIn: ['LEARNING_ELEMENT_SOLVED'],
           },
-        })
+        },
+      })
 
-        return achievements ?? []
-      } catch (error) {
-        throwAsTRPCError(error)
-      }
+      return achievements ?? []
     }),
   })
 }

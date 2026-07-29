@@ -14,7 +14,6 @@ import {
   toSpecificResultDto,
   toPlayerResultCoreDto,
 } from '../dto/results.js'
-import { throwAsTRPCError } from '../errors.js'
 
 const specificInput = z.object({
   gameId: gameIdSchema,
@@ -28,57 +27,44 @@ function present<T>(value: T | null): value is T {
 export function createResultsRouter() {
   return createTRPCRouter({
     listForCurrentGame: playerProcedure.query(async ({ ctx }) => {
-      try {
-        const results = await PlayService.getPlayerResults({}, ctx as any)
+      const results = await PlayService.getPlayerResults({}, ctx as any)
 
-        return (results ?? [])
-          .map((result: any) => toPlayerResultCoreDto(result))
-          .filter(present)
-      } catch (error) {
-        throwAsTRPCError(error)
-      }
+      return (results ?? [])
+        .map((result: any) => toPlayerResultCoreDto(result))
+        .filter(present)
     }),
 
     specific: protectedProcedure
       .input(specificInput)
       .query(async ({ input, ctx }) => {
         // Players may only read results for their own game; admins (reports)
-        // may only read results for games they own. Guarded outside try so
-        // NOT_FOUND/FORBIDDEN are not re-mapped to 500 by throwAsTRPCError.
+        // may only read results for games they own.
         if (ctx.user.role === UserRole.ADMIN) {
           await assertGameOwnership(ctx, input.gameId)
         } else if (input.gameId !== ctx.user.gameId) {
           throw new TRPCError({ code: 'FORBIDDEN', message: 'Forbidden' })
         }
 
-        try {
-          const results = await PlayService.getSpecificResults(
-            {
-              gameId: input.gameId,
-              type: input.type,
-            } as any,
-            ctx as any
-          )
+        const results = await PlayService.getSpecificResults(
+          {
+            gameId: input.gameId,
+            type: input.type,
+          } as any,
+          ctx as any
+        )
 
-          return (results ?? [])
-            .map((result: any) => toSpecificResultDto(result))
-            .filter(present)
-        } catch (error) {
-          throwAsTRPCError(error)
-        }
+        return (results ?? [])
+          .map((result: any) => toSpecificResultDto(result))
+          .filter(present)
       }),
 
     pastForPlayer: playerProcedure.query(async ({ ctx }) => {
-      try {
-        const results = await PlayService.getPastResults({}, ctx as any)
-        if (!results) return []
+      const results = await PlayService.getPastResults({}, ctx as any)
+      if (!results) return []
 
-        return (results ?? [])
-          .map((result: any) => toPastResultDto(result))
-          .filter(present)
-      } catch (error) {
-        throwAsTRPCError(error)
-      }
+      return results
+        .map((result: any) => toPastResultDto(result))
+        .filter(present)
     }),
   })
 }

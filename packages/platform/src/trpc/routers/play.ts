@@ -6,7 +6,6 @@ import * as GameService from '../../services/GameService.js'
 import * as PlayService from '../../services/PlayService.js'
 import { toPlayerSelfDto } from '../dto/player.js'
 import { toPlayerResultCoreDto, toPlayerResultDto } from '../dto/results.js'
-import { throwAsTRPCError } from '../errors.js'
 import { createTRPCRouter, playerProcedure } from '../init.js'
 
 type RouterDeps = {
@@ -62,104 +61,88 @@ export function createPlayRouter({
 }: RouterDeps = {}) {
   return createTRPCRouter({
     self: playerProcedure.query(async ({ ctx }) => {
-      try {
-        const player = await PlayService.getPlayerData(
-          { playerId: ctx.user.sub },
-          ctx as any
-        )
+      const player = await PlayService.getPlayerData(
+        { playerId: ctx.user.sub },
+        ctx as any
+      )
 
-        return toPlayerSelfDto(player as any)
-      } catch (error) {
-        throwAsTRPCError(error)
-      }
+      return toPlayerSelfDto(player as any)
     }),
 
     result: playerProcedure.query(async ({ ctx }) => {
-      try {
-        const gameId = ctx.user.gameId
-        if (typeof gameId !== 'number') {
-          return null
-        }
-
-        const result = await PlayService.getPlayerResult(
-          { gameId, playerId: ctx.user.sub },
-          ctx as any
-        )
-
-        return toPlayerResultDto(result as any)
-      } catch (error) {
-        throwAsTRPCError(error)
+      const gameId = ctx.user.gameId
+      if (typeof gameId !== 'number') {
+        return null
       }
+
+      const result = await PlayService.getPlayerResult(
+        { gameId, playerId: ctx.user.sub },
+        ctx as any
+      )
+
+      return toPlayerResultDto(result as any)
     }),
 
     updateReadyState: playerProcedure
       .input(z.object({ isReady: z.boolean() }))
       .mutation(async ({ input, ctx }) => {
-        try {
-          const player = await PlayService.updateReadyState(
-            { isReady: input.isReady },
-            ctx as any
-          )
+        const player = await PlayService.updateReadyState(
+          { isReady: input.isReady },
+          ctx as any
+        )
 
-          return toPlayerSelfDto(player as any)
-        } catch (error) {
-          throwAsTRPCError(error)
-        }
+        return toPlayerSelfDto(player as any)
       }),
 
     updatePlayerData: playerProcedure
       .input(updatePlayerDataInput)
       .mutation(async ({ input, ctx }) => {
-        try {
-          const previousPlayer = await ctx.prisma.player.findUnique({
-            where: {
-              id: ctx.user.sub,
-            },
-            select: {
-              name: true,
-              facts: true,
-            },
-          })
-          const hadSetupBefore = hasCompletedCompanySetup(previousPlayer)
+        const previousPlayer = await ctx.prisma.player.findUnique({
+          where: {
+            id: ctx.user.sub,
+          },
+          select: {
+            name: true,
+            facts: true,
+          },
+        })
+        const hadSetupBefore = hasCompletedCompanySetup(previousPlayer)
 
-          const facts = input.facts ? parsePayload(input.facts) : undefined
-          const player = await GameService.updatePlayerData(
-            {
-              name: input.name ?? undefined,
-              facts,
-            } as any,
-            ctx as any,
-            { schema: schemas.PlayerFactsSchema }
-          )
+        const facts = input.facts ? parsePayload(input.facts) : undefined
+        const player = await GameService.updatePlayerData(
+          {
+            name: input.name ?? undefined,
+            facts,
+          } as any,
+          ctx as any,
+          { schema: schemas.PlayerFactsSchema }
+        )
 
-          const hasSetupAfter = hasCompletedCompanySetup(player)
-          if (!hadSetupBefore && hasSetupAfter && player) {
-            await EventService.receiveEvents({
-              events: [
-                {
-                  type: 'COMPANY_SETUP_COMPLETED',
-                  facts: { hasName: 1, hasColor: 1 },
-                },
-              ],
-              ctx: {
-                user: ctx.user,
-                args: {
-                  gameId: ctx.user.gameId,
-                  periodIx: player.game?.activePeriodIx ?? 0,
-                  playerId: ctx.user.sub,
-                },
-                achievements: player.achievementKeys,
-                experience: player.experience,
-                currentLevelIx: player.levelIx,
+        const hasSetupAfter = hasCompletedCompanySetup(player)
+        if (!hadSetupBefore && hasSetupAfter && player) {
+          await EventService.receiveEvents({
+            events: [
+              {
+                type: 'COMPANY_SETUP_COMPLETED',
+                facts: { hasName: 1, hasColor: 1 },
               },
-              prisma: ctx.prisma,
-            })
-          }
-
-          return toPlayerSelfDto(player as any)
-        } catch (error) {
-          throwAsTRPCError(error)
+            ],
+            ctx: {
+              user: ctx.user,
+              args: {
+                gameId: ctx.user.gameId,
+                periodIx: player.game?.activePeriodIx ?? 0,
+                playerId: ctx.user.sub,
+              },
+              achievements: player.achievementKeys,
+              experience: player.experience,
+              currentLevelIx: player.levelIx,
+            },
+            prisma: ctx.prisma,
+          })
         }
+
+        return toPlayerSelfDto(player as any)
       }),
 
     performAction: playerProcedure
@@ -170,61 +153,54 @@ export function createPlayRouter({
         })
       )
       .mutation(async ({ input, ctx }) => {
-        try {
-          const currentGame = await GameService.getGameFromContext(ctx as any)
+        const currentGame = await GameService.getGameFromContext(ctx as any)
 
-          if (!currentGame?.activePeriod) return null
+        if (!currentGame?.activePeriod) return null
 
-          const facts = parsePayload(input.payload)
-          if (schemas.ActionFactsSchema) {
-            // yup ValidationError maps to BAD_REQUEST in throwAsTRPCError.
-            await schemas.ActionFactsSchema.validate(facts)
-          }
-
-          const actionResult = await PlayService.performActionWithRetry(
-            {
-              gameId: currentGame.id,
-              actionType: input.type,
-              playerId: ctx.user.sub,
-              periodIx: currentGame.activePeriodIx,
-              segmentIx: currentGame.activePeriod.activeSegmentIx,
-              facts,
-            } as any,
-            ctx as any,
-            {
-              services: services as any,
-            } as any
-          )
-
-          return toPlayerResultCoreDto(actionResult as any)
-        } catch (error) {
-          throwAsTRPCError(error)
+        const facts = parsePayload(input.payload)
+        if (schemas.ActionFactsSchema) {
+          // yup ValidationError maps to BAD_REQUEST in the shared
+          // service-error middleware (init.ts).
+          await schemas.ActionFactsSchema.validate(facts)
         }
+
+        const actionResult = await PlayService.performActionWithRetry(
+          {
+            gameId: currentGame.id,
+            actionType: input.type,
+            playerId: ctx.user.sub,
+            periodIx: currentGame.activePeriodIx,
+            segmentIx: currentGame.activePeriod.activeSegmentIx,
+            facts,
+          } as any,
+          ctx as any,
+          {
+            services: services as any,
+          } as any
+        )
+
+        return toPlayerResultCoreDto(actionResult as any)
       }),
 
     saveConsolidationDecision: playerProcedure
       .input(saveConsolidationDecisionInput)
       .mutation(async ({ input, ctx }) => {
-        try {
-          const facts = parsePayload(input.payload)
+        const facts = parsePayload(input.payload)
 
-          const decision = await PlayService.saveDecisions(
-            {
-              decisionType: DB.PlayerDecisionType.CONSOLIDATION,
-              facts,
-            } as any,
-            ctx as any
-          )
+        const decision = await PlayService.saveDecisions(
+          {
+            decisionType: DB.PlayerDecisionType.CONSOLIDATION,
+            facts,
+          } as any,
+          ctx as any
+        )
 
-          if (!decision) return null
+        if (!decision) return null
 
-          return {
-            id: decision.id,
-            type: decision.type,
-            facts: decision.facts,
-          }
-        } catch (error) {
-          throwAsTRPCError(error)
+        return {
+          id: decision.id,
+          type: decision.type,
+          facts: decision.facts,
         }
       }),
   })

@@ -2,6 +2,7 @@ import superjson from 'superjson'
 import { TRPCError, initTRPC } from '@trpc/server'
 import { UserRole } from '../types.js'
 import type { PlatformContext, PlatformUser } from './context.js'
+import { throwAsTRPCError } from './errors.js'
 
 const t = initTRPC.context<PlatformContext>().create({
   transformer: superjson,
@@ -59,10 +60,30 @@ const enforceRole = (role: UserRole) =>
     return next({ ctx: { ...ctx, user } })
   })
 
-export const publicProcedure = t.procedure
-export const protectedProcedure = t.procedure.use(enforceAuthenticatedUser)
-export const adminProcedure = t.procedure.use(enforceRole(UserRole.ADMIN))
-export const playerProcedure = t.procedure.use(enforceRole(UserRole.PLAYER))
+// Downstream errors never throw through `next()`: tRPC catches them and hands
+// the middleware `{ ok: false, error }`, with the originally thrown value
+// preserved as `error.cause` (already-TRPCErrors keep their code and arrive
+// without remapping-relevant cause handling). Remap service-layer errors
+// (INVALID_TOKEN, yup ValidationError, ...) to their tRPC codes here once so
+// procedure bodies do not each wrap every service call in try/catch.
+const mapServiceErrors = t.middleware(async ({ next }) => {
+  const result = await next()
+
+  if (
+    !result.ok &&
+    result.error.code === 'INTERNAL_SERVER_ERROR' &&
+    result.error.cause !== undefined
+  ) {
+    throwAsTRPCError(result.error.cause)
+  }
+
+  return result
+})
+
+export const publicProcedure = t.procedure.use(mapServiceErrors)
+export const protectedProcedure = publicProcedure.use(enforceAuthenticatedUser)
+export const adminProcedure = publicProcedure.use(enforceRole(UserRole.ADMIN))
+export const playerProcedure = publicProcedure.use(enforceRole(UserRole.PLAYER))
 
 // `adminProcedure` only proves the caller is *an* admin, not that they own the
 // game they are acting on. Every admin route that takes a `gameId` from client

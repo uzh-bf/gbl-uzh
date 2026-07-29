@@ -1,7 +1,6 @@
 import { adminProcedure, assertGameOwnership, createTRPCRouter } from '../init.js'
 import { gameIdSchema, idSchema, jsonObjectSchema } from '../schemas.js'
 import * as GameService from '../../services/GameService.js'
-import { throwAsTRPCError } from '../errors.js'
 import { toActiveSegmentDto } from '../dto/game.js'
 import { z } from 'zod'
 
@@ -27,26 +26,22 @@ export function createSegmentRouter({
   return createTRPCRouter({
     add: adminProcedure.input(addInput).mutation(async ({ input, ctx }) => {
       await assertGameOwnership(ctx, input.gameId)
-      try {
-        const segment = await GameService.addPeriodSegment(
-          {
-            gameId: input.gameId,
-            periodIx: input.periodIx,
-            facts: input.facts,
-            learningElements: input.learningElements,
-            storyElements: input.storyElements,
-          } as Parameters<typeof GameService.addPeriodSegment>[0],
-          ctx as any,
-          {
-            schema: schemas.PeriodSegmentFactsSchema,
-            services: services as any,
-          } as any
-        )
+      const segment = await GameService.addPeriodSegment(
+        {
+          gameId: input.gameId,
+          periodIx: input.periodIx,
+          facts: input.facts,
+          learningElements: input.learningElements,
+          storyElements: input.storyElements,
+        } as Parameters<typeof GameService.addPeriodSegment>[0],
+        ctx as any,
+        {
+          schema: schemas.PeriodSegmentFactsSchema,
+          services: services as any,
+        } as any
+      )
 
-        return toActiveSegmentDto(segment as any)
-      } catch (error) {
-        throwAsTRPCError(error)
-      }
+      return toActiveSegmentDto(segment as any)
     }),
   })
 }

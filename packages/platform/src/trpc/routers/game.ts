@@ -7,7 +7,6 @@ import {
 } from '../dto/game.js'
 import * as GameService from '../../services/GameService.js'
 import * as PlayService from '../../services/PlayService.js'
-import { throwAsTRPCError } from '../errors.js'
 import { z } from 'zod'
 
 type RouterDeps = {
@@ -50,99 +49,65 @@ export function createGameRouter({
 
   return createTRPCRouter({
     list: adminProcedure.query(async ({ ctx }) => {
-      try {
-        const games = await GameService.getGames({}, ctx as any)
+      const games = await GameService.getGames({}, ctx as any)
 
-        return games
-          .map((game: any) => toGameListItemDto(game))
-          .filter((game): game is GameListItemDto => game !== null)
-      } catch (error) {
-        throwAsTRPCError(error)
-      }
+      return games
+        .map((game: any) => toGameListItemDto(game))
+        .filter((game): game is GameListItemDto => game !== null)
     }),
 
-    byId: adminProcedure
-      .input(byIdInput)
-      .query(async ({ input, ctx }) => {
-        await assertGameOwnership(ctx, input.id)
-        try {
-          const game = await GameService.getGame(input, ctx as any)
+    byId: adminProcedure.input(byIdInput).query(async ({ input, ctx }) => {
+      await assertGameOwnership(ctx, input.id)
+      const game = await GameService.getGame(input, ctx as any)
 
-          return toAdminGameDto(game as any)
-        } catch (error) {
-          throwAsTRPCError(error)
-        }
-      }),
+      return toAdminGameDto(game as any)
+    }),
 
     create: adminProcedure
       .input(createGameInput)
       .mutation(async ({ input, ctx }) => {
-        try {
-          const game = await GameService.createGame(
-            input as any,
-            ctx as any,
-            {
-              schema: schemas.GameFactsSchema,
-              roleAssigner,
-            }
-          )
+        const game = await GameService.createGame(input as any, ctx as any, {
+          schema: schemas.GameFactsSchema,
+          roleAssigner,
+        })
 
-          return toAdminGameDto(game as any)
-        } catch (error) {
-          throwAsTRPCError(error)
-        }
+        return toAdminGameDto(game as any)
       }),
 
     activateNextPeriod: adminProcedure
       .input(nextPeriodInput)
       .mutation(async ({ input, ctx }) => {
         await assertGameOwnership(ctx, input.gameId)
-        try {
-          const game = await GameService.activateNextPeriod(input, ctx as any, {
-            services,
-          } as any)
+        const game = await GameService.activateNextPeriod(input, ctx as any, {
+          services,
+        } as any)
 
-          return toAdminGameDto(firstResult(game as any))
-        } catch (error) {
-          throwAsTRPCError(error)
-        }
+        return toAdminGameDto(firstResult(game as any))
       }),
 
     activateNextSegment: adminProcedure
       .input(nextPeriodInput)
       .mutation(async ({ input, ctx }) => {
         await assertGameOwnership(ctx, input.gameId)
-        try {
-          const game = await GameService.activateNextSegment(input, ctx as any, {
-            services,
-          } as any)
+        const game = await GameService.activateNextSegment(input, ctx as any, {
+          services,
+        } as any)
 
-          return toAdminGameDto(firstResult(game as any))
-        } catch (error) {
-          throwAsTRPCError(error)
-        }
+        return toAdminGameDto(firstResult(game as any))
       }),
 
     addCountdown: adminProcedure
       .input(countdownInput)
       .mutation(async ({ input, ctx }) => {
         await assertGameOwnership(ctx, input.gameId)
-        try {
-          return await PlayService.addCountdown(input, ctx as any)
-        } catch (error) {
-          throwAsTRPCError(error)
-        }
+        return PlayService.addCountdown(input, ctx as any)
       }),
 
     toggleSwitch: adminProcedure
       .input(switchInput)
       .mutation(async ({ input, ctx }) => {
         await assertGameOwnership(ctx, input.gameId)
-        try {
-          return await PlayService.toggleSwitch(input, ctx as any)
-        } catch (error) {
-          throwAsTRPCError(error)
-        }
+        return PlayService.toggleSwitch(input, ctx as any)
       }),
   })
 }
