@@ -3,6 +3,9 @@ import type { Event as PlatformEvent } from '../types.js'
 
 const GLOBAL_EVENT_CHANNEL = 'global:events'
 const USER_EVENT_CHANNEL_PREFIX = 'user:events:'
+// Aggregate channel carrying (userId, events) tuples so a bridge can observe
+// every user's events without knowing the per-user channel names.
+const USER_EVENT_AGGREGATE_CHANNEL = 'user:events'
 
 // Cache the emitter on globalThis so Next.js dev HMR (which re-evaluates this
 // module) does not split publishers and subscribers across separate emitter
@@ -47,6 +50,20 @@ export function publishUserNotificationRealtime(
   if (!events.length) return
 
   eventBus.emit(userChannel(userId), events)
+  eventBus.emit(USER_EVENT_AGGREGATE_CHANNEL, userId, events)
+}
+
+// Lets the GraphQL pubsub (loaded only by the example games) mirror the
+// realtime bus, so EventService can stay transport-agnostic and the tRPC apps
+// never have to import graphql-yoga.
+export function bridgeRealtimeEvents(handlers: {
+  onGlobal: (event: PlatformEvent<string>) => void
+  onUser: (userId: string, events: PlatformEvent<string>[]) => void
+}): void {
+  eventBus.on(GLOBAL_EVENT_CHANNEL, handlers.onGlobal)
+  eventBus.on(USER_EVENT_AGGREGATE_CHANNEL, (userId, events) =>
+    handlers.onUser(userId as string, events as PlatformEvent<string>[])
+  )
 }
 
 export function subscribeToGlobalEvents(
