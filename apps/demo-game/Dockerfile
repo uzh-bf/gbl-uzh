@@ -2,8 +2,8 @@ FROM node:24.16-alpine AS base
 
 RUN apk add --no-cache git
 
-# Install pnpm and turbo
-RUN npm install -g pnpm@11.6.0 turbo@2.0.4
+# Install pnpm and turbo (no lifecycle scripts; both ship plain binaries)
+RUN npm install -g --ignore-scripts pnpm@11.6.0 turbo@2.0.4
 
 # Set pnpm store directory
 ENV PNPM_HOME="/pnpm"
@@ -19,7 +19,9 @@ COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/.pnpm-store \
     # Frozen install for reproducible prod builds. Verified the committed lockfile
     # (and turbo's pruned lockfile) install cleanly under --frozen-lockfile.
-    pnpm install --frozen-lockfile
+    # --ignore-scripts: no dependency lifecycle scripts run at install time;
+    # prisma engines are fetched by the explicit `prisma generate` build steps.
+    pnpm install --frozen-lockfile --ignore-scripts
 
 # Prune application with Turbo
 RUN turbo prune --scope="@gbl-uzh/demo-game" --docker
@@ -36,7 +38,9 @@ COPY --from=prune /app/out/json/ .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/.pnpm-store \
     # Frozen install for reproducible prod builds. Verified the committed lockfile
     # (and turbo's pruned lockfile) install cleanly under --frozen-lockfile.
-    pnpm install --frozen-lockfile
+    # --ignore-scripts: no dependency lifecycle scripts run at install time;
+    # prisma engines are fetched by the explicit `prisma generate` build steps.
+    pnpm install --frozen-lockfile --ignore-scripts
 
 COPY --from=prune /app/out/full/ .
 

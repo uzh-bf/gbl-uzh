@@ -217,3 +217,20 @@ W7 after PR #144 merges. Estimated heavy lifting is W1; everything after is boun
 - 2026-07-29: W2 done — `0ee0c0c` bumps trpc 11.18.0, RQ 5.101.4, next 16.2.12,
   next-auth 4.24.15, yup 1.7.1 (aligned in ui), TS ~5.9.3. react/react-dom deviation:
   stay 19.2.7 (single-React-instance override topology; patch bump deferred to W7).
+- 2026-07-29: W3 partial — `2e6352b` adds onError toasts for readyState/storyElement
+  mutations, maps yup ValidationError to BAD_REQUEST in throwAsTRPCError, and injects
+  a DecisionsSchema (`ActionFactsSchema` seam) validated in performAction. Open: D3
+  operator-facts withhold (needs user decision), review-thread triage (W4).
+- 2026-07-29: CI regressions on `e7dbe02` root-caused and fixed: `a626600` mirrors
+  platform peers as devDependencies so turbo prune keeps the graphql closure in the
+  pruned lockfile (Docker frozen install failed only in CI); `f90a7b1` bridges the
+  realtime bus back into the graphql pubsub (EventService had gone realtime-only, so
+  nexus SSE subscriptions in central-bank/rate-wars never fired). Both verified by
+  local prune repro + CI green (build, central-bank, rate-wars) on `f90a7b1`.
+- 2026-07-29: SonarCloud gate (Security Rating C on new code) fixed — 5x rule S6505:
+  added `--ignore-scripts` to the Dockerfile npm/pnpm installs and both workflow
+  installs. Safe because pnpm `allowBuilds` scripts are not needed at install time:
+  prisma engines are fetched by the explicit `prisma generate` steps in every build
+  path; esbuild/swc/sharp ship binaries via optionalDependencies; playwright jobs run
+  in the browser-preinstalled container image. Verified by turbo-prune clean install
+  with `--ignore-scripts` + full 3-task build.
