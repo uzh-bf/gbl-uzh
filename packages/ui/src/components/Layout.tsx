@@ -1,20 +1,16 @@
 import { NavBar } from './NavBar'
 import React from 'react'
 
+interface LayoutPlayerInfo {
+  name: string
+  color: string
+  level: number
+  imgPathAvatar?: string
+}
+
 interface Props {
   tabs: { name: string; href: string }[]
-  playerInfo: {
-    name: string
-    color: string
-    location: string
-    level: number
-    xp: number
-    xpMax: number
-    achievements: any[]
-    imgPathAvatar?: string
-    imgPathLocation?: string
-    onClick: () => void
-  }
+  playerInfo: LayoutPlayerInfo
   children?: React.ReactNode
   sidebar?: React.ReactNode
 }

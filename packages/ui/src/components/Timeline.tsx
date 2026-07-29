@@ -6,12 +6,12 @@ import { TimelineEntry } from './TimelineEntry'
 interface Segment {
   id?: number
   index: number
-  facts: any
+  facts: Record<string, unknown>
 }
 
 interface Period {
   index: number
-  facts: any
+  facts: Record<string, unknown>
   segments: Segment[]
   segmentCount: number
 }
@@ -19,7 +19,7 @@ interface Period {
 interface Entry {
   id?: number
   type: string
-  facts: any
+  facts: Record<string, unknown>
   period: {
     id?: number
     index: number
@@ -31,8 +31,8 @@ interface Entry {
 }
 
 interface DataProps {
-  segmentFlat?: { facts: any }
-  facts: any
+  segmentFlat?: { facts: Record<string, unknown> }
+  facts: Record<string, unknown>
 }
 
 function Timeline({
@@ -59,12 +59,12 @@ function Timeline({
           periodFacts: period.facts,
         }))
       )
-      .reduce((acc: any, element: any) => {
+      .reduce((acc: Record<string, unknown>, element: { periodIx: number; index: number }) => {
         acc[`${element.periodIx + 1}${element.index + 1}`] = element
         return acc
-      }, {})
+      }, {}) as Record<string, Segment & { segmentCount: number; periodIx: number; periodFacts: Record<string, unknown> }>
 
-    const mapped: any[] = entries.flatMap((item) => {
+    const mapped: (Entry & { key: string; segmentFlat: Segment & { segmentCount: number; periodIx: number; periodFacts: Record<string, unknown> } })[] = entries.flatMap((item) => {
       if (item.type === 'PERIOD_START') return []
       if (item.type === 'SEGMENT_START') return []
 

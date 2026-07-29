@@ -1,0 +1,5 @@
+subscription UserEvents {
+  eventsUser {
+    type
+  }
+}

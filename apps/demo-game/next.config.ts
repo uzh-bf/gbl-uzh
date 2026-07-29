@@ -12,6 +12,7 @@ const isDev = process.env.NODE_ENV === 'development'
 const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
+  allowedDevOrigins: ['127.0.0.1'],
   // Next 16 stable React Compiler: auto-memoizes components. Requires React 19
   // (this app runs 19.2.7) and works under Turbopack.
   reactCompiler: true,

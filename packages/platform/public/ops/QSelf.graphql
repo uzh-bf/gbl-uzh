@@ -1,0 +1,7 @@
+#import "./FPlayerData.graphql"
+
+query Self {
+  self {
+    ...PlayerData
+  }
+}

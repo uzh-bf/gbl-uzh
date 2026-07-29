@@ -1,4 +1,9 @@
-import { Layout, PlayerDisplay, ProbabilityChart } from '@gbl-uzh/ui'
+import {
+  EventLog,
+  Form,
+  ProbabilityChart,
+  ReusableFormField,
+} from '@gbl-uzh/ui'
 import {
   Button,
   Card,
@@ -12,9 +17,6 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-  // CycleCountdown,
-  FormikNumberField,
-  Switch,
   ShadcnTable as Table,
   ShadcnTableBody as TableBody,
   ShadcnTableCell as TableCell,
@@ -22,18 +24,8 @@ import {
   ShadcnTableHeader as TableHeader,
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
-
-import { CycleCountdown } from '~/components/CycleCountDown'
-
-import dayjs from 'dayjs'
-import { ReactNode, useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import {
   Area,
   AreaChart,
@@ -46,12 +38,15 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
 
-import { Form, Formik } from 'formik'
-import * as yup from 'yup'
-import { DecisionsDisplayCompact } from '~/components/DecisionsDisplay'
-import LearningElements from '~/components/LearningElements'
-import StoryElements from '~/components/StoryElements'
+import GameLayout from '~/components/GameLayout'
 import { trpc } from '~/lib/trpc'
 import type { RouterOutputs } from '~/server/trpc/router'
 import { useToast } from '../../components/ui/use-toast'
@@ -101,236 +96,57 @@ function getNumber(value: unknown, fallback = 0): number {
   return Number.isFinite(parsed) ? parsed : fallback
 }
 
-function GameLayout({ children }: { children: ReactNode }) {
-  const utils = trpc.useUtils()
+const DECISION_HISTORY_COLUMNS = [
+  {
+    key: 'time',
+    label: 'Time',
+    formatter: (_, row) => `P${row.period.index + 1} S${row.segment.index + 1}`,
+  },
+  {
+    key: 'savings',
+    label: 'Savings',
+    formatter: (_, row) => `${row.decisions.bank}%`,
+  },
+  {
+    key: 'bonds',
+    label: 'Bonds',
+    formatter: (_, row) => `${row.decisions.bonds}%`,
+  },
+  {
+    key: 'stocks',
+    label: 'Stocks',
+    formatter: (_, row) => `${row.decisions.stocks}%`,
+  },
+]
 
-  const {
-    data: resultData,
-    isLoading: isResultLoading,
-    error: resultError,
-  } = trpc.play.result.useQuery()
-  const {
-    data: selfData,
-    isLoading: isSelfLoading,
-    error: selfError,
-  } = trpc.play.self.useQuery()
-
-  const updateReadyState = trpc.play.updateReadyState.useMutation({
-    async onSuccess() {
-      await Promise.all([
-        utils.play.result.invalidate(),
-        utils.play.self.invalidate(),
-      ])
-    },
-  })
-
-  const [countdownNotifications, setCountdownNotifications] = useState({
-    '60': false,
-    '180': false,
-  })
-
-  const { toast } = useToast()
-
-  const currentGameId = resultData?.currentGame?.id
-
-  trpc.events.global.useSubscription(undefined, {
-    enabled: Boolean(currentGameId),
-    onData(event) {
-      const eventGameId = Number(event.facts?.gameId)
-      if (
-        !currentGameId ||
-        Number.isNaN(eventGameId) ||
-        eventGameId !== currentGameId ||
-        !COCKPIT_REFRESH_EVENTS.has(event.type)
-      )
-        return
-
-      console.log(
-        `Player Cockpit: Relevant ${event.type} event for game ${currentGameId}. Refreshing result...`
-      )
-      Promise.all([
-        utils.play.result.invalidate(),
-        utils.play.self.invalidate(),
-      ]).catch((error) => {
-        console.error('Player Cockpit: Failed to refresh result:', error)
-      })
-    },
-    onError: (err) => {
-      console.error('Player Cockpit: Subscription error:', err)
-    },
-  })
-
-  const expiresAtDate =
-    resultData?.currentGame?.activePeriod?.activeSegment?.countdownExpiresAt ??
-    null
-  const countdownDurationMs =
-    resultData?.currentGame?.activePeriod?.activeSegment?.countdownDurationMs ??
-    null
-  const expiresAtKey = expiresAtDate?.getTime() ?? null
-
-  useEffect(() => {
-    if (!expiresAtDate) return
-
-    const secondsRemaining = dayjs(expiresAtDate).diff(dayjs(), 's')
-
-    if (secondsRemaining > 0) {
-      toast({
-        title: 'Countdown set/updated!',
-        description: `${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
-      })
-    }
-
-    setCountdownNotifications({ '60': false, '180': false })
-  }, [expiresAtKey, countdownDurationMs, toast])
-
-  if (isResultLoading || isSelfLoading) return null
-  if (resultError) return `Error! ${resultError}`
-  if (selfError) return `Error! ${selfError}`
-
-  if (!resultData || !selfData) return null
-
-  const playerFacts = getFacts(selfData.facts)
-  const playerResult = resultData.playerResult
-  const playerResultWithProgress =
-    playerResult == null
-      ? null
-      : {
-          ...playerResult,
-          player: {
-            id: selfData.id,
-            completedLearningElementIds:
-              selfData.completedLearningElementIds ?? [],
-            visitedStoryElementIds: selfData.visitedStoryElementIds ?? [],
-          },
-        }
-
-  const playerInfo = {
-    name: selfData.name,
-    color: (playerFacts.color as string) ?? 'Red',
-    location: (playerFacts.location as string) ?? 'ZH',
-    level: selfData.level.index,
-    xp: selfData.experience,
-    xpMax: selfData.experienceToNext,
-    achievements: selfData.achievements,
-    imgPathAvatar:
-      (playerFacts.avatar as string) ?? '/avatars/avatar_placeholder.png',
-    imgPathLocation: `/locations/${
-      (playerFacts.location as string | undefined) ?? 'ZH'
-    }.svg`,
-    onClick: () => {
-      // router.replace('/play/welcome')
-    },
-  }
-  const playerResultData = {
-    ...resultData,
-    playerResult: playerResultWithProgress,
-  }
-
-  const sidebar = (
-    <div id="sidebar" className="flex flex-col justify-between">
-      <Card
-        // className="flex max-w-96 flex-col fixed bottom-4 right-4 h-[calc(100vh-5rem)]"
-        className="mb-4"
-      >
-        <CardContent>
-          <PlayerDisplay
-            name={playerInfo.name}
-            color={playerInfo.color}
-            location={playerInfo.location}
-            level={playerInfo.level}
-            // xp={playerInfo.xp}
-            // xpMax={playerInfo.xpMax}
-            achievements={playerInfo.achievements as any}
-            imgPathAvatar={playerInfo.imgPathAvatar}
-            imgPathLocation={playerInfo.imgPathLocation}
-            onClick={playerInfo.onClick}
-          />
-          <div className="flex items-center justify-between">
-            {selfData && (
-              <div data-cy="ready-switch">
-                <Switch
-                  className={{
-                    root: 'text-xs font-bold text-gray-600',
-                  }}
-                  disabled={updateReadyState.isPending}
-                  id="isReady"
-                  checked={selfData.isReady}
-                  label="Ready?"
-                  onCheckedChange={async () => {
-                    await updateReadyState.mutateAsync({
-                      isReady: !selfData.isReady,
-                    })
-                  }}
-                />
-              </div>
-            )}
-
-            {countdownDurationMs !== null && expiresAtDate !== null && (
-              <CycleCountdown
-                expiresAt={expiresAtDate}
-                totalDuration={countdownDurationMs / 1000}
-                onUpdate={(secondsLeft) => {
-                  if (
-                    countdownNotifications['60'] &&
-                    countdownNotifications['180']
-                  )
-                    return
-
-                  for (const minute of [1, 3]) {
-                    const secondsThreshold = minute * 60
-                    if (
-                      secondsLeft <= secondsThreshold &&
-                      secondsLeft > secondsThreshold - 1
-                    ) {
-                      const secondsKey = String(secondsThreshold)
-                      if (!countdownNotifications[secondsKey]) {
-                        const friendlyMinutes = Math.ceil(secondsLeft / 60)
-                        toast({
-                          title: 'Countdown Update',
-                          description: `Less than ${friendlyMinutes} min remaining! Please press ready.`,
-                        })
-                        setCountdownNotifications((prevState) => ({
-                          ...prevState,
-                          [secondsKey]: true,
-                        }))
-                      }
-                    }
-                  }
-                }}
-                onExpire={() => console.log('Countdown expired')}
-                className="text-xs font-bold text-gray-600"
-              />
-            )}
-          </div>
-          <LearningElements playerResult={playerResultData} />
-        </CardContent>
-      </Card>
-    </div>
-  )
-
+function DecisionHistoryLog({ data }: { data: any[] }) {
   return (
-    <>
-      <StoryElements
-        playerResult={playerResultData}
-        playerRole={selfData.role}
-      />
-      <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
-        {children}
-      </Layout>
-    </>
+    <EventLog
+      title="Decision History"
+      description="Chronological record of your portfolio allocation decisions across savings, bonds, and stocks by time period. P: Period S: Segment"
+      data={data}
+      maxHeightClass="h-56"
+      columns={DECISION_HISTORY_COLUMNS}
+    />
   )
 }
 
-const tabs = [
-  { name: 'Welcome', href: '/play/welcome' },
-  { name: 'Cockpit', href: '/play/cockpit' },
-]
+function formatSegmentEndResults(results: any[]) {
+  return results
+    .filter((o) => o.type == 'SEGMENT_END')
+    .map((e) => ({
+      period: e.period,
+      segment: e.segment,
+      decisions: e.facts.decisions,
+    }))
+    .reverse()
+}
 
 const colors = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
 ]
 
 const months = [
@@ -349,11 +165,12 @@ const months = [
 ]
 const numMonths = months.length
 const PLAYER_DECISION_ACTION_TYPE = ''
-const COCKPIT_REFRESH_EVENTS = new Set<string>([
-  'COUNTDOWN_UPDATED',
-  'PERIOD_ACTIVATED',
-  'SEGMENT_ACTIVATED',
-])
+
+type PortfolioFormValues = {
+  savings: number
+  bonds: number
+  stocks: number
+}
 
 function Cockpit() {
   const [period, setPeriod] = useState<number | null>(null)
@@ -376,6 +193,47 @@ function Cockpit() {
       })
     },
   })
+
+  const form = useForm<PortfolioFormValues>({
+    defaultValues: {
+      savings: 0,
+      bonds: 0,
+      stocks: 0,
+    },
+  })
+  const {
+    handleSubmit,
+    watch,
+    control,
+    reset,
+    formState: { isSubmitting },
+  } = form
+
+  const watchSavings = watch('savings')
+  const watchBonds = watch('bonds')
+  const watchStocks = watch('stocks')
+
+  const sum = useMemo(() => {
+    return (
+      Number(watchSavings || 0) +
+      Number(watchBonds || 0) +
+      Number(watchStocks || 0)
+    )
+  }, [watchSavings, watchBonds, watchStocks])
+
+  const isSumValid = sum === 100
+
+  const resultFactsForForm = getFacts(data?.playerResult?.facts)
+  const resultFactsDecisionsForForm = getFacts(resultFactsForForm.decisions)
+  useEffect(() => {
+    if (Object.keys(resultFactsDecisionsForForm).length > 0) {
+      reset({
+        savings: getNumber(resultFactsDecisionsForForm.bank),
+        bonds: getNumber(resultFactsDecisionsForForm.bonds),
+        stocks: getNumber(resultFactsDecisionsForForm.stocks),
+      })
+    }
+  }, [resultFactsDecisionsForForm, reset])
 
   useEffect(() => {
     if (data?.currentGame?.periods?.length > 0) {
@@ -554,24 +412,9 @@ function Cockpit() {
       const numPeriods = currentGame.periods.length
       const previousResults = playerDataResult.previousResults
       const previousSegmentResults = previousResults.filter(
-        (o) => o.type == 'SEGMENT_END'
+        (o) => o.type === 'SEGMENT_END'
       )
-      const segmentEndResults = previousSegmentResults
-        .map((e) => {
-          const facts = getFacts(e.facts)
-          return {
-            period: {
-              ...e.period,
-              id: String(e.period.id),
-            },
-            segment: {
-              ...e.segment,
-              id: String(e.segment.id),
-            },
-            decisions: getFacts(facts.decisions),
-          }
-        })
-        .reverse()
+      const segmentEndResults = formatSegmentEndResults(previousResults)
 
       const assetsWithReturnsFlat = previousSegmentResults.flatMap((e) =>
         getFactsArray(getFacts(e.facts).assetsWithReturns)
@@ -779,9 +622,7 @@ function Cockpit() {
                     </div>
                   </CardContent>
                 </Card>
-                <DecisionsDisplayCompact
-                  segmentDecisions={segmentEndResults as any}
-                />
+                <DecisionHistoryLog data={segmentEndResults} />
               </div>
               <Card>
                 <CardHeader>
@@ -952,23 +793,7 @@ function Cockpit() {
       const resultFactsDecisions = getFacts(resultFacts.decisions)
       const previousResults = playerDataResult.previousResults
 
-      const segmentEndResults = previousResults
-        .filter((o) => o.type == 'SEGMENT_END')
-        .map((e) => {
-          const facts = getFacts(e.facts)
-          return {
-            period: {
-              ...e.period,
-              id: String(e.period.id),
-            },
-            segment: {
-              ...e.segment,
-              id: String(e.segment.id),
-            },
-            decisions: getFacts(facts.decisions),
-          }
-        })
-        .reverse()
+      const segmentEndResults = formatSegmentEndResults(previousResults)
 
       const columns_portfolio = [
         { label: 'Assets', accessor: 'category', sortable: false },
@@ -1019,47 +844,6 @@ function Cockpit() {
         },
       ]
 
-      const decisions = [
-        {
-          name: 'Savings',
-        },
-        {
-          name: 'Bonds',
-        },
-        {
-          name: 'Stocks',
-        },
-      ]
-
-      const schema = yup
-        .object({
-          savings: yup
-            .number()
-            .integer()
-            .min(0, 'Savings % must be greater equal than 0')
-            .max(100, 'Savings % must be smaller equal than 100')
-            .required('Savings % is required'),
-          bonds: yup
-            .number()
-            .integer()
-            .min(0, 'Bonds % must be greater equal than 0')
-            .max(100, 'Bonds % must be smaller equal than 100')
-            .required('Bonds % is required'),
-          stocks: yup
-            .number()
-            .integer()
-            .min(0, 'Stocks % must be greater equal than 0')
-            .max(100, 'Stocks % must be smaller equal than 100')
-            .required('Stocks % is required'),
-        })
-        .test('sum', 'Sum of values must be 100', (values, ctx) => {
-          const sum = values.savings + values.bonds + values.stocks
-          if (sum === 100) return true
-          return ctx.createError({
-            path: 'sum',
-            message: 'Sum of values must be 100',
-          })
-        })
       return (
         <GameLayout>
           <div className="flex w-full grid-cols-2 flex-col gap-4 xl:grid">
@@ -1132,70 +916,71 @@ function Cockpit() {
                   </CardContent>
                 </Card>
 
-                <div className="mt-8 flex flex-row gap-2">
-                  <Formik
-                    initialValues={{
-                      savings: getNumber(resultFactsDecisions.bank),
-                      bonds: getNumber(resultFactsDecisions.bonds),
-                      stocks: getNumber(resultFactsDecisions.stocks),
-                    }}
-                    validationSchema={schema}
-                    onSubmit={async (values) => {
-                      const savings = Math.trunc(values.savings)
-                      const bonds = Math.trunc(values.bonds)
-                      const stocks = Math.trunc(values.stocks)
+                <div className="mt-8">
+                  <Form<PortfolioFormValues> {...form}>
+                    <form
+                      onSubmit={handleSubmit(async (values) => {
+                        const savings = parseInt(String(values.savings), 10)
+                        const bonds = parseInt(String(values.bonds), 10)
+                        const stocks = parseInt(String(values.stocks), 10)
 
-                      await performAction.mutateAsync({
-                        type: PLAYER_DECISION_ACTION_TYPE,
-                        payload: JSON.stringify({
-                          bank: savings,
-                          bonds,
-                          stocks,
-                        }),
-                      })
-                    }}
-                  >
-                    {(newDecisionForm) => {
-                      return (
-                        <Form>
-                          <div className="mb-2 flex gap-2">
-                            {decisions.map((decision) => {
-                              const fieldName = decision.name.toLowerCase()
-                              return (
-                                <FormikNumberField
-                                  key={fieldName}
-                                  placeholder="0 %"
-                                  label={decision.name}
-                                  name={fieldName}
-                                  tooltip={`Determine how much of all assets you want
-                                      to invest in the ${decision.name}. The
-                                      total should be equal to 100 percent.`}
-                                  required
-                                  data={{ cy: decision.name + '-cy' }}
-                                  className={{ label: 'pb-2 font-normal' }}
-                                />
-                              )
-                            })}
-                          </div>
-                          {(newDecisionForm.errors as { sum?: string }).sum && (
-                            <div className="text-red-500">
-                              The sum of the input values must be{' '}
-                              <span className="font-bold">100</span>!
-                            </div>
-                          )}
-                          <Button
-                            type="submit"
-                            disabled={
-                              !newDecisionForm.isValid ||
-                              newDecisionForm.isSubmitting
-                            }
-                          >
-                            Submit
-                          </Button>
-                        </Form>
-                      )
-                    }}
-                  </Formik>
+                        await performAction.mutateAsync({
+                          type: PLAYER_DECISION_ACTION_TYPE,
+                          payload: JSON.stringify({
+                            bank: savings,
+                            bonds,
+                            stocks,
+                          }),
+                        })
+                      })}
+                    >
+                      <div className="mb-4 flex gap-4">
+                        <div className="w-24">
+                          <ReusableFormField
+                            control={control}
+                            name="savings"
+                            label="Savings"
+                            type="number"
+                            min={0}
+                            max={100}
+                          />
+                        </div>
+                        <div className="w-24">
+                          <ReusableFormField
+                            control={control}
+                            name="bonds"
+                            label="Bonds"
+                            type="number"
+                            min={0}
+                            max={100}
+                          />
+                        </div>
+                        <div className="w-24">
+                          <ReusableFormField
+                            control={control}
+                            name="stocks"
+                            label="Stocks"
+                            type="number"
+                            min={0}
+                            max={100}
+                          />
+                        </div>
+                      </div>
+                      {!isSumValid && (
+                        <div className="mb-4 text-sm text-red-500">
+                          The sum of the input values must be{' '}
+                          <span className="font-bold">100</span>! (Current:{' '}
+                          {sum}%)
+                        </div>
+                      )}
+                      <Button
+                        type="submit"
+                        disabled={!isSumValid || isSubmitting}
+                      >
+                        Submit
+                      </Button>
+                    </form>
+                  </Form>
                 </div>
               </CardContent>
               <CardFooter className="text-slate-500">
@@ -1206,9 +991,7 @@ function Cockpit() {
               </CardFooter>
             </Card>
 
-            <DecisionsDisplayCompact
-              segmentDecisions={segmentEndResults as any}
-            />
+            <DecisionHistoryLog data={segmentEndResults} />
 
             <Card>
               <CardHeader>

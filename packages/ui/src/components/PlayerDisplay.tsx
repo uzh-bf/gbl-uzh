@@ -1,24 +1,21 @@
 import { Logo } from './Logo'
 import { Achievement } from './Achievement'
-// import { XpBar } from './XpBar'
 import { Button } from '@uzh-bf/design-system'
 
-interface PlayerDataProps {
+export interface PlayerDisplayProps {
   name?: string
   color?: string
-  // xp?: number
-  // xpMax: number
   level: number
   location?: string
   achievements?: {
     id: number
     count: number
     achievement: {
-      id: number
+      id: string | number
       name: string
-      descpription: string
-      image: string
-      reward?: any
+      description: string
+      image?: string | null
+      reward?: { xp?: number } | null
     }
   }[]
   imgPathAvatar?: string
@@ -26,48 +23,39 @@ interface PlayerDataProps {
   onClick?: () => void
 }
 
-// TODO(JJ):
-// - Change basic styling of button
-
 function PlayerDisplay({
   name,
   color,
-  // xp,
-  // xpMax,
   level,
   location,
   achievements,
   imgPathAvatar,
   imgPathLocation,
   onClick,
-}: PlayerDataProps) {
+}: PlayerDisplayProps) {
   return (
-    <div>
-      <div className="flex flex-col gap-2">
-        <Button basic onClick={onClick}>
-          <Logo
-            color={color}
-            name={name}
-            imgPathAvatar={imgPathAvatar}
-            imgPathLocation={imgPathLocation}
-            location={location}
-            level={level}
+    <div className="flex flex-col gap-2">
+      <Button basic onClick={onClick}>
+        <Logo
+          color={color}
+          name={name}
+          imgPathAvatar={imgPathAvatar}
+          imgPathLocation={imgPathLocation}
+          location={location}
+          level={level}
+        />
+      </Button>
+
+      <div className="flex flex-row flex-wrap flex-initial gap-2">
+        {achievements?.map((achievement) => (
+          <Achievement
+            key={achievement.achievement.id}
+            name={achievement.achievement.name}
+            xpReward={achievement.achievement.reward?.xp ?? 0}
+            count={achievement.count}
+            image={achievement.achievement.image ?? ''}
           />
-        </Button>
-
-        {/* <XpBar value={xp ?? 0} max={xpMax} /> */}
-
-        <div className="flex flex-row flex-wrap flex-initial gap-2">
-          {achievements?.map((achievement) => (
-            <Achievement
-              key={achievement.achievement.id}
-              name={achievement.achievement.name}
-              xpReward={achievement.achievement.reward.xp}
-              count={achievement.count}
-              image={achievement.achievement.image}
-            />
-          ))}
-        </div>
+        ))}
       </div>
     </div>
   )

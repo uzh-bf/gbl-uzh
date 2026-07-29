@@ -483,7 +483,15 @@ export async function activateNextPeriod(
     // if the final segment is running, go on with consolidation of the period
     // compute the results of the last segment and update the game status
     case DB.GameStatus.RUNNING: {
-      if (!game.activePeriod?.activeSegment || !currentSegmentIx) return null
+      // NOTE: activeSegmentIx is 0-based; `!currentSegmentIx` would reject the
+      // first segment (ix 0), making periods with a single segment impossible
+      // to consolidate. Only -1 / null mean "no active segment".
+      if (
+        !game.activePeriod?.activeSegment ||
+        currentSegmentIx == null ||
+        currentSegmentIx < 0
+      )
+        return null
 
       finalTransactionResult = await ctx.prisma.$transaction(
         async (tx) => {
@@ -619,43 +627,22 @@ export async function activateNextPeriod(
 
       await Promise.all(promises)
 
-      // TODO(JJ): The error happens here for the last consolidation
-      // - there are no more periods
-      // - we prob. need to change the nextPeriodIx if it the last period
-      // suggestion
-      // - maybe setting game.activePeriod to undefined is enough
-      // - In the DB.GameStatus.RESULTS case set the new status
-      // to completed when we are done
-      // - we prob. need to update the game to completed state
-      // - maybe we would like to add a button that finishes the game?
-      //    => it's better not imo, but open for discussion
-      // -> Discuss with RS
-
-      // const lastPeriodIx = game.periods.length - 1
-      let periodIx = nextPeriodIx
-
-      // let data: any = {
-      //   status: DB.GameStatus.RESULTS,
-      // }
-      // if (nextPeriodIx <= lastPeriodIx) {
-      //   // periodIx = lastPeriodIx
-      //   data.activePeriodIx = periodIx
-      //   data.activePeriod = {
-      //     connect: {
-      //       gameId_index: {
-      //         gameId,
-      //         index: periodIx,
-      //       },
-      //     },
-      //   }
-      // }
+      // Advance the pointer to the upcoming period. If the consolidated
+      // period is the last authored one (no next period yet), disconnect the
+      // pointer instead of connecting a nonexistent record — the game then
+      // sits in RESULTS until a new period is authored (continuation games)
+      // or forever (final results). See the RESULTS case, which re-resolves
+      // the upcoming period by activePeriodIx.
+      const hasNextPeriod = game.periods.some(
+        (period) => period.index === nextPeriodIx
+      )
 
       const gameData: any = {
         status: DB.GameStatus.RESULTS,
-        activePeriodIx: periodIx,
-        activePeriod: {
-          connect: { gameId_index: { gameId, index: periodIx } },
-        },
+        activePeriodIx: nextPeriodIx,
+        activePeriod: hasNextPeriod
+          ? { connect: { gameId_index: { gameId, index: nextPeriodIx } } }
+          : { disconnect: true },
       }
 
       // TODO(JJ): Check with RS
@@ -729,8 +716,31 @@ export async function activateNextPeriod(
     // if the game is in the results phase (between periods)
     // initialize the next period and move to PREPARATION
     case DB.GameStatus.RESULTS: {
+      // The upcoming period is usually connected as activePeriod during
+      // consolidation. If the pointer is disconnected (consolidated period was
+      // the last one authored at the time), re-resolve by activePeriodIx — a
+      // facilitator may have authored the period in the meantime
+      // (continuation games).
+      let upcomingPeriod: any = game.activePeriod
+      if (!upcomingPeriod) {
+        upcomingPeriod = await ctx.prisma.period.findUnique({
+          where: { gameId_index: { gameId, index: currentPeriodIx } },
+          include: {
+            previousPeriod: {
+              include: {
+                results: {
+                  include: {
+                    player: true,
+                  },
+                },
+              },
+            },
+          },
+        })
+      }
+
       // if there is no next period, return
-      if (!game.activePeriod) {
+      if (!upcomingPeriod) {
         log.warn('no next period available')
         return null
       }
@@ -760,11 +770,11 @@ export async function activateNextPeriod(
 
       const { results, extras } = computePeriodStartResults(
         {
-          results: game.activePeriod.previousPeriod[0]?.results,
+          results: upcomingPeriod.previousPeriod[0]?.results,
           players: game.players,
           activePeriodIx: currentPeriodIx,
           game,
-          periodFacts: game.activePeriod.facts,
+          periodFacts: upcomingPeriod.facts,
         },
         ctx,
         { services }
@@ -785,6 +795,13 @@ export async function activateNextPeriod(
           },
           data: {
             status: DB.GameStatus.PREPARATION,
+            // re-connect in case consolidation left the pointer disconnected
+            // (period authored only after the previous one was consolidated)
+            activePeriod: {
+              connect: {
+                gameId_index: { gameId, index: currentPeriodIx },
+              },
+            },
             version: {
               increment: 1,
             },

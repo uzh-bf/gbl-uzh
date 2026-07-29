@@ -1,0 +1,9 @@
+fragment GameData on Game {
+  id
+
+  status
+  name
+  activePeriodIx
+  activeSegmentIx
+  facts
+}

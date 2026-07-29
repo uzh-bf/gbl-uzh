@@ -1,0 +1,12 @@
+#import "./FResultData.graphql"
+
+query Results {
+  results {
+    ...ResultData
+    player {
+      id
+
+      name
+    }
+  }
+}

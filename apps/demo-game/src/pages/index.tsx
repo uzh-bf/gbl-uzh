@@ -144,21 +144,32 @@ export default function Home() {
           activePeriodIx={0}
           activeSegmentIx={0}
           formatter={(current, prev) => {
-            // Do computation here
+            // Timeline facts are untyped JSON blobs; narrow to numbers
+            // before doing arithmetic on them.
+            const toNumber = (value: unknown) =>
+              typeof value === 'number' ? value : undefined
+
             const spotPrice =
-              current.segmentFlat?.facts.spotPrice ??
-              current.facts.finalSpotPrice
+              toNumber(current.segmentFlat?.facts.spotPrice) ??
+              toNumber(current.facts.finalSpotPrice)
             const futuresPrice =
-              current.segmentFlat?.facts.futuresPrice ??
-              current.facts.finalSpotPrice
+              toNumber(current.segmentFlat?.facts.futuresPrice) ??
+              toNumber(current.facts.finalSpotPrice)
+
+            const prevSpotPrice = toNumber(prev?.segmentFlat?.facts.spotPrice)
+            const prevFuturesPrice = toNumber(
+              prev?.segmentFlat?.facts.futuresPrice
+            )
 
             const spotPriceDelta =
-              prev?.segmentFlat?.facts.spotPrice &&
-              (spotPrice / prev.segmentFlat.facts.spotPrice - 1) * 100
+              spotPrice !== undefined && prevSpotPrice
+                ? (spotPrice / prevSpotPrice - 1) * 100
+                : undefined
 
             const futuresPriceDelta =
-              prev?.segmentFlat?.facts.futuresPrice &&
-              (futuresPrice / prev.segmentFlat.facts.futuresPrice - 1) * 100
+              futuresPrice !== undefined && prevFuturesPrice
+                ? (futuresPrice / prevFuturesPrice - 1) * 100
+                : undefined
             return (
               <>
                 {spotPriceDelta && <div>S {spotPriceDelta}</div>}
@@ -172,7 +183,7 @@ export default function Home() {
           nameButtonBuy="Buy"
           nameButtonSell="Sell"
           max={10}
-          onSubmit={async (values, helpers) => {
+          onSubmit={async (values) => {
             console.log(values)
             // await performAction({
             //   variables: {
@@ -182,7 +193,6 @@ export default function Home() {
             //     }),
             //   },
             // })
-            helpers.resetForm()
           }}
         />
         <TimelineAdmin />

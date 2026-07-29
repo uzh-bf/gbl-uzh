@@ -1,0 +1,112 @@
+# Self-contained starter stack for first-time game builders: same toolchain,
+# Postgres, and OIDC mock as the devrouter config (../docker-compose.yml), but
+# with ZERO host tooling — no devrouter, no devnet, no mkcert, no DevPod. The
+# app and login service are published directly on 127.0.0.1, everything runs
+# over plain http. Trade-off vs devrouter: fixed host ports (3000/8090/one
+# project at a time) instead of unlimited parallel projects.
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: prisma
+      POSTGRES_PASSWORD: prisma
+      POSTGRES_DB: prisma
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U prisma -d prisma']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - ../docker/init-shadow-db.sql:/docker-entrypoint-initdb.d/01-init-shadow-db.sql:ro
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    # tini as PID1: reaps the many zombie children the dev server spawns and
+    # forwards signals cleanly.
+    init: true
+    env_file:
+      - starter.env
+    environment:
+      # Points the shared lifecycle scripts at the starter env file (they
+      # re-source it; the file also carries GBL_DEV_MODE, which selects
+      # starter behavior in post-start.sh).
+      GBL_ENV_FILE: /workspaces/gbl-uzh/.devcontainer/starter/starter.env
+      GBL_GAME_TARGET: ${GBL_GAME_TARGET:-demo}
+    # Publish on loopback only: exact, predictable URLs for auth
+    # (http://localhost:3000 / :8090) and no LAN exposure. The OIDC mock shares
+    # this container's netns, so its port is published here too.
+    ports:
+      - '127.0.0.1:3000:3000'
+      - '127.0.0.1:8090:8090'
+    volumes:
+      - ../..:/workspaces/gbl-uzh:cached
+      # Named volumes shadow the host node_modules so Linux-native binaries
+      # (Prisma engines, esbuild, vite) are not clobbered by the host's
+      # macOS/Windows ones, and a container `pnpm install` never corrupts the
+      # host tree. One per workspace package that the install may touch.
+      - node_modules_root:/workspaces/gbl-uzh/node_modules
+      - node_modules_demo_game:/workspaces/gbl-uzh/apps/demo-game/node_modules
+      - node_modules_central_bank:/workspaces/gbl-uzh/examples/central-bank/node_modules
+      - node_modules_rate_wars:/workspaces/gbl-uzh/examples/rate-wars/node_modules
+      - node_modules_platform:/workspaces/gbl-uzh/packages/platform/node_modules
+      - node_modules_ui:/workspaces/gbl-uzh/packages/ui/node_modules
+      - node_modules_website:/workspaces/gbl-uzh/apps/website/node_modules
+      - node_modules_advisor:/workspaces/gbl-uzh/apps/advisor/node_modules
+      - node_modules_cypress:/workspaces/gbl-uzh/cypress/node_modules
+      # Claude Code sign-in + settings survive container rebuilds.
+      - claude_config:/root/.claude
+    command: sleep infinity
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Local OIDC provider (Auth0 replacement). Shares the app container's network
+  # namespace so the issuer http://localhost:8090/default is identical whether
+  # reached by the app server (token/jwks) or the host browser (authorize).
+  oidc:
+    image: ghcr.io/navikt/mock-oauth2-server:2.1.11
+    network_mode: service:app
+    depends_on:
+      - app
+    environment:
+      SERVER_PORT: '8090'
+      # interactiveLogin=false -> one-click auto-login as the fixed dev admin.
+      # Constant `sub` keeps the same User/Account across restarts.
+      # Keep JSON_CONFIG identical to the oidc service in ../docker-compose.yml.
+      JSON_CONFIG: >-
+        {
+          "interactiveLogin": false,
+          "tokenCallbacks": [
+            {
+              "issuerId": "default",
+              "requestMappings": [
+                {
+                  "requestParam": "grant_type",
+                  "match": "*",
+                  "claims": {
+                    "sub": "dev-admin",
+                    "email": "gbl-dev@df.uzh.ch",
+                    "name": "GBL Dev",
+                    "email_verified": true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+
+volumes:
+  pgdata:
+  claude_config:
+  node_modules_root:
+  node_modules_demo_game:
+  node_modules_central_bank:
+  node_modules_rate_wars:
+  node_modules_platform:
+  node_modules_ui:
+  node_modules_website:
+  node_modules_advisor:
+  node_modules_cypress:

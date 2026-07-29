@@ -1,6 +1,9 @@
 {
   "name": "gbl-uzh-demo-game",
-  "dockerComposeFile": ["docker-compose.yml"],
+  "dockerComposeFile": [
+    "docker-compose.yml",
+    "${localEnv:DEVCONTAINER_COMPOSE_OVERLAY:docker-compose.default.yml}"
+  ],
   "service": "app",
   "workspaceFolder": "/workspaces/gbl-uzh",
   "runServices": ["app", "postgres", "oidc"],

@@ -1,0 +1,10 @@
+fragment LearningElementData on LearningElement {
+  id
+
+  title
+  question
+  reward
+  motivation
+
+  feedback
+}

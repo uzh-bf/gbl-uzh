@@ -1,0 +1,20 @@
+fragment SegmentData on PeriodSegment {
+  id
+
+  index
+
+  countdownExpiresAt
+  countdownDurationMs
+
+  facts
+
+  learningElements {
+    id
+    title
+  }
+
+  storyElements {
+    id
+    title
+  }
+}

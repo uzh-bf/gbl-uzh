@@ -1,0 +1,19 @@
+#import "./FSegmentData.graphql"
+
+mutation AddPeriodSegment(
+  $gameId: Int!
+  $periodIx: Int!
+  $facts: PeriodSegmentFactsInput!
+  $storyElements: [String]
+  $learningElements: [String]
+) {
+  addPeriodSegment(
+    gameId: $gameId
+    periodIx: $periodIx
+    facts: $facts
+    storyElements: $storyElements
+    learningElements: $learningElements
+  ) {
+    ...SegmentData
+  }
+}

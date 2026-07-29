@@ -3,6 +3,7 @@ packages:
   - '!apps/escapp'
   - '!apps/quartz'
   - 'packages/*'
+  - 'examples/*'
   - cypress
   - playwright
 allowBuilds:

@@ -1,0 +1,10 @@
+#import "./FPlayerData.graphql"
+
+mutation UpdatePlayerData(
+  $name: String
+  $facts: String
+) {
+  updatePlayerData(name: $name, facts: $facts) {
+    ...PlayerData
+  }
+}

@@ -6,13 +6,18 @@ import wikiLinkPlugin from 'remark-wiki-link'
 
 const PREFIX = '../quartz/content/'
 
-const isMarkdownFile = (filename: string) => /\.md?$/.test(filename)
-
-const toSlug = (filename: string) =>
-  filename
+function markdownFilenameToSlug(filename: string) {
+  return filename
     .replace(/\.md?$/, '')
     .replace(/\s/g, '-')
     .toLowerCase()
+}
+
+function getMarkdownFilenames(dirName: string) {
+  return fs
+    .readdirSync(path.join(process.cwd(), `${PREFIX}/${dirName}/`))
+    .filter((filename) => /\.md?$/.test(filename))
+}
 
 const wikiPlugin: any = [
   wikiLinkPlugin,
@@ -25,26 +30,24 @@ const wikiPlugin: any = [
   },
 ]
 
-async function serializeMarkdown(source: Buffer | string) {
-  const { content, data } = matter(source.toString())
+async function serializeMarkdown(source: Buffer) {
+  const { content, data: frontmatter } = matter(source)
   const mdxSource = await serialize(content, {
     mdxOptions: { remarkPlugins: [wikiPlugin] },
   })
 
-  return {
-    ...mdxSource,
-    frontmatter: data,
-  }
+  return { ...mdxSource, frontmatter }
 }
 
 export function getStaticProps(dir_name: string) {
   return async ({ params }: any) => {
-    const dirPath = path.join(process.cwd(), `${PREFIX}/${dir_name}/`)
-    const filename = fs
-      .readdirSync(dirPath)
-      .find((file) => isMarkdownFile(file) && toSlug(file) === params.slug)
+    const filename = getMarkdownFilenames(dir_name).find(
+      (candidate) => markdownFilenameToSlug(candidate) === params.slug
+    )
 
-    if (!filename) return { notFound: true }
+    if (!filename) {
+      throw new Error(`No markdown file found for ${dir_name}/${params.slug}`)
+    }
 
     const mdxPath = path.join(
       process.cwd(),
@@ -62,10 +65,8 @@ export function getStaticProps(dir_name: string) {
 
 export function getStaticPaths(dir_name: string) {
   return async () => {
-    const paths = fs
-      .readdirSync(path.join(process.cwd(), `${PREFIX}/${dir_name}/`))
-      .filter(isMarkdownFile)
-      .map(toSlug)
+    const paths = getMarkdownFilenames(dir_name)
+      .map(markdownFilenameToSlug)
       .map((slug) => ({ params: { slug } }))
 
     return { paths, fallback: false }

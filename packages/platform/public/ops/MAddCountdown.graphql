@@ -1,0 +1,3 @@
+mutation AddCountdown($gameId: Int!, $seconds: Int!) {
+  addCountdown(gameId: $gameId, seconds: $seconds)
+}

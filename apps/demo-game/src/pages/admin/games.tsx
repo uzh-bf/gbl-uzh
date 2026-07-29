@@ -1,9 +1,15 @@
-import { Button, FormikTextField } from '@uzh-bf/design-system'
-import { Form, Formik } from 'formik'
+import { Button } from '@uzh-bf/design-system'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useForm } from 'react-hook-form'
+import { AdminInputField } from '~/components/fields/AdminInputField'
 import { trpc } from '~/lib/trpc'
+
+interface CreateGameFormValues {
+  name: string
+  playerCount: number
+}
 
 function Games() {
   const router = useRouter()
@@ -23,12 +29,37 @@ function Games() {
     },
   })
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateGameFormValues>({
+    defaultValues: {
+      name: '',
+      playerCount: 1,
+    },
+  })
+
   if (gamesQuery.isLoading || !gamesQuery.data) {
     return <div>loading...</div>
   }
 
   if (gamesQuery.error) {
     return <div>{gamesQuery.error.message}</div>
+  }
+
+  const onSubmit = async (values: CreateGameFormValues) => {
+    try {
+      await createGame.mutateAsync({
+        name: values.name,
+        playerCount: parseInt(String(values.playerCount), 10),
+        facts: { myInt: 1 },
+      })
+      reset()
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   return (
@@ -46,52 +77,53 @@ function Games() {
           Logout
         </Button>
       )}
-      <Formik
-        initialValues={{
-          name: '',
-          playerCount: 1,
-          facts: {
-            myInt: 1,
-          },
-        }}
-        onSubmit={async (variables, { resetForm }) => {
-          await createGame.mutateAsync({
-            ...variables,
-            // playerCount is edited through a text input, so Formik stores it
-            // as a string; parseInt coerces to an integer (Number would let a
-            // fractional "1.5" through and fail schema validation).
-            playerCount: parseInt(String(variables.playerCount), 10),
-          })
-          resetForm()
-        }}
+
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="my-4 flex max-w-md flex-col gap-4 rounded border p-4"
       >
-        {() => (
-          <Form className="rounded border p-4">
-            <FormikTextField
-              name="name"
-              label="Name"
-              data={{ cy: 'game-name' }}
-            />
-            <FormikTextField
-              name="playerCount"
-              type="number"
-              min={1}
-              step={1}
-              label="Player Count"
-              data={{ cy: 'game-player-count' }}
-            />
-            <Button type="submit" data={{ cy: 'create-game' }}>
-              Create Game
-            </Button>
-          </Form>
-        )}
-      </Formik>
+        <AdminInputField
+          label="Name"
+          name="name"
+          register={register}
+          error={errors.name}
+          required
+          placeholder="Game Name"
+          testId="game-name"
+        />
+
+        <AdminInputField
+          label="Player Count"
+          name="playerCount"
+          type="number"
+          register={register}
+          error={errors.playerCount}
+          required
+          min={1}
+          step={1}
+          testId="game-player-count"
+          minMessage="Must be at least 1"
+        />
+
+        <Button
+          type="submit"
+          data={{ cy: 'create-game' }}
+          className={{ root: 'w-max' }}
+        >
+          Create Game
+        </Button>
+      </form>
+
       <div className="mt-4 flex flex-col gap-1">
         {gamesQuery.data.map((game) => (
-          <Link className="w-96" href={`/admin/games/${game.id}`} key={game.id}>
+          <Link
+            className="w-96 font-medium text-slate-700"
+            href={`/admin/games/${game.id}`}
+            key={game.id}
+          >
             <Button
               className={{
-                root: 'flex w-full flex-col items-start justify-around',
+                root: 'flex w-full flex-col items-start justify-around text-left',
               }}
             >
               <div className="flex w-full justify-between p-2">
@@ -106,8 +138,8 @@ function Games() {
                     {game.activeSegmentIx}
                   </div>
                 </div>
-                <div className="text-right">Status: {game.status}</div>
               </div>
+              <div className="text-right">Status: {game.status}</div>
             </Button>
           </Link>
         ))}

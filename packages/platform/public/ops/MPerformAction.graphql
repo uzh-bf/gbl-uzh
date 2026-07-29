@@ -1,0 +1,7 @@
+#import "./FResultData.graphql"
+
+mutation PerformAction($type: String!, $payload: String!) {
+  performAction(type: $type, payload: $payload) {
+    ...ResultData
+  }
+}

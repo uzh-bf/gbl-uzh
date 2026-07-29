@@ -11,6 +11,7 @@ module.exports = {
     'apps/advisor/',
     'apps/demo-game/',
     'packages/platform/',
+    'packages/ui/',
   ].reduce((acc, path) => {
     return acc.concat(
       {
