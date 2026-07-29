@@ -244,3 +244,15 @@ W7 after PR #144 merges. Estimated heavy lifting is W1; everything after is boun
   import, post-start rewrite). 2 were the S6505 findings fixed in `9e226aa`.
   Out of scope (pre-existing on dev): LearningActivityModal single-select toggle
   replaces multi-select answers.
+- 2026-07-29: W5 done — `d0b4102` adds a 45-test behavioral baseline for the platform
+  tRPC routers via createCallerFactory + mocked-prisma context: error mapping, auth
+  tiers, assertGameOwnership, performAction schema seam, and the six no-UI (D4)
+  procedures. Jest runs in real ESM mode (--experimental-vm-modules) because the
+  package is type:module with ESM-only deps. Wired into demo-game.yml's lint job.
+- 2026-07-29: demo-game playwright failure on `4a84ce3` root-caused via trace
+  forensics (run 30456783721): advanceGame's unconditional re-click after a slow
+  status flip fired a second state-machine transition and over-advanced the game;
+  assertFinalReport's Report click had no retry against mid-click re-renders.
+  `280985f` guards the re-click behind the pre-click status and retries the Report
+  click until a popup appears. Test-only fix; central-bank's helper clicks once and
+  needs no change.
