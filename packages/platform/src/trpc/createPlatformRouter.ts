@@ -17,6 +17,7 @@ type PlatformRoleAssigner = (ix: number, facts: unknown) => unknown
 type RouterDeps = {
   services?: PlatformRouterServices
   schemas?: {
+    ActionFactsSchema?: unknown
     GameFactsSchema?: unknown
     PeriodFactsSchema?: unknown
     PeriodSegmentFactsSchema?: unknown

@@ -13,6 +13,11 @@ export function asTRPCCodeFromServiceError(
 ): TRPC_ERROR_CODE_KEY {
   if (!(error instanceof Error)) return 'INTERNAL_SERVER_ERROR'
 
+  // yup ValidationError (schema-validated facts/payloads) signals bad player
+  // input, not a server fault. Duck-typed by name so the trpc layer does not
+  // hard-depend on yup.
+  if (error.name === 'ValidationError') return 'BAD_REQUEST'
+
   return (
     TRPC_CODE_BY_SERVICE_ERROR[error.message as ServiceErrorMessage] ??
     'INTERNAL_SERVER_ERROR'

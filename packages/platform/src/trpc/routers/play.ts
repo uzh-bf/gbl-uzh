@@ -13,6 +13,10 @@ type RouterDeps = {
   services?: Record<string, unknown>
   schemas?: {
     PlayerFactsSchema?: any
+    // Game-specific yup schema for the parsed performAction payload; when
+    // provided, invalid player input fails as BAD_REQUEST before it reaches
+    // the game's action reducer.
+    ActionFactsSchema?: any
   }
 }
 
@@ -172,6 +176,10 @@ export function createPlayRouter({
           if (!currentGame?.activePeriod) return null
 
           const facts = parsePayload(input.payload)
+          if (schemas.ActionFactsSchema) {
+            // yup ValidationError maps to BAD_REQUEST in throwAsTRPCError.
+            await schemas.ActionFactsSchema.validate(facts)
+          }
 
           const actionResult = await PlayService.performActionWithRetry(
             {

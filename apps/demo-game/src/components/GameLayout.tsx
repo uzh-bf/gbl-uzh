@@ -65,12 +65,21 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   const { data: resultData } = trpc.play.result.useQuery()
   const { data: selfData } = trpc.play.self.useQuery()
 
+  const { toast } = useToast()
+
   const updateReadyState = trpc.play.updateReadyState.useMutation({
     onSuccess: async () => {
       await Promise.all([
         utils.play.result.invalidate(),
         utils.play.self.invalidate(),
       ])
+    },
+    onError: (err) => {
+      toast({
+        title: 'Could not update your ready state',
+        description: err.message,
+        variant: 'destructive',
+      })
     },
   })
 
@@ -83,9 +92,14 @@ function GameLayout({ children }: { children: React.ReactNode }) {
         utils.play.self.invalidate(),
       ])
     },
+    onError: (err) => {
+      toast({
+        title: 'Could not mark the story element as read',
+        description: err.message,
+        variant: 'destructive',
+      })
+    },
   })
-
-  const { toast } = useToast()
 
   const [countdownNotifications, setCountdownNotifications] = useState({
     '60': false,
@@ -204,8 +218,8 @@ function GameLayout({ children }: { children: React.ReactNode }) {
       readySwitch={{
         checked: selfData.isReady,
         disabled: updateReadyState.isPending,
-        onCheckedChange: async () => {
-          await updateReadyState.mutateAsync({
+        onCheckedChange: () => {
+          updateReadyState.mutate({
             isReady: !selfData.isReady,
           })
         },
@@ -261,9 +275,11 @@ function GameLayout({ children }: { children: React.ReactNode }) {
         visitedStoryElementIds={selfData.visitedStoryElementIds ?? []}
         playerRole={selfData.role ?? undefined}
         onMarkElementVisited={async (id) => {
-          await markStoryElement.mutateAsync({
-            elementId: id,
-          })
+          // onError already surfaces a toast; swallow the rejection so the
+          // awaiting StoryElements handler does not raise it as unhandled.
+          await markStoryElement
+            .mutateAsync({ elementId: id })
+            .catch(() => undefined)
         }}
       />
       <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>

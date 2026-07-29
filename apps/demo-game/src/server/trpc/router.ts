@@ -1,6 +1,7 @@
 import { createPlatformRouter } from '@gbl-uzh/platform'
 import { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import {
+  DecisionsSchema,
   GameFactsSchema,
   PeriodFactsSchema,
   PeriodSegmentFactsSchema,
@@ -12,6 +13,7 @@ import * as services from '../../services'
 export const appRouter = createPlatformRouter({
   services,
   schemas: {
+    ActionFactsSchema: DecisionsSchema,
     GameFactsSchema,
     PeriodFactsSchema,
     PeriodSegmentFactsSchema,
