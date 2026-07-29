@@ -11,6 +11,7 @@ import { Button } from '@uzh-bf/design-system'
 import dayjs from 'dayjs'
 import { useEffect, useRef, useState } from 'react'
 import { useLearningActivities } from '~/hooks/useLearningActivities'
+import { getFacts } from '~/lib/facts'
 import { trpc } from '~/lib/trpc'
 import { useToast } from './ui/use-toast'
 
@@ -18,13 +19,6 @@ const tabs = [
   { name: 'Welcome', href: '/play/welcome' },
   { name: 'Cockpit', href: '/play/cockpit' },
 ]
-
-function getFacts(value: unknown): Record<string, unknown> {
-  if (value === null || value === undefined || typeof value !== 'object')
-    return {}
-  if (Array.isArray(value)) return {}
-  return value as Record<string, unknown>
-}
 
 // The DTO's achievement reward is an untyped JSON blob; PlayerDisplay only
 // ever reads `.xp` off it, so narrow just that.
