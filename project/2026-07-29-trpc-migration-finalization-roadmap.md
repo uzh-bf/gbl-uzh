@@ -256,3 +256,19 @@ W7 after PR #144 merges. Estimated heavy lifting is W1; everything after is boun
   `280985f` guards the re-click behind the pre-click status and retries the Report
   click until a popup appears. Test-only fix; central-bank's helper clicks once and
   needs no change.
+- 2026-07-29: W6 review gates run on `17bb43d` (both as Opus subagents). Security
+  gate: no high-confidence vulnerabilities; branch net-tightens authz (ownership
+  scoping on all admin game routes, player routes derive ids from the JWT ctx;
+  events.global now requires player auth vs the old unauthenticated GraphQL sub).
+  Two pre-existing notes, no action in this PR: global SSE channel is not
+  partitioned per game; story.list returns unfiltered content-bank rows to any
+  authenticated user. Maintainability gate: blocker fixed in `165e554` (cockpit
+  1037→143 lines via per-status view components + shared lib/facts.ts);
+  `4c3563b` replaces the 26 per-procedure try/catch blocks with one shared
+  service-error middleware (tRPC hands downstream errors to middlewares as
+  {ok:false,error} with the thrown value as error.cause — verified in the
+  installed v11 source; the naive try/catch around next() would be a no-op).
+  Deferred to W7 as accepted follow-ups: toServiceContext adapter for the 26
+  `ctx as any` casts, shared onError-toast helper (~14 sites), dead
+  PlatformContext.services/schemas fields + unused router `extensions`,
+  dto/results period/segment ref helper.
