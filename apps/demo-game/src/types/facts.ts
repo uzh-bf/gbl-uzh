@@ -1,6 +1,12 @@
 import { OutputFacts } from '@gbl-uzh/platform'
 import * as yup from 'yup'
 
+// Lives here (not in services/ActionsReducer) so client pages can reference
+// action types without pulling the Prisma-importing reducer into the bundle.
+export enum ActionTypes {
+  NONE = '',
+}
+
 export type AssetsBenchmark = {
   bank: number
   bonds: number

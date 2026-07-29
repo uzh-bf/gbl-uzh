@@ -68,9 +68,10 @@ function asId(value: unknown): string | null {
   return null
 }
 
-function toDate(value: unknown): Date | null {
+export function toDate(value: unknown): Date | null {
   if (value instanceof Date) return value
-  if (!value) return null
+  // Explicit missing-value check: `!value` would also drop epoch 0.
+  if (value === null || value === undefined || value === '') return null
   if (typeof value !== 'string' && typeof value !== 'number') return null
 
   const maybeDate = new Date(value)

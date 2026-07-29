@@ -49,6 +49,7 @@ import {
 import GameLayout from '~/components/GameLayout'
 import { trpc } from '~/lib/trpc'
 import type { RouterOutputs } from '~/server/trpc/router'
+import { ActionTypes } from '~/types/facts'
 import { useToast } from '../../components/ui/use-toast'
 
 const LABEL_MAP = {
@@ -164,7 +165,6 @@ const months = [
   'Dec',
 ]
 const numMonths = months.length
-const PLAYER_DECISION_ACTION_TYPE = ''
 
 type PortfolioFormValues = {
   savings: number
@@ -925,7 +925,7 @@ function Cockpit() {
                         const stocks = parseInt(String(values.stocks), 10)
 
                         await performAction.mutateAsync({
-                          type: PLAYER_DECISION_ACTION_TYPE,
+                          type: ActionTypes.NONE,
                           payload: JSON.stringify({
                             bank: savings,
                             bonds,

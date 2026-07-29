@@ -128,6 +128,14 @@ User events:
 - tRPC `events.global` and `events.user` exist.
 - Publish functions bridge to both old and new event systems.
 
+## Final State (as merged)
+
+EventService publishes to the realtime EventEmitter bus only
+(`lib/realtime.ts`); the GraphQL pubSub (`lib/pubsub.ts`) subscribes to that
+bus via `bridgeRealtimeEvents` so nexus subscriptions in the example games
+keep firing. The bridge lives at the pubsub layer instead of inside the
+publish functions, keeping tRPC apps free of any graphql-yoga import.
+
 ## Handoff Notes
 
 Report:

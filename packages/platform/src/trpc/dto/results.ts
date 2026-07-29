@@ -1,4 +1,5 @@
 import * as DB from '@prisma/client'
+import { toDate } from './game.js'
 
 export interface ResultPlayerDto {
   id: string
@@ -225,9 +226,7 @@ function toResultSegmentSummaryDto(
     id: segment.id,
     index: segment.index ?? 0,
     facts: segment.facts,
-    countdownExpiresAt: segment.countdownExpiresAt
-      ? new Date(segment.countdownExpiresAt)
-      : null,
+    countdownExpiresAt: toDate(segment.countdownExpiresAt),
     countdownDurationMs:
       typeof segment.countdownDurationMs === 'number'
         ? segment.countdownDurationMs

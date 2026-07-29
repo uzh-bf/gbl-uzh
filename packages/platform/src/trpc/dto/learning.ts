@@ -1,5 +1,19 @@
 import { LearningElementState } from '../../types.js'
 
+const LEARNING_ELEMENT_STATES = new Set<string>(
+  Object.values(LearningElementState)
+)
+
+// Runtime guard: the source column is a plain string, so an unexpected value
+// must fall back instead of leaking through a type assertion.
+function toLearningElementState(
+  value: string | null | undefined
+): LearningElementState {
+  return value && LEARNING_ELEMENT_STATES.has(value)
+    ? (value as LearningElementState)
+    : LearningElementState.NEW
+}
+
 export interface LearningElementOptionDto {
   id?: string | number
   content: string
@@ -110,7 +124,7 @@ export function toLearningElementStateDto(
             )
         : undefined,
     },
-    state: (state.state as LearningElementState) ?? LearningElementState.NEW,
+    state: toLearningElementState(state.state),
     solution: state.solution ?? null,
   }
 }

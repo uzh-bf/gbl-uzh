@@ -233,4 +233,14 @@ W7 after PR #144 merges. Estimated heavy lifting is W1; everything after is boun
   prisma engines are fetched by the explicit `prisma generate` steps in every build
   path; esbuild/swc/sharp ship binaries via optionalDependencies; playwright jobs run
   in the browser-preinstalled container image. Verified by turbo-prune clean install
-  with `--ignore-scripts` + full 3-task build.
+  with `--ignore-scripts` + full 3-task build. Gate green on `9e226aa`.
+- 2026-07-29: W4 done — all 19 unresolved review threads triaged against current code.
+  9 fixed: reports empty-results guard, welcome error message rendering, admin game
+  error-before-loading order, cockpit ActionTypes.NONE (enum moved to client-safe
+  types/facts), toDate epoch-0 preservation + export, LearningElementState runtime
+  guard, results countdownExpiresAt via toDate, persist-credentials off in
+  demo-game.yml checkouts, wp03 doc final-state note. 8 resolved by branch state
+  (services injection, protectedProcedure list endpoints, deleted components, unused
+  import, post-start rewrite). 2 were the S6505 findings fixed in `9e226aa`.
+  Out of scope (pre-existing on dev): LearningActivityModal single-select toggle
+  replaces multi-select answers.

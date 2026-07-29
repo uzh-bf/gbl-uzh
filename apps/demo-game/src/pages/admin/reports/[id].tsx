@@ -141,7 +141,10 @@ function ReportGame() {
       gameError ||
       segmentEndResultsError ||
       !reportGame ||
-      !reportSegmentEndResults
+      !reportSegmentEndResults ||
+      // No segment-end results yet (e.g. before the first segment finishes):
+      // indexing [0] below would throw.
+      reportSegmentEndResults.length === 0
     ) {
       return null
     }

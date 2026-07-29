@@ -72,7 +72,7 @@ function Welcome() {
   const watchAvatar = watch('imgPathAvatar')
 
   if (isPlayerLoading) return null
-  if (playerError) return `Error! ${playerError}`
+  if (playerError) return `Error! ${playerError.message}`
   if (!player) {
     return 'No player data found - user may not be authenticated'
   }
