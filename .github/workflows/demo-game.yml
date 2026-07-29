@@ -49,6 +49,9 @@ jobs:
           pnpm --filter @gbl-uzh/platform build
           pnpm --filter @gbl-uzh/ui build
 
+      - name: Test platform
+        run: pnpm --filter @gbl-uzh/platform test
+
       - name: Generate demo-game Prisma client
         working-directory: ./apps/demo-game
         run: |

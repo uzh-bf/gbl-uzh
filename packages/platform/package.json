@@ -75,7 +75,8 @@
     "build:nexus": "tsx src/nexus.ts",
     "build:ts": "cross-env NODE_ENV=production rollup -c",
     "dev": "cross-env NODE_ENV=development rollup -c --watch",
-    "generate": "prisma generate"
+    "generate": "prisma generate",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "engines": {
     "node": ">=24"
