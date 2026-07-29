@@ -100,7 +100,7 @@ Same-major set (registry-verified 2026-07-29; no breaking changes 11.17→11.18)
 | `@trpc/server`,`@trpc/client`,`@trpc/react-query` | 11.17.0 → **11.18.0** (latest 11.x; no v12 exists) |
 | `@tanstack/react-query` | 5.100.9 → 5.101.4 |
 | `next` (demo-game) | 16.2.9 → 16.2.12 |
-| `react`/`react-dom` | 19.2.7 → 19.2.8 |
+| `react`/`react-dom` | stays 19.2.7 — the workspace pins one React instance via parent-scoped pnpm overrides (`pnpm-workspace.yaml`); a patch bump must move demo-game, ui, and both examples at once (deferred to W7) |
 | `next-auth` | 4.24.14 → 4.24.15 (v5 still beta) |
 | `yup` | 1.6.1 → 1.7.1 |
 | `typescript` | ~5.6.3 → ~5.9.3 (stay in 5.x) |
@@ -210,3 +210,10 @@ W7 after PR #144 merges. Estimated heavy lifting is W1; everything after is boun
 
 - 2026-07-29: Roadmap created from three Opus review reports. PR green on `37f4878` but
   CONFLICTING vs dev. Starting W1.
+- 2026-07-29: W1 done — dev merged as `08c19d4` (dual-stack platform restored, pages
+  rewired onto dev's new UI, playwright spec unioned, CI/devcontainer env split
+  trpc/graphql). All gates green: platform+ui builds, demo-game tsc/lint/prettier/build,
+  central-bank tsc, frozen-lockfile install.
+- 2026-07-29: W2 done — `0ee0c0c` bumps trpc 11.18.0, RQ 5.101.4, next 16.2.12,
+  next-auth 4.24.15, yup 1.7.1 (aligned in ui), TS ~5.9.3. react/react-dom deviation:
+  stay 19.2.7 (single-React-instance override topology; patch bump deferred to W7).
