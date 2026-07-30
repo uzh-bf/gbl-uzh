@@ -183,8 +183,12 @@ layers:
 - 2026-07-30 — Layer 2 verification: Every TypeScript check, owned package check, production build, Quartz test, empty Jest discovery, UI package verifier, external Next consumer build, and frozen offline install passes. Existing lint-warning baselines remain in the four game and website apps; the host Node 26 runtime also retains Cypress's declared Node 20 engine warning.
 - 2026-07-30 — Layer 2 review: Separate exact-commit correctness and simplification reviews found no actionable issue. The reviewers confirmed that the Quartz wrapper, temporary website React type paths, non-rolled UI declarations, minimal `players` query addition, generated client deltas, and lockfile peer-context churn are justified compatibility work.
 - 2026-07-30 — Layer 2 publication: Draft PR [#178](https://github.com/uzh-bf/gbl-uzh/pull/178) targets `codex/upgrade-formatters-v3` from `codex/upgrade-typescript-6-bridge`; GitHub readback confirmed the linked stack, draft state, customized metadata, and `needsRebase: false`.
-- 2026-07-30 — Active: Implementing the website React 19 and Next.js 16 layer.
-- Next: Add layer 3 and establish its browser-validation path before implementation.
+- 2026-07-30 — Layer 3 implementation: Commit `be712f6` pins React/React DOM 19.2.8 and Next.js 16.2.12, removes the build-error suppression, preserves webpack and the Pages Router static export, migrates to ESLint 9 flat configuration, and upgrades the design system and Tailwind stack required by the React 19 runtime.
+- 2026-07-30 — Layer 3 verification: The website TypeScript, formatter, and ESLint checks pass with four existing `no-img-element` warnings; the Next.js production build compiles, type-checks, generates all 32 static pages, and exports successfully; a frozen offline install passes.
+- 2026-07-30 — Layer 3 browser proof: The real devrouter HTTPS route rendered the home and games pages at 1440×900 and the home page plus open navigation at 390×844 with no application runtime exceptions. Evidence is stored under `project/screenshots/pr-180/`; residual development-only noise is Next.js's HMR `isrManifest` warning and the existing games-page LCP advisory.
+- 2026-07-30 — Layer 3 review: Correctness found no actionable issue. Simplification narrowed the Syncpack exception to the four deliberate framework dependencies and the development-origin allowlist to the devrouter website host shape; exact-commit re-review confirmed both findings resolved with no remaining actionable issue.
+- 2026-07-30 — Active: Publishing the website React 19 and Next.js 16 layer.
+- Next: Add Layer 4, then pause for explicit approval before starting disposable PostgreSQL.
 
 ## Expected Gate 3 evidence
 
