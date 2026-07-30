@@ -38,6 +38,13 @@
   - [React 19 upgrade guide](https://react.dev/blog/2024/04/25/react-19-upgrade-guide)
   - [Prisma 7 upgrade guide](https://www.prisma.io/docs/guides/upgrade-prisma-orm/v7)
 
+## Independent plan review
+
+- Reviewer: `agy` with Gemini 3.6 Flash High in read-only plan mode against commit `731ff6f`.
+- Result: `DONE`; no scope, topology, or validation changes required.
+- Important advisory: Preserve the explicit approval gate before starting disposable PostgreSQL for layer 4. Accepted; already encoded in the plan and goal.
+- Minor advisory: Prove the undocumented repository-specific TypeScript 6/7 alias bridge through side-by-side diagnostics in layer 5. Accepted; already encoded in the layer acceptance gate.
+
 ## Approved stack
 
 ```yaml
@@ -162,8 +169,9 @@ layers:
 
 - 2026-07-30 — Gate 1: Approved in the origin session.
 - 2026-07-30 — Preparation: Live `dev` verified at `5cac12c`; GitHub stack preview enabled; target versions and migration seams verified; shared devrouter healthy.
-- 2026-07-30 — Active: Bottom branch and stack worktree created. This plan is being committed as the first branch commit.
-- Next: Independently review the plan commit, integrate valid findings, then establish the formatter baseline and implement layer 1.
+- 2026-07-30 — Plan review: Independent read-only review of `731ff6f` returned `DONE`; both advisories were already represented and remain accepted execution gates.
+- 2026-07-30 — Active: Establishing the formatter baseline and implementing layer 1.
+- Next: Pin the compatible Prettier 3 toolchain, separate configuration from mechanical churn, and verify the bottom branch.
 
 ## Expected Gate 3 evidence
 
