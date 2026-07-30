@@ -26,6 +26,8 @@
     "Andrin Rehmann <andrin.rehmann@df.uzh.ch>"
   ],
   "devDependencies": {
+    "@tailwindcss/aspect-ratio": "~0.4.2",
+    "@tailwindcss/forms": "~0.5.10",
     "@types/katex": "0.16.8",
     "@types/mdast": "4.0.4",
     "@types/node": "24.13.2",
