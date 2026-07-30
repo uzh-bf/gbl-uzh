@@ -1,0 +1,20 @@
+{
+  "extends": "./apps/quartz/tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "moduleResolution": "bundler",
+    "noUncheckedSideEffectImports": false,
+    "paths": {
+      "mdast-util-find-and-replace/lib": [
+        "./types/quartz/mdast-util-find-and-replace-lib.d.ts"
+      ],
+      "micromorph": ["./apps/quartz/node_modules/micromorph/index.d.ts"],
+      "preact/src/jsx": ["./apps/quartz/node_modules/preact/src/jsx.d.ts"],
+      "remark-parse/lib": [
+        "./apps/quartz/node_modules/remark-parse/lib/index.d.ts"
+      ],
+      "satori": ["./types/quartz/satori.d.ts"]
+    },
+    "types": ["node"]
+  }
+}

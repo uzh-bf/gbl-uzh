@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react'
 
 import { useQuery } from '@apollo/client'
 import {
-  Game,
   GameDocument,
   SpecificResultsDocument,
 } from 'src/graphql/generated/ops'
@@ -68,6 +67,21 @@ const config = {
   stocks: { label: labels[2], color: colors[2] },
 }
 
+type PlayerPeriodData = {
+  decisions: Record<string, number>[]
+  name: string
+  totalAssets: number[]
+  accTotalAssetsReturn: number[]
+  risk: number
+  totalAssetsReturnsPA: number
+}
+
+type RiskReturnData = {
+  name: string
+  risk: number
+  totalAssetsReturnsPA: number
+}
+
 function ReportGame() {
   const router = useRouter()
 
@@ -119,7 +133,7 @@ function ReportGame() {
       return null
     }
 
-    const game: Game = data.game
+    const game = data.game
 
     const numPeriods = game.periods.length
     // const numPeriodsVis = numPeriods - 1
@@ -141,12 +155,12 @@ function ReportGame() {
     const computeDataPerPeriod = () => {
       if (!previousSegmentResults || previousSegmentResults.length === 0)
         return []
-      let output = []
+      const output: Record<string, PlayerPeriodData>[] = []
       for (let i = 0; i < numPeriods; i++) {
         const playerResPerPeriod = previousSegmentResults.filter(
           (result) => result.period.index === i
         )
-        let dataPerPlayer = {}
+        const dataPerPlayer: Record<string, PlayerPeriodData> = {}
         playerResPerPeriod.map((result) => {
           const decisions = {}
           Object.keys(result.facts.decisions).forEach((v) => {
@@ -262,7 +276,9 @@ function ReportGame() {
 
     console.log('previousPeriodResults', previousPeriodResults)
 
-    const riskReturnPerPeriod = previousPeriodResults.reduce((acc, result) => {
+    const riskReturnPerPeriod = previousPeriodResults.reduce<
+      Record<string, RiskReturnData>[]
+    >((acc, result) => {
       if (!acc[result.period.index]) {
         acc[result.period.index] = {
           [result.player.id]: {
@@ -377,7 +393,7 @@ function ReportGame() {
                         <span className="text-xs text-gray-600">{name}</span>
                       </div>
                       <span className="font-bold text-black">
-                        {value.toFixed(2)}
+                        {Number(value).toFixed(2)}
                       </span>
                     </div>,
                   ]}
@@ -470,7 +486,7 @@ function ReportGame() {
                         <span className="text-xs text-gray-600">{name}</span>
                       </div>
                       <span className="font-bold text-black">
-                        {(value * 100).toFixed(2)}%
+                        {(Number(value) * 100).toFixed(2)}%
                       </span>
                     </div>,
                   ]}
@@ -621,7 +637,7 @@ function ReportGame() {
                           position="top"
                           className="fill-foreground"
                           fontSize={12}
-                          formatter={(v) => `${(v * 100).toFixed(1)}%`}
+                          formatter={(v) => `${(Number(v) * 100).toFixed(1)}%`}
                         />
                       )}
                     </Bar>
@@ -673,7 +689,7 @@ function ReportGame() {
                         <span className="text-xs text-gray-600">{name}</span>
                       </div>
                       <span className="font-bold text-black">
-                        {(value * 100).toFixed(2)}%
+                        {(Number(value) * 100).toFixed(2)}%
                       </span>
                     </div>,
                   ]}

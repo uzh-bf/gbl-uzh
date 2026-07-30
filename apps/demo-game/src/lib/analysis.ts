@@ -2,7 +2,11 @@ import { standardDeviation } from '@gbl-uzh/platform/dist/lib/util'
 import { PlayerResult } from 'src/graphql/generated/ops'
 import { MONTHS, NUM_MONTHS } from './constants'
 
-export const getSegmentEndResults = (results: PlayerResult[]) => {
+export const getSegmentEndResults = <
+  TResult extends Pick<PlayerResult, 'type'>,
+>(
+  results: TResult[]
+) => {
   return results.filter((o) => o.type == 'SEGMENT_END')
 }
 

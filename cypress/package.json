@@ -3,9 +3,12 @@
   "name": "@gbl-uzh/cypress",
   "devDependencies": {
     "@testing-library/cypress": "~9.0.0",
-    "cypress": "~12.16.0"
+    "@types/node": "20.17.6",
+    "cypress": "~12.16.0",
+    "typescript": "6.0.2"
   },
   "scripts": {
+    "check:ts": "tsc --noEmit",
     "test": "cypress open",
     "test:run": "cypress run",
     "test:watch": "cypress open --watch"

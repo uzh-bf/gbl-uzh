@@ -6,6 +6,7 @@
     "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
+    "noUncheckedSideEffectImports": false,
     "types": ["node", "@playwright/test"]
   },
   "include": ["*.ts", "tests/**/*.ts"]

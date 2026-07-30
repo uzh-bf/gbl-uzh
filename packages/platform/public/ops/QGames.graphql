@@ -3,5 +3,8 @@
 query Games {
   games {
     ...GameData
+    players {
+      id
+    }
   }
 }

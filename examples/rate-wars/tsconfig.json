@@ -15,14 +15,20 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "noUncheckedSideEffectImports": false,
     "jsx": "react-jsx",
     "rootDir": ".",
-    "baseUrl": ".",
     "paths": {
+      "src/*": [
+        "./src/*"
+      ],
       "~/*": [
         "./src/*"
       ]
     },
+    "types": [
+      "node"
+    ],
     "target": "ES2017"
   },
   "include": [
