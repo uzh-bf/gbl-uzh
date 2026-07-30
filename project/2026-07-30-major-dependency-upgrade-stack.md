@@ -187,7 +187,8 @@ layers:
 - 2026-07-30 — Layer 3 verification: The website TypeScript, formatter, and ESLint checks pass with four existing `no-img-element` warnings; the Next.js production build compiles, type-checks, generates all 32 static pages, and exports successfully; a frozen offline install passes.
 - 2026-07-30 — Layer 3 browser proof: The real devrouter HTTPS route rendered the home and games pages at 1440×900 and the home page plus open navigation at 390×844 with no application runtime exceptions. Evidence is stored under `project/screenshots/pr-180/`; residual development-only noise is Next.js's HMR `isrManifest` warning and the existing games-page LCP advisory.
 - 2026-07-30 — Layer 3 review: Correctness found no actionable issue. Simplification narrowed the Syncpack exception to the four deliberate framework dependencies and the development-origin allowlist to the devrouter website host shape; exact-commit re-review confirmed both findings resolved with no remaining actionable issue.
-- 2026-07-30 — Active: Publishing the website React 19 and Next.js 16 layer.
+- 2026-07-30 — Layer 3 publication: Draft PR [#180](https://github.com/uzh-bf/gbl-uzh/pull/180) targets `codex/upgrade-typescript-6-bridge` from `codex/upgrade-website-react-next` at `640cf7a`; GitHub readback confirmed the customized metadata, screenshots, linked stack, draft state, pending CI, and `needsRebase: false`.
+- 2026-07-30 — Active: Preparing the Prisma 7 layer.
 - Next: Add Layer 4, then pause for explicit approval before starting disposable PostgreSQL.
 
 ## Expected Gate 3 evidence
