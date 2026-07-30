@@ -17,6 +17,30 @@ allowBuilds:
   prisma: true
   sharp: true
   unrs-resolver: true
+packageExtensions:
+  # Next 15 supports React 18, but does not declare the matching React type
+  # packages. In this mixed React 18/19 workspace, make those optional peers so
+  # its declarations resolve against the website's React 18 types.
+  'next@15':
+    peerDependencies:
+      '@types/react': '^18.2.0'
+      '@types/react-dom': '^18.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+  # Recharts 2 also omits React type peers; declare them so each app receives
+  # the same type major as its React runtime.
+  'recharts@2':
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
 overrides:
   # demo-game runs Next 16 + React 19; several of its deps declare a React 18
   # peer with a *capped* range (`^18`), so pnpm installs a second react@18 copy
@@ -28,16 +52,16 @@ overrides:
   # React 19 apps. Shared deps with open peers (react-markdown `>=16`,
   # react-fontawesome `>=16.3`) resolve per-consumer automatically and need no
   # override.
-  'next@16>react': '^19.0.0'
-  'next@16>react-dom': '^19.0.0'
-  '@uzh-bf/design-system@4>react': '^19.0.0'
-  '@uzh-bf/design-system@4>react-dom': '^19.0.0'
-  '@gbl-uzh/ui>react': '^19.0.0'
-  '@gbl-uzh/ui>react-dom': '^19.0.0'
+  'next@16>react': '19.2.8'
+  'next@16>react-dom': '19.2.8'
+  '@uzh-bf/design-system@4>react': '19.2.8'
+  '@uzh-bf/design-system@4>react-dom': '19.2.8'
+  '@gbl-uzh/ui>react': '19.2.8'
+  '@gbl-uzh/ui>react-dom': '19.2.8'
   # react-dice-complete@2.2.0 peer-deps React <=18; force it onto React 19 so
   # there is a single React instance. Die.tsx wrapper unchanged.
-  'react-dice-complete>react': '^19.0.0'
-  'react-dice-complete>react-dom': '^19.0.0'
+  'react-dice-complete>react': '19.2.8'
+  'react-dice-complete>react-dom': '19.2.8'
   # The workspace mixes Font Awesome 6.6.0 (website, legacy) and 6.7.2
   # (demo-game/ui). fontawesome-common-types holds the IconProp/IconPrefix
   # types; two copies make IconDefinition vs IconProp nominally incompatible

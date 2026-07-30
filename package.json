@@ -58,14 +58,7 @@
   },
   "volta": {
     "node": "24.16.0",
-    "pnpm": "11.6.0"
+    "pnpm": "11.18.0"
   },
-  "packageManager": "pnpm@11.6.0",
-  "pnpm": {
-    "overrides": {
-      "@fortawesome/fontawesome-common-types": "6.7.2",
-      "react-dice-complete>react": "^19.0.0",
-      "react-dice-complete>react-dom": "^19.0.0"
-    }
-  }
+  "packageManager": "pnpm@11.18.0"
 }

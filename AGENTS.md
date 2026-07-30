@@ -21,10 +21,8 @@ Full reference (config schema, docker requirements, env injection, commands):
 
 Quick validation sequence:
 
-- `dev up`
-- `dev tls install` (required when repo defines tcp/postgres apps)
+- `devrouter ensure .`
 - `dev app ls --repo .`
-- `dev app run <host-app> --repo . --yes`
 - `dev ls`
 
 ## GBL Platform Wiki

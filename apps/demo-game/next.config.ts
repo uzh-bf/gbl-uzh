@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   allowedDevOrigins: ['127.0.0.1'],
   // Next 16 stable React Compiler: auto-memoizes components. Requires React 19
-  // (this app runs 19.2.7) and works under Turbopack.
+  // (this app runs 19.2.8) and works under Turbopack.
   reactCompiler: true,
   // Next 16 removed the `eslint` config key (and `next lint`); linting runs
   // standalone via the `lint` script (`eslint .`), not during `next build`.

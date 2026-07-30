@@ -100,7 +100,7 @@ Same-major set (registry-verified 2026-07-29; no breaking changes 11.17→11.18)
 | `@trpc/server`,`@trpc/client`,`@trpc/react-query` | 11.17.0 → **11.18.0** (latest 11.x; no v12 exists) |
 | `@tanstack/react-query` | 5.100.9 → 5.101.4 |
 | `next` (demo-game) | 16.2.9 → 16.2.12 |
-| `react`/`react-dom` | stays 19.2.7 — the workspace pins one React instance via parent-scoped pnpm overrides (`pnpm-workspace.yaml`); a patch bump must move demo-game, ui, and both examples at once (deferred to W7) |
+| `react`/`react-dom` | 19.2.7 → **19.2.8** across demo-game, ui, platform, and both examples; parent-scoped pnpm overrides pin the same patch |
 | `next-auth` | 4.24.14 → 4.24.15 (v5 still beta) |
 | `yup` | 1.6.1 → 1.7.1 |
 | `typescript` | ~5.6.3 → ~5.9.3 (stay in 5.x) |
@@ -272,3 +272,14 @@ W7 after PR #144 merges. Estimated heavy lifting is W1; everything after is boun
   `ctx as any` casts, shared onError-toast helper (~14 sites), dead
   PlatformContext.services/schemas fields + unused router `extensions`,
   dto/results period/segment ref helper.
+- 2026-07-30: Dependency/toolchain finalization refreshed the live registry state:
+  devrouter 0.0.35, pnpm 11.18.0, TypeScript 5.9.3 across active packages,
+  React 19.2.8 for the React 19 apps, Next 16.2.12 / 15.5.22, Playwright 1.62.0,
+  and Apollo Client 3.14.1. tRPC 11.18.0 and TanStack Query 5.101.4 were already
+  current. pnpm package extensions now keep React 18 types scoped to the legacy
+  website in the mixed React 18/19 workspace. Devrouter doctor reports 25 OK,
+  0 errors; the one warning is a pre-existing legacy workspace owner record.
+  Platform tests (45/45), all package type checks, UI package verification, and
+  production builds for platform, ui, demo-game, website, central-bank, and
+  rate-wars pass. TypeScript 7, Prisma 7, and other major upgrades remain
+  separate migrations.

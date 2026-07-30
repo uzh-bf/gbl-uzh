@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# devrouter:managed devcontainer
 # Runs on every container start. Launches the selected game dev server in the
 # background so the app is reachable without a manual step.
 set -euo pipefail
@@ -49,11 +50,19 @@ fi
 export CI=true
 export npm_config_verify_deps_before_run=false
 
-devrouter-process ensure \
-  --name game \
-  --match 'pnpm(\.cjs)? .*dev' \
-  --log /tmp/dev.log \
-  -- bash -lc "exec pnpm -F '${GBL_GAME_PACKAGE}' dev"
+if [ "${GBL_DEV_MODE:-}" = "starter" ]; then
+  if ! pgrep -f 'pnpm(\.cjs)? .*dev' >/dev/null; then
+    nohup bash -lc "exec pnpm -F '${GBL_GAME_PACKAGE}' dev" \
+      >/tmp/dev.log 2>&1 &
+  fi
+else
+  : "${DEVROUTER_PROCESS_HELPER:?devrouter ensure must provide DEVROUTER_PROCESS_HELPER}"
+  "$DEVROUTER_PROCESS_HELPER" ensure \
+    --name game \
+    --match 'pnpm(\.cjs)? .*dev' \
+    --log /tmp/dev.log \
+    -- bash -lc "exec pnpm -F '${GBL_GAME_PACKAGE}' dev"
+fi
 
 if [ "${GBL_DEV_MODE:-}" = "starter" ]; then
   printf '[post-start] App      -> %s      (first compile ~30-60s)\n' "$NEXTAUTH_URL"
@@ -61,6 +70,6 @@ if [ "${GBL_DEV_MODE:-}" = "starter" ]; then
 else
   printf '[post-start] App      -> %s      (via devrouter; first compile ~30-60s)\n' "$NEXTAUTH_URL"
   printf '[post-start] OIDC mock-> %s\n' "$AUTH0_ISSUER"
-  printf '[post-start] Routes   -> on the host: for a in app oidc db; do dev app run "$a" --yes; done\n'
+  printf '[post-start] Lifecycle-> on the host: devrouter ensure .\n'
 fi
 printf '[post-start] Logs     -> tail -f /tmp/dev.log\n'
