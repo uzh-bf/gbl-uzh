@@ -70,7 +70,9 @@
     "react-hook-form": "^7.80.0"
   },
   "scripts": {
-    "build": "tsc && vite build",
+    "build": "node_modules/typescript/bin/tsc --project tsconfig.json && vite build",
+    "check:ts": "../../node_modules/typescript-native/bin/tsc --project tsconfig.json",
+    "check:ts:typescript6": "node_modules/typescript/bin/tsc --project tsconfig.json",
     "dev": "vite build --watch",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "prepack": "pnpm run build",

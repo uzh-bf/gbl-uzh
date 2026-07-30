@@ -16,6 +16,12 @@ const config = {
   semverGroups: [
     {
       range: '',
+      dependencyTypes: ['dev'],
+      dependencies: ['typescript', 'typescript-native'],
+      packages: ['**'],
+    },
+    {
+      range: '',
       dependencyTypes: ['prod', 'resolutions', 'overrides', 'pnpmOverrides'],
       dependencies: ['**'],
       packages: ['**'],
