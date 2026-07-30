@@ -12,11 +12,7 @@ function createPrismaClient() {
     throw new Error('DATABASE_URL is required to create PrismaClient')
   }
 
-  const adapter = new PrismaPg({
-    connectionString,
-    connectionTimeoutMillis: 5_000,
-    idleTimeoutMillis: 300_000,
-  })
+  const adapter = new PrismaPg(connectionString)
 
   return new PrismaClient({ adapter })
 }

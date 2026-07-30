@@ -200,8 +200,10 @@ layers:
 - 2026-07-30 — Layer 4 E2E verification: Demo-game passed setup plus both browser flows (3/3), Rate Wars passed setup plus its two-year three-bank flow (2/2), and Central Bank passed setup plus its full flow (2/2) through the namespaced HTTPS app and OIDC routes.
 - 2026-07-30 — Layer 4 cleanup: The approved disposable runtime is removed. Readback reports `devpod:absent`, zero routes, and no `default-co-bd343` containers, volumes, or networks; the Git worktree is retained.
 - 2026-07-30 — Layer 4 lock portability: The Prisma/Linux lock rewrite now retains the native optional packages for current macOS and Linux glibc on ARM64 and x64. Pnpm 11.6.0 reports no direct importer version drift, the frozen offline install passes, and the platform production build succeeds on macOS.
-- 2026-07-30 — Active: Re-run the affected clean checks at the cascaded Layer 4 tip, then review and publish it.
-- Next: Cascade the existing Layer 5 implementation, then complete whole-stack finish gates and package the five draft PRs.
+- 2026-07-30 — Layer 4 review: Correctness found no actionable issue. Simplification removed three duplicated pool-timeout configurations and the games' redundant direct `pg` and `@types/pg` declarations; the installed adapter's connection-string constructor and transitive PostgreSQL dependency now provide the same required integration with one `pg` resolution.
+- 2026-07-30 — Layer 4 final checks: The post-review tip passes the pnpm 11.6.0 frozen offline install, platform production build, and all three game TypeScript, format, and lint checks with only their recorded warning baselines.
+- 2026-08-01 — Active: Cascade the existing Layer 5 implementation, then rerun affected clean checks and complete the whole-stack finish gates.
+- Next: Publish the five linked draft PRs after the stack topology and branch invariants are verified.
 
 ## Expected Gate 3 evidence
 
