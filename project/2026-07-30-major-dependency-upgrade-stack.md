@@ -118,9 +118,10 @@ layers:
 ### Layer 1 — Formatter v3
 
 - Branch: `codex/upgrade-formatters-v3`
-- Decision: Pin Prettier 3.9.6 and compatible plugins across the active workspace.
+- Decision: Pin Prettier 3.9.6 and compatible plugins in every parent-owned formatter consumer.
+- Boundary: Keep the clean Quartz submodule on its committed Prettier 3.3.3 resolution. Its own `check` already reports 125 formatting differences at the pinned commit, and forcing 3.9.6 from the parent adds four more; changing those files requires a separately authorized cross-repository commit.
 - Do: Keep formatter configuration/toolchain changes separate from mechanical formatting commits.
-- Check: Run formatter checks first, then affected lint, type checks, and production builds.
+- Check: Run formatter checks first, prove Quartz retains its baseline formatter result, then run affected lint, type checks, and production builds.
 - Commit: `build(format): standardize Prettier 3 toolchain`, followed by a mechanical-formatting commit when needed.
 
 ### Layer 2 — TypeScript 6 bridge
@@ -170,8 +171,9 @@ layers:
 - 2026-07-30 — Gate 1: Approved in the origin session.
 - 2026-07-30 — Preparation: Live `dev` verified at `5cac12c`; GitHub stack preview enabled; target versions and migration seams verified; shared devrouter healthy.
 - 2026-07-30 — Plan review: Independent read-only review of `731ff6f` returned `DONE`; both advisories were already represented and remain accepted execution gates.
-- 2026-07-30 — Active: Establishing the formatter baseline and implementing layer 1.
-- Next: Pin the compatible Prettier 3 toolchain, separate configuration from mechanical churn, and verify the bottom branch.
+- 2026-07-30 — Layer 1 baseline: The four parent-owned formatter consumers resolve Prettier 3.9.6 with compatible plugins; Quartz remains clean on 3.3.3 with its 125-file pre-existing formatter debt preserved.
+- 2026-07-30 — Active: Reviewing the formatter toolchain commit before applying the separate mechanical output.
+- Next: Commit and review the compatible Prettier 3 toolchain, then apply and verify the mechanical formatting commit.
 
 ## Expected Gate 3 evidence
 
