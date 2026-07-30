@@ -16,6 +16,9 @@ const Die = dynamic(() => import('@gbl-uzh/ui').then((mod) => mod.Die), {
   ssr: false,
 })
 
+const setIndex = (values: boolean[], index: number, value: boolean) =>
+  values.map((item, itemIndex) => (itemIndex === index ? value : item))
+
 const StaticChartWithDice = ({
   title,
   dieA,
@@ -84,11 +87,17 @@ const Forecast = () => {
   } = decodedData
 
   if (!diceBonds || !diceShared || !diceStocks) return <div>Loading...</div>
-  const colors = [
-    'var(--chart-4)',
-    'var(--chart-5)',
-    'var(--chart-2)',
-  ]
+  const colors = ['var(--chart-4)', 'var(--chart-5)', 'var(--chart-2)']
+
+  const handleRoll = (index: number) => {
+    setRoll((values) => setIndex(values, index, true))
+    setShowDice((values) => setIndex(values, index, false))
+
+    setTimeout(() => {
+      setRoll((values) => setIndex(values, index, false))
+      setShowDice((values) => setIndex(values, index, true))
+    }, 2500)
+  }
 
   return (
     <div className="py-8">
@@ -127,32 +136,7 @@ const Forecast = () => {
                         />
                       </div>
                       <div>
-                        <Button
-                          onClick={() => {
-                            setRoll((prev) =>
-                              prev.map((item, idx) => (idx === i ? true : item))
-                            )
-                            setShowDice((prev) =>
-                              prev.map((item, idx) =>
-                                idx === i ? false : item
-                              )
-                            )
-                            setTimeout(() => {
-                              setRoll((prev) =>
-                                prev.map((item, idx) =>
-                                  idx === i ? false : item
-                                )
-                              )
-                              setShowDice((prev) =>
-                                prev.map((item, idx) =>
-                                  idx === i ? true : item
-                                )
-                              )
-                            }, 2500)
-                          }}
-                        >
-                          Roll
-                        </Button>
+                        <Button onClick={() => handleRoll(i)}>Roll</Button>
                       </div>
                     </div>
 

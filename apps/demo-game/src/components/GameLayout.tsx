@@ -1,25 +1,18 @@
-import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import {
   GameSidebar,
   getCountdownNotification,
-  LearningActivityModal,
-  LearningActivitiesList,
   Layout,
+  LearningActivitiesList,
+  LearningActivityModal,
   shouldRefetchGameResult,
   StoryElements,
-  useLearningActivities,
 } from '@gbl-uzh/ui'
 import { Button } from '@uzh-bf/design-system'
 import dayjs from 'dayjs'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import {
-  AttemptLearningElementDocument,
-  GlobalEventsDocument,
-  LearningElementDocument,
-  MarkStoryElementDocument,
-  ResultDocument,
-  UpdateReadyStateDocument,
-} from 'src/graphql/generated/ops'
+import { useEffect, useRef, useState } from 'react'
+import { useLearningActivities } from '~/hooks/useLearningActivities'
+import { getFacts } from '~/lib/facts'
+import { trpc } from '~/lib/trpc'
 import { useToast } from './ui/use-toast'
 
 const tabs = [
@@ -27,17 +20,80 @@ const tabs = [
   { name: 'Cockpit', href: '/play/cockpit' },
 ]
 
-function GameLayout({ children }: { children: React.ReactNode }) {
-  const { data, refetch: refetchResult } = useQuery(ResultDocument, {
-    fetchPolicy: 'cache-and-network',
-  })
+// The DTO's achievement reward is an untyped JSON blob; PlayerDisplay only
+// ever reads `.xp` off it, so narrow just that.
+function getAchievementReward(value: unknown): { xp?: number } | null {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const xp = (value as Record<string, unknown>).xp
+    return { xp: typeof xp === 'number' ? xp : undefined }
+  }
+  return null
+}
 
-  const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument)
-  const [markStoryElement] = useMutation(MarkStoryElementDocument, {
-    refetchQueries: [ResultDocument],
-  })
+// StoryElements expects a required `type` and a structured `contentRole`;
+// the DTO leaves both loosely typed (optional / unknown JSON), so narrow at
+// the boundary instead of changing StoryElements' contract.
+function toStoryElementData(
+  elements: readonly {
+    id: string
+    title: string
+    type?: string
+    content?: string | null
+    contentRole?: unknown
+  }[]
+) {
+  return elements.map((element) => ({
+    id: element.id,
+    title: element.title,
+    type: (element.type ?? 'GENERIC') as 'GENERIC' | 'ROLE_BASED',
+    content: element.content,
+    contentRole:
+      element.contentRole && typeof element.contentRole === 'object'
+        ? (element.contentRole as Record<string, unknown>)
+        : null,
+  }))
+}
+
+function GameLayout({ children }: { children: React.ReactNode }) {
+  const utils = trpc.useUtils()
+  const { data: resultData } = trpc.play.result.useQuery()
+  const { data: selfData } = trpc.play.self.useQuery()
 
   const { toast } = useToast()
+
+  const updateReadyState = trpc.play.updateReadyState.useMutation({
+    onSuccess: async () => {
+      await Promise.all([
+        utils.play.result.invalidate(),
+        utils.play.self.invalidate(),
+      ])
+    },
+    onError: (err) => {
+      toast({
+        title: 'Could not update your ready state',
+        description: err.message,
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const markStoryElement = trpc.story.markVisited.useMutation({
+    onSuccess: async () => {
+      // visitedStoryElementIds is read from play.self, the story content from
+      // play.result — refresh both.
+      await Promise.all([
+        utils.play.result.invalidate(),
+        utils.play.self.invalidate(),
+      ])
+    },
+    onError: (err) => {
+      toast({
+        title: 'Could not mark the story element as read',
+        description: err.message,
+        variant: 'destructive',
+      })
+    },
+  })
 
   const [countdownNotifications, setCountdownNotifications] = useState({
     '60': false,
@@ -46,10 +102,10 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   const previousCountdownSeconds = useRef<number | null>(null)
 
   const completedLearningElementIds =
-    data?.result?.playerResult?.player?.completedLearningElementIds ?? []
-  const allPeriods = data?.result?.currentGame?.periods ?? []
+    selfData?.completedLearningElementIds ?? []
+  const allPeriods = resultData?.currentGame?.periods ?? []
   const currentLearningElements =
-    data?.result?.currentGame?.activePeriod?.activeSegment?.learningElements ?? []
+    resultData?.currentGame?.activePeriod?.activeSegment?.learningElements ?? []
 
   const {
     activeLearningId,
@@ -64,43 +120,41 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     completedLearningElements,
     openLearningElements,
   } = useLearningActivities({
-    learningElementDocument: LearningElementDocument,
-    attemptLearningElementDocument: AttemptLearningElementDocument,
-    resultDocument: ResultDocument,
     completedLearningElementIds,
     activeSegmentLearningElements: currentLearningElements,
     allPeriods,
     toast,
   })
 
-  const currentGameId = parseInt(data?.result?.currentGame?.id)
+  const currentGameId = resultData?.currentGame?.id
 
-  useSubscription(GlobalEventsDocument, {
-    skip: !currentGameId,
-    onData: ({ data: subData }) => {
-      if (subData?.data?.eventsGlobal) {
-        const event = subData.data.eventsGlobal
-        if (shouldRefetchGameResult(event, currentGameId)) {
-          refetchResult()
-        }
+  trpc.events.global.useSubscription(undefined, {
+    enabled: Boolean(currentGameId),
+    onData(event) {
+      if (!currentGameId) return
+      if (shouldRefetchGameResult(event, currentGameId)) {
+        utils.play.result.invalidate().catch((error) => {
+          console.error('GameLayout: Failed to refresh result:', error)
+        })
       }
+    },
+    onError: (err) => {
+      console.error('GameLayout: Subscription error:', err)
     },
   })
 
-  const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
-    ?.countdownExpiresAt as string | null
-  const countdownDurationMs = data?.result?.currentGame?.activePeriod
-    ?.activeSegment?.countdownDurationMs as number | null
-
-  const expiresAtDate = useMemo(() => {
-    return strExpiresAt ? dayjs(strExpiresAt).toDate() : null
-  }, [strExpiresAt])
+  const expiresAtDate =
+    resultData?.currentGame?.activePeriod?.activeSegment?.countdownExpiresAt ??
+    null
+  const countdownDurationMs =
+    resultData?.currentGame?.activePeriod?.activeSegment?.countdownDurationMs ??
+    null
+  const expiresAtKey = expiresAtDate?.getTime() ?? null
 
   useEffect(() => {
-    if (!strExpiresAt) return
+    if (!expiresAtDate) return
 
-    const dateExpiresAt = dayjs(strExpiresAt)
-    const secondsRemaining = dateExpiresAt.diff(dayjs(), 's')
+    const secondsRemaining = dayjs(expiresAtDate).diff(dayjs(), 's')
     previousCountdownSeconds.current = secondsRemaining
 
     if (secondsRemaining > 0) {
@@ -111,44 +165,59 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     }
 
     setCountdownNotifications({ '60': false, '180': false })
-  }, [strExpiresAt, countdownDurationMs])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expiresAtKey, countdownDurationMs])
 
-
-
-  if (!data?.self || !data?.result?.currentGame) {
+  if (!selfData || !resultData?.currentGame) {
     return null
   }
 
+  const selfFacts = getFacts(selfData.facts)
+  const playerColor =
+    typeof selfFacts.color === 'string' ? selfFacts.color : 'Red'
+  const playerLocation =
+    typeof selfFacts.location === 'string' ? selfFacts.location : 'ZH'
+  const playerAvatar =
+    typeof selfFacts.avatar === 'string'
+      ? selfFacts.avatar
+      : '/avatars/avatar_placeholder.png'
+
+  const achievements = selfData.achievements.map((entry) => ({
+    id: entry.id,
+    count: entry.count,
+    achievement: {
+      id: entry.achievement.id,
+      name: entry.achievement.name,
+      description: entry.achievement.description,
+      image: entry.achievement.image,
+      reward: getAchievementReward(entry.achievement.reward),
+    },
+  }))
+
   const playerInfo = {
-    name: data.self.name,
-    color: data.self.facts.color,
-    location: data.self.facts.location,
-    level: data.self.level.index,
-    xp: data.self.experience,
-    xpMax: data.self.experienceToNext,
-    achievements: data.self.achievements,
-    imgPathAvatar: data.self.facts.avatar,
-    imgPathLocation: `/locations/${data.self.facts.location}.svg`,
+    name: selfData.name,
+    color: playerColor,
+    location: playerLocation,
+    level: selfData.level.index,
+    xp: selfData.experience,
+    xpMax: selfData.experienceToNext,
+    achievements,
+    imgPathAvatar: playerAvatar,
+    imgPathLocation: `/locations/${playerLocation}.svg`,
   }
 
   const sidebar = (
     <GameSidebar
       playerInfo={playerInfo}
-      readySwitch={
-        data?.self
-          ? {
-              checked: data.self.isReady,
-              disabled: loading,
-              onCheckedChange: async () => {
-                await updateReadyState({
-                  variables: {
-                    isReady: !data.self.isReady,
-                  },
-                })
-              },
-            }
-          : undefined
-      }
+      readySwitch={{
+        checked: selfData.isReady,
+        disabled: updateReadyState.isPending,
+        onCheckedChange: () => {
+          updateReadyState.mutate({
+            isReady: !selfData.isReady,
+          })
+        },
+      }}
       countdown={
         countdownDurationMs !== null && expiresAtDate !== null
           ? {
@@ -188,23 +257,23 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     </GameSidebar>
   )
 
-  const activeSegment = data?.result?.currentGame?.activePeriod?.activeSegment
-
-
+  const activeSegment = resultData.currentGame.activePeriod?.activeSegment
 
   return (
     <>
       <StoryElements
         key={activeSegment?.id}
-        activeStoryElements={activeSegment?.storyElements ?? []}
-        visitedStoryElementIds={data?.result?.playerResult?.player?.visitedStoryElementIds ?? []}
-        playerRole={data.self.role}
+        activeStoryElements={toStoryElementData(
+          activeSegment?.storyElements ?? []
+        )}
+        visitedStoryElementIds={selfData.visitedStoryElementIds ?? []}
+        playerRole={selfData.role ?? undefined}
         onMarkElementVisited={async (id) => {
-          await markStoryElement({
-            variables: {
-              elementId: id,
-            },
-          })
+          // onError already surfaces a toast; swallow the rejection so the
+          // awaiting StoryElements handler does not raise it as unhandled.
+          await markStoryElement
+            .mutateAsync({ elementId: id })
+            .catch(() => undefined)
         }}
       />
       <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
@@ -213,7 +282,7 @@ function GameLayout({ children }: { children: React.ReactNode }) {
       <LearningActivityModal
         open={!!activeLearningId}
         onClose={() => setActiveLearningId(null)}
-        element={learningElementData?.learningElement?.element}
+        element={learningElementData?.element}
         state={learningElementState}
         activeElements={activeLearningOptions}
         setActiveElements={setActiveLearningOptions}

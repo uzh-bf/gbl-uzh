@@ -21,14 +21,13 @@ const eslintConfig = [
   },
   {
     // An object with only `ignores` sets global ignores. Mirrors the old
-    // `ignorePatterns` (build output + generated GraphQL); node_modules is
-    // ignored by flat config out of the box.
+    // `ignorePatterns` for build output; node_modules is ignored by flat config
+    // out of the box.
     ignores: [
       '.next/**',
       'out/**',
       'build/**',
       'next-env.d.ts',
-      'src/graphql/generated/**',
     ],
   },
 ]

@@ -14,7 +14,7 @@
     "@uzh-bf/design-system": "^3.0.0-alpha.35",
     "autoprefixer": "10.4.20",
     "gray-matter": "4.0.3",
-    "next": "15.5.19",
+    "next": "15.5.22",
     "next-mdx-remote": "6.0.0",
     "ramda": "0.30.1",
     "react": "18.3.1",
@@ -28,8 +28,10 @@
     "@types/node": "^20.17.6",
     "@types/ramda": "^0.30.2",
     "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.7",
     "cross-env": "~7.0.3",
-    "eslint-config-next": "15.5.19",
+    "eslint": "~8.57.1",
+    "eslint-config-next": "15.5.22",
     "npm-run-all": "~4.1.5",
     "postcss": "~8.4.49",
     "prettier": "~3.3.2",
@@ -37,7 +39,7 @@
     "prettier-plugin-tailwindcss": "~0.4.1",
     "remark-wiki-link": "2.0.1",
     "sharp": "~0.32.6",
-    "typescript": "~5.6.3"
+    "typescript": "~5.9.3"
   },
   "scripts": {
     "build": "cross-env NODE_ENV=production next build",

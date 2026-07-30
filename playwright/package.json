@@ -3,9 +3,9 @@
   "name": "@gbl-uzh/playwright",
   "version": "0.0.0",
   "devDependencies": {
-    "@playwright/test": "1.61.1",
-    "@types/node": "24.13.2",
-    "typescript": "5.6.3"
+    "@playwright/test": "1.62.0",
+    "@types/node": "24.13.3",
+    "typescript": "5.9.3"
   },
   "scripts": {
     "check:ts": "tsc --noEmit",
