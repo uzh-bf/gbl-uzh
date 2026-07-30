@@ -109,8 +109,9 @@ export const PeriodSegmentFactsSchema = yup.object({
   shockOverride: yup.number().min(-25).max(25).nullable().optional(),
 })
 
-export interface PeriodSegmentFacts
-  extends yup.InferType<typeof PeriodSegmentFactsSchema> {
+export interface PeriodSegmentFacts extends yup.InferType<
+  typeof PeriodSegmentFactsSchema
+> {
   // computed at authoring time by Segment.initialize:
   defaultShock: number
   realizedDefaultRate: number

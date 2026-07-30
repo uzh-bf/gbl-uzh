@@ -172,8 +172,11 @@ layers:
 - 2026-07-30 — Preparation: Live `dev` verified at `5cac12c`; GitHub stack preview enabled; target versions and migration seams verified; shared devrouter healthy.
 - 2026-07-30 — Plan review: Independent read-only review of `731ff6f` returned `DONE`; both advisories were already represented and remain accepted execution gates.
 - 2026-07-30 — Layer 1 baseline: The four parent-owned formatter consumers resolve Prettier 3.9.6 with compatible plugins; Quartz remains clean on 3.3.3 with its 125-file pre-existing formatter debt preserved.
-- 2026-07-30 — Active: Reviewing the formatter toolchain commit before applying the separate mechanical output.
-- Next: Commit and review the compatible Prettier 3 toolchain, then apply and verify the mechanical formatting commit.
+- 2026-07-30 — Layer 1 toolchain: Commit `d75524d` passed separate correctness and simplification reviews with no actionable findings.
+- 2026-07-30 — Layer 1 verification: All four owned formatter checks pass; Quartz reports the same 125 files as its 3.3.3 baseline; platform, UI, demo-game, website, Rate Wars, and Central Bank production builds pass. Central Bank used `NEXT_PUBLIC_API_URL=http://localhost:3000/api/graphql` for its required static-build input.
+- 2026-07-30 — Layer 1 inherited checks: Central Bank's complete check passes. Demo-game and Rate Wars lint with warnings but retain existing TypeScript errors; website retains its existing React 18/19 type split and ESLint 9 flat-config failure. The successful production builds are the behavior gate for this formatter-only layer; layers 2 and 3 own the TypeScript and website remediation.
+- 2026-07-30 — Active: Reviewing the separate mechanical formatting output.
+- Next: Commit and review the mechanical output, publish the bottom draft PR, then add layer 2.
 
 ## Expected Gate 3 evidence
 

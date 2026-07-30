@@ -29,11 +29,12 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {}
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -43,7 +44,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       className={twMerge(buttonVariants({ variant, size, className }))}
       {...props}
     />
-  )
+  ),
 );
 Button.displayName = "Button";
 

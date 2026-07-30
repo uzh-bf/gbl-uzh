@@ -190,7 +190,9 @@ function Welcome() {
                           colors={COLORS}
                           color={values.color}
                           value={values.imgPathAvatar}
-                          onChange={(val) => setFieldValue("imgPathAvatar", val)}
+                          onChange={(val) =>
+                            setFieldValue("imgPathAvatar", val)
+                          }
                           fallbackSrc="/avatars/avatar_placeholder.png"
                           label="Avatar"
                           className="w-48 pb-2 text-sm text-gray-600"

@@ -1,5 +1,5 @@
-import { useField } from 'formik'
 import { MultiSelect } from '@gbl-uzh/ui'
+import { useField } from 'formik'
 
 interface MultiSelectFieldProps {
   name: string

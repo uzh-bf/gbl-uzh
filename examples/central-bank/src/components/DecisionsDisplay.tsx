@@ -70,7 +70,7 @@ function OnOffIcon({ on = false }: { on?: boolean }) {
     <div
       className={twMerge(
         "h-4 w-4 rounded-full",
-        on ? "bg-uzh-blue-100" : "bg-uzh-blue-20"
+        on ? "bg-uzh-blue-100" : "bg-uzh-blue-20",
       )}
     />
   );

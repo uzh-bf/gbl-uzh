@@ -35,7 +35,7 @@ export default function ReportGame() {
         type: "PERIOD_END",
       },
       skip: !router.query.id,
-    }
+    },
   );
 
   if (loading || periodResultsLoading) {
@@ -99,7 +99,7 @@ export default function ReportGame() {
   });
 
   const sortedSummaries = Object.values(playerSummaryMap).sort(
-    (a, b) => a.cumulativePenalty - b.cumulativePenalty
+    (a, b) => a.cumulativePenalty - b.cumulativePenalty,
   );
 
   return (

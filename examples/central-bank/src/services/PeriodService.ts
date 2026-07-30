@@ -23,7 +23,7 @@ export function initialize(
     GameFacts,
     PeriodFacts,
     PeriodSegmentFacts
-  >
+  >,
 ): OutputPeriodFacts {
   const baseFacts: OutputPeriodFacts = {
     resultFacts: facts,
@@ -31,7 +31,7 @@ export function initialize(
 
   const resultFacts: OutputPeriodFacts = produce(
     baseFacts,
-    (draft: OutputPeriodFacts) => {}
+    (draft: OutputPeriodFacts) => {},
   );
 
   debugLog("PeriodInitialize", facts, payload, resultFacts);
@@ -40,7 +40,7 @@ export function initialize(
 
 export function consolidate(
   facts: InputPeriodFacts,
-  payload: PayloadPeriodConsolidation<GameFacts, PeriodSegmentFacts>
+  payload: PayloadPeriodConsolidation<GameFacts, PeriodSegmentFacts>,
 ): OutputPeriodFacts {
   const baseFacts: OutputPeriodFacts = {
     resultFacts: facts,
@@ -48,7 +48,7 @@ export function consolidate(
 
   const resultFacts: OutputPeriodFacts = produce(
     baseFacts,
-    (draft: OutputPeriodFacts) => {}
+    (draft: OutputPeriodFacts) => {},
   );
   debugLog("PeriodConsolidate", facts, payload, resultFacts);
   return resultFacts;

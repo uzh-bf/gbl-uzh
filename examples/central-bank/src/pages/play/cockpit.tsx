@@ -167,7 +167,7 @@ function MetricsSummary({
         subtext={`Target: ${scenario.targetInflation.toFixed(1)}%`}
         colorClass={
           Math.abs(
-            (resultFacts.inflation ?? DEFAULT_RATE) - scenario.targetInflation
+            (resultFacts.inflation ?? DEFAULT_RATE) - scenario.targetInflation,
           ) > 2
             ? "text-red-500"
             : "text-green-500"
@@ -176,7 +176,7 @@ function MetricsSummary({
         {renderDeviationMeter(
           resultFacts.inflation ?? DEFAULT_RATE,
           scenario.targetInflation,
-          DEFAULT_RATE
+          DEFAULT_RATE,
         )}
       </MetricCard>
       <MetricCard
@@ -186,7 +186,7 @@ function MetricsSummary({
         colorClass={
           Math.abs(
             (resultFacts.unemployment ?? DEFAULT_RATE) -
-              scenario.naturalUnemployment
+              scenario.naturalUnemployment,
           ) > 1.5
             ? "text-red-500"
             : "text-green-500"
@@ -195,7 +195,7 @@ function MetricsSummary({
         {renderDeviationMeter(
           resultFacts.unemployment ?? DEFAULT_RATE,
           scenario.naturalUnemployment,
-          3.0
+          3.0,
         )}
       </MetricCard>
       <MetricCard
@@ -379,7 +379,7 @@ export default function Cockpit() {
     ResultDocument,
     {
       fetchPolicy: "cache-and-network",
-    }
+    },
   );
   const [performAction] = useMutation(PerformActionDocument);
   const { toast } = useToast();
@@ -423,10 +423,10 @@ export default function Cockpit() {
       const activeSegResult = playerResults.find(
         (res) =>
           res.type === "SEGMENT_END" &&
-          res.segment?.index === currentGame?.activePeriod?.activeSegmentIx
+          res.segment?.index === currentGame?.activePeriod?.activeSegmentIx,
       );
       const periodEndResult = playerResults.find(
-        (res) => res.type === "PERIOD_END"
+        (res) => res.type === "PERIOD_END",
       );
 
       const displayResult = periodEndResult || activeSegResult;
@@ -550,7 +550,7 @@ export default function Cockpit() {
         0.5 * (growth - TREND_GROWTH);
       const recommendedRate = Math.min(
         15,
-        Math.max(0, parseFloat(taylorRate.toFixed(2)))
+        Math.max(0, parseFloat(taylorRate.toFixed(2))),
       );
 
       const schema = yup.object({
@@ -635,7 +635,7 @@ export default function Cockpit() {
                               onChange={(e) => {
                                 formik.setFieldValue(
                                   "rate",
-                                  parseFloat(e.target.value)
+                                  parseFloat(e.target.value),
                                 );
                               }}
                               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-primary"
@@ -804,8 +804,8 @@ export default function Cockpit() {
                             resultFacts.exchangeRateIndex > 100.05
                               ? "text-blue-600"
                               : resultFacts.exchangeRateIndex < 99.95
-                              ? "text-amber-600"
-                              : "text-gray-600"
+                                ? "text-amber-600"
+                                : "text-gray-600"
                           }`}
                         >
                           {resultFacts.exchangeRateIndex.toFixed(1)}
@@ -814,8 +814,8 @@ export default function Cockpit() {
                           {resultFacts.exchangeRateIndex > 100.05
                             ? "Appreciated 📈"
                             : resultFacts.exchangeRateIndex < 99.95
-                            ? "Depreciated 📉"
-                            : "Stable ⚖️"}
+                              ? "Depreciated 📉"
+                              : "Stable ⚖️"}
                         </div>
                       </CardContent>
                     </Card>
@@ -830,8 +830,8 @@ export default function Cockpit() {
                             resultFacts.tradeBalance > 0.01
                               ? "text-green-600"
                               : resultFacts.tradeBalance < -0.01
-                              ? "text-red-600"
-                              : "text-gray-600"
+                                ? "text-red-600"
+                                : "text-gray-600"
                           }`}
                         >
                           {resultFacts.tradeBalance > 0
@@ -843,8 +843,8 @@ export default function Cockpit() {
                           {resultFacts.tradeBalance > 0.01
                             ? "Trade Surplus 💰"
                             : resultFacts.tradeBalance < -0.01
-                            ? "Trade Deficit 💸"
-                            : "Balanced ⚖️"}
+                              ? "Trade Deficit 💸"
+                              : "Balanced ⚖️"}
                         </div>
                       </CardContent>
                     </Card>
@@ -859,8 +859,8 @@ export default function Cockpit() {
                             resultFacts.spilloverInflation > 0.01
                               ? "text-red-600"
                               : resultFacts.spilloverInflation < -0.01
-                              ? "text-green-600"
-                              : "text-gray-600"
+                                ? "text-green-600"
+                                : "text-gray-600"
                           }`}
                         >
                           {resultFacts.spilloverInflation > 0
@@ -884,8 +884,8 @@ export default function Cockpit() {
                             resultFacts.spilloverUnemployment > 0.01
                               ? "text-red-600"
                               : resultFacts.spilloverUnemployment < -0.01
-                              ? "text-green-600"
-                              : "text-gray-600"
+                                ? "text-green-600"
+                                : "text-gray-600"
                           }`}
                         >
                           {resultFacts.spilloverUnemployment > 0

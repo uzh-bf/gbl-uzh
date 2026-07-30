@@ -20,7 +20,7 @@ type OutputPeriodResultFactsInit = OutputFacts<
 
 export function initialize(
   facts: InputPeriodResultFactsInit,
-  payload: PayloadPeriodResult<GameFacts, PeriodFacts, PlayerRole>
+  payload: PayloadPeriodResult<GameFacts, PeriodFacts, PlayerRole>,
 ): OutputPeriodResultFactsInit {
   const scenario = payload.periodFacts.scenario;
   const baseFacts: OutputPeriodResultFactsInit = {
@@ -38,7 +38,7 @@ export function initialize(
 
   const resultFacts: OutputPeriodResultFactsInit = produce(
     baseFacts,
-    (draft: OutputPeriodResultFactsInit) => {}
+    (draft: OutputPeriodResultFactsInit) => {},
   );
 
   debugLog("PeriodResultInitialize", facts, payload, resultFacts);
@@ -47,7 +47,7 @@ export function initialize(
 
 export function start(
   facts: ResultFacts,
-  payload: PayloadPeriodResult<GameFacts, PeriodFacts, PlayerRole>
+  payload: PayloadPeriodResult<GameFacts, PeriodFacts, PlayerRole>,
 ): OutputResultFacts {
   const baseFacts: OutputResultFacts = {
     resultFacts: facts,
@@ -66,7 +66,7 @@ export function end(
     PeriodFacts,
     PeriodSegmentFacts,
     PlayerRole
-  >
+  >,
 ): OutputResultFacts {
   const baseFacts: OutputResultFacts = {
     resultFacts: facts,
@@ -124,7 +124,7 @@ export function end(
       growth = parseFloat(Math.min(10, Math.max(-10, growth)).toFixed(2));
       inflation = parseFloat(Math.min(20, Math.max(-5, inflation)).toFixed(2));
       unemployment = parseFloat(
-        Math.min(20, Math.max(1, unemployment)).toFixed(2)
+        Math.min(20, Math.max(1, unemployment)).toFixed(2),
       );
 
       // Recalculate loss penalty
@@ -164,7 +164,7 @@ export function end(
       draft.resultFacts.penalty = penalty;
       draft.resultFacts.cumulativePenalty = cumulativePenalty;
       draft.resultFacts.history = history;
-    }
+    },
   );
 
   debugLog("PeriodResultEnd", facts, payload, resultFacts);

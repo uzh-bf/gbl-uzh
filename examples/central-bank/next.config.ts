@@ -17,10 +17,10 @@ const isDev = process.env.NODE_ENV === "development";
 // build — there the alias would silently no-op and the duplicate React would
 // return). require/__dirname are injected by Next's config loader.
 const appReactDir = path.dirname(
-  require.resolve("react", { paths: [__dirname] })
+  require.resolve("react", { paths: [__dirname] }),
 );
 const appReactDomDir = path.dirname(
-  require.resolve("react-dom", { paths: [__dirname] })
+  require.resolve("react-dom", { paths: [__dirname] }),
 );
 
 // @apollo/client peer-resolves separately for react@18 and react@19, so pnpm
@@ -32,7 +32,7 @@ const appReactDomDir = path.dirname(
 // network request returning 200. Pin every `@apollo/client` import in this
 // app's bundle to a single copy.
 const appApolloDir = path.dirname(
-  require.resolve("@apollo/client/package.json", { paths: [__dirname] })
+  require.resolve("@apollo/client/package.json", { paths: [__dirname] }),
 );
 
 const nextConfig: NextConfig = {

@@ -3,22 +3,30 @@
  * Do not make changes to this file directly
  */
 
-
-import type { core } from "nexus"
+import type { core } from 'nexus'
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
     /**
      * A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
      */
-    date<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "DateTime";
+    date<FieldName extends string>(
+      fieldName: FieldName,
+      opts?: core.CommonInputFieldConfig<TypeName, FieldName>
+    ): void // "DateTime";
     /**
      * The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
      */
-    json<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "JSONObject";
+    json<FieldName extends string>(
+      fieldName: FieldName,
+      opts?: core.CommonInputFieldConfig<TypeName, FieldName>
+    ): void // "JSONObject";
     /**
      * The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
      */
-    jsonValue<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "JSON";
+    jsonValue<FieldName extends string>(
+      fieldName: FieldName,
+      opts?: core.CommonInputFieldConfig<TypeName, FieldName>
+    ): void // "JSON";
   }
 }
 declare global {
@@ -26,55 +34,75 @@ declare global {
     /**
      * A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
      */
-    date<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "DateTime";
+    date<FieldName extends string>(
+      fieldName: FieldName,
+      ...opts: core.ScalarOutSpread<TypeName, FieldName>
+    ): void // "DateTime";
     /**
      * The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
      */
-    json<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "JSONObject";
+    json<FieldName extends string>(
+      fieldName: FieldName,
+      ...opts: core.ScalarOutSpread<TypeName, FieldName>
+    ): void // "JSONObject";
     /**
      * The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
      */
-    jsonValue<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "JSON";
+    jsonValue<FieldName extends string>(
+      fieldName: FieldName,
+      ...opts: core.ScalarOutSpread<TypeName, FieldName>
+    ): void // "JSON";
   }
 }
-
 
 declare global {
   interface NexusGen extends NexusGenTypes {}
 }
 
 export interface NexusGenInputs {
-  GameFactsInput: { // input type
-    actionCounter?: number | null; // Int
-    myInt?: number | null; // Int
+  GameFactsInput: {
+    // input type
+    actionCounter?: number | null // Int
+    myInt?: number | null // Int
   }
-  PeriodFactsInput: { // input type
-    rollsPerSegment: number | null; // Int
-    scenario: NexusGenInputs['PeriodFactsScenarioInput'] | null; // PeriodFactsScenarioInput
+  PeriodFactsInput: {
+    // input type
+    rollsPerSegment: number | null // Int
+    scenario: NexusGenInputs['PeriodFactsScenarioInput'] | null // PeriodFactsScenarioInput
   }
-  PeriodFactsScenarioInput: { // input type
-    gapBonds: number | null; // Float
-    gapStocks: number | null; // Float
-    interestBank: number | null; // Float
-    seed: number | null; // Int
-    trendBonds: number | null; // Float
-    trendStocks: number | null; // Float
+  PeriodFactsScenarioInput: {
+    // input type
+    gapBonds: number | null // Float
+    gapStocks: number | null // Float
+    interestBank: number | null // Float
+    seed: number | null // Int
+    trendBonds: number | null // Float
+    trendStocks: number | null // Float
   }
-  PeriodSegmentFactsInput: { // input type
-    bankPercentage?: number | null; // Float
-    bondsPercentage?: number | null; // Float
-    stockPercentage?: number | null; // Float
+  PeriodSegmentFactsInput: {
+    // input type
+    bankPercentage?: number | null // Float
+    bondsPercentage?: number | null // Float
+    stockPercentage?: number | null // Float
   }
 }
 
 export interface NexusGenEnums {
-  AchievementFrequency: "EACH" | "FIRST"
-  AchievementScope: "GAME" | "PERIOD"
-  GameStatus: "COMPLETED" | "CONSOLIDATION" | "PAUSED" | "PREPARATION" | "RESULTS" | "RUNNING" | "SCHEDULED"
-  PlayerDecisionType: "CONSOLIDATION" | "PREPARATION"
-  PlayerResultType: "PERIOD_END" | "PERIOD_START" | "SEGMENT_END" | "SEGMENT_START"
-  StoryElementType: "GENERIC" | "ROLE_BASED"
-  UserRole: "ADMIN" | "MASTER"
+  AchievementFrequency: 'EACH' | 'FIRST'
+  AchievementScope: 'GAME' | 'PERIOD'
+  GameStatus:
+    | 'COMPLETED'
+    | 'CONSOLIDATION'
+    | 'PAUSED'
+    | 'PREPARATION'
+    | 'RESULTS'
+    | 'RUNNING'
+    | 'SCHEDULED'
+  PlayerDecisionType: 'CONSOLIDATION' | 'PREPARATION'
+  PlayerResultType:
+    'PERIOD_END' | 'PERIOD_START' | 'SEGMENT_END' | 'SEGMENT_START'
+  StoryElementType: 'GENERIC' | 'ROLE_BASED'
+  UserRole: 'ADMIN' | 'MASTER'
 }
 
 export interface NexusGenScalars {
@@ -89,374 +117,412 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
-  Achievement: { // root type
-    activePeriods: number[]; // [Int!]!
-    conditions?: NexusGenScalars['JSON'] | null; // JSON
-    description: string; // String!
-    descriptionsByRole?: NexusGenScalars['JSONObject'] | null; // JSONObject
-    id: string; // ID!
-    image?: string | null; // String
-    name: string; // String!
-    namesByRole?: NexusGenScalars['JSONObject'] | null; // JSONObject
-    reward?: NexusGenScalars['JSONObject'] | null; // JSONObject
-    scope: NexusGenEnums['AchievementScope']; // AchievementScope!
-    when: NexusGenEnums['AchievementFrequency']; // AchievementFrequency!
+  Achievement: {
+    // root type
+    activePeriods: number[] // [Int!]!
+    conditions?: NexusGenScalars['JSON'] | null // JSON
+    description: string // String!
+    descriptionsByRole?: NexusGenScalars['JSONObject'] | null // JSONObject
+    id: string // ID!
+    image?: string | null // String
+    name: string // String!
+    namesByRole?: NexusGenScalars['JSONObject'] | null // JSONObject
+    reward?: NexusGenScalars['JSONObject'] | null // JSONObject
+    scope: NexusGenEnums['AchievementScope'] // AchievementScope!
+    when: NexusGenEnums['AchievementFrequency'] // AchievementFrequency!
   }
-  AchievementInstance: { // root type
-    achievement: NexusGenRootTypes['Achievement']; // Achievement!
-    count: number; // Int!
-    id: number; // Int!
-    periodIx: number; // Int!
+  AchievementInstance: {
+    // root type
+    achievement: NexusGenRootTypes['Achievement'] // Achievement!
+    count: number // Int!
+    id: number // Int!
+    periodIx: number // Int!
   }
-  Event: { // root type
-    facts?: NexusGenScalars['JSONObject'] | null; // JSONObject
-    sub?: string | null; // String
-    type?: string | null; // String
+  Event: {
+    // root type
+    facts?: NexusGenScalars['JSONObject'] | null // JSONObject
+    sub?: string | null // String
+    type?: string | null // String
   }
-  Game: { // root type
-    activePeriod?: NexusGenRootTypes['Period'] | null; // Period
-    activePeriodIx?: number | null; // Int
-    activeSegmentIx?: number | null; // Int
-    facts: NexusGenScalars['JSONObject']; // JSONObject!
-    id: string; // ID!
-    name: string; // String!
-    periods: NexusGenRootTypes['Period'][]; // [Period!]!
-    players: NexusGenRootTypes['Player'][]; // [Player!]!
-    status: NexusGenEnums['GameStatus']; // GameStatus!
-    version: number; // Int!
+  Game: {
+    // root type
+    activePeriod?: NexusGenRootTypes['Period'] | null // Period
+    activePeriodIx?: number | null // Int
+    activeSegmentIx?: number | null // Int
+    facts: NexusGenScalars['JSONObject'] // JSONObject!
+    id: string // ID!
+    name: string // String!
+    periods: NexusGenRootTypes['Period'][] // [Period!]!
+    players: NexusGenRootTypes['Player'][] // [Player!]!
+    status: NexusGenEnums['GameStatus'] // GameStatus!
+    version: number // Int!
   }
-  LearningAnswerOption: { // root type
-    content: string; // String!
-    correct: boolean; // Boolean!
-    id: string; // ID!
+  LearningAnswerOption: {
+    // root type
+    content: string // String!
+    correct: boolean // Boolean!
+    id: string // ID!
   }
-  LearningElement: { // root type
-    feedback?: string | null; // String
-    id: string; // ID!
-    motivation?: string | null; // String
-    options: NexusGenRootTypes['LearningAnswerOption'][]; // [LearningAnswerOption!]!
-    question: string; // String!
-    reward?: NexusGenScalars['JSONObject'] | null; // JSONObject
-    title: string; // String!
+  LearningElement: {
+    // root type
+    feedback?: string | null // String
+    id: string // ID!
+    motivation?: string | null // String
+    options: NexusGenRootTypes['LearningAnswerOption'][] // [LearningAnswerOption!]!
+    question: string // String!
+    reward?: NexusGenScalars['JSONObject'] | null // JSONObject
+    title: string // String!
   }
-  LearningElementAttempt: { // root type
-    element?: NexusGenRootTypes['LearningElement'] | null; // LearningElement
-    id?: string | null; // ID
-    player?: NexusGenRootTypes['Player'] | null; // Player
-    pointsAchieved?: number | null; // Int
-    pointsMax?: number | null; // Int
+  LearningElementAttempt: {
+    // root type
+    element?: NexusGenRootTypes['LearningElement'] | null // LearningElement
+    id?: string | null // ID
+    player?: NexusGenRootTypes['Player'] | null // Player
+    pointsAchieved?: number | null // Int
+    pointsMax?: number | null // Int
   }
-  LearningElementState: { // root type
-    element?: NexusGenRootTypes['LearningElement'] | null; // LearningElement
-    id?: string | null; // ID
-    solution?: string | null; // String
-    state?: string | null; // String
+  LearningElementState: {
+    // root type
+    element?: NexusGenRootTypes['LearningElement'] | null // LearningElement
+    id?: string | null // ID
+    solution?: string | null // String
+    state?: string | null // String
   }
-  Mutation: {};
-  Period: { // root type
-    actions: NexusGenRootTypes['PlayerAction'][]; // [PlayerAction!]!
-    activeSegment?: NexusGenRootTypes['PeriodSegment'] | null; // PeriodSegment
-    activeSegmentIx?: number | null; // Int
-    facts: NexusGenScalars['JSONObject']; // JSONObject!
-    id: string; // ID!
-    index: number; // Int!
-    results: NexusGenRootTypes['PlayerResult'][]; // [PlayerResult!]!
-    segmentCount?: number | null; // Int
-    segments: NexusGenRootTypes['PeriodSegment'][]; // [PeriodSegment!]!
+  Mutation: {}
+  Period: {
+    // root type
+    actions: NexusGenRootTypes['PlayerAction'][] // [PlayerAction!]!
+    activeSegment?: NexusGenRootTypes['PeriodSegment'] | null // PeriodSegment
+    activeSegmentIx?: number | null // Int
+    facts: NexusGenScalars['JSONObject'] // JSONObject!
+    id: string // ID!
+    index: number // Int!
+    results: NexusGenRootTypes['PlayerResult'][] // [PlayerResult!]!
+    segmentCount?: number | null // Int
+    segments: NexusGenRootTypes['PeriodSegment'][] // [PeriodSegment!]!
   }
-  PeriodSegment: { // root type
-    actions: NexusGenRootTypes['PlayerAction'][]; // [PlayerAction!]!
-    countdownDurationMs?: number | null; // Int
-    countdownExpiresAt?: NexusGenScalars['DateTime'] | null; // DateTime
-    facts: NexusGenScalars['JSONObject']; // JSONObject!
-    id: string; // ID!
-    index: number; // Int!
-    learningElements: NexusGenRootTypes['LearningElement'][]; // [LearningElement!]!
-    periodIx: number; // Int!
-    results: NexusGenRootTypes['PlayerResult'][]; // [PlayerResult!]!
-    storyElements: NexusGenRootTypes['StoryElement'][]; // [StoryElement!]!
+  PeriodSegment: {
+    // root type
+    actions: NexusGenRootTypes['PlayerAction'][] // [PlayerAction!]!
+    countdownDurationMs?: number | null // Int
+    countdownExpiresAt?: NexusGenScalars['DateTime'] | null // DateTime
+    facts: NexusGenScalars['JSONObject'] // JSONObject!
+    id: string // ID!
+    index: number // Int!
+    learningElements: NexusGenRootTypes['LearningElement'][] // [LearningElement!]!
+    periodIx: number // Int!
+    results: NexusGenRootTypes['PlayerResult'][] // [PlayerResult!]!
+    storyElements: NexusGenRootTypes['StoryElement'][] // [StoryElement!]!
   }
-  Player: { // root type
-    achievementIds: string[]; // [String!]!
-    achievementKeys: string[]; // [String!]!
-    achievements: NexusGenRootTypes['AchievementInstance'][]; // [AchievementInstance!]!
-    completedLearningElementIds: string[]; // [String!]!
-    completedLearningElements: NexusGenRootTypes['LearningElement'][]; // [LearningElement!]!
-    experience: number; // Int!
-    experienceToNext: number; // Int!
-    facts: NexusGenScalars['JSONObject']; // JSONObject!
-    game: NexusGenRootTypes['Game']; // Game!
-    id: string; // ID!
-    isReady: boolean; // Boolean!
-    level: NexusGenRootTypes['PlayerLevel']; // PlayerLevel!
-    levelIx: number; // Int!
-    name: string; // String!
-    number: number; // Int!
-    role?: string | null; // String
-    token: string; // String!
-    tutorialCompleted: boolean; // Boolean!
-    visitedStoryElementIds: string[]; // [String!]!
-    visitedStoryElements: NexusGenRootTypes['StoryElement'][]; // [StoryElement!]!
+  Player: {
+    // root type
+    achievementIds: string[] // [String!]!
+    achievementKeys: string[] // [String!]!
+    achievements: NexusGenRootTypes['AchievementInstance'][] // [AchievementInstance!]!
+    completedLearningElementIds: string[] // [String!]!
+    completedLearningElements: NexusGenRootTypes['LearningElement'][] // [LearningElement!]!
+    experience: number // Int!
+    experienceToNext: number // Int!
+    facts: NexusGenScalars['JSONObject'] // JSONObject!
+    game: NexusGenRootTypes['Game'] // Game!
+    id: string // ID!
+    isReady: boolean // Boolean!
+    level: NexusGenRootTypes['PlayerLevel'] // PlayerLevel!
+    levelIx: number // Int!
+    name: string // String!
+    number: number // Int!
+    role?: string | null // String
+    token: string // String!
+    tutorialCompleted: boolean // Boolean!
+    visitedStoryElementIds: string[] // [String!]!
+    visitedStoryElements: NexusGenRootTypes['StoryElement'][] // [StoryElement!]!
   }
-  PlayerAction: { // root type
-    facts?: NexusGenScalars['JSONObject'] | null; // JSONObject
-    id: string; // ID!
-    period: NexusGenRootTypes['Period']; // Period!
-    periodIx: number; // Int!
-    player: NexusGenRootTypes['Player']; // Player!
-    segment?: NexusGenRootTypes['PeriodSegment'] | null; // PeriodSegment
-    segmentIx?: number | null; // Int
-    type: string; // String!
+  PlayerAction: {
+    // root type
+    facts?: NexusGenScalars['JSONObject'] | null // JSONObject
+    id: string // ID!
+    period: NexusGenRootTypes['Period'] // Period!
+    periodIx: number // Int!
+    player: NexusGenRootTypes['Player'] // Player!
+    segment?: NexusGenRootTypes['PeriodSegment'] | null // PeriodSegment
+    segmentIx?: number | null // Int
+    type: string // String!
   }
-  PlayerDecision: { // root type
-    facts: NexusGenScalars['JSONObject']; // JSONObject!
-    id: string; // ID!
-    period: NexusGenRootTypes['Period']; // Period!
-    periodIx: number; // Int!
-    player: NexusGenRootTypes['Player']; // Player!
-    type: NexusGenEnums['PlayerDecisionType']; // PlayerDecisionType!
+  PlayerDecision: {
+    // root type
+    facts: NexusGenScalars['JSONObject'] // JSONObject!
+    id: string // ID!
+    period: NexusGenRootTypes['Period'] // Period!
+    periodIx: number // Int!
+    player: NexusGenRootTypes['Player'] // Player!
+    type: NexusGenEnums['PlayerDecisionType'] // PlayerDecisionType!
   }
-  PlayerLevel: { // root type
-    description: string; // String!
-    id: string; // ID!
-    index: number; // Int!
-    requiredXP: number; // Int!
+  PlayerLevel: {
+    // root type
+    description: string // String!
+    id: string // ID!
+    index: number // Int!
+    requiredXP: number // Int!
   }
-  PlayerResult: { // root type
-    facts?: NexusGenScalars['JSONObject'] | null; // JSONObject
-    id: string; // ID!
-    period: NexusGenRootTypes['Period']; // Period!
-    periodIx: number; // Int!
-    player: NexusGenRootTypes['Player']; // Player!
-    segment?: NexusGenRootTypes['PeriodSegment'] | null; // PeriodSegment
-    segmentIx?: number | null; // Int
-    type?: NexusGenEnums['PlayerResultType'] | null; // PlayerResultType
+  PlayerResult: {
+    // root type
+    facts?: NexusGenScalars['JSONObject'] | null // JSONObject
+    id: string // ID!
+    period: NexusGenRootTypes['Period'] // Period!
+    periodIx: number // Int!
+    player: NexusGenRootTypes['Player'] // Player!
+    segment?: NexusGenRootTypes['PeriodSegment'] | null // PeriodSegment
+    segmentIx?: number | null // Int
+    type?: NexusGenEnums['PlayerResultType'] | null // PlayerResultType
   }
-  PlayerState: { // root type
-    currentGame?: NexusGenRootTypes['Game'] | null; // Game
-    playerResult?: NexusGenRootTypes['PlayerResult'] | null; // PlayerResult
-    previousResults?: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
-    transactions?: NexusGenRootTypes['PlayerAction'][] | null; // [PlayerAction!]
+  PlayerState: {
+    // root type
+    currentGame?: NexusGenRootTypes['Game'] | null // Game
+    playerResult?: NexusGenRootTypes['PlayerResult'] | null // PlayerResult
+    previousResults?: NexusGenRootTypes['PlayerResult'][] | null // [PlayerResult!]
+    transactions?: NexusGenRootTypes['PlayerAction'][] | null // [PlayerAction!]
   }
-  Query: {};
-  StoryElement: { // root type
-    content?: string | null; // String
-    contentRole?: NexusGenScalars['JSONObject'] | null; // JSONObject
-    id: string; // ID!
-    reward?: NexusGenScalars['JSONObject'] | null; // JSONObject
-    title: string; // String!
-    type: NexusGenEnums['StoryElementType']; // StoryElementType!
+  Query: {}
+  StoryElement: {
+    // root type
+    content?: string | null // String
+    contentRole?: NexusGenScalars['JSONObject'] | null // JSONObject
+    id: string // ID!
+    reward?: NexusGenScalars['JSONObject'] | null // JSONObject
+    title: string // String!
+    type: NexusGenEnums['StoryElementType'] // StoryElementType!
   }
-  Subscription: {};
+  Subscription: {}
 }
 
-export interface NexusGenInterfaces {
-}
+export interface NexusGenInterfaces {}
 
-export interface NexusGenUnions {
-}
+export interface NexusGenUnions {}
 
 export type NexusGenRootTypes = NexusGenObjects
 
-export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
+export type NexusGenAllTypes = NexusGenRootTypes &
+  NexusGenScalars &
+  NexusGenEnums
 
 export interface NexusGenFieldTypes {
-  Achievement: { // field return type
-    activePeriods: number[]; // [Int!]!
-    conditions: NexusGenScalars['JSON'] | null; // JSON
-    description: string; // String!
-    descriptionsByRole: NexusGenScalars['JSONObject'] | null; // JSONObject
-    id: string; // ID!
-    image: string | null; // String
-    name: string; // String!
-    namesByRole: NexusGenScalars['JSONObject'] | null; // JSONObject
-    reward: NexusGenScalars['JSONObject'] | null; // JSONObject
-    scope: NexusGenEnums['AchievementScope']; // AchievementScope!
-    when: NexusGenEnums['AchievementFrequency']; // AchievementFrequency!
+  Achievement: {
+    // field return type
+    activePeriods: number[] // [Int!]!
+    conditions: NexusGenScalars['JSON'] | null // JSON
+    description: string // String!
+    descriptionsByRole: NexusGenScalars['JSONObject'] | null // JSONObject
+    id: string // ID!
+    image: string | null // String
+    name: string // String!
+    namesByRole: NexusGenScalars['JSONObject'] | null // JSONObject
+    reward: NexusGenScalars['JSONObject'] | null // JSONObject
+    scope: NexusGenEnums['AchievementScope'] // AchievementScope!
+    when: NexusGenEnums['AchievementFrequency'] // AchievementFrequency!
   }
-  AchievementInstance: { // field return type
-    achievement: NexusGenRootTypes['Achievement']; // Achievement!
-    count: number; // Int!
-    id: number; // Int!
-    periodIx: number; // Int!
+  AchievementInstance: {
+    // field return type
+    achievement: NexusGenRootTypes['Achievement'] // Achievement!
+    count: number // Int!
+    id: number // Int!
+    periodIx: number // Int!
   }
-  Event: { // field return type
-    facts: NexusGenScalars['JSONObject'] | null; // JSONObject
-    sub: string | null; // String
-    type: string | null; // String
+  Event: {
+    // field return type
+    facts: NexusGenScalars['JSONObject'] | null // JSONObject
+    sub: string | null // String
+    type: string | null // String
   }
-  Game: { // field return type
-    activePeriod: NexusGenRootTypes['Period'] | null; // Period
-    activePeriodIx: number | null; // Int
-    activeSegmentIx: number | null; // Int
-    facts: NexusGenScalars['JSONObject']; // JSONObject!
-    id: string; // ID!
-    name: string; // String!
-    nextAutoContinueAt: NexusGenScalars['DateTime'] | null; // DateTime
-    periods: NexusGenRootTypes['Period'][]; // [Period!]!
-    players: NexusGenRootTypes['Player'][]; // [Player!]!
-    status: NexusGenEnums['GameStatus']; // GameStatus!
-    version: number; // Int!
+  Game: {
+    // field return type
+    activePeriod: NexusGenRootTypes['Period'] | null // Period
+    activePeriodIx: number | null // Int
+    activeSegmentIx: number | null // Int
+    facts: NexusGenScalars['JSONObject'] // JSONObject!
+    id: string // ID!
+    name: string // String!
+    nextAutoContinueAt: NexusGenScalars['DateTime'] | null // DateTime
+    periods: NexusGenRootTypes['Period'][] // [Period!]!
+    players: NexusGenRootTypes['Player'][] // [Player!]!
+    status: NexusGenEnums['GameStatus'] // GameStatus!
+    version: number // Int!
   }
-  LearningAnswerOption: { // field return type
-    content: string; // String!
-    correct: boolean; // Boolean!
-    id: string; // ID!
+  LearningAnswerOption: {
+    // field return type
+    content: string // String!
+    correct: boolean // Boolean!
+    id: string // ID!
   }
-  LearningElement: { // field return type
-    feedback: string | null; // String
-    id: string; // ID!
-    motivation: string | null; // String
-    options: NexusGenRootTypes['LearningAnswerOption'][]; // [LearningAnswerOption!]!
-    question: string; // String!
-    reward: NexusGenScalars['JSONObject'] | null; // JSONObject
-    title: string; // String!
+  LearningElement: {
+    // field return type
+    feedback: string | null // String
+    id: string // ID!
+    motivation: string | null // String
+    options: NexusGenRootTypes['LearningAnswerOption'][] // [LearningAnswerOption!]!
+    question: string // String!
+    reward: NexusGenScalars['JSONObject'] | null // JSONObject
+    title: string // String!
   }
-  LearningElementAttempt: { // field return type
-    element: NexusGenRootTypes['LearningElement'] | null; // LearningElement
-    id: string | null; // ID
-    player: NexusGenRootTypes['Player'] | null; // Player
-    pointsAchieved: number | null; // Int
-    pointsMax: number | null; // Int
+  LearningElementAttempt: {
+    // field return type
+    element: NexusGenRootTypes['LearningElement'] | null // LearningElement
+    id: string | null // ID
+    player: NexusGenRootTypes['Player'] | null // Player
+    pointsAchieved: number | null // Int
+    pointsMax: number | null // Int
   }
-  LearningElementState: { // field return type
-    element: NexusGenRootTypes['LearningElement'] | null; // LearningElement
-    id: string | null; // ID
-    solution: string | null; // String
-    state: string | null; // String
+  LearningElementState: {
+    // field return type
+    element: NexusGenRootTypes['LearningElement'] | null // LearningElement
+    id: string | null // ID
+    solution: string | null // String
+    state: string | null // String
   }
-  Mutation: { // field return type
-    activateNextPeriod: NexusGenRootTypes['Game'] | null; // Game
-    activateNextSegment: NexusGenRootTypes['Game'] | null; // Game
-    addCountdown: boolean | null; // Boolean
-    addGamePeriod: NexusGenRootTypes['Period'] | null; // Period
-    addPeriodSegment: NexusGenRootTypes['PeriodSegment'] | null; // PeriodSegment
-    attemptLearningElement: NexusGenRootTypes['LearningElementAttempt'] | null; // LearningElementAttempt
-    createGame: NexusGenRootTypes['Game'] | null; // Game
-    loginAsTeam: NexusGenRootTypes['Player'] | null; // Player
-    logoutAsTeam: boolean | null; // Boolean
-    markStoryElement: NexusGenRootTypes['Player'] | null; // Player
-    performAction: NexusGenRootTypes['PlayerResult'] | null; // PlayerResult
-    saveConsolidationDecision: NexusGenRootTypes['PlayerDecision'] | null; // PlayerDecision
-    toggleSwitch: boolean | null; // Boolean
-    updatePlayerData: NexusGenRootTypes['Player'] | null; // Player
-    updateReadyState: NexusGenRootTypes['Player'] | null; // Player
+  Mutation: {
+    // field return type
+    activateNextPeriod: NexusGenRootTypes['Game'] | null // Game
+    activateNextSegment: NexusGenRootTypes['Game'] | null // Game
+    addCountdown: boolean | null // Boolean
+    addGamePeriod: NexusGenRootTypes['Period'] | null // Period
+    addPeriodSegment: NexusGenRootTypes['PeriodSegment'] | null // PeriodSegment
+    attemptLearningElement: NexusGenRootTypes['LearningElementAttempt'] | null // LearningElementAttempt
+    createGame: NexusGenRootTypes['Game'] | null // Game
+    loginAsTeam: NexusGenRootTypes['Player'] | null // Player
+    logoutAsTeam: boolean | null // Boolean
+    markStoryElement: NexusGenRootTypes['Player'] | null // Player
+    performAction: NexusGenRootTypes['PlayerResult'] | null // PlayerResult
+    saveConsolidationDecision: NexusGenRootTypes['PlayerDecision'] | null // PlayerDecision
+    toggleSwitch: boolean | null // Boolean
+    updatePlayerData: NexusGenRootTypes['Player'] | null // Player
+    updateReadyState: NexusGenRootTypes['Player'] | null // Player
   }
-  Period: { // field return type
-    actions: NexusGenRootTypes['PlayerAction'][]; // [PlayerAction!]!
-    activeSegment: NexusGenRootTypes['PeriodSegment'] | null; // PeriodSegment
-    activeSegmentIx: number | null; // Int
-    facts: NexusGenScalars['JSONObject']; // JSONObject!
-    id: string; // ID!
-    index: number; // Int!
-    results: NexusGenRootTypes['PlayerResult'][]; // [PlayerResult!]!
-    segmentCount: number | null; // Int
-    segments: NexusGenRootTypes['PeriodSegment'][]; // [PeriodSegment!]!
+  Period: {
+    // field return type
+    actions: NexusGenRootTypes['PlayerAction'][] // [PlayerAction!]!
+    activeSegment: NexusGenRootTypes['PeriodSegment'] | null // PeriodSegment
+    activeSegmentIx: number | null // Int
+    facts: NexusGenScalars['JSONObject'] // JSONObject!
+    id: string // ID!
+    index: number // Int!
+    results: NexusGenRootTypes['PlayerResult'][] // [PlayerResult!]!
+    segmentCount: number | null // Int
+    segments: NexusGenRootTypes['PeriodSegment'][] // [PeriodSegment!]!
   }
-  PeriodSegment: { // field return type
-    actions: NexusGenRootTypes['PlayerAction'][]; // [PlayerAction!]!
-    countdownDurationMs: number | null; // Int
-    countdownExpiresAt: NexusGenScalars['DateTime'] | null; // DateTime
-    facts: NexusGenScalars['JSONObject']; // JSONObject!
-    id: string; // ID!
-    index: number; // Int!
-    learningElements: NexusGenRootTypes['LearningElement'][]; // [LearningElement!]!
-    periodIx: number; // Int!
-    results: NexusGenRootTypes['PlayerResult'][]; // [PlayerResult!]!
-    storyElements: NexusGenRootTypes['StoryElement'][]; // [StoryElement!]!
+  PeriodSegment: {
+    // field return type
+    actions: NexusGenRootTypes['PlayerAction'][] // [PlayerAction!]!
+    countdownDurationMs: number | null // Int
+    countdownExpiresAt: NexusGenScalars['DateTime'] | null // DateTime
+    facts: NexusGenScalars['JSONObject'] // JSONObject!
+    id: string // ID!
+    index: number // Int!
+    learningElements: NexusGenRootTypes['LearningElement'][] // [LearningElement!]!
+    periodIx: number // Int!
+    results: NexusGenRootTypes['PlayerResult'][] // [PlayerResult!]!
+    storyElements: NexusGenRootTypes['StoryElement'][] // [StoryElement!]!
   }
-  Player: { // field return type
-    achievementIds: string[]; // [String!]!
-    achievementKeys: string[]; // [String!]!
-    achievements: NexusGenRootTypes['AchievementInstance'][]; // [AchievementInstance!]!
-    completedLearningElementIds: string[]; // [String!]!
-    completedLearningElements: NexusGenRootTypes['LearningElement'][]; // [LearningElement!]!
-    experience: number; // Int!
-    experienceToNext: number; // Int!
-    facts: NexusGenScalars['JSONObject']; // JSONObject!
-    game: NexusGenRootTypes['Game']; // Game!
-    id: string; // ID!
-    isReady: boolean; // Boolean!
-    level: NexusGenRootTypes['PlayerLevel']; // PlayerLevel!
-    levelIx: number; // Int!
-    name: string; // String!
-    number: number; // Int!
-    role: string | null; // String
-    token: string; // String!
-    tutorialCompleted: boolean; // Boolean!
-    visitedStoryElementIds: string[]; // [String!]!
-    visitedStoryElements: NexusGenRootTypes['StoryElement'][]; // [StoryElement!]!
+  Player: {
+    // field return type
+    achievementIds: string[] // [String!]!
+    achievementKeys: string[] // [String!]!
+    achievements: NexusGenRootTypes['AchievementInstance'][] // [AchievementInstance!]!
+    completedLearningElementIds: string[] // [String!]!
+    completedLearningElements: NexusGenRootTypes['LearningElement'][] // [LearningElement!]!
+    experience: number // Int!
+    experienceToNext: number // Int!
+    facts: NexusGenScalars['JSONObject'] // JSONObject!
+    game: NexusGenRootTypes['Game'] // Game!
+    id: string // ID!
+    isReady: boolean // Boolean!
+    level: NexusGenRootTypes['PlayerLevel'] // PlayerLevel!
+    levelIx: number // Int!
+    name: string // String!
+    number: number // Int!
+    role: string | null // String
+    token: string // String!
+    tutorialCompleted: boolean // Boolean!
+    visitedStoryElementIds: string[] // [String!]!
+    visitedStoryElements: NexusGenRootTypes['StoryElement'][] // [StoryElement!]!
   }
-  PlayerAction: { // field return type
-    facts: NexusGenScalars['JSONObject'] | null; // JSONObject
-    id: string; // ID!
-    period: NexusGenRootTypes['Period']; // Period!
-    periodIx: number; // Int!
-    player: NexusGenRootTypes['Player']; // Player!
-    segment: NexusGenRootTypes['PeriodSegment'] | null; // PeriodSegment
-    segmentIx: number | null; // Int
-    type: string; // String!
+  PlayerAction: {
+    // field return type
+    facts: NexusGenScalars['JSONObject'] | null // JSONObject
+    id: string // ID!
+    period: NexusGenRootTypes['Period'] // Period!
+    periodIx: number // Int!
+    player: NexusGenRootTypes['Player'] // Player!
+    segment: NexusGenRootTypes['PeriodSegment'] | null // PeriodSegment
+    segmentIx: number | null // Int
+    type: string // String!
   }
-  PlayerDecision: { // field return type
-    facts: NexusGenScalars['JSONObject']; // JSONObject!
-    id: string; // ID!
-    period: NexusGenRootTypes['Period']; // Period!
-    periodIx: number; // Int!
-    player: NexusGenRootTypes['Player']; // Player!
-    type: NexusGenEnums['PlayerDecisionType']; // PlayerDecisionType!
+  PlayerDecision: {
+    // field return type
+    facts: NexusGenScalars['JSONObject'] // JSONObject!
+    id: string // ID!
+    period: NexusGenRootTypes['Period'] // Period!
+    periodIx: number // Int!
+    player: NexusGenRootTypes['Player'] // Player!
+    type: NexusGenEnums['PlayerDecisionType'] // PlayerDecisionType!
   }
-  PlayerLevel: { // field return type
-    description: string; // String!
-    id: string; // ID!
-    index: number; // Int!
-    requiredXP: number; // Int!
+  PlayerLevel: {
+    // field return type
+    description: string // String!
+    id: string // ID!
+    index: number // Int!
+    requiredXP: number // Int!
   }
-  PlayerResult: { // field return type
-    facts: NexusGenScalars['JSONObject'] | null; // JSONObject
-    id: string; // ID!
-    period: NexusGenRootTypes['Period']; // Period!
-    periodIx: number; // Int!
-    player: NexusGenRootTypes['Player']; // Player!
-    segment: NexusGenRootTypes['PeriodSegment'] | null; // PeriodSegment
-    segmentIx: number | null; // Int
-    type: NexusGenEnums['PlayerResultType'] | null; // PlayerResultType
+  PlayerResult: {
+    // field return type
+    facts: NexusGenScalars['JSONObject'] | null // JSONObject
+    id: string // ID!
+    period: NexusGenRootTypes['Period'] // Period!
+    periodIx: number // Int!
+    player: NexusGenRootTypes['Player'] // Player!
+    segment: NexusGenRootTypes['PeriodSegment'] | null // PeriodSegment
+    segmentIx: number | null // Int
+    type: NexusGenEnums['PlayerResultType'] | null // PlayerResultType
   }
-  PlayerState: { // field return type
-    currentGame: NexusGenRootTypes['Game'] | null; // Game
-    playerResult: NexusGenRootTypes['PlayerResult'] | null; // PlayerResult
-    previousResults: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
-    transactions: NexusGenRootTypes['PlayerAction'][] | null; // [PlayerAction!]
+  PlayerState: {
+    // field return type
+    currentGame: NexusGenRootTypes['Game'] | null // Game
+    playerResult: NexusGenRootTypes['PlayerResult'] | null // PlayerResult
+    previousResults: NexusGenRootTypes['PlayerResult'][] | null // [PlayerResult!]
+    transactions: NexusGenRootTypes['PlayerAction'][] | null // [PlayerAction!]
   }
-  Query: { // field return type
-    decision: NexusGenRootTypes['PlayerDecision'] | null; // PlayerDecision
-    game: NexusGenRootTypes['Game'] | null; // Game
-    games: NexusGenRootTypes['Game'][] | null; // [Game!]
-    learningElement: NexusGenRootTypes['LearningElementState'] | null; // LearningElementState
-    learningElements: NexusGenRootTypes['LearningElement'][] | null; // [LearningElement!]
-    pastResults: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
-    questAchievements: NexusGenRootTypes['Achievement'][] | null; // [Achievement!]
-    result: NexusGenRootTypes['PlayerState'] | null; // PlayerState
-    results: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
-    self: NexusGenRootTypes['Player'] | null; // Player
-    specificResults: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
-    storyElements: NexusGenRootTypes['StoryElement'][] | null; // [StoryElement!]
+  Query: {
+    // field return type
+    decision: NexusGenRootTypes['PlayerDecision'] | null // PlayerDecision
+    game: NexusGenRootTypes['Game'] | null // Game
+    games: NexusGenRootTypes['Game'][] | null // [Game!]
+    learningElement: NexusGenRootTypes['LearningElementState'] | null // LearningElementState
+    learningElements: NexusGenRootTypes['LearningElement'][] | null // [LearningElement!]
+    pastResults: NexusGenRootTypes['PlayerResult'][] | null // [PlayerResult!]
+    questAchievements: NexusGenRootTypes['Achievement'][] | null // [Achievement!]
+    result: NexusGenRootTypes['PlayerState'] | null // PlayerState
+    results: NexusGenRootTypes['PlayerResult'][] | null // [PlayerResult!]
+    self: NexusGenRootTypes['Player'] | null // Player
+    specificResults: NexusGenRootTypes['PlayerResult'][] | null // [PlayerResult!]
+    storyElements: NexusGenRootTypes['StoryElement'][] | null // [StoryElement!]
   }
-  StoryElement: { // field return type
-    content: string | null; // String
-    contentRole: NexusGenScalars['JSONObject'] | null; // JSONObject
-    id: string; // ID!
-    reward: NexusGenScalars['JSONObject'] | null; // JSONObject
-    title: string; // String!
-    type: NexusGenEnums['StoryElementType']; // StoryElementType!
+  StoryElement: {
+    // field return type
+    content: string | null // String
+    contentRole: NexusGenScalars['JSONObject'] | null // JSONObject
+    id: string // ID!
+    reward: NexusGenScalars['JSONObject'] | null // JSONObject
+    title: string // String!
+    type: NexusGenEnums['StoryElementType'] // StoryElementType!
   }
-  Subscription: { // field return type
-    eventsGlobal: NexusGenRootTypes['Event'] | null; // Event
-    eventsUser: NexusGenRootTypes['Event'][] | null; // [Event!]
+  Subscription: {
+    // field return type
+    eventsGlobal: NexusGenRootTypes['Event'] | null // Event
+    eventsUser: NexusGenRootTypes['Event'][] | null // [Event!]
   }
 }
 
 export interface NexusGenFieldTypeNames {
-  Achievement: { // field return type name
+  Achievement: {
+    // field return type name
     activePeriods: 'Int'
     conditions: 'JSON'
     description: 'String'
@@ -469,18 +535,21 @@ export interface NexusGenFieldTypeNames {
     scope: 'AchievementScope'
     when: 'AchievementFrequency'
   }
-  AchievementInstance: { // field return type name
+  AchievementInstance: {
+    // field return type name
     achievement: 'Achievement'
     count: 'Int'
     id: 'Int'
     periodIx: 'Int'
   }
-  Event: { // field return type name
+  Event: {
+    // field return type name
     facts: 'JSONObject'
     sub: 'String'
     type: 'String'
   }
-  Game: { // field return type name
+  Game: {
+    // field return type name
     activePeriod: 'Period'
     activePeriodIx: 'Int'
     activeSegmentIx: 'Int'
@@ -493,12 +562,14 @@ export interface NexusGenFieldTypeNames {
     status: 'GameStatus'
     version: 'Int'
   }
-  LearningAnswerOption: { // field return type name
+  LearningAnswerOption: {
+    // field return type name
     content: 'String'
     correct: 'Boolean'
     id: 'ID'
   }
-  LearningElement: { // field return type name
+  LearningElement: {
+    // field return type name
     feedback: 'String'
     id: 'ID'
     motivation: 'String'
@@ -507,20 +578,23 @@ export interface NexusGenFieldTypeNames {
     reward: 'JSONObject'
     title: 'String'
   }
-  LearningElementAttempt: { // field return type name
+  LearningElementAttempt: {
+    // field return type name
     element: 'LearningElement'
     id: 'ID'
     player: 'Player'
     pointsAchieved: 'Int'
     pointsMax: 'Int'
   }
-  LearningElementState: { // field return type name
+  LearningElementState: {
+    // field return type name
     element: 'LearningElement'
     id: 'ID'
     solution: 'String'
     state: 'String'
   }
-  Mutation: { // field return type name
+  Mutation: {
+    // field return type name
     activateNextPeriod: 'Game'
     activateNextSegment: 'Game'
     addCountdown: 'Boolean'
@@ -537,7 +611,8 @@ export interface NexusGenFieldTypeNames {
     updatePlayerData: 'Player'
     updateReadyState: 'Player'
   }
-  Period: { // field return type name
+  Period: {
+    // field return type name
     actions: 'PlayerAction'
     activeSegment: 'PeriodSegment'
     activeSegmentIx: 'Int'
@@ -548,7 +623,8 @@ export interface NexusGenFieldTypeNames {
     segmentCount: 'Int'
     segments: 'PeriodSegment'
   }
-  PeriodSegment: { // field return type name
+  PeriodSegment: {
+    // field return type name
     actions: 'PlayerAction'
     countdownDurationMs: 'Int'
     countdownExpiresAt: 'DateTime'
@@ -560,7 +636,8 @@ export interface NexusGenFieldTypeNames {
     results: 'PlayerResult'
     storyElements: 'StoryElement'
   }
-  Player: { // field return type name
+  Player: {
+    // field return type name
     achievementIds: 'String'
     achievementKeys: 'String'
     achievements: 'AchievementInstance'
@@ -582,7 +659,8 @@ export interface NexusGenFieldTypeNames {
     visitedStoryElementIds: 'String'
     visitedStoryElements: 'StoryElement'
   }
-  PlayerAction: { // field return type name
+  PlayerAction: {
+    // field return type name
     facts: 'JSONObject'
     id: 'ID'
     period: 'Period'
@@ -592,7 +670,8 @@ export interface NexusGenFieldTypeNames {
     segmentIx: 'Int'
     type: 'String'
   }
-  PlayerDecision: { // field return type name
+  PlayerDecision: {
+    // field return type name
     facts: 'JSONObject'
     id: 'ID'
     period: 'Period'
@@ -600,13 +679,15 @@ export interface NexusGenFieldTypeNames {
     player: 'Player'
     type: 'PlayerDecisionType'
   }
-  PlayerLevel: { // field return type name
+  PlayerLevel: {
+    // field return type name
     description: 'String'
     id: 'ID'
     index: 'Int'
     requiredXP: 'Int'
   }
-  PlayerResult: { // field return type name
+  PlayerResult: {
+    // field return type name
     facts: 'JSONObject'
     id: 'ID'
     period: 'Period'
@@ -616,13 +697,15 @@ export interface NexusGenFieldTypeNames {
     segmentIx: 'Int'
     type: 'PlayerResultType'
   }
-  PlayerState: { // field return type name
+  PlayerState: {
+    // field return type name
     currentGame: 'Game'
     playerResult: 'PlayerResult'
     previousResults: 'PlayerResult'
     transactions: 'PlayerAction'
   }
-  Query: { // field return type name
+  Query: {
+    // field return type name
     decision: 'PlayerDecision'
     game: 'Game'
     games: 'Game'
@@ -636,7 +719,8 @@ export interface NexusGenFieldTypeNames {
     specificResults: 'PlayerResult'
     storyElements: 'StoryElement'
   }
-  StoryElement: { // field return type name
+  StoryElement: {
+    // field return type name
     content: 'String'
     contentRole: 'JSONObject'
     id: 'ID'
@@ -644,7 +728,8 @@ export interface NexusGenFieldTypeNames {
     title: 'String'
     type: 'StoryElementType'
   }
-  Subscription: { // field return type name
+  Subscription: {
+    // field return type name
     eventsGlobal: 'Event'
     eventsUser: 'Event'
   }
@@ -652,97 +737,112 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
-    activateNextPeriod: { // args
-      gameId: number; // Int!
+    activateNextPeriod: {
+      // args
+      gameId: number // Int!
     }
-    activateNextSegment: { // args
-      gameId: number; // Int!
+    activateNextSegment: {
+      // args
+      gameId: number // Int!
     }
-    addCountdown: { // args
-      gameId: number; // Int!
-      seconds: number; // Int!
+    addCountdown: {
+      // args
+      gameId: number // Int!
+      seconds: number // Int!
     }
-    addGamePeriod: { // args
-      facts: NexusGenInputs['PeriodFactsInput']; // PeriodFactsInput!
-      gameId: number; // Int!
-      segmentCount: number; // Int!
+    addGamePeriod: {
+      // args
+      facts: NexusGenInputs['PeriodFactsInput'] // PeriodFactsInput!
+      gameId: number // Int!
+      segmentCount: number // Int!
     }
-    addPeriodSegment: { // args
-      facts: NexusGenInputs['PeriodSegmentFactsInput']; // PeriodSegmentFactsInput!
-      gameId: number; // Int!
-      learningElements?: Array<string | null> | null; // [String]
-      periodIx: number; // Int!
-      storyElements?: Array<string | null> | null; // [String]
+    addPeriodSegment: {
+      // args
+      facts: NexusGenInputs['PeriodSegmentFactsInput'] // PeriodSegmentFactsInput!
+      gameId: number // Int!
+      learningElements?: Array<string | null> | null // [String]
+      periodIx: number // Int!
+      storyElements?: Array<string | null> | null // [String]
     }
-    attemptLearningElement: { // args
-      elementId: string; // ID!
-      selection: string; // String!
+    attemptLearningElement: {
+      // args
+      elementId: string // ID!
+      selection: string // String!
     }
-    createGame: { // args
-      facts: NexusGenInputs['GameFactsInput']; // GameFactsInput!
-      name: string; // String!
-      playerCount: number; // Int!
+    createGame: {
+      // args
+      facts: NexusGenInputs['GameFactsInput'] // GameFactsInput!
+      name: string // String!
+      playerCount: number // Int!
     }
-    loginAsTeam: { // args
-      token: string; // String!
+    loginAsTeam: {
+      // args
+      token: string // String!
     }
-    markStoryElement: { // args
-      elementId: string; // ID!
+    markStoryElement: {
+      // args
+      elementId: string // ID!
     }
-    performAction: { // args
-      payload: string; // String!
-      type: string; // String!
+    performAction: {
+      // args
+      payload: string // String!
+      type: string // String!
     }
-    saveConsolidationDecision: { // args
-      payload: string; // String!
+    saveConsolidationDecision: {
+      // args
+      payload: string // String!
     }
-    toggleSwitch: { // args
-      gameId: number; // Int!
-      toggle: boolean; // Boolean!
+    toggleSwitch: {
+      // args
+      gameId: number // Int!
+      toggle: boolean // Boolean!
     }
-    updatePlayerData: { // args
-      facts?: string | null; // String
-      name?: string | null; // String
+    updatePlayerData: {
+      // args
+      facts?: string | null // String
+      name?: string | null // String
     }
-    updateReadyState: { // args
-      isReady: boolean; // Boolean!
+    updateReadyState: {
+      // args
+      isReady: boolean // Boolean!
     }
   }
   Query: {
-    game: { // args
-      id?: number | null; // Int
+    game: {
+      // args
+      id?: number | null // Int
     }
-    learningElement: { // args
-      id: string; // ID!
+    learningElement: {
+      // args
+      id: string // ID!
     }
-    specificResults: { // args
-      gameId: number; // Int!
-      type: string; // String!
+    specificResults: {
+      // args
+      gameId: number // Int!
+      type: string // String!
     }
   }
 }
 
-export interface NexusGenAbstractTypeMembers {
-}
+export interface NexusGenAbstractTypeMembers {}
 
-export interface NexusGenTypeInterfaces {
-}
+export interface NexusGenTypeInterfaces {}
 
-export type NexusGenObjectNames = keyof NexusGenObjects;
+export type NexusGenObjectNames = keyof NexusGenObjects
 
-export type NexusGenInputNames = keyof NexusGenInputs;
+export type NexusGenInputNames = keyof NexusGenInputs
 
-export type NexusGenEnumNames = keyof NexusGenEnums;
+export type NexusGenEnumNames = keyof NexusGenEnums
 
-export type NexusGenInterfaceNames = never;
+export type NexusGenInterfaceNames = never
 
-export type NexusGenScalarNames = keyof NexusGenScalars;
+export type NexusGenScalarNames = keyof NexusGenScalars
 
-export type NexusGenUnionNames = never;
+export type NexusGenUnionNames = never
 
-export type NexusGenObjectsUsingAbstractStrategyIsTypeOf = never;
+export type NexusGenObjectsUsingAbstractStrategyIsTypeOf = never
 
-export type NexusGenAbstractsUsingStrategyResolveType = never;
+export type NexusGenAbstractsUsingStrategyResolveType = never
 
 export type NexusGenFeaturesConfig = {
   abstractTypeStrategies: {
@@ -753,43 +853,51 @@ export type NexusGenFeaturesConfig = {
 }
 
 export interface NexusGenTypes {
-  context: any;
-  inputTypes: NexusGenInputs;
-  rootTypes: NexusGenRootTypes;
-  inputTypeShapes: NexusGenInputs & NexusGenEnums & NexusGenScalars;
-  argTypes: NexusGenArgTypes;
-  fieldTypes: NexusGenFieldTypes;
-  fieldTypeNames: NexusGenFieldTypeNames;
-  allTypes: NexusGenAllTypes;
-  typeInterfaces: NexusGenTypeInterfaces;
-  objectNames: NexusGenObjectNames;
-  inputNames: NexusGenInputNames;
-  enumNames: NexusGenEnumNames;
-  interfaceNames: NexusGenInterfaceNames;
-  scalarNames: NexusGenScalarNames;
-  unionNames: NexusGenUnionNames;
-  allInputTypes: NexusGenTypes['inputNames'] | NexusGenTypes['enumNames'] | NexusGenTypes['scalarNames'];
-  allOutputTypes: NexusGenTypes['objectNames'] | NexusGenTypes['enumNames'] | NexusGenTypes['unionNames'] | NexusGenTypes['interfaceNames'] | NexusGenTypes['scalarNames'];
-  allNamedTypes: NexusGenTypes['allInputTypes'] | NexusGenTypes['allOutputTypes']
-  abstractTypes: NexusGenTypes['interfaceNames'] | NexusGenTypes['unionNames'];
-  abstractTypeMembers: NexusGenAbstractTypeMembers;
-  objectsUsingAbstractStrategyIsTypeOf: NexusGenObjectsUsingAbstractStrategyIsTypeOf;
-  abstractsUsingStrategyResolveType: NexusGenAbstractsUsingStrategyResolveType;
-  features: NexusGenFeaturesConfig;
+  context: any
+  inputTypes: NexusGenInputs
+  rootTypes: NexusGenRootTypes
+  inputTypeShapes: NexusGenInputs & NexusGenEnums & NexusGenScalars
+  argTypes: NexusGenArgTypes
+  fieldTypes: NexusGenFieldTypes
+  fieldTypeNames: NexusGenFieldTypeNames
+  allTypes: NexusGenAllTypes
+  typeInterfaces: NexusGenTypeInterfaces
+  objectNames: NexusGenObjectNames
+  inputNames: NexusGenInputNames
+  enumNames: NexusGenEnumNames
+  interfaceNames: NexusGenInterfaceNames
+  scalarNames: NexusGenScalarNames
+  unionNames: NexusGenUnionNames
+  allInputTypes:
+    | NexusGenTypes['inputNames']
+    | NexusGenTypes['enumNames']
+    | NexusGenTypes['scalarNames']
+  allOutputTypes:
+    | NexusGenTypes['objectNames']
+    | NexusGenTypes['enumNames']
+    | NexusGenTypes['unionNames']
+    | NexusGenTypes['interfaceNames']
+    | NexusGenTypes['scalarNames']
+  allNamedTypes:
+    NexusGenTypes['allInputTypes'] | NexusGenTypes['allOutputTypes']
+  abstractTypes: NexusGenTypes['interfaceNames'] | NexusGenTypes['unionNames']
+  abstractTypeMembers: NexusGenAbstractTypeMembers
+  objectsUsingAbstractStrategyIsTypeOf: NexusGenObjectsUsingAbstractStrategyIsTypeOf
+  abstractsUsingStrategyResolveType: NexusGenAbstractsUsingStrategyResolveType
+  features: NexusGenFeaturesConfig
 }
 
-
 declare global {
-  interface NexusGenPluginTypeConfig<TypeName extends string> {
-  }
-  interface NexusGenPluginInputTypeConfig<TypeName extends string> {
-  }
-  interface NexusGenPluginFieldConfig<TypeName extends string, FieldName extends string> {
-  }
-  interface NexusGenPluginInputFieldConfig<TypeName extends string, FieldName extends string> {
-  }
-  interface NexusGenPluginSchemaConfig {
-  }
-  interface NexusGenPluginArgConfig {
-  }
+  interface NexusGenPluginTypeConfig<TypeName extends string> {}
+  interface NexusGenPluginInputTypeConfig<TypeName extends string> {}
+  interface NexusGenPluginFieldConfig<
+    TypeName extends string,
+    FieldName extends string,
+  > {}
+  interface NexusGenPluginInputFieldConfig<
+    TypeName extends string,
+    FieldName extends string,
+  > {}
+  interface NexusGenPluginSchemaConfig {}
+  interface NexusGenPluginArgConfig {}
 }

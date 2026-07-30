@@ -13,7 +13,7 @@ type OutputSegmentFacts = OutputFacts<
 
 export function initialize(
   facts: InputSegmentFacts,
-  payload: PayloadSegment<GameFacts, PeriodFacts, PeriodSegmentFacts>
+  payload: PayloadSegment<GameFacts, PeriodFacts, PeriodSegmentFacts>,
 ): OutputSegmentFacts {
   const baseFacts: OutputSegmentFacts = {
     resultFacts: {
@@ -64,9 +64,9 @@ export function initialize(
       draft.resultFacts.demandShock = event.demandShock;
       draft.resultFacts.eventName = event.name;
       draft.resultFacts.shock = parseFloat(
-        (event.supplyShock + event.demandShock).toFixed(2)
+        (event.supplyShock + event.demandShock).toFixed(2),
       );
-    }
+    },
   );
 
   debugLog("SegmentInitialize", facts, payload, resultFacts);

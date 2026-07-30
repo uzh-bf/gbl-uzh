@@ -4,11 +4,7 @@ import { produce } from 'immer'
 import { PlayerRole } from '../settings/Constants'
 import { GameFacts } from '../types/Game'
 import type { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
-import {
-  OutputResultFacts,
-  ResultFacts,
-  ResultFactsInit,
-} from '../types/facts'
+import { OutputResultFacts, ResultFacts, ResultFactsInit } from '../types/facts'
 
 // In Rate Wars the market clears at the PERIOD boundary (cross-player data is
 // only available in PeriodResult.end), so segment results are thin: carry the
@@ -73,8 +69,7 @@ export function end(
 
   const resultFacts = produce(basefacts, (draft: OutputResultFacts) => {
     const decisions = facts.decisions ?? { depositRate: 0, loanRate: 0 }
-    draft.resultFacts.spread =
-      decisions.loanRate - decisions.depositRate
+    draft.resultFacts.spread = decisions.loanRate - decisions.depositRate
   })
 
   debugLog('SegmentResultEnd', facts, payload, resultFacts)

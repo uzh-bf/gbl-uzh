@@ -58,8 +58,9 @@ export const PeriodSegmentFactsSchema = yup.object({
   eventName: yup.string(),
 });
 
-export interface PeriodSegmentFacts
-  extends yup.InferType<typeof PeriodSegmentFactsSchema> {}
+export interface PeriodSegmentFacts extends yup.InferType<
+  typeof PeriodSegmentFactsSchema
+> {}
 
 export const PeriodSegmentFactsInput = inputObjectType({
   name: "PeriodSegmentFactsInput",

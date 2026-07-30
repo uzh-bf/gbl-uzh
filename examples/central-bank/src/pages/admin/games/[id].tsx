@@ -100,22 +100,22 @@ function ManageGame() {
             anchor.scrollIntoView({ behavior: "smooth", block: "center" });
         } catch (e) {}
       },
-    }
+    },
   );
   const [activateNextSegment, { loading: nextSegmentLoading }] = useMutation(
-    ActivateNextSegmentDocument
+    ActivateNextSegmentDocument,
   );
   const [addGamePeriod, { loading: addGamePeriodLoading }] = useMutation(
     AddGamePeriodDocument,
     {
       refetchQueries: "active",
-    }
+    },
   );
   const [addPeriodSegment, { loading: addPeriodSegmentLoading }] = useMutation(
     AddPeriodSegmentDocument,
     {
       refetchQueries: "active",
-    }
+    },
   );
 
   const [addCountdown] = useMutation(AddCountdownDocument, {
@@ -291,7 +291,7 @@ function ManageGame() {
     (e) => ({
       label: e.id,
       value: e.id,
-    })
+    }),
   );
 
   return (
@@ -334,7 +334,7 @@ function ManageGame() {
                     "flex flex-1 flex-col gap-1 rounded border p-2",
                     isPeriodPaused && "border-orange-300 bg-orange-100",
                     isPeriodActive && "border-green-300 bg-green-50",
-                    isPeriodCompleted && "bg-gray-100 text-gray-400"
+                    isPeriodCompleted && "bg-gray-100 text-gray-400",
                   )}
                 >
                   <div className="mb-4 flex flex-col items-start justify-between">
@@ -404,7 +404,7 @@ function ManageGame() {
                         const segmentStatus = computeSegmentStatus(
                           game as any,
                           period as any,
-                          ix
+                          ix,
                         );
 
                         const isSegmentActive =
@@ -423,7 +423,8 @@ function ManageGame() {
                               "flex-initial rounded border p-2 text-center",
                               (!segment || isSegmentCompleted) &&
                                 "bg-gray-100 text-gray-400",
-                              isSegmentActive && "border-green-600 bg-green-100"
+                              isSegmentActive &&
+                                "border-green-600 bg-green-100",
                             )}
                             key={ix}
                             data-cy={`period-${period.index}-segment-${ix}`}
@@ -478,7 +479,7 @@ function ManageGame() {
                             )}
                           </div>
                         );
-                      }
+                      },
                     )}
                     {!isPeriodCompleted && game.periods.length - 1 === ix && (
                       <Formik
@@ -554,7 +555,7 @@ function ManageGame() {
                               onPrimaryAction={async () => {
                                 await newSegmentForm.setFieldValue(
                                   "periodIx",
-                                  period.index
+                                  period.index,
                                 );
                                 newSegmentForm.handleSubmit();
                                 setIsSegmentModalOpen(false);
@@ -586,7 +587,7 @@ function ManageGame() {
                   className={twMerge(
                     "flex flex-row items-center rounded border bg-gray-50 p-2 text-xl text-gray-300",
                     periodStatus === STATUS.RESULTS &&
-                      "border-red-200 text-red-400"
+                      "border-red-200 text-red-400",
                   )}
                 >
                   <FontAwesomeIcon icon={faPauseCircle} />
@@ -612,12 +613,12 @@ function ManageGame() {
               const seed = parseInt(variables.seed);
               const targetInflation = parseFloat(variables.targetInflation);
               const naturalUnemployment = parseFloat(
-                variables.naturalUnemployment
+                variables.naturalUnemployment,
               );
               const lambda = parseFloat(variables.lambda);
               const initialInflation = parseFloat(variables.initialInflation);
               const initialUnemployment = parseFloat(
-                variables.initialUnemployment
+                variables.initialUnemployment,
               );
               const initialGrowth = parseFloat(variables.initialGrowth);
               await addGamePeriod({
@@ -670,7 +671,7 @@ function ManageGame() {
                   onPrimaryAction={async () => {
                     await newPeriodForm.setFieldValue(
                       "newPeriodIx",
-                      game.periods.length
+                      game.periods.length,
                     );
                     newPeriodForm.handleSubmit();
                     setIsPeriodModalOpen(false);

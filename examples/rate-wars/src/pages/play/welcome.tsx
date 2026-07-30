@@ -13,7 +13,7 @@ import {
   SelfDocument,
   UpdatePlayerDataDocument,
 } from 'src/graphql/generated/ops'
-import { LOCATIONS, AVATARS } from 'src/lib/constants'
+import { AVATARS, LOCATIONS } from 'src/lib/constants'
 import * as Yup from 'yup'
 
 import {
@@ -123,7 +123,7 @@ function Welcome() {
                 avator form.
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-wrap gap-4 sm:flex-nowrap  sm:justify-center">
+            <CardContent className="flex flex-wrap gap-4 sm:flex-nowrap sm:justify-center">
               <div className="flex w-full flex-col gap-4">
                 <Card className="h-full">
                   <CardHeader>
@@ -142,20 +142,19 @@ function Welcome() {
                     <div className="pt-10">
                       <span className="pb-2 text-2xl font-medium">Task</span>
                       <div>
-                        Each year you set two numbers: the{' '}
-                        <b>deposit rate</b> you pay savers and the{' '}
-                        <b>loan rate</b> you charge borrowers. Savers chase
-                        yield, borrowers avoid cost — win volume without giving
-                        your margin away, keep an eye on defaults, and grow
-                        your bank&apos;s equity. The bank with the most equity
-                        after the final year wins.
+                        Each year you set two numbers: the <b>deposit rate</b>{' '}
+                        you pay savers and the <b>loan rate</b> you charge
+                        borrowers. Savers chase yield, borrowers avoid cost —
+                        win volume without giving your margin away, keep an eye
+                        on defaults, and grow your bank&apos;s equity. The bank
+                        with the most equity after the final year wins.
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
-              <Form className="max-w-1/2 w-full sm:w-max">
+              <Form className="w-full max-w-1/2 sm:w-max">
                 <Card>
                   <CardHeader>
                     <CardTitle>Avatar</CardTitle>
@@ -196,7 +195,9 @@ function Welcome() {
                           colors={COLORS}
                           color={values.color}
                           value={values.imgPathAvatar}
-                          onChange={(val) => setFieldValue('imgPathAvatar', val)}
+                          onChange={(val) =>
+                            setFieldValue('imgPathAvatar', val)
+                          }
                           fallbackSrc="/avatars/avatar_placeholder.png"
                           label="Avatar"
                           className="w-48 pb-2 text-sm text-gray-600"

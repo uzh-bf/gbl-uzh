@@ -21,7 +21,7 @@ export function initialize(
     PeriodFacts,
     PeriodSegmentFacts,
     PlayerRole
-  >
+  >,
 ): OutputSegmentResultFactsInit {
   const basefacts: OutputSegmentResultFactsInit = {
     resultFacts: facts,
@@ -29,7 +29,7 @@ export function initialize(
 
   const resultFacts: OutputSegmentResultFactsInit = produce(
     basefacts,
-    (draft: OutputSegmentResultFactsInit) => {}
+    (draft: OutputSegmentResultFactsInit) => {},
   );
 
   debugLog("SegmentResultInitialize", facts, payload, resultFacts);
@@ -43,7 +43,7 @@ export function start(
     PeriodFacts,
     PeriodSegmentFacts,
     PlayerRole
-  >
+  >,
 ): OutputResultFacts {
   const basefacts: OutputResultFacts = {
     resultFacts: facts,
@@ -51,7 +51,7 @@ export function start(
 
   const resultFacts: OutputResultFacts = produce(
     basefacts,
-    (draft: OutputResultFacts) => {}
+    (draft: OutputResultFacts) => {},
   );
 
   debugLog("SegmentResultStart", facts, payload, resultFacts);
@@ -65,7 +65,7 @@ export function end(
     PeriodFacts,
     PeriodSegmentFacts,
     PlayerRole
-  >
+  >,
 ): OutputResultFacts {
   const basefacts: OutputResultFacts = {
     resultFacts: facts,
@@ -100,7 +100,7 @@ export function end(
       growth = parseFloat(Math.min(10, Math.max(-10, growth)).toFixed(2));
       inflation = parseFloat(Math.min(20, Math.max(-5, inflation)).toFixed(2));
       unemployment = parseFloat(
-        Math.min(20, Math.max(1, unemployment)).toFixed(2)
+        Math.min(20, Math.max(1, unemployment)).toFixed(2),
       );
 
       // Loss / penalty calculation
@@ -133,7 +133,7 @@ export function end(
       draft.resultFacts.penalty = penalty;
       draft.resultFacts.cumulativePenalty = cumulativePenalty;
       draft.resultFacts.history = [...(facts.history || []), historyEntry];
-    }
+    },
   );
 
   debugLog("SegmentResultEnd", facts, payload, resultFacts);

@@ -1,7 +1,12 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { EventLog, ProbabilityChart, ReusableFormField, Form } from '@gbl-uzh/ui'
-import { Button } from '@uzh-bf/design-system'
 import {
+  EventLog,
+  Form,
+  ProbabilityChart,
+  ReusableFormField,
+} from '@gbl-uzh/ui'
+import {
+  Button,
   Card,
   CardContent,
   CardDescription,
@@ -20,13 +25,6 @@ import {
   ShadcnTableHeader as TableHeader,
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import {
@@ -41,8 +39,18 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
 
-import { PerformActionDocument, ResultDocument } from 'src/graphql/generated/ops'
+import {
+  PerformActionDocument,
+  ResultDocument,
+} from 'src/graphql/generated/ops'
 import { getSegmentEndResults } from 'src/lib/analysis'
 import GameLayout from '~/components/GameLayout'
 
@@ -156,16 +164,27 @@ function Cockpit() {
       savings: 0,
       bonds: 0,
       stocks: 0,
-    }
+    },
   })
-  const { register, handleSubmit, watch, control, reset, formState: { errors, isSubmitting } } = form
+  const {
+    register,
+    handleSubmit,
+    watch,
+    control,
+    reset,
+    formState: { errors, isSubmitting },
+  } = form
 
   const watchSavings = watch('savings')
   const watchBonds = watch('bonds')
   const watchStocks = watch('stocks')
 
   const sum = useMemo(() => {
-    return Number(watchSavings || 0) + Number(watchBonds || 0) + Number(watchStocks || 0)
+    return (
+      Number(watchSavings || 0) +
+      Number(watchBonds || 0) +
+      Number(watchStocks || 0)
+    )
   }, [watchSavings, watchBonds, watchStocks])
 
   const isSumValid = sum === 100
@@ -566,8 +585,8 @@ function Cockpit() {
                       <CardHeader>
                         <CardTitle>Absolute Performance</CardTitle>
                         <CardDescription>
-                          Your portfolio&apos;s total value (total assets) compared
-                          to benchmarks (savings, bonds and stocks,
+                          Your portfolio&apos;s total value (total assets)
+                          compared to benchmarks (savings, bonds and stocks,
                           respectively) over time.
                         </CardDescription>
                       </CardHeader>
@@ -884,9 +903,10 @@ function Cockpit() {
                         </div>
                       </div>
                       {!isSumValid && (
-                        <div className="text-red-500 text-sm mb-4">
+                        <div className="mb-4 text-sm text-red-500">
                           The sum of the input values must be{' '}
-                          <span className="font-bold">100</span>! (Current: {sum}%)
+                          <span className="font-bold">100</span>! (Current:{' '}
+                          {sum}%)
                         </div>
                       )}
                       <Button

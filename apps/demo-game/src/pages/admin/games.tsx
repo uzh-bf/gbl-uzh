@@ -97,7 +97,7 @@ function Games() {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="rounded border p-4 flex flex-col gap-4 max-w-md my-4"
+        className="my-4 flex max-w-md flex-col gap-4 rounded border p-4"
       >
         <AdminInputField
           label="Name"

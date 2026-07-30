@@ -20,10 +20,10 @@ import { twMerge } from 'tailwind-merge'
 
 import { useMutation, useQuery } from '@apollo/client'
 import {
-  STATUS,
   computePeriodStatus,
   computeSegmentStatus,
   PlayerCompact,
+  STATUS,
 } from '@gbl-uzh/ui'
 import { useCallback, useEffect, useState } from 'react'
 import {
@@ -324,9 +324,7 @@ function ManageGame() {
                           <FontAwesomeIcon icon={faCheck} />
                         )}
                       </div>
-                      <div className="font-bold">
-                        Year {period.index + 1}
-                      </div>
+                      <div className="font-bold">Year {period.index + 1}</div>
                       {isPeriodActive && <div>{game.status}</div>}
                     </div>
                     <Table className="text-sm">

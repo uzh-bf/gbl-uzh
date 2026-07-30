@@ -1,11 +1,15 @@
-import { H1, H2, Prose } from '@uzh-bf/design-system'
+import {
+  faChalkboardTeacher,
+  faChartLine,
+  faGamepad,
+} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { H1, Prose } from '@uzh-bf/design-system'
 import { MDXRemote } from 'next-mdx-remote'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { twMerge } from 'tailwind-merge'
 import TitleBackground from '../../components/common/TitleBackground'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChalkboardTeacher, faGamepad, faChartLine } from '@fortawesome/free-solid-svg-icons'
 
 import Content from '../../components/Content'
 import PageWithHeader from '../../components/PageWithHeader'
@@ -33,9 +37,7 @@ function UseCase({
       <div>
         <PageWithHeader title={source.frontmatter.title}>
           <TitleBackground>
-            <H1 className={{ root: 'mx-auto max-w-6xl md:pl-4' }}>
-              Use Cases
-            </H1>
+            <H1 className={{ root: 'mx-auto max-w-6xl md:pl-4' }}>Use Cases</H1>
           </TitleBackground>
 
           <Content>
@@ -47,11 +49,12 @@ function UseCase({
                   )
                   if (useCases.length === 0) return null
 
-                  const icon = type === 'didactics'
-                    ? faChalkboardTeacher
-                    : type === 'development'
-                    ? faGamepad
-                    : faChartLine
+                  const icon =
+                    type === 'didactics'
+                      ? faChalkboardTeacher
+                      : type === 'development'
+                        ? faGamepad
+                        : faChartLine
 
                   return (
                     <div key={type} className="mb-6 last:mb-0">
@@ -77,7 +80,7 @@ function UseCase({
                                 'hover:bg-slate-50',
                                 router.query.slug === frontmatter.slug && [
                                   'font-medium text-orange-600',
-                                  'before:absolute before:left-0 before:top-0 before:h-full before:w-0.5 before:bg-orange-600'
+                                  'before:absolute before:left-0 before:top-0 before:h-full before:w-0.5 before:bg-orange-600',
                                 ]
                               )}
                             >

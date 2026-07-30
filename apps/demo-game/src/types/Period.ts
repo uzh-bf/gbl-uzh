@@ -85,8 +85,9 @@ export const PeriodFactsInput = inputObjectType({
 
 export const PeriodSegmentFactsSchema = yup.object({})
 
-export interface PeriodSegmentFacts
-  extends yup.InferType<typeof PeriodSegmentFactsSchema> {
+export interface PeriodSegmentFacts extends yup.InferType<
+  typeof PeriodSegmentFactsSchema
+> {
   returns: { bank: number; bonds: number; stocks: number }[]
   diceRolls: { bonds: number; stocks: number }[]
 }

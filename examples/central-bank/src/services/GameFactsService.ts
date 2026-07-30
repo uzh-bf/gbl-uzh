@@ -6,7 +6,7 @@ type OutputGameFacts = OutputFactsGame<GameFacts, any, any>;
 
 export function update(
   facts: GameFacts,
-  payload: PayloadGame
+  payload: PayloadGame,
 ): OutputGameFacts {
   const baseFacts: OutputGameFacts = {
     updatedGameFacts: facts,

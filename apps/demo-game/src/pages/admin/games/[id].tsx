@@ -6,24 +6,19 @@ import {
   faSync,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  Button,
-  H3,
-  H4,
-  Modal,
-} from '@uzh-bf/design-system'
-import { Controller, useForm } from 'react-hook-form'
 import { MultiSelect } from '@gbl-uzh/ui'
+import { Button, H3, H4, Modal } from '@uzh-bf/design-system'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { Controller, useForm } from 'react-hook-form'
 import { twMerge } from 'tailwind-merge'
 
 import { useMutation, useQuery } from '@apollo/client'
 import {
-  STATUS,
   computePeriodStatus,
   computeSegmentStatus,
   PlayerCompact,
+  STATUS,
 } from '@gbl-uzh/ui'
 import { useCallback, useEffect, useState } from 'react'
 import {
@@ -55,8 +50,8 @@ import {
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
 
-import { useToast } from '~/components/ui/use-toast'
 import { AdminInputField } from '~/components/fields/AdminInputField'
+import { useToast } from '~/components/ui/use-toast'
 import {
   DEFAULT_SEED,
   GAP_BONDS,
@@ -610,7 +605,8 @@ function ManageGame() {
                         ) : storyElementsError || learningElementsError ? (
                           <div>
                             Error loading elements:{' '}
-                            {storyElementsError?.message || learningElementsError?.message}
+                            {storyElementsError?.message ||
+                              learningElementsError?.message}
                           </div>
                         ) : (
                           <Modal
@@ -619,8 +615,7 @@ function ManageGame() {
                             trigger={
                               <Button
                                 disabled={
-                                  period.segmentCount ===
-                                  period.segments.length
+                                  period.segmentCount === period.segments.length
                                 }
                                 className={{
                                   root: 'h-full w-12 font-bold text-gray-500',
@@ -647,7 +642,9 @@ function ManageGame() {
                           >
                             <div className="flex w-1/2 flex-col gap-2">
                               <div className="flex flex-col gap-2">
-                                <span className="text-sm font-normal text-gray-700">Story Elements</span>
+                                <span className="text-sm font-normal text-gray-700">
+                                  Story Elements
+                                </span>
                                 <Controller
                                   control={segmentControl}
                                   name="storyElements"
@@ -662,7 +659,9 @@ function ManageGame() {
                                 />
                               </div>
                               <div className="flex flex-col gap-2">
-                                <span className="text-sm font-normal text-gray-700">Learning Elements</span>
+                                <span className="text-sm font-normal text-gray-700">
+                                  Learning Elements
+                                </span>
                                 <Controller
                                   control={segmentControl}
                                   name="learningElements"
