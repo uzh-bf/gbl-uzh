@@ -1,13 +1,10 @@
 datasource db {
-  provider          = "postgres"
-  url               = env("DATABASE_URL")
-  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  provider = "postgres"
 }
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearchPostgres", "postgresqlExtensions"]
-  binaryTargets = ["native", "linux-musl"]
+  provider = "prisma-client"
+  output   = "../../src/generated/prisma"
 }
 
 model Account {

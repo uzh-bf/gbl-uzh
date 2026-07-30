@@ -1,4 +1,3 @@
-import * as DB from '@prisma/client'
 import {
   arg,
   booleanArg,
@@ -9,6 +8,7 @@ import {
   objectType,
   stringArg,
 } from 'nexus'
+import * as DB from '../generated/prisma/client.js'
 import * as AccountService from '../services/AccountService.js'
 import * as GameService from '../services/GameService.js'
 
@@ -51,7 +51,7 @@ export function generateBaseMutations<
   GameFacts,
   PeriodFacts,
   PeriodSegmentFacts,
-  PlayerFacts
+  PlayerFacts,
 >({
   services = defaultServices,
   roleAssigner,

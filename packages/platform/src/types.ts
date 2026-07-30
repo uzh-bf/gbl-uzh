@@ -1,11 +1,10 @@
-import { Prisma, PrismaClient } from '@prisma/client'
-import { DefaultArgs } from '@prisma/client/runtime/library'
 import { NextPageContext } from 'next'
 import type yup from 'yup'
+import { PrismaClient } from './generated/prisma/client.js'
 
 export type TxType = Omit<
-  PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
-  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+  PrismaClient,
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends'
 >
 
 export enum UserRole {
@@ -47,7 +46,7 @@ export type OutputFactsUser<
   FactsType,
   NotificationType,
   GlobalNotificationType,
-  EventType
+  EventType,
 > = {
   result: FactsType
   isDirty?: boolean
@@ -87,7 +86,7 @@ export type PayloadGame = {
 export type PayloadPeriodInitialisation<
   GameFactsType,
   PeriodFactsType,
-  PeriodSegmentFactsType
+  PeriodSegmentFactsType,
 > = {
   periodIx: number
   segmentCount?: number
@@ -108,7 +107,7 @@ export type PayloadPeriodConsolidation<GameFactsType, PeriodSegmentFactsType> =
 export type PayloadPeriodResult<
   GameFactsType,
   PeriodFactsType,
-  PlayerRoleType
+  PlayerRoleType,
 > = {
   playerRole: PlayerRoleType
   gameFacts: GameFactsType
@@ -120,7 +119,7 @@ export type PayloadPeriodResultEnd<
   GameFactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
-  PlayerRoleType
+  PlayerRoleType,
 > = {
   segmentEndResults: ResultsFactsType
   otherPlayersSegmentEndResults: ResultsFactsType
@@ -138,7 +137,7 @@ export type PayloadPeriodResultEnd<
 export type PayloadSegment<
   GameFactsType,
   PeriodFactsType,
-  PeriodSegmentFactsType
+  PeriodSegmentFactsType,
 > = {
   segmentIx: number
   segmentCount: number
@@ -152,7 +151,7 @@ export type PayloadSegmentResult<
   GameFactsType,
   PeriodFactsType,
   PeriodSegmentFactsType,
-  PlayerRoleType
+  PlayerRoleType,
 > = {
   playerRole: PlayerRoleType
   gameFacts: GameFactsType
@@ -182,7 +181,7 @@ interface Period<
   EventType,
   // TODO(JJ): Decide what to do with prisma -> goes into payload?
   // -> add a third param: ctx: CtxWithPrisma
-  PrismaType
+  PrismaType,
 > {
   initialize: (
     facts: FactsType,
@@ -213,7 +212,7 @@ interface PeriodResult<
   PlayerRoleType,
   NotificationType,
   EventType,
-  PrismaType
+  PrismaType,
 > {
   initialize: (
     facts: FactsType,
@@ -247,7 +246,7 @@ interface Segment<
   PeriodSegmentFactsType,
   NotificationType,
   EventType,
-  PrismaType
+  PrismaType,
 > {
   initialize: (
     facts: FactsType,
@@ -281,7 +280,7 @@ interface SegmentResult<
   PlayerRoleType,
   NotificationType,
   EventType,
-  PrismaType
+  PrismaType,
 > {
   initialize: (
     facts: FactsType,
@@ -319,7 +318,7 @@ interface Reducer<
   NotificationType,
   GlobalNotificationType,
   EventType,
-  PrismaType
+  PrismaType,
 > {
   apply: (
     state: StateType,

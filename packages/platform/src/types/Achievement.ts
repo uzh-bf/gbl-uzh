@@ -1,5 +1,5 @@
-import * as DB from '@prisma/client'
 import { enumType, objectType } from 'nexus'
+import * as DB from '../generated/prisma/client.js'
 
 export const AchievementFrequency = enumType({
   name: 'AchievementFrequency',

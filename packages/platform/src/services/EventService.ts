@@ -1,11 +1,8 @@
-import * as DB from '@prisma/client'
-import { getPubSub } from '../lib/pubsub.js'
-import { BaseUserNotificationType as UserNotificationType } from '../types.js'
-import type {
-  BaseGlobalNotificationType,
-  Event as PlatformEvent,
-} from '../types.js'
+import * as DB from '../generated/prisma/client.js'
 import log from '../lib/logger.js'
+import { getPubSub } from '../lib/pubsub.js'
+import type { Event as PlatformEvent } from '../types.js'
+import { BaseUserNotificationType as UserNotificationType } from '../types.js'
 
 export const realtimeGameStateSelect = {
   status: true,
@@ -74,7 +71,9 @@ export async function receiveEvents({ events, ctx, prisma }) {
 
   const transaction = (prisma as any)?.$transaction
   const results =
-    typeof transaction === 'function' ? transaction.call(prisma, ops) : Promise.all(ops)
+    typeof transaction === 'function'
+      ? transaction.call(prisma, ops)
+      : Promise.all(ops)
 
   return results
 }

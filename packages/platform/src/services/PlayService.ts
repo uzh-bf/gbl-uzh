@@ -1,15 +1,14 @@
-import * as DB from '@prisma/client'
+import dayjs from 'dayjs'
+import * as DB from '../generated/prisma/client.js'
+import log from '../lib/logger.js'
 import {
+  BaseGlobalNotificationType,
   CtxWithPrisma,
   LearningElementState,
-  BaseUserNotificationType as UserNotificationType,
-  BaseGlobalNotificationType,
   Event as PlatformEvent,
+  BaseUserNotificationType as UserNotificationType,
 } from '../types.js'
 import * as EventService from './EventService.js'
-import dayjs from 'dayjs'
-import log from '../lib/logger.js'
-import { withRetry } from 'src/lib/util.js'
 
 type Context = CtxWithPrisma<DB.PrismaClient>
 
