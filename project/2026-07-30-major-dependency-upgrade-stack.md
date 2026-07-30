@@ -182,8 +182,9 @@ layers:
 - 2026-07-30 — Layer 2 implementation: Commit `398e857` pins TypeScript 6.0.2 across every owned compiler consumer, migrates removed compiler options without suppressing deprecations, adds a parent-owned Quartz compatibility wrapper, preserves the website's React 18 type boundary until layer 3, restores valid UI declarations, and corrects the three game list queries to consume generated schema fields.
 - 2026-07-30 — Layer 2 verification: Every TypeScript check, owned package check, production build, Quartz test, empty Jest discovery, UI package verifier, external Next consumer build, and frozen offline install passes. Existing lint-warning baselines remain in the four game and website apps; the host Node 26 runtime also retains Cypress's declared Node 20 engine warning.
 - 2026-07-30 — Layer 2 review: Separate exact-commit correctness and simplification reviews found no actionable issue. The reviewers confirmed that the Quartz wrapper, temporary website React type paths, non-rolled UI declarations, minimal `players` query addition, generated client deltas, and lockfile peer-context churn are justified compatibility work.
-- 2026-07-30 — Active: Publishing the completed TypeScript 6 bridge as the second draft PR.
-- Next: Publish layer 2, then add layer 3.
+- 2026-07-30 — Layer 2 publication: Draft PR [#178](https://github.com/uzh-bf/gbl-uzh/pull/178) targets `codex/upgrade-formatters-v3` from `codex/upgrade-typescript-6-bridge`; GitHub readback confirmed the linked stack, draft state, customized metadata, and `needsRebase: false`.
+- 2026-07-30 — Active: Implementing the website React 19 and Next.js 16 layer.
+- Next: Add layer 3 and establish its browser-validation path before implementation.
 
 ## Expected Gate 3 evidence
 
