@@ -175,8 +175,9 @@ layers:
 - 2026-07-30 — Layer 1 toolchain: Commit `d75524d` passed separate correctness and simplification reviews with no actionable findings.
 - 2026-07-30 — Layer 1 verification: All four owned formatter checks pass; Quartz reports the same 125 files as its 3.3.3 baseline; platform, UI, demo-game, website, Rate Wars, and Central Bank production builds pass. Central Bank used `NEXT_PUBLIC_API_URL=http://localhost:3000/api/graphql` for its required static-build input.
 - 2026-07-30 — Layer 1 inherited checks: Central Bank's complete check passes. Demo-game and Rate Wars lint with warnings but retain existing TypeScript errors; website retains its existing React 18/19 type split and ESLint 9 flat-config failure. The successful production builds are the behavior gate for this formatter-only layer; layers 2 and 3 own the TypeScript and website remediation.
-- 2026-07-30 — Active: Reviewing the separate mechanical formatting output.
-- Next: Commit and review the mechanical output, publish the bottom draft PR, then add layer 2.
+- 2026-07-30 — Layer 1 mechanical review: Correctness found no actionable issue. Simplification found that generated GraphQL outputs caused 86% of added lines and are overwritten by builds; accepted by ignoring those directories and restoring generator-owned output.
+- 2026-07-30 — Active: Re-reviewing the generated-output exclusion before publishing the bottom layer.
+- Next: Publish the bottom draft PR, then add layer 2.
 
 ## Expected Gate 3 evidence
 
