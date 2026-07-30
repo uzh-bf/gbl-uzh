@@ -1,5 +1,4 @@
 import { faBars } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@uzh-bf/design-system'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -136,7 +135,7 @@ function PageHead() {
           <Logo />
         </div>
 
-        <div className="pb-4 pr-6">
+        <div className="pr-6 pb-4">
           <Button
             basic
             className={{
@@ -144,9 +143,7 @@ function PageHead() {
             }}
             onClick={() => setOpen(!isOpen)}
           >
-            <Button.Icon>
-              <FontAwesomeIcon icon={faBars} />
-            </Button.Icon>
+            <Button.Icon icon={faBars} />
           </Button>
         </div>
       </div>

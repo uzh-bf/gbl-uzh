@@ -19,7 +19,7 @@ function Contact({ name, institution, role, link, imgSrc, tags }: any) {
           <Prose>{role}</Prose>
           <Prose className={{ root: 'text-xs' }}>{institution}</Prose>
           <a
-            className="mt-2 text-uzh-red-100 hover:underline"
+            className="text-uzh-red-100 mt-2 hover:underline"
             target="_blank"
             href={link}
             rel="noreferrer"

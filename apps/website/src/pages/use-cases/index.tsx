@@ -63,7 +63,7 @@ function GBLUseCases({ sourceArr }: Props) {
                   key={frontmatter.slug}
                   className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white transition-all hover:border-orange-200 hover:shadow-md"
                 >
-                  <div className="aspect-video relative w-full overflow-hidden">
+                  <div className="relative aspect-video w-full overflow-hidden">
                     <img
                       src={frontmatter.imgSrc}
                       alt={frontmatter.title}
@@ -72,7 +72,7 @@ function GBLUseCases({ sourceArr }: Props) {
                     <div className="absolute bottom-0 left-0 h-12 w-full bg-gradient-to-t from-white to-transparent" />
                   </div>
                   <div className="relative p-6">
-                    <div className="absolute -top-px left-4 right-4 h-px bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
+                    <div className="absolute -top-px right-4 left-4 h-px bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
                     <h3 className="mb-2 text-xl font-bold">
                       {frontmatter.title}
                     </h3>
@@ -86,12 +86,12 @@ function GBLUseCases({ sourceArr }: Props) {
                       className={{ root: 'group/button' }}
                     >
                       <Button.Label>Read more</Button.Label>
-                      <Button.Icon>
-                        <FontAwesomeIcon
-                          icon={faArrowRight}
-                          className="transition-transform group-hover/button:translate-x-0.5"
-                        />
-                      </Button.Icon>
+                      <Button.Icon
+                        icon={faArrowRight}
+                        className={{
+                          root: 'transition-transform group-hover/button:translate-x-0.5',
+                        }}
+                      />
                     </Button>
                   </div>
                 </div>
@@ -117,7 +117,7 @@ function GBLUseCases({ sourceArr }: Props) {
                   key={frontmatter.slug}
                   className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white transition-all hover:border-orange-200 hover:shadow-md"
                 >
-                  <div className="aspect-video relative w-full overflow-hidden">
+                  <div className="relative aspect-video w-full overflow-hidden">
                     <img
                       src={frontmatter.imgSrc}
                       alt={frontmatter.title}
@@ -126,7 +126,7 @@ function GBLUseCases({ sourceArr }: Props) {
                     <div className="absolute bottom-0 left-0 h-12 w-full bg-gradient-to-t from-white to-transparent" />
                   </div>
                   <div className="relative p-6">
-                    <div className="absolute -top-px left-4 right-4 h-px bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
+                    <div className="absolute -top-px right-4 left-4 h-px bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
                     <h3 className="mb-2 text-xl font-bold">
                       {frontmatter.title}
                     </h3>
@@ -140,12 +140,12 @@ function GBLUseCases({ sourceArr }: Props) {
                       className={{ root: 'group/button' }}
                     >
                       <Button.Label>Read more</Button.Label>
-                      <Button.Icon>
-                        <FontAwesomeIcon
-                          icon={faArrowRight}
-                          className="transition-transform group-hover/button:translate-x-0.5"
-                        />
-                      </Button.Icon>
+                      <Button.Icon
+                        icon={faArrowRight}
+                        className={{
+                          root: 'transition-transform group-hover/button:translate-x-0.5',
+                        }}
+                      />
                     </Button>
                   </div>
                 </div>
@@ -171,7 +171,7 @@ function GBLUseCases({ sourceArr }: Props) {
                   key={frontmatter.slug}
                   className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white transition-all hover:border-orange-200 hover:shadow-md"
                 >
-                  <div className="aspect-video relative w-full overflow-hidden">
+                  <div className="relative aspect-video w-full overflow-hidden">
                     <img
                       src={frontmatter.imgSrc}
                       alt={frontmatter.title}
@@ -180,7 +180,7 @@ function GBLUseCases({ sourceArr }: Props) {
                     <div className="absolute bottom-0 left-0 h-12 w-full bg-gradient-to-t from-white to-transparent" />
                   </div>
                   <div className="relative p-6">
-                    <div className="absolute -top-px left-4 right-4 h-px bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
+                    <div className="absolute -top-px right-4 left-4 h-px bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
                     <h3 className="mb-2 text-xl font-bold">
                       {frontmatter.title}
                     </h3>
@@ -194,12 +194,12 @@ function GBLUseCases({ sourceArr }: Props) {
                       className={{ root: 'group/button' }}
                     >
                       <Button.Label>Read more</Button.Label>
-                      <Button.Icon>
-                        <FontAwesomeIcon
-                          icon={faArrowRight}
-                          className="transition-transform group-hover/button:translate-x-0.5"
-                        />
-                      </Button.Icon>
+                      <Button.Icon
+                        icon={faArrowRight}
+                        className={{
+                          root: 'transition-transform group-hover/button:translate-x-0.5',
+                        }}
+                      />
                     </Button>
                   </div>
                 </div>

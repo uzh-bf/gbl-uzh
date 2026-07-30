@@ -28,7 +28,7 @@ function TitleImage({ imgSrc, children }: Props) {
             className={twMerge(
               'p-4 md:p-6',
               imgSrc &&
-                'absolute bottom-0 border-b border-slate-300 bg-opacity-90 p-4 sm:top-auto md:bottom-3'
+                'bg-opacity-90 absolute bottom-0 border-b border-slate-300 p-4 sm:top-auto md:bottom-3'
             )}
           >
             {children}

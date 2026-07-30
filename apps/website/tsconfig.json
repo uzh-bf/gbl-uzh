@@ -16,17 +16,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": false,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "target": "ES2017",
     "rootDir": ".",
-    "paths": {
-      "react": [
-        "./node_modules/@types/react/index.d.ts"
-      ],
-      "react/*": [
-        "./node_modules/@types/react/*"
-      ]
-    },
     "types": [
       "node"
     ]

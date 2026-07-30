@@ -1,9 +1,17 @@
-@import 'tailwindcss/src/css/preflight.css';
-@import '@uzh-bf/design-system/dist/style.css';
+@layer theme, base, components, utilities;
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'tw-animate-css';
+@import '../node_modules/@uzh-bf/design-system/dist/design-system.css';
+
+@plugin '@tailwindcss/typography';
+
+@source './**/*.{ts,tsx}';
+
+@theme {
+  --breakpoint-lg: 72rem;
+}
 
 :root {
   --theme-color-primary: #0028a5;

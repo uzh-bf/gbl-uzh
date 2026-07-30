@@ -80,7 +80,8 @@ const config = {
   versionGroups: [
     {
       label:
-        'website is intentionally frozen on the legacy React 18 / design-system v3 / Tailwind 3 stack and is upgraded separately',
+        'website pins its separately approved React 19.2.8 and Next.js 16.2.12 targets',
+      dependencies: ['next', 'eslint-config-next', 'react', 'react-dom'],
       packages: ['@gbl-uzh/website'],
       isIgnored: true,
     },

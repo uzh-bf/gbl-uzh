@@ -1,5 +1,4 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, H1, H2, Prose } from '@uzh-bf/design-system'
 import { sortBy } from 'ramda'
 import Content from '../../components/Content'
@@ -60,12 +59,10 @@ function GBLinUse({ sourceArr }: Props) {
               <Button
                 fluid
                 className={{
-                  root: 'h-full flex-col border-uzh-red-40 bg-uzh-red-20 text-lg',
+                  root: 'border-uzh-red-40 bg-uzh-red-20 h-full flex-col text-lg',
                 }}
               >
-                <Button.Icon>
-                  <FontAwesomeIcon icon={faPlus} />
-                </Button.Icon>
+                <Button.Icon icon={faPlus} />
                 <Button.Label>Submit your own game</Button.Label>
               </Button>
             </a>
@@ -99,12 +96,10 @@ function GBLinUse({ sourceArr }: Props) {
               <Button
                 fluid
                 className={{
-                  root: 'h-full flex-col border-uzh-red-40 bg-uzh-red-20 text-lg',
+                  root: 'border-uzh-red-40 bg-uzh-red-20 h-full flex-col text-lg',
                 }}
               >
-                <Button.Icon>
-                  <FontAwesomeIcon icon={faPlus} />
-                </Button.Icon>
+                <Button.Icon icon={faPlus} />
                 <Button.Label>Submit your own game</Button.Label>
               </Button>
             </a>
@@ -134,9 +129,7 @@ function GBLinUse({ sourceArr }: Props) {
 
             <a href="https://forms.office.com/e/nieHr9d1EX" target="_blank">
               <Button fluid className={{ root: 'h-full gap-4 text-lg' }}>
-                <Button.Icon>
-                  <FontAwesomeIcon icon={faPlus} />
-                </Button.Icon>
+                <Button.Icon icon={faPlus} />
                 <Button.Label>Submit your own course</Button.Label>
               </Button>
             </a>
