@@ -1181,8 +1181,8 @@ export async function getGames(args, ctx: Context) {
       id: 'desc',
     },
     include: {
-      _count: {
-        select: { players: true },
+      players: {
+        select: { id: true },
       },
       activePeriod: true,
     },
