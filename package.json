@@ -36,11 +36,13 @@
     "standard-version": "~9.5.0",
     "syncpack": "~13.0.0",
     "turbo": "~2.2.3",
-    "typescript": "6.0.2"
+    "typescript": "6.0.2",
+    "typescript-native": "npm:typescript@7.0.2"
   },
   "scripts": {
     "build": "turbo run build",
-    "check:ts:quartz": "tsc --project tsconfig.quartz.json --noEmit",
+    "check:ts:quartz": "node_modules/typescript-native/bin/tsc --project tsconfig.quartz.json --noEmit",
+    "check:ts:quartz:typescript6": "node_modules/typescript/bin/tsc --project tsconfig.quartz.json --noEmit",
     "dev": "nodemon -w packages/platform/public --ext graphql --exec turbo run dev",
     "dev-web": "turbo run dev-web",
     "format": "turbo run format",

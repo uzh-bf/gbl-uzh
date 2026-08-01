@@ -8,7 +8,8 @@
     "typescript": "6.0.2"
   },
   "scripts": {
-    "check:ts": "tsc --noEmit",
+    "check:ts": "../node_modules/typescript-native/bin/tsc --project tsconfig.json --noEmit",
+    "check:ts:typescript6": "node_modules/typescript/bin/tsc --project tsconfig.json --noEmit",
     "test": "cypress open",
     "test:run": "cypress run",
     "test:watch": "cypress open --watch"

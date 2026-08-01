@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, type ComponentType } from 'react'
 import { mapObjIndexed } from 'ramda'
 import {
   Bar,
@@ -10,7 +10,16 @@ import {
   // Tooltip,
   XAxis,
   YAxis,
+  type BarProps,
+  type XAxisProps,
+  type YAxisProps,
 } from 'recharts'
+
+// Recharts 2 declares legacy class components that are not JSX-compatible
+// with React 19's types, despite the runtime's React 19 peer support.
+const CompatibleBar = Bar as unknown as ComponentType<BarProps>
+const CompatibleXAxis = XAxis as unknown as ComponentType<XAxisProps>
+const CompatibleYAxis = YAxis as unknown as ComponentType<YAxisProps>
 
 // TODO(JJ):
 // - It would make sense to define this prob. distribution somewhere else
@@ -128,13 +137,16 @@ function ProbabilityChart({
         >
           {/* <Tooltip content={CustomTooltip} /> */}
 
-          <XAxis dataKey="eyes">
+          <CompatibleXAxis dataKey="eyes">
             <Label value="Dice Roll" position="bottom" offset={0} />
-          </XAxis>
-          <YAxis dataKey="prob" tickFormatter={(value) => `${(value * 100).toFixed(1)}%`}>
+          </CompatibleXAxis>
+          <CompatibleYAxis
+            dataKey="prob"
+            tickFormatter={(value) => `${(value * 100).toFixed(1)}%`}
+          >
             <Label value="Probability" angle={-90} position="left" offset={0} />
-          </YAxis>
-          <Bar dataKey="prob">
+          </CompatibleYAxis>
+          <CompatibleBar dataKey="prob">
             <LabelList
               dataKey="change"
               position="top"
@@ -149,7 +161,7 @@ function ProbabilityChart({
                 key={`cell-${index}`}
               ></Cell>
             ))}
-          </Bar>
+          </CompatibleBar>
         </BarChart>
       </ResponsiveContainer>
     </div>
