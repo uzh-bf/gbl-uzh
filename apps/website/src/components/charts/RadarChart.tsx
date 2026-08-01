@@ -1,11 +1,23 @@
+import type { ComponentType } from 'react'
 import {
-  PolarAngleAxis,
   PolarGrid,
-  PolarRadiusAxis,
-  Radar,
+  PolarAngleAxis as RechartsPolarAngleAxis,
+  PolarRadiusAxis as RechartsPolarRadiusAxis,
+  Radar as RechartsRadar,
   RadarChart as RechartsRadarChart,
   ResponsiveContainer,
+  type PolarAngleAxisProps,
+  type PolarRadiusAxisProps,
+  type RadarProps,
 } from 'recharts'
+
+// Recharts 2 declares legacy class components that are not JSX-compatible
+// with React 19's types, despite the runtime's React 19 peer support.
+const PolarAngleAxis =
+  RechartsPolarAngleAxis as unknown as ComponentType<PolarAngleAxisProps>
+const PolarRadiusAxis =
+  RechartsPolarRadiusAxis as unknown as ComponentType<PolarRadiusAxisProps>
+const Radar = RechartsRadar as unknown as ComponentType<RadarProps>
 
 function RadarChart({ data }: any) {
   return (

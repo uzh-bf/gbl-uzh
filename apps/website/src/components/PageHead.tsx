@@ -1,5 +1,4 @@
 import { faBars } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@uzh-bf/design-system'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -24,7 +23,11 @@ interface NavigationItemProps {
   children: React.ReactNode
 }
 
-function NavigationItem({ isActive, children, href }: NavigationItemProps) {
+function NavigationItem({
+  isActive = false,
+  children,
+  href,
+}: NavigationItemProps) {
   return (
     <Link
       href={href}
@@ -39,14 +42,10 @@ function NavigationItem({ isActive, children, href }: NavigationItemProps) {
   )
 }
 
-NavigationItem.defaultProps = {
-  isActive: false,
-}
-
 interface NavigationProps {
   isOpen: boolean
 }
-function Navigation({ isOpen }: NavigationProps) {
+function Navigation({ isOpen = false }: NavigationProps) {
   const router = useRouter()
 
   const mobileMenu = (
@@ -98,10 +97,6 @@ function Navigation({ isOpen }: NavigationProps) {
   )
 }
 
-Navigation.defaultProps = {
-  isOpen: false,
-}
-
 function Logo() {
   return (
     <Link
@@ -136,7 +131,7 @@ function PageHead() {
           <Logo />
         </div>
 
-        <div className="pb-4 pr-6">
+        <div className="pr-6 pb-4">
           <Button
             basic
             className={{
@@ -144,9 +139,7 @@ function PageHead() {
             }}
             onClick={() => setOpen(!isOpen)}
           >
-            <Button.Icon>
-              <FontAwesomeIcon icon={faBars} />
-            </Button.Icon>
+            <Button.Icon icon={faBars} />
           </Button>
         </div>
       </div>

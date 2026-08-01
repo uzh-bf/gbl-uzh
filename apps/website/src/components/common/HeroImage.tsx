@@ -10,7 +10,7 @@ interface Props {
   className?: string
 }
 
-function HeroImage({ imgSrc, label, href, className }: Props) {
+function HeroImage({ imgSrc, label, href, className = '' }: Props) {
   return (
     <div className="flex-1">
       <Link href={href} className={twMerge(className)}>
@@ -23,10 +23,6 @@ function HeroImage({ imgSrc, label, href, className }: Props) {
       </Link>
     </div>
   )
-}
-
-HeroImage.defaultProps = {
-  className: '',
 }
 
 HeroImage.Group = function HeroImageGroup({

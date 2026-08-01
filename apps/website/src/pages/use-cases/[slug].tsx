@@ -63,7 +63,7 @@ function UseCase({
                           icon={icon}
                           className="h-4 w-4 text-slate-600"
                         />
-                        <h3 className="font-bold capitalize text-slate-700">
+                        <h3 className="font-bold text-slate-700 capitalize">
                           {type === 'development' ? 'Game Development' : type}
                         </h3>
                       </div>
@@ -80,7 +80,7 @@ function UseCase({
                                 'hover:bg-slate-50',
                                 router.query.slug === frontmatter.slug && [
                                   'font-medium text-orange-600',
-                                  'before:absolute before:left-0 before:top-0 before:h-full before:w-0.5 before:bg-orange-600',
+                                  'before:absolute before:top-0 before:left-0 before:h-full before:w-0.5 before:bg-orange-600',
                                 ]
                               )}
                             >
@@ -97,7 +97,7 @@ function UseCase({
                 <H1 className={{ root: 'mb-8' }}>{source.frontmatter.title}</H1>
                 <Prose
                   className={{
-                    root: 'max-w-none prose-headings:mb-[0.5em] prose-headings:font-sans prose-h2:text-xl',
+                    root: 'prose-headings:mb-[0.5em] prose-headings:font-sans prose-h2:text-xl max-w-none',
                   }}
                 >
                   <MDXRemote {...source} components={components} />

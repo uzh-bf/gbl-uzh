@@ -9,7 +9,7 @@ interface Props {
   tags?: string[]
 }
 
-function GameCard({ name, tags, linkHref, imgSrc }: Props) {
+function GameCard({ name, tags = [], linkHref, imgSrc }: Props) {
   const router = useRouter()
 
   const addToRouter = () => {
@@ -21,14 +21,9 @@ function GameCard({ name, tags, linkHref, imgSrc }: Props) {
   return <Card name={name} tags={tags} imgSrc={imgSrc} onClick={addToRouter} />
 }
 
-GameCard.defaultProps = {
-  linkHref: undefined,
-  tags: [],
-}
-
 GameCard.ProcessSignifier = function ProcessSignifier() {
   return (
-    <div className="mb-2 flex flex-col items-center rounded border p-2 md:mb-0 md:mr-2 md:last:mr-0">
+    <div className="mb-2 flex flex-col items-center rounded border p-2 md:mr-2 md:mb-0 md:last:mr-0">
       <div className="flex flex-row">
         <svg height="35" width="35">
           <circle

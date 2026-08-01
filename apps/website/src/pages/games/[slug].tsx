@@ -69,7 +69,7 @@ function Game({ source }: Props) {
 
           <Content className="max-w-7xl">
             <div className="flex flex-col items-start gap-4 md:flex-row md:gap-8">
-              <div className="flex-1 pb-4 md:pb-0 md:pr-8">
+              <div className="flex-1 pb-4 md:pr-8 md:pb-0">
                 <H2>{frontmatter.subtitle}</H2>
                 {frontmatter.keywords && (
                   <div className="mt-2 flex flex-row gap-4">
@@ -139,7 +139,7 @@ function Game({ source }: Props) {
                         {frontmatter.resources.map((item: any) => (
                           <li key={item.name}>
                             <a
-                              className="flex flex-row items-center hover:text-uzh-red-100"
+                              className="hover:text-uzh-red-100 flex flex-row items-center"
                               target="_blank"
                               href={item.href}
                               rel="noreferrer"

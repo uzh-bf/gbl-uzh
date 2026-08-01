@@ -20,20 +20,10 @@ interface Props {
   }[]
   isOpen?: boolean
   isCompleted?: boolean
-  onNext: () => void
-  onPrevious: () => void
+  onNext?: () => void
+  onPrevious?: () => void
   onActivate: () => void
   children: React.ReactNode
-}
-
-const defaultProps = {
-  isOpen: false,
-  onNext: undefined,
-  onPrevious: undefined,
-  resources: undefined,
-  videoSrc: undefined,
-  duration: undefined,
-  keyTakeaways: undefined,
 }
 
 function Panel({
@@ -42,7 +32,7 @@ function Panel({
   duration,
   keyTakeaways,
   resources,
-  isOpen,
+  isOpen = false,
   isCompleted,
   onNext,
   onPrevious,
@@ -89,7 +79,7 @@ function Panel({
                     {resources.map((item) => (
                       <li key={item.name}>
                         <a
-                          className="flex flex-row items-center gap-1 hover:text-uzh-red-100"
+                          className="hover:text-uzh-red-100 flex flex-row items-center gap-1"
                           target="_blank"
                           href={item.href}
                           rel="noreferrer"
@@ -117,9 +107,7 @@ function Panel({
           <div className="mt-4 flex justify-between border-t pt-4">
             {onPrevious && (
               <Button onClick={onPrevious}>
-                <Button.Icon>
-                  <FontAwesomeIcon icon={faArrowLeft} />
-                </Button.Icon>
+                <Button.Icon icon={faArrowLeft} />
                 <Button.Label>Previous Module</Button.Label>
               </Button>
             )}
@@ -128,18 +116,14 @@ function Panel({
                 <div className="flex-1"></div>
                 <Button onClick={onNext}>
                   <Button.Label>Next Module</Button.Label>
-                  <Button.Icon>
-                    <FontAwesomeIcon icon={faArrowRight} />
-                  </Button.Icon>
+                  <Button.Icon icon={faArrowRight} />
                 </Button>
               </>
             )}
             {onNext && !!onPrevious && (
               <Button onClick={onNext}>
                 <Button.Label>Next Module</Button.Label>
-                <Button.Icon>
-                  <FontAwesomeIcon icon={faArrowRight} />
-                </Button.Icon>
+                <Button.Icon icon={faArrowRight} />
               </Button>
             )}
           </div>
@@ -208,7 +192,5 @@ function Panel({
     </div>
   )
 }
-
-Panel.defaultProps = defaultProps
 
 export default Panel

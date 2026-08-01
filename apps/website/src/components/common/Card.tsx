@@ -16,12 +16,12 @@ interface Props {
 
 function Card({
   name,
-  tags,
+  tags = [],
   className,
   imgSrc,
   onClick,
   minHeight,
-  colored,
+  colored = false,
   disabled,
   objectFit = undefined,
 }: Props) {
@@ -32,11 +32,11 @@ function Card({
       onClick={onClick}
       className={{
         root: twMerge(
-          'border-none p-0 outline outline-1 outline-uzh-grey-60 filter',
+          'outline-uzh-grey-60 border-none p-0 outline outline-1 filter',
           !colored && 'grayscale',
           className,
           onClick
-            ? 'hover:shadow-lg hover:outline-uzh-red-100 hover:filter-none'
+            ? 'hover:outline-uzh-red-100 hover:shadow-lg hover:filter-none'
             : 'cursor-default'
         ),
       }}
@@ -62,7 +62,7 @@ function Card({
         )}
 
         {name && (
-          <div className="prose absolute bottom-3 left-0 right-0 z-10 bg-white bg-opacity-95 py-1 text-center text-lg font-bold">
+          <div className="prose bg-opacity-95 absolute right-0 bottom-3 left-0 z-10 bg-white py-1 text-center text-lg font-bold">
             {name}
           </div>
         )}
@@ -77,15 +77,6 @@ function Card({
       </div>
     </Button>
   )
-}
-
-Card.defaultProps = {
-  name: undefined,
-  className: undefined,
-  tags: [],
-  onClick: undefined,
-  minHeight: undefined,
-  colored: false,
 }
 
 export default Card

@@ -17,10 +17,6 @@ function HomeSection({ className, children }: Props) {
   )
 }
 
-HomeSection.defaultProps = {
-  className: undefined,
-}
-
 interface HomeSectionContentProps {
   title: string
   content?: string
@@ -39,7 +35,7 @@ HomeSection.Content = function HomeSectionContent({
       <div className="p-8 md:p-16">
         <H2>{title}</H2>
         {content && (
-          <Prose className={{ root: 'mt-4 md:prose-lg' }}>{content}</Prose>
+          <Prose className={{ root: 'md:prose-lg mt-4' }}>{content}</Prose>
         )}
         {children}
       </div>

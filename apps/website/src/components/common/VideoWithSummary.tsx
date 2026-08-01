@@ -50,9 +50,4 @@ function VideoWithSummary({ title, videoSrc, children, keyTakeaways }: Props) {
   )
 }
 
-VideoWithSummary.defaultProps = {
-  videoSrc: undefined,
-  keyTakeaways: undefined,
-}
-
 export default VideoWithSummary

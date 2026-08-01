@@ -1,5 +1,4 @@
 import { faArrowRight, faUsers } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, H1, H2, Prose } from '@uzh-bf/design-system'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -42,12 +41,10 @@ function Home() {
           >
             <Button
               className={{
-                root: 'gap-4 border-0 bg-uzh-red-100 text-white md:gap-8 md:px-4 md:py-3 md:text-xl',
+                root: 'bg-uzh-red-100 gap-4 border-0 text-white md:gap-8 md:px-4 md:py-3 md:text-xl',
               }}
             >
-              <Button.Icon>
-                <FontAwesomeIcon icon={faUsers} />
-              </Button.Icon>
+              <Button.Icon icon={faUsers} />
               <Button.Label>Join the community</Button.Label>
             </Button>
           </a>
@@ -64,7 +61,7 @@ function Home() {
                 </div>
                 <div className="flex-1">
                   <H2>Advisory Wizard</H2>
-                  <Prose className={{ root: 'max-w-none md:prose-lg' }}>
+                  <Prose className={{ root: 'md:prose-lg max-w-none' }}>
                     Don&apos;t know where to start? Get personalized
                     recommendations with our Gamification and Game-Based
                     Learning advisory wizard.
@@ -81,27 +78,21 @@ function Home() {
 
         <div className="py-4">
           <HeroImage.Group>
-            <Link href="/kb" passHref legacyBehavior>
-              <HeroImage
-                href="/kb"
-                imgSrc={TeacherIcon}
-                label="GBL for teachers"
-              />
-            </Link>
-            <Link href="/games" passHref legacyBehavior>
-              <HeroImage
-                href="/games"
-                imgSrc={StudentIcon}
-                label="GBL for students"
-              />
-            </Link>
-            <Link href="/dev" passHref legacyBehavior>
-              <HeroImage
-                href="/dev"
-                imgSrc={DevIcon}
-                label="GBL for developers"
-              />
-            </Link>
+            <HeroImage
+              href="/kb"
+              imgSrc={TeacherIcon}
+              label="GBL for teachers"
+            />
+            <HeroImage
+              href="/games"
+              imgSrc={StudentIcon}
+              label="GBL for students"
+            />
+            <HeroImage
+              href="/dev"
+              imgSrc={DevIcon}
+              label="GBL for developers"
+            />
           </HeroImage.Group>
         </div>
 
@@ -111,7 +102,7 @@ function Home() {
             <div>
               <div className="flex flex-col md:flex-row">
                 <div className="flex-1">
-                  <div className="prose mt-2 max-w-none md:prose-lg">
+                  <div className="prose md:prose-lg mt-2 max-w-none">
                     Games and simulations developed at the Department of Banking
                     and Finance, as well as courses supported with Game-Based
                     Learning.
@@ -136,7 +127,7 @@ function Home() {
                         },
                       ].map(({ name, href, imgSrc }: any) => (
                         <GameCard
-                          key="name"
+                          key={name}
                           name={name}
                           imgSrc={imgSrc}
                           linkHref={href}
@@ -148,9 +139,7 @@ function Home() {
                     className={{ root: 'mt-4' }}
                     onClick={() => router.push('/games')}
                   >
-                    <Button.Icon>
-                      <FontAwesomeIcon icon={faArrowRight} />
-                    </Button.Icon>
+                    <Button.Icon icon={faArrowRight} />
                     <Button.Label>Games and Courses</Button.Label>
                   </Button>
                 </div>
@@ -169,9 +158,7 @@ function Home() {
               className={{ root: 'mt-4' }}
               onClick={() => router.push('/escape')}
             >
-              <Button.Icon>
-                <FontAwesomeIcon icon={faArrowRight} />
-              </Button.Icon>
+              <Button.Icon icon={faArrowRight} />
               <Button.Label>EscapeUZH</Button.Label>
             </Button>
           </HomeSection.Content>
@@ -185,9 +172,7 @@ function Home() {
               className={{ root: 'mt-4' }}
               onClick={() => router.push('/kb')}
             >
-              <Button.Icon>
-                <FontAwesomeIcon icon={faArrowRight} />
-              </Button.Icon>
+              <Button.Icon icon={faArrowRight} />
               <Button.Label>Knowledge Base</Button.Label>
             </Button>
           </HomeSection.Content>
@@ -203,9 +188,7 @@ function Home() {
               className={{ root: 'mt-4' }}
               onClick={() => router.push('/dev')}
             >
-              <Button.Icon>
-                <FontAwesomeIcon icon={faArrowRight} />
-              </Button.Icon>
+              <Button.Icon icon={faArrowRight} />
               <Button.Label>Development Practices</Button.Label>
             </Button>
           </HomeSection.Content>
@@ -221,9 +204,7 @@ function Home() {
               className={{ root: 'mt-4' }}
               onClick={() => router.push('/about')}
             >
-              <Button.Icon>
-                <FontAwesomeIcon icon={faArrowRight} />
-              </Button.Icon>
+              <Button.Icon icon={faArrowRight} />
               <Button.Label>Roadmap</Button.Label>
             </Button>
           </HomeSection.Content>

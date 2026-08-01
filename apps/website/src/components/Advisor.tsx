@@ -1,5 +1,4 @@
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { push } from '@socialgouv/matomo-next'
 import { Button, Modal } from '@uzh-bf/design-system'
 import { useState } from 'react'
@@ -19,9 +18,7 @@ function Advisor() {
             push(['trackEvent', 'GBL Advisor', 'Opened'])
           }}
         >
-          <Button.Icon>
-            <FontAwesomeIcon icon={faArrowRight} />
-          </Button.Icon>
+          <Button.Icon icon={faArrowRight} />
           <Button.Label>Start Advisor</Button.Label>
         </Button>
       }
