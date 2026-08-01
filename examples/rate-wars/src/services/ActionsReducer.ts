@@ -1,7 +1,7 @@
 import { Action } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
-import { PrismaClient } from '@prisma/client'
 import { produce } from 'immer'
+import { PrismaClient } from 'src/generated/prisma/client'
 import { RateDecision } from '../types/facts'
 import { GameFacts, PeriodFacts, PeriodSegmentFacts } from '../types/index'
 

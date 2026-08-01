@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '../src/generated/prisma/client'
+import prismaClient from '../src/lib/prisma'
 
 // TODO(JJ): Maybe add images
 // const IMG_BASE_PATH = '/assets/'
@@ -238,8 +239,6 @@ async function main(prisma: PrismaClient) {
     )
   )
 }
-
-const prismaClient = new PrismaClient()
 
 main(prismaClient)
   .catch((e) => {

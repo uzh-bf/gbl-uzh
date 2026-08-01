@@ -1,6 +1,6 @@
-import type { PrismaClient } from '@prisma/client'
 import JWT from 'jsonwebtoken'
 import { destroyCookie, setCookie } from 'nookies'
+import type { PrismaClient } from '../generated/prisma/client.js'
 import { CtxWithPrisma, UserRole } from '../types.js'
 
 interface CreateLoginTokenArgs {

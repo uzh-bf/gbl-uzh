@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '../src/generated/prisma/client'
+import prismaClient from '../src/lib/prisma'
 
 const STORY_ELEMENTS: any[] = [
   {
@@ -134,8 +135,6 @@ async function main(prisma: PrismaClient) {
     )
   )
 }
-
-const prismaClient = new PrismaClient()
 
 main(prismaClient)
   .catch((e) => {

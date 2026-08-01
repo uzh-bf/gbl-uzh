@@ -1,4 +1,4 @@
-import * as DB from '@prisma/client'
+import * as DB from '../generated/prisma/client.js'
 
 import { enumType, objectType } from 'nexus'
 import { AchievementInstance } from './Achievement.js'

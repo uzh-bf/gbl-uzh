@@ -4,6 +4,17 @@ packages:
   - 'examples/*'
   - cypress
   - playwright
+supportedArchitectures:
+  os:
+    - current
+    - linux
+  cpu:
+    - current
+    - arm64
+    - x64
+  libc:
+    - current
+    - glibc
 allowBuilds:
   '@parcel/watcher': true
   '@prisma/client': true

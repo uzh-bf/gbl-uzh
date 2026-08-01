@@ -1,5 +1,5 @@
-import * as DB from '@prisma/client'
 import { idArg, intArg, nonNull, objectType, stringArg } from 'nexus'
+import * as DB from '../generated/prisma/client.js'
 import * as GameService from '../services/GameService.js'
 import * as PlayService from '../services/PlayService.js'
 import { Achievement } from './Achievement.js'

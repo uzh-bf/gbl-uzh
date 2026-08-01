@@ -1,16 +1,16 @@
-import * as DB from '@prisma/client'
-import { PrismaClient } from '@prisma/client'
 import { nanoid } from 'nanoid'
 import { none, repeat } from 'ramda'
 import * as yup from 'yup'
+import * as DB from '../generated/prisma/client.js'
+import { PrismaClient } from '../generated/prisma/client.js'
 import log from '../lib/logger.js'
 import {
+  BaseGlobalNotificationType,
   CtxWithFacts,
   CtxWithFactsAndSchema,
   CtxWithPrisma,
-  UpdatePlayerDataArgs,
-  BaseGlobalNotificationType,
   Event as PlatformEvent,
+  UpdatePlayerDataArgs,
 } from '../types.js'
 import * as EventService from './EventService.js'
 
@@ -28,7 +28,10 @@ export async function createGame<TFacts>(
   {
     schema,
     roleAssigner,
-  }: { schema: yup.Schema<TFacts>; roleAssigner?: (ix: number, facts: any) => any }
+  }: {
+    schema: yup.Schema<TFacts>
+    roleAssigner?: (ix: number, facts: any) => any
+  }
 ) {
   const validatedFacts = schema.validateSync(facts) as any
 
