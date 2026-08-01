@@ -1,0 +1,92 @@
+name: TypeScript checks
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/package.json'
+      - '**/tsconfig*.json'
+      - '.github/workflows/typescript-checks.yml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig.quartz.json'
+      - 'types/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DATABASE_URL: postgres://prisma:prisma@127.0.0.1:5432/prisma?schema=public
+  SHADOW_DATABASE_URL: postgres://prisma:prisma@127.0.0.1:5432/shadow?schema=public
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        with:
+          version: 11.6.0
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma clients and platform distribution
+        run: |
+          set -euo pipefail
+          pnpm --filter @gbl-uzh/platform build
+          for game in demo-game central-bank rate-wars; do
+            pnpm --filter "@gbl-uzh/${game}" prisma:copy
+            pnpm --filter "@gbl-uzh/${game}" prisma:generate
+          done
+
+      - name: Run TypeScript 7 checks
+        run: |
+          set -euo pipefail
+          pnpm run check:ts:quartz
+          pnpm --filter @gbl-uzh/platform check:ts
+          pnpm --filter @gbl-uzh/ui check:ts
+          pnpm --filter @gbl-uzh/demo-game check:ts
+          pnpm --filter @gbl-uzh/central-bank check:ts
+          pnpm --filter @gbl-uzh/rate-wars check:ts
+          pnpm --filter @gbl-uzh/website check:ts
+          pnpm --filter @gbl-uzh/cypress check:ts
+          pnpm --filter @gbl-uzh/playwright check:ts
+
+      - name: Run TypeScript 6 checks
+        run: |
+          set -euo pipefail
+          pnpm run check:ts:quartz:typescript6
+          pnpm --filter @gbl-uzh/platform check:ts:typescript6
+          pnpm --filter @gbl-uzh/ui check:ts:typescript6
+          pnpm --filter @gbl-uzh/demo-game check:ts:typescript6
+          pnpm --filter @gbl-uzh/central-bank check:ts:typescript6
+          pnpm --filter @gbl-uzh/rate-wars check:ts:typescript6
+          pnpm --filter @gbl-uzh/website check:ts:typescript6
+          pnpm --filter @gbl-uzh/cypress check:ts:typescript6
+          pnpm --filter @gbl-uzh/playwright check:ts:typescript6
