@@ -25,7 +25,6 @@ type SegmentResultFactsInit = ResultFactsInit & {
 type OutputSegmentResultFactsInit = OutputFacts<
   SegmentResultFactsInit,
   GameFacts,
-  any,
   any
 >
 

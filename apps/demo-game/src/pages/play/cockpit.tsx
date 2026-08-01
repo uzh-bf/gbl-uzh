@@ -664,7 +664,7 @@ function Cockpit() {
                                         </span>
                                       </div>
                                       <span className="font-bold text-black">
-                                        {(value * 100).toFixed(2)}%
+                                        {(Number(value) * 100).toFixed(2)}%
                                       </span>
                                     </div>,
                                   ]}

@@ -125,7 +125,7 @@ function Games() {
                     <div>Player count: {game?.playerCount}</div>
                     <div>
                       Active Period/Segment: {game?.activePeriodIx}/
-                      {game?.activePeriod?.activeSegmentIx}
+                      {game?.activeSegmentIx}
                     </div>
                   </div>
                   <div className="text-right">Status: {game?.status}</div>

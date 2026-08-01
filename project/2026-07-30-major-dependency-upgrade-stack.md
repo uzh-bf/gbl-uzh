@@ -178,8 +178,13 @@ layers:
 - 2026-07-30 — Layer 1 mechanical review: Correctness found no actionable issue. Simplification found that generated GraphQL outputs caused 86% of added lines and are overwritten by builds; accepted by ignoring those directories and restoring generator-owned output.
 - 2026-07-30 — Layer 1 correction: Commit `22f895d` restores all 12 generated artifacts byte-for-byte to `origin/dev` and excludes only their three generator-owned directories. Separate correctness and simplification reviews found no actionable issue.
 - 2026-07-30 — Layer 1 stability: Demo-game, Rate Wars, and Central Bank builds regenerate their GraphQL artifacts successfully; all three formatter checks pass immediately afterward and the worktree stays clean. The rerun used installed pnpm 11.13.1 with the documented one-command `pmOnFail=ignore` override because restricted network access prevented pnpm from downloading the pinned 11.6.0 binary.
-- 2026-07-30 — Active: Publishing the completed bottom layer as a draft PR.
-- Next: Publish the bottom draft PR, then add layer 2.
+- 2026-07-30 — Layer 1 publication: Draft PR [#177](https://github.com/uzh-bf/gbl-uzh/pull/177) targets `dev` from `codex/upgrade-formatters-v3` at `bfedbee`.
+- 2026-07-30 — Layer 2 implementation: Commit `398e857` pins TypeScript 6.0.2 across every owned compiler consumer, migrates removed compiler options without suppressing deprecations, adds a parent-owned Quartz compatibility wrapper, preserves the website's React 18 type boundary until layer 3, restores valid UI declarations, and corrects the three game list queries to consume generated schema fields.
+- 2026-07-30 — Layer 2 verification: Every TypeScript check, owned package check, production build, Quartz test, empty Jest discovery, UI package verifier, external Next consumer build, and frozen offline install passes. Existing lint-warning baselines remain in the four game and website apps; the host Node 26 runtime also retains Cypress's declared Node 20 engine warning.
+- 2026-07-30 — Layer 2 review: Separate exact-commit correctness and simplification reviews found no actionable issue. The reviewers confirmed that the Quartz wrapper, temporary website React type paths, non-rolled UI declarations, minimal `players` query addition, generated client deltas, and lockfile peer-context churn are justified compatibility work.
+- 2026-07-30 — Layer 2 publication: Draft PR [#178](https://github.com/uzh-bf/gbl-uzh/pull/178) targets `codex/upgrade-formatters-v3` from `codex/upgrade-typescript-6-bridge`; GitHub readback confirmed the linked stack, draft state, customized metadata, and `needsRebase: false`.
+- 2026-07-30 — Active: Implementing the website React 19 and Next.js 16 layer.
+- Next: Add layer 3 and establish its browser-validation path before implementation.
 
 ## Expected Gate 3 evidence
 

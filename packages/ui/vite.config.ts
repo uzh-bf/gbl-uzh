@@ -8,7 +8,7 @@ import { externalizeDeps } from 'vite-plugin-externalize-deps'
 export default defineConfig({
   plugins: [
     react(),
-    dts({ rollupTypes: true }),
+    dts(),
     externalizeDeps({
       deps: true,
       peerDeps: true,

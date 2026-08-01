@@ -1,4 +1,5 @@
 .next/
+*.tsbuildinfo
 out/
 build/
 .vercel/

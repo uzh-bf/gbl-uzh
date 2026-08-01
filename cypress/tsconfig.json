@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["es5", "dom"],
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": false,
+    "noUncheckedSideEffectImports": false,
     "types": ["cypress", "node", "@testing-library/cypress"]
   },
   "include": ["**/*.ts"]

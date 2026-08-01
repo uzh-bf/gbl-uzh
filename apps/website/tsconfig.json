@@ -12,12 +12,24 @@
     "incremental": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "noUncheckedSideEffectImports": false,
     "jsx": "preserve",
     "target": "ES2017",
-    "rootDir": "."
+    "rootDir": ".",
+    "paths": {
+      "react": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "react/*": [
+        "./node_modules/@types/react/*"
+      ]
+    },
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "next-env.d.ts",

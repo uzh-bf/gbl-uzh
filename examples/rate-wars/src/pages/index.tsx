@@ -156,20 +156,23 @@ export default function Home() {
           activeSegmentIx={0}
           formatter={(current, prev) => {
             // Do computation here
-            const spotPrice =
+            const spotPrice = Number(
               current.segmentFlat?.facts.spotPrice ??
-              current.facts.finalSpotPrice
-            const futuresPrice =
+                current.facts.finalSpotPrice
+            )
+            const futuresPrice = Number(
               current.segmentFlat?.facts.futuresPrice ??
-              current.facts.finalSpotPrice
+                current.facts.finalSpotPrice
+            )
 
             const spotPriceDelta =
               prev?.segmentFlat?.facts.spotPrice &&
-              (spotPrice / prev.segmentFlat.facts.spotPrice - 1) * 100
+              (spotPrice / Number(prev.segmentFlat.facts.spotPrice) - 1) * 100
 
             const futuresPriceDelta =
               prev?.segmentFlat?.facts.futuresPrice &&
-              (futuresPrice / prev.segmentFlat.facts.futuresPrice - 1) * 100
+              (futuresPrice / Number(prev.segmentFlat.facts.futuresPrice) - 1) *
+                100
             return (
               <>
                 {spotPriceDelta && <div>S {spotPriceDelta}</div>}

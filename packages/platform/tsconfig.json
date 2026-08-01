@@ -9,7 +9,6 @@
     "instrumented"
   ],
   "compilerOptions": {
-    "baseUrl": ".",
     "rootDir": ".",
     /* Base Options: */
     "esModuleInterop": true,
@@ -19,6 +18,7 @@
     "resolveJsonModule": true,
     "moduleDetection": "force",
     "isolatedModules": true,
+    "noUncheckedSideEffectImports": false,
     "verbatimModuleSyntax": false,
     /* Strictness */
     "strict": true,
@@ -27,6 +27,11 @@
     "noImplicitAny": false,
     /* If transpiling with TypeScript: */
     "module": "NodeNext",
+    "paths": {
+      "src/*": [
+        "./src/*"
+      ]
+    },
     "outDir": "dist",
     "sourceMap": true,
     /* AND if you're building for a library: */
@@ -38,6 +43,9 @@
     /* If your code doesn't run in the DOM: */
     "lib": [
       "es2022"
+    ],
+    "types": [
+      "node"
     ],
     "noErrorTruncation": true
     // "preserveSymlinks": true
