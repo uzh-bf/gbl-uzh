@@ -13,8 +13,4 @@ function TitleBackground({ children, className }: Props) {
   )
 }
 
-TitleBackground.defaultProps = {
-  className: undefined,
-}
-
 export default TitleBackground

@@ -9,7 +9,7 @@ interface Props {
   tags?: string[]
 }
 
-function GameCard({ name, tags, linkHref, imgSrc }: Props) {
+function GameCard({ name, tags = [], linkHref, imgSrc }: Props) {
   const router = useRouter()
 
   const addToRouter = () => {
@@ -19,11 +19,6 @@ function GameCard({ name, tags, linkHref, imgSrc }: Props) {
   }
 
   return <Card name={name} tags={tags} imgSrc={imgSrc} onClick={addToRouter} />
-}
-
-GameCard.defaultProps = {
-  linkHref: undefined,
-  tags: [],
 }
 
 GameCard.ProcessSignifier = function ProcessSignifier() {

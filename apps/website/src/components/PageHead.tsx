@@ -23,7 +23,11 @@ interface NavigationItemProps {
   children: React.ReactNode
 }
 
-function NavigationItem({ isActive, children, href }: NavigationItemProps) {
+function NavigationItem({
+  isActive = false,
+  children,
+  href,
+}: NavigationItemProps) {
   return (
     <Link
       href={href}
@@ -38,14 +42,10 @@ function NavigationItem({ isActive, children, href }: NavigationItemProps) {
   )
 }
 
-NavigationItem.defaultProps = {
-  isActive: false,
-}
-
 interface NavigationProps {
   isOpen: boolean
 }
-function Navigation({ isOpen }: NavigationProps) {
+function Navigation({ isOpen = false }: NavigationProps) {
   const router = useRouter()
 
   const mobileMenu = (
@@ -95,10 +95,6 @@ function Navigation({ isOpen }: NavigationProps) {
       {mobileMenuDrawer(isOpen)}
     </>
   )
-}
-
-Navigation.defaultProps = {
-  isOpen: false,
 }
 
 function Logo() {

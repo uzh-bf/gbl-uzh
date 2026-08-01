@@ -10,11 +10,12 @@ interface Props {
   className?: string
 }
 
-const defaultProps = {
-  withFooter: true,
-}
-
-function PageWithHeader({ className, title, children, withFooter }: Props) {
+function PageWithHeader({
+  className,
+  title,
+  children,
+  withFooter = true,
+}: Props) {
   return (
     <div className={twMerge('flex h-full flex-col', className)}>
       <Head>
@@ -29,7 +30,5 @@ function PageWithHeader({ className, title, children, withFooter }: Props) {
     </div>
   )
 }
-
-PageWithHeader.defaultProps = defaultProps
 
 export default PageWithHeader

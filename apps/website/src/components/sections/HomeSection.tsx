@@ -17,10 +17,6 @@ function HomeSection({ className, children }: Props) {
   )
 }
 
-HomeSection.defaultProps = {
-  className: undefined,
-}
-
 interface HomeSectionContentProps {
   title: string
   content?: string

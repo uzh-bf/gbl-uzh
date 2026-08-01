@@ -16,12 +16,12 @@ interface Props {
 
 function Card({
   name,
-  tags,
+  tags = [],
   className,
   imgSrc,
   onClick,
   minHeight,
-  colored,
+  colored = false,
   disabled,
   objectFit = undefined,
 }: Props) {
@@ -77,15 +77,6 @@ function Card({
       </div>
     </Button>
   )
-}
-
-Card.defaultProps = {
-  name: undefined,
-  className: undefined,
-  tags: [],
-  onClick: undefined,
-  minHeight: undefined,
-  colored: false,
 }
 
 export default Card

@@ -54,9 +54,4 @@ function FocusArea({
   )
 }
 
-FocusArea.defaultProps = {
-  className: undefined,
-  roadmapHref: undefined,
-}
-
 export default FocusArea

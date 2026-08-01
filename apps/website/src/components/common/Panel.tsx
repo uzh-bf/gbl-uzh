@@ -20,20 +20,10 @@ interface Props {
   }[]
   isOpen?: boolean
   isCompleted?: boolean
-  onNext: () => void
-  onPrevious: () => void
+  onNext?: () => void
+  onPrevious?: () => void
   onActivate: () => void
   children: React.ReactNode
-}
-
-const defaultProps = {
-  isOpen: false,
-  onNext: undefined,
-  onPrevious: undefined,
-  resources: undefined,
-  videoSrc: undefined,
-  duration: undefined,
-  keyTakeaways: undefined,
 }
 
 function Panel({
@@ -42,7 +32,7 @@ function Panel({
   duration,
   keyTakeaways,
   resources,
-  isOpen,
+  isOpen = false,
   isCompleted,
   onNext,
   onPrevious,
@@ -202,7 +192,5 @@ function Panel({
     </div>
   )
 }
-
-Panel.defaultProps = defaultProps
 
 export default Panel
