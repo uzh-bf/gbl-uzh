@@ -123,7 +123,7 @@ function Games() {
                 </div>
                 <div className="flex w-full items-end justify-between p-2 text-sm">
                   <div className="flex flex-col justify-between gap-y-1 text-left">
-                    <div>Player count: {game?.players.length}</div>
+                    <div>Player count: {game?.playerCount}</div>
                     <div>
                       Active Period/Segment: {game?.activePeriodIx}/
                       {game?.activeSegmentIx}

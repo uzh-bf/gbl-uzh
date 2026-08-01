@@ -53,6 +53,7 @@ type Game {
   name: String!
   nextAutoContinueAt: DateTime
   periods: [Period!]!
+  playerCount: Int!
   players: [Player!]!
   status: GameStatus!
   version: Int!

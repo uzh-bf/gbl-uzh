@@ -42,6 +42,10 @@ export function generateBaseGame(opts?: GenerateBaseGameOpts) {
 
       t.int('activeSegmentIx')
 
+      t.nonNull.int('playerCount', {
+        resolve: (game) => game._count?.players ?? game.players?.length ?? 0,
+      })
+
       t.nonNull.list.nonNull.field('players', {
         type: Player,
       })

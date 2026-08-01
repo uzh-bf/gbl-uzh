@@ -294,6 +294,7 @@ export interface NexusGenFieldTypes {
     name: string; // String!
     nextAutoContinueAt: NexusGenScalars['DateTime'] | null; // DateTime
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
+    playerCount: number; // Int!
     players: NexusGenRootTypes['Player'][]; // [Player!]!
     status: NexusGenEnums['GameStatus']; // GameStatus!
     version: number; // Int!
@@ -489,6 +490,7 @@ export interface NexusGenFieldTypeNames {
     name: 'String'
     nextAutoContinueAt: 'DateTime'
     periods: 'Period'
+    playerCount: 'Int'
     players: 'Player'
     status: 'GameStatus'
     version: 'Int'
