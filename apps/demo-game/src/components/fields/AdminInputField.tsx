@@ -65,7 +65,7 @@ export function AdminInputField<TFieldValues extends FieldValues>({
               }
             : { required: required ? 'Required' : false }
         )}
-        className="w-full rounded border border-slate-300 bg-white p-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+        className="w-full rounded border border-slate-300 bg-white p-2 text-sm focus:ring-2 focus:ring-slate-500 focus:outline-none"
         data-cy={testId ?? name}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}

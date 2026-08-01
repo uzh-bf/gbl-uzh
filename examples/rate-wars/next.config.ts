@@ -16,7 +16,9 @@ const isDev = process.env.NODE_ENV === 'development'
 // node_modules path, which may not exist under pnpm hoisting in a clean Docker
 // build — there the alias would silently no-op and the duplicate React would
 // return). require/__dirname are injected by Next's config loader.
-const appReactDir = path.dirname(require.resolve('react', { paths: [__dirname] }))
+const appReactDir = path.dirname(
+  require.resolve('react', { paths: [__dirname] })
+)
 const appReactDomDir = path.dirname(
   require.resolve('react-dom', { paths: [__dirname] })
 )

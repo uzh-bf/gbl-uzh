@@ -1,6 +1,6 @@
-import path from "node:path";
+import path from 'node:path'
 
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 // @uzh-bf/design-system declares a React 18 peer, so pnpm resolves its subtree
 // to react@18 while this app runs react@19. In dev it is additionally consumed
@@ -10,18 +10,18 @@ import type { NextConfig } from "next";
 // the unknown case defaults to the safe production path. `next dev` sets
 // NODE_ENV=development and `next build` sets production, so both real paths are
 // correct.
-const isDev = process.env.NODE_ENV === "development";
+const isDev = process.env.NODE_ENV === 'development'
 
 // Resolve the app's single React copy through pnpm's symlinks (not a hardcoded
 // node_modules path, which may not exist under pnpm hoisting in a clean Docker
 // build — there the alias would silently no-op and the duplicate React would
 // return). require/__dirname are injected by Next's config loader.
 const appReactDir = path.dirname(
-  require.resolve("react", { paths: [__dirname] })
-);
+  require.resolve('react', { paths: [__dirname] })
+)
 const appReactDomDir = path.dirname(
-  require.resolve("react-dom", { paths: [__dirname] })
-);
+  require.resolve('react-dom', { paths: [__dirname] })
+)
 
 // @apollo/client peer-resolves separately for react@18 and react@19, so pnpm
 // materialises two physical copies. demo-game imports its hooks from the
@@ -32,11 +32,11 @@ const appReactDomDir = path.dirname(
 // network request returning 200. Pin every `@apollo/client` import in this
 // app's bundle to a single copy.
 const appApolloDir = path.dirname(
-  require.resolve("@apollo/client/package.json", { paths: [__dirname] })
-);
+  require.resolve('@apollo/client/package.json', { paths: [__dirname] })
+)
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: 'standalone',
   reactStrictMode: true,
   typescript: {
     ignoreBuildErrors: true,
@@ -48,14 +48,14 @@ const nextConfig: NextConfig = {
   // Dev only: the design system's `development` export points at raw `.tsx`
   // source that `next dev`'s webpack cannot parse on its own. A production build
   // resolves the compiled `dist` instead — transpiling there breaks the build.
-  ...(isDev && { transpilePackages: ["@uzh-bf/design-system"] }),
+  ...(isDev && { transpilePackages: ['@uzh-bf/design-system'] }),
 
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
-      };
+      }
       // Client bundle only: pin React to this app's single react@19 copy.
       // Without this the design system's react@18 peer adds a second physical
       // React to the browser bundle and hooks crash ("Cannot read properties of
@@ -64,10 +64,10 @@ const nextConfig: NextConfig = {
       config.resolve.alias = {
         ...config.resolve.alias,
         react: appReactDir,
-        "react-dom": appReactDomDir,
+        'react-dom': appReactDomDir,
         // Collapse the duplicate @apollo/client copies (see appApolloDir above)
         // to one, so the provider and useQuery share a single ApolloContext.
-        "@apollo/client": appApolloDir,
+        '@apollo/client': appApolloDir,
         // Some `~/types/*` modules (nexus GraphQL type defs) are imported by
         // client pages for an incidental util (e.g. computePeriodStatus). nexus
         // statically pulls in `prettier`, whose ESM build imports Node builtins
@@ -76,10 +76,10 @@ const nextConfig: NextConfig = {
         // 500s. prettier is never needed client-side -> stub it to an empty
         // module. (Pre-existing import-boundary smell, surfaced by dev mode.)
         prettier: false,
-      };
+      }
     }
-    return config;
+    return config
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig

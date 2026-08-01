@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useSubscription } from "@apollo/client";
+import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import {
   CycleCountdown,
   Layout,
@@ -8,10 +8,10 @@ import {
   shouldRefetchGameResult,
   StoryElements,
   useLearningActivities,
-} from "@gbl-uzh/ui";
-import { Button, Card, CardContent } from "@uzh-bf/design-system";
-import dayjs from "dayjs";
-import { useMemo } from "react";
+} from '@gbl-uzh/ui'
+import { Button, Card, CardContent } from '@uzh-bf/design-system'
+import dayjs from 'dayjs'
+import { useMemo } from 'react'
 import {
   AttemptLearningElementDocument,
   GlobalEventsDocument,
@@ -19,27 +19,27 @@ import {
   MarkStoryElementDocument,
   ResultDocument,
   UpdateReadyStateDocument,
-} from "src/graphql/generated/ops";
-import { useToast } from "./ui/use-toast";
+} from 'src/graphql/generated/ops'
+import { useToast } from './ui/use-toast'
 
 export default function GameLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   const { data, refetch: refetchResult } = useQuery(ResultDocument, {
-    fetchPolicy: "cache-and-network",
-  });
+    fetchPolicy: 'cache-and-network',
+  })
 
-  const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument);
-  const { toast } = useToast();
+  const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument)
+  const { toast } = useToast()
 
   const completedLearningElementIds =
-    data?.result?.playerResult?.player?.completedLearningElementIds || [];
-  const periods = data?.result?.currentGame?.periods || [];
+    data?.result?.playerResult?.player?.completedLearningElementIds || []
+  const periods = data?.result?.currentGame?.periods || []
   const learningElements =
     data?.result?.currentGame?.activePeriod?.activeSegment?.learningElements ||
-    [];
+    []
 
   const {
     activeLearningId,
@@ -60,69 +60,69 @@ export default function GameLayout({
     activeSegmentLearningElements: learningElements,
     allPeriods: periods,
     toast,
-  });
+  })
 
   const [markStoryElement] = useMutation(MarkStoryElementDocument, {
     refetchQueries: [ResultDocument],
-  });
+  })
 
-  const currentGameId = parseInt(data?.result?.currentGame?.id);
+  const currentGameId = parseInt(data?.result?.currentGame?.id)
 
   useSubscription(GlobalEventsDocument, {
     skip: !currentGameId,
     onData: ({ data: subData }) => {
       if (subData?.data?.eventsGlobal) {
-        const event = subData.data.eventsGlobal;
+        const event = subData.data.eventsGlobal
         if (shouldRefetchGameResult(event, currentGameId)) {
-          refetchResult();
+          refetchResult()
         }
       }
     },
     onError: (err) => {
-      console.error("Player Cockpit: Subscription error:", err);
+      console.error('Player Cockpit: Subscription error:', err)
     },
-  });
+  })
 
   const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
-    ?.countdownExpiresAt as string | null;
+    ?.countdownExpiresAt as string | null
   const countdownDurationMs = data?.result?.currentGame?.activePeriod
-    ?.activeSegment?.countdownDurationMs as number | null;
+    ?.activeSegment?.countdownDurationMs as number | null
 
   const expiresAtDate = useMemo(() => {
-    return strExpiresAt ? dayjs(strExpiresAt).toDate() : null;
-  }, [strExpiresAt]);
+    return strExpiresAt ? dayjs(strExpiresAt).toDate() : null
+  }, [strExpiresAt])
 
-  const self = data?.self;
+  const self = data?.self
 
   if (!data?.result) {
     return (
       <div className="flex h-screen items-center justify-center">
         Loading...
       </div>
-    );
+    )
   }
 
-  const isReady = self?.isReady ?? false;
+  const isReady = self?.isReady ?? false
 
   const playerInfo = {
-    name: self?.name || "",
-    color: self?.facts?.color || "White",
-    location: self?.facts?.location || "ZH",
+    name: self?.name || '',
+    color: self?.facts?.color || 'White',
+    location: self?.facts?.location || 'ZH',
     level: self?.level?.index ?? 0,
     xp: self?.experience ?? 0,
     xpMax: self?.experienceToNext ?? 100,
     achievements: (self?.achievements || []) as any,
-    imgPathAvatar: self?.facts?.avatar || "",
+    imgPathAvatar: self?.facts?.avatar || '',
     imgPathLocation: self?.facts?.location
       ? `/locations/${self.facts.location}.svg`
-      : "",
+      : '',
     onClick: () => {},
-  };
+  }
 
   const sidebar = (
-    <div id="sidebar" className="flex flex-col justify-between w-80">
+    <div id="sidebar" className="flex w-80 flex-col justify-between">
       <Card className="mb-4">
-        <CardContent className="pt-6 space-y-4">
+        <CardContent className="space-y-4 pt-6">
           <PlayerDisplay
             name={playerInfo.name}
             color={playerInfo.color}
@@ -138,7 +138,7 @@ export default function GameLayout({
               <div data-cy="ready-switch" className="flex items-center gap-2">
                 <span className="text-sm font-medium">Ready?</span>
                 <Button
-                  variant={isReady ? "success" : "default"}
+                  variant={isReady ? 'success' : 'default'}
                   disabled={loading}
                   onClick={async () => {
                     try {
@@ -146,18 +146,18 @@ export default function GameLayout({
                         variables: {
                           isReady: !isReady,
                         },
-                      });
-                      refetchResult();
+                      })
+                      refetchResult()
                     } catch (e: any) {
                       toast({
-                        title: "Error updating ready state",
+                        title: 'Error updating ready state',
                         description: e.message,
-                        variant: "destructive",
-                      });
+                        variant: 'destructive',
+                      })
                     }
                   }}
                 >
-                  {isReady ? "Ready" : "Set Ready"}
+                  {isReady ? 'Ready' : 'Set Ready'}
                 </Button>
               </div>
             )}
@@ -177,14 +177,14 @@ export default function GameLayout({
         </CardContent>
       </Card>
     </div>
-  );
+  )
 
   const tabs = [
-    { name: "Welcome", href: "/play/welcome" },
-    { name: "Cockpit", href: "/play/cockpit" },
-  ];
+    { name: 'Welcome', href: '/play/welcome' },
+    { name: 'Cockpit', href: '/play/cockpit' },
+  ]
 
-  const activeSegment = data?.result?.currentGame?.activePeriod?.activeSegment;
+  const activeSegment = data?.result?.currentGame?.activePeriod?.activeSegment
 
   return (
     <>
@@ -198,7 +198,7 @@ export default function GameLayout({
         onMarkElementVisited={async (elementId) => {
           await markStoryElement({
             variables: { elementId },
-          });
+          })
         }}
       />
       <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
@@ -215,5 +215,5 @@ export default function GameLayout({
         loading={attemptingLearning}
       />
     </>
-  );
+  )
 }

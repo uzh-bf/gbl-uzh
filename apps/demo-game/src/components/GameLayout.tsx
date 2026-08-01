@@ -2,9 +2,9 @@ import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import {
   GameSidebar,
   getCountdownNotification,
-  LearningActivityModal,
-  LearningActivitiesList,
   Layout,
+  LearningActivitiesList,
+  LearningActivityModal,
   shouldRefetchGameResult,
   StoryElements,
   useLearningActivities,
@@ -49,7 +49,8 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     data?.result?.playerResult?.player?.completedLearningElementIds ?? []
   const allPeriods = data?.result?.currentGame?.periods ?? []
   const currentLearningElements =
-    data?.result?.currentGame?.activePeriod?.activeSegment?.learningElements ?? []
+    data?.result?.currentGame?.activePeriod?.activeSegment?.learningElements ??
+    []
 
   const {
     activeLearningId,
@@ -112,8 +113,6 @@ function GameLayout({ children }: { children: React.ReactNode }) {
 
     setCountdownNotifications({ '60': false, '180': false })
   }, [strExpiresAt, countdownDurationMs])
-
-
 
   if (!data?.self || !data?.result?.currentGame) {
     return null
@@ -190,14 +189,14 @@ function GameLayout({ children }: { children: React.ReactNode }) {
 
   const activeSegment = data?.result?.currentGame?.activePeriod?.activeSegment
 
-
-
   return (
     <>
       <StoryElements
         key={activeSegment?.id}
         activeStoryElements={activeSegment?.storyElements ?? []}
-        visitedStoryElementIds={data?.result?.playerResult?.player?.visitedStoryElementIds ?? []}
+        visitedStoryElementIds={
+          data?.result?.playerResult?.player?.visitedStoryElementIds ?? []
+        }
         playerRole={data.self.role}
         onMarkElementVisited={async (id) => {
           await markStoryElement({

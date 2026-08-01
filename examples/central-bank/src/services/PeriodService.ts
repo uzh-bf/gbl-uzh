@@ -2,14 +2,14 @@ import {
   OutputFacts,
   PayloadPeriodConsolidation,
   PayloadPeriodInitialisation,
-} from "@gbl-uzh/platform";
-import { debugLog } from "@gbl-uzh/platform/dist/lib/util";
-import { produce } from "immer";
-import { GameFacts } from "../types/Game";
-import { PeriodFacts, PeriodSegmentFacts } from "../types/Period";
+} from '@gbl-uzh/platform'
+import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
+import { produce } from 'immer'
+import { GameFacts } from '../types/Game'
+import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
-type InputPeriodFacts = PeriodFacts;
-type OutputPeriodFacts = OutputFacts<InputPeriodFacts, any, any>;
+type InputPeriodFacts = PeriodFacts
+type OutputPeriodFacts = OutputFacts<InputPeriodFacts, any, any>
 
 // TODO(JJ):
 // - Init baseFacts outside of fn and provide only draft as input
@@ -27,15 +27,15 @@ export function initialize(
 ): OutputPeriodFacts {
   const baseFacts: OutputPeriodFacts = {
     resultFacts: facts,
-  };
+  }
 
   const resultFacts: OutputPeriodFacts = produce(
     baseFacts,
     (draft: OutputPeriodFacts) => {}
-  );
+  )
 
-  debugLog("PeriodInitialize", facts, payload, resultFacts);
-  return resultFacts;
+  debugLog('PeriodInitialize', facts, payload, resultFacts)
+  return resultFacts
 }
 
 export function consolidate(
@@ -44,12 +44,12 @@ export function consolidate(
 ): OutputPeriodFacts {
   const baseFacts: OutputPeriodFacts = {
     resultFacts: facts,
-  };
+  }
 
   const resultFacts: OutputPeriodFacts = produce(
     baseFacts,
     (draft: OutputPeriodFacts) => {}
-  );
-  debugLog("PeriodConsolidate", facts, payload, resultFacts);
-  return resultFacts;
+  )
+  debugLog('PeriodConsolidate', facts, payload, resultFacts)
+  return resultFacts
 }

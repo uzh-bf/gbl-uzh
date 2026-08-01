@@ -1,22 +1,24 @@
-import { useMutation, useQuery } from "@apollo/client";
-import { Button, FormikNumberField } from "@uzh-bf/design-system";
+import { useMutation, useQuery } from '@apollo/client'
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  FormikNumberField,
   ShadcnTable as Table,
   ShadcnTableBody as TableBody,
   ShadcnTableCell as TableCell,
   ShadcnTableHead as TableHead,
   ShadcnTableHeader as TableHeader,
   ShadcnTableRow as TableRow,
-} from "@uzh-bf/design-system";
-import { DEFAULT_RATE, NEUTRAL_RATE, TREND_GROWTH } from "~/settings/Constants";
-import { Form, Formik } from "formik";
-import { useEffect, useMemo } from "react";
+} from '@uzh-bf/design-system'
+import { Form, Formik } from 'formik'
+import { useEffect, useMemo } from 'react'
 import {
+  Bar,
+  BarChart,
   CartesianGrid,
   Legend,
   Line,
@@ -25,118 +27,117 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  BarChart,
-  Bar,
-} from "recharts";
-import * as yup from "yup";
-import GameLayout from "../../components/GameLayout";
-import { useToast } from "../../components/ui/use-toast";
+} from 'recharts'
+import * as yup from 'yup'
+import { DEFAULT_RATE, NEUTRAL_RATE, TREND_GROWTH } from '~/settings/Constants'
+import GameLayout from '../../components/GameLayout'
+import { useToast } from '../../components/ui/use-toast'
 
 import {
   PerformActionDocument,
   ResultDocument,
   ResultsDocument,
-} from "src/graphql/generated/ops";
+} from 'src/graphql/generated/ops'
 
 function GameHeader({ currentGame }) {
   return (
-    <div className="flex justify-between items-center rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
+    <div className="bg-card text-card-foreground flex items-center justify-between rounded-lg border p-4 shadow-sm">
       <div>
         <h2 className="text-xl font-bold tracking-tight">
           Game #{currentGame.id}
         </h2>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           Monetary Policy Simulation
         </p>
       </div>
       <div className="flex items-center gap-4">
-        <span className="text-sm font-medium px-2.5 py-0.5 rounded bg-primary/10 text-primary">
+        <span className="bg-primary/10 text-primary rounded px-2.5 py-0.5 text-sm font-medium">
           Status: {currentGame.status}
         </span>
       </div>
     </div>
-  );
+  )
 }
 function MetricCard({
   title,
   value,
   subtext,
-  colorClass = "",
+  colorClass = '',
   children,
 }: {
-  title: string;
-  value: string;
-  subtext: string;
-  colorClass?: string;
-  children?: React.ReactNode;
+  title: string
+  value: string
+  subtext: string
+  colorClass?: string
+  children?: React.ReactNode
 }) {
   return (
-    <Card className="flex-1 min-w-[200px]">
+    <Card className="min-w-[200px] flex-1">
       <CardHeader className="pb-2">
-        <CardDescription className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <CardDescription className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
           {title}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className={`text-3xl font-bold ${colorClass}`}>{value}</div>
-        <p className="text-xs text-muted-foreground mt-1">{subtext}</p>
+        <p className="text-muted-foreground mt-1 text-xs">{subtext}</p>
         {children}
       </CardContent>
     </Card>
-  );
+  )
 }
 
 function renderDeviationMeter(val: number, target: number, range: number) {
-  const diff = val - target;
-  const percentage = Math.min(100, Math.max(0, 50 + (diff / range) * 50));
+  const diff = val - target
+  const percentage = Math.min(100, Math.max(0, 50 + (diff / range) * 50))
   return (
-    <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-1.5 mt-3 relative">
-      <div className="absolute top-0 bottom-0 left-[40%] right-[40%] bg-green-200/50 dark:bg-green-950/20 rounded-sm"></div>
-      <div className="absolute top-[-3px] h-3 w-0.5 bg-gray-400 dark:bg-gray-600 left-[50%]"></div>
+    <div className="relative mt-3 h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-800">
+      <div className="absolute top-0 right-[40%] bottom-0 left-[40%] rounded-sm bg-green-200/50 dark:bg-green-950/20"></div>
+      <div className="absolute top-[-3px] left-[50%] h-3 w-0.5 bg-gray-400 dark:bg-gray-600"></div>
       <div
-        className={`absolute top-[-3px] h-3 w-3 rounded-full border-2 border-white dark:border-gray-900 transition-all duration-300 ${
-          Math.abs(diff) > range * 0.5 ? "bg-red-500" : "bg-green-500"
+        className={`absolute top-[-3px] h-3 w-3 rounded-full border-2 border-white transition-all duration-300 dark:border-gray-900 ${
+          Math.abs(diff) > range * 0.5 ? 'bg-red-500' : 'bg-green-500'
         }`}
         style={{ left: `calc(${percentage}% - 6px)` }}
       ></div>
     </div>
-  );
+  )
 }
 
 function NewsflashBanner({ activeSegmentFacts }: { activeSegmentFacts: any }) {
-  if (!activeSegmentFacts?.eventName) return null;
-  const isCalm = activeSegmentFacts.eventName === "Calm markets";
+  if (!activeSegmentFacts?.eventName) return null
+  const isCalm = activeSegmentFacts.eventName === 'Calm markets'
 
   return (
     <Card
       className={
         isCalm
-          ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800"
-          : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
+          ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/20'
+          : 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20'
       }
     >
       <CardHeader className="pb-2">
         <CardTitle
-          className={`text-lg font-bold flex items-center gap-2 ${
+          className={`flex items-center gap-2 text-lg font-bold ${
             isCalm
-              ? "text-emerald-800 dark:text-emerald-300"
-              : "text-amber-800 dark:text-amber-300"
+              ? 'text-emerald-800 dark:text-emerald-300'
+              : 'text-amber-800 dark:text-amber-300'
           }`}
         >
           {isCalm
-            ? "Market Situation"
+            ? 'Market Situation'
             : `Breaking News: ${activeSegmentFacts.eventName}`}
         </CardTitle>
         <CardDescription>
           {isCalm
-            ? "No major external shocks affecting the economy."
-            : "An external macroeconomic event is unfolding."}
+            ? 'No major external shocks affecting the economy.'
+            : 'An external macroeconomic event is unfolding.'}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-sm">
           {isCalm
-            ? "The economy is running on its baseline trend. Shocks are at 0%."
+            ? 'The economy is running on its baseline trend. Shocks are at 0%.'
             : `Macroeconomic shock detected: supply shock is ${
                 activeSegmentFacts.supplyShock > 0
                   ? `+${activeSegmentFacts.supplyShock}`
@@ -149,15 +150,15 @@ function NewsflashBanner({ activeSegmentFacts }: { activeSegmentFacts: any }) {
         </p>
       </CardContent>
     </Card>
-  );
+  )
 }
 
 function MetricsSummary({
   resultFacts,
   scenario,
 }: {
-  resultFacts: any;
-  scenario: any;
+  resultFacts: any
+  scenario: any
 }) {
   return (
     <div className="flex flex-wrap gap-4">
@@ -169,8 +170,8 @@ function MetricsSummary({
           Math.abs(
             (resultFacts.inflation ?? DEFAULT_RATE) - scenario.targetInflation
           ) > 2
-            ? "text-red-500"
-            : "text-green-500"
+            ? 'text-red-500'
+            : 'text-green-500'
         }
       >
         {renderDeviationMeter(
@@ -188,8 +189,8 @@ function MetricsSummary({
             (resultFacts.unemployment ?? DEFAULT_RATE) -
               scenario.naturalUnemployment
           ) > 1.5
-            ? "text-red-500"
-            : "text-green-500"
+            ? 'text-red-500'
+            : 'text-green-500'
         }
       >
         {renderDeviationMeter(
@@ -203,7 +204,7 @@ function MetricsSummary({
         value={`${(resultFacts.growth ?? 3.0).toFixed(1)}%`}
         subtext="Target: ~2.0-3.0%"
         colorClass={
-          (resultFacts.growth ?? 3.0) < 0 ? "text-red-500" : "text-green-500"
+          (resultFacts.growth ?? 3.0) < 0 ? 'text-red-500' : 'text-green-500'
         }
       >
         {renderDeviationMeter(resultFacts.growth ?? 3.0, 2.5, 5.0)}
@@ -214,7 +215,7 @@ function MetricsSummary({
         subtext="Target: 0.0 (Perfect Mandate)"
       />
     </div>
-  );
+  )
 }
 
 function HistoryChart({ history }) {
@@ -225,15 +226,15 @@ function HistoryChart({ history }) {
       unemployment: h.unemployment,
       growth: h.growth,
       rate: h.rate,
-    }));
-  }, [history]);
+    }))
+  }, [history])
 
   if (!chartData.length) {
     return (
-      <div className="flex h-[300px] items-center justify-center text-muted-foreground">
+      <div className="text-muted-foreground flex h-[300px] items-center justify-center">
         No economic history available yet. Play a round to see charts.
       </div>
-    );
+    )
   }
 
   return (
@@ -280,42 +281,42 @@ function HistoryChart({ history }) {
         </LineChart>
       </ResponsiveContainer>
     </div>
-  );
+  )
 }
 
 function Leaderboard() {
   const { data, refetch } = useQuery(ResultsDocument, {
-    fetchPolicy: "cache-and-network",
-  });
+    fetchPolicy: 'cache-and-network',
+  })
 
   // Refetch leaderboard periodically
   useEffect(() => {
-    const timer = setInterval(() => refetch(), 5000);
-    return () => clearInterval(timer);
-  }, [refetch]);
+    const timer = setInterval(() => refetch(), 5000)
+    return () => clearInterval(timer)
+  }, [refetch])
 
   const leaderboard = useMemo(() => {
-    if (!data?.results) return [];
+    if (!data?.results) return []
 
-    const latestResultByPlayer: Record<string, any> = {};
+    const latestResultByPlayer: Record<string, any> = {}
     data.results.forEach((res: any) => {
-      const playerId = res.player.id;
-      const current = latestResultByPlayer[playerId];
+      const playerId = res.player.id
+      const current = latestResultByPlayer[playerId]
       if (!current) {
-        latestResultByPlayer[playerId] = res;
+        latestResultByPlayer[playerId] = res
       } else {
-        const curPeriod = current.period?.index ?? -1;
-        const curSegment = current.segment?.index ?? -1;
-        const resPeriod = res.period?.index ?? -1;
-        const resSegment = res.segment?.index ?? -1;
+        const curPeriod = current.period?.index ?? -1
+        const curSegment = current.segment?.index ?? -1
+        const resPeriod = res.period?.index ?? -1
+        const resSegment = res.segment?.index ?? -1
         if (
           resPeriod > curPeriod ||
           (resPeriod === curPeriod && resSegment > curSegment)
         ) {
-          latestResultByPlayer[playerId] = res;
+          latestResultByPlayer[playerId] = res
         }
       }
-    });
+    })
 
     return Object.values(latestResultByPlayer)
       .map((res: any) => ({
@@ -326,8 +327,8 @@ function Leaderboard() {
         unemployment: res.facts?.unemployment ?? 0,
         growth: res.facts?.growth ?? 0,
       }))
-      .sort((a, b) => a.cumulativePenalty - b.cumulativePenalty);
-  }, [data]);
+      .sort((a, b) => a.cumulativePenalty - b.cumulativePenalty)
+  }, [data])
 
   return (
     <Card>
@@ -352,7 +353,7 @@ function Leaderboard() {
             {leaderboard.map((player, index) => (
               <TableRow
                 key={player.id}
-                className={index === 0 ? "bg-primary/5 font-semibold" : ""}
+                className={index === 0 ? 'bg-primary/5 font-semibold' : ''}
               >
                 <TableCell className="font-mono">#{index + 1}</TableCell>
                 <TableCell>{player.name}</TableCell>
@@ -371,77 +372,77 @@ function Leaderboard() {
         </Table>
       </CardContent>
     </Card>
-  );
+  )
 }
 
 export default function Cockpit() {
   const { data: playerDataResult, refetch: refetchResult } = useQuery(
     ResultDocument,
     {
-      fetchPolicy: "cache-and-network",
+      fetchPolicy: 'cache-and-network',
     }
-  );
-  const [performAction] = useMutation(PerformActionDocument);
-  const { toast } = useToast();
+  )
+  const [performAction] = useMutation(PerformActionDocument)
+  const { toast } = useToast()
 
-  const currentGame = playerDataResult?.result?.currentGame;
-  const status = currentGame?.status;
+  const currentGame = playerDataResult?.result?.currentGame
+  const status = currentGame?.status
 
   const { data: resultsData } = useQuery(ResultsDocument, {
     skip:
-      status === "RUNNING" ||
-      status === "PREPARATION" ||
-      status === "SCHEDULED",
-    fetchPolicy: "cache-and-network",
-  });
+      status === 'RUNNING' ||
+      status === 'PREPARATION' ||
+      status === 'SCHEDULED',
+    fetchPolicy: 'cache-and-network',
+  })
 
   const activeSegmentFacts = useMemo(() => {
-    const f = currentGame?.activePeriod?.activeSegment?.facts;
-    if (!f) return {};
-    if (typeof f === "string") {
+    const f = currentGame?.activePeriod?.activeSegment?.facts
+    if (!f) return {}
+    if (typeof f === 'string') {
       try {
-        return JSON.parse(f);
+        return JSON.parse(f)
       } catch {
-        return {};
+        return {}
       }
     }
-    return f;
-  }, [currentGame]);
+    return f
+  }, [currentGame])
 
   const comparativeData = useMemo(() => {
-    if (!resultsData?.results) return [];
+    if (!resultsData?.results) return []
 
-    const playerMap: Record<string, any[]> = {};
+    const playerMap: Record<string, any[]> = {}
     resultsData.results.forEach((res: any) => {
       if (res.period?.index === currentGame?.activePeriod?.index) {
-        if (!playerMap[res.player.id]) playerMap[res.player.id] = [];
-        playerMap[res.player.id].push(res);
+        if (!playerMap[res.player.id]) playerMap[res.player.id] = []
+        playerMap[res.player.id].push(res)
       }
-    });
+    })
 
     return Object.entries(playerMap).map(([playerId, playerResults]) => {
       const activeSegResult = playerResults.find(
         (res) =>
-          res.type === "SEGMENT_END" &&
+          res.type === 'SEGMENT_END' &&
           res.segment?.index === currentGame?.activePeriod?.activeSegmentIx
-      );
+      )
       const periodEndResult = playerResults.find(
-        (res) => res.type === "PERIOD_END"
-      );
+        (res) => res.type === 'PERIOD_END'
+      )
 
-      const displayResult = periodEndResult || activeSegResult;
-      let facts = displayResult?.facts || {};
-      if (typeof facts === "string") {
+      const displayResult = periodEndResult || activeSegResult
+      let facts = displayResult?.facts || {}
+      if (typeof facts === 'string') {
         try {
-          facts = JSON.parse(facts);
+          facts = JSON.parse(facts)
         } catch {
-          facts = {};
+          facts = {}
         }
       }
 
       return {
         id: playerId,
-        name: playerResults[0]?.player.name || "Governor",
+        name: playerResults[0]?.player.name || 'Governor',
         inflation: facts.inflation ?? 0,
         unemployment: facts.unemployment ?? 0,
         growth: facts.growth ?? 0,
@@ -451,61 +452,61 @@ export default function Cockpit() {
         spilloverInflation: facts.spilloverInflation ?? 0,
         spilloverUnemployment: facts.spilloverUnemployment ?? 0,
         history: [...playerResults]
-          .filter((res) => res.type === "SEGMENT_END")
+          .filter((res) => res.type === 'SEGMENT_END')
           .sort((a, b) => (a.segment?.index ?? 0) - (b.segment?.index ?? 0))
           .map((res) => {
-            let f = res.facts;
-            if (typeof f === "string") {
+            let f = res.facts
+            if (typeof f === 'string') {
               try {
-                f = JSON.parse(f);
+                f = JSON.parse(f)
               } catch {
-                f = {};
+                f = {}
               }
             }
-            return f.decisions?.rate ?? DEFAULT_RATE;
+            return f.decisions?.rate ?? DEFAULT_RATE
           }),
-      };
-    });
-  }, [resultsData, currentGame]);
+      }
+    })
+  }, [resultsData, currentGame])
 
   const policyHistoryData = useMemo(() => {
-    if (!currentGame?.activePeriod) return [];
+    if (!currentGame?.activePeriod) return []
     const segCount =
       currentGame.activePeriod.activeSegmentIx !== null &&
       currentGame.activePeriod.activeSegmentIx !== undefined
         ? currentGame.activePeriod.activeSegmentIx + 1
-        : 0;
-    const chartPoints = [];
+        : 0
+    const chartPoints = []
 
     for (let i = 0; i < segCount; i++) {
-      const point: any = { round: `R${i + 1}` };
+      const point: any = { round: `R${i + 1}` }
       comparativeData.forEach((team) => {
-        point[team.name] = team.history[i] ?? DEFAULT_RATE;
-      });
-      chartPoints.push(point);
+        point[team.name] = team.history[i] ?? DEFAULT_RATE
+      })
+      chartPoints.push(point)
     }
-    return chartPoints;
-  }, [comparativeData, currentGame]);
+    return chartPoints
+  }, [comparativeData, currentGame])
 
   if (!playerDataResult?.result) {
     return (
       <div className="flex h-screen items-center justify-center">
         Loading cockpit...
       </div>
-    );
+    )
   }
 
-  const resultFacts = playerDataResult.result.playerResult?.facts || {};
-  const activePeriodFacts = currentGame.activePeriod?.facts || {};
+  const resultFacts = playerDataResult.result.playerResult?.facts || {}
+  const activePeriodFacts = currentGame.activePeriod?.facts || {}
   const scenario = activePeriodFacts.scenario || {
     targetInflation: 2.0,
     naturalUnemployment: 5.0,
-  };
+  }
 
   switch (status) {
-    case "PREPARATION":
-    case "COMPLETED":
-    case "SCHEDULED":
+    case 'PREPARATION':
+    case 'COMPLETED':
+    case 'SCHEDULED':
       return (
         <GameLayout>
           <div className="space-y-6">
@@ -520,15 +521,15 @@ export default function Cockpit() {
               <CardContent className="space-y-4">
                 <p>
                   As the Governor of the Central Bank, your objective is to
-                  steer the economy toward the target inflation of{" "}
-                  <span className="font-bold">{scenario.targetInflation}%</span>{" "}
-                  while keeping unemployment close to the natural rate of{" "}
+                  steer the economy toward the target inflation of{' '}
+                  <span className="font-bold">{scenario.targetInflation}%</span>{' '}
+                  while keeping unemployment close to the natural rate of{' '}
                   <span className="font-bold">
                     {scenario.naturalUnemployment}%
                   </span>
                   .
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Wait for the facilitator to start the period and segment. Once
                   running, you will be able to adjust the interest rate.
                 </p>
@@ -536,30 +537,30 @@ export default function Cockpit() {
             </Card>
           </div>
         </GameLayout>
-      );
+      )
 
-    case "RUNNING": {
-      const currentRate = resultFacts.decisions?.rate ?? DEFAULT_RATE;
-      const inflation = resultFacts.inflation ?? 4.0;
-      const growth = resultFacts.growth ?? 3.0;
-      const targetInflation = scenario.targetInflation ?? 2.0;
+    case 'RUNNING': {
+      const currentRate = resultFacts.decisions?.rate ?? DEFAULT_RATE
+      const inflation = resultFacts.inflation ?? 4.0
+      const growth = resultFacts.growth ?? 3.0
+      const targetInflation = scenario.targetInflation ?? 2.0
 
       const taylorRate =
         NEUTRAL_RATE +
         1.5 * (inflation - targetInflation) +
-        0.5 * (growth - TREND_GROWTH);
+        0.5 * (growth - TREND_GROWTH)
       const recommendedRate = Math.min(
         15,
         Math.max(0, parseFloat(taylorRate.toFixed(2)))
-      );
+      )
 
       const schema = yup.object({
         rate: yup
           .number()
-          .min(0, "Policy rate cannot be below 0%")
-          .max(15, "Policy rate cannot exceed 15%")
-          .required("Policy rate is required"),
-      });
+          .min(0, 'Policy rate cannot be below 0%')
+          .max(15, 'Policy rate cannot exceed 15%')
+          .required('Policy rate is required'),
+      })
 
       return (
         <GameLayout>
@@ -572,9 +573,9 @@ export default function Cockpit() {
             {/* Current Metrics */}
             <MetricsSummary resultFacts={resultFacts} scenario={scenario} />
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {/* Decision Form */}
-              <div className="lg:col-span-1 flex flex-col gap-4">
+              <div className="flex flex-col gap-4 lg:col-span-1">
                 <Card>
                   <CardHeader>
                     <CardTitle>Set Policy Interest Rate</CardTitle>
@@ -594,23 +595,23 @@ export default function Cockpit() {
                         try {
                           await performAction({
                             variables: {
-                              type: "",
+                              type: '',
                               payload: JSON.stringify({
                                 rate: parseFloat(values.rate.toString()),
                               }),
                             },
-                          });
+                          })
                           toast({
-                            title: "Decision submitted",
+                            title: 'Decision submitted',
                             description: `Policy rate set to ${values.rate}%`,
-                          });
-                          refetchResult();
+                          })
+                          refetchResult()
                         } catch (e: any) {
                           toast({
-                            title: "Error submitting decision",
+                            title: 'Error submitting decision',
                             description: e.message,
-                            variant: "destructive",
-                          });
+                            variant: 'destructive',
+                          })
                         }
                       }}
                     >
@@ -622,8 +623,8 @@ export default function Cockpit() {
                             name="rate"
                             tooltip="Select your central bank interest rate between 0% and 15%."
                             required
-                            data={{ cy: "rate-input-cy" }}
-                            className={{ label: "pb-2 font-semibold" }}
+                            data={{ cy: 'rate-input-cy' }}
+                            className={{ label: 'pb-2 font-semibold' }}
                           />
                           <div className="pt-1">
                             <input
@@ -634,20 +635,20 @@ export default function Cockpit() {
                               value={formik.values.rate}
                               onChange={(e) => {
                                 formik.setFieldValue(
-                                  "rate",
+                                  'rate',
                                   parseFloat(e.target.value)
-                                );
+                                )
                               }}
-                              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-primary"
+                              className="accent-primary h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 dark:bg-gray-700"
                             />
-                            <div className="flex justify-between text-[10px] text-muted-foreground pt-1 px-1">
-                              <span className="text-blue-500 font-semibold">
+                            <div className="text-muted-foreground flex justify-between px-1 pt-1 text-[10px]">
+                              <span className="font-semibold text-blue-500">
                                 Dovish (0%)
                               </span>
                               <span className="text-gray-400">
                                 Neutral (4%)
                               </span>
-                              <span className="text-red-500 font-semibold">
+                              <span className="font-semibold text-red-500">
                                 Hawkish (15%)
                               </span>
                             </div>
@@ -655,7 +656,7 @@ export default function Cockpit() {
                           <Button
                             type="submit"
                             disabled={!formik.isValid || formik.isSubmitting}
-                            className={{ root: "w-full mt-4" }}
+                            className={{ root: 'mt-4 w-full' }}
                           >
                             Submit Policy Rate
                           </Button>
@@ -668,7 +669,7 @@ export default function Cockpit() {
                 {/* Economic Advisor Outlook Card */}
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-bold uppercase tracking-wider text-primary">
+                    <CardTitle className="text-primary text-sm font-bold tracking-wider uppercase">
                       Economic Advisor Outlook
                     </CardTitle>
                     <CardDescription>
@@ -677,40 +678,40 @@ export default function Cockpit() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex items-baseline justify-between border-b pb-2">
-                      <span className="text-xs font-semibold text-muted-foreground">
+                      <span className="text-muted-foreground text-xs font-semibold">
                         Recommended Rate:
                       </span>
                       <span className="text-2xl font-extrabold text-blue-600 dark:text-blue-400">
                         {recommendedRate.toFixed(2)}%
                       </span>
                     </div>
-                    <div className="text-xs text-muted-foreground space-y-2">
+                    <div className="text-muted-foreground space-y-2 text-xs">
                       <p>
                         The Taylor Rule aims to balance inflation and growth:
                       </p>
-                      <div className="font-mono bg-muted p-1.5 rounded text-[10px] select-all">
-                        Rate = {NEUTRAL_RATE.toFixed(1)} + 1.5 * (Inflation -{" "}
-                        {targetInflation.toFixed(1)}) + 0.5 * (Growth -{" "}
+                      <div className="bg-muted rounded p-1.5 font-mono text-[10px] select-all">
+                        Rate = {NEUTRAL_RATE.toFixed(1)} + 1.5 * (Inflation -{' '}
+                        {targetInflation.toFixed(1)}) + 0.5 * (Growth -{' '}
                         {TREND_GROWTH.toFixed(1)})
                       </div>
-                      <ul className="list-disc pl-4 space-y-1">
+                      <ul className="list-disc space-y-1 pl-4">
                         <li>
-                          Inflation Gap:{" "}
-                          <span className="font-semibold text-foreground">
+                          Inflation Gap:{' '}
+                          <span className="text-foreground font-semibold">
                             {(inflation - targetInflation).toFixed(2)}%
-                          </span>{" "}
-                          {inflation > targetInflation ? "above" : "below"}{" "}
+                          </span>{' '}
+                          {inflation > targetInflation ? 'above' : 'below'}{' '}
                           target.
                         </li>
                         <li>
-                          Output Gap (GDP):{" "}
-                          <span className="font-semibold text-foreground">
+                          Output Gap (GDP):{' '}
+                          <span className="text-foreground font-semibold">
                             {(growth - 2.5).toFixed(2)}%
-                          </span>{" "}
+                          </span>{' '}
                           relative to trend.
                         </li>
                       </ul>
-                      <p className="text-[10px] italic pt-1 border-t text-muted-foreground/80">
+                      <p className="text-muted-foreground/80 border-t pt-1 text-[10px] italic">
                         *Note: Shocks and spillovers are unpredictable and will
                         cause deviation from this target.
                       </p>
@@ -734,11 +735,11 @@ export default function Cockpit() {
             </div>
           </div>
         </GameLayout>
-      );
+      )
     }
 
-    case "PAUSED":
-    case "CONSOLIDATION": {
+    case 'PAUSED':
+    case 'CONSOLIDATION': {
       return (
         <GameLayout>
           <div className="space-y-6">
@@ -767,10 +768,10 @@ export default function Cockpit() {
             </div>
           </div>
         </GameLayout>
-      );
+      )
     }
 
-    case "RESULTS": {
+    case 'RESULTS': {
       return (
         <GameLayout>
           <div className="space-y-6">
@@ -793,45 +794,45 @@ export default function Cockpit() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                     <Card className="bg-muted/50 border-none">
                       <CardContent className="p-4 text-center">
-                        <div className="text-xs text-muted-foreground uppercase font-semibold">
+                        <div className="text-muted-foreground text-xs font-semibold uppercase">
                           Exchange Rate Index
                         </div>
                         <div
-                          className={`text-xl font-bold mt-1 ${
+                          className={`mt-1 text-xl font-bold ${
                             resultFacts.exchangeRateIndex > 100.05
-                              ? "text-blue-600"
+                              ? 'text-blue-600'
                               : resultFacts.exchangeRateIndex < 99.95
-                              ? "text-amber-600"
-                              : "text-gray-600"
+                                ? 'text-amber-600'
+                                : 'text-gray-600'
                           }`}
                         >
                           {resultFacts.exchangeRateIndex.toFixed(1)}
                         </div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-muted-foreground mt-0.5 text-[10px]">
                           {resultFacts.exchangeRateIndex > 100.05
-                            ? "Appreciated 📈"
+                            ? 'Appreciated 📈'
                             : resultFacts.exchangeRateIndex < 99.95
-                            ? "Depreciated 📉"
-                            : "Stable ⚖️"}
+                              ? 'Depreciated 📉'
+                              : 'Stable ⚖️'}
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card className="bg-muted/50 border-none">
                       <CardContent className="p-4 text-center">
-                        <div className="text-xs text-muted-foreground uppercase font-semibold">
+                        <div className="text-muted-foreground text-xs font-semibold uppercase">
                           Trade Balance
                         </div>
                         <div
-                          className={`text-xl font-bold mt-1 ${
+                          className={`mt-1 text-xl font-bold ${
                             resultFacts.tradeBalance > 0.01
-                              ? "text-green-600"
+                              ? 'text-green-600'
                               : resultFacts.tradeBalance < -0.01
-                              ? "text-red-600"
-                              : "text-gray-600"
+                                ? 'text-red-600'
+                                : 'text-gray-600'
                           }`}
                         >
                           {resultFacts.tradeBalance > 0
@@ -839,28 +840,28 @@ export default function Cockpit() {
                             : resultFacts.tradeBalance.toFixed(2)}
                           % of GDP
                         </div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-muted-foreground mt-0.5 text-[10px]">
                           {resultFacts.tradeBalance > 0.01
-                            ? "Trade Surplus 💰"
+                            ? 'Trade Surplus 💰'
                             : resultFacts.tradeBalance < -0.01
-                            ? "Trade Deficit 💸"
-                            : "Balanced ⚖️"}
+                              ? 'Trade Deficit 💸'
+                              : 'Balanced ⚖️'}
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card className="bg-muted/50 border-none">
                       <CardContent className="p-4 text-center">
-                        <div className="text-xs text-muted-foreground uppercase font-semibold">
+                        <div className="text-muted-foreground text-xs font-semibold uppercase">
                           Imported Inflation
                         </div>
                         <div
-                          className={`text-xl font-bold mt-1 ${
+                          className={`mt-1 text-xl font-bold ${
                             resultFacts.spilloverInflation > 0.01
-                              ? "text-red-600"
+                              ? 'text-red-600'
                               : resultFacts.spilloverInflation < -0.01
-                              ? "text-green-600"
-                              : "text-gray-600"
+                                ? 'text-green-600'
+                                : 'text-gray-600'
                           }`}
                         >
                           {resultFacts.spilloverInflation > 0
@@ -868,7 +869,7 @@ export default function Cockpit() {
                             : resultFacts.spilloverInflation.toFixed(2)}
                           %
                         </div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-muted-foreground mt-0.5 text-[10px]">
                           Spillover from global rates
                         </div>
                       </CardContent>
@@ -876,16 +877,16 @@ export default function Cockpit() {
 
                     <Card className="bg-muted/50 border-none">
                       <CardContent className="p-4 text-center">
-                        <div className="text-xs text-muted-foreground uppercase font-semibold">
+                        <div className="text-muted-foreground text-xs font-semibold uppercase">
                           Export Job Effect
                         </div>
                         <div
-                          className={`text-xl font-bold mt-1 ${
+                          className={`mt-1 text-xl font-bold ${
                             resultFacts.spilloverUnemployment > 0.01
-                              ? "text-red-600"
+                              ? 'text-red-600'
                               : resultFacts.spilloverUnemployment < -0.01
-                              ? "text-green-600"
-                              : "text-gray-600"
+                                ? 'text-green-600'
+                                : 'text-gray-600'
                           }`}
                         >
                           {resultFacts.spilloverUnemployment > 0
@@ -893,43 +894,43 @@ export default function Cockpit() {
                             : resultFacts.spilloverUnemployment.toFixed(2)}
                           %
                         </div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-muted-foreground mt-0.5 text-[10px]">
                           Unemployment change
                         </div>
                       </CardContent>
                     </Card>
                   </div>
 
-                  <div className="text-xs text-muted-foreground bg-primary/5 p-3 rounded border border-primary/10">
-                    <span className="font-semibold text-primary">
+                  <div className="text-muted-foreground bg-primary/5 border-primary/10 rounded border p-3 text-xs">
+                    <span className="text-primary font-semibold">
                       Economic Briefing:
-                    </span>{" "}
+                    </span>{' '}
                     {resultFacts.exchangeRateIndex > 100.05 ? (
                       <span>
                         Your relatively high interest rate attracted capital
-                        inflows,{" "}
-                        <strong>appreciating your exchange rate</strong> to{" "}
+                        inflows,{' '}
+                        <strong>appreciating your exchange rate</strong> to{' '}
                         {resultFacts.exchangeRateIndex.toFixed(1)}. This made
-                        imports cheaper (lowering domestic inflation by{" "}
+                        imports cheaper (lowering domestic inflation by{' '}
                         {Math.abs(resultFacts.spilloverInflation).toFixed(2)}%),
-                        but hurt your export competitiveness, creating a{" "}
-                        <strong>trade deficit</strong> of{" "}
+                        but hurt your export competitiveness, creating a{' '}
+                        <strong>trade deficit</strong> of{' '}
                         {Math.abs(resultFacts.tradeBalance).toFixed(2)}% and
-                        raising unemployment by{" "}
+                        raising unemployment by{' '}
                         {resultFacts.spilloverUnemployment.toFixed(2)}%.
                       </span>
                     ) : resultFacts.exchangeRateIndex < 99.95 ? (
                       <span>
                         Your relatively low interest rate caused capital
-                        outflows,{" "}
-                        <strong>depreciating your exchange rate</strong> to{" "}
+                        outflows,{' '}
+                        <strong>depreciating your exchange rate</strong> to{' '}
                         {resultFacts.exchangeRateIndex.toFixed(1)}. This boosted
-                        your exports (creating a <strong>trade surplus</strong>{" "}
+                        your exports (creating a <strong>trade surplus</strong>{' '}
                         of {resultFacts.tradeBalance.toFixed(2)}% and lowering
-                        unemployment by{" "}
+                        unemployment by{' '}
                         {Math.abs(resultFacts.spilloverUnemployment).toFixed(2)}
-                        %), but increased the price of imports, adding{" "}
-                        <strong>imported inflation</strong> of{" "}
+                        %), but increased the price of imports, adding{' '}
+                        <strong>imported inflation</strong> of{' '}
                         {resultFacts.spilloverInflation.toFixed(2)}% to your
                         economy.
                       </span>
@@ -945,14 +946,14 @@ export default function Cockpit() {
               </Card>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {/* Leaderboard */}
               <div className="lg:col-span-1">
                 <Leaderboard />
               </div>
 
               {/* Charts & Analysis */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="space-y-6 lg:col-span-2">
                 {/* Economic History Chart */}
                 <Card>
                   <CardHeader>
@@ -991,15 +992,15 @@ export default function Cockpit() {
                             <Legend />
                             {comparativeData.map((team, idx) => {
                               const colors = [
-                                "#3b82f6",
-                                "#ef4444",
-                                "#10b981",
-                                "#f59e0b",
-                                "#8b5cf6",
-                                "#ec4899",
-                                "#ec4899",
-                              ];
-                              const color = colors[idx % colors.length];
+                                '#3b82f6',
+                                '#ef4444',
+                                '#10b981',
+                                '#f59e0b',
+                                '#8b5cf6',
+                                '#ec4899',
+                                '#ec4899',
+                              ]
+                              const color = colors[idx % colors.length]
                               return (
                                 <Line
                                   key={team.name}
@@ -1008,7 +1009,7 @@ export default function Cockpit() {
                                   stroke={color}
                                   strokeWidth={2}
                                 />
-                              );
+                              )
                             })}
                           </LineChart>
                         </ResponsiveContainer>
@@ -1081,7 +1082,7 @@ export default function Cockpit() {
             </div>
           </div>
         </GameLayout>
-      );
+      )
     }
   }
 }

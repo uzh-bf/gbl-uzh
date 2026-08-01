@@ -84,11 +84,7 @@ const Forecast = () => {
   } = decodedData
 
   if (!diceBonds || !diceShared || !diceStocks) return <div>Loading...</div>
-  const colors = [
-    'var(--chart-4)',
-    'var(--chart-5)',
-    'var(--chart-2)',
-  ]
+  const colors = ['var(--chart-4)', 'var(--chart-5)', 'var(--chart-2)']
 
   return (
     <div className="py-8">

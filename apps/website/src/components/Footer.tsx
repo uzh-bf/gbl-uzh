@@ -2,9 +2,9 @@ import { faBook, faCode, faMailBulk } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Image from 'next/image'
 import Link from 'next/link'
+import GBLLogo from '../../public/images/GBLUZH.png'
 import SwissUniLogo from '../../public/images/logo_swissuniversities.png'
 import UZHLogo from '../../public/images/uzh_logo_d_pos.svg'
-import GBLLogo from '../../public/images/GBLUZH.png'
 function Footer() {
   return (
     <footer className="border-top mt-8 bg-slate-100 text-sm text-gray-600 md:text-base">

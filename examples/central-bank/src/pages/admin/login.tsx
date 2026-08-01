@@ -1,8 +1,8 @@
-import { Button } from "@uzh-bf/design-system";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { Button } from '@uzh-bf/design-system'
+import { signIn, signOut, useSession } from 'next-auth/react'
 
 function Login() {
-  const { data: session } = useSession();
+  const { data: session } = useSession()
 
   if (session?.user) {
     return (
@@ -10,7 +10,7 @@ function Login() {
         Signed in as {session.user.email} <br />
         <Button onClick={() => signOut()}>Sign out</Button>
       </>
-    );
+    )
   }
 
   return (
@@ -18,7 +18,7 @@ function Login() {
       Not signed in <br />
       <Button
         onClick={() =>
-          signIn("auth0", {
+          signIn('auth0', {
             callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/admin/games`,
           })
         }
@@ -26,7 +26,7 @@ function Login() {
         Sign in
       </Button>
     </>
-  );
+  )
 }
 
-export default Login;
+export default Login

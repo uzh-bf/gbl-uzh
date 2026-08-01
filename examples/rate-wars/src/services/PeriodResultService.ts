@@ -98,15 +98,18 @@ export function end(
     )
     const ownPlayerId = own[own.length - 1]?.playerId
 
-    const ownBank = own.length > 0
-      ? {
-          playerId: own[own.length - 1].playerId as string,
-          decisions: facts.decisions ?? { ...DEFAULT_DECISIONS },
-          equity: facts.equity ?? INITIAL_EQUITY,
-        }
-      : null
+    const ownBank =
+      own.length > 0
+        ? {
+            playerId: own[own.length - 1].playerId as string,
+            decisions: facts.decisions ?? { ...DEFAULT_DECISIONS },
+            equity: facts.equity ?? INITIAL_EQUITY,
+          }
+        : null
 
-    const otherBanks = [...new Map(others.map((r) => [r.playerId, r])).values()].map((r) => ({
+    const otherBanks = [
+      ...new Map(others.map((r) => [r.playerId, r])).values(),
+    ].map((r) => ({
       playerId: r.playerId as string,
       decisions: r.facts?.decisions ?? { ...DEFAULT_DECISIONS },
       equity: r.facts?.equity ?? INITIAL_EQUITY,

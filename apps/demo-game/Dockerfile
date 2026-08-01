@@ -16,11 +16,8 @@ WORKDIR /app
 
 COPY . .
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/.pnpm-store \
-    # HACK: Install without frozen lockfile - reevaluate after upgrades branch is merged
-    pnpm install --no-frozen-lockfile
-
-# Prune application with Turbo
+# Prune application with Turbo. This needs no prior install: turbo builds the
+# pruned lockfile from the manifests, not from an installed node_modules tree.
 RUN turbo prune --scope="@gbl-uzh/demo-game" --docker
 
 

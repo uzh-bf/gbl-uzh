@@ -2,10 +2,10 @@ import {
   generateBaseMutations,
   generateBaseQueries,
   generateBaseSubscriptions,
-} from "@gbl-uzh/platform/dist/nexus";
-import type { GameFacts } from "../../src/types/Game";
-import type { PeriodFacts, PeriodSegmentFacts } from "../../src/types/Period";
-import * as services from "../services";
+} from '@gbl-uzh/platform/dist/nexus'
+import type { GameFacts } from '../../src/types/Game'
+import type { PeriodFacts, PeriodSegmentFacts } from '../../src/types/Period'
+import * as services from '../services'
 import {
   GameFactsInput,
   GameFactsSchema,
@@ -15,10 +15,10 @@ import {
   PeriodSegmentFactsSchema,
   PlayerFacts,
   PlayerFactsSchema,
-} from "../types";
-export * from "@gbl-uzh/platform/dist/nexus";
+} from '../types'
+export * from '@gbl-uzh/platform/dist/nexus'
 
-export const Query = generateBaseQueries();
+export const Query = generateBaseQueries()
 export const Mutation = generateBaseMutations<
   GameFacts,
   PeriodFacts,
@@ -37,5 +37,5 @@ export const Mutation = generateBaseMutations<
     PeriodFactsInput,
     PeriodSegmentFactsInput,
   },
-});
-export const Subscription = generateBaseSubscriptions();
+})
+export const Subscription = generateBaseSubscriptions()

@@ -560,7 +560,7 @@ function ReportGame() {
                           {Object.values(dataPerPlayer)[0]?.decisions.map(
                             (d, segmentIx) => {
                               return (
-                                <div key={segmentIx} className="min-w-12 ">
+                                <div key={segmentIx} className="min-w-12">
                                   P{periodIndex + 1} S{segmentIx + 1}
                                 </div>
                               )

@@ -1,9 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import {
   Button,
-  FormikNumberField,
-} from '@uzh-bf/design-system'
-import {
   Card,
   CardContent,
   CardDescription,
@@ -15,6 +12,7 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
+  FormikNumberField,
   ShadcnTable as Table,
   ShadcnTableBody as TableBody,
   ShadcnTableCell as TableCell,
@@ -23,19 +21,13 @@ import {
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
 
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
 
+import { Form, Formik } from 'formik'
 import {
   PerformActionDocument,
   ResultDocument,
 } from 'src/graphql/generated/ops'
-import { Form, Formik } from 'formik'
 import * as yup from 'yup'
 import GameLayout from '../../components/GameLayout'
 
@@ -94,9 +86,7 @@ function MarketOverviewTable({
             <TableCell data-cy={`bank-${row.rank}`}>
               {bankName(players, row.playerId, selfId)}
             </TableCell>
-            <TableCell className="text-right">
-              {pct(row.depositRate)}
-            </TableCell>
+            <TableCell className="text-right">{pct(row.depositRate)}</TableCell>
             <TableCell className="text-right">{pct(row.loanRate)}</TableCell>
             <TableCell className="text-right">
               {pct(row.depositShare * 100, 1)}
@@ -270,7 +260,8 @@ function Cockpit() {
               </CardHeader>
               <CardContent>
                 <div className="mb-4 text-sm text-gray-600">
-                  Equity: <span className="font-bold">{chf(resultFacts.equity)}</span>
+                  Equity:{' '}
+                  <span className="font-bold">{chf(resultFacts.equity)}</span>
                   {' · '}Cumulative profit:{' '}
                   <span className="font-bold">
                     {chf(resultFacts.cumulativeProfit)}

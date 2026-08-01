@@ -1,11 +1,11 @@
-import { faCalendar, faPauseCircle } from "@fortawesome/free-regular-svg-icons";
+import { faCalendar, faPauseCircle } from '@fortawesome/free-regular-svg-icons'
 import {
   faCheck,
   faPause,
   faPlus,
   faSync,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Button,
   FormikNumberField,
@@ -13,20 +13,20 @@ import {
   H3,
   H4,
   Modal,
-} from "@uzh-bf/design-system";
-import { Form, Formik } from "formik";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import { twMerge } from "tailwind-merge";
+} from '@uzh-bf/design-system'
+import { Form, Formik } from 'formik'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { twMerge } from 'tailwind-merge'
 
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery } from '@apollo/client'
 import {
-  STATUS,
   computePeriodStatus,
   computeSegmentStatus,
   PlayerCompact,
-} from "@gbl-uzh/ui";
-import { useCallback, useEffect, useState } from "react";
+  STATUS,
+} from '@gbl-uzh/ui'
+import { useCallback, useEffect, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
@@ -39,7 +39,7 @@ import {
   LearningElementsDocument,
   Player,
   StoryElementsDocument,
-} from "src/graphql/generated/ops";
+} from 'src/graphql/generated/ops'
 
 import {
   Card,
@@ -48,92 +48,86 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-  ShadcnTable as Table,
-  ShadcnTableBody as TableBody,
-  ShadcnTableCell as TableCell,
-  ShadcnTableHead as TableHead,
-  ShadcnTableHeader as TableHeader,
-  ShadcnTableRow as TableRow,
-} from "@uzh-bf/design-system";
+} from '@uzh-bf/design-system'
 
-import { FormikMultiSelectField } from "~/components/fields/FormikMultiSelectField";
-import { useToast } from "~/components/ui/use-toast";
-const DEFAULT_SEED = 1;
-const DEFAULT_TARGET_INFLATION = 2.0;
-const DEFAULT_NATURAL_UNEMPLOYMENT = 5.0;
-const DEFAULT_LAMBDA = 1.0;
-const DEFAULT_INITIAL_INFLATION = 4.0;
-const DEFAULT_INITIAL_UNEMPLOYMENT = 4.0;
-const DEFAULT_INITIAL_GROWTH = 3.0;
+import { FormikMultiSelectField } from '~/components/fields/FormikMultiSelectField'
+import { useToast } from '~/components/ui/use-toast'
+const DEFAULT_SEED = 1
+const DEFAULT_TARGET_INFLATION = 2.0
+const DEFAULT_NATURAL_UNEMPLOYMENT = 5.0
+const DEFAULT_LAMBDA = 1.0
+const DEFAULT_INITIAL_INFLATION = 4.0
+const DEFAULT_INITIAL_UNEMPLOYMENT = 4.0
+const DEFAULT_INITIAL_GROWTH = 3.0
 
 function ManageGame() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
-  const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false);
+  const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
+  const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
 
   const { data, error, loading } = useQuery(GameDocument, {
     variables: { id: Number(router.query.id) },
     pollInterval: 15000,
     skip: !router.query.id,
-  });
+  })
 
   const {
     data: learningElementsData,
     loading: learningElementsLoading,
     error: learningElementsError,
-  } = useQuery(LearningElementsDocument);
+  } = useQuery(LearningElementsDocument)
 
   const {
     data: storyElementsData,
     loading: storyElementsLoading,
     error: storyElementsError,
-  } = useQuery(StoryElementsDocument);
+  } = useQuery(StoryElementsDocument)
 
   const [activateNextPeriod, { loading: nextPeriodLoading }] = useMutation(
     ActivateNextPeriodDocument,
     {
       onCompleted() {
         try {
-          const anchor = document.querySelector("#active-period");
+          const anchor = document.querySelector('#active-period')
           if (anchor)
-            anchor.scrollIntoView({ behavior: "smooth", block: "center" });
+            anchor.scrollIntoView({ behavior: 'smooth', block: 'center' })
         } catch (e) {}
       },
     }
-  );
+  )
   const [activateNextSegment, { loading: nextSegmentLoading }] = useMutation(
     ActivateNextSegmentDocument
-  );
+  )
   const [addGamePeriod, { loading: addGamePeriodLoading }] = useMutation(
     AddGamePeriodDocument,
     {
-      refetchQueries: "active",
+      refetchQueries: 'active',
     }
-  );
+  )
   const [addPeriodSegment, { loading: addPeriodSegmentLoading }] = useMutation(
     AddPeriodSegmentDocument,
     {
-      refetchQueries: "active",
+      refetchQueries: 'active',
     }
-  );
+  )
 
   const [addCountdown] = useMutation(AddCountdownDocument, {
     refetchQueries: [GameDocument],
     onCompleted: () =>
       toast({
-        title: "Countdown added",
-        description: "Players were notified.",
+        title: 'Countdown added',
+        description: 'Players were notified.',
       }),
     onError: (err) =>
       toast({
-        title: "Countdown failed",
+        title: 'Countdown failed',
         description: err.message,
-        variant: "destructive",
+        variant: 'destructive',
       }),
-  });
+  })
 
-  const { toast } = useToast();
+  const { toast } = useToast()
 
   const nextPeriod = () =>
     activateNextPeriod({
@@ -141,7 +135,7 @@ function ManageGame() {
         gameId: Number(router.query.id),
       },
       refetchQueries: [GameDocument],
-    });
+    })
 
   const nextSegment = () =>
     activateNextSegment({
@@ -149,77 +143,77 @@ function ManageGame() {
         gameId: Number(router.query.id),
       },
       refetchQueries: [GameDocument],
-    });
+    })
 
   useEffect(() => {
-    const game = data?.game;
-    if (game?.status !== GameStatus.Running) return;
+    const game = data?.game
+    if (game?.status !== GameStatus.Running) return
 
-    const allPlayersReady = game.players.every((player) => player.isReady);
+    const allPlayersReady = game.players.every((player) => player.isReady)
     if (allPlayersReady) {
       toast({
-        title: "All players are ready!",
-        description: "All players are ready to continue.",
-      });
+        title: 'All players are ready!',
+        description: 'All players are ready to continue.',
+      })
 
-      const audio = new Audio("/sounds/notification.mp3");
+      const audio = new Audio('/sounds/notification.mp3')
       audio.play().catch((err) => {
-        alert("Autoplay restrictions. Please enable autoplay in your browser.");
-        console.error("Error playing notification sound:", err);
-      });
+        alert('Autoplay restrictions. Please enable autoplay in your browser.')
+        console.error('Error playing notification sound:', err)
+      })
     }
-  }, [data?.game]);
+  }, [data?.game])
 
   const getButton = useCallback(() => {
-    const game = data.game as Game;
+    const game = data.game as Game
     // const disabled = game.periods.length === 0
-    const activePeriod = game?.activePeriod;
-    const segments = activePeriod?.segments;
-    const activeSegmentIx = activePeriod?.activeSegmentIx;
+    const activePeriod = game?.activePeriod
+    const segments = activePeriod?.segments
+    const activeSegmentIx = activePeriod?.activeSegmentIx
 
     switch (game.status) {
       case GameStatus.Preparation: {
-        const atLastSegment = activeSegmentIx >= segments.length - 1;
+        const atLastSegment = activeSegmentIx >= segments.length - 1
         if (!atLastSegment) {
           return (
             <Button disabled={nextSegmentLoading} onClick={nextSegment}>
               Next Segment
             </Button>
-          );
+          )
         }
         const disabled =
-          game.periods.length === 0 || activePeriod.segments.length === 0;
+          game.periods.length === 0 || activePeriod.segments.length === 0
         return (
           <Button disabled={disabled} onClick={nextPeriod}>
             Start Period
           </Button>
-        );
+        )
       }
       case GameStatus.Scheduled:
         if (!activePeriod) {
           const disabled =
-            game.periods.length === 0 || game.periods[0].segments.length === 0;
+            game.periods.length === 0 || game.periods[0].segments.length === 0
           return (
             <Button disabled={disabled} onClick={nextPeriod}>
               Start Period
             </Button>
-          );
+          )
         }
-        return <Button onClick={nextPeriod}>Start Segment</Button>;
+        return <Button onClick={nextPeriod}>Start Segment</Button>
       case GameStatus.Running: {
         const atLastSegment =
           activeSegmentIx >= segments.length - 1 &&
-          activePeriod.segmentCount === segments.length;
+          activePeriod.segmentCount === segments.length
         if (atLastSegment) {
           return (
             <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
               Consolidate
             </Button>
-          );
+          )
         }
         // Currently we need to disable the button if the next segment is not
         // available
-        const disabled = activePeriod.activeSegmentIx === segments.length - 1;
+        const disabled = activePeriod.activeSegmentIx === segments.length - 1
         return (
           <Button
             disabled={nextSegmentLoading || disabled}
@@ -227,10 +221,10 @@ function ManageGame() {
           >
             Segment Results
           </Button>
-        );
+        )
       }
       case GameStatus.Paused: {
-        const atLastSegment = activeSegmentIx >= segments.length - 1;
+        const atLastSegment = activeSegmentIx >= segments.length - 1
         return (
           <Button
             disabled={nextSegmentLoading || atLastSegment}
@@ -238,7 +232,7 @@ function ManageGame() {
           >
             Next Segment
           </Button>
-        );
+        )
       }
 
       // TODO(JJ):
@@ -251,14 +245,14 @@ function ManageGame() {
           <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
             Period Results
           </Button>
-        );
+        )
       case GameStatus.Results: {
-        const anotherPeriod = game.activePeriodIx > game.periods.length - 1;
+        const anotherPeriod = game.activePeriodIx > game.periods.length - 1
         return (
           <Button disabled={anotherPeriod} onClick={nextPeriod}>
             Next Period
           </Button>
-        );
+        )
       }
 
       case GameStatus.Completed:
@@ -266,75 +260,75 @@ function ManageGame() {
           <Button disabled onClick={() => null}>
             Completed
           </Button>
-        );
+        )
     }
-  }, [data?.game]);
+  }, [data?.game])
 
   if (loading || !data?.game) {
-    return <div>loading...</div>;
+    return <div>loading...</div>
   }
 
   if (error) {
-    return <div>{error.message}</div>;
+    return <div>{error.message}</div>
   }
 
-  const game = data.game;
+  const game = data.game
 
   const learningElementsAll = (
     learningElementsData?.learningElements || []
   ).map((e) => ({
     label: e.id,
     value: e.id,
-  }));
+  }))
 
   const storyElementsAll = (storyElementsData?.storyElements || []).map(
     (e) => ({
       label: e.id,
       value: e.id,
     })
-  );
+  )
 
   return (
     <div className="p-4" data-cy="game-detail" data-game-status={game.status}>
       <div>
         <div className="mb-4 flex flex-col gap-2 overflow-x-auto md:flex-row">
           {game.periods.map((period, ix) => {
-            const periodStatus = computePeriodStatus(game as any, ix);
+            const periodStatus = computePeriodStatus(game as any, ix)
 
             const labels = [
               `Target \u03c0: ${period.facts.scenario?.targetInflation}%`,
               `Natural U: ${period.facts.scenario?.naturalUnemployment}%`,
-            ];
+            ]
 
-            const isPeriodPlanned = periodStatus === STATUS.SCHEDULED;
-            const isPeriodPaused = periodStatus === STATUS.PAUSED;
-            const isPeriodActive = periodStatus === STATUS.ACTIVE;
+            const isPeriodPlanned = periodStatus === STATUS.SCHEDULED
+            const isPeriodPaused = periodStatus === STATUS.PAUSED
+            const isPeriodActive = periodStatus === STATUS.ACTIVE
             const isPeriodCompleted =
               periodStatus === STATUS.COMPLETED ||
-              periodStatus === STATUS.RESULTS;
+              periodStatus === STATUS.RESULTS
 
-            const scenario = period.facts.scenario;
-            const targetInflation = scenario.targetInflation;
-            const naturalUnemployment = scenario.naturalUnemployment;
-            const lambda = scenario.lambda;
-            const initialInflation = scenario.initialInflation;
-            const initialUnemployment = scenario.initialUnemployment;
-            const initialGrowth = scenario.initialGrowth;
-            const seed = scenario.seed;
+            const scenario = period.facts.scenario
+            const targetInflation = scenario.targetInflation
+            const naturalUnemployment = scenario.naturalUnemployment
+            const lambda = scenario.lambda
+            const initialInflation = scenario.initialInflation
+            const initialUnemployment = scenario.initialUnemployment
+            const initialGrowth = scenario.initialGrowth
+            const seed = scenario.seed
 
             return (
               <div
                 className="flex flex-row gap-2"
                 key={period.id}
-                id={isPeriodActive ? "active-period" : undefined}
+                id={isPeriodActive ? 'active-period' : undefined}
                 data-cy={`period-${ix}`}
               >
                 <div
                   className={twMerge(
-                    "flex flex-1 flex-col gap-1 rounded border p-2",
-                    isPeriodPaused && "border-orange-300 bg-orange-100",
-                    isPeriodActive && "border-green-300 bg-green-50",
-                    isPeriodCompleted && "bg-gray-100 text-gray-400"
+                    'flex flex-1 flex-col gap-1 rounded border p-2',
+                    isPeriodPaused && 'border-orange-300 bg-orange-100',
+                    isPeriodActive && 'border-green-300 bg-green-50',
+                    isPeriodCompleted && 'bg-gray-100 text-gray-400'
                   )}
                 >
                   <div className="mb-4 flex flex-col items-start justify-between">
@@ -352,8 +346,8 @@ function ManageGame() {
                       <div className="font-bold">Period {period.index + 1}</div>
                       {isPeriodActive && <div>{game.status}</div>}
                     </div>
-                    <div className="flex flex-row gap-2 mt-2 w-full text-sm">
-                      <div className="flex flex-col gap-1 w-1/2">
+                    <div className="mt-2 flex w-full flex-row gap-2 text-sm">
+                      <div className="flex w-1/2 flex-col gap-1">
                         <div className="flex justify-between">
                           <span>Seed:</span>
                           <span className="font-semibold">{seed}</span>
@@ -375,7 +369,7 @@ function ManageGame() {
                           <span className="font-semibold">{lambda}</span>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-1 w-1/2 border-l pl-4">
+                      <div className="flex w-1/2 flex-col gap-1 border-l pl-4">
                         <div className="flex justify-between">
                           <span>Init Inflation:</span>
                           <span className="font-semibold">
@@ -400,30 +394,30 @@ function ManageGame() {
                   <div className="mt-1 flex flex-row gap-1">
                     {Array.apply(null, Array(period.segmentCount)).map(
                       (_, ix) => {
-                        const segment = period.segments[ix];
+                        const segment = period.segments[ix]
                         const segmentStatus = computeSegmentStatus(
                           game as any,
                           period as any,
                           ix
-                        );
+                        )
 
                         const isSegmentActive =
                           periodStatus === STATUS.ACTIVE &&
-                          segmentStatus === STATUS.ACTIVE;
+                          segmentStatus === STATUS.ACTIVE
                         const isSegmentCompleted =
                           periodStatus === STATUS.COMPLETED ||
-                          segmentStatus === STATUS.COMPLETED;
+                          segmentStatus === STATUS.COMPLETED
 
-                        const roll = segment?.facts?.roll;
-                        const shock = segment?.facts?.shock;
+                        const roll = segment?.facts?.roll
+                        const shock = segment?.facts?.shock
 
                         return (
                           <div
                             className={twMerge(
-                              "flex-initial rounded border p-2 text-center",
+                              'flex-initial rounded border p-2 text-center',
                               (!segment || isSegmentCompleted) &&
-                                "bg-gray-100 text-gray-400",
-                              isSegmentActive && "border-green-600 bg-green-100"
+                                'bg-gray-100 text-gray-400',
+                              isSegmentActive && 'border-green-600 bg-green-100'
                             )}
                             key={ix}
                             data-cy={`period-${period.index}-segment-${ix}`}
@@ -442,10 +436,10 @@ function ManageGame() {
                               </div>
                               {
                                 <div>
-                                  Segment{" "}
+                                  Segment{' '}
                                   {segment?.index !== undefined
                                     ? segment.index + 1
-                                    : ""}
+                                    : ''}
                                 </div>
                               }
                             </div>
@@ -461,7 +455,7 @@ function ManageGame() {
                             </div>
 
                             {segment && (
-                              <div className="flex flex-col rounded border border-gray-300 p-2 text-xs text-left bg-muted/20">
+                              <div className="bg-muted/20 flex flex-col rounded border border-gray-300 p-2 text-left text-xs">
                                 <div className="flex justify-between">
                                   <span>Roll:</span>
                                   <span className="font-mono font-bold">
@@ -477,7 +471,7 @@ function ManageGame() {
                               </div>
                             )}
                           </div>
-                        );
+                        )
                       }
                     )}
                     {!isPeriodCompleted && game.periods.length - 1 === ix && (
@@ -496,33 +490,33 @@ function ManageGame() {
                               storyElements: variables.storyElements,
                               learningElements: variables.learningElements,
                             },
-                          });
-                          resetForm();
+                          })
+                          resetForm()
                         }}
                       >
                         {(newSegmentForm) => {
                           if (storyElementsLoading) {
-                            return <div>Loading story elements...</div>;
+                            return <div>Loading story elements...</div>
                           }
                           if (storyElementsError) {
                             return (
                               <div>
-                                Error loading story elements:{" "}
+                                Error loading story elements:{' '}
                                 {storyElementsError.message}
                               </div>
-                            );
+                            )
                           }
 
                           if (learningElementsLoading) {
-                            return <div>Loading learning elements...</div>;
+                            return <div>Loading learning elements...</div>
                           }
                           if (learningElementsError) {
                             return (
                               <div>
-                                Error loading learning elements:{" "}
+                                Error loading learning elements:{' '}
                                 {learningElementsError.message}
                               </div>
-                            );
+                            )
                           }
 
                           return (
@@ -536,28 +530,28 @@ function ManageGame() {
                                     period.segments.length
                                   }
                                   className={{
-                                    root: "h-full w-12 font-bold text-gray-500",
+                                    root: 'h-full w-12 font-bold text-gray-500',
                                   }}
                                   onClick={() => setIsSegmentModalOpen(true)}
                                   aria-label="Add segment"
-                                  data={{ cy: "add-segment" }}
+                                  data={{ cy: 'add-segment' }}
                                 >
                                   <FontAwesomeIcon icon={faPlus} />
                                 </Button>
                               }
                               title="Add Segment"
                               onSecondaryAction={() => {
-                                newSegmentForm.resetForm();
-                                setIsSegmentModalOpen(false);
+                                newSegmentForm.resetForm()
+                                setIsSegmentModalOpen(false)
                               }}
                               secondaryLabel="Discard"
                               onPrimaryAction={async () => {
                                 await newSegmentForm.setFieldValue(
-                                  "periodIx",
+                                  'periodIx',
                                   period.index
-                                );
-                                newSegmentForm.handleSubmit();
-                                setIsSegmentModalOpen(false);
+                                )
+                                newSegmentForm.handleSubmit()
+                                setIsSegmentModalOpen(false)
                               }}
                               primaryLabel="Submit"
                             >
@@ -576,7 +570,7 @@ function ManageGame() {
                                 />
                               </div>
                             </Modal>
-                          );
+                          )
                         }}
                       </Formik>
                     )}
@@ -584,21 +578,21 @@ function ManageGame() {
                 </div>
                 <div
                   className={twMerge(
-                    "flex flex-row items-center rounded border bg-gray-50 p-2 text-xl text-gray-300",
+                    'flex flex-row items-center rounded border bg-gray-50 p-2 text-xl text-gray-300',
                     periodStatus === STATUS.RESULTS &&
-                      "border-red-200 text-red-400"
+                      'border-red-200 text-red-400'
                   )}
                 >
                   <FontAwesomeIcon icon={faPauseCircle} />
                 </div>
               </div>
-            );
+            )
           })}
 
           <Formik
             initialValues={{
-              periodName: "Game Period",
-              segmentCount: "4",
+              periodName: 'Game Period',
+              segmentCount: '4',
               seed: DEFAULT_SEED.toString(),
               targetInflation: DEFAULT_TARGET_INFLATION.toString(),
               naturalUnemployment: DEFAULT_NATURAL_UNEMPLOYMENT.toString(),
@@ -608,18 +602,18 @@ function ManageGame() {
               initialGrowth: DEFAULT_INITIAL_GROWTH.toString(),
             }}
             onSubmit={async (variables, { resetForm }) => {
-              const segmentCount: number = parseInt(variables.segmentCount);
-              const seed = parseInt(variables.seed);
-              const targetInflation = parseFloat(variables.targetInflation);
+              const segmentCount: number = parseInt(variables.segmentCount)
+              const seed = parseInt(variables.seed)
+              const targetInflation = parseFloat(variables.targetInflation)
               const naturalUnemployment = parseFloat(
                 variables.naturalUnemployment
-              );
-              const lambda = parseFloat(variables.lambda);
-              const initialInflation = parseFloat(variables.initialInflation);
+              )
+              const lambda = parseFloat(variables.lambda)
+              const initialInflation = parseFloat(variables.initialInflation)
               const initialUnemployment = parseFloat(
                 variables.initialUnemployment
-              );
-              const initialGrowth = parseFloat(variables.initialGrowth);
+              )
+              const initialGrowth = parseFloat(variables.initialGrowth)
               await addGamePeriod({
                 variables: {
                   gameId: Number(router.query.id),
@@ -636,15 +630,15 @@ function ManageGame() {
                   },
                   segmentCount: segmentCount,
                 },
-              });
-              resetForm();
+              })
+              resetForm()
             }}
           >
             {(newPeriodForm) => {
-              const lastPeriod = game.periods[game.periods.length - 1];
+              const lastPeriod = game.periods[game.periods.length - 1]
               const disabled =
                 lastPeriod &&
-                lastPeriod.segmentCount !== lastPeriod.segments.length;
+                lastPeriod.segmentCount !== lastPeriod.segments.length
 
               return (
                 <Modal
@@ -653,27 +647,27 @@ function ManageGame() {
                   trigger={
                     <Button
                       disabled={disabled}
-                      className={{ root: "font-bold text-gray-500 md:w-48" }}
+                      className={{ root: 'font-bold text-gray-500 md:w-48' }}
                       onClick={() => setIsPeriodModalOpen(true)}
                       aria-label="Add period"
-                      data={{ cy: "add-period" }}
+                      data={{ cy: 'add-period' }}
                     >
                       <FontAwesomeIcon icon={faPlus} />
                     </Button>
                   }
                   title="Add Period"
                   onSecondaryAction={() => {
-                    newPeriodForm.resetForm();
-                    setIsPeriodModalOpen(false);
+                    newPeriodForm.resetForm()
+                    setIsPeriodModalOpen(false)
                   }}
                   secondaryLabel="Discard"
                   onPrimaryAction={async () => {
                     await newPeriodForm.setFieldValue(
-                      "newPeriodIx",
+                      'newPeriodIx',
                       game.periods.length
-                    );
-                    newPeriodForm.handleSubmit();
-                    setIsPeriodModalOpen(false);
+                    )
+                    newPeriodForm.handleSubmit()
+                    setIsPeriodModalOpen(false)
                   }}
                   primaryLabel="Submit"
                 >
@@ -681,19 +675,19 @@ function ManageGame() {
                     <FormikTextField
                       name="periodName"
                       label="Period Name"
-                      data={{ cy: "period-name" }}
-                      className={{ label: "pb-2 font-normal" }}
+                      data={{ cy: 'period-name' }}
+                      className={{ label: 'pb-2 font-normal' }}
                     />
                     <FormikNumberField
                       placeholder={newPeriodForm.values.segmentCount}
                       label="Number of segments"
                       name="segmentCount"
                       tooltip={
-                        "One period corresponds to one year. The number of segments is used to compute the number of months in the period."
+                        'One period corresponds to one year. The number of segments is used to compute the number of months in the period.'
                       }
                       required
-                      data={{ cy: "segment-count" }}
-                      className={{ label: "pb-2 font-normal" }}
+                      data={{ cy: 'segment-count' }}
+                      className={{ label: 'pb-2 font-normal' }}
                     />
                   </div>
                   <div className="mt-4">
@@ -703,10 +697,10 @@ function ManageGame() {
                         placeholder={newPeriodForm.values.seed}
                         label="Seed"
                         name="seed"
-                        tooltip={"Seed for randomness."}
+                        tooltip={'Seed for randomness.'}
                         required
-                        data={{ cy: "seed" }}
-                        className={{ label: "pb-2 font-normal" }}
+                        data={{ cy: 'seed' }}
+                        className={{ label: 'pb-2 font-normal' }}
                       />
                     </div>
                   </div>
@@ -717,28 +711,28 @@ function ManageGame() {
                         placeholder={newPeriodForm.values.targetInflation}
                         label="Target Inflation (%)"
                         name="targetInflation"
-                        tooltip={"Default is 2.0%"}
+                        tooltip={'Default is 2.0%'}
                         required
-                        data={{ cy: "target-inflation" }}
-                        className={{ label: "pb-2 font-normal" }}
+                        data={{ cy: 'target-inflation' }}
+                        className={{ label: 'pb-2 font-normal' }}
                       />
                       <FormikNumberField
                         placeholder={newPeriodForm.values.naturalUnemployment}
                         label="Natural Unemployment (%)"
                         name="naturalUnemployment"
-                        tooltip={"Default is 5.0%"}
+                        tooltip={'Default is 5.0%'}
                         required
-                        data={{ cy: "natural-unemployment" }}
-                        className={{ label: "pb-2 font-normal" }}
+                        data={{ cy: 'natural-unemployment' }}
+                        className={{ label: 'pb-2 font-normal' }}
                       />
                       <FormikNumberField
                         placeholder={newPeriodForm.values.lambda}
                         label="Weight Lambda"
                         name="lambda"
-                        tooltip={"Default is 1.0"}
+                        tooltip={'Default is 1.0'}
                         required
-                        data={{ cy: "lambda" }}
-                        className={{ label: "pb-2 font-normal" }}
+                        data={{ cy: 'lambda' }}
+                        className={{ label: 'pb-2 font-normal' }}
                       />
                     </div>
                   </div>
@@ -749,33 +743,33 @@ function ManageGame() {
                         placeholder={newPeriodForm.values.initialInflation}
                         label="Initial Inflation (%)"
                         name="initialInflation"
-                        tooltip={"Default is 4.0%"}
+                        tooltip={'Default is 4.0%'}
                         required
-                        data={{ cy: "initial-inflation" }}
-                        className={{ label: "pb-2 font-normal" }}
+                        data={{ cy: 'initial-inflation' }}
+                        className={{ label: 'pb-2 font-normal' }}
                       />
                       <FormikNumberField
                         placeholder={newPeriodForm.values.initialUnemployment}
                         label="Initial Unemployment (%)"
                         name="initialUnemployment"
-                        tooltip={"Default is 4.0%"}
+                        tooltip={'Default is 4.0%'}
                         required
-                        data={{ cy: "initial-unemployment" }}
-                        className={{ label: "pb-2 font-normal" }}
+                        data={{ cy: 'initial-unemployment' }}
+                        className={{ label: 'pb-2 font-normal' }}
                       />
                       <FormikNumberField
                         placeholder={newPeriodForm.values.initialGrowth}
                         label="Initial Growth (%)"
                         name="initialGrowth"
-                        tooltip={"Default is 3.0%"}
+                        tooltip={'Default is 3.0%'}
                         required
-                        data={{ cy: "initial-growth" }}
-                        className={{ label: "pb-2 font-normal" }}
+                        data={{ cy: 'initial-growth' }}
+                        className={{ label: 'pb-2 font-normal' }}
                       />
                     </div>
                   </div>
                 </Modal>
-              );
+              )
             }}
           </Formik>
         </div>
@@ -824,7 +818,7 @@ function ManageGame() {
                     name="countdownSeconds"
                     precision={0}
                     label="Countdown in seconds"
-                    className={{ label: "pb-2 font-normal" }}
+                    className={{ label: 'pb-2 font-normal' }}
                   />
                 </div>
                 {/* TODO(JJ): @RS Do we want to show the following? If no we
@@ -840,7 +834,7 @@ function ManageGame() {
         </Formik>
       </div>
     </div>
-  );
+  )
 }
 
-export default ManageGame;
+export default ManageGame
