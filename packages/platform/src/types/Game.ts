@@ -43,7 +43,19 @@ export function generateBaseGame(opts?: GenerateBaseGameOpts) {
       t.int('activeSegmentIx')
 
       t.nonNull.int('playerCount', {
-        resolve: (game) => game._count?.players ?? game.players?.length ?? 0,
+        async resolve(game, _args, ctx) {
+          if (typeof game._count?.players === 'number') {
+            return game._count.players
+          }
+
+          if (Array.isArray(game.players)) {
+            return game.players.length
+          }
+
+          return ctx.prisma.player.count({
+            where: { gameId: game.id },
+          })
+        },
       })
 
       t.nonNull.list.nonNull.field('players', {
