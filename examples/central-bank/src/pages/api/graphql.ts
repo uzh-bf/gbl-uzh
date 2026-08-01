@@ -1,26 +1,26 @@
-import { pubSub } from "@gbl-uzh/platform/dist/lib/pubsub";
-import { createYoga } from "graphql-yoga";
-import { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../lib/authOptions";
+import { pubSub } from '@gbl-uzh/platform/dist/lib/pubsub'
+import { createYoga } from 'graphql-yoga'
+import { NextApiRequest, NextApiResponse } from 'next'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '../../lib/authOptions'
 
-import { schema } from "../../graphql/nexus";
-import prisma from "../../lib/prisma";
+import { schema } from '../../graphql/nexus'
+import prisma from '../../lib/prisma'
 
 export const config = {
   api: {
     bodyParser: false,
   },
-};
+}
 
 export default createYoga<{
-  req: NextApiRequest;
-  res: NextApiResponse;
+  req: NextApiRequest
+  res: NextApiResponse
 }>({
-  graphqlEndpoint: "/api/graphql",
+  graphqlEndpoint: '/api/graphql',
   schema,
   async context({ req, res, ...ctx }) {
-    const session = await getServerSession(req, res, authOptions);
+    const session = await getServerSession(req, res, authOptions)
 
     return {
       ...ctx,
@@ -28,6 +28,6 @@ export default createYoga<{
       res,
       user: session?.user,
       pubSub,
-    };
+    }
   },
-});
+})

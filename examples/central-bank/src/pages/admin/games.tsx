@@ -1,27 +1,27 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery } from '@apollo/client'
 import {
   CreateGameDocument,
   GameDataFragmentDoc,
   GamesDocument,
-} from "src/graphql/generated/ops";
+} from 'src/graphql/generated/ops'
 
-import { Button, FormikTextField } from "@uzh-bf/design-system";
-import { Form, Formik } from "formik";
-import { signOut, useSession } from "next-auth/react";
-import Link from "next/link";
-import { useRouter } from "next/router";
+import { Button, FormikTextField } from '@uzh-bf/design-system'
+import { Form, Formik } from 'formik'
+import { signOut, useSession } from 'next-auth/react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 function Games() {
-  const router = useRouter();
+  const router = useRouter()
 
   const session = useSession({
     required: true,
     onUnauthenticated: () => {
-      router.push("/admin/login");
+      router.push('/admin/login')
     },
-  });
+  })
 
-  const { data, error, loading } = useQuery(GamesDocument);
+  const { data, error, loading } = useQuery(GamesDocument)
   const [createGame] = useMutation(CreateGameDocument, {
     update(cache, { data: { createGame: createGameResult } }) {
       cache.modify({
@@ -30,20 +30,20 @@ function Games() {
             const newGameRef = cache.writeFragment({
               data: createGameResult,
               fragment: GameDataFragmentDoc,
-            });
-            return [...existingGames, newGameRef];
+            })
+            return [...existingGames, newGameRef]
           },
         },
-      });
+      })
     },
-  });
+  })
 
   if (loading || !data) {
-    return <div>loading...</div>;
+    return <div>loading...</div>
   }
 
   if (error) {
-    return <div>{error.message}</div>;
+    return <div>{error.message}</div>
   }
 
   return (
@@ -54,8 +54,8 @@ function Games() {
             const data = await signOut({
               redirect: false,
               callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/admin/games`,
-            });
-            router.push(data.url);
+            })
+            router.push(data.url)
           }}
         >
           Logout
@@ -63,7 +63,7 @@ function Games() {
       )}
       <Formik
         initialValues={{
-          name: "",
+          name: '',
           playerCount: 1,
           facts: {},
         }}
@@ -77,8 +77,8 @@ function Games() {
               playerCount: parseInt(String(variables.playerCount), 10),
             },
             refetchQueries: [GamesDocument],
-          });
-          resetForm();
+          })
+          resetForm()
         }}
       >
         {() => (
@@ -86,7 +86,7 @@ function Games() {
             <FormikTextField
               name="name"
               label="Name"
-              data={{ cy: "game-name" }}
+              data={{ cy: 'game-name' }}
             />
             <FormikTextField
               name="playerCount"
@@ -94,9 +94,9 @@ function Games() {
               min={1}
               step={1}
               label="Player Count"
-              data={{ cy: "game-player-count" }}
+              data={{ cy: 'game-player-count' }}
             />
-            <Button type="submit" data={{ cy: "create-game" }}>
+            <Button type="submit" data={{ cy: 'create-game' }}>
               Create Game
             </Button>
           </Form>
@@ -104,7 +104,7 @@ function Games() {
       </Formik>
       <div className="mt-4 flex flex-col gap-1">
         {data.games.map((g, index, array) => {
-          const game = g as any;
+          const game = g as any
           return (
             <Link
               className="w-96"
@@ -113,7 +113,7 @@ function Games() {
             >
               <Button
                 className={{
-                  root: "flex w-full flex-col items-start justify-around",
+                  root: 'flex w-full flex-col items-start justify-around',
                 }}
               >
                 <div className="flex w-full justify-between p-2">
@@ -132,11 +132,11 @@ function Games() {
                 </div>
               </Button>
             </Link>
-          );
+          )
         })}
       </div>
     </div>
-  );
+  )
 }
 
-export default Games;
+export default Games

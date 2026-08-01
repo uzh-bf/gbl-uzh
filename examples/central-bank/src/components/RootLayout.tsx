@@ -1,6 +1,6 @@
-import { sourceSansPro } from "~/lib/fonts";
+import { sourceSansPro } from '~/lib/fonts'
 
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren } from 'react'
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
@@ -13,5 +13,5 @@ export default function RootLayout({ children }: PropsWithChildren) {
         }
       `}</style>
     </div>
-  );
+  )
 }

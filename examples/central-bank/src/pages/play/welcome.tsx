@@ -1,20 +1,20 @@
-import { useMutation, useQuery } from "@apollo/client";
-import { COLORS } from "@gbl-uzh/platform/src/lib/constants";
-import { Logo, LogoSelector } from "@gbl-uzh/ui";
+import { useMutation, useQuery } from '@apollo/client'
+import { COLORS } from '@gbl-uzh/platform/src/lib/constants'
+import { Logo, LogoSelector } from '@gbl-uzh/ui'
 import {
   Button,
   FormikSelectField,
   FormikTextField,
-} from "@uzh-bf/design-system";
-import { Form, Formik } from "formik";
-import { useRouter } from "next/router";
-import { useState } from "react";
+} from '@uzh-bf/design-system'
+import { Form, Formik } from 'formik'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
 import {
   SelfDocument,
   UpdatePlayerDataDocument,
-} from "src/graphql/generated/ops";
-import { LOCATIONS, AVATARS } from "src/lib/constants";
-import * as Yup from "yup";
+} from 'src/graphql/generated/ops'
+import { AVATARS, LOCATIONS } from 'src/lib/constants'
+import * as Yup from 'yup'
 
 import {
   Card,
@@ -23,14 +23,14 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@uzh-bf/design-system";
+} from '@uzh-bf/design-system'
 
 const Schema = Yup.object().shape({
   name: Yup.string()
-    .min(2, "Too Short!")
-    .max(20, "Too Long!")
-    .required("Required"),
-});
+    .min(2, 'Too Short!')
+    .max(20, 'Too Long!')
+    .required('Required'),
+})
 
 // TODO(JJ):
 // - Move modal to ui package
@@ -41,19 +41,19 @@ const Schema = Yup.object().shape({
 // - avatar info, color, location, onSubmit, no player.role
 // - add banks, like colors
 function Welcome() {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { data, loading, error } = useQuery(SelfDocument, {
     // fetchPolicy: 'network-cache',
     onError: (error) => {
-      console.error("Error fetching player data:", error);
+      console.error('Error fetching player data:', error)
     },
     onCompleted: (data) => {
       if (!data.self) {
-        console.warn("No player data found - user may not be authenticated");
+        console.warn('No player data found - user may not be authenticated')
       }
     },
-  });
+  })
 
   const [updatePlayerData] = useMutation(UpdatePlayerDataDocument, {
     optimisticResponse: {
@@ -67,17 +67,17 @@ function Welcome() {
       },
     } as any,
     onError: (error) => {
-      console.error("Error updating player data:", error);
-      setIsSubmitting(false);
+      console.error('Error updating player data:', error)
+      setIsSubmitting(false)
     },
-  });
+  })
 
-  if (loading) return null;
-  if (error) return `Error! ${error}`;
+  if (loading) return null
+  if (error) return `Error! ${error}`
 
-  const gameName = "Central Bank Simulation";
+  const gameName = 'Central Bank Simulation'
 
-  const player = data.self;
+  const player = data.self
 
   return (
     <div className="m-auto w-full max-w-4xl p-8">
@@ -87,11 +87,11 @@ function Welcome() {
           color: player.facts.color ?? Object.keys(COLORS)[0],
           location: player.facts.location ?? LOCATIONS.Trader[0],
           imgPathAvatar:
-            player.facts.avatar ?? "/avatars/avatar_placeholder.png",
+            player.facts.avatar ?? '/avatars/avatar_placeholder.png',
         }}
         validationSchema={Schema}
         onSubmit={async (values) => {
-          setIsSubmitting(true);
+          setIsSubmitting(true)
 
           await updatePlayerData({
             variables: {
@@ -102,8 +102,8 @@ function Welcome() {
                 location: values.location,
               }),
             },
-          });
-          router.replace("/play/cockpit");
+          })
+          router.replace('/play/cockpit')
         }}
       >
         {({ values, errors, touched, setFieldValue }) => (
@@ -115,7 +115,7 @@ function Welcome() {
                 Central Bank governor profile.
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-wrap gap-4 sm:flex-nowrap  sm:justify-center">
+            <CardContent className="flex flex-wrap gap-4 sm:flex-nowrap sm:justify-center">
               <div className="flex w-full flex-col gap-4">
                 <Card className="h-full">
                   <CardHeader>
@@ -147,7 +147,7 @@ function Welcome() {
                 </Card>
               </div>
 
-              <Form className="max-w-1/2 w-full sm:w-max">
+              <Form className="w-full max-w-1/2 sm:w-max">
                 <Card>
                   <CardHeader>
                     <CardTitle>Governor Profile</CardTitle>
@@ -170,7 +170,7 @@ function Welcome() {
                         <FormikTextField
                           label="Name of Central Bank"
                           name="name"
-                          className={{ label: "pb-2 font-normal" }}
+                          className={{ label: 'pb-2 font-normal' }}
                         />
                         <FormikSelectField
                           label="Location"
@@ -180,9 +180,9 @@ function Welcome() {
                             label,
                           }))}
                           className={{
-                            root: "w-full",
-                            label: "pb-2 font-normal",
-                            select: { root: "w-full", trigger: "w-full" },
+                            root: 'w-full',
+                            label: 'pb-2 font-normal',
+                            select: { root: 'w-full', trigger: 'w-full' },
                           }}
                         />
                         <LogoSelector
@@ -191,7 +191,7 @@ function Welcome() {
                           color={values.color}
                           value={values.imgPathAvatar}
                           onChange={(val) =>
-                            setFieldValue("imgPathAvatar", val)
+                            setFieldValue('imgPathAvatar', val)
                           }
                           fallbackSrc="/avatars/avatar_placeholder.png"
                           label="Avatar"
@@ -206,9 +206,9 @@ function Welcome() {
                             label,
                           }))}
                           className={{
-                            root: "w-full",
-                            label: "pb-2 font-normal",
-                            select: { root: "w-full", trigger: "w-full" },
+                            root: 'w-full',
+                            label: 'pb-2 font-normal',
+                            select: { root: 'w-full', trigger: 'w-full' },
                           }}
                         />
                       </div>
@@ -216,11 +216,11 @@ function Welcome() {
                   </CardContent>
                   <CardFooter>
                     <Button
-                      className={{ root: "mt-4" }}
+                      className={{ root: 'mt-4' }}
                       type="submit"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? "Loading..." : "Start Game"}
+                      {isSubmitting ? 'Loading...' : 'Start Game'}
                     </Button>
                   </CardFooter>
                 </Card>
@@ -230,7 +230,7 @@ function Welcome() {
         )}
       </Formik>
     </div>
-  );
+  )
 }
 
-export default Welcome;
+export default Welcome

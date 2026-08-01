@@ -12,26 +12,26 @@ import {
   ShadcnTableHead as TableHead,
   ShadcnTableHeader as TableHeader,
   ShadcnTableRow as TableRow,
-} from "@uzh-bf/design-system";
-import { twMerge } from "tailwind-merge";
+} from '@uzh-bf/design-system'
+import { twMerge } from 'tailwind-merge'
 
 interface ObjectProps {
-  id: string;
-  index: number;
+  id: string
+  index: number
 }
 
 interface DecisionProps {
-  period: ObjectProps;
-  segment: ObjectProps;
+  period: ObjectProps
+  segment: ObjectProps
   decisions: {
-    bank: number;
-    bonds: number;
-    stocks: number;
-  };
+    bank: number
+    bonds: number
+    stocks: number
+  }
 }
 
 interface DecisionDisplayProps {
-  segmentDecisions: DecisionProps[];
+  segmentDecisions: DecisionProps[]
 }
 
 function DecisionLayout({
@@ -42,12 +42,12 @@ function DecisionLayout({
   children,
   separator = true,
 }: {
-  title?: string;
-  actionTitle?: string;
-  activeTitle?: string;
-  icon?: React.ReactNode;
-  children?: React.ReactNode;
-  separator?: boolean;
+  title?: string
+  actionTitle?: string
+  activeTitle?: string
+  icon?: React.ReactNode
+  children?: React.ReactNode
+  separator?: boolean
 }) {
   return (
     <div>
@@ -62,18 +62,18 @@ function DecisionLayout({
       {separator && <Separator className="my-2" />}
       {children}
     </div>
-  );
+  )
 }
 
 function OnOffIcon({ on = false }: { on?: boolean }) {
   return (
     <div
       className={twMerge(
-        "h-4 w-4 rounded-full",
-        on ? "bg-uzh-blue-100" : "bg-uzh-blue-20",
+        'h-4 w-4 rounded-full',
+        on ? 'bg-uzh-blue-100' : 'bg-uzh-blue-20'
       )}
     />
-  );
+  )
 }
 
 function DecisionsDisplayCompact({ segmentDecisions }: DecisionDisplayProps) {
@@ -125,14 +125,14 @@ function DecisionsDisplayCompact({ segmentDecisions }: DecisionDisplayProps) {
                       </div>
                     </TableCell>
                   </TableRow>
-                );
+                )
               })}
             </TableBody>
           </Table>
         </ScrollArea>
       </CardContent>
     </Card>
-  );
+  )
 }
 
-export { DecisionsDisplayCompact };
+export { DecisionsDisplayCompact }
