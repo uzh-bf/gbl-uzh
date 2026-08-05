@@ -6,7 +6,7 @@
 # mock config and the shadow-DB init script.
 #
 #   docker compose up -d
-#   pnpm install && pnpm run prisma:setup
+#   pnpm install && pnpm run setup:host
 #   pnpm -F @gbl-uzh/demo-game dev     # then open http://localhost:3000
 #
 # Ports are overridable when 5432/8090 are taken on your machine (e.g. by a

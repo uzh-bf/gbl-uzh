@@ -29,14 +29,14 @@ All three modes share the same database bootstrap and local OIDC mock (one-click
 | --- | --- | --- |
 | **Starter devcontainer** | First-time users, game builders — works natively with the VS Code Dev Containers extension | Open in VS Code, pick **GBL Starter**; app on <http://localhost:3000> ([walkthrough](docs/getting-started.md)) |
 | **Devcontainer + [devrouter](https://github.com/rschlaefli/devrouter)** | Maintainers running many projects side by side | `dev up`, then `devpod up .`; app on `https://demo-game.localhost` ([details](.devcontainer/README.md)) |
-| **Native `pnpm dev`** | Developers who prefer the host toolchain (Node 24+, PNPM) | `docker compose up -d` (Postgres + OIDC mock), `pnpm install && pnpm run prisma:setup`, then `pnpm -F @gbl-uzh/demo-game dev`; app on <http://localhost:3000> |
+| **Native `pnpm dev`** | Developers who prefer the host toolchain (Node 24+, PNPM 11) | `docker compose up -d` (Postgres + OIDC mock), `pnpm install && pnpm run setup:host`, then `pnpm -F @gbl-uzh/demo-game dev`; app on <http://localhost:3000> |
 
 In native mode, ports 5432/8090 must be free (override with `GBL_DB_PORT`/`GBL_OIDC_PORT` in the compose environment — devrouter's Traefik binds 5432, so stop it or override when mixing modes). Login against a real Auth0 tenant instead of the mock is possible via `apps/demo-game/.env.local` (see `.env.local.template`).
 
 ## Requirements
 
 - Building a game with the starter devcontainer: only Docker Desktop, VS Code, and the Dev Containers extension — see [Getting Started](docs/getting-started.md).
-- Working on the codebase outside a devcontainer: Docker / Podman, Node.js 24+, PNPM.
+- Working on the codebase outside a devcontainer: Docker / Podman, Node.js 24+, PNPM 11 — the repo pins `pnpm@11.6.0` via `packageManager`, so `corepack enable` picks the right version automatically. An older global pnpm (e.g. 9.x) silently leaves a stale `node_modules` behind.
 
 ## Contributing
 
