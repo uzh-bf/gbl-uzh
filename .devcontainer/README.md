@@ -112,3 +112,8 @@ Environment lives in `devcontainer.env` (committed, dev-only values). Lifecycle:
 `post-create.sh` (install + build platform/ui + prisma generate/push/seed) then
 `post-start.sh` (launch dev server). `node_modules` are named volumes (not the
 host's), so native binaries match the Linux container.
+
+The OIDC mock's config is shared by all run modes (this one, `starter/`, and
+the root `docker-compose.yml` for native `pnpm dev`):
+`docker/oidc-config.json`, mounted via `JSON_CONFIG_PATH`. Sanity-check any
+running mode with `bash .devcontainer/smoke.sh <app-url> <issuer-url>`.

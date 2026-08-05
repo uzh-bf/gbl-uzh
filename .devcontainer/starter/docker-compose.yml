@@ -73,30 +73,11 @@ services:
       - app
     environment:
       SERVER_PORT: '8090'
-      # interactiveLogin=false -> one-click auto-login as the fixed dev admin.
-      # Constant `sub` keeps the same User/Account across restarts.
-      # Keep JSON_CONFIG identical to the oidc service in ../docker-compose.yml.
-      JSON_CONFIG: >-
-        {
-          "interactiveLogin": false,
-          "tokenCallbacks": [
-            {
-              "issuerId": "default",
-              "requestMappings": [
-                {
-                  "requestParam": "grant_type",
-                  "match": "*",
-                  "claims": {
-                    "sub": "dev-admin",
-                    "email": "gbl-dev@df.uzh.ch",
-                    "name": "GBL Dev",
-                    "email_verified": true
-                  }
-                }
-              ]
-            }
-          ]
-        }
+      # Shared config (one-click auto-login as the fixed dev admin, constant
+      # `sub` across restarts) — single source for all run modes.
+      JSON_CONFIG_PATH: /etc/mock-oauth2/config.json
+    volumes:
+      - ../docker/oidc-config.json:/etc/mock-oauth2/config.json:ro
 
 volumes:
   pgdata:

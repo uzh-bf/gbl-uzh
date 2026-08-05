@@ -21,6 +21,18 @@ The `gbl-uzh` project consists of the following key components:
 
 Want to build a learning game on the platform? [docs/getting-started.md](docs/getting-started.md) takes you from zero to a running local environment with an AI assistant that does the technical work — no coding experience needed. The same starter devcontainer also gives developers a zero-setup environment; the devrouter-based configuration for running many projects side by side is described in [.devcontainer/README.md](.devcontainer/README.md).
 
+### Three ways to run the platform locally
+
+All three modes share the same database bootstrap and local OIDC mock (one-click admin login, no Auth0 account needed); they differ only in where the app process runs and how it is reached. Verify any mode with `bash .devcontainer/smoke.sh`.
+
+| Mode | For | Setup |
+| --- | --- | --- |
+| **Starter devcontainer** | First-time users, game builders — works natively with the VS Code Dev Containers extension | Open in VS Code, pick **GBL Starter**; app on <http://localhost:3000> ([walkthrough](docs/getting-started.md)) |
+| **Devcontainer + [devrouter](https://github.com/rschlaefli/devrouter)** | Maintainers running many projects side by side | `dev up`, then `devpod up .`; app on `https://demo-game.localhost` ([details](.devcontainer/README.md)) |
+| **Native `pnpm dev`** | Developers who prefer the host toolchain (Node 24+, PNPM) | `docker compose up -d` (Postgres + OIDC mock), `pnpm install && pnpm run prisma:setup`, then `pnpm -F @gbl-uzh/demo-game dev`; app on <http://localhost:3000> |
+
+In native mode, ports 5432/8090 must be free (override with `GBL_DB_PORT`/`GBL_OIDC_PORT` in the compose environment — devrouter's Traefik binds 5432, so stop it or override when mixing modes). Login against a real Auth0 tenant instead of the mock is possible via `apps/demo-game/.env.local` (see `.env.local.template`).
+
 ## Requirements
 
 - Building a game with the starter devcontainer: only Docker Desktop, VS Code, and the Dev Containers extension — see [Getting Started](docs/getting-started.md).
