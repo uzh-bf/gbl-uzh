@@ -29,14 +29,27 @@ All three modes share the same OIDC mock config, database image, and schema/seed
 | --- | --- | --- |
 | **Starter devcontainer** | First-time users, game builders — works natively with the VS Code Dev Containers extension | Open in VS Code, pick **GBL Starter**; app on <http://localhost:3000> ([walkthrough](docs/getting-started.md)) |
 | **Devcontainer + [devrouter](https://github.com/rschlaefli/devrouter)** | Maintainers running many projects side by side | `dev up`, then `devpod up .`; app on `https://demo-game.localhost` ([details](.devcontainer/README.md)) |
-| **Native `pnpm dev`** (demo-game) | Developers who prefer the host toolchain (Node 24+, PNPM 11) | `docker compose up -d --wait` (Postgres + OIDC mock), `pnpm install && pnpm run setup:host`, then `pnpm -F @gbl-uzh/demo-game dev`; app on <http://localhost:3000> |
+| **Native `pnpm dev`** (demo-game) | Developers who prefer the host toolchain (Node 24+, PNPM 11) | [Native quickstart](#native-quickstart-demo-game) below; app on <http://localhost:3000> |
 
-In native mode, ports 5432/8090/3000 must be free. Every port override needs its app-side counterpart (the app reads defaults from `apps/demo-game/.env*`): `GBL_DB_PORT` also needs `DATABASE_URL`/`SHADOW_DATABASE_URL`, `GBL_OIDC_PORT` also needs `AUTH0_ISSUER`, and `PORT` also needs `NEXTAUTH_URL`/`NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_API_URL` — see the header of [docker-compose.yml](docker-compose.yml). Native mode is currently wired for the demo game only; the example games still assume a devcontainer. Login against a real Auth0 tenant instead of the mock is possible via `apps/demo-game/.env.local` (see `.env.local.template`).
+#### Native quickstart (demo-game)
+
+1. Make sure Docker is running and ports **5432, 8090, 3000** are free.
+2. Get the pinned pnpm (`11.6.0`) — an older pnpm exits fine but leaves a stale `node_modules` behind:
+   - **Volta** (team default): Volta's pnpm support is behind a feature flag — add `export VOLTA_FEATURE_PNPM=1` to your shell profile, otherwise Volta silently runs its default pnpm and ignores the repo pin.
+   - **No Volta:** `corepack enable` honors the `packageManager` field.
+   - Either way, verify: `pnpm --version` inside the repo must print `11.6.0`.
+3. `docker compose up -d --wait` — starts Postgres and the local login mock (replaces Auth0, no account needed).
+4. `pnpm install && pnpm run setup:host` — installs, builds shared packages, prepares and seeds the database.
+5. `pnpm -F @gbl-uzh/demo-game dev`
+6. Open <http://localhost:3000/admin/login> and click the login button — no password; you are the dev admin `gbl-dev@df.uzh.ch`.
+7. If something seems off, `bash .devcontainer/smoke.sh` tells you whether the login mock, the app, or your setup is at fault.
+
+If a default port is taken, every override needs its app-side counterpart (the app reads defaults from `apps/demo-game/.env*`): `GBL_DB_PORT` also needs `DATABASE_URL`/`SHADOW_DATABASE_URL`, `GBL_OIDC_PORT` also needs `AUTH0_ISSUER`, and `PORT` also needs `NEXTAUTH_URL`/`NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_API_URL` — see the header of [docker-compose.yml](docker-compose.yml). Native mode is currently wired for the demo game only; the example games still assume a devcontainer. Login against a real Auth0 tenant instead of the mock is possible via `apps/demo-game/.env.local` (see `.env.local.template`).
 
 ## Requirements
 
 - Building a game with the starter devcontainer: only Docker Desktop, VS Code, and the Dev Containers extension — see [Getting Started](docs/getting-started.md).
-- Working on the codebase outside a devcontainer: Docker / Podman, Node.js 24+, PNPM 11 — the repo pins `pnpm@11.6.0` via `packageManager`, so `corepack enable` picks the right version automatically. An older global pnpm (e.g. 9.x) silently leaves a stale `node_modules` behind.
+- Working on the codebase outside a devcontainer: Docker / Podman, Node.js 24+, PNPM 11. The repo pins both (`volta` field and `packageManager`); see step 2 of the [native quickstart](#native-quickstart-demo-game) for making the pnpm pin actually apply (Volta needs `VOLTA_FEATURE_PNPM=1`).
 
 ## Contributing
 
