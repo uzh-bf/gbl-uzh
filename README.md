@@ -23,15 +23,15 @@ Want to build a learning game on the platform? [docs/getting-started.md](docs/ge
 
 ### Three ways to run the platform locally
 
-All three modes share the same database bootstrap and local OIDC mock (one-click admin login, no Auth0 account needed); they differ only in where the app process runs and how it is reached. Verify any mode with `bash .devcontainer/smoke.sh`.
+All three modes share the same OIDC mock config, database image, and schema/seed (one-click admin login, no Auth0 account needed); they differ in where the app process runs, how it is reached, and which script bootstraps it (the devcontainers use `.devcontainer/post-create.sh`, native mode uses `pnpm run setup:host`). Verify any mode with `bash .devcontainer/smoke.sh`.
 
 | Mode | For | Setup |
 | --- | --- | --- |
 | **Starter devcontainer** | First-time users, game builders — works natively with the VS Code Dev Containers extension | Open in VS Code, pick **GBL Starter**; app on <http://localhost:3000> ([walkthrough](docs/getting-started.md)) |
 | **Devcontainer + [devrouter](https://github.com/rschlaefli/devrouter)** | Maintainers running many projects side by side | `dev up`, then `devpod up .`; app on `https://demo-game.localhost` ([details](.devcontainer/README.md)) |
-| **Native `pnpm dev`** | Developers who prefer the host toolchain (Node 24+, PNPM 11) | `docker compose up -d` (Postgres + OIDC mock), `pnpm install && pnpm run setup:host`, then `pnpm -F @gbl-uzh/demo-game dev`; app on <http://localhost:3000> |
+| **Native `pnpm dev`** (demo-game) | Developers who prefer the host toolchain (Node 24+, PNPM 11) | `docker compose up -d --wait` (Postgres + OIDC mock), `pnpm install && pnpm run setup:host`, then `pnpm -F @gbl-uzh/demo-game dev`; app on <http://localhost:3000> |
 
-In native mode, ports 5432/8090 must be free (override with `GBL_DB_PORT`/`GBL_OIDC_PORT` in the compose environment — devrouter's Traefik binds 5432, so stop it or override when mixing modes). Login against a real Auth0 tenant instead of the mock is possible via `apps/demo-game/.env.local` (see `.env.local.template`).
+In native mode, ports 5432/8090/3000 must be free. Every port override needs its app-side counterpart (the app reads defaults from `apps/demo-game/.env*`): `GBL_DB_PORT` also needs `DATABASE_URL`/`SHADOW_DATABASE_URL`, `GBL_OIDC_PORT` also needs `AUTH0_ISSUER`, and `PORT` also needs `NEXTAUTH_URL`/`NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_API_URL` — see the header of [docker-compose.yml](docker-compose.yml). Native mode is currently wired for the demo game only; the example games still assume a devcontainer. Login against a real Auth0 tenant instead of the mock is possible via `apps/demo-game/.env.local` (see `.env.local.template`).
 
 ## Requirements
 
