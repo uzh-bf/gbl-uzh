@@ -21,13 +21,17 @@ coverage
 
 # Next.js build output
 .next
+**/.next
 out
+**/out
 
 # Production build output
 dist
+**/dist
 
 # TypeScript
 *.tsbuildinfo
+**/*.tsbuildinfo
 
 # Environment variables
 .env
@@ -42,8 +46,12 @@ dist
 
 # Ignore build artifacts
 build
+**/build
 
 .turbo
+**/.turbo
+.rollup.cache
+**/.rollup.cache
 .next
 
 apps/escapp

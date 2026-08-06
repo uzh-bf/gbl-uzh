@@ -3,12 +3,12 @@
 # install/build/seed, the selected `GBL_GAME_TARGET` dev server); devrouter's Traefik fronts everything on
 # the shared :443 / :5432. Many projects coexist with zero port collisions.
 #
-# Usage: `dev up` + `dev tls install` (creates devnet + the mkcert CA), THEN
-# bring the devcontainer up (devnet is external — must pre-exist), then
-# `for a in app oidc db; do dev app run "$a" --yes; done`. Requires devrouter >= 0.0.31.
+# Usage: `devrouter ensure .` is the canonical lifecycle command. It prepares
+# devrouter/TLS, brings up the devcontainer, and starts the declared routes.
+# Requires devrouter >= 0.0.35.
 version: 1
 devrouter:
-  version: 0.0.31
+  version: 0.0.35
 project:
   name: demo-game
 apps:
