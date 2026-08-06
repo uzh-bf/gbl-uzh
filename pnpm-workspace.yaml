@@ -1,7 +1,5 @@
 packages:
   - 'apps/*'
-  - '!apps/escapp'
-  - '!apps/quartz'
   - 'packages/*'
   - 'examples/*'
   - cypress
