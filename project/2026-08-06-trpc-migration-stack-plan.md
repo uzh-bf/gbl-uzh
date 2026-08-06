@@ -1,0 +1,187 @@
+# tRPC Migration — Stack Plan (Gate 1 draft)
+
+Date: 2026-08-06
+Source branch: `codex/trpc-migration-work-packages` @ `c25e0a7f`
+Source PR: [#144 feat(trpc): migrate platform and demo-game from GraphQL to tRPC v11](https://github.com/uzh-bf/gbl-uzh/pull/144) — OPEN, non-draft, CONFLICTING, 93 commits, 134 files, +11033/−17270, 30 comments (14 human threads by jajakob, 16 automated).
+Base: `dev` @ `254606c` (6 commits ahead of the branch merge-base `5cac12c`; all merged Aug 1, all toolchain).
+Provider: GitHub (stacks preview enabled — repo stack #179 exists).
+Worktree: new `trees/trpc-migration-stack` (one stack, one worktree). Source worktree `.claude/worktrees/modest-rosalind-8e36bd` stays untouched.
+
+## 1. Reconcile live state (verified 2026-08-06)
+
+| Item | State |
+| --- | --- |
+| Source branch HEAD | `c25e0a7f`, clean, pushed, equals origin |
+| PR #144 | OPEN, targets `dev`, CONFLICTING, 14 unresolved human threads (jajakob), 16 automated comments |
+| `dev` HEAD | `254606c` — 6 commits: #183 native ARM CI, #177 Prettier 3.9.6, #178 TS 6.0.2 bridge, #180 website React 19/Next 16, #181 Prisma 7.9.1, #182 TS 7 native checks |
+| Branch already merged dev | Yes, at `08c19d4` (incl. ui extraction `6159395`, central-bank, stakeholder fixes, managed devrouter `5cac12c`). Remaining 6 dev commits are toolchain/CI only → merge is mechanical |
+| Branch still on | Prisma 6.14.0, TS ~5.9.3, Prettier ~3.3.2 + own newer bumps (next 16.2.12, react 19.2.8, pnpm 11.18.0, playwright 1.62.0) |
+| Prior gates | Roadmap `project/2026-07-29-trpc-migration-finalization-roadmap.md` records W1–W7 complete, security + maintainability gates run, 45-test platform baseline |
+| No-merge boundary | No merge without explicit user authority (memory + handoffs) |
+
+## 2. Approach — extraction, not re-implementation
+
+The branch's **final tree** is re-staged deliberately onto `origin/dev`, layer by layer, with `git add <paths>` and focused commits. PR #144 and its branch are frozen as a safety reference until the stack validates (migration contract: freeze, extract, prove, audit).
+
+### Step 0 — absorb `dev` (L0)
+Create `trees/trpc-migration-stack` from `origin/dev`, merge the source branch's final tree, then take **dev's versions** of the 6 toolchain commits: Prisma 7.9.1 (`prisma.config.ts`, adapter-pg, generated client), TS 6 canonical + `typescript-native@7` alias with dual `check:ts` / `check:ts:typescript6` in every package, Prettier 3.9.6, native ARM Docker matrix, website React 19/Next 16. Reconcile `pnpm-lock.yaml`, manifests, `pnpm-workspace.yaml`. Result is behavior-identical to `dev` with every check green.
+
+> **L0 definition (verified 2026-08-06):** L0 is the execution-contract commit — the plan file plus this coverage ledger. Its tree equals `origin/dev` exactly (zero code diff by construction; `git diff origin/dev <L0 tip>` shows only the added plan file). The reconciled `pnpm-workspace.yaml` and `pnpm-lock.yaml` are **not** dev-identical (branch-authored exclusions, React/FontAwesome overrides, and a lockfile regenerated for the full merged tree), so they cannot ride in L0 without breaking L0's dev-parity and `--frozen-lockfile` check. They travel with the layer whose manifests change them: `pnpm-workspace.yaml` + regenerated lockfile in L1, lockfile regenerated again at the L2 and L3 tips. L3's regenerated lockfile must equal merge-ref `92fd710:pnpm-lock.yaml` (same manifests) — that equality is the convergence check.
+
+### Step 1 — re-stage layers bottom-up
+Each layer is a work package with its own branch in the stack, its own commits, and per-layer CI.
+
+```yaml
+feature: trpc-migration
+provider: github
+base: dev
+mode: guided            # Gate 2 pause after L0 (toolchain foundation)
+
+layers:
+  - id: 00
+    name: absorb-dev-toolchain
+    work_package: dev parity — Prisma 7, TS 6/7 dual checks, Prettier 3, native ARM CI, lockfile reconciliation
+    responsibility: churn isolation; every layer above carries only human-authored change
+    depends_on: base
+    reviewer: devops / CI audience
+    attention: mechanical
+    reviewer_focus:
+      - Is the merged tree exactly dev-identical in behavior (no stray branch deltas)?
+      - Do both TS check scripts run in every package?
+    validation:
+      - pnpm install --frozen-lockfile
+      - check:ts (TS 6) and check:ts:typescript6 (TS 7 alias) per package
+      - lint, build, platform jest baseline (45 tests)
+    activation: complete
+    risk: medium
+
+  - id: 01
+    name: platform-trpc-kernel
+    work_package: tRPC server kernel in packages/platform — procedures, DTOs, auth tiers, error mapping, realtime bus, tests
+    responsibility: all of packages/platform/src/trpc/* (additions, ~+2897 lines), platform tests, jest config, platform manifest deps, rollup/index exports, pubsub→realtime bridge, EventService/GameService collateral
+    depends_on: 00
+    reviewer: platform backend audience
+    attention: judgment-heavy
+    reviewer_focus:
+      - Auth tier boundaries (public/player/admin) and ownership assertions
+      - DTO shapes vs GraphQL parity; D3 fact-withholding on results DTOs (incl. residual in toPastResultDto)
+      - Error mapping contract (yup ValidationError → BAD_REQUEST)
+      - API surface is inert: no consumers until L2
+    validation:
+      - platform jest (45 tests), check:ts, lint, build
+    activation: inert
+    risk: low-medium
+
+  - id: 02
+    name: demo-game-trpc-migration
+    work_package: demo-game runtime migration — remove GraphQL/nexus, add tRPC client + hooks, rewire pages/components, Dockerfile/next.config
+    responsibility: apps/demo-game/* (additions + rewiring + graphql deletions), consumed packages/ui component fixes (command/dialog/Timeline), rate-wars index.tsx typing collateral
+    depends_on: 01
+    reviewer: demo-game frontend audience
+    attention: judgment-heavy
+    reviewer_focus:
+      - Runtime behavior parity (cockpit, admin, reports, learning elements, realtime bus)
+      - Error/loading state handling (verified current bugs: games.tsx error-after-loading, multi-select toggle in LearningActivityModal)
+      - Realtime event flow via trpc subscription vs old pubsub
+    validation:
+      - demo-game build, check:ts, lint, unit tests
+      - playwright demo-game-flow smoke
+      - docker build demo-game
+    activation: complete
+    risk: high
+
+  - id: 03
+    name: ci-devcontainer-docs-collateral
+    work_package: CI workflows, devcontainer/devrouter, vercel.json, playwright config, example-game manifests, project docs, AGENTS.md
+    responsibility: residual branch-authored deltas after L0 absorption; answer-only review threads; no behavior change
+    depends_on: 02
+    reviewer: devops / maintainer audience
+    attention: mechanical
+    reviewer_focus:
+      - Answers to jajakob's config/devops questions (vercel.json, cypress, nodemon, yup/zod, graphql-in-platform, Dockerfile explanations, devrouter commands, post-start env, playwright workflow, webpack, globals.css comment)
+    validation:
+      - workflow lint, docker builds (demo-game, rate-wars), devcontainer config validation
+    activation: complete
+    risk: low
+
+follow_up_stacks:
+  - W7 follow-ups: migrate example games to tRPC, decouple ui useLearningActivities from Apollo, optional @trpc/tanstack-react-query
+```
+
+## 3. Coverage ledger (source branch → layer)
+
+Every diff file of the source branch maps to exactly one layer; cross-cutting files (manifests, lockfile) are split by hunk with L0 taking dev-alignment and L2/L3 taking branch-authored hunks.
+
+| Layer | Files |
+| --- | --- |
+| 00 | This plan + coverage ledger only. Tree == `origin/dev` (`254606c`) with zero code diff; verified via `git diff origin/dev <L0 tip>` (plan file is the sole addition). |
+| 01 | `packages/platform/src/trpc/**` (22 files), `packages/platform/test/**` (6), `packages/platform/jest.config.cjs`, `packages/platform/package.json` (trpc deps + mirrored devDeps), `packages/platform/rollup.config.js`, `packages/platform/src/index.ts`, `src/lib/pubsub.ts`, `src/lib/realtime.ts` (addition), `src/services/EventService.ts`, `src/services/GameService.ts` — plus `pnpm-workspace.yaml` (branch toolchain reconciliation: escapp/quartz excludes, React/FontAwesome overrides, packageExtensions) and `pnpm-lock.yaml` regenerated at the L1 tip. |
+| 02 | `apps/demo-game/**` (54 files incl. `src/graphql/**` deletions, `codegen.ts`, `api/graphql.ts`), `packages/ui/src/components/{Timeline,ui/command,ui/dialog,LearningActivityModal}.tsx` (incl. multi-select fix), `examples/rate-wars/src/pages/index.tsx`, `pnpm-lock.yaml` regenerated at the L2 tip. |
+| 03 | `.github/workflows/*` (branch type-gate + ARM matrix), `.devcontainer/**`, `.devrouter.yml`, `.dockerignore`, `vercel.json`, `playwright/**`, `.agents/skills/{devrouter,gbl-playwright-e2e}/SKILL.md`, `docs/solutions/integration/devpod-oidc-network-namespace-recreate.md`, `examples/rate-wars/Dockerfile`, `packages/ui/package.json` (next devDep closure), `AGENTS.md`, `project/**` (14 migration docs; the plan file itself lives in L0), `pnpm-lock.yaml` regenerated at the L3 tip (must equal `92fd710:pnpm-lock.yaml`). |
+
+After L0, any file whose branch version equals dev's drops out of the diff automatically; L3 content is the computed residual.
+
+## 4. Review-thread triage (PR #144, jajakob)
+
+14 human threads — 12 answer-with-explanation, 2 may warrant small fixes (Timeline rename; "examples should also use trpc" → answer: deliberate W7 deferral). All answered in L3 (or their owning layer where code changes). Automated comments (Sonar, bots): 3 verified already-fixed (missing awaits, services injection, toDate epoch-0), 2 verified still-valid (games.tsx error order, multi-select toggle) → fixed in L2, rest are config/explanation.
+
+Verified current-code findings (bot comments that survive):
+
+| Finding | Status | Layer |
+| --- | --- | --- |
+| Multi-select learning elements unsolvable (`LearningActivityModal.tsx` replaces selection with `[index]`) | Still valid | 02 |
+| `games.tsx` loading-before-error guard | Still valid | 02 |
+| Missing awaits (logoutAsTeam, addCountdown, toggleSwitch) | Already fixed (returned promises) | — |
+| services injection crash (play router) | Already fixed (demo-game passes services) | — |
+| toDate epoch-0 | Already fixed | — |
+
+## 5. Deliberate exclusions (unchanged from prior decisions)
+
+- D2: stay classic `createTRPCReact` (no tanstack adapter)
+- D3 residual: `toPastResultDto` still copies `period.facts` / `segment.facts` / `player.facts` into the player-facing `pastForPlayer`. No consumer reads them (verified: zero call sites in demo-game) and GraphQL parity is not required → **proposed small fix in L1**: withhold these facts, matching `SpecificResultDto`.
+- D4: 6 no-UI procedures kept
+- W7 follow-ups: examples stay on GraphQL (Apollo stays in example manifests), ui `useLearningActivities` stays Apollo-backed — deferred stack
+
+## 6. Open PRs on dev (overlap check, verified 2026-08-06)
+
+| PR | Scope | Overlap | Handling |
+| --- | --- | --- | --- |
+| #168 `claude/pr161-review-followups` (ui dep externalization, OPEN/CONFLICTING) | packages/ui + demo-game components | L2 ui components, L3 ui manifest | Leave independent; conflicts resolved at merge time if it lands first |
+| #184 dependabot postcss bump (OPEN) | manifests + lockfile | L0 lockfile | Leave independent |
+| #185 `enhance/native-dev-mode` devcontainer (OPEN/MERGEABLE) | .devcontainer | L3 devcontainer | Leave independent; re-check before Gate 3 |
+
+## 7. Validation & gates
+
+- Per-layer CI at each layer's tip (GitHub: each layer PR evaluated against `dev` rules) — never rely on the top layer being green
+- Gate 2 (after L0): foundation is toolchain churn, not auth/API — present L0 result, continue per guided mode
+- Gate 3: review package with per-layer human-authored vs generated delta, review focus, risk; one decision: open for review / revise / keep drafts
+- Final-outcome review (repo Mandatory Review Gates): configured reviewer over the integrated stack before opening for review; security + maintainability gates were run on the source branch and are re-validated at Gate 3 on the exact re-staged content
+- Landing (Gate 4): explicit user authorization; user lands via GitHub UI; stack lands atomically bottom-up
+
+## 8. Open decisions (recommendations)
+
+1. **Topology: 4 layers (recommended) vs 3** (fold L0 into L1). 4 isolates toolchain churn; 3 saves one review context-switch.
+2. **PR #144: freeze now (recommended)** — keep as safety reference until stack validates; close after stack lands. Alternative: close immediately.
+3. **D3 residual: fix in L1 (recommended)** — strip period/segment/player facts from `pastForPlayer`; no consumers, matches D3. Alternative: defer.
+4. **Thread triage: answer 14 + fix the 2 verified bugs (recommended)** in their owning layers. Alternative: answers only, bugs as follow-ups.
+5. **Open PRs #168/#184/#185: leave independent on dev (recommended)**.
+
+## 9. Agy discussion (planning-stage challenge pass)
+
+### Outcome: agy unavailable in this environment (verified 2026-08-06, agy 1.1.10)
+
+Every invocation shape was attempted and verified against agy's own conversation transcripts (the CLI records what it actually received):
+
+| Attempt | Result |
+| --- | --- |
+| `agy --print "<prompt>"` | Prompt dropped — model received only the `--model` flag token |
+| `agy --print --prompt "<prompt>"` | Same: model received only `--prompt` |
+| `--prompt=`, `--print=`, positional-after-`--`, stdin pipe | Prompt dropped or empty reply |
+| `agy -i` (interactive PTY) | CLI not signed in (Antigravity auth) + invalid `settings.json` (`artifactReviewPolicy: "request-review"`) — exits before any prompt |
+
+The model calls do fire (stream ResponseIDs appear in agy's logs), but print mode never emits the reply in this setup, so the planning-stage challenge pass could not be obtained. No agent/client configuration was modified (per repo rules).
+
+**Fallback for the planning-stage pass:** the plan in this file is the Gate 1 draft; the repo's Mandatory Review Gates require one separate read-only planning-stage pass before the plan is presented as the execution contract. Options (user ruling):
+1. Run the configured reviewer (`reviewer` route per `$rs-model-routing`) on this plan now — recommended; satisfies the gate and the "discuss with agy" intent is recorded as attempted-but-blocked.
+2. Retry agy later (sign in / fix `settings.json` outside this session), then re-run the critique before Gate 3.
+3. Proceed to Gate 1 with in-session review only and accept the gate as waived for this plan — not recommended; the final outcome review would still run before any merge.
