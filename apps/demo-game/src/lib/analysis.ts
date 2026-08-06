@@ -1,12 +1,41 @@
 import { standardDeviation } from '@gbl-uzh/platform/dist/lib/util'
-import { PlayerResult } from 'src/graphql/generated/ops'
 import { MONTHS, NUM_MONTHS } from './constants'
 
-export const getSegmentEndResults = <
-  TResult extends Pick<PlayerResult, 'type'>,
->(
-  results: TResult[]
-) => {
+type ChartPlayerData = {
+  name: string
+  [key: string]: any
+}
+
+export type ReportPlayerResult = {
+  type?: string | null
+  facts?: {
+    initialCapital?: number
+    decisions?: Record<string, number | string>
+    assetsWithReturns?: Array<{
+      totalAssets?: number
+      totalAssetsReturn?: number
+      accBankBenchmarkReturn?: number
+      accTotalAssetsReturn?: number
+    }>
+    risk?: number
+    totalAssetsReturnsPA?: number
+    sharpeRatio?: number
+  } | null
+  player?: {
+    id: string
+    name: string
+  } | null
+  period?: {
+    id?: string | number
+    index: number
+  } | null
+  segment?: {
+    id?: string | number
+    index: number
+  } | null
+}
+
+export const getSegmentEndResults = (results: ReportPlayerResult[]) => {
   return results.filter((o) => o.type == 'SEGMENT_END')
 }
 
@@ -15,14 +44,14 @@ export const composeChartData = (dataPerPeriod: any, key: string) => {
   dataPerPeriod.forEach((periodData, periodIndex) => {
     if (Object.keys(periodData).length === 0) return
 
-    const players = Object.values(periodData) as any[]
+    const players = Object.values(periodData) as ChartPlayerData[]
     const num = players.length > 0 ? players[0][key].length : NUM_MONTHS
 
     for (let i = 0; i < num; i++) {
       const entry = {
         period: periodIndex,
         month: MONTHS[i % NUM_MONTHS] + ' P' + (periodIndex + 1).toString(),
-      }
+      } as Record<string, string | number>
 
       players.forEach((player) => {
         entry[player.name] = player[key][i]
@@ -35,7 +64,7 @@ export const composeChartData = (dataPerPeriod: any, key: string) => {
 }
 
 export const computeRiskAndReturnOfPlayer = (
-  segmentEndResultsOfPlayer: PlayerResult[]
+  segmentEndResultsOfPlayer: ReportPlayerResult[]
 ) => {
   const totalAssetsReturns = segmentEndResultsOfPlayer.flatMap(({ facts }) => {
     const assetsWithReturns = facts?.assetsWithReturns.slice(1) || []
