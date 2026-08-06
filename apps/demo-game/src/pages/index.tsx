@@ -1,4 +1,3 @@
-// import { useQuery } from '@apollo/client'
 import { faStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -10,19 +9,9 @@ import {
   TimelineEntry,
   TradingForm,
 } from '@gbl-uzh/ui'
-// import { ResultDocument } from 'src/graphql/generated/ops'
-
 import { useRouter } from 'next/router'
 
 export default function Home() {
-  // const { data, loading, error } = useQuery(ResultDocument, {
-  //   fetchPolicy: 'cache-first',
-  // })
-
-  // if (loading) return <div>Loading...</div>
-  // if (error) return <div>Error {error.message}</div>
-  // console.log(data)
-
   const router = useRouter()
   const tabs = [
     { name: 'Welcome', href: '/play/welcome' },
@@ -155,24 +144,32 @@ export default function Home() {
           activePeriodIx={0}
           activeSegmentIx={0}
           formatter={(current, prev) => {
-            // Do computation here
-            const spotPrice = Number(
-              current.segmentFlat?.facts.spotPrice ??
-                current.facts.finalSpotPrice
-            )
-            const futuresPrice = Number(
-              current.segmentFlat?.facts.futuresPrice ??
-                current.facts.finalSpotPrice
+            // Timeline facts are untyped JSON blobs; narrow to numbers
+            // before doing arithmetic on them.
+            const toNumber = (value: unknown) =>
+              typeof value === 'number' ? value : undefined
+
+            const spotPrice =
+              toNumber(current.segmentFlat?.facts.spotPrice) ??
+              toNumber(current.facts.finalSpotPrice)
+            const futuresPrice =
+              toNumber(current.segmentFlat?.facts.futuresPrice) ??
+              toNumber(current.facts.finalSpotPrice)
+
+            const prevSpotPrice = toNumber(prev?.segmentFlat?.facts.spotPrice)
+            const prevFuturesPrice = toNumber(
+              prev?.segmentFlat?.facts.futuresPrice
             )
 
             const spotPriceDelta =
-              prev?.segmentFlat?.facts.spotPrice &&
-              (spotPrice / Number(prev.segmentFlat.facts.spotPrice) - 1) * 100
+              spotPrice !== undefined && prevSpotPrice
+                ? (spotPrice / prevSpotPrice - 1) * 100
+                : undefined
 
             const futuresPriceDelta =
-              prev?.segmentFlat?.facts.futuresPrice &&
-              (futuresPrice / Number(prev.segmentFlat.facts.futuresPrice) - 1) *
-                100
+              futuresPrice !== undefined && prevFuturesPrice
+                ? (futuresPrice / prevFuturesPrice - 1) * 100
+                : undefined
             return (
               <>
                 {spotPriceDelta && <div>S {spotPriceDelta}</div>}
