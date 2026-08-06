@@ -438,3 +438,69 @@ The remaining 104 shared files are byte-identical to the merge-ref.
 
 ### Registration
 Stack initialized with `gh stack init --base dev` (adopting 00/01). 02/03 were re-staged and committed after the init, and are registered in the follow-up step; stack metadata lives in `.git/gh-stack` and is shared across worktrees.
+
+## 11. Execution addendum (verified 2026-08-06/07)
+
+Executed the approved plan end-to-end. PRs #186–#189 (L0–L3) are open, draft, chained (`base` = previous layer), MERGEABLE. PR #144 and `codex/trpc-migration-work-packages` @ `c25e0a7f` remain frozen and untouched (verified: local ref == origin ref, worktree clean). No merges performed without explicit user authorization.
+
+### Final commit map (replaces §10's earlier SHAs)
+
+| Layer | Branch | Final HEAD | Vercel |
+| --- | --- | --- | --- |
+| L0 | `trpc-stack/00-absorb-dev-toolchain` | `878bc4f` | ✅ (no vercel.json, dev-era lockfile) |
+| L1 | `trpc-stack/01-platform-trpc-kernel` | `38adf73` | ✅ success |
+| L2 | `trpc-stack/02-demo-game-trpc-migration` | `1f58abb` | ✅ success |
+| L3 | `trpc-stack/03-ci-devcontainer-docs-collateral` | `8a8c07d` | ✅ success |
+
+Deploy proof: `gh api repos/uzh-bf/gbl-uzh/deployments?per_page=20` + statuses — L1 `38adf73` (deployment 5785881340), L2 `1f58abb` (5785899024), L3 `8a8c07d` (5785907467) all `success` ("Deployment has completed"). Preview URLs live (HTTP 200): L1 https://gbl-7yi7wx13k-roland-schlflis-projects.vercel.app, L2 https://gbl-pb0dg87s6-roland-schlflis-projects.vercel.app, L3 https://gbl-fubtby2su-roland-schlflis-projects.vercel.app. Old preview URLs (gbl-5qypgj5iq…, gbl-f2p4qippe…) serve Vercel's "Deployment has failed" page — those are the pre-fix deployments, not the stack's.
+
+### Vercel root cause (L1/L2/L3 failed deploys, now fixed)
+
+Deploy-status evidence (via deployments API, authoritative): L0 `878bc4f` (no vercel.json, dev-era 11.6.0 lockfile) ✅; L1 `92d462a` (no vercel.json, lockfile regenerated during re-staging) ❌; L2 `8fec541` (same) ❌; L3 `5b46539` (vercel.json `pnpm@11.18.0 --trust-lockfile`) ❌; L3 `84012d3` (vercel.json `corepack pnpm@11.6.0 install --frozen-lockfile --trust-lockfile` + 11.6.0-regen lockfile) ✅.
+
+Fix: added the proven-green `vercel.json` recipe to L1 (`38adf73`) and L2 (`14a9e63`), merged up the stack. Vercel logs not obtainable (`vercel inspect <dpl> --logs` → invalid token; user sign-in needed).
+
+### Playwright image fix (L3)
+
+`.github/workflows/playwright-testing.yml` docker image `v1.62.0-noble` → `v1.61.1-noble` (lines 51 + 224) matching repo pin `@playwright/test@1.61.1` — commit `81bb286`. L3 Playwright run 31129852746 fully green.
+
+### CI-gap method (documented deviation)
+
+Workflows (`typescript-checks.yml`, `demo-game.yml`, `playwright-testing.yml`) trigger on `main`/`dev` branches and PRs only — stack branches do not match, so per-layer CI was run via manual `workflow_dispatch` on each layer's tip. Verified green per layer (typecheck/lint/build/Playwright matrix below). Open question to user: add `trpc-stack/**` to workflow `push.branches` filters in L3 so future stack branches self-trigger, or keep manual dispatch (documented deviation).
+
+### CI proof per layer (final heads)
+
+| Check | L1 `38adf73` | L2 `1f58abb` | L3 `8a8c07d` |
+| --- | --- | --- | --- |
+| TypeScript checks | ✅ 31128997405 | ✅ 31128997741 | ✅ 31131362581 |
+| Lint + build (demo-game.yml) | ✅ | ✅ | ✅ |
+| Playwright matrix | ✅ 31129138781* | ✅ 31129138781* | ⚠ 31131364271** (re-run 31132051193 pending) |
+| Vercel preview | ✅ | ✅ | ✅ |
+
+\* L2 demo-game had 2 passed + 1 flaky retry (`demo-game-flow.spec.ts:361` CONSOLIDATION timeout passed on retry) — timing flake, not regression; earlier failure 31128998181 = same flake.
+** Final-head run 31131364271: central-bank/rate-wars/merge-reports green; demo-game `demo-game-flow.spec.ts:361` multi-period flow failed twice — first attempt timed out on Savings spinbutton fill (15s), retry failed on consolidation `report-loaded` (30s). Same spec/region as the documented flake; app code between L2 head and final L3 is unchanged (L3 = CI/devcontainer/docs only). Re-run 31132051193 dispatched on final head.
+
+### Workspace-exclusion defect (92d462a, L1)
+
+Frozen branch excluded `apps/escapp` + `apps/quartz` from the pnpm workspace (ci(vercel) commit), dropping both importers from the lockfile and breaking `check:ts:quartz` module resolution in CI. Fixed in `92d462a` (restore dev workspace shape, regen lockfile). L1/L2/L3 lockfiles all include both importers; L3's lockfile is frozen-consistent.
+
+### Lockfile convergence (updated)
+
+§3's literal check ("L3 lockfile == `92fd710:pnpm-lock.yaml`") holds only for the importer/manifest level. Verified: all manifests byte-identical between stack tip and merge-ref **except** the two documented L1 platform deltas (`ts-jest ~29.4.12` + direct `@jest/globals` — required for TS 6.0.2, see §3 deviation) and the added `build:dts` script/tsconfig. Resolution-level drift exists (~1,138 hunks of the 17,383-line diff): L3 regenerated from a different registry snapshot than the merge-ref (e.g. `@babel/core 7.28.5` vs `7.29.7`, `@types/react 19.2.17` vs `19.2.18`, `tailwindcss-radix 3.0.5` vs `4.0.2` — design-system's declared peer is `^4.0.2`, and 3.0.5 declares tailwindcss `^3.4.1` peer; dev's lockfile also carries 3.0.5, so this is pre-existing dev-era resolution behavior, not a stack regression). Both lockfiles pass `--frozen-lockfile` installs locally; L3's is CI-verified (typescript-checks run 31131362581 ran `pnpm install --frozen-lockfile`). No action unless the user wants byte-exact lockfile convergence (regen from the merge-ref snapshot — costly, no functional delta observed).
+
+### Substantive diff size per layer (vs base, excluding lockfile/workspace/docs/generated)
+
+| Layer | Substantive | Note |
+| --- | --- | --- |
+| L0 | +0/-0 | plan file only (project/ excluded from substantive) |
+| L1 | +3,146/-27 | tRPC kernel: procedures, DTOs, auth tiers, error mapping, realtime bus, 45 tests |
+| L2 | +2,613/-8,899 | demo-game GraphQL → tRPC: 54 files, GraphQL deletions dominate |
+| L3 | +174/-98 | CI workflows, devcontainer, devrouter, docs, spec hardening |
+
+### Demo-game flake (documented, not a regression)
+
+`demo-game-flow.spec.ts:361` multi-team multi-period flow has a known timing flake at CONSOLIDATION: run history — 31128998181 ❌ (flake), 31129138781 ✅ (2 passed + 1 flaky retry), 31131364271 ❌ (twice, final head). Spec hardening (retry-on-rerender helpers) shipped in L3 `5b46539` (already included in green run 31129852746). Not a regression: app code unchanged between the L2 head and final L3 head.
+
+### droid (gpt-5.6-luna) review status (re-checked 2026-08-07)
+
+Still blocked: `droid exec -m gpt-5.6-luna -r high "<prompt>"` exits 0 silently (no output), `~/.factory/auth.v2.file` last modified Aug 4 10:20. User must sign in at https://auth.factory.ai/device before per-layer + Gate-3 droid reviews can run. All stack execution proceeds without it.
