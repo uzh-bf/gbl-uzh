@@ -15,7 +15,7 @@ RUN apt-get update \
 
 # Pin pnpm to the repo's packageManager version (matches the prod Dockerfile).
 # Use npm (not corepack) to avoid corepack's stale signing-key verification.
-RUN npm install -g --ignore-scripts pnpm@11.18.0
+RUN npm install -g --ignore-scripts pnpm@11.6.0
 
 # Keep the pnpm store inside the image (not on the bind-mounted workspace), so
 # it neither pollutes the repo nor fights the host's store.
