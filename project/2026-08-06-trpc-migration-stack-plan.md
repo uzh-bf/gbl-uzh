@@ -121,6 +121,8 @@ Every diff file of the source branch maps to exactly one layer; cross-cutting fi
 
 After L0, any file whose branch version equals dev's drops out of the diff automatically; L3 content is the computed residual.
 
+> **L3 convergence-check deviation (verified 2026-08-06):** the literal check "L3 lockfile equals `92fd710:pnpm-lock.yaml`" cannot hold — the merge-ref was never CI-green. Its platform setup (`ts-jest ~29.2.6`, no direct `@jest/globals`) fails under TS 6.0.2 (ts-jest 29.2.6 peer is `typescript <6` → TS5107) and `@jest/globals` is not hoisted under pnpm 11. L1 carries the verified fixes: `ts-jest ~29.4.12` (peer `typescript >=4.3 <7`) and a direct `@jest/globals ~29.7.0` devDep. The L3 lockfile is frozen-consistent (`CI=true pnpm install --frozen-lockfile --ignore-scripts` passes) and differs from `92fd710:pnpm-lock.yaml` only in those two platform importer entries plus version-string drift (@babel/core 7.29.7, @types/react 19.2.18, next-auth resolution shape) — no manifest-level dependency additions.
+
 ## 4. Review-thread triage (PR #144, jajakob)
 
 14 human threads — 12 answer-with-explanation, 2 may warrant small fixes (Timeline rename; "examples should also use trpc" → answer: deliberate W7 deferral). All answered in L3 (or their owning layer where code changes). Automated comments (Sonar, bots): 3 verified already-fixed (missing awaits, services injection, toDate epoch-0), 2 verified still-valid (games.tsx error order, multi-select toggle) → fixed in L2, rest are config/explanation.
@@ -185,3 +187,43 @@ The model calls do fire (stream ResponseIDs appear in agy's logs), but print mod
 1. Run the configured reviewer (`reviewer` route per `$rs-model-routing`) on this plan now — recommended; satisfies the gate and the "discuss with agy" intent is recorded as attempted-but-blocked.
 2. Retry agy later (sign in / fix `settings.json` outside this session), then re-run the critique before Gate 3.
 3. Proceed to Gate 1 with in-session review only and accept the gate as waived for this plan — not recommended; the final outcome review would still run before any merge.
+
+### Droid (gpt-5.6-luna) review status (re-checked 2026-08-06)
+Per user ruling, droid replaces agy as the review provider for this plan. Still blocked: `droid exec -m gpt-5.6-luna -r high "<prompt>"` exits 1 silently and `~/.factory/auth.v2.file` is stale (Aug 4); `droid exec -m gpt-5.6-luna --list-tools` works, so the model and read-only tools are valid. The user must sign in at https://auth.factory.ai/device before per-layer and Gate-3 reviews can run. All stack execution proceeds without it.
+
+## 10. Full verification and equivalence audit (executed 2026-08-06)
+
+### Stack state
+All four layers committed in `trees/trpc-migration-stack`: 00 `d556d0b`, 01 `24d3271`, 02 `821b341`, 03 `6e6ccc6`. `origin/dev` re-fetched and unchanged at `254606c` — base did not advance, no rebase needed. PR #144 and its branch remain frozen and untouched (`codex/trpc-migration-work-packages` @ `c25e0a7f`, OPEN/CONFLICTING).
+
+### File-set equivalence (stack tip vs merge-ref `92fd710`)
+`comm` over the three `git diff --name-only` lists:
+
+| Set | Files | vs stack |
+| --- | --- | --- |
+| PR #144 (`origin/dev..c25e0a7f`) | 315 | 193 equal dev (drop out in merged tree); 1 carried fix not in PR set (see below) |
+| merge-ref (`origin/dev..92fd710`) | 122 | **identical set**: 122/122 common, 0 missing, 0 unexplained extra |
+| stack (`origin/dev..6e6ccc6`) | 124 | = merge-ref set + 2 intentional additions |
+
+The 2 intentional additions:
+- `project/2026-08-06-trpc-migration-stack-plan.md` — the L0 plan/ledger itself (by design).
+- `packages/platform/tsconfig.build.json` (+ `build:dts` script in `package.json`) — L1 addition, absent from branch, merge-ref, and dev. Rationale (recorded in commit `24d3271`): rollup-plugin-typescript with TS 6.0.2 drops `.d.ts` for files whose inferred types hit TS2883 (all router factories); standalone `tsc --project tsconfig.build.json` emits portable declarations into the rollup dist layout. demo-game consumes `@gbl-uzh/platform` (`workspace:*`), so the declarations are load-bearing.
+
+Of the 122 shared files, 18 carry content deltas vs the merge-ref, all attributable:
+- **L1 (13):** platform `package.json` (ts-jest ~29.4.12, @jest/globals, restored `test` script), `src/services/EventService.ts`, `src/trpc/context.ts`, DTOs `game/player/results`, `routers/play.ts`, `schemas.ts`, and 5 test files (explicit `@jest/globals` imports).
+- **L2 (4):** demo-game `admin/games/[id].tsx`, `admin/reports/[id].tsx`, `server/trpc/context.ts`, `services/ActionsReducer.ts` — Prisma 7 fixes (enums from generated client, type-only `PrismaClient`, generated-client cast in context).
+- **L3 (1):** `pnpm-lock.yaml` (documented ts-jest/@jest/globals delta, see §3 deviation note).
+
+The remaining 104 shared files are byte-identical to the merge-ref.
+
+### LearningActivityModal fix attribution
+`packages/ui/src/components/LearningActivityModal.tsx` is the one file in the merge-ref/stack set that is **not** in PR #144's diff: dev and the frozen branch both carry the buggy `[index]` toggle (verified byte-level at `c25e0a7f` and `origin/dev`), while the merge-ref and stack carry the review-thread fix `[...previous, index]`. This matches §4 triage ("multi-select toggle — still valid → fixed in L2") and rides in L2 commit `821b341`. It is a planned repair carried via the merge-ref, not an unexplained extra.
+
+### Verification status per layer
+- L1: TS7 + TS6 `check:ts`, lint (0 errors / 5 pre-existing warnings), 45/45 jest, clean rollup build emitting all 66 declarations.
+- L2: Prisma 7 breaks from the mechanical merge fixed and verified; TS7 + TS6 checks, lint, jest passWithNoTests, full `pnpm run build` green.
+- L3: configs validated; lockfile frozen-consistent per §3 deviation note.
+- Per-layer CI on GitHub and the droid (gpt-5.6-luna) review pass remain pending: CI starts with `gh stack submit`, droid waits on user sign-in at https://auth.factory.ai/device.
+
+### Registration
+Stack initialized with `gh stack init --base dev` (adopting 00/01). 02/03 were re-staged and committed after the init, and are registered in the follow-up step; stack metadata lives in `.git/gh-stack` and is shared across worktrees.
