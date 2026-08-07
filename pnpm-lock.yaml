@@ -278,7 +278,7 @@ importers:
         version: 1.8.1
       connect-session-sequelize:
         specifier: ^7.1.3
-        version: 7.1.7(sequelize@6.37.8(pg@8.22.0))
+        version: 7.1.7(sequelize@6.37.8(pg@8.22.0)(supports-color@8.1.1))(supports-color@8.1.1)
       cookie-parser:
         specifier: ^1.4.6
         version: 1.4.7
@@ -296,7 +296,7 @@ importers:
         version: 3.1.10
       eslint:
         specifier: ^8.14.0
-        version: 8.57.1
+        version: 8.57.1(supports-color@8.1.1)
       express:
         specifier: ^4.17.3
         version: 4.22.2
@@ -347,7 +347,7 @@ importers:
         version: 1.101.0
       sequelize:
         specifier: ^6.19.0
-        version: 6.37.8(pg@8.22.0)
+        version: 6.37.8(pg@8.22.0)(supports-color@8.1.1)
       sequelize-cli:
         specifier: ^6.4.1
         version: 6.6.5
@@ -356,16 +356,16 @@ importers:
         version: 4.5.0
       supertest:
         specifier: ^4.0.2
-        version: 4.0.2
+        version: 4.0.2(supports-color@8.1.1)
       supertest-session:
         specifier: ^4.0.0
-        version: 4.1.0(supertest@4.0.2)
+        version: 4.1.0(supertest@4.0.2(supports-color@8.1.1))
       uuid-token-generator:
         specifier: ^1.0.0
         version: 1.0.0
       zombie:
         specifier: ^6.1.4
-        version: 6.1.4
+        version: 6.1.4(supports-color@8.1.1)
     devDependencies:
       jest:
         specifier: ^28.0.3
@@ -1320,6 +1320,9 @@ importers:
       lucide-react:
         specifier: 0.522.0
         version: 0.522.0(react@19.2.7)
+      next:
+        specifier: ^16.2.9
+        version: 16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0)
       ramda:
         specifier: 0.30.1
         version: 0.30.1
@@ -1378,9 +1381,6 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ~0.4.7
         version: 0.4.24(eslint@8.57.1)
-      next:
-        specifier: 16.2.9
-        version: 16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0)
       postcss:
         specifier: ~8.4.49
         version: 8.4.49
@@ -14145,6 +14145,11 @@ snapshots:
   '@esbuild/win32-x64@0.25.12':
     optional: true
 
+  '@eslint-community/eslint-utils@4.9.1(eslint@8.57.1(supports-color@8.1.1))':
+    dependencies:
+      eslint: 8.57.1(supports-color@8.1.1)
+      eslint-visitor-keys: 3.4.3
+
   '@eslint-community/eslint-utils@4.9.1(eslint@8.57.1)':
     dependencies:
       eslint: 8.57.1
@@ -14178,7 +14183,7 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
 
-  '@eslint/eslintrc@2.1.4':
+  '@eslint/eslintrc@2.1.4(supports-color@8.1.1)':
     dependencies:
       ajv: 6.15.0
       debug: 4.4.3(supports-color@8.1.1)
@@ -14846,7 +14851,7 @@ snapshots:
 
   '@humanfs/types@0.15.0': {}
 
-  '@humanwhocodes/config-array@0.13.0':
+  '@humanwhocodes/config-array@0.13.0(supports-color@8.1.1)':
     dependencies:
       '@humanwhocodes/object-schema': 2.0.3
       debug: 4.4.3(supports-color@8.1.1)
@@ -20184,10 +20189,10 @@ snapshots:
 
   connect-flash@0.1.1: {}
 
-  connect-session-sequelize@7.1.7(sequelize@6.37.8(pg@8.22.0)):
+  connect-session-sequelize@7.1.7(sequelize@6.37.8(pg@8.22.0)(supports-color@8.1.1))(supports-color@8.1.1):
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
-      sequelize: 6.37.8(pg@8.22.0)
+      sequelize: 6.37.8(pg@8.22.0)(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -21635,9 +21640,52 @@ snapshots:
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@8.57.1)
       '@eslint-community/regexpp': 4.12.2
-      '@eslint/eslintrc': 2.1.4
+      '@eslint/eslintrc': 2.1.4(supports-color@8.1.1)
       '@eslint/js': 8.57.1
-      '@humanwhocodes/config-array': 0.13.0
+      '@humanwhocodes/config-array': 0.13.0(supports-color@8.1.1)
+      '@humanwhocodes/module-importer': 1.0.1
+      '@nodelib/fs.walk': 1.2.8
+      '@ungap/structured-clone': 1.3.0
+      ajv: 6.15.0
+      chalk: 4.1.2
+      cross-spawn: 7.0.6
+      debug: 4.4.3(supports-color@8.1.1)
+      doctrine: 3.0.0
+      escape-string-regexp: 4.0.0
+      eslint-scope: 7.2.2
+      eslint-visitor-keys: 3.4.3
+      espree: 9.6.1
+      esquery: 1.6.0
+      esutils: 2.0.3
+      fast-deep-equal: 3.1.3
+      file-entry-cache: 6.0.1
+      find-up: 5.0.0
+      glob-parent: 6.0.2
+      globals: 13.24.0
+      graphemer: 1.4.0
+      ignore: 5.3.2
+      imurmurhash: 0.1.4
+      is-glob: 4.0.3
+      is-path-inside: 3.0.3
+      js-yaml: 4.1.1
+      json-stable-stringify-without-jsonify: 1.0.1
+      levn: 0.4.1
+      lodash.merge: 4.6.2
+      minimatch: 3.1.5
+      natural-compare: 1.4.0
+      optionator: 0.9.4
+      strip-ansi: 6.0.1
+      text-table: 0.2.0
+    transitivePeerDependencies:
+      - supports-color
+
+  eslint@8.57.1(supports-color@8.1.1):
+    dependencies:
+      '@eslint-community/eslint-utils': 4.9.1(eslint@8.57.1(supports-color@8.1.1))
+      '@eslint-community/regexpp': 4.12.2
+      '@eslint/eslintrc': 2.1.4(supports-color@8.1.1)
+      '@eslint/js': 8.57.1
+      '@humanwhocodes/config-array': 0.13.0(supports-color@8.1.1)
       '@humanwhocodes/module-importer': 1.0.1
       '@nodelib/fs.walk': 1.2.8
       '@ungap/structured-clone': 1.3.0
@@ -27207,7 +27255,7 @@ snapshots:
 
   sequelize-pool@7.1.0: {}
 
-  sequelize@6.37.8(pg@8.22.0):
+  sequelize@6.37.8(pg@8.22.0)(supports-color@8.1.1):
     dependencies:
       '@types/debug': 4.1.12
       '@types/validator': 13.15.10
@@ -27759,7 +27807,7 @@ snapshots:
 
   stylis@4.4.0: {}
 
-  superagent@3.8.3:
+  superagent@3.8.3(supports-color@8.1.1):
     dependencies:
       component-emitter: 1.3.1
       cookiejar: 2.1.4
@@ -27778,17 +27826,17 @@ snapshots:
     dependencies:
       copy-anything: 4.0.5
 
-  supertest-session@4.1.0(supertest@4.0.2):
+  supertest-session@4.1.0(supertest@4.0.2(supports-color@8.1.1)):
     dependencies:
       cookiejar: 2.1.4
       methods: 1.1.2
       object-assign: 4.1.1
-      supertest: 4.0.2
+      supertest: 4.0.2(supports-color@8.1.1)
 
-  supertest@4.0.2:
+  supertest@4.0.2(supports-color@8.1.1):
     dependencies:
       methods: 1.1.2
-      superagent: 3.8.3
+      superagent: 3.8.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -28902,7 +28950,7 @@ snapshots:
 
   zod@3.25.72: {}
 
-  zombie@6.1.4:
+  zombie@6.1.4(supports-color@8.1.1):
     dependencies:
       babel-runtime: 6.26.0
       bluebird: 3.7.2
