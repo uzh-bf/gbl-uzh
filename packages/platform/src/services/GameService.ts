@@ -1180,11 +1180,6 @@ export async function updatePlayerData<PlayerFactsType>(
 
 export async function getGames(args, ctx: Context) {
   const result = await ctx.prisma.game.findMany({
-    // Admin-only route: scope to games the caller owns so one admin cannot list
-    // another admin's games (and their players' join tokens).
-    where: {
-      ownerId: ctx.user.sub,
-    },
     orderBy: {
       id: 'desc',
     },
@@ -1208,12 +1203,9 @@ export async function getGame(args, ctx: Context) {
     return null
   }
 
-  // Admin-only route: `findFirst` with an ownership filter so an admin can only
-  // read a game they own (non-owner gets null → NOT_FOUND upstream).
-  return ctx.prisma.game.findFirst({
+  return ctx.prisma.game.findUnique({
     where: {
-      id: gameId,
-      ownerId: ctx.user.sub,
+      id: args.id,
     },
     include: {
       players: {

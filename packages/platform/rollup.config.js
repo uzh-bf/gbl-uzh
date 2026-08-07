@@ -12,11 +12,6 @@ const config = defineConfig([
       'src/lib/util.ts',
       'src/lib/apollo.ts',
       'src/lib/pubsub.ts',
-      'src/trpc/init.ts',
-      'src/trpc/createPlatformRouter.ts',
-      'src/trpc/context.ts',
-      'src/trpc/errors.ts',
-      'src/trpc/schemas.ts',
     ],
     output: {
       dir: 'dist',
