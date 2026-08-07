@@ -1320,6 +1320,9 @@ importers:
       lucide-react:
         specifier: 0.522.0
         version: 0.522.0(react@19.2.7)
+      next:
+        specifier: ^16.2.9
+        version: 16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0)
       ramda:
         specifier: 0.30.1
         version: 0.30.1
@@ -1378,9 +1381,6 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ~0.4.7
         version: 0.4.24(eslint@8.57.1)
-      next:
-        specifier: 16.2.9
-        version: 16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0)
       postcss:
         specifier: ~8.4.49
         version: 8.4.49
