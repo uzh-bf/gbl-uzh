@@ -293,3 +293,19 @@ Frozen branch excluded `apps/escapp` + `apps/quartz` from the pnpm workspace (ci
 ### droid (gpt-5.6-luna) review status (re-checked 2026-08-07)
 
 Still blocked: `droid exec -m gpt-5.6-luna -r high "<prompt>"` exits 0 silently (no output), `~/.factory/auth.v2.file` last modified Aug 4 10:20. User must sign in at https://auth.factory.ai/device before per-layer + Gate-3 droid reviews can run. All stack execution proceeds without it.
+
+### agy review status (re-checked 2026-08-07, per user ruling: agy replaces droid)
+
+The earlier "agy unavailable" verdict (section 9) was a sandbox artifact, not a real blocker. Outside the sandbox, agy 1.1.10 is signed in and the working invocation shape is bare `agy --print "<prompt>"` run from a trusted workspace (`trees/major-dependency-upgrades`), which delivers the prompt to the default model Gemini 3.6 Flash (High) and can read stack files via absolute paths. Any flag that enables permissions (`--model`, `--effort`, `--mode plan`, `--sandbox`, `--dangerously-skip-permissions`, `--print-timeout`, `--add-dir`) drops the prompt in this setup, so reviews run with default permissions and file reads only.
+
+All five review passes completed 2026-08-07, persisted under `project/_local/reviews/`:
+
+| Review | Scope | Verdict |
+| --- | --- | --- |
+| Planning-stage challenge | plan + Gate 3 package | APPROVE-WITH-FINDINGS (3 findings, all already recorded; map to open decisions a/b) |
+| L1 platform kernel | `52c2134..7b226b5` | APPROVE (no findings >= 75) |
+| L2 demo-game migration | `7b226b5..f8de28c` | APPROVE (no findings >= 75) |
+| L3 CI/devcontainer/docs | `f8de28c..1d6925c` | APPROVE (no findings >= 75) |
+| Final-outcome (integrated) | `254606c..1d6925c` | APPROVE (no findings >= 75) |
+
+Review reports: `2026-08-07-trpc-stack-{planning-stage,l1,l2,l3,final-outcome}-agy.md`. The planning-stage findings (L0 isolation, CI trigger gap, lockfile convergence drift) are the same three items already surfaced as open decisions; no new actionable items. The final-outcome review satisfies the repo Mandatory Review Gate for the integrated stack before opening for review.
