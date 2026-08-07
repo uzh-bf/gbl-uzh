@@ -5,8 +5,10 @@ import {
 } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
-import { PlayerResult } from 'src/graphql/generated/ops'
-import { computeRiskAndReturnOfPlayer } from '../lib/analysis'
+import {
+  computeRiskAndReturnOfPlayer,
+  type ReportPlayerResult,
+} from '../lib/analysis'
 import { PlayerRole } from '../settings/Constants'
 import { GameFacts } from '../types/Game'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
@@ -87,7 +89,7 @@ export function start(
 export function end(
   facts: ResultFacts,
   payload: PayloadPeriodResultEnd<
-    PlayerResult[],
+    ReportPlayerResult[],
     GameFacts,
     PeriodFacts,
     PeriodSegmentFacts,
