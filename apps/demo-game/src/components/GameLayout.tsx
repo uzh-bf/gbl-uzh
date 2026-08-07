@@ -133,7 +133,13 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     onData(event) {
       if (!currentGameId) return
       if (shouldRefetchGameResult(event, currentGameId)) {
-        utils.play.result.invalidate().catch((error) => {
+        // Period/segment transitions reset player readiness server-side, and
+        // the ready switch reads isReady from play.self — refresh both, the way
+        // the single GraphQL Result document used to.
+        Promise.all([
+          utils.play.result.invalidate(),
+          utils.play.self.invalidate(),
+        ]).catch((error) => {
           console.error('GameLayout: Failed to refresh result:', error)
         })
       }
