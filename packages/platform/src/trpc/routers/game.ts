@@ -1,5 +1,9 @@
 import { adminProcedure, assertGameOwnership, createTRPCRouter } from '../init.js'
-import { gameIdSchema, jsonObjectSchema } from '../schemas.js'
+import {
+  gameIdSchema,
+  jsonObjectSchema,
+  requireFactsSchema,
+} from '../schemas.js'
 import {
   toAdminGameDto,
   toGameListItemDto,
@@ -67,7 +71,7 @@ export function createGameRouter({
       .input(createGameInput)
       .mutation(async ({ input, ctx }) => {
         const game = await GameService.createGame(input as any, ctx as any, {
-          schema: schemas.GameFactsSchema,
+          schema: requireFactsSchema(schemas.GameFactsSchema, 'GameFactsSchema'),
           roleAssigner,
         })
 

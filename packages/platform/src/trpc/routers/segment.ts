@@ -1,5 +1,10 @@
 import { adminProcedure, assertGameOwnership, createTRPCRouter } from '../init.js'
-import { gameIdSchema, idSchema, jsonObjectSchema } from '../schemas.js'
+import {
+  gameIdSchema,
+  idSchema,
+  jsonObjectSchema,
+  requireFactsSchema,
+} from '../schemas.js'
 import * as GameService from '../../services/GameService.js'
 import { toActiveSegmentDto } from '../dto/game.js'
 import { z } from 'zod'
@@ -36,7 +41,10 @@ export function createSegmentRouter({
         } as Parameters<typeof GameService.addPeriodSegment>[0],
         ctx as any,
         {
-          schema: schemas.PeriodSegmentFactsSchema,
+          schema: requireFactsSchema(
+            schemas.PeriodSegmentFactsSchema,
+            'PeriodSegmentFactsSchema'
+          ),
           services: services as any,
         } as any
       )

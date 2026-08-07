@@ -7,6 +7,7 @@ import * as PlayService from '../../services/PlayService.js'
 import { toPlayerSelfDto } from '../dto/player.js'
 import { toPlayerResultCoreDto, toPlayerResultDto } from '../dto/results.js'
 import { createTRPCRouter, playerProcedure } from '../init.js'
+import { requireFactsSchema } from '../schemas.js'
 
 type RouterDeps = {
   services?: Record<string, unknown>
@@ -109,13 +110,18 @@ export function createPlayRouter({
         const hadSetupBefore = hasCompletedCompanySetup(previousPlayer)
 
         const facts = input.facts ? parsePayload(input.facts) : undefined
+        // The service only validates when facts are present, so a name-only
+        // update stays valid for a game that injects no PlayerFactsSchema.
+        const playerFactsSchema = facts
+          ? requireFactsSchema(schemas.PlayerFactsSchema, 'PlayerFactsSchema')
+          : schemas.PlayerFactsSchema
         const player = await GameService.updatePlayerData(
           {
             name: input.name ?? undefined,
             facts,
           } as any,
           ctx as any,
-          { schema: schemas.PlayerFactsSchema }
+          { schema: playerFactsSchema }
         )
 
         const hasSetupAfter = hasCompletedCompanySetup(player)
