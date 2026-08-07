@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - dev
+      - 'trpc-stack/**'
   pull_request:
     branches:
       - main
