@@ -2,8 +2,8 @@ FROM node:24.16-alpine AS base
 
 RUN apk add --no-cache git
 
-# Install pnpm and turbo
-RUN npm install -g pnpm@11.6.0 turbo@2.0.4
+# Install pnpm and turbo (no lifecycle scripts; both ship plain binaries)
+RUN npm install -g --ignore-scripts pnpm@11.6.0 turbo@2.0.4
 
 # Set pnpm store directory
 ENV PNPM_HOME="/pnpm"
@@ -11,13 +11,15 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN pnpm config set store-dir $PNPM_HOME/.pnpm-store
 
 
-FROM base as prune
+FROM base AS prune
 WORKDIR /app
 
 COPY . .
 
-# Prune application with Turbo. This needs no prior install: turbo builds the
-# pruned lockfile from the manifests, not from an installed node_modules tree.
+RUN --mount=type=cache,id=pnpm,target=/pnpm/.pnpm-store \
+    pnpm install --frozen-lockfile --ignore-scripts
+
+# Prune application with Turbo
 RUN turbo prune --scope="@gbl-uzh/demo-game" --docker
 
 
@@ -30,8 +32,7 @@ COPY --from=prune /app/out/json/ .
 
 # Install dependencies
 RUN --mount=type=cache,id=pnpm,target=/pnpm/.pnpm-store \
-    # HACK: Install without frozen lockfile - reevaluate after upgrades branch is merged
-    pnpm install --no-frozen-lockfile
+    pnpm install --frozen-lockfile --ignore-scripts
 
 COPY --from=prune /app/out/full/ .
 
