@@ -17,11 +17,13 @@ host-port collisions** (nothing is published on the host).
 
 ## Prerequisites
 
-devrouter **≥ 0.0.35** (proxy + TCP routing and managed DevPod lifecycle).
-Run the one-time host setup before the first workspace:
+devrouter **≥ 0.0.31** (proxy + TCP routing and managed workspace cleanup).
+One-time host setup — must run **before** the container starts, because the
+stack joins devrouter's external `devnet` network and that network must already
+exist:
 
 ```bash
-devrouter setup --repo . --yes
+dev up && dev tls install   # Traefik + the shared `devnet` + mkcert CA (needs 80/443/5432 free)
 ```
 
 The compose file mounts the mkcert root CA from
@@ -29,16 +31,17 @@ The compose file mounts the mkcert root CA from
 macOS default). On Linux set `DEVROUTER_MKCERT_CAROOT=~/.local/share/mkcert`,
 on Windows `%LOCALAPPDATA%\mkcert`, before starting the container.
 
-## Run
+## Run with DevPod
 
 ```bash
-devrouter ensure .
-```
+brew install devpod            # or: https://devpod.sh/docs/getting-started/install
+devpod provider add docker
 
-This builds or reuses the managed DevPod, starts DB/OIDC, installs and builds
-dependencies, seeds the database, launches the dev server, and registers the
-routes. Do not run raw DevPod lifecycle commands for this repository because
-they bypass devrouter's workspace ownership lock.
+devpod up . --ide none         # builds image, starts DB/OIDC, installs, builds deps, seeds, runs dev
+
+# register the routes (one per app; prints the https URLs)
+for a in app oidc db; do dev app run "$a" --yes; done
+```
 
 Open <https://demo-game.localhost>. The dev server auto-starts in the background
 (`tail -f /tmp/dev.log` for output).
@@ -55,13 +58,10 @@ seed, and the dev server. It defaults to `demo`; the supported values are:
 | `central-bank` | `@gbl-uzh/central-bank` |
 | `rate-wars`    | `@gbl-uzh/rate-wars`    |
 
-Pass an explicit target through the managed lifecycle. Include it in the
-process fingerprint so changing targets recreates the affected process:
+Pass an explicit target when creating the DevPod workspace, for example:
 
 ```bash
-GBL_GAME_TARGET=central-bank \
-  DEVROUTER_PROCESS_FINGERPRINT_ENV=GBL_GAME_TARGET \
-  devrouter ensure .
+devpod up . --ide none --workspace-env GBL_GAME_TARGET=central-bank
 ```
 
 The target does not derive from a branch or workspace name, and it does not

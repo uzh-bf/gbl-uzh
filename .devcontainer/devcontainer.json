@@ -8,12 +8,14 @@
   "workspaceFolder": "/workspaces/gbl-uzh",
   "runServices": ["app", "postgres", "oidc"],
   "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postStartCommand": "bash .devcontainer/post-start.sh",
   "customizations": {
     "vscode": {
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "Prisma.prisma"
+        "Prisma.prisma",
+        "GraphQL.vscode-graphql"
       ]
     }
   }

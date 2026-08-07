@@ -59,10 +59,9 @@ the managed game process (`.devcontainer/post-start.sh:27`). Starter mode keeps
 its existing shared-namespace topology because the rewrite is explicitly
 guarded from starter execution (`.devcontainer/starter/docker-compose.yml:66`).
 
-The game process remains owned by the helper delivered at runtime by
-`devrouter ensure`. The repository's post-start script invokes that exact
-helper through `DEVROUTER_PROCESS_HELPER`; no devrouter package or helper is
-baked into the devcontainer image.
+The game process itself remains owned by the exact devrouter 0.0.31 helper
+(`.devcontainer/Dockerfile:21`) and starts through one
+`devrouter-process ensure` call (`.devcontainer/post-start.sh:47`).
 
 ## Why This Works
 
@@ -75,7 +74,7 @@ resolve to the same OIDC endpoint used by the browser.
 ## Prevention
 
 After changing devcontainer lifecycle or network ownership, run
-`devrouter ensure .` twice in a linked worktree. Capture the app and
+`devrouter workspace ensure .` twice in a linked worktree. Capture the app and
 sidecar container IDs plus `/tmp/devrouter-process-game.state` before and after
 the second run. Both container IDs and the managed PID/process-group/fingerprint
 must remain unchanged, while the namespaced app route and OIDC discovery endpoint

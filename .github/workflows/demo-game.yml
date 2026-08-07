@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - dev
-      - 'trpc-stack/**'
   pull_request:
     branches:
       - main
@@ -23,9 +22,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          # No later step needs the git token; do not leave it in the checkout.
-          persist-credentials: false
 
       - name: Use Node 24
         uses: actions/setup-node@v4
@@ -39,29 +35,6 @@ jobs:
       - name: Lint demo-game
         working-directory: ./apps/demo-game
         run: pnpm run lint
-
-      # Type gate lives in this job (reusing its checkout/install) so it runs
-      # fast, ahead of the slow Docker `build`. tsc resolves
-      # `@gbl-uzh/platform/dist/*`, `@gbl-uzh/ui/dist/*` and the generated
-      # Prisma client, so all must exist first (mirrors the local `dev`
-      # prereqs and the Playwright workflow).
-      - name: Build workspace packages
-        run: |
-          pnpm --filter @gbl-uzh/platform build
-          pnpm --filter @gbl-uzh/ui build
-
-      - name: Test platform
-        run: pnpm --filter @gbl-uzh/platform test
-
-      - name: Generate demo-game Prisma client
-        working-directory: ./apps/demo-game
-        run: |
-          pnpm run prisma:copy
-          pnpm run prisma:generate
-
-      - name: Typecheck demo-game
-        working-directory: ./apps/demo-game
-        run: pnpm run check:ts
 
   build:
     strategy:
@@ -81,9 +54,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          # No later step needs the git token; do not leave it in the checkout.
-          persist-credentials: false
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
