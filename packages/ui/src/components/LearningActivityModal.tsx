@@ -59,7 +59,7 @@ export function LearningActivityModal({
             setActiveElements((previous) =>
               previous.includes(index)
                 ? previous.filter((activeIndex) => activeIndex !== index)
-                : [...previous, index]
+                : [index]
             )
           }}
           onSubmit={onSubmit}

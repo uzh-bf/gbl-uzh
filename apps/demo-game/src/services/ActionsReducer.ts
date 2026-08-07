@@ -1,11 +1,13 @@
 import { Action } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
-import type { PrismaClient } from 'src/generated/prisma/client'
 import { produce } from 'immer'
-import { ActionTypes, Decisions } from '../types/facts'
+import { PrismaClient } from 'src/generated/prisma/client'
+import { Decisions } from '../types/facts'
 import { GameFacts, PeriodFacts, PeriodSegmentFacts } from '../types/index'
 
-export { ActionTypes }
+export enum ActionTypes {
+  NONE = '',
+}
 
 type PayloadType = {
   playerArgs: Decisions

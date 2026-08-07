@@ -1,3 +1,4 @@
+import { inputObjectType } from 'nexus'
 import * as yup from 'yup'
 
 export const ROLLS_PER_SEGMENT = 3
@@ -22,13 +23,37 @@ export const PeriodFactsSchema = yup.object({
     .required(),
 })
 
-export interface PeriodFacts extends yup.InferType<typeof PeriodFactsSchema> {
-  // Operator-set trading toggles, surfaced in the admin game view. Optional:
-  // absent on periods created before the toggles existed.
-  spotTradingEnabled?: boolean
-  futuresTradingEnabled?: boolean
-  optionsTradingEnabled?: boolean
-}
+export interface PeriodFacts extends yup.InferType<typeof PeriodFactsSchema> {}
+
+export const PeriodFactsScenarioInput = inputObjectType({
+  name: 'PeriodFactsScenarioInput',
+  definition(t) {
+    t.int('seed', { default: DEFAULT_SEED })
+    t.float('trendStocks', { default: TREND_STOCKS })
+    t.float('trendBonds', { default: TREND_BONDS })
+    t.float('gapStocks', { default: GAP_STOCKS })
+    t.float('gapBonds', { default: GAP_BONDS })
+    t.float('interestBank', { default: INTEREST_BANK })
+  },
+})
+
+export const PeriodFactsInput = inputObjectType({
+  name: 'PeriodFactsInput',
+  definition(t) {
+    t.int('rollsPerSegment', { default: ROLLS_PER_SEGMENT })
+    t.field('scenario', {
+      type: PeriodFactsScenarioInput,
+      default: {
+        seed: DEFAULT_SEED,
+        trendStocks: TREND_STOCKS,
+        trendBonds: TREND_BONDS,
+        gapStocks: GAP_STOCKS,
+        gapBonds: GAP_BONDS,
+        interestBank: INTEREST_BANK,
+      },
+    })
+  },
+})
 
 // function generateDiceObject() {
 //   return yup.number().positive().integer().max(6).required()
@@ -64,7 +89,14 @@ export interface PeriodSegmentFacts extends yup.InferType<
   typeof PeriodSegmentFactsSchema
 > {
   returns: { bank: number; bonds: number; stocks: number }[]
-  // `shared` is the third (shared bonds/stocks) die; written by the reducer,
-  // read in the admin dice view. Optional to stay compatible with older facts.
-  diceRolls: { bonds: number; stocks: number; shared?: number }[]
+  diceRolls: { bonds: number; stocks: number }[]
 }
+
+export const PeriodSegmentFactsInput = inputObjectType({
+  name: 'PeriodSegmentFactsInput',
+  definition(t) {
+    t.float('bankPercentage')
+    t.float('bondsPercentage')
+    t.float('stockPercentage')
+  },
+})

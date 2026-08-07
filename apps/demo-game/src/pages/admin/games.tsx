@@ -1,10 +1,15 @@
+import { useMutation, useQuery } from '@apollo/client'
 import { Button } from '@uzh-bf/design-system'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form'
+import {
+  CreateGameDocument,
+  GameDataFragmentDoc,
+  GamesDocument,
+} from 'src/graphql/generated/ops'
 import { AdminInputField } from '~/components/fields/AdminInputField'
-import { trpc } from '~/lib/trpc'
 
 interface CreateGameFormValues {
   name: string
@@ -13,7 +18,6 @@ interface CreateGameFormValues {
 
 function Games() {
   const router = useRouter()
-  const utils = trpc.useUtils()
 
   const session = useSession({
     required: true,
@@ -22,10 +26,20 @@ function Games() {
     },
   })
 
-  const gamesQuery = trpc.game.list.useQuery()
-  const createGame = trpc.game.create.useMutation({
-    async onSuccess() {
-      await utils.game.list.invalidate()
+  const { data, error, loading } = useQuery(GamesDocument)
+  const [createGame] = useMutation(CreateGameDocument, {
+    update(cache, { data: { createGame: createGameResult } }) {
+      cache.modify({
+        fields: {
+          games(existingGames = []) {
+            const newGameRef = cache.writeFragment({
+              data: createGameResult,
+              fragment: GameDataFragmentDoc,
+            })
+            return [...existingGames, newGameRef]
+          },
+        },
+      })
     },
   })
 
@@ -41,20 +55,23 @@ function Games() {
     },
   })
 
-  if (gamesQuery.error) {
-    return <div>{gamesQuery.error.message}</div>
+  if (loading || !data) {
+    return <div>loading...</div>
   }
 
-  if (gamesQuery.isLoading || !gamesQuery.data) {
-    return <div>loading...</div>
+  if (error) {
+    return <div>{error.message}</div>
   }
 
   const onSubmit = async (values: CreateGameFormValues) => {
     try {
-      await createGame.mutateAsync({
-        name: values.name,
-        playerCount: parseInt(String(values.playerCount), 10),
-        facts: { myInt: 1 },
+      await createGame({
+        variables: {
+          name: values.name,
+          playerCount: parseInt(String(values.playerCount), 10),
+          facts: { myInt: 1 },
+        },
+        refetchQueries: [GamesDocument],
       })
       reset()
     } catch (e) {
@@ -115,34 +132,36 @@ function Games() {
       </form>
 
       <div className="mt-4 flex flex-col gap-1">
-        {gamesQuery.data.map((game) => (
-          <Link
-            className="w-96 font-medium text-slate-700"
-            href={`/admin/games/${game.id}`}
-            key={game.id}
-          >
-            <Button
-              className={{
-                root: 'flex w-full flex-col items-start justify-around text-left',
-              }}
+        {data.games.map((game) => {
+          return (
+            <Link
+              className="w-96 font-medium text-slate-700"
+              href={`/admin/games/${game?.id}`}
+              key={game?.id}
             >
-              <div className="flex w-full justify-between p-2">
-                <div>{game.name}</div>
-                <div className="flex w-10">Id: {game.id}</div>
-              </div>
-              <div className="flex w-full items-end justify-between p-2 text-sm">
-                <div className="flex flex-col justify-between gap-y-1 text-left">
-                  <div>Player count: {game.playersCount}</div>
-                  <div>
-                    Active Period/Segment: {game.activePeriodIx}/
-                    {game.activeSegmentIx}
-                  </div>
+              <Button
+                className={{
+                  root: 'flex w-full flex-col items-start justify-around text-left',
+                }}
+              >
+                <div className="flex w-full justify-between p-2">
+                  <div>{game?.name}</div>
+                  <div className="flex w-10">Id: {game?.id}</div>
                 </div>
-              </div>
-              <div className="text-right">Status: {game.status}</div>
-            </Button>
-          </Link>
-        ))}
+                <div className="flex w-full items-end justify-between p-2 text-sm">
+                  <div className="flex flex-col justify-between gap-y-1 text-left">
+                    <div>Player count: {game?.playerCount}</div>
+                    <div>
+                      Active Period/Segment: {game?.activePeriodIx}/
+                      {game?.activeSegmentIx}
+                    </div>
+                  </div>
+                  <div className="text-right">Status: {game?.status}</div>
+                </div>
+              </Button>
+            </Link>
+          )
+        })}
       </div>
     </div>
   )

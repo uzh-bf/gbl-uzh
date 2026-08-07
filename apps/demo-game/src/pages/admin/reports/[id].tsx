@@ -1,6 +1,11 @@
-import { PlayerResultType } from 'src/generated/prisma/enums'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
+
+import { useQuery } from '@apollo/client'
+import {
+  GameDocument,
+  SpecificResultsDocument,
+} from 'src/graphql/generated/ops'
 
 import {
   Card,
@@ -44,11 +49,8 @@ import {
   YAxis,
 } from 'recharts'
 
-import { composeChartData, type ReportPlayerResult } from '~/lib/analysis'
+import { composeChartData } from '~/lib/analysis'
 import { NUM_MONTHS } from '~/lib/constants'
-import { trpc } from '~/lib/trpc'
-import type { Decisions } from '~/types'
-import type { GameDetail } from '~/types/api'
 
 const colors = [
   'var(--chart-1)',
@@ -58,8 +60,6 @@ const colors = [
 ]
 
 const labels = ['Savings', 'Bonds', 'Stocks', 'Total Assets']
-type ReportSpecificResult = ReportPlayerResult
-type ReportSpecificResultList = ReportSpecificResult[]
 
 const config = {
   bank: { label: labels[0], color: colors[0] },
@@ -68,15 +68,15 @@ const config = {
 }
 
 type PlayerPeriodData = {
-  decisions: Decisions[]
+  decisions: Record<string, number>[]
   name: string
   totalAssets: number[]
   accTotalAssetsReturn: number[]
-  risk?: number
-  totalAssetsReturnsPA?: number
+  risk: number
+  totalAssetsReturnsPA: number
 }
 
-type RiskReturnPlayerData = {
+type RiskReturnData = {
   name: string
   risk: number
   totalAssetsReturnsPA: number
@@ -84,83 +84,67 @@ type RiskReturnPlayerData = {
 
 function ReportGame() {
   const router = useRouter()
-  const gameId = Number(router.query.id)
-  const hasGameId = Number.isFinite(gameId)
 
   const [currPeriod, setCurrPeriod] = useState<number>(0)
 
-  const {
-    data: reportGameData,
-    error: gameError,
-    isLoading: gameLoading,
-  } = trpc.game.byId.useQuery(
-    { id: hasGameId ? gameId : 0 },
-    {
-      enabled: hasGameId,
-    }
-  )
+  const { data, error, loading } = useQuery(GameDocument, {
+    variables: { id: Number(router.query.id) },
+    // pollInterval: 15000,
+    skip: !router.query.id,
+  })
 
   const {
-    data: segmentEndResults = [],
-    isLoading: segmentEndResultsLoading,
+    data: segmentEndResults,
+    loading: segmentEndResultsLoading,
     error: segmentEndResultsError,
-  } = trpc.results.specific.useQuery(
-    {
-      gameId: hasGameId ? gameId : 0,
-      type: PlayerResultType.SEGMENT_END,
+  } = useQuery(SpecificResultsDocument, {
+    variables: {
+      gameId: Number(router.query.id),
+      type: 'SEGMENT_END',
     },
-    {
-      enabled: hasGameId,
-    }
-  )
+    // pollInterval: 15000,
+    skip: !router.query.id,
+    fetchPolicy: 'cache-first',
+  })
 
   const {
-    data: periodEndResults = [],
-    isLoading: periodEndResultsLoading,
+    data: periodEndResults,
+    loading: periodEndResultsLoading,
     error: periodEndResultsError,
-  } = trpc.results.specific.useQuery(
-    {
-      gameId: hasGameId ? gameId : 0,
-      type: PlayerResultType.PERIOD_END,
+  } = useQuery(SpecificResultsDocument, {
+    variables: {
+      gameId: Number(router.query.id),
+      type: 'PERIOD_END',
     },
-    {
-      enabled: hasGameId,
-    }
-  )
-
-  const reportGame = reportGameData as GameDetail | undefined
-  const reportSegmentEndResults =
-    segmentEndResults as unknown as ReportSpecificResultList
-  const reportPeriodEndResults =
-    periodEndResults as unknown as ReportSpecificResultList
+    // pollInterval: 15000,
+    skip: !router.query.id,
+    fetchPolicy: 'cache-first',
+  })
 
   const memoizedData = useMemo(() => {
     if (
-      gameLoading ||
+      loading ||
       segmentEndResultsLoading ||
-      gameError ||
+      error ||
       segmentEndResultsError ||
-      !reportGame ||
-      !reportSegmentEndResults ||
-      // No segment-end results yet (e.g. before the first segment finishes):
-      // indexing [0] below would throw.
-      reportSegmentEndResults.length === 0
+      !data?.game ||
+      !segmentEndResults?.specificResults
     ) {
       return null
     }
 
-    const currentGame = reportGame
+    const game = data.game
 
-    const numPeriods = currentGame.periods.length
+    const numPeriods = game.periods.length
     // const numPeriodsVis = numPeriods - 1
-    const previousSegmentResults = reportSegmentEndResults
+    const previousSegmentResults = segmentEndResults.specificResults
     const initialCapital = previousSegmentResults[0].facts.initialCapital
     // console.log(
     //   'previousSegmentResults',
     //   JSON.stringify(previousSegmentResults, null, 4)
     // )
 
-    const playerConfig = currentGame.players.reduce((acc, player, ix) => {
+    const playerConfig = game.players.reduce((acc, player, ix) => {
       acc[player.name] = {
         label: player.name,
         color: colors[ix % colors.length],
@@ -177,8 +161,8 @@ function ReportGame() {
           (result) => result.period.index === i
         )
         const dataPerPlayer: Record<string, PlayerPeriodData> = {}
-        playerResPerPeriod.forEach((result) => {
-          const decisions = {} as Decisions
+        playerResPerPeriod.map((result) => {
+          const decisions = {}
           Object.keys(result.facts.decisions).forEach((v) => {
             decisions[v] = Number(result.facts.decisions[v])
           })
@@ -227,7 +211,7 @@ function ReportGame() {
       'accTotalAssetsReturn'
     )
 
-    const segmentResultsPerPlayer = currentGame.players.map((player) => {
+    const segmentResultsPerPlayer = game.players.map((player) => {
       return previousSegmentResults
         .filter((result) => result.player.id === player.id)
         .map((result) => {
@@ -262,7 +246,7 @@ function ReportGame() {
     const totalDecisionAvg = computeTotalDecisionAvg()
 
     return {
-      game: currentGame,
+      game,
       playerConfig,
       initialCapital,
       dataPerPeriod,
@@ -271,10 +255,10 @@ function ReportGame() {
       totalDecisionAvg,
     }
   }, [
-    reportGame,
-    gameLoading,
-    gameError,
-    reportSegmentEndResults,
+    data,
+    loading,
+    error,
+    segmentEndResults,
     segmentEndResultsLoading,
     segmentEndResultsError,
   ])
@@ -283,23 +267,17 @@ function ReportGame() {
     if (
       periodEndResultsLoading ||
       periodEndResultsError ||
-      !reportPeriodEndResults
+      !periodEndResults?.specificResults
     ) {
       return null
     }
 
-    const previousPeriodResults = reportPeriodEndResults
+    const previousPeriodResults = periodEndResults.specificResults
 
-    if (previousPeriodResults.length === 0) {
-      return {
-        riskReturnPerPeriod: [],
-        sharpeRatioPerPeriod: [],
-        configSharpeRatio: {},
-      }
-    }
+    console.log('previousPeriodResults', previousPeriodResults)
 
     const riskReturnPerPeriod = previousPeriodResults.reduce<
-      Record<string, RiskReturnPlayerData>[]
+      Record<string, RiskReturnData>[]
     >((acc, result) => {
       if (!acc[result.period.index]) {
         acc[result.period.index] = {
@@ -328,7 +306,7 @@ function ReportGame() {
       return acc
     }, [])
 
-    const configSharpeRatio = Object.keys(sharpeRatioPerPeriod[0] ?? {}).reduce(
+    const configSharpeRatio = Object.keys(sharpeRatioPerPeriod[0]).reduce(
       (acc, item) => {
         if (item.endsWith('sharpeRatio')) {
           acc[item] = {
@@ -341,10 +319,10 @@ function ReportGame() {
     )
 
     return { riskReturnPerPeriod, sharpeRatioPerPeriod, configSharpeRatio }
-  }, [reportPeriodEndResults, periodEndResultsLoading, periodEndResultsError])
+  }, [periodEndResults, periodEndResultsLoading, periodEndResultsError])
 
   if (
-    gameLoading ||
+    loading ||
     segmentEndResultsLoading ||
     periodEndResultsLoading ||
     !memoizedDataPeriod ||
@@ -353,8 +331,8 @@ function ReportGame() {
     return <div>loading...</div>
   }
 
-  if (gameError) {
-    return <div>{gameError.message}</div>
+  if (error) {
+    return <div>{error.message}</div>
   }
   if (segmentEndResultsError) {
     return <div>{segmentEndResultsError.message}</div>
@@ -364,7 +342,7 @@ function ReportGame() {
   }
 
   const {
-    game: reportResultGame,
+    game,
     playerConfig,
     initialCapital,
     dataPerPeriod,
@@ -375,8 +353,6 @@ function ReportGame() {
 
   const { riskReturnPerPeriod, sharpeRatioPerPeriod, configSharpeRatio } =
     memoizedDataPeriod
-
-  const game = reportResultGame
 
   const dataAvg = [
     {
@@ -678,7 +654,7 @@ function ReportGame() {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tickFormatter={(v) => `${(Number(v) * 100).toFixed(1)}%`}
+                  tickFormatter={(v) => `${(v * 100).toFixed(1)}%`}
                   domain={['auto', (dataMax) => dataMax * 1.1]}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
@@ -725,7 +701,7 @@ function ReportGame() {
                   tickMargin={8}
                   type="number"
                   name="Risk"
-                  tickFormatter={(v) => `${(Number(v) * 100).toFixed(2)}%`}
+                  tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
                 />
                 <YAxis
                   dataKey="totalAssetsReturnsPA"
@@ -733,7 +709,7 @@ function ReportGame() {
                   name="Returns p.a."
                   tickLine={false}
                   tickMargin={8}
-                  tickFormatter={(v) => `${(Number(v) * 100).toFixed(2)}%`}
+                  tickFormatter={(v) => `${(v * 100).toFixed(2)}%`}
                 />
                 {Object.values(
                   riskReturnPerPeriod[riskReturnPerPeriod.length - 1]
@@ -771,7 +747,7 @@ function ReportGame() {
                         position="top"
                         className="fill-foreground"
                         fontSize={12}
-                        formatter={(v) => `${Number(v).toFixed(2)}`}
+                        formatter={(v) => `${v.toFixed(2)}`}
                       />
                     </Bar>
                   )
@@ -788,7 +764,7 @@ function ReportGame() {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tickFormatter={(v) => `${Number(v).toFixed(2)}`}
+                  tickFormatter={(v) => `${v.toFixed(2)}`}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
               </BarChart>
