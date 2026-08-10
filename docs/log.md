@@ -13,6 +13,7 @@
 
 - **Update**: `api-layer.md`, `developing-a-game.md`, and deployment/building guidance - made tRPC v11 the supported game API, documented the official Pages Router wrapper, bounded batching, SSE/SuperJSON links, typed authorization, targeted invalidation, and same-origin browser routing.
 - **Update**: `api-layer.md` and `index.md` - recorded Rate Wars as a complete tRPC example after its admin, player, report, learning, story, and realtime paths passed the real two-year lifecycle.
+- **Decision**: `adr/0001-deprecate-graphql-compatibility.md` - retained published platform GraphQL exports and the UI Apollo hook as deprecated compatibility until external-consumer removal evidence exists; all repository games now use tRPC.
 
 ## 2026-07-11
 

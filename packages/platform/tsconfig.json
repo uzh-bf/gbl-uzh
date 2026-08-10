@@ -5,6 +5,7 @@
   "exclude": [
     "node_modules",
     "dist",
+    "fixtures",
     "src/scripts",
     "instrumented"
   ],

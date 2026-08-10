@@ -204,7 +204,7 @@ This plan's extraction was replaced by the still-open draft PR stack #194-#197
 at commits `1e19f05`, `d704da8`, `c2d972d`, and `2f363c1`. A second draft
 stack builds on #194 to apply the official Pages Router client pattern and
 migrate Rate Wars and Central Bank. See
-`project/2026-08-10-pr-205-trpc-examples-stack-plan.md` for current execution state.
+`project/2026-08-10-trpc-examples-stack-plan.md` for current execution state.
 No layer from either stack has been merged.
 
 ## 2026-08-12 base-refresh note (superseded by the active plan)

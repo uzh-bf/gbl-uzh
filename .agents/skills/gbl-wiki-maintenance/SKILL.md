@@ -15,7 +15,9 @@ The wiki in `docs/` is the ground truth AI agents use to build games on this pla
 - **Game API or transport changes**: keep [api-layer](../../../docs/api-layer.md),
   [developing-a-game](../../../docs/developing-a-game.md), deployment guidance,
   and the new-game/frontend/backend/Playwright skills aligned with the current
-  tRPC pattern.
+  tRPC pattern. Published GraphQL compatibility may be described only as
+  deprecated external compatibility; never reintroduce it as a game-building
+  path.
 - **Deployment setup changes**: Vercel/Neon env vars or `deploy/` k8s path changes, Prisma `binaryTargets`, auth-provider wiring (`authOptions.ts`), or the `prisma/copy.ts` build-order → [deploying-a-game](../../../docs/deploying-a-game.md); if the easy staging path or the production path moves, update the corresponding section and the `gbl-deploy-staging` skill
 - Wiki also has documented caveats that expire: `COMPLETED` unreachable, `GameFacts.update` unwired, UI first-publish bootstrap pending, and demo game as primary reference. If a change invalidates one, remove it everywhere (grep the claim).
 

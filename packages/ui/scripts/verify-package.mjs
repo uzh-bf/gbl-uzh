@@ -16,27 +16,8 @@ import ts from 'typescript'
 const packageRoot = dirname(
   fileURLToPath(new URL('../package.json', import.meta.url))
 )
-const npmCliCandidates = [
-  join(
-    dirname(process.execPath),
-    '..',
-    'lib',
-    'node_modules',
-    'npm',
-    'bin',
-    'npm-cli.js'
-  ),
-  join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js'),
-]
-const npmCli = npmCliCandidates.find(existsSync)
-const tarExecutable = '/usr/bin/tar'
-
-if (!npmCli) {
-  throw new Error(`Cannot find npm CLI beside Node: ${process.execPath}`)
-}
-if (!existsSync(tarExecutable)) {
-  throw new Error(`Cannot find tar at ${tarExecutable}`)
-}
+const npmExecutable = process.platform === 'win32' ? 'npm.cmd' : 'npm'
+const tarExecutable = process.platform === 'win32' ? 'tar.exe' : 'tar'
 
 const temporaryRoot = await mkdtemp(join(tmpdir(), 'gbl-ui-package-'))
 const outputOptionIndex = process.argv.indexOf('--output')
@@ -62,15 +43,8 @@ function dependencyName(specifier) {
 try {
   await mkdir(outputRoot, { recursive: true })
   const packOutput = execFileSync(
-    process.execPath,
-    [
-      npmCli,
-      'pack',
-      '--ignore-scripts',
-      '--json',
-      '--pack-destination',
-      outputRoot,
-    ],
+    npmExecutable,
+    ['pack', '--ignore-scripts', '--json', '--pack-destination', outputRoot],
     {
       cwd: packageRoot,
       encoding: 'utf8',

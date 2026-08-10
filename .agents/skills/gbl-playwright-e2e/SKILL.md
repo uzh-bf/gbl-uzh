@@ -18,7 +18,9 @@ Playwright docs/skills only for API details; keep repo-specific decisions here.
 - Support helpers: `playwright/tests/support/*.ts`
 - Config: `playwright/playwright.config.ts`
 - CI workflow: `.github/workflows/playwright-testing.yml`
-- App under test: `apps/demo-game`
+- Apps under test: `apps/demo-game`, `examples/rate-wars`, and
+  `examples/central-bank`; each has a matching lifecycle spec and only one app
+  serves the shared base URL at a time.
 - Local routing: `.devrouter.yml`
 - Plan/history: `project/2026-06-28-demo-game-playwright-plan.md`
 
@@ -107,8 +109,8 @@ Keep `.github/workflows/playwright-testing.yml` close to the Klicker pattern, bu
 adapt it to GBL's smaller stack:
 
 - Use the Playwright Docker image matching `playwright/package.json`
-  (`mcr.microsoft.com/playwright:v1.62.0-noble` for Playwright `1.62.0`).
-- Use Node `24` and pnpm `11.18.0`, matching the root package manager metadata.
+  (`mcr.microsoft.com/playwright:v1.61.1-noble` for Playwright `1.61.1`).
+- Use Node `24` and pnpm `11.6.0`, matching the root package manager metadata.
 - Pin third-party GitHub Actions to a full commit SHA. SonarCloud flags
   floating third-party action tags such as `pnpm/action-setup@v4`.
 - Run Postgres and `ghcr.io/navikt/mock-oauth2-server:2.1.11` as job services.
@@ -148,19 +150,22 @@ adapt it to GBL's smaller stack:
 > **Segment facts validation schemas must allow empty/partial input.** When the admin clicks "Add Segment", the platform submits `{}` as the initial facts before calling `SegmentService.initialize`. If your yup schema marks fields as `.required()`, the mutation silently fails. Make segment-facts schema fields `.optional()` (or `.nullable()`) and let `SegmentService.initialize` fill them.
 
 > [!TIP]
-> **After clicking submit, assert `toBeEnabled()`, not `toBeDisabled()`.** GraphQL mutations resolve fast; by the time Playwright checks, the button has already re-enabled. Asserting `toBeDisabled()` flakes. The stable idiom is: click submit, then `await expect(submitButton).toBeEnabled()` to confirm the mutation finished processing, then assert the next durable UI state (e.g. the "Set Ready" button appears).
+> **Wait for the exact tRPC mutation response.** Start `page.waitForResponse`
+> with a predicate for the intended procedure path and POST method before the
+> click, then require `response.ok()`. Follow that transport assertion with the
+> next durable UI state. Button enabled/disabled timing alone is not proof that
+> the intended mutation succeeded.
+
 ## GBL Game Flow Rules
 
-Current stable broad flow (demo game):
+Current stable lifecycle matrix:
 
-- 4 teams.
-- 2 played periods.
-- 4 played segments.
-- Admin setup guards.
-- Dice page smoke.
-- Player decision/ready/result states.
-- Countdown smoke.
-- Final report smoke.
+- Demo-game: four teams, two periods, four segments, dice, countdown, player
+  decisions/results, and final report.
+- Rate Wars: its complete multi-bank, multi-period lifecycle.
+- Central Bank: its complete monetary-policy lifecycle, including decision and
+  admin mutation response checks, no-reload SSE countdown, period results, and
+  leaderboard.
 
 Platform notes:
 
@@ -225,7 +230,9 @@ The demo-game spec (`playwright/tests/demo-game-flow.spec.ts`) is the template f
 - **Decision form**: swap the demo's allocation inputs (`bank` / `bonds` / `stocks` summing to 100) for your game's single decision. Update the input locator (e.g. `getByPlaceholder`, `input[name=...]`), the yup validation values, and the submit button name. Mirror the constraints your `Actions.apply` reducer enforces.
 - **Player plan**: replace the `decisions` array with your game's per-segment decision values (e.g. `[{ rate: '6.0' }, { rate: '5.5' }]`).
 - **Dashboard assertions**: replace demo-game metric labels (`Assets Overview`, `Savings`, `Bonds`, `Stocks`, `Total`) with your game's (`Current Inflation`, `Unemployment`, `GDP Growth`, `Cumulative Loss`). Assert durable headings, not chart pixels or transient numbers.
-- **Keep the sentinel period** (see the WARNING above). Add one unplayed period after your last played period.
+- **Do not add a sentinel period.** Final-period consolidation disconnects the
+  next-period pointer safely; the lifecycle spec should prove that the real last
+  period reaches `RESULTS` without a fabricated extra period.
 - **Keep the admin flow**: `createGame` -> `addPeriod` -> `addSegment` (per period) -> join players -> advance transitions. The state-transition sequence is game-agnostic.
 - **Keep `expectGameStatusEventually`** (or equivalent reload-aware polling) for admin status assertions - UI data lags mutations.
 - **Segment count via stable child content**: count real segments by a child that only exists after `SegmentService.initialize` (e.g. `text=Roll:`), not by placeholder card count.

@@ -7,7 +7,7 @@ tags:
   - design-system
   - tailwind
   - components
-timestamp: '2026-07-11T00:00:00Z'
+timestamp: '2026-08-10T00:00:00Z'
 ---
 
 # UI Building Blocks
@@ -28,9 +28,9 @@ After the bootstrap publication:
 pnpm add @gbl-uzh/ui
 ```
 
-Declare compatible application-level peers such as `next`, `react`, `react-dom`, `@apollo/client`, `react-hook-form`, and `@uzh-bf/design-system` directly in the game. Resolve any remaining peer warnings against `@gbl-uzh/ui`'s published `peerDependencies` instead of installing arbitrary latest versions.
+Declare compatible application-level peers such as `next`, `react`, `react-dom`, `react-hook-form`, and `@uzh-bf/design-system` directly in the game. Resolve peer warnings against `@gbl-uzh/ui`'s published `peerDependencies` instead of installing arbitrary latest versions.
 
-The React 18 reference games use Apollo Client 3.11. The strict external React 19 fixture uses Apollo Client 3.14.1; use 3.14.1 or newer when pairing this package with React 19.
+The package root still exports the deprecated Apollo-backed `useLearningActivities` hook, so an external package-root consumer must also provide a compatible `@apollo/client` peer for now. Repository games do not use that hook; their learning adapters call app-local tRPC hooks. New code must not couple learning UI to GraphQL documents.
 
 Import components from the package root and the utilities-only stylesheet from the stable CSS subpath:
 
@@ -52,7 +52,7 @@ Vite-built ESM library; source `packages/ui/src/components/`. Selected exports f
 | ---------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | Shell and identity     | `Layout`, `NavBar`, `Logo`, `LogoSelector`, `PlayerDisplay`, `PlayerCompact`, `GameSidebar`, `XpBar` | The package is consumed by all three games; use of individual exports varies          |
 | Lifecycle display      | `Timeline`, `TimelineEntry`, `CycleCountdown`, status helpers                                        | Player timeline/countdown usable; `TimelineAdmin` remains a hardcoded stub            |
-| Narrative and learning | `StoryElements`, `LearningActivitiesList`, `LearningActivityModal`, `useLearningActivities`          | Shared typed flow; games supply generated GraphQL documents and app-specific adapters |
+| Narrative and learning | `StoryElements`, `LearningActivitiesList`, `LearningActivityModal`, `useLearningActivities`          | Components are current; the exported hook is deprecated GraphQL compatibility, and games use app-local tRPC adapters |
 | Forms and controls     | `TradingForm`, `ReusableFormField`, `Form`, `MultiSelect`, `HelpTooltip`                             | React Hook Form for shared reusable fields; app authoring forms may still use Formik  |
 | Data and game widgets  | `EventLog`, `ProbabilityChart`, `StorageOverview`, `Die`                                             | `ProbabilityChart` and `Die` remain reference-game flavored                           |
 
@@ -85,4 +85,4 @@ Known holes, confirmed by how the demo game works around them (candidates for li
 - **No multi-select** in the design system. Use the shared UI package's `MultiSelect`; games can keep a thin Formik adapter when needed.
 - **Local shadcn-style fallbacks** coexist with the design system in `apps/demo-game/src/components/ui/` (`select`, `dialog`, `popover`, `command`, `toast`/`toaster`, `button`) — e.g. the cockpit uses the local `Select`, and `_app.tsx` uses the local `Toaster`.
 - **No chart components** beyond `ProbabilityChart` — games assemble recharts (`LineChart`, `BarChart`, `AreaChart`, scatter) by hand; only `ChartContainer` is shared.
-- **`@gbl-uzh/ui` gaps**: use `Button` from the design system; the package still lacks a usable admin timeline, generic decision-form scaffold, and results-table component. Keep game-specific layouts, decisions, charts, and GraphQL adapters in the game.
+- **`@gbl-uzh/ui` gaps**: use `Button` from the design system; the package still lacks a usable admin timeline, generic decision-form scaffold, and results-table component. Keep game-specific layouts, decisions, charts, and tRPC adapters in the game.

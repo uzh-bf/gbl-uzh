@@ -6,6 +6,11 @@ import {
 import { asNexusMethod, enumType, objectType } from 'nexus'
 import * as DB from './generated/prisma/client.js'
 
+/**
+ * @deprecated This module is retained only for published GraphQL compatibility.
+ * New games compose createPlatformRouter and host /api/trpc instead.
+ */
+
 export const JsonScalar = asNexusMethod(JSONObjectResolver, 'json')
 export const JsonValueScalar = asNexusMethod(JSONResolver, 'jsonValue')
 export const DateScalar = asNexusMethod(DateTimeResolver, 'date')

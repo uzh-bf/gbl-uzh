@@ -15,13 +15,14 @@ timestamp: "2026-08-10T00:00:00Z"
 The supported game API is tRPC v11 on the Next.js Pages Router. The platform
 owns procedures, authorization, data transfer objects, and realtime semantics;
 each game supplies its services and fact schemas, creates one router, and hosts
-one `/api/trpc` route. The reference implementation is `apps/demo-game`.
+one `/api/trpc` route. The reference implementation is `apps/demo-game`;
+`examples/rate-wars` and `examples/central-bank` are complete game-specific
+examples of the same pattern.
 
-Demo-game and Rate Wars use this pattern. Central Bank still contains the
-deprecated GraphQL compatibility client until its migration layer and is not a
-template for new games. Public GraphQL exports remain available temporarily for
-unknown external consumers, but repository code and documentation must use
-tRPC.
+All repository games use tRPC. Published GraphQL exports remain available only
+as deprecated compatibility for external consumers whose usage has not yet
+been confirmed. They are not a supported starting point for new work; see
+[ADR 0001](adr/0001-deprecate-graphql-compatibility.md).
 
 ## Server contract
 
@@ -80,6 +81,16 @@ the real Playwright lifecycle remains the primary end-to-end behavior check.
 The browser client does not need `NEXT_PUBLIC_API_URL` because it uses the
 same-origin relative route. Server-side construction uses the deployed Vercel
 origin, a configured API origin, or the local development origin as a fallback.
+
+## Published package boundary
+
+`@gbl-uzh/platform` exposes the supported tRPC router, context, DTO, and
+realtime modules. Its packed-artifact verifier checks declarations, relative
+runtime imports, dependency closure, and a clean tRPC-only consumer. GraphQL
+peers are optional there because only deprecated compatibility subpaths need
+them. `@gbl-uzh/ui` still has one deprecated Apollo-backed learning hook at its
+package root, so external consumers of that package must currently satisfy its
+Apollo peer even when they do not call the hook.
 
 ## Cache and realtime semantics
 

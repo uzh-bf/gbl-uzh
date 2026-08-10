@@ -1,11 +1,44 @@
 # tRPC example games and documentation reconciliation
 
 Date: 2026-08-10
-Status: approved for implementation
+Status: in progress; layers 00-02 reviewed in draft PRs, layer 03 active
 Provider: GitHub stacked changes
 Base: `trpc-stack/03-ci-devcontainer-docs-collateral` at `2f363c1`
 Worktree: `trees/trpc-examples-stack`
 Mode: guided, with a review pause after every layer
+
+## Execution status (2026-08-10)
+
+| Layer                               | Branch / pull request                                                                           | Verified state                                                                                  |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 00 canonical Pages Router pattern   | `rs/trpc-examples/00-pages-router-pattern` / [#201](https://github.com/uzh-bf/gbl-uzh/pull/201) | Commit `a7ac89a`; checks, lifecycle proof, and intermediate review passed                       |
+| 01 Rate Wars                        | `rs/trpc-examples/01-rate-wars-trpc` / [#202](https://github.com/uzh-bf/gbl-uzh/pull/202)       | Commit `10fcc62`; complete lifecycle and intermediate review passed                             |
+| 02 Central Bank                     | `rs/trpc-examples/02-central-bank-trpc` / [#204](https://github.com/uzh-bf/gbl-uzh/pull/204)    | Commit `4a1271d`; complete lifecycle and intermediate review passed                             |
+| 03 compatibility and reconciliation | `rs/trpc-examples/03-graphql-deprecation-docs`                                                  | Static checks, builds, package consumers, and all three browser lifecycles passed; commit and reviews remain |
+
+All listed pull requests are draft and unmerged. The earlier replacement stack
+[#194-#197](https://github.com/uzh-bf/gbl-uzh/pulls?q=is%3Apr+197+196+195+194)
+remains unchanged and unmerged.
+
+### Layer 03 verification record
+
+- Frozen lockfile and supply-chain-policy verification passed with pnpm 11.6.0.
+- Platform TypeScript 7 and 6 checks, production build, 48 tests, packed-artifact
+  verifier, and clean tRPC-only consumer passed.
+- UI TypeScript 7 and 6 checks, lint, production build, packed-artifact
+  verifier, and clean Next.js consumer passed. Its verifier now resolves npm
+  and tar from `PATH` instead of assuming host-specific absolute locations.
+- Demo-game, Rate Wars, and Central Bank passed TypeScript 7 and 6, formatting,
+  lint, and production builds. Existing lint warnings remain unchanged.
+- Real Node 24 container lifecycles passed: Central Bank 2/2, Rate Wars 2/2,
+  and demo-game 3/3. The first Central Bank attempt stopped before app access
+  because the disposable container lacked Chromium; installing the pinned
+  Playwright browser and host libraries restored the intended environment, and
+  the unchanged spec then passed.
+- OKF/frontmatter/link validation passed. Active game-code and runtime-config
+  audits have no Apollo, GraphQL endpoint/codegen, Nexus build, or
+  `/api/graphql` matches. Retained repository matches are classified in
+  `project/2026-08-10-trpc-graphql-reference-audit.md`.
 
 ## Goal
 
@@ -60,12 +93,12 @@ pattern differs from the supported Pages Router setup.
 
 ## Stack topology
 
-| Layer | Branch | Complete outcome | Risk |
-| --- | --- | --- | --- |
-| 00 | `rs/trpc-examples/00-pages-router-pattern` | Canonical Pages Router client pattern proven in demo-game | Medium, cross-cutting client foundation |
-| 01 | `rs/trpc-examples/01-rate-wars-trpc` | Rate Wars runs only on the repository tRPC API path | High, auth/realtime/cache migration |
-| 02 | `rs/trpc-examples/02-central-bank-trpc` | Central Bank runs only on the repository tRPC API path | High, auth/realtime/cache migration |
-| 03 | `rs/trpc-examples/03-graphql-deprecation-docs` | Internal GraphQL retirement, public compatibility deprecation, and repository-wide documentation reconciliation | High, public-contract and documentation boundary |
+| Layer | Branch                                         | Complete outcome                                                                                                | Risk                                             |
+| ----- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| 00    | `rs/trpc-examples/00-pages-router-pattern`     | Canonical Pages Router client pattern proven in demo-game                                                       | Medium, cross-cutting client foundation          |
+| 01    | `rs/trpc-examples/01-rate-wars-trpc`           | Rate Wars runs only on the repository tRPC API path                                                             | High, auth/realtime/cache migration              |
+| 02    | `rs/trpc-examples/02-central-bank-trpc`        | Central Bank runs only on the repository tRPC API path                                                          | High, auth/realtime/cache migration              |
+| 03    | `rs/trpc-examples/03-graphql-deprecation-docs` | Internal GraphQL retirement, public compatibility deprecation, and repository-wide documentation reconciliation | High, public-contract and documentation boundary |
 
 Each layer must be independently functional, reviewable, green, and safe to
 land on its parent. A partial game migration is not a valid layer because it
@@ -192,11 +225,11 @@ Verification:
 The independent planning-stage review returned `REVISE` with three findings.
 All are part of this approved plan:
 
-| Finding | Resolution |
-| --- | --- |
+| Finding                                                                 | Resolution                                                                                                                  |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | Public compatibility removal lacked explicit authorization and rollback | User selected deprecation first; public shims remain until external-consumer confirmation, with an ADR and restoration path |
-| High-risk layers lacked intermediate reviews | Every layer now pauses for one risk-selected intermediate review |
-| Platform package lacked clean-consumer proof | Layer 03 adds a packed-platform verifier for the supported tRPC surface |
+| High-risk layers lacked intermediate reviews                            | Every layer now pauses for one risk-selected intermediate review                                                            |
+| Platform package lacked clean-consumer proof                            | Layer 03 adds a packed-platform verifier for the supported tRPC surface                                                     |
 
 ## Stop conditions
 
