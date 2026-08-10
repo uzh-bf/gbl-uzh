@@ -1,85 +1,49 @@
 import { execFileSync } from 'node:child_process'
-import {
-  existsSync,
-  readFileSync,
-  realpathSync,
-  renameSync,
-  rmSync,
-} from 'node:fs'
-import { mkdir, mkdtemp } from 'node:fs/promises'
-import { isBuiltin } from 'node:module'
-import { tmpdir } from 'node:os'
-import { dirname, join, resolve } from 'node:path'
+import { existsSync, realpathSync, renameSync } from 'node:fs'
+import { mkdir } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
+import {
+  assert,
+  assertExpectedFiles,
+  dependencyName,
+  inspectPackedRuntime,
+  preparePackedPackage,
+} from '../../../scripts/package-verification.mjs'
 
 const packageRoot = dirname(
   fileURLToPath(new URL('../package.json', import.meta.url))
 )
-const npmExecutable = process.platform === 'win32' ? 'npm.cmd' : 'npm'
-const tarExecutable = process.platform === 'win32' ? 'tar.exe' : 'tar'
-
-const temporaryRoot = await mkdtemp(join(tmpdir(), 'gbl-ui-package-'))
-const outputOptionIndex = process.argv.indexOf('--output')
-const outputOptionValue = process.argv[outputOptionIndex + 1]
-
-if (outputOptionIndex !== -1 && !outputOptionValue) {
-  throw new Error('--output requires a directory')
-}
-
-const outputRoot =
-  outputOptionIndex === -1 ? temporaryRoot : resolve(outputOptionValue)
-
-function assert(condition, message) {
-  if (!condition) throw new Error(message)
-}
-
-function dependencyName(specifier) {
-  if (specifier.startsWith('@'))
-    return specifier.split('/').slice(0, 2).join('/')
-  return specifier.split('/')[0]
-}
+const packedPackage = await preparePackedPackage({
+  packageRoot,
+  temporaryPrefix: 'gbl-ui-package-',
+})
+const {
+  archivePath,
+  artifactPreserved,
+  extractedPackageRoot,
+  packedFiles,
+  packResult,
+  temporaryRoot,
+} = packedPackage
+const {
+  declaredRuntimePackages,
+  nodeBuiltins,
+  packageJson,
+  runtimeSpecifiers,
+  undeclaredRuntimePackages,
+} = inspectPackedRuntime({ extractedPackageRoot, packResult })
 
 try {
-  await mkdir(outputRoot, { recursive: true })
-  const packOutput = execFileSync(
-    npmExecutable,
-    ['pack', '--ignore-scripts', '--json', '--pack-destination', outputRoot],
-    {
-      cwd: packageRoot,
-      encoding: 'utf8',
-      env: {
-        ...process.env,
-        npm_config_cache: join(temporaryRoot, 'npm-cache'),
-      },
-    }
-  )
-  const [packResult] = JSON.parse(packOutput)
-  const archivePath = join(outputRoot, packResult.filename)
-  const packedFiles = new Set(packResult.files.map(({ path }) => path))
-
-  for (const expectedFile of [
+  assertExpectedFiles(packedFiles, [
     'LICENSE.md',
     'README.md',
     'package.json',
     'dist/index.js',
     'dist/index.d.ts',
     'dist/style.css',
-  ]) {
-    assert(
-      packedFiles.has(expectedFile),
-      `Packed artifact misses ${expectedFile}`
-    )
-  }
-
-  const extractedRoot = join(temporaryRoot, 'extracted')
-  await mkdir(extractedRoot)
-  execFileSync(tarExecutable, ['-xzf', archivePath, '-C', extractedRoot])
-
-  const extractedPackageRoot = join(extractedRoot, 'package')
-  const packageJson = JSON.parse(
-    readFileSync(join(extractedPackageRoot, 'package.json'), 'utf8')
-  )
+  ])
   const rootExport = packageJson.exports?.['.']
 
   assert(
@@ -113,41 +77,12 @@ try {
     )
   }
 
-  const declaredRuntimePackages = new Set([
-    ...Object.keys(packageJson.dependencies ?? {}),
-    ...Object.keys(packageJson.peerDependencies ?? {}),
-  ])
-  const runtimeSpecifiers = packResult.files
-    .map(({ path }) => path)
-    .filter((path) => path.startsWith('dist/') && path.endsWith('.js'))
-    .flatMap((path) =>
-      ts
-        .preProcessFile(
-          readFileSync(join(extractedPackageRoot, path), 'utf8'),
-          true,
-          true
-        )
-        .importedFiles.map(({ fileName }) => fileName)
-    )
-  const nodeBuiltins = runtimeSpecifiers.filter(
-    (specifier) => specifier.startsWith('node:') || isBuiltin(specifier)
-  )
-
   assert(
     nodeBuiltins.length === 0,
     `Node built-ins are not allowed in browser bundle: ${nodeBuiltins.join(
       ', '
     )}`
   )
-
-  const undeclaredRuntimePackages = [
-    ...new Set(
-      runtimeSpecifiers
-        .filter((specifier) => !specifier.startsWith('.'))
-        .map(dependencyName)
-        .filter((name) => !declaredRuntimePackages.has(name))
-    ),
-  ]
 
   assert(
     undeclaredRuntimePackages.length === 0,
@@ -241,9 +176,9 @@ try {
     } packed files, ${
       runtimeSpecifiers.length
     } runtime imports, root/CSS/types resolve.${
-      outputOptionIndex === -1 ? '' : ` Artifact: ${archivePath}`
+      artifactPreserved ? ` Artifact: ${archivePath}` : ''
     }`
   )
 } finally {
-  rmSync(temporaryRoot, { recursive: true, force: true })
+  packedPackage.cleanup()
 }
