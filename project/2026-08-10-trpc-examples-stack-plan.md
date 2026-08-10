@@ -1,7 +1,7 @@
 # tRPC example games and documentation reconciliation
 
 Date: 2026-08-10
-Status: in progress; layers 00-02 reviewed in draft PRs, layer 03 active
+Status: implementation and local verification complete; exact-head final review pending
 Provider: GitHub stacked changes
 Base: `trpc-stack/03-ci-devcontainer-docs-collateral` at `2f363c1`
 Worktree: `trees/trpc-examples-stack`
@@ -14,7 +14,7 @@ Mode: guided, with a review pause after every layer
 | 00 canonical Pages Router pattern   | `rs/trpc-examples/00-pages-router-pattern` / [#201](https://github.com/uzh-bf/gbl-uzh/pull/201) | Commit `a7ac89a`; checks, lifecycle proof, and intermediate review passed                       |
 | 01 Rate Wars                        | `rs/trpc-examples/01-rate-wars-trpc` / [#202](https://github.com/uzh-bf/gbl-uzh/pull/202)       | Commit `10fcc62`; complete lifecycle and intermediate review passed                             |
 | 02 Central Bank                     | `rs/trpc-examples/02-central-bank-trpc` / [#204](https://github.com/uzh-bf/gbl-uzh/pull/204)    | Commit `4a1271d`; complete lifecycle and intermediate review passed                             |
-| 03 compatibility and reconciliation | `rs/trpc-examples/03-graphql-deprecation-docs`                                                  | Implementation tip `f6447f2`; checks pass; Terra rerun approved with two P3 findings closed |
+| 03 compatibility and reconciliation | `rs/trpc-examples/03-graphql-deprecation-docs` / [#205](https://github.com/uzh-bf/gbl-uzh/pull/205) | Implementation through `a9e535e`; checks pass; security review passed; maintainability findings closed |
 
 All listed pull requests are draft and unmerged. The earlier replacement stack
 [#194-#197](https://github.com/uzh-bf/gbl-uzh/pulls?q=is%3Apr+197+196+195+194)
@@ -30,11 +30,14 @@ remains unchanged and unmerged.
   and tar from `PATH` instead of assuming host-specific absolute locations.
 - Demo-game, Rate Wars, and Central Bank passed TypeScript 7 and 6, formatting,
   lint, and production builds. Existing lint warnings remain unchanged.
-- Real Node 24 container lifecycles passed: Central Bank 2/2, Rate Wars 2/2,
-  and demo-game 3/3. The first Central Bank attempt stopped before app access
-  because the disposable container lacked Chromium; installing the pinned
-  Playwright browser and host libraries restored the intended environment, and
-  the unchanged spec then passed.
+- Real Node 24 browser lifecycles passed: Central Bank 2/2, Rate Wars 2/2 on
+  two consecutive runs, and demo-game 3/3. Player contexts now explicitly start
+  with empty storage instead of inheriting the administrator project's saved
+  authentication state. Game-status assertions observe the tRPC-driven DOM
+  update directly, without a reload fallback, so the tests prove targeted cache
+  invalidation. A local Docker OIDC crash and disk-pressure interruption were
+  recovered without changing application behavior; the final suites ran
+  against the recovered local app and OIDC sidecar.
 - OKF/frontmatter/link validation passed. Active game-code and runtime-config
   audits have no Apollo, GraphQL endpoint/codegen, Nexus build, or
   `/api/graphql` matches. Retained repository matches are classified in
@@ -46,6 +49,17 @@ remains unchanged and unmerged.
   `APPROVE-WITH-FINDINGS`: two non-blocking P3 cleanup/status issues. `f6447f2`
   closes the cleanup issue, and this ledger update closes the stale-status
   issue. The reports are stored under `project/_local/reviews/`.
+- The bounded security review of `2f363c1..9e42693` passed with no findings.
+- The maintainability review of `2f363c1..9e42693` found one P2 DTO contract
+  weakness and one P3 Rate Wars type erasure. Commit `a9e535e` maps current-game
+  results through the required-player DTO, preserves inferred result types in
+  Central Bank and Rate Wars, and adds the browser-session proof described
+  above. TypeScript 7 and 6, all 48 platform tests, all app checks, both
+  Playwright type checks, package verification, production builds, and all
+  three browser lifecycles pass after remediation.
+- One exact-head integrated final review remains before the draft stack can be
+  presented as ready. No merge, publication, deployment, branch deletion, or
+  worktree cleanup is authorized by this plan.
 
 ## Goal
 
