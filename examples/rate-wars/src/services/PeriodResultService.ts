@@ -1,21 +1,26 @@
-import {
+import type {
   OutputFacts,
   PayloadPeriodResult,
   PayloadPeriodResultEnd,
 } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
-import { PlayerResult } from 'src/graphql/generated/ops'
 import { clearMarket, rankByEquity } from '../lib/model'
-import { PlayerRole } from '../settings/Constants'
-import { GameFacts } from '../types/Game'
-import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
-import {
+import type { PlayerRole } from '../settings/Constants'
+import type { GameFacts } from '../types/Game'
+import type { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
+import type {
   MarketEntry,
   OutputResultFacts,
   ResultFacts,
   ResultFactsInit,
 } from '../types/facts'
+
+type SegmentEndResultRow = {
+  playerId: string
+  periodIx: number
+  facts?: Partial<ResultFacts>
+}
 
 export const INITIAL_EQUITY = 500
 export const DEFAULT_DECISIONS = { depositRate: 1, loanRate: 4 }
@@ -72,7 +77,7 @@ export function start(
 export function end(
   facts: ResultFacts,
   payload: PayloadPeriodResultEnd<
-    PlayerResult[],
+    SegmentEndResultRow[],
     GameFacts,
     PeriodFacts,
     PeriodSegmentFacts,

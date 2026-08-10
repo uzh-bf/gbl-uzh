@@ -1,4 +1,3 @@
-// import { useQuery } from '@apollo/client'
 import { faStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -10,19 +9,10 @@ import {
   TimelineEntry,
   TradingForm,
 } from '@gbl-uzh/ui'
-// import { ResultDocument } from 'src/graphql/generated/ops'
 
 import { useRouter } from 'next/router'
 
 export default function Home() {
-  // const { data, loading, error } = useQuery(ResultDocument, {
-  //   fetchPolicy: 'cache-first',
-  // })
-
-  // if (loading) return <div>Loading...</div>
-  // if (error) return <div>Error {error.message}</div>
-  // console.log(data)
-
   const router = useRouter()
   const tabs = [
     { name: 'Welcome', href: '/play/welcome' },

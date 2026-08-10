@@ -213,7 +213,21 @@ async function advanceGame(
 ) {
   const button = page.getByRole('button', { name: action })
   await expect(button).toBeEnabled()
-  await button.click()
+  // The status poll reloads the page. Wait for the tRPC mutation response
+  // first so that reload cannot abort a just-dispatched client request.
+  const procedure =
+    action === 'Next Segment'
+      ? 'game.activateNextSegment'
+      : 'game.activateNextPeriod'
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (candidate) =>
+        candidate.request().method() === 'POST' &&
+        candidate.url().includes(`/api/trpc/${procedure}`)
+    ),
+    button.click(),
+  ])
+  expect(response.ok()).toBe(true)
   await expectGameStatusEventually(page, expectedStatus)
 }
 
@@ -263,22 +277,9 @@ async function setCountdown(page: Page, seconds: string) {
 }
 
 async function assertCountdownVisible(page: Page) {
-  await expect
-    .poll(
-      async () => {
-        await page.reload()
-        return page
-          .getByTestId('countdown')
-          .waitFor({ state: 'visible', timeout: 10_000 })
-          .then(() => true)
-          .catch(() => false)
-      },
-      {
-        intervals: [500, 1_000],
-        timeout: 60_000,
-      }
-    )
-    .toBe(true)
+  // Do not reload: this assertion proves that the already-connected player
+  // receives the SSE event and invalidates play.result after the admin update.
+  await expect(page.getByTestId('countdown')).toBeVisible({ timeout: 60_000 })
 }
 
 async function runYear(

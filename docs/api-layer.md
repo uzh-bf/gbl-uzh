@@ -17,10 +17,11 @@ owns procedures, authorization, data transfer objects, and realtime semantics;
 each game supplies its services and fact schemas, creates one router, and hosts
 one `/api/trpc` route. The reference implementation is `apps/demo-game`.
 
-Rate Wars and Central Bank still contain the deprecated GraphQL compatibility
-client on the first migration layer. They are migration inputs, not templates
-for new games. Public GraphQL exports remain available temporarily for unknown
-external consumers, but repository code and documentation must use tRPC.
+Demo-game and Rate Wars use this pattern. Central Bank still contains the
+deprecated GraphQL compatibility client until its migration layer and is not a
+template for new games. Public GraphQL exports remain available temporarily for
+unknown external consumers, but repository code and documentation must use
+tRPC.
 
 ## Server contract
 
