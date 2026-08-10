@@ -96,8 +96,8 @@ function pathOption(name, { required = false } = {}) {
 }
 
 export async function preparePackedPackage({ packageRoot, temporaryPrefix }) {
-  const temporaryRoot = await mkdtemp(join(tmpdir(), temporaryPrefix))
   const configuredOutputRoot = pathOption('--output')
+  const temporaryRoot = await mkdtemp(join(tmpdir(), temporaryPrefix))
   const outputRoot = configuredOutputRoot ?? temporaryRoot
   const npmExecutable = process.platform === 'win32' ? 'npm.cmd' : 'npm'
   const tarExecutable = process.platform === 'win32' ? 'tar.exe' : 'tar'

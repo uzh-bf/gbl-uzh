@@ -27,15 +27,16 @@ const {
   packResult,
   temporaryRoot,
 } = packedPackage
-const {
-  declaredRuntimePackages,
-  nodeBuiltins,
-  packageJson,
-  runtimeSpecifiers,
-  undeclaredRuntimePackages,
-} = inspectPackedRuntime({ extractedPackageRoot, packResult })
 
 try {
+  const {
+    declaredRuntimePackages,
+    nodeBuiltins,
+    packageJson,
+    runtimeSpecifiers,
+    undeclaredRuntimePackages,
+  } = inspectPackedRuntime({ extractedPackageRoot, packResult })
+
   assertExpectedFiles(packedFiles, [
     'LICENSE.md',
     'README.md',
