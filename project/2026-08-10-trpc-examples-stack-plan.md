@@ -14,7 +14,7 @@ Mode: guided, with a review pause after every layer
 | 00 canonical Pages Router pattern   | `rs/trpc-examples/00-pages-router-pattern` / [#201](https://github.com/uzh-bf/gbl-uzh/pull/201) | Commit `a7ac89a`; checks, lifecycle proof, and intermediate review passed                       |
 | 01 Rate Wars                        | `rs/trpc-examples/01-rate-wars-trpc` / [#202](https://github.com/uzh-bf/gbl-uzh/pull/202)       | Commit `10fcc62`; complete lifecycle and intermediate review passed                             |
 | 02 Central Bank                     | `rs/trpc-examples/02-central-bank-trpc` / [#204](https://github.com/uzh-bf/gbl-uzh/pull/204)    | Commit `4a1271d`; complete lifecycle and intermediate review passed                             |
-| 03 compatibility and reconciliation | `rs/trpc-examples/03-graphql-deprecation-docs`                                                  | Commit `b08f89e`; all checks and lifecycles passed; Terra intermediate review approved with no findings |
+| 03 compatibility and reconciliation | `rs/trpc-examples/03-graphql-deprecation-docs`                                                  | Implementation tip `f6447f2`; checks pass; Terra rerun approved with two P3 findings closed |
 
 All listed pull requests are draft and unmerged. The earlier replacement stack
 [#194-#197](https://github.com/uzh-bf/gbl-uzh/pulls?q=is%3Apr+197+196+195+194)
@@ -39,9 +39,13 @@ remains unchanged and unmerged.
   audits have no Apollo, GraphQL endpoint/codegen, Nexus build, or
   `/api/graphql` matches. Retained repository matches are classified in
   `project/2026-08-10-trpc-graphql-reference-audit.md`.
-- Terra reviewed `4a1271d..b08f89e` read-only and returned `APPROVE` with no
-  findings or advisories. The report is stored at
-  `project/_local/reviews/2026-08-10-trpc-graphql-deprecation-docs-intermediate.md`.
+- Terra first reviewed `4a1271d..b08f89e` with no findings. After the initial
+  Sonar run found three missing `--ignore-scripts` flags and 123 duplicated
+  verifier lines, `7fd6b32` added the flags and one shared verifier helper.
+- The review rerun on `4a1271d..7fd6b32` returned
+  `APPROVE-WITH-FINDINGS`: two non-blocking P3 cleanup/status issues. `f6447f2`
+  closes the cleanup issue, and this ledger update closes the stale-status
+  issue. The reports are stored under `project/_local/reviews/`.
 
 ## Goal
 
