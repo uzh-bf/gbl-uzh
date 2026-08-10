@@ -38,5 +38,8 @@ overrides:
   # and break @gbl-uzh/ui's tsc. Pin one (6.7.2 is a superset) so the type is
   # identical everywhere.
   '@fortawesome/fontawesome-common-types': '6.7.2'
+# Temporary exact-version exception for the freshly published alpha.3. Remove
+# this entry after the seven-day maturity window or when alpha.4 supersedes it;
+# do not broaden the exception to a range.
 minimumReleaseAgeExclude:
   - '@uzh-bf/design-system@5.0.0-alpha.3'

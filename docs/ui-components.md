@@ -65,7 +65,7 @@ CSS: the package ships a Tailwind v4 **utilities-only** stylesheet (no preflight
 Version `5.0.0-alpha.3` is the v5 migration target for the demo game and `packages/ui`. It exports the v5 public root and `@uzh-bf/design-system/primitives` subpath; the slice exercised by the reference game is:
 
 - **Structure**: `Card` family (`CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`) — the workhorse container; `Modal`; `NavigationMenu` family; headings `H3`/`H4`; `Prose`.
-- **Forms (RHF-first)**: `Form`, `RhfTextField`, `RhfNumberField`, `RhfSelectField`, and `RhfMultiSelect` from the package root. Pass `control={form.control}` explicitly. `RhfNumberField` edits as `number | ''`; normalize at the submit boundary before calling GraphQL or domain actions. Formik fields remain available for legacy consumers.
+- **Forms (RHF-first)**: `Form`, `RhfTextField`, `RhfNumberField`, `RhfSelectField`, and `RhfMultiSelect` from the package root. Pass `control={form.control}` explicitly. `RhfNumberField` edits as `number | ''`; normalize at the submit boundary before calling GraphQL or domain actions. Formik fields remain compatibility exports for legacy consumers; new forms use RHF.
 - **Controls**: `Button` (with `data={{ cy, test }}` for test selectors), `Select`, `Switch`, `Progress`.
 - **Data display**: `Table`, `TableBody`, `TableCell`, `TableHead`, `TableHeader`, and `TableRow` from `@uzh-bf/design-system/primitives`, plus `ChartContainer` for recharts wrappers.
 
@@ -75,8 +75,7 @@ Copy the demo game's setup (`apps/demo-game/src/globals.css`, `postcss.config.js
 
 1. Import the design system's compiled CSS through its public bare export: `@import '@uzh-bf/design-system/css';`. The v5 package also exposes `@uzh-bf/design-system/preflight.css` when an app needs the reset separately.
 2. Skip your own Tailwind preflight — the design-system CSS already ships the base reset (double-applying breaks styles).
-3. `@layer utilities { .aspect-video { ... } }` is manually patched in because the design system's `ChartContainer` needs it but the shipped CSS doesn't emit it.
-4. Theming = CSS custom properties on `:root` (`--theme-color-primary`, `--theme-color-secondary`, with `-80/-60/-40/-20` shades).
+3. Theming = CSS custom properties on `:root` (`--theme-color-primary`, `--theme-color-secondary`, with `-80/-60/-40/-20` shades).
 
 ## Gaps a new game will hit
 

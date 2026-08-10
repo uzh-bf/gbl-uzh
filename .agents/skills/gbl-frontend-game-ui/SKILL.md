@@ -34,7 +34,7 @@ One page, four layers — keep this shape:
 >
 > **Do not import `@prisma/client` in frontend code — not even indirectly.** If a shared utility (e.g. from `@gbl-uzh/platform`) uses Prisma enums like `DB.GameStatus`, those will be `undefined` in the browser and crash. Compare game status against string literals (`'RUNNING'`, `'PAUSED'`, `'RESULTS'`, etc.) or the generated GraphQL enum (`GameStatus` from `src/graphql/generated/ops.ts`).
 
-The decision form validates with a yup schema mirroring the constraints your `Actions.apply` reducer enforces server-side, and submits via the perform-action mutation. **Ensure the decision screen surfaces enough information** (forecasts, trend indicators, current state, target values) for the player to make a theory-informed decision — not guess randomly.
+The decision form uses React Hook Form fields and rules that mirror the constraints your `Actions.apply` reducer enforces server-side, and submits via the perform-action mutation. Keep numeric editing values as `number | ''` until the submit boundary. **Ensure the decision screen surfaces enough information** (forecasts, trend indicators, current state, target values) for the player to make a theory-informed decision — not guess randomly.
 
 ## The two chart layers (PAUSED vs RESULTS)
 
@@ -93,12 +93,12 @@ Priority order:
 
 1. **`@uzh-bf/design-system`** (v5 alpha): `Card` family, `Button`, `Modal`, `Switch`, `Progress`, `ChartContainer`, `Form`, `RhfTextField`, `RhfNumberField`, `RhfSelectField`, and `RhfMultiSelect`. Import `Table*` from `@uzh-bf/design-system/primitives`. New game and admin forms use explicit React Hook Form `control` props; `RhfNumberField` edits `number | ''` and submit handlers normalize it.
 2. **`@gbl-uzh/ui`**: shared shell, player display, story/learning flow, countdown, compatibility form exports, and game widgets — see the [inventory with statuses](../../../docs/ui-components.md). Use the design system's `Button`; keep domain controls such as `LogoSelector` in the app; `TimelineAdmin` remains a stub.
-3. **Copy/adapt from `apps/demo-game`** only when neither package provides the behavior: game-specific layouts, decisions, result charts, GraphQL adapters, and thin Formik wrappers around shared controls.
+3. **Copy/adapt from `apps/demo-game`** only when neither package provides the behavior: game-specific layouts, decisions, result charts, GraphQL adapters, and explicitly scoped app-owned controls. Compatibility wrappers are for legacy migrations, not new forms.
 4. **recharts** directly for game charts.
 
 ## Styling setup
 
-Tailwind v4, CSS-only config. Copy `apps/demo-game/src/globals.css` + `postcss.config.js` and keep its gotchas intact (bare `@uzh-bf/design-system/css` import, no own preflight, `.aspect-video` patch, `--theme-color-*` custom properties). Details: [docs/ui-components.md](../../../docs/ui-components.md).
+Tailwind v4, CSS-only config. Copy `apps/demo-game/src/globals.css` + `postcss.config.js` and keep its gotchas intact (bare `@uzh-bf/design-system/css` import, no own preflight, `--theme-color-*` custom properties). Details: [docs/ui-components.md](../../../docs/ui-components.md).
 
 ## Leaderboards / cross-team views
 

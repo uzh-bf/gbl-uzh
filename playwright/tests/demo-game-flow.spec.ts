@@ -19,6 +19,10 @@ type DecisionValues = {
 
 type PlayerPlan = {
   name: string
+  profile?: {
+    color: string
+    location: string
+  }
   decisions: DecisionValues[]
 }
 
@@ -31,6 +35,7 @@ type PlayerSession = {
 const players: PlayerPlan[] = [
   {
     name: 'Playwright Bank One',
+    profile: { color: 'Green', location: 'TI' },
     decisions: [
       { savings: '40', bonds: '30', stocks: '30' },
       { savings: '35', bonds: '35', stocks: '30' },
@@ -173,25 +178,59 @@ async function joinPlayer(
   await page.waitForURL('**/play/welcome')
   await input(page, 'name').fill(plan.name)
 
-  const location = page.getByRole('combobox', { name: 'Location' })
-  await location.click()
-  await page.getByRole('option', { name: 'TI', exact: true }).click()
-  await expect(location).toContainText('TI')
+  const expectedProfile = plan.profile ?? { color: 'Red', location: 'AG' }
+  if (plan.profile) {
+    const location = page.getByRole('combobox', { name: 'Location' })
+    await location.click()
+    await page
+      .getByRole('option', { name: plan.profile.location, exact: true })
+      .click()
+    await expect(location).toContainText(plan.profile.location)
 
-  const color = page.getByRole('combobox', { name: 'Color' })
-  await color.click()
-  await page.getByRole('option', { name: 'Green', exact: true }).click()
-  await expect(color).toContainText('Green')
+    const color = page.getByRole('combobox', { name: 'Color' })
+    await color.click()
+    await page
+      .getByRole('option', { name: plan.profile.color, exact: true })
+      .click()
+    await expect(color).toContainText(plan.profile.color)
+  }
+
+  const updatePlayerDataRequest = plan.profile
+    ? page.waitForRequest((request) => {
+        if (
+          request.method() !== 'POST' ||
+          !request.url().includes('/api/graphql')
+        ) {
+          return false
+        }
+
+        try {
+          return request.postDataJSON().operationName === 'UpdatePlayerData'
+        } catch {
+          return false
+        }
+      })
+    : undefined
 
   await Promise.all([
     page.waitForURL('**/play/cockpit'),
+    updatePlayerDataRequest ?? Promise.resolve(),
     page.getByRole('button', { name: 'Start Game' }).click(),
   ])
+
+  if (updatePlayerDataRequest) {
+    const requestBody = (await updatePlayerDataRequest).postDataJSON() as {
+      variables: { facts: string }
+    }
+    expect(JSON.parse(requestBody.variables.facts)).toMatchObject(
+      expectedProfile
+    )
+  }
 
   await expect(page.getByText('Game is scheduled.')).toBeVisible({
     timeout: 30_000,
   })
-  await expect(page.getByText('HQ: TI')).toBeVisible()
+  await expect(page.getByText(`HQ: ${expectedProfile.location}`)).toBeVisible()
 
   return { context, page, plan }
 }
@@ -256,7 +295,10 @@ async function assertPlayerDecisionForm(sessions: PlayerSession[]) {
 async function dismissStoryElementIfVisible(page: Page) {
   const continueButton = page.getByRole('button', { name: 'Continue' })
   if (await continueButton.isVisible().catch(() => false)) {
-    await continueButton.click()
+    // Countdown notifications are non-modal but can briefly overlap the
+    // story dialog. The dialog is already the visible target, so do not let a
+    // transient toast make the lifecycle test flaky.
+    await continueButton.click({ force: true })
     await expect(continueButton).toBeHidden()
   }
 }
