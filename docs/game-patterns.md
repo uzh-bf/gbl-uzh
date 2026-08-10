@@ -24,7 +24,7 @@ This document outlines successful didactical and mechanical patterns from existi
 1. **Backend (`SegmentResultService` / `PeriodResultService`):**
    Instead of just computing a final score, break the calculation down into intermediate steps (e.g., revenue, COGS, gross margin, net income) and save these in the `SegmentResult` facts.
 2. **Frontend (`/play/cockpit`):**
-   When `game.status` is `PAUSED` or `RESULTS`, display a structured dashboard (using the design system's `Card` and `ShadcnTable`) that visually maps the player's initial decisions to the final outcome. Use tooltips or explanatory text to clarify the "why" behind the numbers.
+   When `game.status` is `PAUSED` or `RESULTS`, display a structured dashboard using the design system's `Card` and `@uzh-bf/design-system/primitives` `Table*` components. Visually map the player's initial decisions to the final outcome. Use tooltips or explanatory text to clarify the "why" behind the numbers.
 
 *Reference:* The financial dashboards in `business-game` and the end-of-period consolidation views in `derivatives-game`.
 

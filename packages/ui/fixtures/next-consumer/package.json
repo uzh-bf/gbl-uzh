@@ -9,7 +9,7 @@
   "dependencies": {
     "@apollo/client": "3.14.1",
     "@gbl-uzh/ui": "0.0.0-package-verifier",
-    "@uzh-bf/design-system": "4.1.6",
+    "@uzh-bf/design-system": "5.0.0-alpha.3",
     "next": "16.2.9",
     "react": "19.2.7",
     "react-dom": "19.2.7",

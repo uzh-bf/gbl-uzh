@@ -1,5 +1,10 @@
 # Log
 
+## 2026-08-09
+
+- **Update**: `ui-components.md`, `game-patterns.md`, and the frontend/playwright skills - recorded the v5 alpha.3 RHF field surface, primitives table imports, bare CSS export, numeric `number | ''` editing contract, and demo-game migration coverage.
+- **Update**: the demo-game pilot - replaced generic admin fields, shared `ReusableFormField` callers, local cockpit/report selects, and legacy `ShadcnTable` aliases with the design system v5 surface; retained `LogoSelector` as an app-owned domain control.
+
 ## 2026-07-11
 
 - **Update**: `platform-overview.md`, `ui-components.md`, and `developing-a-game.md` - documented the verified public package contract, stable CSS export, external Next.js consumption, release/version workflow, and one-time npm trusted-publishing bootstrap for `@gbl-uzh/ui`.

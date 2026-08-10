@@ -1,10 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client'
-import {
-  EventLog,
-  Form,
-  ProbabilityChart,
-  ReusableFormField,
-} from '@gbl-uzh/ui'
+import { EventLog, ProbabilityChart } from '@gbl-uzh/ui'
 import {
   Button,
   Card,
@@ -18,13 +13,18 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-  ShadcnTable as Table,
-  ShadcnTableBody as TableBody,
-  ShadcnTableCell as TableCell,
-  ShadcnTableHead as TableHead,
-  ShadcnTableHeader as TableHeader,
-  ShadcnTableRow as TableRow,
+  Form,
+  RhfNumberField,
+  Select,
 } from '@uzh-bf/design-system'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@uzh-bf/design-system/primitives'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import {
@@ -39,14 +39,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
-
 import {
   PerformActionDocument,
   ResultDocument,
@@ -140,9 +132,9 @@ const months = [
 const numMonths = months.length
 
 type PortfolioFormValues = {
-  savings: number
-  bonds: number
-  stocks: number
+  savings: number | ''
+  bonds: number | ''
+  stocks: number | ''
 }
 
 function Cockpit() {
@@ -152,12 +144,9 @@ function Cockpit() {
     fetchPolicy: 'cache-first',
   })
 
-  const [performAction, updatedPlayerResult] = useMutation(
-    PerformActionDocument,
-    {
-      refetchQueries: [ResultDocument],
-    }
-  )
+  const [performAction] = useMutation(PerformActionDocument, {
+    refetchQueries: [ResultDocument],
+  })
 
   const form = useForm<PortfolioFormValues>({
     defaultValues: {
@@ -167,12 +156,11 @@ function Cockpit() {
     },
   })
   const {
-    register,
     handleSubmit,
     watch,
     control,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = form
 
   const watchSavings = watch('savings')
@@ -558,22 +546,14 @@ function Cockpit() {
                     <div className="font-normal">
                       {period !== null && (
                         <Select
-                          defaultValue={period.toString()}
-                          onValueChange={(value) => {
-                            setPeriod((prev) => parseInt(value))
-                          }}
-                        >
-                          <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Period" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {allDataPerPeriod.map((_, index) => (
-                              <SelectItem key={index} value={index.toString()}>
-                                Period {index + 1}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          value={period.toString()}
+                          onChange={(value) => setPeriod(Number(value))}
+                          items={allDataPerPeriod.map((_, index) => ({
+                            value: index.toString(),
+                            label: `Period ${index + 1}`,
+                          }))}
+                          className={{ trigger: 'w-[180px]' }}
+                        />
                       )}
                     </div>
                   </CardTitle>
@@ -854,9 +834,9 @@ function Cockpit() {
                   <Form<PortfolioFormValues> {...form}>
                     <form
                       onSubmit={handleSubmit(async (values) => {
-                        const savings = parseInt(String(values.savings), 10)
-                        const bonds = parseInt(String(values.bonds), 10)
-                        const stocks = parseInt(String(values.stocks), 10)
+                        const savings = Math.trunc(Number(values.savings))
+                        const bonds = Math.trunc(Number(values.bonds))
+                        const stocks = Math.trunc(Number(values.stocks))
 
                         await performAction({
                           variables: {
@@ -872,31 +852,28 @@ function Cockpit() {
                     >
                       <div className="mb-4 flex gap-4">
                         <div className="w-24">
-                          <ReusableFormField
+                          <RhfNumberField
                             control={control}
                             name="savings"
                             label="Savings"
-                            type="number"
                             min={0}
                             max={100}
                           />
                         </div>
                         <div className="w-24">
-                          <ReusableFormField
+                          <RhfNumberField
                             control={control}
                             name="bonds"
                             label="Bonds"
-                            type="number"
                             min={0}
                             max={100}
                           />
                         </div>
                         <div className="w-24">
-                          <ReusableFormField
+                          <RhfNumberField
                             control={control}
                             name="stocks"
                             label="Stocks"
-                            type="number"
                             min={0}
                             max={100}
                           />

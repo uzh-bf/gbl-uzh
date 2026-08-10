@@ -1,9 +1,9 @@
-import { Button } from '@uzh-bf/design-system'
+import { Button, Form, RhfNumberField } from '@uzh-bf/design-system'
 import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
-import { ReusableFormField } from './ReusableFormField'
-import { Form } from './ui/form'
+
+type TradingFormValues = {
+  volume: number | ''
+}
 
 function optionalValueToCHFString(value: number, digits = 2) {
   return value?.toLocaleString('de-CH', {
@@ -34,17 +34,7 @@ function TradingForm({
   disableButtonBuy = false,
   disableButtonSell = false,
 }: Props) {
-  const schema = yup.object({
-    volume: yup
-      .number()
-      .typeError('Volume must be a number')
-      .moreThan(0, 'Volume must be greater than 0')
-      .max(max, 'Volume must be smaller equal than ' + max)
-      .required('Volume is required'),
-  })
-
-  const form = useForm({
-    resolver: yupResolver(schema),
+  const form = useForm<TradingFormValues>({
     defaultValues: {
       volume: 0,
     },
@@ -53,7 +43,7 @@ function TradingForm({
 
   const submitTrade = (modifier: 1 | -1) =>
     form.handleSubmit(async (values) => {
-      await onSubmit({ ...values, modifier })
+      await onSubmit({ volume: Number(values.volume), modifier })
       form.reset()
     })
 
@@ -61,17 +51,30 @@ function TradingForm({
     <div className="flex w-max gap-4 rounded border p-8">
       <Form {...form}>
         <form onSubmit={(event) => event.preventDefault()}>
-          <ReusableFormField
+          <RhfNumberField
             control={form.control}
             name="volume"
             label="Volume"
-            type="number"
             placeholder="0"
             required
+            max={max}
+            rules={{
+              required: 'Volume is required',
+              validate: (value) =>
+                value !== '' && value > 0
+                  ? true
+                  : 'Volume must be greater than 0',
+              max: {
+                value: max,
+                message: 'Volume must be smaller equal than ' + max,
+              },
+            }}
           />
           <div className="mt-2">
-            Trading {form.watch('volume') || 0} {unitName} for{' '}
-            {optionalValueToCHFString((form.watch('volume') || 0) * price)}
+            Trading {Number(form.watch('volume') || 0)} {unitName} for{' '}
+            {optionalValueToCHFString(
+              Number(form.watch('volume') || 0) * price
+            )}
           </div>
 
           <div className="mt-2 flex flex-row gap-2">

@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { Logo, LogoSelector, cn } from '@gbl-uzh/ui'
+import { Logo, LogoSelector } from '@gbl-uzh/ui'
 import {
   Button,
   Card,
@@ -8,6 +8,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  RhfSelectField,
+  RhfTextField,
 } from '@uzh-bf/design-system'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
@@ -17,6 +19,13 @@ import {
   UpdatePlayerDataDocument,
 } from 'src/graphql/generated/ops'
 import { AVATARS, COLORS, LOCATIONS } from 'src/lib/constants'
+
+type WelcomeFormValues = {
+  name: string
+  color: string
+  location: string
+  imgPathAvatar: string
+}
 
 function Welcome() {
   const router = useRouter()
@@ -53,13 +62,7 @@ function Welcome() {
     },
   })
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    control,
-    formState: { errors },
-  } = useForm({
+  const { handleSubmit, watch, control } = useForm<WelcomeFormValues>({
     defaultValues: {
       name: data?.self?.name ?? '',
       color: data?.self?.facts?.color ?? Object.keys(COLORS)[0],
@@ -88,12 +91,7 @@ function Welcome() {
 
   const gameName = 'Minigame'
 
-  const onSubmit = async (values: {
-    name: string
-    color: string
-    location: string
-    imgPathAvatar: string
-  }) => {
+  const onSubmit = async (values: WelcomeFormValues) => {
     setIsSubmitting(true)
 
     try {
@@ -177,44 +175,30 @@ function Welcome() {
                     />
                   </div>
                   <div className="flex w-64 flex-col gap-4">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-slate-700">
-                        Name of bank
-                      </label>
-                      <input
-                        {...register('name', {
-                          required: 'Required',
-                          minLength: { value: 2, message: 'Too Short!' },
-                          maxLength: { value: 20, message: 'Too Long!' },
-                        })}
-                        className={cn(
-                          'w-full rounded-md border border-slate-300 bg-white p-2 text-sm focus:ring-2 focus:ring-slate-500 focus:outline-none',
-                          errors.name && 'border-red-500 focus:ring-red-500'
-                        )}
-                        placeholder="Enter bank name"
-                      />
-                      {errors.name && (
-                        <span className="text-[10px] font-semibold text-red-500">
-                          {errors.name.message}
-                        </span>
-                      )}
-                    </div>
+                    <RhfTextField
+                      control={control}
+                      name="name"
+                      label="Name of bank"
+                      placeholder="Enter bank name"
+                      required
+                      rules={{
+                        required: 'Required',
+                        minLength: { value: 2, message: 'Too Short!' },
+                        maxLength: { value: 20, message: 'Too Long!' },
+                      }}
+                    />
 
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-slate-700">
-                        Location
-                      </label>
-                      <select
-                        {...register('location', { required: true })}
-                        className="w-full rounded-md border border-slate-300 bg-white p-2 text-sm focus:ring-2 focus:ring-slate-500 focus:outline-none"
-                      >
-                        {LOCATIONS.Trader.map((label) => (
-                          <option key={label} value={label}>
-                            {label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <RhfSelectField
+                      control={control}
+                      name="location"
+                      label="Location"
+                      required
+                      rules={{ required: 'Required' }}
+                      items={LOCATIONS.Trader.map((label) => ({
+                        value: label,
+                        label,
+                      }))}
+                    />
 
                     <div className="flex flex-col gap-1">
                       <label className="text-xs font-semibold text-slate-700">
@@ -236,21 +220,17 @@ function Welcome() {
                       />
                     </div>
 
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-slate-700">
-                        Color
-                      </label>
-                      <select
-                        {...register('color', { required: true })}
-                        className="w-full rounded-md border border-slate-300 bg-white p-2 text-sm focus:ring-2 focus:ring-slate-500 focus:outline-none"
-                      >
-                        {Object.keys(COLORS).map((label) => (
-                          <option key={label} value={label}>
-                            {label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <RhfSelectField
+                      control={control}
+                      name="color"
+                      label="Color"
+                      required
+                      rules={{ required: 'Required' }}
+                      items={Object.keys(COLORS).map((label) => ({
+                        value: label,
+                        label,
+                      }))}
+                    />
                   </div>
                 </CardContent>
                 <CardFooter>

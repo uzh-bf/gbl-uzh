@@ -20,7 +20,7 @@
     "@radix-ui/react-popover": "1.1.2",
     "@radix-ui/react-select": "2.2.5",
     "@radix-ui/react-toast": "1.2.2",
-    "@uzh-bf/design-system": "4.1.6",
+    "@uzh-bf/design-system": "5.0.0-alpha.3",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.0.4",

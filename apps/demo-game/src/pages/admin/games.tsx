@@ -1,5 +1,10 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { Button } from '@uzh-bf/design-system'
+import {
+  Button,
+  Form,
+  RhfNumberField,
+  RhfTextField,
+} from '@uzh-bf/design-system'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -9,11 +14,10 @@ import {
   GameDataFragmentDoc,
   GamesDocument,
 } from 'src/graphql/generated/ops'
-import { AdminInputField } from '~/components/fields/AdminInputField'
 
 interface CreateGameFormValues {
   name: string
-  playerCount: number
+  playerCount: number | ''
 }
 
 function Games() {
@@ -43,17 +47,13 @@ function Games() {
     },
   })
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<CreateGameFormValues>({
+  const form = useForm<CreateGameFormValues>({
     defaultValues: {
       name: '',
       playerCount: 1,
     },
   })
+  const { handleSubmit, reset, control } = form
 
   if (loading || !data) {
     return <div>loading...</div>
@@ -68,7 +68,7 @@ function Games() {
       await createGame({
         variables: {
           name: values.name,
-          playerCount: parseInt(String(values.playerCount), 10),
+          playerCount: Math.trunc(Number(values.playerCount)),
           facts: { myInt: 1 },
         },
         refetchQueries: [GamesDocument],
@@ -95,41 +95,44 @@ function Games() {
         </Button>
       )}
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="my-4 flex max-w-md flex-col gap-4 rounded border p-4"
-      >
-        <AdminInputField
-          label="Name"
-          name="name"
-          register={register}
-          error={errors.name}
-          required
-          placeholder="Game Name"
-          testId="game-name"
-        />
-
-        <AdminInputField
-          label="Player Count"
-          name="playerCount"
-          type="number"
-          register={register}
-          error={errors.playerCount}
-          required
-          min={1}
-          step={1}
-          testId="game-player-count"
-          minMessage="Must be at least 1"
-        />
-
-        <Button
-          type="submit"
-          data={{ cy: 'create-game' }}
-          className={{ root: 'w-max' }}
+      <Form<CreateGameFormValues> {...form}>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="my-4 flex max-w-md flex-col gap-4 rounded border p-4"
         >
-          Create Game
-        </Button>
-      </form>
+          <RhfTextField
+            control={control}
+            name="name"
+            label="Name"
+            required
+            rules={{ required: 'Required' }}
+            placeholder="Game Name"
+            data={{ cy: 'game-name' }}
+          />
+
+          <RhfNumberField
+            control={control}
+            name="playerCount"
+            label="Player Count"
+            required
+            min={1}
+            step={1}
+            rules={{
+              required: 'Required',
+              min: { value: 1, message: 'Must be at least 1' },
+            }}
+            data={{ cy: 'game-player-count' }}
+          />
+
+          <Button
+            type="submit"
+            data={{ cy: 'create-game' }}
+            className={{ root: 'w-max' }}
+          >
+            Create Game
+          </Button>
+        </form>
+      </Form>
 
       <div className="mt-4 flex flex-col gap-1">
         {data.games.map((game) => {

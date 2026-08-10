@@ -38,3 +38,5 @@ overrides:
   # and break @gbl-uzh/ui's tsc. Pin one (6.7.2 is a superset) so the type is
   # identical everywhere.
   '@fortawesome/fontawesome-common-types': '6.7.2'
+minimumReleaseAgeExclude:
+  - '@uzh-bf/design-system@5.0.0-alpha.3'

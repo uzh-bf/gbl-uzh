@@ -18,20 +18,16 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-  ShadcnTable as Table,
-  ShadcnTableBody as TableBody,
-  ShadcnTableCell as TableCell,
-  ShadcnTableHead as TableHead,
-  ShadcnTableHeader as TableHeader,
-  ShadcnTableRow as TableRow,
+  Select,
 } from '@uzh-bf/design-system'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@uzh-bf/design-system/primitives'
 
 import {
   Area,
@@ -439,23 +435,17 @@ function ReportGame() {
             <CardTitle>Accumulated Total Return</CardTitle>
             {/* <CardDescription>Assets over time.</CardDescription> */}
             <Select
-              onValueChange={(value) => setCurrPeriod(parseInt(value))}
-              defaultValue="0"
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Period" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem key={0} value="0">
-                  All Periods
-                </SelectItem>
-                {dataPerPeriod.map((_, index) => (
-                  <SelectItem key={index + 1} value={(index + 1).toString()}>
-                    Period {index + 1}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              value={currPeriod.toString()}
+              onChange={(value) => setCurrPeriod(Number.parseInt(value, 10))}
+              items={[
+                { value: '0', label: 'All Periods' },
+                ...dataPerPeriod.map((_, index) => ({
+                  value: (index + 1).toString(),
+                  label: `Period ${index + 1}`,
+                })),
+              ]}
+              className={{ trigger: 'w-[180px]' }}
+            />
           </CardHeader>
           <CardContent className="flex-grow">
             <ChartContainer config={playerConfig} className="h-[300px] w-full">

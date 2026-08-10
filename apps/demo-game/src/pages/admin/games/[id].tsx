@@ -6,11 +6,26 @@ import {
   faSync,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { MultiSelect } from '@gbl-uzh/ui'
-import { Button, H3, H4, Modal } from '@uzh-bf/design-system'
+import {
+  Button,
+  Form,
+  H3,
+  H4,
+  Modal,
+  RhfMultiSelect,
+  RhfNumberField,
+} from '@uzh-bf/design-system'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@uzh-bf/design-system/primitives'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { twMerge } from 'tailwind-merge'
 
 import { useMutation, useQuery } from '@apollo/client'
@@ -42,15 +57,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-  ShadcnTable as Table,
-  ShadcnTableBody as TableBody,
-  ShadcnTableCell as TableCell,
-  ShadcnTableHead as TableHead,
-  ShadcnTableHeader as TableHeader,
-  ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
 
-import { AdminInputField } from '~/components/fields/AdminInputField'
 import { useToast } from '~/components/ui/use-toast'
 import {
   DEFAULT_SEED,
@@ -62,13 +70,23 @@ import {
 } from '~/types/Period'
 
 interface PeriodFormValues {
-  segmentCount: number
-  seed: number
-  interestBank: number
-  trendBonds: number
-  gapBonds: number
-  trendStocks: number
-  gapStocks: number
+  segmentCount: number | ''
+  seed: number | ''
+  interestBank: number | ''
+  trendBonds: number | ''
+  gapBonds: number | ''
+  trendStocks: number | ''
+  gapStocks: number | ''
+}
+
+interface SegmentFormValues {
+  periodIx: number
+  storyElements: string[]
+  learningElements: string[]
+}
+
+interface CountdownFormValues {
+  countdownSeconds: number | ''
 }
 
 function ManageGame() {
@@ -77,25 +95,21 @@ function ManageGame() {
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
 
+  const segmentForm = useForm<SegmentFormValues>({
+    defaultValues: {
+      periodIx: -1,
+      storyElements: [],
+      learningElements: [],
+    },
+  })
   const {
     control: segmentControl,
     handleSubmit: handleSegmentSubmit,
     reset: resetSegment,
     setValue: setSegmentValue,
-  } = useForm({
-    defaultValues: {
-      periodIx: -1,
-      storyElements: [] as string[],
-      learningElements: [] as string[],
-    },
-  })
+  } = segmentForm
 
-  const {
-    register: registerPeriod,
-    handleSubmit: handlePeriodSubmit,
-    reset: resetPeriod,
-    formState: { errors: errorsPeriod },
-  } = useForm<PeriodFormValues>({
+  const periodForm = useForm<PeriodFormValues>({
     defaultValues: {
       segmentCount: 4,
       seed: DEFAULT_SEED,
@@ -106,22 +120,21 @@ function ManageGame() {
       gapStocks: GAP_STOCKS,
     },
   })
-
   const {
-    register: registerCountdown,
-    handleSubmit: handleCountdownSubmit,
-    formState: { errors: errorsCountdown },
-  } = useForm({
+    handleSubmit: handlePeriodSubmit,
+    reset: resetPeriod,
+    control: periodControl,
+  } = periodForm
+
+  const countdownForm = useForm<CountdownFormValues>({
     defaultValues: {
       countdownSeconds: 300,
     },
   })
+  const { handleSubmit: handleCountdownSubmit, control: countdownControl } =
+    countdownForm
 
-  const onSegmentSubmit = async (values: {
-    periodIx: number
-    storyElements: string[]
-    learningElements: string[]
-  }) => {
+  const onSegmentSubmit = async (values: SegmentFormValues) => {
     await addPeriodSegment({
       variables: {
         gameId: Number(router.query.id),
@@ -140,25 +153,25 @@ function ManageGame() {
         gameId: Number(router.query.id),
         facts: {
           scenario: {
-            seed: Math.trunc(values.seed),
-            interestBank: values.interestBank,
-            trendBonds: values.trendBonds,
-            gapBonds: values.gapBonds,
-            trendStocks: values.trendStocks,
-            gapStocks: values.gapStocks,
+            seed: Math.trunc(Number(values.seed)),
+            interestBank: Number(values.interestBank),
+            trendBonds: Number(values.trendBonds),
+            gapBonds: Number(values.gapBonds),
+            trendStocks: Number(values.trendStocks),
+            gapStocks: Number(values.gapStocks),
           },
         },
-        segmentCount: Math.trunc(values.segmentCount),
+        segmentCount: Math.trunc(Number(values.segmentCount)),
       },
     })
     resetPeriod()
   }
 
-  const onCountdownSubmit = (values: { countdownSeconds: number }) => {
+  const onCountdownSubmit = (values: CountdownFormValues) => {
     addCountdown({
       variables: {
         gameId: Number(router.query.id),
-        seconds: Number(values.countdownSeconds),
+        seconds: Math.trunc(Number(values.countdownSeconds)),
       },
     })
   }
@@ -640,42 +653,26 @@ function ManageGame() {
                             }}
                             primaryLabel="Submit"
                           >
-                            <div className="flex w-1/2 flex-col gap-2">
-                              <div className="flex flex-col gap-2">
-                                <span className="text-sm font-normal text-gray-700">
-                                  Story Elements
-                                </span>
-                                <Controller
+                            <Form<SegmentFormValues> {...segmentForm}>
+                              <div className="flex w-1/2 flex-col gap-2">
+                                <RhfMultiSelect
                                   control={segmentControl}
                                   name="storyElements"
-                                  render={({ field }) => (
-                                    <MultiSelect
-                                      options={storyElementsAll}
-                                      value={field.value}
-                                      onChange={field.onChange}
-                                      searchPlaceholder="Search story elements..."
-                                    />
-                                  )}
+                                  label="Story Elements"
+                                  items={storyElementsAll}
+                                  searchPlaceholder="Search story elements..."
+                                  data={{ cy: 'story-elements' }}
                                 />
-                              </div>
-                              <div className="flex flex-col gap-2">
-                                <span className="text-sm font-normal text-gray-700">
-                                  Learning Elements
-                                </span>
-                                <Controller
+                                <RhfMultiSelect
                                   control={segmentControl}
                                   name="learningElements"
-                                  render={({ field }) => (
-                                    <MultiSelect
-                                      options={learningElementsAll}
-                                      value={field.value}
-                                      onChange={field.onChange}
-                                      searchPlaceholder="Search learning elements..."
-                                    />
-                                  )}
+                                  label="Learning Elements"
+                                  items={learningElementsAll}
+                                  searchPlaceholder="Search learning elements..."
+                                  data={{ cy: 'learning-elements' }}
                                 />
                               </div>
-                            </div>
+                            </Form>
                           </Modal>
                         )}
                       </>
@@ -728,98 +725,100 @@ function ManageGame() {
                 }}
                 primaryLabel="Submit"
               >
-                <div className="flex w-1/2 flex-col gap-2">
-                  <AdminInputField
-                    label="Number of segments"
-                    name="segmentCount"
-                    type="number"
-                    tooltip={
-                      'One period corresponds to one year. The number of segments is used to compute the number of months in the period.'
-                    }
-                    required
-                    register={registerPeriod}
-                    error={errorsPeriod.segmentCount}
-                  />
-                </div>
-                <div className="mt-4">
-                  <H3>Scenario Parameters</H3>
+                <Form<PeriodFormValues> {...periodForm}>
                   <div className="flex w-1/2 flex-col gap-2">
-                    <AdminInputField
-                      label="Seed"
-                      name="seed"
-                      type="number"
-                      tooltip={'Seed ....'}
+                    <RhfNumberField
+                      control={periodControl}
+                      name="segmentCount"
+                      label="Number of segments"
+                      tooltip={
+                        'One period corresponds to one year. The number of segments is used to compute the number of months in the period.'
+                      }
                       required
-                      register={registerPeriod}
-                      error={errorsPeriod.seed}
+                      rules={{ required: 'Required' }}
+                      data={{ cy: 'segment-count' }}
                     />
                   </div>
-                </div>
-                <div className="mt-4">
-                  <H4>Bank</H4>
-                  <div className="flex w-1/2 flex-col gap-2">
-                    <AdminInputField
-                      label="Saving Interest"
-                      name="interestBank"
-                      type="number"
-                      step={0.0001}
-                      tooltip={'Saving interest ....'}
-                      required
-                      register={registerPeriod}
-                      error={errorsPeriod.interestBank}
-                    />
+                  <div className="mt-4">
+                    <H3>Scenario Parameters</H3>
+                    <div className="flex w-1/2 flex-col gap-2">
+                      <RhfNumberField
+                        control={periodControl}
+                        name="seed"
+                        label="Seed"
+                        tooltip="Seed ...."
+                        required
+                        rules={{ required: 'Required' }}
+                        data={{ cy: 'seed' }}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="mt-4">
-                  <H4>Bonds</H4>
-                  <div className="flex w-1/2 gap-2">
-                    <AdminInputField
-                      label="Trend"
-                      name="trendBonds"
-                      type="number"
-                      step={0.0001}
-                      tooltip={'Trend is the expectation value.'}
-                      required
-                      register={registerPeriod}
-                      error={errorsPeriod.trendBonds}
-                    />
-                    <AdminInputField
-                      label="Gap"
-                      name="gapBonds"
-                      type="number"
-                      step={0.0001}
-                      tooltip={'TODO.'}
-                      required
-                      register={registerPeriod}
-                      error={errorsPeriod.gapBonds}
-                    />
+                  <div className="mt-4">
+                    <H4>Bank</H4>
+                    <div className="flex w-1/2 flex-col gap-2">
+                      <RhfNumberField
+                        control={periodControl}
+                        name="interestBank"
+                        label="Saving Interest"
+                        step={0.0001}
+                        tooltip="Saving interest ...."
+                        required
+                        rules={{ required: 'Required' }}
+                        data={{ cy: 'interest-bank' }}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="mt-4">
-                  <H4>Stocks</H4>
-                  <div className="flex w-1/2 gap-2">
-                    <AdminInputField
-                      label="Trend"
-                      name="trendStocks"
-                      type="number"
-                      step={0.0001}
-                      tooltip={'Trend is the expectation value.'}
-                      required
-                      register={registerPeriod}
-                      error={errorsPeriod.trendStocks}
-                    />
-                    <AdminInputField
-                      label="Gap"
-                      name="gapStocks"
-                      type="number"
-                      step={0.0001}
-                      tooltip={'TODO.'}
-                      required
-                      register={registerPeriod}
-                      error={errorsPeriod.gapStocks}
-                    />
+                  <div className="mt-4">
+                    <H4>Bonds</H4>
+                    <div className="flex w-1/2 gap-2">
+                      <RhfNumberField
+                        control={periodControl}
+                        name="trendBonds"
+                        label="Trend"
+                        step={0.0001}
+                        tooltip="Trend is the expectation value."
+                        required
+                        rules={{ required: 'Required' }}
+                        data={{ cy: 'trend-bonds' }}
+                      />
+                      <RhfNumberField
+                        control={periodControl}
+                        name="gapBonds"
+                        label="Gap"
+                        step={0.0001}
+                        tooltip="TODO."
+                        required
+                        rules={{ required: 'Required' }}
+                        data={{ cy: 'gap-bonds' }}
+                      />
+                    </div>
                   </div>
-                </div>
+                  <div className="mt-4">
+                    <H4>Stocks</H4>
+                    <div className="flex w-1/2 gap-2">
+                      <RhfNumberField
+                        control={periodControl}
+                        name="trendStocks"
+                        label="Trend"
+                        step={0.0001}
+                        tooltip="Trend is the expectation value."
+                        required
+                        rules={{ required: 'Required' }}
+                        data={{ cy: 'trend-stocks' }}
+                      />
+                      <RhfNumberField
+                        control={periodControl}
+                        name="gapStocks"
+                        label="Gap"
+                        step={0.0001}
+                        tooltip="TODO."
+                        required
+                        rules={{ required: 'Required' }}
+                        data={{ cy: 'gap-stocks' }}
+                      />
+                    </div>
+                  </div>
+                </Form>
               </Modal>
             )
           })()}
@@ -844,35 +843,36 @@ function ManageGame() {
           </div>
         </div>
 
-        <form onSubmit={handleCountdownSubmit(onCountdownSubmit)}>
-          <Card className="flex flex-col">
-            <CardHeader>
-              <CardTitle>Countdown</CardTitle>
-              <CardDescription>
-                Set a countdown for the segment.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div data-cy="countdown-seconds">
-                <AdminInputField
-                  label="Countdown in seconds"
-                  name="countdownSeconds"
-                  type="number"
-                  register={registerCountdown}
-                  error={errorsCountdown.countdownSeconds}
-                  required
-                />
-              </div>
-              {/* TODO(JJ): @RS Do we want to show the following? If no we
-                we can remove the refetchQueries.
-              */}
-              {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
-            </CardContent>
-            <CardFooter>
-              <Button type="submit">Set Countdown</Button>
-            </CardFooter>
-          </Card>
-        </form>
+        <Form<CountdownFormValues> {...countdownForm}>
+          <form onSubmit={handleCountdownSubmit(onCountdownSubmit)}>
+            <Card className="flex flex-col">
+              <CardHeader>
+                <CardTitle>Countdown</CardTitle>
+                <CardDescription>
+                  Set a countdown for the segment.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div data-cy="countdown-seconds">
+                  <RhfNumberField
+                    control={countdownControl}
+                    name="countdownSeconds"
+                    label="Countdown in seconds"
+                    required
+                    rules={{ required: 'Required' }}
+                  />
+                </div>
+                {/* TODO(JJ): @RS Do we want to show the following? If no we
+                  we can remove the refetchQueries.
+                */}
+                {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
+              </CardContent>
+              <CardFooter>
+                <Button type="submit">Set Countdown</Button>
+              </CardFooter>
+            </Card>
+          </form>
+        </Form>
       </div>
     </div>
   )

@@ -72,7 +72,7 @@ Both are selected by the admin in the add-segment dialog and attached to specifi
 
 ## Admin pages
 
-- `/admin/games/[id]`: the advance button is a `switch (game.status)` producing one label + mutation per state (copy `getButton` from the demo game); add-period and add-segment modals expose **your** period/segment facts fields (Formik + yup); include the player list with join links and the countdown form.
+- `/admin/games/[id]`: the advance button is a `switch (game.status)` producing one label + mutation per state (copy `getButton` from the demo game); add-period and add-segment modals expose **your** period/segment facts fields with typed React Hook Form controls; include the player list with join links and the countdown form.
 - `/admin/reports/[id]`: query result rows of type `SEGMENT_END` / `PERIOD_END` and chart per-player metrics; aggregation happens client-side.
 
 > [!TIP] > **Always guard `JSON.parse` on facts data.** Facts may be `null`, `undefined`, a plain object, or a double-stringified JSON string depending on the game state. Use a `parseFacts(raw, defaultValue)` wrapper (see `gbl-backend-computations` skill) in every component that reads `team.facts`, `period.facts`, or `segment.facts`. Without this, early game states (before initialisation) will crash the admin reports and player cockpit.
@@ -91,14 +91,14 @@ See [docs/game-patterns.md](../../../docs/game-patterns.md) for pattern details.
 
 Priority order:
 
-1. **`@uzh-bf/design-system`** (v4): `Card` family, `Button`, `Modal`, `Switch`, `Progress`, `ShadcnTable*` (alias to `Table`...), `ChartContainer`, and the Formik fields (`FormikTextField`, `FormikNumberField`, `FormikSelectField`). Game-specific and admin authoring forms use **Formik + yup**. Shared UI fields may use the package's exported React Hook Form `Form` and `ReusableFormField` contract.
-2. **`@gbl-uzh/ui`**: shared shell, player display, story/learning flow, countdown, reusable fields, `MultiSelect`, and game widgets — see the [inventory with statuses](../../../docs/ui-components.md). Use the design system's `Button`; `TimelineAdmin` remains a stub.
+1. **`@uzh-bf/design-system`** (v5 alpha): `Card` family, `Button`, `Modal`, `Switch`, `Progress`, `ChartContainer`, `Form`, `RhfTextField`, `RhfNumberField`, `RhfSelectField`, and `RhfMultiSelect`. Import `Table*` from `@uzh-bf/design-system/primitives`. New game and admin forms use explicit React Hook Form `control` props; `RhfNumberField` edits `number | ''` and submit handlers normalize it.
+2. **`@gbl-uzh/ui`**: shared shell, player display, story/learning flow, countdown, compatibility form exports, and game widgets — see the [inventory with statuses](../../../docs/ui-components.md). Use the design system's `Button`; keep domain controls such as `LogoSelector` in the app; `TimelineAdmin` remains a stub.
 3. **Copy/adapt from `apps/demo-game`** only when neither package provides the behavior: game-specific layouts, decisions, result charts, GraphQL adapters, and thin Formik wrappers around shared controls.
 4. **recharts** directly for game charts.
 
 ## Styling setup
 
-Tailwind v4, CSS-only config. Copy `apps/demo-game/src/globals.css` + `postcss.config.js` and keep its gotchas intact (relative `node_modules` import of the design-system CSS, no own preflight, `.aspect-video` patch, `--theme-color-*` custom properties). Details: [docs/ui-components.md](../../../docs/ui-components.md).
+Tailwind v4, CSS-only config. Copy `apps/demo-game/src/globals.css` + `postcss.config.js` and keep its gotchas intact (bare `@uzh-bf/design-system/css` import, no own preflight, `.aspect-video` patch, `--theme-color-*` custom properties). Details: [docs/ui-components.md](../../../docs/ui-components.md).
 
 ## Leaderboards / cross-team views
 
