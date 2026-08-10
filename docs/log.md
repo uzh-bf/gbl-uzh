@@ -9,6 +9,10 @@
 - **Update**: `developing-a-game.md`, `deploying-a-game.md`, and local onboarding docs - documented the shared local OIDC service, demo-game's fail-closed provider selection, and native-only real Auth0 opt-in.
 - **Update**: `developing-a-game.md` - documented demo-game's ordered env bootstrap so strict mock-auth validation also works before Next.js starts.
 
+## 2026-08-10
+
+- **Update**: `api-layer.md`, `developing-a-game.md`, and `index.md` - made tRPC v11 the supported game API, documented the official Pages Router wrapper, bounded batching, SSE/SuperJSON links, typed authorization, targeted invalidation, and the deprecation-first GraphQL compatibility boundary.
+
 ## 2026-07-11
 
 - **Update**: `platform-overview.md`, `ui-components.md`, and `developing-a-game.md` - documented the verified public package contract, stable CSS export, external Next.js consumption, release/version workflow, and one-time npm trusted-publishing bootstrap for `@gbl-uzh/ui`.

@@ -97,7 +97,12 @@ Define TypeScript types + yup schemas for `GameFacts`, `PeriodFacts`, `PeriodSeg
 
 ### Wiring it together
 
-The `services` object, yup schemas, and facts input types are passed into the platform's API builder, which exposes all queries/mutations/subscriptions. What that builder looks like depends on the transport — GraphQL today, tRPC after the migration. See [api-layer.md](api-layer.md); reference: `apps/demo-game/src/graphql/index.ts` (`generateBaseMutations({ services, schemas, inputTypes })`).
+The `services` object and yup fact schemas are passed to
+`createPlatformRouter`, which exposes the platform queries, mutations, and
+subscriptions. The game hosts that router at `src/pages/api/trpc/[trpc].ts` and
+exports its `AppRouter` type for the Pages Router client. See
+[API Layer and Realtime](api-layer.md); the reference wiring is
+`apps/demo-game/src/server/trpc/router.ts`.
 
 ## Frontend: built per game
 
@@ -122,7 +127,12 @@ The cockpit pattern (from `apps/demo-game/src/pages/play/cockpit.tsx`):
 
 > [!WARNING]
 >
-> **Prisma enum trap:** `@prisma/client` exports runtime enum objects (`GameStatus`, etc.) that Next.js strips from client bundles. Code like `DB.GameStatus.RESULTS` will be `undefined` in the browser. In the cockpit `switch` and any shared utility reachable from the frontend, compare against string literals (`'RUNNING'`, `'PAUSED'`, etc.) or the GraphQL-generated enum from `src/graphql/generated/ops.ts`. Use `import type` for Prisma imports in shared files.
+> **Prisma enum trap:** `@prisma/client` exports runtime enum objects
+> (`GameStatus`, etc.) that Next.js can strip from client bundles. Code like
+> `DB.GameStatus.RESULTS` can be `undefined` in the browser. In cockpit switches
+> and shared frontend utilities, compare the router's inferred status value to
+> string literals (`'RUNNING'`, `'PAUSED'`, etc.). Use `import type` for Prisma
+> and `AppRouter` imports in browser-reachable files.
 
 Your game-specific work is almost entirely: the decision form (validate with yup: same constraints as your `Actions.apply`), the results/report visualizations (the demo game uses recharts), and the admin authoring forms for your period/segment facts.
 
