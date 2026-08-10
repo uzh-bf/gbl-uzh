@@ -1,14 +1,14 @@
-import {
+import type {
   OutputFacts,
   PayloadPeriodResult,
   PayloadPeriodResultEnd,
 } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
-import { PlayerRole } from '../settings/Constants'
-import { GameFacts } from '../types/Game'
-import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
-import { OutputResultFacts, ResultFacts } from '../types/facts'
+import type { PlayerRole } from '../settings/Constants'
+import type { GameFacts } from '../types/Game'
+import type { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
+import type { OutputResultFacts, ResultFacts } from '../types/facts'
 
 type InputPeriodResultFactsInit = {}
 type OutputPeriodResultFactsInit = OutputFacts<

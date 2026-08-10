@@ -12,8 +12,8 @@
 // regardless of caller identity" instead of contorting a procedure into
 // throwing errors its tier structurally cannot produce.
 import { beforeEach, describe, expect, it } from '@jest/globals'
-import { createCallerFactory } from '../src/trpc/init.js'
 import { createPlatformRouter } from '../src/trpc/createPlatformRouter.js'
+import { createCallerFactory } from '../src/trpc/init.js'
 import { UserRole } from '../src/types.js'
 import { createMockPrisma, createTestContext } from './helpers.js'
 
@@ -202,5 +202,29 @@ describe('player tier: play.self', () => {
       id: 'player-1',
       name: 'Team 1',
     })
+  })
+
+  it('updates readiness without requiring unloaded player relations', async () => {
+    const prisma = createMockPrisma()
+    prisma.player.update.mockResolvedValue({
+      id: 'player-1',
+      isReady: true,
+    })
+    prisma.game.findUnique.mockResolvedValue({
+      status: 'RUNNING',
+      activePeriodIx: 0,
+      version: 2,
+      activePeriod: { activeSegmentIx: 0 },
+    })
+    const caller = createCaller(
+      createTestContext({
+        prisma,
+        user: { sub: 'player-1', role: UserRole.PLAYER, gameId: 1 },
+      })
+    )
+
+    await expect(
+      caller.play.updateReadyState({ isReady: true })
+    ).resolves.toEqual({ id: 'player-1', isReady: true })
   })
 })

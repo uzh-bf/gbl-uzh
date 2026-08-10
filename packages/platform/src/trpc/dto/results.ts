@@ -165,6 +165,7 @@ export function toPlayerResultCoreDto(
     id?: number
     type?: DB.PlayerResultType
     facts?: unknown
+    player?: unknown
     period?: { id?: number; index?: number; facts?: unknown }
     segment?: { id?: number; index?: number; facts?: unknown } | null
   } | null
@@ -177,6 +178,7 @@ export function toPlayerResultCoreDto(
     id: source.id,
     type: source.type,
     facts: source.facts,
+    player: toResultPlayerDto(source.player),
     period: {
       id: source.period.id,
       index: source.period.index ?? 0,

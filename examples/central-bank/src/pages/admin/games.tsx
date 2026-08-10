@@ -1,18 +1,13 @@
-import { useMutation, useQuery } from '@apollo/client'
-import {
-  CreateGameDocument,
-  GameDataFragmentDoc,
-  GamesDocument,
-} from 'src/graphql/generated/ops'
-
 import { Button, FormikTextField } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { trpc } from '~/lib/trpc'
 
 function Games() {
   const router = useRouter()
+  const utils = trpc.useUtils()
 
   const session = useSession({
     required: true,
@@ -21,29 +16,19 @@ function Games() {
     },
   })
 
-  const { data, error, loading } = useQuery(GamesDocument)
-  const [createGame] = useMutation(CreateGameDocument, {
-    update(cache, { data: { createGame: createGameResult } }) {
-      cache.modify({
-        fields: {
-          games(existingGames = []) {
-            const newGameRef = cache.writeFragment({
-              data: createGameResult,
-              fragment: GameDataFragmentDoc,
-            })
-            return [...existingGames, newGameRef]
-          },
-        },
-      })
+  const gamesQuery = trpc.game.list.useQuery()
+  const createGame = trpc.game.create.useMutation({
+    async onSuccess() {
+      await utils.game.list.invalidate()
     },
   })
 
-  if (loading || !data) {
+  if (gamesQuery.isLoading || !gamesQuery.data) {
     return <div>loading...</div>
   }
 
-  if (error) {
-    return <div>{error.message}</div>
+  if (gamesQuery.error) {
+    return <div>{gamesQuery.error.message}</div>
   }
 
   return (
@@ -65,18 +50,14 @@ function Games() {
         initialValues={{
           name: '',
           playerCount: 1,
-          facts: {},
+          facts: {
+            myInt: 1,
+          },
         }}
         onSubmit={async (variables, { resetForm }) => {
-          await createGame({
-            variables: {
-              ...variables,
-              // playerCount is edited through a text input, so Formik stores it
-              // as a string; the GraphQL schema requires Int!. parseInt guarantees
-              // an integer (Number would pass a fractional "1.5" through and fail).
-              playerCount: parseInt(String(variables.playerCount), 10),
-            },
-            refetchQueries: [GamesDocument],
+          await createGame.mutateAsync({
+            ...variables,
+            playerCount: parseInt(String(variables.playerCount), 10),
           })
           resetForm()
         }}
@@ -103,8 +84,7 @@ function Games() {
         )}
       </Formik>
       <div className="mt-4 flex flex-col gap-1">
-        {data.games.map((g, index, array) => {
-          const game = g as any
+        {gamesQuery.data.map((game) => {
           return (
             <Link
               className="w-96"
@@ -122,7 +102,7 @@ function Games() {
                 </div>
                 <div className="flex w-full items-end justify-between p-2 text-sm">
                   <div className="flex flex-col justify-between gap-y-1 text-left">
-                    <div>Player count: {game?.playerCount}</div>
+                    <div>Player count: {game?.playersCount}</div>
                     <div>
                       Active Period/Segment: {game?.activePeriodIx}/
                       {game?.activeSegmentIx}
