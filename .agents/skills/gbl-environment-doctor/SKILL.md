@@ -11,18 +11,18 @@ Most "bugs" a first-time user hits are environment problems, not code problems. 
 
 Choose the branch that owns the app process:
 
-- **Native host**: commands run from the repository root on the host. The app defaults to `http://localhost:3000`; the mock issuer defaults to `http://localhost:8090/default`.
-- **Starter devcontainer**: `GBL_DEV_MODE=starter` inside `/workspaces/gbl-uzh`. It uses the same localhost URLs as the host browser.
-- **Devrouter devcontainer**: inside `/workspaces/gbl-uzh` with no starter flag. The app is `http://localhost:3000` inside the container. Derive the human-facing, possibly namespaced HTTPS app and issuer URLs on the host with `dev ls` or `dev app ls`; never assume the primary-checkout hostname.
+- **Native host**: commands run from the repository root on the host. Set `APP_URL="${APP_URL:-http://localhost:${PORT:-3000}}"` and `BROWSER_URL="${BROWSER_URL:-$APP_URL}"`; the mock issuer defaults to `http://localhost:${GBL_OIDC_PORT:-8090}/default`.
+- **Starter devcontainer**: `GBL_DEV_MODE=starter` inside `/workspaces/gbl-uzh`. Set `APP_URL=http://localhost:3000` and `BROWSER_URL="$APP_URL"`.
+- **Devrouter devcontainer**: inside `/workspaces/gbl-uzh` with no starter flag. Set `APP_URL=http://localhost:3000` for in-container checks. Derive `BROWSER_URL` and `ISSUER` from the human-facing, possibly namespaced HTTPS routes shown by `dev ls` or `dev app ls`; never assume the primary-checkout hostname.
 
-Set `ISSUER` accordingly for the checks below; `APP_URL` below means the URL the human's browser uses.
+Set `ISSUER` to the configured mock issuer. `APP_URL` is the URL reachable beside the app process; call the human-facing route `BROWSER_URL` when devrouter makes it different.
 
 ## Step 1: Health checks, in order
 
 1. **Execution context matches the mode**: native checks stay on the host; starter and devrouter checks run in the app container. Do not use a host-side devrouter URL for the container's app probe.
 2. **Dev server process**: `pgrep -f "next dev" || echo DOWN`. In a container, rerun `bash .devcontainer/post-start.sh` when DOWN and inspect `tail -50 /tmp/dev.log`. In native mode, restart the documented `pnpm -F @gbl-uzh/demo-game dev` command and inspect its terminal output.
-3. **App responds beside its process**: `curl -s -o /dev/null -w '%{http_code}' http://localhost:3000` -> expect `200`. The first compile can take 30-60s. Devrouter mode additionally requires a host-side probe of the routed HTTPS app; an in-container 200 plus routed 404 means routes are missing.
-4. **OIDC discovery + seed**: run `bash .devcontainer/smoke.sh http://localhost:3000 "$ISSUER"`. It verifies the exact issuer using Node's TLS/DNS path (the same path NextAuth uses), checks the app, prints the `PlayerLevel` row count, and fails when the seed is missing.
+3. **App responds beside its process**: `curl -s -o /dev/null -w '%{http_code}' "$APP_URL"` -> expect `200`. The first compile can take 30-60s. Devrouter mode additionally requires a host-side probe of `BROWSER_URL`; an in-container 200 plus routed 404 means routes are missing.
+4. **OIDC discovery + seed**: run `bash .devcontainer/smoke.sh "$APP_URL" "$ISSUER"`. It verifies the exact issuer using Node's TLS/DNS path (the same path NextAuth uses), checks the app, prints the `PlayerLevel` row count, and fails when the seed is missing.
 5. **Install intact**: `pnpm -F @gbl-uzh/demo-game exec prisma -v` works and the repository-root `node_modules` exists. If not, run a full `pnpm install` in the same host/container that owns the app — never a filtered install, which omits a design-system CSS dependency.
 
 ## Step 2: Known failure signatures
@@ -54,4 +54,4 @@ The human-facing walkthrough (installs, cloning, first login) is [docs/getting-s
 
 ## Step 4: Declare healthy
 
-Environment is healthy when: app returns 200, OIDC discovery issuer matches, `PlayerLevel rows: > 0`, and a browser one-click login at `$APP_URL/admin/login` lands on the admin dashboard. State what was broken and what you fixed, then continue the original task.
+Environment is healthy when: app returns 200, OIDC discovery issuer matches, `PlayerLevel rows: > 0`, and a browser one-click login at `$BROWSER_URL/admin/login` lands on the admin dashboard. For native and starter modes, `BROWSER_URL` equals `APP_URL`. State what was broken and what you fixed, then continue the original task.
