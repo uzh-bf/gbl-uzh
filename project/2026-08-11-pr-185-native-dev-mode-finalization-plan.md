@@ -122,7 +122,7 @@
 - [x] User approved preserving legacy example-game auth and temporarily stopping/restarting the conflicting starter app container.
 - [x] Planning-stage reviews complete; accepted findings are integrated above.
 - [x] S1 plan and ADR committed (`27547ca`, `6ccc5c9`).
-- [ ] S2 corrective tracer bullet implemented and locally verified; commit, simplifier, and intermediate review remain. Fresh evidence: auth tests 7/7; platform/demo/central-bank/rate-wars/Playwright type checks; platform/UI/demo production builds; all three app linters with pre-existing warnings only; all Nexus builds; shell syntax; three Compose renderings; Playwright lists all five tests; Prettier and OKF checks. `actionlint` is not installed; exact-head GitHub Actions remains the workflow parser gate.
+- [x] S2 corrective tracer bullet committed (`703694f`) and locally verified. The intermediate reviewer requested restoration of the configurable fresh-install heap guard; that adjustment and its shell and Compose checks are included in the follow-up commit. The configured native simplifier role is unavailable in this client, so its result is recorded as `BLOCKED` without substitution. Fresh evidence: auth tests 7/7; platform/demo/central-bank/rate-wars/Playwright type checks; platform/UI/demo production builds; all three app linters with pre-existing warnings only; all Nexus builds; shell syntax; three Compose renderings; Playwright lists all five tests; Prettier and OKF checks. `actionlint` is not installed; exact-head GitHub Actions remains the workflow parser gate.
 - [ ] S3 native, starter, and devrouter live proof complete.
 - [ ] S4 exact-head CI/Sonar and final gates complete; PR body current and ready.
 
