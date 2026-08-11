@@ -1,20 +1,20 @@
 # tRPC example games and documentation reconciliation
 
 Date: 2026-08-10
-Status: implementation and local verification complete; exact-head final review pending
+Status: implementation, local verification, simplifier, and integrated final review complete; all pull requests remain draft and unmerged
 Provider: GitHub stacked changes
 Base: `trpc-stack/03-ci-devcontainer-docs-collateral` at `2f363c1`
 Worktree: `trees/trpc-examples-stack`
 Mode: guided, with a review pause after every layer
 
-## Execution status (2026-08-10)
+## Execution status (2026-08-11)
 
 | Layer                               | Branch / pull request                                                                           | Verified state                                                                                  |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | 00 canonical Pages Router pattern   | `rs/trpc-examples/00-pages-router-pattern` / [#201](https://github.com/uzh-bf/gbl-uzh/pull/201) | Commit `a7ac89a`; checks, lifecycle proof, and intermediate review passed                       |
 | 01 Rate Wars                        | `rs/trpc-examples/01-rate-wars-trpc` / [#202](https://github.com/uzh-bf/gbl-uzh/pull/202)       | Commit `10fcc62`; complete lifecycle and intermediate review passed                             |
 | 02 Central Bank                     | `rs/trpc-examples/02-central-bank-trpc` / [#204](https://github.com/uzh-bf/gbl-uzh/pull/204)    | Commit `4a1271d`; complete lifecycle and intermediate review passed                             |
-| 03 compatibility and reconciliation | `rs/trpc-examples/03-graphql-deprecation-docs` / [#205](https://github.com/uzh-bf/gbl-uzh/pull/205) | Implementation and residual-audit cleanup through `ffb4173`; checks pass; security review passed; maintainability findings closed |
+| 03 compatibility and reconciliation | `rs/trpc-examples/03-graphql-deprecation-docs` / [#205](https://github.com/uzh-bf/gbl-uzh/pull/205) | Implementation and final-review closure through `79c7042`; all local gates complete |
 
 All listed pull requests are draft and unmerged. The earlier replacement stack
 [#194-#197](https://github.com/uzh-bf/gbl-uzh/pulls?q=is%3Apr+197+196+195+194)
@@ -60,9 +60,16 @@ remains unchanged and unmerged.
 - The dedicated simplifier reviewed the substantive remediation range
   `9e42693..a9e535e` and returned `DONE`: no behavior-preserving net
   reduction is justified, and no additional verification is needed.
-- One exact-head integrated final review remains before the draft stack can be
-  presented as ready. No merge, publication, deployment, branch deletion, or
-  worktree cleanup is authorized by this plan.
+- The integrated final reviewer inspected `2f363c1..9f570bd` and returned
+  `APPROVE-WITH-FINDINGS`: no blocking correctness, security, maintainability,
+  package, test-strategy, or landing-safety issue. Its one low-severity finding
+  identified guidance that treated the optional `events.user` subscription as
+  canonical. Commit `79c7042` corrects both documentation locations. Prettier,
+  OKF/link validation, and direct comparison with all three `GameLayout`
+  implementations close this reviewer-requested documentation-only change; it
+  introduces no behavior and does not re-arm the final review gate.
+- No merge, publication, deployment, branch deletion, or worktree cleanup is
+  authorized by this plan.
 
 ## Goal
 
