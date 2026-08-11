@@ -46,7 +46,7 @@
 | `apps/demo-game/.env.development` | Keep | Prove native mock defaults and process-env precedence. |
 | `apps/demo-game/.env.local.template` | Keep | Preserve explicit real-Auth0 opt-in. |
 | `apps/demo-game/README.md` | Rework if needed | Match the proven mode matrix. |
-| `apps/demo-game/src/graphql/generated/ops.ts` | Regenerate | Remove `GameWithoutFacts` if no source operation reproduces it. |
+| `apps/demo-game/src/graphql/generated/ops.ts` | Regenerate and bound | Remove `GameWithoutFacts` if no source operation reproduces it; exclude unrelated historical generator drift. |
 | `apps/demo-game/src/lib/authOptions.ts` | Keep | Shared resolver consumer. |
 | `apps/demo-game/src/lib/prisma.ts` | Keep | Standalone Next-style environment bootstrap. |
 | `docker-compose.yml` | Keep | Prove conflict-safe native overrides. |
@@ -85,7 +85,7 @@
 | Compose validity | Existing checks | all three rendered Compose combinations | invalid mounts, env, or networking | S2 |
 | Authenticated callback in each local mode | Existing Playwright setup | `test:auth` plus browser session | discovery works but OAuth callback fails | S3 |
 | Example-game compatibility | Existing CI and source comparison | central-bank/rate-wars flows | mixed namespace breaks supported target | S2/S4 |
-| Generated output integrity | Regenerate | GraphQL codegen cleanliness | generated API with no source operation | S2 |
+| Generated output integrity | Regenerate against the current sources | Exact pre-Jakob baseline plus absence of `GameWithoutFacts` | generated API with no source operation | S2 |
 
 ## Slices
 
@@ -121,8 +121,8 @@
 - [x] Standards/spec reviews and exhaustive 31-file audit complete.
 - [x] User approved preserving legacy example-game auth and temporarily stopping/restarting the conflicting starter app container.
 - [x] Planning-stage reviews complete; accepted findings are integrated above.
-- [ ] S1 plan and ADR committed.
-- [ ] S2 corrective tracer bullet committed, verified, simplified, and reviewed.
+- [x] S1 plan and ADR committed (`27547ca`, `6ccc5c9`).
+- [ ] S2 corrective tracer bullet implemented and locally verified; commit, simplifier, and intermediate review remain. Fresh evidence: auth tests 7/7; platform/demo/central-bank/rate-wars/Playwright type checks; platform/UI/demo production builds; all three app linters with pre-existing warnings only; all Nexus builds; shell syntax; three Compose renderings; Playwright lists all five tests; Prettier and OKF checks. `actionlint` is not installed; exact-head GitHub Actions remains the workflow parser gate.
 - [ ] S3 native, starter, and devrouter live proof complete.
 - [ ] S4 exact-head CI/Sonar and final gates complete; PR body current and ready.
 

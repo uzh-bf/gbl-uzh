@@ -100,9 +100,11 @@ no password. You are authenticated as the fixed dev admin `gbl-dev@df.uzh.ch`
 consistent; the app resolves that host to the host gateway (`extra_hosts`) and
 trusts the mkcert CA via `NODE_EXTRA_CA_CERTS` (see `docker-compose.yml`).
 
-All local modes default to the mock through `GBL_MOCK_OIDC_*`. A real Auth0
-tenant is an explicit opt-in: set `GBL_AUTH_MODE=auth0` in the ignored
-`.env.local` and provide `AUTH0_*`; configure the routed callback as
+Demo-game defaults to the mock through `GBL_MOCK_OIDC_*`. The devcontainer env
+also exposes equivalent fake `AUTH0_*` aliases for example games that retain
+their legacy provider wiring. For demo-game, a real Auth0 tenant is an explicit
+opt-in: set `GBL_AUTH_MODE=auth0` in the ignored `.env.local` and provide
+`AUTH0_*`; configure the routed callback as
 `https://demo-game.localhost/api/auth/callback/auth0` (or the equivalent
 workspace hostname). The starter callback remains
 `http://localhost:3000/api/auth/callback/auth0`.
@@ -123,6 +125,7 @@ host's), so native binaries match the Linux container.
 The OIDC mock's config is shared by all run modes (this one, `starter/`, and
 the root `docker-compose.yml` for native `pnpm dev`):
 `docker/oidc-config.json`, mounted via `JSON_CONFIG_PATH`. Sanity-check any
-running mode from inside the app container with
+running container mode from inside the app container with
 `bash .devcontainer/smoke.sh http://localhost:3000 <issuer-url>`; probe the
-routed app URL separately from the host.
+devrouter app URL separately from the host. Native host mode runs the same
+script from the repository root.

@@ -1,4 +1,4 @@
-import { resolveAdminOidcConfig, UserRole } from '@gbl-uzh/platform/dist/index'
+import { UserRole } from '@gbl-uzh/platform/dist/index'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import type { DefaultSession, NextAuthOptions } from 'next-auth'
 import type { DefaultJWT } from 'next-auth/jwt'
@@ -8,8 +8,6 @@ import Auth0Provider from 'next-auth/providers/auth0'
 import { decode, encode } from './jwt'
 
 import prisma from './prisma'
-
-const oidcConfig = resolveAdminOidcConfig()
 
 interface ExtendedSession extends DefaultSession {
   user?: DefaultSession['user'] & {
@@ -23,9 +21,9 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     Auth0Provider({
-      clientId: oidcConfig.clientId,
-      clientSecret: oidcConfig.clientSecret,
-      issuer: oidcConfig.issuer,
+      clientId: process.env.AUTH0_CLIENT_ID as string,
+      clientSecret: process.env.AUTH0_CLIENT_SECRET as string,
+      issuer: process.env.AUTH0_ISSUER,
     }),
   ],
   session: {

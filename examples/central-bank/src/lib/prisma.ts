@@ -1,17 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg'
-import { config } from 'dotenv'
+import 'dotenv/config'
 import { PrismaClient } from 'src/generated/prisma/client'
-
-const nodeEnvironment = process.env.NODE_ENV ?? 'development'
-config({
-  path: [
-    `.env.${nodeEnvironment}.local`,
-    ...(nodeEnvironment === 'test' ? [] : ['.env.local']),
-    `.env.${nodeEnvironment}`,
-    '.env',
-  ],
-  quiet: true,
-})
 
 declare global {
   var prisma: PrismaClient | undefined

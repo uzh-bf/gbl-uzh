@@ -36,12 +36,14 @@ if [ "${GBL_DEV_MODE:-}" != "starter" ]; then
   export NEXT_PUBLIC_APP_URL="https://${app_host}"
   export NEXT_PUBLIC_API_URL="https://${app_host}/api/graphql"
   export GBL_MOCK_OIDC_ISSUER="https://${oidc_host}/default"
+  export AUTH0_ISSUER="https://${oidc_host}/default"
 fi
 
-# No-TTY pnpm hardening (see post-create.sh). Keep this idempotent because the
-# environment doctor may invoke post-start directly on an existing container.
+# No-TTY pnpm hardening (see post-create.sh): keep the dev server from aborting on
+# a node_modules purge or hanging on an implicit verify-deps install. post-create
+# already installed dependencies.
 export CI=true
-pnpm config set verify-deps-before-run false >/dev/null
+export npm_config_verify_deps_before_run=false
 
 devrouter-process ensure \
   --name game \

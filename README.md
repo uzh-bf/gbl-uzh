@@ -23,13 +23,13 @@ Want to build a learning game on the platform? [docs/getting-started.md](docs/ge
 
 ### Three ways to run the platform locally
 
-All three modes share the same OIDC mock config, database image, and schema/seed (one-click admin login, no Auth0 account needed); they differ in where the app process runs, how it is reached, and which script bootstraps it (the devcontainers use `.devcontainer/post-create.sh`, native mode uses `pnpm run setup:host`). Verify a mode with `bash .devcontainer/smoke.sh` from the same host or container that runs its app process.
+All three modes share the same OIDC mock config, database image, and schema/seed (one-click admin login, no Auth0 account needed); they differ in where the app process runs, how it is reached, and which script bootstraps it (the devcontainers use `.devcontainer/post-create.sh`, native mode uses `pnpm run setup:host`). Run `bash .devcontainer/smoke.sh` on the native host or inside the selected app container; probe a devrouter HTTPS route separately from the host.
 
-| Mode | For | Setup |
-| --- | --- | --- |
-| **Starter devcontainer** | First-time users, game builders — works natively with the VS Code Dev Containers extension | Open in VS Code, pick **GBL Starter**; app on <http://localhost:3000> ([walkthrough](docs/getting-started.md)) |
-| **Devcontainer + [devrouter](https://github.com/rschlaefli/devrouter)** | Maintainers running many projects side by side | `dev up`, then `devpod up .`; app on `https://demo-game.localhost` ([details](.devcontainer/README.md)) |
-| **Native `pnpm dev`** (demo-game) | Developers who prefer the host toolchain (Node 24+, PNPM 11) | [Native quickstart](#native-quickstart-demo-game) below; app on <http://localhost:3000> |
+| Mode                                                                    | For                                                                                        | Setup                                                                                                                                   |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Starter devcontainer**                                                | First-time users, game builders — works natively with the VS Code Dev Containers extension | Open in VS Code, pick **GBL Starter**; app on <http://localhost:3000> ([walkthrough](docs/getting-started.md))                          |
+| **Devcontainer + [devrouter](https://github.com/rschlaefli/devrouter)** | Maintainers running many projects side by side                                             | `dev up`, then `dev workspace ensure .` for a linked worktree; use `dev ls` for its namespaced URL ([details](.devcontainer/README.md)) |
+| **Native `pnpm dev`** (demo-game)                                       | Developers who prefer the host toolchain (Node 24+, PNPM 11)                               | [Native quickstart](#native-quickstart-demo-game) below; app on <http://localhost:3000>                                                 |
 
 #### Native quickstart (demo-game)
 

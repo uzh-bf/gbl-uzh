@@ -100,7 +100,7 @@ DATABASE_URL="<neon-direct-string>" pnpm prisma:seed
 
 ## Step 5 - Auth for a real deployment
 
-The one-click mock OIDC login is **local-only** (the devcontainer's `mock-oauth2-server` sidecar). A public staging deploy needs a real OIDC/Auth0 tenant. The shared `resolveAdminOidcConfig` helper selects the real `AUTH0_CLIENT_ID` / `AUTH0_CLIENT_SECRET` / `AUTH0_ISSUER` variables for production (`packages/platform/src/lib/auth.ts`).
+The one-click mock OIDC login is **local-only** (the devcontainer's `mock-oauth2-server` sidecar). A public staging deploy needs a real OIDC/Auth0 tenant. Demo-game's shared `resolveAdminOidcConfig` helper selects the real `AUTH0_CLIENT_ID` / `AUTH0_CLIENT_SECRET` / `AUTH0_ISSUER` variables in production; current example games read the same production variables directly (`packages/platform/src/lib/auth.ts`, `apps/demo-game/src/lib/authOptions.ts`).
 
 Minimum setup in your provider, then set the three `AUTH0_*` vars in Vercel:
 

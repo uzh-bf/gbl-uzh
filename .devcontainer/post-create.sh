@@ -22,14 +22,14 @@ fi
 . .devcontainer/game-target.sh
 resolve_gbl_game_target
 
-# DevPod lifecycle hooks run without a TTY. CI mode auto-confirms replacing a
-# stale node_modules volume; post-create owns installation, so disable pnpm's
-# redundant install-before-script check.
+# devpod lifecycle hooks run without a TTY. Two pnpm behaviours misbehave there:
+#   - CI=true auto-confirms purging a stale/partial node_modules volume (else
+#     pnpm aborts: ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY).
+#   - verify-deps-before-run=false stops every `pnpm -F ... <script>` (build,
+#     prisma:*, dev) from re-running an implicit install that would hang on stdin.
+# post-create owns dependency installation, so this verification is redundant.
 export CI=true
-# The full workspace install can exceed Node's default heap on a fresh
-# devcontainer. Keep the override configurable for smaller hosts/CI runners.
-export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}"
-pnpm config set verify-deps-before-run false >/dev/null
+export npm_config_verify_deps_before_run=false
 
 echo "[post-create] Installing dependencies (pnpm, full workspace)..."
 # Full install (not filtered): the design-system's dev-mode src/tailwind.css

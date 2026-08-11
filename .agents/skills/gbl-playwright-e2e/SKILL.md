@@ -113,13 +113,14 @@ adapt it to GBL's smaller stack:
 - Use Node `24` and pnpm `11.6.0`, matching the root package manager metadata.
 - Pin third-party GitHub Actions to a full commit SHA. SonarCloud flags
   floating third-party action tags such as `pnpm/action-setup@v4`.
-- Run native CI dependencies through the repository root `docker-compose.yml`.
+- Run Postgres and `mock-oauth2-server` as job services; the job container reaches the issuer through the `oidc` service alias.
 - In CI, do not use devrouter/TLS. Use:
   - `PLAYWRIGHT_BASE_URL=http://localhost:3000`
   - `NEXTAUTH_URL=http://localhost:3000`
   - `GBL_AUTH_MODE=mock`
-  - `GBL_MOCK_OIDC_ISSUER=http://localhost:8090/default`
-- Build `@gbl-uzh/platform` and `@gbl-uzh/ui` before starting `demo-game`.
+  - `GBL_MOCK_OIDC_ISSUER=http://oidc:8090/default`
+  - `AUTH0_ISSUER=http://oidc:8090/default` while example games retain their legacy provider wiring
+- Build `@gbl-uzh/platform` and `@gbl-uzh/ui` before starting the selected game.
 - Prepare Prisma with `prisma:copy`, `prisma:generate`, `prisma:push`, and
   `prisma:seed`.
 - Start the selected game in the background, wait for OIDC discovery and
@@ -152,6 +153,7 @@ adapt it to GBL's smaller stack:
 
 > [!TIP]
 > **After clicking submit, assert `toBeEnabled()`, not `toBeDisabled()`.** GraphQL mutations resolve fast; by the time Playwright checks, the button has already re-enabled. Asserting `toBeDisabled()` flakes. The stable idiom is: click submit, then `await expect(submitButton).toBeEnabled()` to confirm the mutation finished processing, then assert the next durable UI state (e.g. the "Set Ready" button appears).
+
 ## GBL Game Flow Rules
 
 Current stable broad flow (demo game):
