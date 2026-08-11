@@ -12,7 +12,7 @@ services:
       POSTGRES_PASSWORD: prisma
       POSTGRES_DB: prisma
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U prisma -d prisma']
+      test: ["CMD-SHELL", "pg_isready -U prisma -d prisma"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -39,8 +39,8 @@ services:
     # (http://localhost:3000 / :8090) and no LAN exposure. The OIDC mock shares
     # this container's netns, so its port is published here too.
     ports:
-      - '127.0.0.1:3000:3000'
-      - '127.0.0.1:8090:8090'
+      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:8090:8090"
     volumes:
       - ../..:/workspaces/gbl-uzh:cached
       # Named volumes shadow the host node_modules so Linux-native binaries
@@ -51,6 +51,12 @@ services:
       - node_modules_demo_game:/workspaces/gbl-uzh/apps/demo-game/node_modules
       - node_modules_central_bank:/workspaces/gbl-uzh/examples/central-bank/node_modules
       - node_modules_rate_wars:/workspaces/gbl-uzh/examples/rate-wars/node_modules
+      # Keep Linux-generated Next.js caches out of the host checkout. Native
+      # and container runs can otherwise overwrite each other's platform-
+      # specific artifacts or leave a stale dev-server lock behind.
+      - next_demo_game:/workspaces/gbl-uzh/apps/demo-game/.next
+      - next_central_bank:/workspaces/gbl-uzh/examples/central-bank/.next
+      - next_rate_wars:/workspaces/gbl-uzh/examples/rate-wars/.next
       - node_modules_platform:/workspaces/gbl-uzh/packages/platform/node_modules
       - node_modules_ui:/workspaces/gbl-uzh/packages/ui/node_modules
       - node_modules_website:/workspaces/gbl-uzh/apps/website/node_modules
@@ -72,7 +78,7 @@ services:
     depends_on:
       - app
     environment:
-      SERVER_PORT: '8090'
+      SERVER_PORT: "8090"
       # Shared config (one-click auto-login as the fixed dev admin, constant
       # `sub` across restarts) — single source for all run modes.
       JSON_CONFIG_PATH: /etc/mock-oauth2/config.json
@@ -86,6 +92,9 @@ volumes:
   node_modules_demo_game:
   node_modules_central_bank:
   node_modules_rate_wars:
+  next_demo_game:
+  next_central_bank:
+  next_rate_wars:
   node_modules_platform:
   node_modules_ui:
   node_modules_website:

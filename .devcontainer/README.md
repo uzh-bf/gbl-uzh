@@ -119,8 +119,10 @@ workspace hostname). The starter callback remains
 
 Environment lives in `devcontainer.env` (committed, dev-only values). Lifecycle:
 `post-create.sh` (install + build platform/ui + prisma generate/push/seed) then
-`post-start.sh` (launch dev server). `node_modules` are named volumes (not the
-host's), so native binaries match the Linux container.
+`post-start.sh` (launch dev server). `node_modules` and each game's generated
+`.next` cache are named volumes (not the host's), so native binaries match the
+Linux container and switching between native and container modes cannot reuse
+an incompatible build cache.
 
 The OIDC mock's config is shared by all run modes (this one, `starter/`, and
 the root `docker-compose.yml` for native `pnpm dev`):
