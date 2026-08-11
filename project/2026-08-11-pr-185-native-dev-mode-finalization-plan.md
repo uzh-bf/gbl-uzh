@@ -70,8 +70,8 @@
 | Mode | App and issuer | Environment path | Required proof |
 | --- | --- | --- | --- |
 | Native host | `http://localhost:<app-port>` and `http://localhost:<oidc-port>/default` | demo `.env.development`; explicit process overrides for conflict-safe ports | root Compose, `setup:host`, smoke, Playwright auth, browser callback |
-| Starter devcontainer | `http://localhost:3000` and `http://localhost:8090/default` | `starter.env`, re-sourced by lifecycle scripts | fresh lifecycle logs, in-container smoke/Playwright, host callback |
-| Devrouter devcontainer | namespaced HTTPS app/OIDC routes; app remains `http://localhost:3000` in-container | `devcontainer.env`, workspace rewrite in `post-start.sh`, mounted CA | `workspace ensure`, route probes, container smoke/Playwright, host callback |
+| Starter devcontainer | `http://localhost:3000` and `http://localhost:8090/default` | `starter.env`, re-sourced by lifecycle scripts | fresh lifecycle logs, in-container smoke, host Playwright callback and authenticated screenshot |
+| Devrouter devcontainer | namespaced HTTPS app/OIDC routes; app remains `http://localhost:3000` in-container | `devcontainer.env`, workspace rewrite in `post-start.sh`, mounted CA | `workspace ensure`, route probes, container smoke, host Playwright and browser callback |
 | CI | `http://localhost:3000` app and `http://oidc:8090/default` issuer | workflow provides demo `GBL_*` and legacy example `AUTH0_*` variables | all three matrix jobs and Sonar green on exact head |
 
 ## Test Portfolio
@@ -123,7 +123,7 @@
 - [x] Planning-stage reviews complete; accepted findings are integrated above.
 - [x] S1 plan and ADR committed (`27547ca`, `6ccc5c9`).
 - [x] S2 corrective tracer bullet committed (`703694f`) and locally verified. The intermediate reviewer requested restoration of the configurable fresh-install heap guard; that adjustment and its shell and Compose checks are included in the follow-up commit. The configured native simplifier role is unavailable in this client, so its result is recorded as `BLOCKED` without substitution. Fresh evidence: auth tests 7/7; platform/demo/central-bank/rate-wars/Playwright type checks; platform/UI/demo production builds; all three app linters with pre-existing warnings only; all Nexus builds; shell syntax; three Compose renderings; Playwright lists all five tests; Prettier and OKF checks. `actionlint` is not installed; exact-head GitHub Actions remains the workflow parser gate.
-- [ ] S3 native, starter, and devrouter live proof complete.
+- [x] S3 native, starter, and devrouter live proof complete. Native used isolated ports `13000`/`18090`/`55433` and passed `setup:host`, smoke, Playwright auth, and an independent browser callback. Devrouter completed a fresh empty-store lifecycle, namespaced host and container route probes, smoke, warmed Playwright auth, and an independent HTTPS browser callback. Starter completed an independent fresh lifecycle, smoke, Playwright auth, and an authenticated Playwright screenshot on the canonical localhost ports. The native and Linux dev servers had to run serially because they share `.next`; preserving the native cache and rebuilding a clean Linux cache removed the cross-platform compile stall. Agent-browser 0.32.2 with Chrome 149 could render starter HTML but its Next 16 HMR client did not activate the sign-in control; Playwright 1.61.1 completed the same live callback and authenticated page. The approved `gbl-trpc-examples` app container was stopped for starter proof and restarted on its original ports afterward.
 - [ ] S4 exact-head CI/Sonar and final gates complete; PR body current and ready.
 
 ## Stop Gates
