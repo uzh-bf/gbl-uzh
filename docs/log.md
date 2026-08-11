@@ -1,5 +1,10 @@
 # Log
 
+## 2026-08-11
+
+- **Update**: `developing-a-game.md`, `deploying-a-game.md`, and local onboarding docs - standardized native, starter, and devrouter authentication around the shared mock OIDC defaults; real Auth0 is now an explicit `GBL_AUTH_MODE=auth0` opt-in.
+- **Update**: `developing-a-game.md` - documented the ordered env bootstrap used by standalone Nexus/GraphQL processes so strict mock-auth validation also works before Next.js starts.
+
 ## 2026-07-11
 
 - **Update**: `platform-overview.md`, `ui-components.md`, and `developing-a-game.md` - documented the verified public package contract, stable CSS export, external Next.js consumption, release/version workflow, and one-time npm trusted-publishing bootstrap for `@gbl-uzh/ui`.

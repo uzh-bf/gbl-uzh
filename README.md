@@ -23,7 +23,7 @@ Want to build a learning game on the platform? [docs/getting-started.md](docs/ge
 
 ### Three ways to run the platform locally
 
-All three modes share the same OIDC mock config, database image, and schema/seed (one-click admin login, no Auth0 account needed); they differ in where the app process runs, how it is reached, and which script bootstraps it (the devcontainers use `.devcontainer/post-create.sh`, native mode uses `pnpm run setup:host`). Verify any mode with `bash .devcontainer/smoke.sh`.
+All three modes share the same OIDC mock config, database image, and schema/seed (one-click admin login, no Auth0 account needed); they differ in where the app process runs, how it is reached, and which script bootstraps it (the devcontainers use `.devcontainer/post-create.sh`, native mode uses `pnpm run setup:host`). Verify a mode with `bash .devcontainer/smoke.sh` from the same host or container that runs its app process.
 
 | Mode | For | Setup |
 | --- | --- | --- |
@@ -44,7 +44,7 @@ All three modes share the same OIDC mock config, database image, and schema/seed
 6. Open <http://localhost:3000/admin/login> and click the login button — no password; you are the dev admin `gbl-dev@df.uzh.ch`.
 7. If something seems off, `bash .devcontainer/smoke.sh` tells you whether the login mock, the app, or your setup is at fault.
 
-If a default port is taken, every override needs its app-side counterpart (the app reads defaults from `apps/demo-game/.env*`): `GBL_DB_PORT` also needs `DATABASE_URL`/`SHADOW_DATABASE_URL`, `GBL_OIDC_PORT` also needs `AUTH0_ISSUER`, and `PORT` also needs `NEXTAUTH_URL`/`NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_API_URL` — see the header of [docker-compose.yml](docker-compose.yml). Native mode is currently wired for the demo game only; the example games still assume a devcontainer. Login against a real Auth0 tenant instead of the mock is possible via `apps/demo-game/.env.local` (see `.env.local.template`).
+If a default port is taken, every override needs its app-side counterpart (the app reads defaults from `apps/demo-game/.env*`): `GBL_DB_PORT` also needs `DATABASE_URL`/`SHADOW_DATABASE_URL`, `GBL_OIDC_PORT` also needs `GBL_MOCK_OIDC_ISSUER`, and `PORT` also needs `NEXTAUTH_URL`/`NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_API_URL` — see the header of [docker-compose.yml](docker-compose.yml). Native mode is currently wired for the demo game only; the example games still assume a devcontainer. Login against a real Auth0 tenant instead of the mock requires `GBL_AUTH_MODE=auth0` in `apps/demo-game/.env.local` (see `.env.local.template`).
 
 ## Requirements
 

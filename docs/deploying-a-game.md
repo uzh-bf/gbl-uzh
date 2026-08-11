@@ -8,7 +8,7 @@ tags:
   - vercel
   - neon
   - prisma
-timestamp: "2026-07-06T00:00:00Z"
+timestamp: "2026-08-11T00:00:00Z"
 ---
 
 # Deploying a Game to Staging (Vercel + Neon)
@@ -100,7 +100,7 @@ DATABASE_URL="<neon-direct-string>" pnpm prisma:seed
 
 ## Step 5 - Auth for a real deployment
 
-The one-click mock OIDC login is **local-only** (the devcontainer's `mock-oauth2-server` sidecar). A public staging deploy needs a real OIDC/Auth0 tenant, because `authOptions.ts` wires a single `Auth0Provider` reading `AUTH0_CLIENT_ID` / `AUTH0_CLIENT_SECRET` / `AUTH0_ISSUER` (`apps/<game>/src/lib/authOptions.ts`).
+The one-click mock OIDC login is **local-only** (the devcontainer's `mock-oauth2-server` sidecar). A public staging deploy needs a real OIDC/Auth0 tenant. The shared `resolveAdminOidcConfig` helper selects the real `AUTH0_CLIENT_ID` / `AUTH0_CLIENT_SECRET` / `AUTH0_ISSUER` variables for production (`packages/platform/src/lib/auth.ts`).
 
 Minimum setup in your provider, then set the three `AUTH0_*` vars in Vercel:
 

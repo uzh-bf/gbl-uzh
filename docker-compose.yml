@@ -14,7 +14,7 @@
 # Overrides must be mirrored on the app side, which reads its defaults from
 # apps/demo-game/.env*:
 #   GBL_DB_PORT   -> also override DATABASE_URL + SHADOW_DATABASE_URL
-#   GBL_OIDC_PORT -> also override AUTH0_ISSUER
+#   GBL_OIDC_PORT -> also override GBL_MOCK_OIDC_ISSUER
 #   PORT (next dev, when 3000 is taken)
 #                 -> also override NEXTAUTH_URL + NEXT_PUBLIC_APP_URL
 #                    + NEXT_PUBLIC_API_URL
@@ -37,7 +37,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   # Local OIDC provider (Auth0 replacement). Published on loopback, so
-  # http://localhost:8090/default is the SAME issuer for the browser
+  # http://localhost:8090/default is the SAME mock issuer for the browser
   # (authorize) and the app server (discovery/token/jwks) — the token `iss`
   # matches without TLS or extra host mappings.
   oidc:

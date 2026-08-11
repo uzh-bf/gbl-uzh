@@ -47,13 +47,9 @@ services:
     # with zero host-port collisions). The OIDC mock has its own
     # `${WORKSPACE:-demo-game}-oidc` alias.
     #
-    # OIDC server-side reachability: the app validates the token issuer against
-    # AUTH0_ISSUER and fetches discovery/
-    # token/jwks from it server-side. So that host must resolve + be reachable from
-    # INSIDE this container too — map it to the host gateway (where Traefik listens
-    # on :443). The server-side HTTPS fetch trusts the local mkcert CA, mounted
-    # read-only and pointed to by NODE_EXTRA_CA_CERTS (devcontainer.env). Browser +
-    # server thus use the SAME issuer host over verified TLS → consistent `iss`.
+    # NextAuth must reach the routed OIDC host server-side, so map it to Traefik
+    # on the host gateway. The mkcert CA is mounted below and trusted through
+    # NODE_EXTRA_CA_CERTS. Playwright maps browser traffic to Traefik separately.
     extra_hosts:
       - 'oidc.demo-game.localhost:host-gateway'
       - 'oidc.demo-game.${WORKSPACE:-demo-game}.localhost:host-gateway'
