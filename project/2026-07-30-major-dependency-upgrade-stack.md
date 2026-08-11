@@ -4,7 +4,8 @@
 > and Playwright outcomes below describe this dependency stack at execution
 > time. Current game API wiring is tRPC v11 for demo-game, Rate Wars, and
 > Central Bank; current package-manager and Playwright pins are `pnpm@11.6.0`
-> and Playwright `1.61.1`. See `project/2026-08-10-trpc-examples-stack-plan.md`.
+> and Playwright `1.61.1`. See
+> `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`.
 
 ## Goal
 

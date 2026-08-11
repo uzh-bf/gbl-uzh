@@ -1,7 +1,8 @@
 # tRPC example games and documentation reconciliation
 
 Date: 2026-08-10
-Status: implementation, local verification, simplifier, and integrated final review complete; all pull requests remain draft and unmerged
+Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
+Status: implementation and review complete; NOT_READY because PRs #202 and #204 fail the SonarCloud new-code duplication gate; all pull requests remain open and unmerged
 Provider: GitHub stacked changes
 Base: `trpc-stack/03-ci-devcontainer-docs-collateral` at `2f363c1`
 Worktree: `trees/trpc-examples-stack`
@@ -12,13 +13,34 @@ Mode: guided, with a review pause after every layer
 | Layer                               | Branch / pull request                                                                           | Verified state                                                                                  |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | 00 canonical Pages Router pattern   | `rs/trpc-examples/00-pages-router-pattern` / [#201](https://github.com/uzh-bf/gbl-uzh/pull/201) | Commit `a7ac89a`; checks, lifecycle proof, and intermediate review passed                       |
-| 01 Rate Wars                        | `rs/trpc-examples/01-rate-wars-trpc` / [#202](https://github.com/uzh-bf/gbl-uzh/pull/202)       | Commit `10fcc62`; complete lifecycle and intermediate review passed                             |
-| 02 Central Bank                     | `rs/trpc-examples/02-central-bank-trpc` / [#204](https://github.com/uzh-bf/gbl-uzh/pull/204)    | Commit `4a1271d`; complete lifecycle and intermediate review passed                             |
+| 01 Rate Wars                        | `rs/trpc-examples/01-rate-wars-trpc` / [#202](https://github.com/uzh-bf/gbl-uzh/pull/202)       | Commit `10fcc62`; lifecycle and review pass; Sonar duplication gate fails at 46.4%               |
+| 02 Central Bank                     | `rs/trpc-examples/02-central-bank-trpc` / [#204](https://github.com/uzh-bf/gbl-uzh/pull/204)    | Commit `4a1271d`; lifecycle and review pass; Sonar duplication gate fails at 38.1%               |
 | 03 compatibility and reconciliation | `rs/trpc-examples/03-graphql-deprecation-docs` / [#205](https://github.com/uzh-bf/gbl-uzh/pull/205) | Implementation and final-review closure through `79c7042`; all local gates complete |
 
 All listed pull requests are draft and unmerged. The earlier replacement stack
 [#194-#197](https://github.com/uzh-bf/gbl-uzh/pulls?q=is%3Apr+197+196+195+194)
 remains unchanged and unmerged.
+
+### Current forge blocker (2026-08-11)
+
+- [Rate Wars PR #202](https://github.com/uzh-bf/gbl-uzh/pull/202) passes
+  Greptile, Vercel, and the Sonar GitHub check, but SonarCloud's code-analysis
+  quality gate rejects 46.4% new-code duplication against a 3% limit. The main
+  contributors are the intentionally template-aligned `GameLayout`, learning
+  hook, tRPC client, and administrator detail page.
+- [Central Bank PR #204](https://github.com/uzh-bf/gbl-uzh/pull/204) has the
+  same check profile, with 38.1% new-code duplication. Its largest contributors
+  are `GameLayout`, join/welcome pages, the facts helper, game list, learning
+  hook, and administrator detail page.
+- Reliability, security, maintainability, and reviewed-hotspot conditions pass
+  on both pull requests. The failing measure is duplication only.
+- The repeated code is largely deliberate example-game scaffolding tied to each
+  app's distinct `AppRouter`. The recommended resolution is a narrow
+  SonarCloud copy-paste-detection exclusion for the confirmed boilerplate files,
+  rather than a cross-game abstraction that weakens app-local router types.
+  Automatic analysis accepts `sonar.cpd.exclusions`, but applying a project
+  analysis-scope setting is an external configuration change and is not
+  authorized by this plan.
 
 ### Layer 03 verification record
 

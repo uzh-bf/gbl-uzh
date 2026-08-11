@@ -15,7 +15,7 @@ now use tRPC v11 throughout repository code. WP10 completed for demo-game. For
 WP11, the approved deprecation path was selected: published platform GraphQL
 exports and the UI Apollo-backed hook remain deprecated until external-consumer
 confirmation permits removal. Current execution and verification live in
-`project/2026-08-10-trpc-examples-stack-plan.md`; retained references are
+`project/2026-08-10-pr-205-trpc-examples-stack-plan.md`; retained references are
 classified in `project/2026-08-10-trpc-graphql-reference-audit.md`.
 
 ## Migration Frame
