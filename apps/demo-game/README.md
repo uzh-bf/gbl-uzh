@@ -14,15 +14,16 @@ Local development through native mode or either devcontainer uses mocked OIDC,
 not real Auth0. The committed environments point `GBL_MOCK_OIDC_ISSUER` at the
 local `mock-oauth2-server` sidecar, so admin login works without real credentials.
 
-To opt into a real Auth0 application locally, set `GBL_AUTH_MODE=auth0` in
-`.env.local` and fill in the `AUTH0_*` variables. Without that explicit flag,
-stale Auth0 values are ignored and the mock remains active:
+Native host mode can opt into a real Auth0 application. The starter and
+devrouter containers intentionally pin mock process variables, which override
+`.env.local`. For native mode, set `GBL_AUTH_MODE=auth0` in `.env.local` and
+fill in the `AUTH0_*` variables. Without that explicit flag, stale Auth0 values
+are ignored and the mock remains active:
 
 1. Duplicate `.env.local.template` and rename it to `.env.local`.
 2. Create an Auth0 application and configure login, callback, and logout URLs
-   from one origin: `http://localhost:3000` for native/starter or
-   `https://demo-game.localhost` for devrouter (including its namespaced form).
-   The callback path is `/api/auth/callback/auth0`.
+   from the native origin `http://localhost:3000`. The callback path is
+   `/api/auth/callback/auth0`.
 3. Set `GBL_AUTH_MODE=auth0`.
 4. Copy the Auth0 client ID to `AUTH0_CLIENT_ID=`.
 5. Copy the Auth0 client secret to `AUTH0_CLIENT_SECRET=`.

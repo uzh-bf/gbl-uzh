@@ -102,12 +102,10 @@ trusts the mkcert CA via `NODE_EXTRA_CA_CERTS` (see `docker-compose.yml`).
 
 Demo-game defaults to the mock through `GBL_MOCK_OIDC_*`. The devcontainer env
 also exposes equivalent fake `AUTH0_*` aliases for example games that retain
-their legacy provider wiring. For demo-game, a real Auth0 tenant is an explicit
-opt-in: set `GBL_AUTH_MODE=auth0` in the ignored `.env.local` and provide
-`AUTH0_*`; configure the routed callback as
-`https://demo-game.localhost/api/auth/callback/auth0` (or the equivalent
-workspace hostname). The starter callback remains
-`http://localhost:3000/api/auth/callback/auth0`.
+their legacy provider wiring. These process variables intentionally override
+`.env.local`, so container modes support mock login only. To test demo-game
+against a real Auth0 tenant, use native host mode with `GBL_AUTH_MODE=auth0`
+and `AUTH0_*` in the ignored `.env.local`.
 
 ## What's inside
 

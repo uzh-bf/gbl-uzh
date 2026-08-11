@@ -32,10 +32,10 @@ The getting-started / building-with-an-agent path: the app is published on `http
 
 ```bash
 # Install browsers once per app container (reinstall after a container rebuild)
-docker compose -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && pnpm --filter @gbl-uzh/playwright exec playwright install --with-deps chromium'
+docker compose -f .devcontainer/starter/docker-compose.yml -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && pnpm --filter @gbl-uzh/playwright exec playwright install --with-deps chromium'
 
 # Run the suite
-docker compose -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium'
+docker compose -f .devcontainer/starter/docker-compose.yml -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium'
 ```
 
 Point tests at `http://localhost:3000` - set `PLAYWRIGHT_BASE_URL=http://localhost:3000` if the config defaults elsewhere. Everything below is the devrouter/DevPod maintainer stack only.
