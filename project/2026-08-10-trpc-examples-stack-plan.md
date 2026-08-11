@@ -57,6 +57,9 @@ remains unchanged and unmerged.
   above. TypeScript 7 and 6, all 48 platform tests, all app checks, both
   Playwright type checks, package verification, production builds, and all
   three browser lifecycles pass after remediation.
+- The dedicated simplifier reviewed the substantive remediation range
+  `9e42693..a9e535e` and returned `DONE`: no behavior-preserving net
+  reduction is justified, and no additional verification is needed.
 - One exact-head integrated final review remains before the draft stack can be
   presented as ready. No merge, publication, deployment, branch deletion, or
   worktree cleanup is authorized by this plan.
