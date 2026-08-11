@@ -2,7 +2,9 @@
 
 Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
-Status: implementation and review complete; NOT_READY because PRs #202 and #204 fail the SonarCloud new-code duplication gate; all pull requests remain open and unmerged
+Status: Gate 3 approved for review; the user accepted the duplication-only
+SonarCloud failures on PRs #202 and #204 as non-blocking process exceptions;
+all pull requests remain open and unmerged
 Provider: GitHub stacked changes
 Base: `trpc-stack/03-ci-devcontainer-docs-collateral` at `2f363c1`
 Worktree: `trees/trpc-examples-stack`
@@ -12,16 +14,17 @@ Mode: guided, with a review pause after every layer
 
 | Layer                               | Branch / pull request                                                                           | Verified state                                                                                  |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| 00 canonical Pages Router pattern   | `rs/trpc-examples/00-pages-router-pattern` / [#201](https://github.com/uzh-bf/gbl-uzh/pull/201) | Commit `a7ac89a`; checks, lifecycle proof, and intermediate review passed                       |
-| 01 Rate Wars                        | `rs/trpc-examples/01-rate-wars-trpc` / [#202](https://github.com/uzh-bf/gbl-uzh/pull/202)       | Commit `10fcc62`; lifecycle and review pass; Sonar duplication gate fails at 46.4%               |
-| 02 Central Bank                     | `rs/trpc-examples/02-central-bank-trpc` / [#204](https://github.com/uzh-bf/gbl-uzh/pull/204)    | Commit `4a1271d`; lifecycle and review pass; Sonar duplication gate fails at 38.1%               |
-| 03 compatibility and reconciliation | `rs/trpc-examples/03-graphql-deprecation-docs` / [#205](https://github.com/uzh-bf/gbl-uzh/pull/205) | Implementation and final-review closure through `79c7042`; all local gates complete |
+| 00 canonical Pages Router pattern   | `rs/trpc-examples/00-pages-router-pattern` / [#201](https://github.com/uzh-bf/gbl-uzh/pull/201) | Commit `a7ac89a`; checks, lifecycle proof, and intermediate review passed                                      |
+| 01 Rate Wars                        | `rs/trpc-examples/01-rate-wars-trpc` / [#202](https://github.com/uzh-bf/gbl-uzh/pull/202)       | Commit `10fcc62`; lifecycle and review passed; the 46.4% duplication-only SonarCloud failure is accepted       |
+| 02 Central Bank                     | `rs/trpc-examples/02-central-bank-trpc` / [#204](https://github.com/uzh-bf/gbl-uzh/pull/204)    | Commit `4a1271d`; lifecycle and review passed; the 38.1% duplication-only SonarCloud failure is accepted       |
+| 03 compatibility and reconciliation | `rs/trpc-examples/03-graphql-deprecation-docs` / [#205](https://github.com/uzh-bf/gbl-uzh/pull/205) | Implementation and final-review closure through `79c7042`; all local gates complete                           |
 
-All listed pull requests are draft and unmerged. The earlier replacement stack
-[#194-#197](https://github.com/uzh-bf/gbl-uzh/pulls?q=is%3Apr+197+196+195+194)
+The user approved opening pull requests #201, #202, #204, and #205 for review
+on 2026-08-11. All listed pull requests remain unmerged. The earlier replacement
+stack [#194-#197](https://github.com/uzh-bf/gbl-uzh/pulls?q=is%3Apr+197+196+195+194)
 remains unchanged and unmerged.
 
-### Current forge blocker (2026-08-11)
+### Accepted SonarCloud exception (2026-08-11)
 
 - [Rate Wars PR #202](https://github.com/uzh-bf/gbl-uzh/pull/202) passes
   Greptile, Vercel, and the Sonar GitHub check, but SonarCloud's code-analysis
@@ -35,12 +38,13 @@ remains unchanged and unmerged.
 - Reliability, security, maintainability, and reviewed-hotspot conditions pass
   on both pull requests. The failing measure is duplication only.
 - The repeated code is largely deliberate example-game scaffolding tied to each
-  app's distinct `AppRouter`. The recommended resolution is a narrow
-  SonarCloud copy-paste-detection exclusion for the confirmed boilerplate files,
-  rather than a cross-game abstraction that weakens app-local router types.
-  Automatic analysis accepts `sonar.cpd.exclusions`, but applying a project
-  analysis-scope setting is an external configuration change and is not
-  authorized by this plan.
+  app's distinct `AppRouter`. The user accepted both duplication-only failures
+  as non-blocking process exceptions and approved opening all four example-stack
+  pull requests for review. No SonarCloud setting, copy-paste-detection
+  exclusion, or code refactor was applied.
+- GitHub continues to report PRs #202 and #204 as `UNSTABLE` because their
+  SonarCloud quality gates remain red. This accepted exception does not turn
+  those checks green and does not authorize merging any layer.
 
 ### Layer 03 verification record
 
