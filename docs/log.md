@@ -2,7 +2,7 @@
 
 ## 2026-08-11
 
-- **Update**: `developing-a-game.md`, `deploying-a-game.md`, and local onboarding docs - documented the shared local OIDC service, demo-game's fail-closed provider selection, and temporary legacy aliases for example games.
+- **Update**: `developing-a-game.md`, `deploying-a-game.md`, and local onboarding docs - documented the shared local OIDC service, demo-game's fail-closed provider selection, native-only real Auth0 opt-in, and temporary legacy aliases for example games.
 - **Update**: `developing-a-game.md` - documented demo-game's ordered env bootstrap so strict mock-auth validation also works before Next.js starts.
 
 ## 2026-07-11
