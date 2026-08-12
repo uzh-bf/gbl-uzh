@@ -1,0 +1,20 @@
+{
+  "interactiveLogin": false,
+  "tokenCallbacks": [
+    {
+      "issuerId": "default",
+      "requestMappings": [
+        {
+          "requestParam": "grant_type",
+          "match": "*",
+          "claims": {
+            "sub": "dev-admin",
+            "email": "gbl-dev@df.uzh.ch",
+            "name": "GBL Dev",
+            "email_verified": true
+          }
+        }
+      ]
+    }
+  ]
+}

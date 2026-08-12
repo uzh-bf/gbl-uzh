@@ -12,6 +12,7 @@
     "check:ts:typescript6": "node_modules/typescript/bin/tsc --project tsconfig.json --noEmit",
     "test": "playwright test",
     "test:run": "playwright test",
+    "test:auth": "playwright test --project=setup",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "show-report": "playwright show-report"

@@ -21,6 +21,7 @@ The default Playwright base URL is `https://demo-game.localhost`.
 
 ```bash
 pnpm --filter @gbl-uzh/playwright test:run --project=chromium
+pnpm --filter @gbl-uzh/playwright test:auth
 pnpm --filter @gbl-uzh/playwright test:headed
 pnpm --filter @gbl-uzh/playwright test:ui
 pnpm --filter @gbl-uzh/playwright show-report
@@ -29,6 +30,6 @@ pnpm --filter @gbl-uzh/playwright show-report
 Override the app URL when needed:
 
 ```bash
-PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 \
+PLAYWRIGHT_BASE_URL=http://localhost:3000 \
   pnpm --filter @gbl-uzh/playwright test:run --project=chromium
 ```

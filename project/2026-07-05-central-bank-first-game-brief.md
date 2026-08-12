@@ -15,12 +15,12 @@ The full reference is `docs/building-with-an-agent.md` (you'll have it once clon
    git clone https://github.com/uzh-bf/gbl-uzh
    cd gbl-uzh
    docker compose -f .devcontainer/starter/docker-compose.yml -p gbl up -d --build
-   docker compose -p gbl exec app bash /workspaces/gbl-uzh/.devcontainer/post-create.sh
-   docker compose -p gbl exec app bash /workspaces/gbl-uzh/.devcontainer/post-start.sh
+   docker compose -f .devcontainer/starter/docker-compose.yml -p gbl exec app bash /workspaces/gbl-uzh/.devcontainer/post-create.sh
+   docker compose -f .devcontainer/starter/docker-compose.yml -p gbl exec app bash /workspaces/gbl-uzh/.devcontainer/post-start.sh
    ```
 
-3. **Verify:** `docker compose -p gbl exec app curl -s -o /dev/null -w '%{http_code}' http://localhost:3000` returns `200` (curl runs inside the container, so it works from PowerShell too). Have the user open <http://localhost:3000> and log in at <http://localhost:3000/admin/login> — one click, no password; they become admin `gbl-dev@df.uzh.ch`.
-4. **From now on:** edit game code in the host clone (those are the files you can see and edit); run **every** repo command inside the container with `docker compose -p gbl exec app bash -lc 'cd /workspaces/gbl-uzh && <command>'`. Never run `pnpm install` on the host.
+3. **Verify:** `docker compose -f .devcontainer/starter/docker-compose.yml -p gbl exec app curl -s -o /dev/null -w '%{http_code}' http://localhost:3000` returns `200` (curl runs inside the container, so it works from PowerShell too). Have the user open <http://localhost:3000> and log in at <http://localhost:3000/admin/login> — one click, no password; they become admin `gbl-dev@df.uzh.ch`.
+4. **From now on:** edit game code in the host clone (those are the files you can see and edit); run **every** repo command inside the container with `docker compose -f .devcontainer/starter/docker-compose.yml -p gbl exec app bash -lc 'cd /workspaces/gbl-uzh && <command>'`. Never run `pnpm install` on the host.
 5. If anything is off (app won't load, login fails, empty admin UI), invoke the **`gbl-environment-doctor`** skill (run its checks via the exec prefix) before debugging code.
 
 Note anything confusing or broken here — it's feedback.
@@ -46,7 +46,7 @@ The bundled demo game is itself an asset-allocation / portfolio game (players sp
 
 ### Use the skills, in this order
 
-Actually invoke/read each skill and the docs it points to rather than working from assumptions. Remember: edit files in the host clone, run commands via the `docker compose -p gbl exec app …` prefix.
+Actually invoke/read each skill and the docs it points to rather than working from assumptions. Remember: edit files in the host clone, run commands via the `docker compose -f .devcontainer/starter/docker-compose.yml -p gbl exec app …` prefix.
 
 1. **`gbl-environment-doctor`** — already used in Phase 1. Re-invoke whenever a later step hits an environment error; run it before debugging application code.
 2. **`gbl-game-design` — FIRST, before any code.** Fit-check the Central Bank idea against `docs/game-types.md`, fill in the design mapping (period / segment / decision / facts / roles / computation), and sanity-check the computation against what's available at segment-result and period-result time. Produce the design doc it asks for. Interview the user only where a decision genuinely needs their input.

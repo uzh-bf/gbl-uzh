@@ -1,5 +1,14 @@
 # Log
 
+## 2026-08-12
+
+- **Update**: example auth consumers, container environments, CI, and current auth documentation - all in-repo games now use `resolveAdminOidcConfig()`, starter/devrouter/CI use only `GBL_AUTH_MODE=mock` and `GBL_MOCK_OIDC_*`, native example mock startup remains unsupported, and production forbids mock mode.
+
+## 2026-08-11
+
+- **Update**: `developing-a-game.md`, `deploying-a-game.md`, and local onboarding docs - documented the shared local OIDC service, demo-game's fail-closed provider selection, and native-only real Auth0 opt-in.
+- **Update**: `developing-a-game.md` - documented demo-game's ordered env bootstrap so strict mock-auth validation also works before Next.js starts.
+
 ## 2026-07-11
 
 - **Update**: `platform-overview.md`, `ui-components.md`, and `developing-a-game.md` - documented the verified public package contract, stable CSS export, external Next.js consumption, release/version workflow, and one-time npm trusted-publishing bootstrap for `@gbl-uzh/ui`.

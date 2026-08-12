@@ -12,6 +12,8 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - apps/demo-game/**
+      - examples/central-bank/**
+      - examples/rate-wars/**
       - packages/platform/**
       - packages/ui/**
       - playwright/**
@@ -36,13 +38,14 @@ env:
   DATABASE_URL: postgres://prisma:prisma@postgres:5432/prisma?schema=public&connection_limit=20
   SHADOW_DATABASE_URL: postgres://prisma:prisma@postgres:5432/shadow?schema=public&connection_limit=20
   NEXTAUTH_SECRET: ci-demo-game-not-a-secret
-  NEXTAUTH_URL: http://127.0.0.1:3000
-  NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
-  NEXT_PUBLIC_API_URL: http://127.0.0.1:3000/api/graphql
-  AUTH0_ISSUER: http://oidc:8090/default
-  AUTH0_CLIENT_ID: demo-game-local
-  AUTH0_CLIENT_SECRET: demo-game-local-secret
-  PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+  NEXTAUTH_URL: http://localhost:3000
+  NEXT_PUBLIC_APP_URL: http://localhost:3000
+  NEXT_PUBLIC_API_URL: http://localhost:3000/api/graphql
+  GBL_AUTH_MODE: mock
+  GBL_MOCK_OIDC_ISSUER: http://oidc:8090/default
+  GBL_MOCK_OIDC_CLIENT_ID: demo-game-local
+  GBL_MOCK_OIDC_CLIENT_SECRET: demo-game-local-secret
+  PLAYWRIGHT_BASE_URL: http://localhost:3000
 
 jobs:
   playwright-run:
@@ -166,7 +169,7 @@ jobs:
 
           for url in \
             "http://oidc:8090/default/.well-known/openid-configuration" \
-            "http://127.0.0.1:3000/admin/login"
+            "http://localhost:3000/admin/login"
           do
             ready=0
             for attempt in $(seq 1 90); do
@@ -187,8 +190,7 @@ jobs:
 
           pnpm --dir playwright exec playwright test \
             --project=chromium \
-            tests/${{ matrix.game }}-flow.spec.ts \
-            --pass-with-no-tests
+            tests/${{ matrix.game }}-flow.spec.ts
 
       - name: Upload blob report
         if: ${{ !cancelled() }}

@@ -7,7 +7,7 @@ tags:
   - agent
   - devcontainer
   - docker
-timestamp: "2026-07-05T00:00:00Z"
+timestamp: "2026-08-11T00:00:00Z"
 ---
 
 # Building a Game with Your Own Coding Agent
@@ -50,10 +50,10 @@ cd gbl-uzh
 docker compose -f .devcontainer/starter/docker-compose.yml -p gbl up -d --build
 
 # 2. Install deps, build shared packages, create + seed the database (~1-2 min)
-docker compose -p gbl exec app bash /workspaces/gbl-uzh/.devcontainer/post-create.sh
+docker compose -f .devcontainer/starter/docker-compose.yml -p gbl exec app bash /workspaces/gbl-uzh/.devcontainer/post-create.sh
 
 # 3. Start the dev server (the first page compiles in ~30-60s)
-docker compose -p gbl exec app bash /workspaces/gbl-uzh/.devcontainer/post-start.sh
+docker compose -f .devcontainer/starter/docker-compose.yml -p gbl exec app bash /workspaces/gbl-uzh/.devcontainer/post-start.sh
 ```
 
 > **Shortcut if you have Node on your host:** `npx -y @devcontainers/cli up --workspace-folder . --config .devcontainer/starter/devcontainer.json` does steps 1–3 in one command (it runs the same setup hooks). The three Docker commands above need only Docker.
@@ -65,7 +65,7 @@ Open **http://localhost:3000** in your browser — you should see the demo game.
 For a scripted check, curl _inside the container_ (works from PowerShell, WSL, or macOS — unlike a host `curl`, which PowerShell rewrites):
 
 ```bash
-docker compose -p gbl exec app curl -s -o /dev/null -w '%{http_code}\n' http://localhost:3000   # -> 200
+docker compose -f .devcontainer/starter/docker-compose.yml -p gbl exec app curl -s -o /dev/null -w '%{http_code}\n' http://localhost:3000   # -> 200
 ```
 
 ## How your agent works from here
@@ -74,29 +74,30 @@ docker compose -p gbl exec app curl -s -o /dev/null -w '%{http_code}\n' http://l
 - **Run repo commands inside the container.** Whenever a skill or the docs tell you to run something (`pnpm …`, `prisma …`, a health check), run it in the container:
 
   ```bash
-  docker compose -p gbl exec app bash -lc 'cd /workspaces/gbl-uzh && <the command>'
+  docker compose -f .devcontainer/starter/docker-compose.yml -p gbl exec app bash -lc 'cd /workspaces/gbl-uzh && <the command>'
   ```
 
   Do **not** run `pnpm install` on your host — `node_modules` live in the container's volumes so the Linux-native binaries stay correct.
 
 - **Follow the game-building skills** (they assume this platform and read the wiki themselves): `gbl-game-design` (first, before any code) → `gbl-new-game-app` (scaffold) → `gbl-backend-computations` → `gbl-frontend-game-ui`, with `gbl-playwright-e2e` for tests. See [developing-a-game.md](developing-a-game.md) and the [agent skills](../.agents/skills/). One caveat: `gbl-playwright-e2e`'s "Local Stack" section is for the devrouter/DevPod setup — in this Docker-only mode the app is already at `http://localhost:3000`, so skip that section and run Playwright inside the container (the skill now says as much).
-- **If anything breaks** (app won't load, login fails, empty admin UI): run the `gbl-environment-doctor` skill first, before debugging code. Its checks are meant to run inside the container, so prefix them with `docker compose -p gbl exec app …` as above. The mode is `starter`; the app is always `http://localhost:3000`.
+- **If anything breaks** (app won't load, login fails, empty admin UI): run the `gbl-environment-doctor` skill first, before debugging code. Its checks are meant to run inside the container, so prefix them with `docker compose -f .devcontainer/starter/docker-compose.yml -p gbl exec app …` as above. The mode is `starter`; the app is always `http://localhost:3000`.
 
 ## Troubleshooting
 
-| Symptom | Cause | Fix |
-|---------|-------|-----|
-| `EACCES` error mentioning `pnpm.cjs` under `.volta/` when running `pnpm run dev` or `pnpm run build` | `npm-run-all` (`run-s`) cannot spawn the Volta-shimmed pnpm on the host | Run commands **inside the container** via the `docker compose exec` prefix (the container has a normal pnpm). If you must run on the host, execute the sub-commands from the `run-s` sequence directly (e.g. `pnpm run generate && pnpm run build:nexus && pnpm run build:ts` instead of `pnpm run build`). |
-| `127.0.0.1` vs `localhost` cookie / OIDC errors | NextAuth state cookies are domain-scoped; `127.0.0.1` ≠ `localhost` | Always use `http://localhost:3000` in the browser and in `PLAYWRIGHT_BASE_URL`. |
-| App silently reads/writes the wrong database (e.g. writes land in `prisma`, not your game's DB) | A `DATABASE_URL` set in the container's shell environment overrides the app's `.env` — Node gives `process.env` precedence over `.env` files | Pass `DATABASE_URL` explicitly on the command (e.g. `DATABASE_URL="postgres://prisma:prisma@postgres:5432/<game>?schema=public" pnpm prisma db push --schema=prisma/schema`), or unset the shell var so the app's `.env` wins. |
+| Symptom                                                                                              | Cause                                                                                                                                        | Fix                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EACCES` error mentioning `pnpm.cjs` under `.volta/` when running `pnpm run dev` or `pnpm run build` | `npm-run-all` (`run-s`) cannot spawn the Volta-shimmed pnpm on the host                                                                      | Run commands **inside the container** via the explicit starter `docker compose -f .devcontainer/starter/docker-compose.yml -p gbl exec app` prefix (the container has a normal pnpm). If you must run on the host, execute the sub-commands from the `run-s` sequence directly (e.g. `pnpm run generate && pnpm run build:nexus && pnpm run build:ts` instead of `pnpm run build`). |
+| `127.0.0.1` vs `localhost` cookie / OIDC errors                                                      | NextAuth state cookies are domain-scoped; `127.0.0.1` ≠ `localhost`                                                                          | Always use `http://localhost:3000` in the browser and in `PLAYWRIGHT_BASE_URL`.                                                                                                                                                                                                                                                                                                     |
+| You need to test demo-game against a real Auth0 tenant                                               | Starter process variables intentionally pin the local mock and override `.env.local`                                                         | Use native host mode with `GBL_AUTH_MODE=auth0` in `apps/demo-game/.env.local`; the starter path supports mock login only.                                                                                                                                                                                                                                                          |
+| App silently reads/writes the wrong database (e.g. writes land in `prisma`, not your game's DB)      | A `DATABASE_URL` set in the container's shell environment overrides the app's `.env` — Node gives `process.env` precedence over `.env` files | Pass `DATABASE_URL` explicitly on the command (e.g. `DATABASE_URL="postgres://prisma:prisma@postgres:5432/<game>?schema=public" pnpm prisma db push --schema=prisma/schema`), or unset the shell var so the app's `.env` wins.                                                                                                                                                      |
 
 ## Stop, restart, reset
 
 ```bash
-docker compose -p gbl stop        # pause (keeps data)
-docker compose -p gbl up -d       # resume, then re-run post-start.sh for the dev server
-docker compose -p gbl down        # remove containers (keeps the database volume)
-docker compose -p gbl down -v     # full reset (also wipes the database)
+docker compose -f .devcontainer/starter/docker-compose.yml -p gbl stop        # pause (keeps data)
+docker compose -f .devcontainer/starter/docker-compose.yml -p gbl up -d       # resume, then re-run post-start.sh for the dev server
+docker compose -f .devcontainer/starter/docker-compose.yml -p gbl down        # remove containers (keeps the database volume)
+docker compose -f .devcontainer/starter/docker-compose.yml -p gbl down -v     # full reset (also wipes the database)
 ```
 
 ## A first game to build
