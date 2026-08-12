@@ -80,7 +80,7 @@ Do not edit example `.env.development` files or root Compose to imply native moc
 
 ### S5: All games use the shared resolver
 
-- Progress: S5 implementation is present and awaiting commit plus the required intermediate review gates. No native example mock support or tRPC-stack changes are allowed.
+- Progress: S5 implementation is committed at `c095ebe`; platform auth tests 7/7, platform build, both example TypeScript checks, both linters, both production builds with safe dummy Auth0/public URLs, shell syntax, Compose rendering, diff check, and alias audits pass. Central Bank initially needed the documented `NEXT_PUBLIC_*` build variables; the rerun passed. The simplifier report is `project/_local/reviews/2026-08-12-pr-185-s5-simplifier.md` with DONE/no reduction; the intermediate auth review is `project/_local/reviews/2026-08-12-pr-185-s5-intermediate.md` with PASS/no findings. No native example mock support or tRPC-stack changes are allowed.
 - Do: make only the owned implementation and documentation changes above.
 - Check, in order:
   1. `pnpm -F @gbl-uzh/platform test:auth`
@@ -120,8 +120,9 @@ Do not edit example `.env.development` files or root Compose to imply native moc
 - [x] PR #185 returned to draft; worktree was clean and synchronized with its remote before S4.
 - [x] Revised planning review completed; all six findings integrated.
 - [x] S4 revised contract and ADR reviewed; PR #185 is draft.
-- [ ] S5 implementation, focused verification, simplifier, and intermediate review complete.
+- [x] S5 implementation, focused verification, simplifier, and intermediate review complete at `c095ebe`; no findings require correction.
 - [ ] S6 local proof, final reviews, push, exact-head CI/Sonar, PR body, and ready transition complete.
+- [ ] S6 is active: prove Central Bank in starter and Rate Wars in devrouter, then run final gates before push.
 
 ## Stop gates
 
