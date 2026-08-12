@@ -17,13 +17,15 @@ Choose the branch that owns the app process:
 
 Set `ISSUER` to the configured mock issuer. `APP_URL` is the URL reachable beside the app process; call the human-facing route `BROWSER_URL` when devrouter makes it different.
 
+Set `GAME` to the running game — `demo`, `central-bank`, or `rate-wars`. Native mode takes it as an argument to `pnpm dev`; container modes carry it in `GBL_GAME_TARGET`. Every game has its own database, so a check aimed at the wrong one reports a healthy environment as broken. `. .devcontainer/game-target.sh && resolve_gbl_game_target "$GAME"` exports the matching `GBL_GAME_PACKAGE`.
+
 ## Step 1: Health checks, in order
 
 1. **Execution context matches the mode**: native checks stay on the host; starter and devrouter checks run in the app container. Do not use a host-side devrouter URL for the container's app probe.
-2. **Dev server process**: `pgrep -f "next dev" || echo DOWN`. In a container, rerun `bash .devcontainer/post-start.sh` when DOWN and inspect `tail -50 /tmp/dev.log`. In native mode, restart the documented `pnpm -F @gbl-uzh/demo-game dev` command and inspect its terminal output.
+2. **Dev server process**: `pgrep -f "next dev" || echo DOWN`. In a container, rerun `bash .devcontainer/post-start.sh` when DOWN and inspect `tail -50 /tmp/dev.log`. In native mode, restart with `pnpm dev "$GAME"` and inspect its terminal output; that entry point also brings Postgres and the OIDC mock back up and starts the shared platform/ui watch builds, which a bare per-package `dev` does not.
 3. **App responds beside its process**: `curl -s -o /dev/null -w '%{http_code}' "$APP_URL"` -> expect `200`. The first compile can take 30-60s. Devrouter mode additionally requires a host-side probe of `BROWSER_URL`; an in-container 200 plus routed 404 means routes are missing.
-4. **OIDC discovery + seed**: run `bash .devcontainer/smoke.sh "$APP_URL" "$ISSUER"`. It verifies the exact issuer using Node's TLS/DNS path (the same path NextAuth uses), checks the app, prints the `PlayerLevel` row count, and fails when the seed is missing.
-5. **Install intact**: `pnpm -F @gbl-uzh/demo-game exec prisma -v` works and the repository-root `node_modules` exists. If not, run a full `pnpm install` in the same host/container that owns the app — never a filtered install, which omits a design-system CSS dependency.
+4. **OIDC discovery + seed**: run `bash .devcontainer/smoke.sh "$APP_URL" "$ISSUER" "$GAME"`. It verifies the exact issuer using Node's TLS/DNS path (the same path NextAuth uses), checks the app, prints the `PlayerLevel` row count, and fails when the seed is missing.
+5. **Install intact**: `pnpm -F "$GBL_GAME_PACKAGE" exec prisma -v` works and the repository-root `node_modules` exists. If not, run a full `pnpm install` in the same host/container that owns the app — never a filtered install, which omits a design-system CSS dependency.
 
 ## Step 2: Known failure signatures
 

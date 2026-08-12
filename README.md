@@ -23,13 +23,13 @@ Want to build a learning game on the platform? [docs/getting-started.md](docs/ge
 
 ### Three ways to run the platform locally
 
-All three modes share the same OIDC mock config, database image, and schema/seed (one-click admin login, no Auth0 account needed); they differ in where the app process runs, how it is reached, and which script bootstraps it (the devcontainers use `.devcontainer/post-create.sh`, native mode uses `pnpm run setup:host`). Run `bash .devcontainer/smoke.sh` on the native host or inside the selected app container; probe a devrouter HTTPS route separately from the host.
+All three modes share the same OIDC mock config, database image, and schema/seed (one-click admin login, no Auth0 account needed); they differ in where the app process runs, how it is reached, and which script bootstraps it (the devcontainers use `.devcontainer/post-create.sh`, native mode uses `pnpm bootstrap`). Run `bash .devcontainer/smoke.sh` on the native host or inside the selected app container; probe a devrouter HTTPS route separately from the host.
 
 | Mode                                                                    | For                                                                                        | Setup                                                                                                                                   |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
 | **Starter devcontainer**                                                | First-time users, game builders — works natively with the VS Code Dev Containers extension | Open in VS Code, pick **GBL Starter**; app on <http://localhost:3000> ([walkthrough](docs/getting-started.md))                          |
 | **Devcontainer + [devrouter](https://github.com/rschlaefli/devrouter)** | Maintainers running many projects side by side                                             | `dev up`, then `dev workspace ensure .` for a linked worktree; use `dev ls` for its namespaced URL ([details](.devcontainer/README.md)) |
-| **Native `pnpm dev`**                                                   | Developers who prefer the host toolchain (Node 24+, PNPM 11)                               | [Native quickstart](#native-quickstart) below; app on <http://localhost:3000>                                                          |
+| **Native `pnpm dev`**                                                   | Developers who prefer the host toolchain (Node 24+, PNPM 11)                               | [Native quickstart](#native-quickstart) below; app on <http://localhost:3000>                                                           |
 
 #### Native quickstart
 
@@ -38,22 +38,27 @@ All three modes share the same OIDC mock config, database image, and schema/seed
    - **Volta** (team default): Volta's pnpm support is behind a feature flag — add `export VOLTA_FEATURE_PNPM=1` to your shell profile, otherwise Volta silently runs its default pnpm and ignores the repo pin.
    - **No Volta:** `corepack enable` honors the `packageManager` field.
    - Either way, verify: `pnpm --version` inside the repo must print `11.6.0`.
-3. `docker compose up -d --wait` — starts Postgres and the local login mock (replaces Auth0, no account needed).
-4. `pnpm install && pnpm run setup:host` — installs, builds shared packages, prepares and seeds the database.
-5. `pnpm -F @gbl-uzh/demo-game dev`
+3. `pnpm install`
+4. `pnpm bootstrap` — starts Postgres and the local login mock (replaces Auth0, no account needed), builds the shared packages, then prepares and seeds the database. Run it once per game.
+5. `pnpm dev` — also brings the two services back up if they are not running.
 6. Open <http://localhost:3000/admin/login> and click the login button — no password; you are the dev admin `gbl-dev@df.uzh.ch`.
-7. If something seems off, `bash .devcontainer/smoke.sh` tells you whether the login mock, the app, or your setup is at fault.
+7. If something seems off, `bash .devcontainer/smoke.sh` tells you whether the login mock, the app, or your setup is at fault. Its third argument names the game, so an example game is `bash .devcontainer/smoke.sh '' '' central-bank`.
 
-If a default port is taken, every override needs its app-side counterpart (the app reads defaults from `apps/demo-game/.env*`): `GBL_DB_PORT` also needs `DATABASE_URL`/`SHADOW_DATABASE_URL`, `GBL_OIDC_PORT` also needs `GBL_MOCK_OIDC_ISSUER`, and `PORT` also needs `NEXTAUTH_URL`/`NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_API_URL` — see the header of [docker-compose.yml](docker-compose.yml). Pass the resulting URLs to the diagnostic, for example `bash .devcontainer/smoke.sh http://localhost:13000 http://localhost:18090/default`. Login against a real Auth0 tenant instead of the mock requires `GBL_AUTH_MODE=auth0` in the game's `.env.local` (see `.env.local.template`).
+#### Running an example game natively
 
-To run an example game instead, select it with `GBL_GAME_TARGET` — the same steps otherwise, and Prisma creates that game's database on first push:
+Both commands take the game as an argument; without one they run the demo game. Everything else is identical — same Docker stack, same mock login. Prisma creates that game's database on the first push, so nothing extra has to be provisioned:
 
-```bash
-GBL_GAME_TARGET=central-bank pnpm run setup:host
-pnpm -F @gbl-uzh/central-bank dev
-```
+| Game         | Bootstrap (once)              | Start                   |
+| ------------ | ----------------------------- | ----------------------- |
+| Demo game    | `pnpm bootstrap`              | `pnpm dev`              |
+| Central Bank | `pnpm bootstrap central-bank` | `pnpm dev central-bank` |
+| Rate Wars    | `pnpm bootstrap rate-wars`    | `pnpm dev rate-wars`    |
 
-Supported targets are `demo`, `central-bank`, and `rate-wars`. All three default to port 3000, so running them at the same time needs the `PORT` override and its counterparts.
+`pnpm dev` runs exactly one game, plus the watch builds of `@gbl-uzh/platform` and `@gbl-uzh/ui` so edits to the shared packages reach it. One at a time is the point: all three games bind port 3000 and hardcode `http://localhost:3000` in their `.env.development`, so a second game started in parallel silently lands on 3001 with authentication URLs pointing at the first one. Running two side by side means overriding `PORT` **and** its three app-side URLs for the second one (see below). Each game keeps its own database (`prisma`, `central_bank`, `rate_wars`) on the shared Postgres, so switching between them does not wipe the others.
+
+The scripts also accept `GBL_GAME_TARGET` instead of the argument, which is how the devcontainers select their game; an explicit argument wins over the variable.
+
+If a default port is taken, every override needs its app-side counterpart (each game reads its defaults from its own `.env*` files): `GBL_DB_PORT` also needs `DATABASE_URL`/`SHADOW_DATABASE_URL`, `GBL_OIDC_PORT` also needs `GBL_MOCK_OIDC_ISSUER`, and `PORT` also needs `NEXTAUTH_URL`/`NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_API_URL` — see the header of [docker-compose.yml](docker-compose.yml). Pass the resulting URLs to the diagnostic, for example `bash .devcontainer/smoke.sh http://localhost:13000 http://localhost:18090/default`. Login against a real Auth0 tenant instead of the mock requires `GBL_AUTH_MODE=auth0` in the game's `.env.local` (see `.env.local.template`).
 
 ## Requirements
 

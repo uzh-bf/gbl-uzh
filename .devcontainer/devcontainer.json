@@ -1,5 +1,8 @@
 {
-  "name": "gbl-uzh-demo-game",
+  // VS Code lists both configurations side by side when reopening in a
+  // container, so the name has to say which one needs host setup first
+  // (`dev up && dev tls install`, see README.md in this directory).
+  "name": "GBL Devrouter — needs devrouter running on the host",
   "dockerComposeFile": [
     "docker-compose.yml",
     "${localEnv:DEVCONTAINER_COMPOSE_OVERLAY:docker-compose.default.yml}"

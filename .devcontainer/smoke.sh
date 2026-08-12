@@ -1,19 +1,23 @@
 #!/usr/bin/env bash
 # Mode-agnostic smoke check: verifies the app and the OIDC mock are up and
 # agree on the issuer. Works identically in all three run modes — pass or
-# export the URLs of the mode under test:
+# export the URLs of the mode under test, and name the game when it is not the
+# demo game (the seed check queries that game's database):
 #
 #   host mode (defaults follow PORT / GBL_OIDC_PORT overrides):
 #                          bash .devcontainer/smoke.sh
+#                          bash .devcontainer/smoke.sh '' '' central-bank
 #   starter devcontainer:  bash .devcontainer/smoke.sh   # env carries the URLs
 #   devrouter (container): bash .devcontainer/smoke.sh http://localhost:3000 \
 #                            https://oidc.demo-game.localhost/default
 set -euo pipefail
 
-APP_URL="${1:-http://localhost:${PORT:-3000}}"
-ISSUER="${2:-${GBL_MOCK_OIDC_ISSUER:-http://localhost:${GBL_OIDC_PORT:-8090}/default}}"
+APP_URL="${1:-}"
+ISSUER="${2:-}"
+APP_URL="${APP_URL:-http://localhost:${PORT:-3000}}"
+ISSUER="${ISSUER:-${GBL_MOCK_OIDC_ISSUER:-http://localhost:${GBL_OIDC_PORT:-8090}/default}}"
 . .devcontainer/game-target.sh
-resolve_gbl_game_target
+resolve_gbl_game_target "${3:-}"
 GAME_PACKAGE="${GBL_GAME_PACKAGE}"
 
 echo "[smoke] OIDC discovery: ${ISSUER}/.well-known/openid-configuration"

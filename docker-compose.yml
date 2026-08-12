@@ -5,14 +5,15 @@
 # own networking. All three modes share `.devcontainer/docker/` for the OIDC
 # mock config and the shadow-DB init script.
 #
-#   docker compose up -d --wait        # --wait blocks until postgres is healthy
-#   pnpm install && pnpm run setup:host
-#   pnpm -F @gbl-uzh/demo-game dev     # then open http://localhost:3000
+#   pnpm install
+#   pnpm bootstrap [game]              # also runs `docker compose up -d --wait`
+#   pnpm dev [game]                    # ditto, then open http://localhost:3000
 #
 # Ports are overridable when 5432/8090 are taken on your machine (e.g. by a
 # local Postgres or by devrouter's Traefik): GBL_DB_PORT / GBL_OIDC_PORT.
-# Overrides must be mirrored on the app side, which reads its defaults from
-# apps/demo-game/.env*:
+# Overrides must be mirrored on the app side, and each game reads its defaults
+# from its own .env* files (apps/demo-game, examples/central-bank,
+# examples/rate-wars):
 #   GBL_DB_PORT   -> also override DATABASE_URL + SHADOW_DATABASE_URL
 #   GBL_OIDC_PORT -> also override GBL_MOCK_OIDC_ISSUER
 #   PORT (next dev, when 3000 is taken)

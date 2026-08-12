@@ -26,6 +26,13 @@ allowBuilds:
   prisma: true
   sharp: true
   unrs-resolver: true
+# These are duplicated in package.json under `pnpm.overrides`, and the two
+# copies must stay identical. Vercel builds with pnpm 9 ("Using pnpm@9.x based
+# on project creation date"), which reads overrides only from package.json —
+# dropping that copy fails its frozen install with
+# ERR_PNPM_LOCKFILE_CONFIG_MISMATCH. Local pnpm 11 reads only this file and
+# warns about the package.json copy on every command. Both copies can go once
+# the Vercel project opts into pnpm 10+ via corepack.
 overrides:
   # react-dice-complete@2.2.0 peer-deps React <=18; force it onto the
   # workspace React 19 so there is a single React instance (avoids a duplicate
