@@ -16,6 +16,21 @@ migrate Rate Wars and Central Bank. See
 `project/2026-08-10-pr-205-trpc-examples-stack-plan.md` for current execution state.
 No layer from either stack has been merged.
 
+## 2026-08-12 base-refresh note
+
+The eight draft layers are now one local stack rooted at `dev` commit
+`5852341`. The refresh incorporates the native mock-auth work from PR #185 and
+folds late review corrections into their owning layers: the platform result
+contract in #196, demo-game lifecycle proof in #195, canonical Pages Router
+guidance in #201, and game-specific corrections in #202 and #204. #194 owns
+the resulting CI, devcontainer, auth-variable, and pnpm-pin integration.
+
+All eight pull requests are drafts. The rewritten branches have not been
+pushed, and the previous Gate 3 decision does not apply to their new commit
+identities. Exact-tip verification and one integrated final review must pass
+before a fresh Gate 3 decision. No merge, publication, deployment, branch
+deletion, or worktree cleanup is authorized.
+
 ## 1. Reconcile live state (verified 2026-08-06)
 
 | Item | State |
