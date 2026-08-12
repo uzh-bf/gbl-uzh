@@ -41,7 +41,7 @@ if [[ "${GBL_DEV_MODE:-}" != "starter" ]]; then
   else
     export NEXT_PUBLIC_API_URL="https://${app_host}/api/graphql"
   fi
-  export AUTH0_ISSUER="https://${oidc_host}/default"
+  export GBL_MOCK_OIDC_ISSUER="https://${oidc_host}/default"
 fi
 
 # No-TTY pnpm hardening (see post-create.sh): keep the dev server from aborting on
@@ -66,10 +66,10 @@ fi
 
 if [[ "${GBL_DEV_MODE:-}" = "starter" ]]; then
   printf '[post-start] App      -> %s      (first compile ~30-60s)\n' "$NEXTAUTH_URL"
-  printf '[post-start] OIDC mock-> %s\n' "$AUTH0_ISSUER"
+  printf '[post-start] OIDC mock-> %s\n' "$GBL_MOCK_OIDC_ISSUER"
 else
   printf '[post-start] App      -> %s      (via devrouter; first compile ~30-60s)\n' "$NEXTAUTH_URL"
-  printf '[post-start] OIDC mock-> %s\n' "$AUTH0_ISSUER"
+  printf '[post-start] OIDC mock-> %s\n' "$GBL_MOCK_OIDC_ISSUER"
   printf '[post-start] Lifecycle-> on the host: devrouter ensure .\n'
 fi
 printf '[post-start] Logs     -> tail -f /tmp/dev.log\n'

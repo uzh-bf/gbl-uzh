@@ -61,7 +61,9 @@ jobs:
     env:
       # demo-game is tRPC; the example games still run GraphQL. The demo-game
       # client rewrites the path either way, but keep the env truthful.
-      NEXT_PUBLIC_API_URL: http://127.0.0.1:3000${{ matrix.game == 'demo-game' && '/api/trpc' || '/api/graphql' }}
+      # Keep the browser API origin identical to NEXTAUTH_URL so auth cookies
+      # are included during the still-GraphQL example layers.
+      NEXT_PUBLIC_API_URL: http://localhost:3000${{ matrix.game == 'demo-game' && '/api/trpc' || '/api/graphql' }}
     services:
       postgres:
         image: postgres:15
@@ -111,7 +113,7 @@ jobs:
 
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
         with:
-          version: 11.18.0
+          version: 11.6.0
           run_install: false
 
       - name: Get pnpm store directory
@@ -236,7 +238,7 @@ jobs:
 
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
         with:
-          version: 11.18.0
+          version: 11.6.0
           run_install: false
 
       - name: Install dependencies
