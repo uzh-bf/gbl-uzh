@@ -123,7 +123,9 @@ Do not edit example `.env.development` files or root Compose to imply native moc
 - [x] S5 implementation, focused verification, simplifier, and intermediate review complete at `c095ebe`; no findings require correction.
 - [ ] S6 local proof, final reviews, push, exact-head CI/Sonar, PR body, and ready transition complete.
 - [x] S6 local proof complete: Central Bank starter smoke and full flow passed; Rate Wars devrouter route, smoke, and full flow passed; all three local Playwright flows passed; preserved environments restored.
-- [ ] S6 is active: the integrated review requested durable browser evidence; that docs-only correction is recorded below, then the integrated gate must rerun on the resulting exact scope before push.
+- [x] Bounded final security review passed on `8b71911..8614c65`; no high-confidence vulnerabilities or ADR conflicts.
+- [x] Strict maintainability review passed on `8b71911..8614c65`; no actionable structural findings.
+- [ ] S6 is active: the integrated review requested durable browser evidence; the docs-only correction is recorded below, and the integrated gate must rerun on the resulting exact scope before push.
 
 ### S6 local proof evidence
 
