@@ -153,6 +153,7 @@ async function joinPlayer(
   const context = await browser.newContext({
     baseURL,
     ignoreHTTPSErrors: true,
+    storageState: { cookies: [], origins: [] },
   })
   const page = await context.newPage()
 
@@ -160,7 +161,7 @@ async function joinPlayer(
   await page.waitForURL('**/play/welcome')
   await input(page, 'name').fill(plan.name)
   await Promise.all([
-    page.waitForURL('**/play/cockpit'),
+    page.waitForURL('**/play/cockpit', { waitUntil: 'domcontentloaded' }),
     page.getByRole('button', { name: 'Start Game' }).click(),
   ])
 
@@ -232,7 +233,9 @@ async function advanceGame(
 }
 
 async function assertRateForm(sessions: PlayerSession[]) {
-  await Promise.all(sessions.map(({ page }) => page.reload()))
+  await Promise.all(
+    sessions.map(({ page }) => page.reload({ waitUntil: 'domcontentloaded' }))
+  )
   await Promise.all(
     sessions.map(({ page }) =>
       expect(
@@ -252,7 +255,7 @@ async function assertLeaderboard(
   await expect
     .poll(
       async () => {
-        await page.reload()
+        await page.reload({ waitUntil: 'domcontentloaded' })
         return page
           .getByText(`Leaderboard — Year ${year}`)
           .waitFor({ state: 'visible', timeout: 10_000 })
@@ -301,7 +304,7 @@ async function runYear(
     expectedStatus: 'CONSOLIDATION',
   })
 
-  await sessions[0].page.reload()
+  await sessions[0].page.reload({ waitUntil: 'domcontentloaded' })
   await expect(sessions[0].page.getByText('Rates locked')).toBeVisible()
 
   await advanceGame(adminPage, {
@@ -330,10 +333,14 @@ async function assertUniqueJoinUrls(
 }
 
 async function assertAdminReport(page: Page, playerPlans: PlayerPlan[]) {
-  const [reportPage] = await Promise.all([
-    page.waitForEvent('popup'),
-    page.getByRole('button', { name: 'Report' }).click(),
-  ])
+  // Admin-page refreshes can replace the button inside the target=_blank link
+  // during the click. Retry until the browser actually creates the report page.
+  let reportPage!: Page
+  await expect(async () => {
+    const popupPromise = page.waitForEvent('popup', { timeout: 5_000 })
+    await page.getByRole('button', { name: 'Report' }).click()
+    reportPage = await popupPromise
+  }).toPass({ timeout: 30_000, intervals: [500, 1_000] })
 
   try {
     await expect(reportPage.getByText('Standings')).toBeVisible({
