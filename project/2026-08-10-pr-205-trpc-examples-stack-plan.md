@@ -6,8 +6,9 @@ Status: shared CI install ownership was moved into the bottom layer and
 propagated through the draft stack on 2026-08-12; both integrated final passes
 are closed and their findings are corrected in the owning platform layer; the
 corrected eight-branch stack was atomically pushed and read back; fresh CI is
-partially terminal with PR #197 fully green, so Gate 3 remains pending until
-every current-generation layer has a terminal status readback; all pull
+terminal for every layer; PR #195's failed browser job is now green on rerun,
+while PR #205 still needs a fresh artifact generation after its report merge
+failed twice, so Gate 3 remains pending; all pull
 requests remain draft, open, and unmerged
 Provider: GitHub stacked changes
 Base: `dev` at `6bab3ed`
@@ -39,27 +40,50 @@ authorized.
 
 The corrected push started a new CI generation for every layer. PR #197's
 workflow run `31638659737` is fully green: arm64 and amd64 image builds, lint,
-and manifest merge all passed. The platform type gate passed in run
-`31638659837`; the demo-game migration's type gate passed in run
-`31638660256`, its browser job passed the demo-game shard in run
-`31638660452`, and its Docker workflow passed lint and both image builds before
-manifest aggregation. The CI/docs layer's TypeScript run passed, and its
-current-generation browser run passed all three game shards and merged reports
-in `31638660726`. The example runs observed before status readback throttling
-showed Central Bank's three browser shards passing and its TypeScript gate
-passing; the remaining example Docker, browser aggregation, and canonical
-pattern runs were still in progress when the GitHub core API rate limit reached
-zero. Gate 3 therefore remains pending: current CI is not yet a complete
-terminal evidence set, and no PR was marked ready or merged.
+and manifest merge all passed. PR #196 is fully green on fresh TypeScript,
+Docker, and browser runs `31638659837`, `31638659924`, and `31638659935`.
+PR #194 is fully green on fresh runs `31638660683`, `31638660696`, and
+`31638660726`; the latter passed all three game shards and merged reports. PR
+#201 is fully green on fresh runs `31638663513`, `31638663549`, and
+`31638663819`. PR #202 is fully green on fresh runs `31638661148`,
+`31638661160`, and `31638661283`. PR #204 is fully green on fresh runs
+`31638662318`, `31638662375`, and `31638662408`.
+
+PR #195's fresh Docker and TypeScript runs `31638659669`, `31638660445`, and
+`31638660256` passed. Its failed browser run `31638660452` was rerun: Central
+Bank passed in job `94275688457`, demo-game and Rate Wars passed, and merged
+reports passed in job `94278825058`. The earlier dependency-install failure is
+closed as transient infrastructure.
+
+PR #205's fresh Docker and TypeScript runs `31638660728` and `31638660872`
+passed, and all three browser jobs in `31638660796` passed. Its original
+`merge-reports` job failed while downloading blob reports, and the failed-job
+rerun reproduced the same failure in job `94275701610`: the artifact service
+found all six artifacts, downloaded two blob reports successfully, and failed
+the third after five retries. This rerun reused the original matrix artifacts,
+so Gate 3 remains pending until a fresh #205 browser generation completes
+report aggregation. No PR was marked ready or merged.
+
+The official tRPC v11 documentation was re-read against the checked-in
+clients after this refresh. The three apps use the documented Pages Router
+`createTRPCNext<AppRouter>` and `withTRPC` wrapper with `ssr: false`; browser
+requests use same-origin `/api/trpc`; `splitLink` routes subscriptions to
+`httpSubscriptionLink`; and finite operations use `httpBatchLink` with
+`maxItems: 10` and `maxURLLength: 2083`. Each server adapter sets the matching
+`maxBatchSize: 10`, and SuperJSON is configured in the platform router and on
+both terminating client links. This matches the official [Pages Router setup](https://trpc.io/docs/client/nextjs/pages-router/setup),
+[HTTP subscription](https://trpc.io/docs/client/links/httpSubscriptionLink),
+[HTTP batch](https://trpc.io/docs/client/links/httpBatchLink), and
+[data transformer](https://trpc.io/docs/server/data-transformers) guidance.
 
 ### Refreshed exact-tip verification (2026-08-12)
 
 - The eight-layer local and remote stack is clean and contiguous from `dev`
-  commit `6bab3ed` through executable code head `786ed47`; the final
-  documentation and verification-ledger tip is `576ddf6`. The exact remote
-  heads are `321a958` (#197), `8140600` (#196), `dd26b0f` (#195), `2e36f98`
-  (#194), `d392283` (#201), `e2738dd` (#202), `786ed47` (#204), and
-  `576ddf6` (#205). Every local and remote layer reports `needsRebase: false`.
+  commit `6bab3ed` through executable code head `786ed47`; the lower-layer
+  remote heads are `321a958` (#197), `8140600` (#196), `dd26b0f` (#195),
+  `2e36f98` (#194), `d392283` (#201), `e2738dd` (#202), and `786ed47` (#204).
+  The top branch carries this current ledger update. Every local and remote
+  layer reports `needsRebase: false`.
 - PR #206 landed while the first refreshed CI cycle was running. Its native
   development changes were incorporated at the trunk boundary, not patched at
   the top of the stack. The only semantic conflicts preserved PR #206's
@@ -93,11 +117,11 @@ terminal evidence set, and no PR was marked ready or merged.
   for all three games pass at the new final tip. The full no-retry browser
   evidence remains reusable because PR #206 does not change game runtime code,
   tRPC wiring, browser tests, or the CI game servers. The fresh corrected-stack
-  generation then showed #197's arm64 build, amd64 build, lint, and manifest
-  merge all passing; the platform type gate passed; the demo-game and Central
-  Bank browser jobs observed so far passed; and the remaining layers were still
-  completing when the GitHub core API rate limit was exhausted. This is a
-  status-readback gap, not a passing Gate 3 result.
+  generation is green for #197, #196, #194, #201, #202, and #204, and the
+  rerun closes #195's Central Bank dependency-install failure. The only
+  unresolved CI evidence is #205's artifact-download failure described above;
+  it is not an application assertion failure, but a fresh #205 browser
+  generation must complete report aggregation before Gate 3 can close.
 - Browser proof found two synchronization defects in the example specs. Rate
   Wars still reloaded all player pages concurrently before its live form
   assertion; commit `f9b55a1` removes those reloads. Central Bank both waited
@@ -137,7 +161,7 @@ terminal evidence set, and no PR was marked ready or merged.
   changes with no new behavior beyond restoring the published compatibility
   contract, so the two-review budget closes with focused verification.
 
-## Execution status (2026-08-11)
+## Historical execution status (2026-08-11, pre-refresh)
 
 | Layer                               | Branch / pull request                                                                               | Verified state                                                                                           |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
