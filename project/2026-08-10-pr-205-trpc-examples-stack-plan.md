@@ -58,15 +58,15 @@ closed as transient infrastructure.
 PR #205's initial fresh Docker and TypeScript runs `31638660728` and
 `31638660872` passed, and its first browser generation `31638660796` plus the
 failed-job rerun exposed a transient artifact-service download failure. The
-final pushed top-tip generation on commit `c254d20f` passed Docker run
+final documentation-only top-layer generation on commit `c254d20f` passed Docker run
 `31648405382`, TypeScript run `31648405370`, all three browser jobs in run
 `31648405436`, and merged reports in job `94288353440`. Gate 3 CI evidence is
 complete. No PR was marked ready or merged.
 
-Commit `691b92c4` is a documentation-only reconciliation on that verified
-executable tip. Its exact-tip Docker run `31649181311`, TypeScript run
-`31649181302`, and Playwright run `31649181376` also passed, including merged
-reports in job `94290745474`; no executable stack behavior changed.
+The later top-layer commits are documentation-only evidence reconciliations on
+the same code-bearing stack. Their exact-tip Docker, TypeScript, and Playwright
+generations passed, including merged reports; no executable stack behavior
+changed.
 
 The earlier #205 failed run and failed-job rerun remain recorded as historical
 infrastructure evidence: they did not fail a game assertion, and the fresh
@@ -90,9 +90,10 @@ both terminating client links. This matches the official [Pages Router setup](ht
   commit `6bab3ed` through executable code head `786ed47`; the lower-layer
   remote heads are `321a958` (#197), `8140600` (#196), `dd26b0f` (#195),
   `2e36f98` (#194), `d392283` (#201), `e2738dd` (#202), and `786ed47` (#204).
-  The top branch carries the current reconciled ledger. The executable tip
-  `c254d20f` and the documentation-only reconciliation `691b92c4` both passed
-  their exact-tip CI; every local and remote layer reports `needsRebase: false`.
+  The top branch carries the current reconciled ledger. The code-bearing stack
+  ends at #204 (`786ed47`); every later #205 commit is documentation-only, and
+  the current exact-tip CI is green. Every local and remote layer reports
+  `needsRebase: false`.
 - PR #206 landed while the first refreshed CI cycle was running. Its native
   development changes were incorporated at the trunk boundary, not patched at
   the top of the stack. The only semantic conflicts preserved PR #206's
