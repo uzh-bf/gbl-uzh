@@ -58,9 +58,9 @@ closed as transient infrastructure.
 PR #205's initial fresh Docker and TypeScript runs `31638660728` and
 `31638660872` passed, and its first browser generation `31638660796` plus the
 failed-job rerun exposed a transient artifact-service download failure. The
-final pushed top-tip generation on commit `c7fbef6c` passed Docker run
-`31647492436`, TypeScript run `31647492411`, all three browser jobs in run
-`31647492444`, and merged reports in job `94285547597`. Gate 3 CI evidence is
+final pushed top-tip generation on commit `c254d20f` passed Docker run
+`31648405382`, TypeScript run `31648405370`, all three browser jobs in run
+`31648405436`, and merged reports in job `94288353440`. Gate 3 CI evidence is
 complete. No PR was marked ready or merged.
 
 The earlier #205 failed run and failed-job rerun remain recorded as historical
@@ -85,8 +85,9 @@ both terminating client links. This matches the official [Pages Router setup](ht
   commit `6bab3ed` through executable code head `786ed47`; the lower-layer
   remote heads are `321a958` (#197), `8140600` (#196), `dd26b0f` (#195),
   `2e36f98` (#194), `d392283` (#201), `e2738dd` (#202), and `786ed47` (#204).
-  The top branch carries the current ledger update at `c7fbef6c`. Every local
-  and remote layer reports `needsRebase: false`.
+  The top branch carries the current reconciled ledger. The last verified
+  top-tip commit is `c254d20f`; every local and remote layer reports
+  `needsRebase: false`.
 - PR #206 landed while the first refreshed CI cycle was running. Its native
   development changes were incorporated at the trunk boundary, not patched at
   the top of the stack. The only semantic conflicts preserved PR #206's
