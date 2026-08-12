@@ -28,11 +28,12 @@ import {
   YAxis,
 } from 'recharts'
 import * as yup from 'yup'
-import { getFacts } from '~/lib/facts'
+import { getFacts, getNumber } from '~/lib/facts'
 import { trpc } from '~/lib/trpc'
 import { DEFAULT_RATE, NEUTRAL_RATE, TREND_GROWTH } from '~/settings/Constants'
-import type { PeriodFacts } from '~/types/Period'
+import type { CurrentGameResult } from '~/types/api'
 import type { ResultFacts } from '~/types/facts'
+import type { PeriodFacts } from '~/types/Period'
 import GameLayout from '../../components/GameLayout'
 import { useToast } from '../../components/ui/use-toast'
 
@@ -99,6 +100,16 @@ function renderDeviationMeter(val: number, target: number, range: number) {
       ></div>
     </div>
   )
+}
+
+function getResultFacts(value: unknown) {
+  if (typeof value !== 'string') return getFacts(value)
+
+  try {
+    return getFacts(JSON.parse(value))
+  } catch {
+    return {}
+  }
 }
 
 function NewsflashBanner({ activeSegmentFacts }: { activeSegmentFacts: any }) {
@@ -289,8 +300,8 @@ function Leaderboard() {
   const leaderboard = useMemo(() => {
     if (!data) return []
 
-    const latestResultByPlayer: Record<string, any> = {}
-    data.forEach((res: any) => {
+    const latestResultByPlayer: Record<string, CurrentGameResult> = {}
+    data.forEach((res) => {
       const playerId = res.player.id
       const current = latestResultByPlayer[playerId]
       if (!current) {
@@ -310,14 +321,17 @@ function Leaderboard() {
     })
 
     return Object.values(latestResultByPlayer)
-      .map((res: any) => ({
-        id: res.player.id,
-        name: res.player.name,
-        cumulativePenalty: res.facts?.cumulativePenalty ?? 0,
-        inflation: res.facts?.inflation ?? 0,
-        unemployment: res.facts?.unemployment ?? 0,
-        growth: res.facts?.growth ?? 0,
-      }))
+      .map((res) => {
+        const facts = getResultFacts(res.facts)
+        return {
+          id: res.player.id,
+          name: res.player.name,
+          cumulativePenalty: getNumber(facts.cumulativePenalty),
+          inflation: getNumber(facts.inflation),
+          unemployment: getNumber(facts.unemployment),
+          growth: getNumber(facts.growth),
+        }
+      })
       .sort((a, b) => a.cumulativePenalty - b.cumulativePenalty)
   }, [data])
 
@@ -407,8 +421,8 @@ export default function Cockpit() {
   const comparativeData = useMemo(() => {
     if (!resultsData) return []
 
-    const playerMap: Record<string, any[]> = {}
-    resultsData.forEach((res: any) => {
+    const playerMap: Record<string, CurrentGameResult[]> = {}
+    resultsData.forEach((res) => {
       if (res.period?.index === currentGame?.activePeriod?.index) {
         if (!playerMap[res.player.id]) playerMap[res.player.id] = []
         playerMap[res.player.id].push(res)
@@ -426,39 +440,26 @@ export default function Cockpit() {
       )
 
       const displayResult = periodEndResult || activeSegResult
-      let facts = displayResult?.facts || {}
-      if (typeof facts === 'string') {
-        try {
-          facts = JSON.parse(facts)
-        } catch {
-          facts = {}
-        }
-      }
+      const facts = getResultFacts(displayResult?.facts)
 
       return {
         id: playerId,
         name: playerResults[0]?.player.name || 'Governor',
-        inflation: facts.inflation ?? 0,
-        unemployment: facts.unemployment ?? 0,
-        growth: facts.growth ?? 0,
-        cumulativePenalty: facts.cumulativePenalty ?? 0,
-        exchangeRate: facts.exchangeRateIndex ?? 100,
-        tradeBalance: facts.tradeBalance ?? 0,
-        spilloverInflation: facts.spilloverInflation ?? 0,
-        spilloverUnemployment: facts.spilloverUnemployment ?? 0,
+        inflation: getNumber(facts.inflation),
+        unemployment: getNumber(facts.unemployment),
+        growth: getNumber(facts.growth),
+        cumulativePenalty: getNumber(facts.cumulativePenalty),
+        exchangeRate: getNumber(facts.exchangeRateIndex, 100),
+        tradeBalance: getNumber(facts.tradeBalance),
+        spilloverInflation: getNumber(facts.spilloverInflation),
+        spilloverUnemployment: getNumber(facts.spilloverUnemployment),
         history: [...playerResults]
           .filter((res) => res.type === 'SEGMENT_END')
           .sort((a, b) => (a.segment?.index ?? 0) - (b.segment?.index ?? 0))
           .map((res) => {
-            let f = res.facts
-            if (typeof f === 'string') {
-              try {
-                f = JSON.parse(f)
-              } catch {
-                f = {}
-              }
-            }
-            return f.decisions?.rate ?? DEFAULT_RATE
+            const resultFacts = getResultFacts(res.facts)
+            const decisions = getFacts(resultFacts.decisions)
+            return getNumber(decisions.rate, DEFAULT_RATE)
           }),
       }
     })

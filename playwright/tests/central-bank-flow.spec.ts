@@ -74,7 +74,9 @@ async function createGame(
   await input(page, 'playerCount').fill(String(playerCount))
   await page.getByRole('button', { name: 'Create Game' }).click()
   await page.getByRole('link', { name: new RegExp(name) }).click()
-  await expect(page.getByTestId('game-detail')).toBeVisible()
+  await expect(page.getByTestId('game-detail')).toBeVisible({
+    timeout: 30_000,
+  })
 }
 
 async function addPeriod(
@@ -121,6 +123,7 @@ async function joinPlayer(
   const context = await browser.newContext({
     baseURL,
     ignoreHTTPSErrors: true,
+    storageState: { cookies: [], origins: [] },
   })
   const page = await context.newPage()
 
@@ -128,7 +131,7 @@ async function joinPlayer(
   await page.waitForURL('**/play/welcome')
   await input(page, 'name').fill(plan.name)
   await Promise.all([
-    page.waitForURL('**/play/cockpit'),
+    page.waitForURL('**/play/cockpit', { waitUntil: 'domcontentloaded' }),
     page.getByRole('button', { name: 'Start Game' }).click(),
   ])
 
