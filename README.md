@@ -54,7 +54,7 @@ Both commands take the game as an argument; without one they run the demo game. 
 | Central Bank | `pnpm bootstrap central-bank` | `pnpm dev central-bank` |
 | Rate Wars    | `pnpm bootstrap rate-wars`    | `pnpm dev rate-wars`    |
 
-`pnpm dev` also runs the watch builds of `@gbl-uzh/platform` and `@gbl-uzh/ui`, so edits to the shared packages reach the running game. `pnpm dev:all` starts every app at once instead — rarely what you want, since they all bind port 3000. The same applies to two games side by side: the second one needs the `PORT` override below. Each game keeps its own database (`prisma`, `central_bank`, `rate_wars`) on the shared Postgres, so switching between them does not wipe the others.
+`pnpm dev` runs exactly one game, plus the watch builds of `@gbl-uzh/platform` and `@gbl-uzh/ui` so edits to the shared packages reach it. One at a time is the point: all three games bind port 3000 and hardcode `http://localhost:3000` in their `.env.development`, so a second game started in parallel silently lands on 3001 with authentication URLs pointing at the first one. Running two side by side means overriding `PORT` **and** its three app-side URLs for the second one (see below). Each game keeps its own database (`prisma`, `central_bank`, `rate_wars`) on the shared Postgres, so switching between them does not wipe the others.
 
 The scripts also accept `GBL_GAME_TARGET` instead of the argument, which is how the devcontainers select their game; an explicit argument wins over the variable.
 
