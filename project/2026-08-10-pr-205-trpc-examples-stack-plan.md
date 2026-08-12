@@ -6,9 +6,9 @@ Status: shared CI install ownership was moved into the bottom layer and
 propagated through the draft stack on 2026-08-12; both integrated final passes
 are closed and their findings are corrected in the owning platform layer; the
 corrected eight-branch stack was atomically pushed and read back; fresh CI is
-terminal for every layer; PR #195's failed browser job is now green on rerun,
-while PR #205 still needs a fresh artifact generation after its report merge
-failed twice, so Gate 3 remains pending; all pull
+terminal and green for every layer, including a fresh top-tip artifact
+generation; Gate 3 evidence is complete with the accepted SonarCloud
+duplication exceptions explicitly skipped; all pull
 requests remain draft, open, and unmerged
 Provider: GitHub stacked changes
 Base: `dev` at `6bab3ed`
@@ -55,14 +55,17 @@ Bank passed in job `94275688457`, demo-game and Rate Wars passed, and merged
 reports passed in job `94278825058`. The earlier dependency-install failure is
 closed as transient infrastructure.
 
-PR #205's fresh Docker and TypeScript runs `31638660728` and `31638660872`
-passed, and all three browser jobs in `31638660796` passed. Its original
-`merge-reports` job failed while downloading blob reports, and the failed-job
-rerun reproduced the same failure in job `94275701610`: the artifact service
-found all six artifacts, downloaded two blob reports successfully, and failed
-the third after five retries. This rerun reused the original matrix artifacts,
-so Gate 3 remains pending until a fresh #205 browser generation completes
-report aggregation. No PR was marked ready or merged.
+PR #205's initial fresh Docker and TypeScript runs `31638660728` and
+`31638660872` passed, and its first browser generation `31638660796` plus the
+failed-job rerun exposed a transient artifact-service download failure. A
+fresh top-tip generation on commit `87d492cf` passed Docker run `31646732224`,
+TypeScript run `31646732234`, all three browser jobs in run `31646732223`, and
+merged reports in job `94283656302`. Gate 3 CI evidence is complete. No PR was
+marked ready or merged.
+
+The earlier #205 failed run and failed-job rerun remain recorded as historical
+infrastructure evidence: they did not fail a game assertion, and the fresh
+generation independently uploaded and merged a new artifact set.
 
 The official tRPC v11 documentation was re-read against the checked-in
 clients after this refresh. The three apps use the documented Pages Router
@@ -82,8 +85,8 @@ both terminating client links. This matches the official [Pages Router setup](ht
   commit `6bab3ed` through executable code head `786ed47`; the lower-layer
   remote heads are `321a958` (#197), `8140600` (#196), `dd26b0f` (#195),
   `2e36f98` (#194), `d392283` (#201), `e2738dd` (#202), and `786ed47` (#204).
-  The top branch carries this current ledger update. Every local and remote
-  layer reports `needsRebase: false`.
+  The top branch carries the current ledger update at `87d492cf`. Every local
+  and remote layer reports `needsRebase: false`.
 - PR #206 landed while the first refreshed CI cycle was running. Its native
   development changes were incorporated at the trunk boundary, not patched at
   the top of the stack. The only semantic conflicts preserved PR #206's
@@ -117,11 +120,13 @@ both terminating client links. This matches the official [Pages Router setup](ht
   for all three games pass at the new final tip. The full no-retry browser
   evidence remains reusable because PR #206 does not change game runtime code,
   tRPC wiring, browser tests, or the CI game servers. The fresh corrected-stack
-  generation is green for #197, #196, #194, #201, #202, and #204, and the
-  rerun closes #195's Central Bank dependency-install failure. The only
-  unresolved CI evidence is #205's artifact-download failure described above;
-  it is not an application assertion failure, but a fresh #205 browser
-  generation must complete report aggregation before Gate 3 can close.
+  generation is green for #197, #196, #195, #194, #201, #202, #204, and #205.
+  The #195 rerun closes its transient Central Bank dependency-install failure;
+  the fresh #205 generation closes the artifact-download failure. Gate 3 CI
+  evidence is complete. PRs #202 and #204 remain `UNSTABLE` only because of
+  the accepted duplication-only SonarCloud exception, which is intentionally
+  skipped; all PRs remain draft and no merge or ready-state transition was
+  performed.
 - Browser proof found two synchronization defects in the example specs. Rate
   Wars still reloaded all player pages concurrently before its live form
   assertion; commit `f9b55a1` removes those reloads. Central Bank both waited
