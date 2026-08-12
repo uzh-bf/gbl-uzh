@@ -39,21 +39,24 @@ All three modes share the same OIDC mock config, database image, and schema/seed
    - **No Volta:** `corepack enable` honors the `packageManager` field.
    - Either way, verify: `pnpm --version` inside the repo must print `11.6.0`.
 3. `docker compose up -d --wait` — starts Postgres and the local login mock (replaces Auth0, no account needed).
-4. `pnpm install && pnpm run setup:host` — installs, builds shared packages, prepares and seeds the database.
+4. `pnpm install && pnpm run setup:host` — installs, builds shared packages, prepares and seeds the database. `GBL_GAME_TARGET` picks the game; unset means the demo game.
 5. `pnpm -F @gbl-uzh/demo-game dev`
 6. Open <http://localhost:3000/admin/login> and click the login button — no password; you are the dev admin `gbl-dev@df.uzh.ch`.
-7. If something seems off, `bash .devcontainer/smoke.sh` tells you whether the login mock, the app, or your setup is at fault.
+7. If something seems off, `bash .devcontainer/smoke.sh` tells you whether the login mock, the app, or your setup is at fault (pass the same `GBL_GAME_TARGET` when checking an example).
 
-If a default port is taken, every override needs its app-side counterpart (the app reads defaults from `apps/demo-game/.env*`): `GBL_DB_PORT` also needs `DATABASE_URL`/`SHADOW_DATABASE_URL`, `GBL_OIDC_PORT` also needs `GBL_MOCK_OIDC_ISSUER`, and `PORT` also needs `NEXTAUTH_URL`/`NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_API_URL` — see the header of [docker-compose.yml](docker-compose.yml). Pass the resulting URLs to the diagnostic, for example `bash .devcontainer/smoke.sh http://localhost:13000 http://localhost:18090/default`. Login against a real Auth0 tenant instead of the mock requires `GBL_AUTH_MODE=auth0` in the game's `.env.local` (see `.env.local.template`).
+#### Running an example game natively
 
-To run an example game instead, select it with `GBL_GAME_TARGET` — the same steps otherwise, and Prisma creates that game's database on first push:
+The examples use the same Docker stack, the same mock login, and the same two commands — only the target and the package name change. Prisma creates that game's database on the first push, so nothing extra has to be provisioned:
 
-```bash
-GBL_GAME_TARGET=central-bank pnpm run setup:host
-pnpm -F @gbl-uzh/central-bank dev
-```
+| Game         | Bootstrap                                           | Start                              |
+| ------------ | --------------------------------------------------- | ---------------------------------- |
+| Demo game    | `pnpm run setup:host`                               | `pnpm -F @gbl-uzh/demo-game dev`    |
+| Central Bank | `GBL_GAME_TARGET=central-bank pnpm run setup:host`  | `pnpm -F @gbl-uzh/central-bank dev` |
+| Rate Wars    | `GBL_GAME_TARGET=rate-wars pnpm run setup:host`     | `pnpm -F @gbl-uzh/rate-wars dev`    |
 
-Supported targets are `demo`, `central-bank`, and `rate-wars`. All three default to port 3000, so running them at the same time needs the `PORT` override and its counterparts.
+Each game keeps its own database (`prisma`, `central_bank`, `rate_wars`) on the shared Postgres, so switching between them does not wipe the others. All three serve on port 3000, so running two at once needs the `PORT` override below for the second one.
+
+If a default port is taken, every override needs its app-side counterpart (each game reads its defaults from its own `.env*` files): `GBL_DB_PORT` also needs `DATABASE_URL`/`SHADOW_DATABASE_URL`, `GBL_OIDC_PORT` also needs `GBL_MOCK_OIDC_ISSUER`, and `PORT` also needs `NEXTAUTH_URL`/`NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_API_URL` — see the header of [docker-compose.yml](docker-compose.yml). Pass the resulting URLs to the diagnostic, for example `bash .devcontainer/smoke.sh http://localhost:13000 http://localhost:18090/default`. Login against a real Auth0 tenant instead of the mock requires `GBL_AUTH_MODE=auth0` in the game's `.env.local` (see `.env.local.template`).
 
 ## Requirements
 
