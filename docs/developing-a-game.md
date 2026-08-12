@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: "2026-08-11T00:00:00Z"
+timestamp: "2026-08-12T00:00:00Z"
 ---
 
 # Developing a Game
@@ -24,6 +24,18 @@ Before writing any code or scaffolding an app, use the `gbl-game-design` skill t
 - **Content overlays**: creating learning elements (quizzes/reflections) and story elements (narrative popups) that support the game's mechanics and story.
 - **Two chart layers**: planning tactical charts for the `PAUSED` screen (relevant for immediate feedback during play) and historical/comparative charts for the `RESULTS` screen (between periods) to allow the game master to draw didactical conclusions in class.
 
+## Authentication and local development
+
+All in-repo games use the shared `resolveAdminOidcConfig()` resolver
+(`packages/platform/src/lib/auth.ts:resolveAdminOidcConfig`). The starter and
+devrouter containers, plus CI, use mock OIDC through `GBL_AUTH_MODE=mock` and
+`GBL_MOCK_OIDC_*`. Native host mock startup is unsupported for example packages.
+
+Native host real-tenant opt-in requires explicit `GBL_AUTH_MODE=auth0` with real
+`AUTH0_*` values in an ignored `.env.local`. Production defaults to real
+`AUTH0_*` and forbids mock mode. If the environment misbehaves, use the
+`gbl-environment-doctor` skill.
+
 ## 2. Scaffolding a new game app
 
 There is no generator. The supported path is copying the reference game inside a monorepo clone/fork:
@@ -32,7 +44,7 @@ There is no generator. The supported path is copying the reference game inside a
 2. Keep the Prisma setup as-is: `prisma/copy.ts` copies the platform schema to `prisma/schema/platform.prisma` on every build/dev run (never edit that file); `prisma/schema/specific.prisma` is yours for game-specific tables (the demo game's is an unused stub).
 3. Replace the game logic: `src/services/` (computations, below), `src/types/` (facts shapes + yup schemas), `prisma/seed.ts` (levels/content), and the pages under `src/pages/`.
 4. The workspace glob `apps/*` picks the package up automatically; run from the repo root with turbo or from the app directory.
-5. Local dev environment: native mode and both devcontainer configurations use the same mock OIDC service (one-click admin login as a fixed dev admin). The **starter** config (`.devcontainer/starter/`, published localhost ports), the **devrouter** config (`.devcontainer/README.md`, namespaced maintainer routing), and native demo-game mode share its mock configuration. Demo-game selects the mock through `GBL_AUTH_MODE`; the devcontainer env also supplies fake legacy `AUTH0_*` aliases for example games. `GBL_GAME_TARGET` selects `demo`, `central-bank`, or `rate-wars` for the devcontainer lifecycle; native host mode remains demo-only. If the environment misbehaves, use the `gbl-environment-doctor` skill. Only native host mode supports opting into a real Auth0 tenant through `GBL_AUTH_MODE=auth0` and `.env.local.template`; both container modes intentionally remain mock-only.
+5. Local dev environment: the **starter** config (`.devcontainer/starter/`, published localhost ports) and the **devrouter** config (`.devcontainer/README.md`, namespaced maintainer routing) select `demo`, `central-bank`, or `rate-wars` through `GBL_GAME_TARGET`. Both use the shared mock OIDC contract described above; native host mock startup remains demo-game-only.
 
 Demo-game's standalone Nexus and GraphQL scripts run before Next.js can load environment files. Its Prisma bootstrap loads `.env.<mode>.local`, `.env.local`, `.env.<mode>`, and `.env` in Next's precedence order before authentication is resolved (`apps/demo-game/src/lib/prisma.ts:default`). Existing process or container variables still take priority.
 

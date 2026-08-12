@@ -100,12 +100,13 @@ no password. You are authenticated as the fixed dev admin `gbl-dev@df.uzh.ch`
 consistent; the app resolves that host to the host gateway (`extra_hosts`) and
 trusts the mkcert CA via `NODE_EXTRA_CA_CERTS` (see `docker-compose.yml`).
 
-Demo-game defaults to the mock through `GBL_MOCK_OIDC_*`. The devcontainer env
-also exposes equivalent fake `AUTH0_*` aliases for example games that retain
-their legacy provider wiring. These process variables intentionally override
-`.env.local`, so container modes support mock login only. To test demo-game
-against a real Auth0 tenant, use native host mode with `GBL_AUTH_MODE=auth0`
-and `AUTH0_*` in the ignored `.env.local`.
+All in-repo games use the platform's shared `resolveAdminOidcConfig()` resolver.
+Starter, devrouter, and CI use mock OIDC through `GBL_AUTH_MODE=mock` and
+`GBL_MOCK_OIDC_*`. These container variables override `.env.local`, so container
+modes support mock login only; native host mock startup is unsupported for the
+example packages. A native host real-tenant run requires explicit
+`GBL_AUTH_MODE=auth0` with real `AUTH0_*` values in ignored `.env.local`.
+Production defaults to real `AUTH0_*` and forbids mock mode.
 
 ## What's inside
 
@@ -122,8 +123,7 @@ Environment lives in `devcontainer.env` (committed, dev-only values). Lifecycle:
 Linux container and switching between native and container modes cannot reuse
 an incompatible build cache.
 
-The OIDC mock's config is shared by all run modes (this one, `starter/`, and
-the root `docker-compose.yml` for native `pnpm dev`):
+The OIDC mock's config is shared by the container modes and native demo-game run:
 `docker/oidc-config.json`, mounted via `JSON_CONFIG_PATH`. Sanity-check any
 running container mode from inside the app container with
 `bash .devcontainer/smoke.sh http://localhost:3000 <issuer-url>`; probe the

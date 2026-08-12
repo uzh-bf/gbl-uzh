@@ -8,7 +8,7 @@ tags:
   - vercel
   - neon
   - prisma
-timestamp: "2026-08-11T00:00:00Z"
+timestamp: "2026-08-12T00:00:00Z"
 ---
 
 # Deploying a Game to Staging (Vercel + Neon)
@@ -100,7 +100,7 @@ DATABASE_URL="<neon-direct-string>" pnpm prisma:seed
 
 ## Step 5 - Auth for a real deployment
 
-The one-click mock OIDC login is **local-only** (the devcontainer's `mock-oauth2-server` sidecar). A public staging deploy needs a real OIDC/Auth0 tenant. Demo-game's shared `resolveAdminOidcConfig` helper selects the real `AUTH0_CLIENT_ID` / `AUTH0_CLIENT_SECRET` / `AUTH0_ISSUER` variables in production; current example games read the same production variables directly (`packages/platform/src/lib/auth.ts`, `apps/demo-game/src/lib/authOptions.ts`).
+The one-click mock OIDC login is **local-only** (the devcontainer's `mock-oauth2-server` sidecar). All in-repo games use the shared `resolveAdminOidcConfig()` resolver (`packages/platform/src/lib/auth.ts:resolveAdminOidcConfig`). Starter, devrouter, and CI use mock OIDC through `GBL_AUTH_MODE=mock` and `GBL_MOCK_OIDC_*`. Native host real-tenant opt-in requires explicit `GBL_AUTH_MODE=auth0` with ignored `AUTH0_*` values; production defaults to real `AUTH0_*` and forbids mock mode.
 
 Minimum setup in your provider, then set the three `AUTH0_*` vars in Vercel:
 

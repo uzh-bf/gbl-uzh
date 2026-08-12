@@ -80,6 +80,7 @@ Do not edit example `.env.development` files or root Compose to imply native moc
 
 ### S5: All games use the shared resolver
 
+- Progress: S5 implementation is present and awaiting commit plus the required intermediate review gates. No native example mock support or tRPC-stack changes are allowed.
 - Do: make only the owned implementation and documentation changes above.
 - Check, in order:
   1. `pnpm -F @gbl-uzh/platform test:auth`

@@ -36,7 +36,6 @@ if [ "${GBL_DEV_MODE:-}" != "starter" ]; then
   export NEXT_PUBLIC_APP_URL="https://${app_host}"
   export NEXT_PUBLIC_API_URL="https://${app_host}/api/graphql"
   export GBL_MOCK_OIDC_ISSUER="https://${oidc_host}/default"
-  export AUTH0_ISSUER="https://${oidc_host}/default"
 fi
 
 # No-TTY pnpm hardening (see post-create.sh): keep the dev server from aborting on
