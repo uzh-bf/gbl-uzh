@@ -337,9 +337,11 @@ async function assertAdminReport(page: Page, playerPlans: PlayerPlan[]) {
   // during the click. Retry until the browser actually creates the report page.
   let reportPage!: Page
   await expect(async () => {
-    const popupPromise = page.waitForEvent('popup', { timeout: 5_000 })
-    await page.getByRole('button', { name: 'Report' }).click()
-    reportPage = await popupPromise
+    const [popup] = await Promise.all([
+      page.waitForEvent('popup', { timeout: 5_000 }),
+      page.getByRole('button', { name: 'Report' }).click(),
+    ])
+    reportPage = popup
   }).toPass({ timeout: 30_000, intervals: [500, 1_000] })
 
   try {
