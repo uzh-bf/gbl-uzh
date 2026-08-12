@@ -2,38 +2,126 @@
 
 Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
-Status: draft stack rewritten locally on 2026-08-12; exact-tip verification
-and a fresh integrated final review are pending; all pull requests remain
-draft, open, and unmerged
+Status: shared CI install ownership was moved into the bottom layer and
+propagated through the draft stack on 2026-08-12; both integrated final passes
+are closed and their findings are corrected in the owning platform layer;
+atomic push/readback and fresh CI are pending, so Gate 3 remains pending;
+all pull requests remain draft, open, and unmerged
 Provider: GitHub stacked changes
-Base: `trpc-stack/03-ci-devcontainer-docs-collateral` at `2f363c1`
+Base: `dev` at `6bab3ed`
 Worktree: `trees/trpc-examples-stack`
 Mode: guided, with a review pause after every layer
 
 ## 2026-08-12 refresh status
 
 The examples stack is now layered directly on the refreshed original tRPC
-stack rooted at `dev` commit `5852341`. The refresh includes PR #185's native
-mock-auth contract. Late corrections were folded into the earliest owning
-layers instead of remaining as repairs in this final layer: canonical guidance
-in #201, Rate Wars corrections in #202, Central Bank corrections in #204, and
-the shared platform result contract in #196.
+stack rooted at `dev` commit `6bab3ed`. The refresh includes PR #185's native
+mock-auth contract and PR #206's `pnpm dev [game]` native-development path.
+Late corrections were folded into the earliest owning layers instead of
+remaining as repairs in this final layer: the shared CI install in #197,
+canonical guidance in #201, Rate Wars corrections in #202, Central Bank
+corrections in #204, and the shared platform result contract in #196.
 
 The prior execution and Gate 3 record below remains historical evidence for the
 pre-refresh commit identities. It is not current readiness evidence. The
-rewritten branches have not been pushed; every PR is draft. Full exact-tip
-verification, one integrated final review, atomic stack push, and GitHub
-readback must precede a fresh Gate 3 decision. No merge, publication,
-deployment, branch deletion, or worktree cleanup is authorized.
+rewritten branches were pushed and read back once before PR #206 landed, and
+the latest-`dev` rebase was pushed and read back once before this CI ownership
+correction. Every PR remains draft. The shared demo-game workflow's
+deterministic install now belongs to the bottom toolchain layer (#197), so
+lower platform and example layers inherit the same `--ignore-scripts` install;
+#194 retains its independent same-origin and workflow-path corrections. The
+corrected stack still requires one final atomic push/readback and fresh CI
+before the fresh Gate 3 decision. No merge, publication, deployment, branch
+deletion, or worktree cleanup is authorized.
+
+### Refreshed exact-tip verification (2026-08-12)
+
+- The eight-layer local stack is clean and contiguous from `dev` commit
+  `6bab3ed` through executable code head `786ed47`; the final pre-ledger tip
+  `f69c93b` contains only later documentation and verification-ledger changes.
+  Every local layer reports `needsRebase: false`.
+- PR #206 landed while the first refreshed CI cycle was running. Its native
+  development changes were incorporated at the trunk boundary, not patched at
+  the top of the stack. The only semantic conflicts preserved PR #206's
+  `pnpm dev [game]` launcher and workspace exclusions while retaining the
+  platform layer's React package extensions. A range-diff shows the remaining
+  stack commits replayed unchanged.
+- The common demo-game workflow initially failed in bottom layers before
+  reaching lint or Playwright because `pnpm/action-setup` inherited
+  `run_install: true` and `sharp@0.32.6` hit a `socket hang up` downloading its
+  native binary. That fix now lives in #197 as `run_install: false` plus an
+  explicit frozen `--ignore-scripts` install. The later #194 layer keeps only
+  its already-owned checkout, type-gate, and app-origin corrections.
+- Frozen install and supply-chain checks pass. Platform tests pass 53/53;
+  TypeScript 7 and 6, production build, auth tests 8/8, packed-package
+  verification, and the clean tRPC-only consumer pass. The build retains its
+  existing non-fatal declaration-portability and circular-dependency warnings.
+- UI TypeScript 7 and 6, lint, production build, packed-package verification,
+  and the clean Next.js consumer pass. Demo-game, Rate Wars, and Central Bank
+  TypeScript 7 and 6, lint, and production builds pass with existing lint
+  warnings only.
+- A namespaced devrouter/DevPod runtime on Node 24 used the repository mock OIDC
+  provider and isolated PostgreSQL database. With Playwright retries disabled,
+  demo-game passed 3/3 in 1.5 minutes, Rate Wars passed 2/2 in 31.8 seconds, and
+  Central Bank passed 2/2 in 38.3 seconds.
+- Before PR #206 landed, the corrected #194 workflow completed green on GitHub:
+  TypeScript, deterministic install/lint, amd64 and arm64 Docker builds, all
+  three Playwright jobs, and merged reports passed. Central Bank passed after
+  one automatic retry, which remains recorded as flakiness. After rebasing onto
+  PR #206, frozen install, host-script syntax and target selection, platform
+  TypeScript 7 and 6, 53/53 tests, platform build, and both TypeScript compilers
+  for all three games pass at the new final tip. The full no-retry browser
+  evidence remains reusable because PR #206 does not change game runtime code,
+  tRPC wiring, browser tests, or the CI game servers. The latest red bottom and
+  platform checks were both the same inherited `sharp@0.32.6` install failure;
+  the corrected lower-layer workflow needs a fresh CI generation after push.
+- Browser proof found two synchronization defects in the example specs. Rate
+  Wars still reloaded all player pages concurrently before its live form
+  assertion; commit `f9b55a1` removes those reloads. Central Bank both waited
+  for a missed `domcontentloaded` event after successful client navigation and
+  retained the same concurrent reload pattern; commit `e28d99d` asserts the
+  final URL and removes those reloads. Both fixes live in their owning game
+  layers, pass TypeScript 7 and 6, pass their no-retry lifecycles, and have
+  completed simplification and intermediate review with no findings.
+- Changed documentation passes Prettier and OKF link/frontmatter validation.
+  The active runtime audit has no repository game consumer of Apollo, GraphQL
+  code generation, Nexus build wiring, or `/api/graphql`; retained matches are
+  deprecated public compatibility or historical/test material classified in
+  `project/2026-08-10-trpc-graphql-reference-audit.md`.
+- The canonical Pages Router pattern was checked against the official tRPC v11
+  setup, batching, subscription, and transformer documentation: it uses
+  `createTRPCNext<AppRouter>`, `withTRPC`, `ssr: false`, `httpBatchLink` for
+  finite operations, `httpSubscriptionLink` behind `splitLink` for SSE, and
+  SuperJSON on both terminating links and the server.
+- The initial integrated final review found two cross-player privacy gaps in
+  the platform layer: historical results included private progression fields,
+  and the tRPC SSE subscription consumed one repository-wide event channel.
+  Both corrections now live in PR #196 at `0e7ae11`: historical result DTOs
+  expose only player id and name, and tRPC subscriptions derive the game scope
+  from the authenticated context while the deprecated GraphQL bridge retains
+  its aggregate compatibility stream. The platform passes both TypeScript
+  compilers, 52/52 tests, package build, and 8/8 auth
+  tests. The simplifier's redundant-assertion reduction was applied, and the
+  risk-selected correction review returned `DONE` with no findings.
+- The integrated correction review confirmed both privacy findings were
+  closed, then found that the game-scoping change had replaced the published
+  one-argument `EventService.publishGlobalNotification(event)` contract. PR
+  #196 now keeps that overload, always preserves aggregate GraphQL delivery,
+  and additionally scopes legacy events when their facts contain a validated
+  game id. Two focused compatibility tests pass. The same review also found a
+  stale code-head SHA in this ledger; the reproducible executable and final
+  documentation tips above replace it. These are reviewer-requested closure
+  changes with no new behavior beyond restoring the published compatibility
+  contract, so the two-review budget closes with focused verification.
 
 ## Execution status (2026-08-11)
 
-| Layer                               | Branch / pull request                                                                           | Verified state                                                                                  |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| 00 canonical Pages Router pattern   | `rs/trpc-examples/00-pages-router-pattern` / [#201](https://github.com/uzh-bf/gbl-uzh/pull/201) | Commit `a7ac89a`; checks, lifecycle proof, and intermediate review passed                                      |
-| 01 Rate Wars                        | `rs/trpc-examples/01-rate-wars-trpc` / [#202](https://github.com/uzh-bf/gbl-uzh/pull/202)       | Commit `10fcc62`; lifecycle and review passed; the 46.4% duplication-only SonarCloud failure is accepted       |
-| 02 Central Bank                     | `rs/trpc-examples/02-central-bank-trpc` / [#204](https://github.com/uzh-bf/gbl-uzh/pull/204)    | Commit `4a1271d`; lifecycle and review passed; the 38.1% duplication-only SonarCloud failure is accepted       |
-| 03 compatibility and reconciliation | `rs/trpc-examples/03-graphql-deprecation-docs` / [#205](https://github.com/uzh-bf/gbl-uzh/pull/205) | Implementation and final-review closure through `79c7042`; all local gates complete                           |
+| Layer                               | Branch / pull request                                                                               | Verified state                                                                                           |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| 00 canonical Pages Router pattern   | `rs/trpc-examples/00-pages-router-pattern` / [#201](https://github.com/uzh-bf/gbl-uzh/pull/201)     | Commit `a7ac89a`; checks, lifecycle proof, and intermediate review passed                                |
+| 01 Rate Wars                        | `rs/trpc-examples/01-rate-wars-trpc` / [#202](https://github.com/uzh-bf/gbl-uzh/pull/202)           | Commit `10fcc62`; lifecycle and review passed; the 46.4% duplication-only SonarCloud failure is accepted |
+| 02 Central Bank                     | `rs/trpc-examples/02-central-bank-trpc` / [#204](https://github.com/uzh-bf/gbl-uzh/pull/204)        | Commit `4a1271d`; lifecycle and review passed; the 38.1% duplication-only SonarCloud failure is accepted |
+| 03 compatibility and reconciliation | `rs/trpc-examples/03-graphql-deprecation-docs` / [#205](https://github.com/uzh-bf/gbl-uzh/pull/205) | Implementation and final-review closure through `79c7042`; all local gates complete                      |
 
 The user approved opening pull requests #201, #202, #204, and #205 for review
 on 2026-08-11. All listed pull requests remain unmerged. The earlier replacement
