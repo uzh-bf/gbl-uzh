@@ -63,10 +63,11 @@ final documentation-only top-layer generation on commit `c254d20f` passed Docker
 `31648405436`, and merged reports in job `94288353440`. Gate 3 CI evidence is
 complete. No PR was marked ready or merged.
 
-The later top-layer commits are documentation-only evidence reconciliations on
-the same code-bearing stack. Their exact-tip Docker, TypeScript, and Playwright
-generations passed, including merged reports; no executable stack behavior
-changed.
+The last exact-tip CI generation on documentation-only commit `e7c0ba08`
+passed Docker run `31649892531`, TypeScript run `31649892556`, and Playwright
+run `31649892585`, including merged reports in job `94292831912`. The current
+#205 tip is documentation-only after that green generation and has no
+executable changes.
 
 The earlier #205 failed run and failed-job rerun remain recorded as historical
 infrastructure evidence: they did not fail a game assertion, and the fresh
@@ -91,9 +92,9 @@ both terminating client links. This matches the official [Pages Router setup](ht
   remote heads are `321a958` (#197), `8140600` (#196), `dd26b0f` (#195),
   `2e36f98` (#194), `d392283` (#201), `e2738dd` (#202), and `786ed47` (#204).
   The top branch carries the current reconciled ledger. The code-bearing stack
-  ends at #204 (`786ed47`); every later #205 commit is documentation-only, and
-  the current exact-tip CI is green. Every local and remote layer reports
-  `needsRebase: false`.
+  ends at #204 (`786ed47`); every #205 commit is documentation-only. The last
+  exact-tip CI is green on `e7c0ba08`; the current #205 tip only changes
+  ledger wording. Every local and remote layer reports `needsRebase: false`.
 - PR #206 landed while the first refreshed CI cycle was running. Its native
   development changes were incorporated at the trunk boundary, not patched at
   the top of the stack. The only semantic conflicts preserved PR #206's
