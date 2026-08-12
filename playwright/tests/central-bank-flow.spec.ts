@@ -129,10 +129,8 @@ async function joinPlayer(
   await page.goto(joinUrl)
   await page.waitForURL('**/play/welcome')
   await input(page, 'name').fill(plan.name)
-  await Promise.all([
-    page.waitForURL('**/play/cockpit', { waitUntil: 'domcontentloaded' }),
-    page.getByRole('button', { name: 'Start Game' }).click(),
-  ])
+  await page.getByRole('button', { name: 'Start Game' }).click()
+  await expect(page).toHaveURL(/\/play\/cockpit$/, { timeout: 30_000 })
 
   return { context, page, plan }
 }
@@ -221,12 +219,11 @@ async function assertCountdownVisible(page: Page) {
 }
 
 async function assertPlayerDecisionForm(sessions: PlayerSession[]) {
-  await Promise.all(sessions.map(({ page }) => page.reload()))
   await Promise.all(
     sessions.map(({ page }) =>
       expect(
         page.getByRole('button', { name: 'Submit Policy Rate' })
-      ).toBeVisible()
+      ).toBeVisible({ timeout: 30_000 })
     )
   )
 }

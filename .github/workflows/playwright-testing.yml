@@ -11,10 +11,10 @@ on:
       - main
       - dev
     types: [opened, synchronize, reopened, ready_for_review]
-      paths:
-        - apps/demo-game/**
-        - examples/rate-wars/**
-        - examples/central-bank/**
+    paths:
+      - apps/demo-game/**
+      - examples/rate-wars/**
+      - examples/central-bank/**
       - packages/platform/**
       - packages/ui/**
       - playwright/**
