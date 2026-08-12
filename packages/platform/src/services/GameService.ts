@@ -858,7 +858,7 @@ export async function activateNextPeriod(
         type: BaseGlobalNotificationType.PERIOD_ACTIVATED,
         facts: EventService.buildGameRealtimeFacts(gameId, gameAfterUpdate),
       }
-      EventService.publishGlobalNotification(eventToPublish)
+      EventService.publishGlobalNotification(gameId, eventToPublish)
       log.info(
         `Published ${eventToPublish.type} for game ${gameId}`,
         eventToPublish.facts
@@ -1123,7 +1123,7 @@ export async function activateNextSegment(
         type: BaseGlobalNotificationType.SEGMENT_ACTIVATED,
         facts: EventService.buildGameRealtimeFacts(gameId, gameAfterUpdate),
       }
-      EventService.publishGlobalNotification(eventToPublish)
+      EventService.publishGlobalNotification(gameId, eventToPublish)
       log.info(
         `Published ${eventToPublish.type} for game ${gameId}`,
         eventToPublish.facts

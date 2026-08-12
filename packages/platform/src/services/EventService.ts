@@ -1,5 +1,6 @@
 import * as DB from '../generated/prisma/client.js'
 import {
+  publishGlobalNotificationAggregateRealtime,
   publishGlobalNotificationRealtime,
   publishUserNotificationRealtime,
 } from '../lib/realtime.js'
@@ -327,8 +328,28 @@ export async function receiveEvent(
   return []
 }
 
-export function publishGlobalNotification(event: PlatformEvent<any>) {
-  publishGlobalNotificationRealtime(event)
+export function publishGlobalNotification(event: PlatformEvent<any>): void
+export function publishGlobalNotification(
+  gameId: number,
+  event: PlatformEvent<any>
+): void
+export function publishGlobalNotification(
+  gameIdOrEvent: number | PlatformEvent<any>,
+  scopedEvent?: PlatformEvent<any>
+): void {
+  if (typeof gameIdOrEvent === 'number') {
+    publishGlobalNotificationRealtime(gameIdOrEvent, scopedEvent!)
+    return
+  }
+
+  const legacyEvent = gameIdOrEvent
+  const gameId = legacyEvent.facts?.gameId
+  if (Number.isInteger(gameId) && gameId > 0) {
+    publishGlobalNotificationRealtime(gameId, legacyEvent)
+    return
+  }
+
+  publishGlobalNotificationAggregateRealtime(legacyEvent)
 }
 
 export function publishUserNotification(

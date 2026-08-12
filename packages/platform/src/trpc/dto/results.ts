@@ -91,20 +91,7 @@ export interface PastResultDto extends Omit<SpecificResultDto, 'player'> {
     id: number
     index: number
   } | null
-  player: {
-    id: string
-    name: string
-    role?: string | null
-    facts?: unknown
-    experience?: number
-    experienceToNext?: number
-    level?: {
-      id: number
-      index: number
-    }
-    completedLearningElementIds?: string[]
-    visitedStoryElementIds?: string[]
-  }
+  player: ResultPlayerDto
 }
 
 interface ResultPeriodSummaryDto {
@@ -479,19 +466,6 @@ export function toPastResultDto(
     player: {
       id: source.player.id,
       name: source.player.name ?? '',
-      role: source.player.role ?? null,
-      facts: source.player.facts,
-      experience: source.player.experience,
-      experienceToNext: source.player.experienceToNext,
-      level:
-        source.player.level?.id && source.player.level.index !== undefined
-          ? {
-              id: source.player.level.id,
-              index: source.player.level.index,
-            }
-          : undefined,
-      completedLearningElementIds: source.player.completedLearningElementIds,
-      visitedStoryElementIds: source.player.visitedStoryElementIds,
     },
   }
 }

@@ -1,7 +1,8 @@
 import { EventEmitter, on } from 'node:events'
 import type { Event as PlatformEvent } from '../types.js'
 
-const GLOBAL_EVENT_CHANNEL = 'global:events'
+const GLOBAL_EVENT_AGGREGATE_CHANNEL = 'global:events'
+const GAME_EVENT_CHANNEL_PREFIX = 'game:events:'
 const USER_EVENT_CHANNEL_PREFIX = 'user:events:'
 // Aggregate channel carrying (userId, events) tuples so a bridge can observe
 // every user's events without knowing the per-user channel names.
@@ -33,14 +34,28 @@ function userChannel(userId: string): string {
   return `${USER_EVENT_CHANNEL_PREFIX}${userId}`
 }
 
+function gameChannel(gameId: number): string {
+  return `${GAME_EVENT_CHANNEL_PREFIX}${gameId}`
+}
+
 function isAbortError(error: unknown): boolean {
   return error instanceof Error && error.name === 'AbortError'
 }
 
 export function publishGlobalNotificationRealtime(
+  gameId: number,
   event: PlatformEvent<string>
 ): void {
-  eventBus.emit(GLOBAL_EVENT_CHANNEL, event)
+  eventBus.emit(gameChannel(gameId), event)
+  publishGlobalNotificationAggregateRealtime(event)
+}
+
+export function publishGlobalNotificationAggregateRealtime(
+  event: PlatformEvent<string>
+): void {
+  // GraphQL compatibility still consumes one aggregate stream. tRPC clients
+  // subscribe to game-scoped channels and never receive this stream.
+  eventBus.emit(GLOBAL_EVENT_AGGREGATE_CHANNEL, event)
 }
 
 export function publishUserNotificationRealtime(
@@ -60,18 +75,19 @@ export function bridgeRealtimeEvents(handlers: {
   onGlobal: (event: PlatformEvent<string>) => void
   onUser: (userId: string, events: PlatformEvent<string>[]) => void
 }): void {
-  eventBus.on(GLOBAL_EVENT_CHANNEL, handlers.onGlobal)
+  eventBus.on(GLOBAL_EVENT_AGGREGATE_CHANNEL, handlers.onGlobal)
   eventBus.on(USER_EVENT_AGGREGATE_CHANNEL, (userId, events) =>
     handlers.onUser(userId as string, events as PlatformEvent<string>[])
   )
 }
 
 export function subscribeToGlobalEvents(
+  gameId: number,
   signal?: AbortSignal
 ): AsyncIterable<PlatformEvent<string>> {
   const iterator = on(
     eventBus,
-    GLOBAL_EVENT_CHANNEL,
+    gameChannel(gameId),
     signal ? { signal } : undefined
   )
 
