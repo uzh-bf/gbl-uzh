@@ -5,6 +5,7 @@ import {
   type BrowserContext,
   type Locator,
   type Page,
+  type Response,
 } from '@playwright/test'
 
 test.setTimeout(300_000)
@@ -140,7 +141,6 @@ async function joinPlayer(
   const context = await browser.newContext({
     baseURL,
     ignoreHTTPSErrors: true,
-    storageState: { cookies: [], origins: [] },
   })
   const page = await context.newPage()
 
@@ -203,9 +203,18 @@ async function advanceGame(
   await expect(button).toBeEnabled()
   // A React re-render can replace the button between mousedown and mouseup,
   // swallowing the click without an error. Retry only until the matching tRPC
-  // mutation is sent; after that, another click could advance the
-  // state machine twice while the invalidated game query is still refreshing.
+  // mutation is sent; after that, another click could advance the state
+  // machine twice while the invalidated game query is still refreshing.
+  let responsePromise: Promise<Response> | undefined
   await expect(async () => {
+    const candidateResponse = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'POST' &&
+        /\/api\/trpc\/game\.activateNext(?:Period|Segment)$/.test(
+          new URL(response.url()).pathname
+        ),
+      { timeout: 30_000 }
+    )
     const requestPromise = page
       .waitForRequest(
         (request) =>
@@ -218,8 +227,15 @@ async function advanceGame(
       .catch(() => null)
 
     await page.getByRole('button', { name: action }).click()
-    expect(await requestPromise).not.toBeNull()
+    const request = await requestPromise
+    if (!request) {
+      void candidateResponse.catch(() => undefined)
+      throw new Error(`No tRPC game-transition request after clicking ${action}`)
+    }
+    responsePromise = candidateResponse
   }).toPass({ timeout: 60_000, intervals: [500, 1_000, 2_000] })
+  if (!responsePromise) throw new Error(`No tRPC response wait for ${action}`)
+  expect((await responsePromise).ok()).toBe(true)
   await expect(detail).toHaveAttribute('data-game-status', expectedStatus, {
     timeout: 30_000,
   })
@@ -307,9 +323,11 @@ async function assertDicePage(page: Page) {
 
   let dicePage!: Page
   await expect(async () => {
-    const popupPromise = page.waitForEvent('popup', { timeout: 5_000 })
-    await diceLink.click()
-    dicePage = await popupPromise
+    const [popup] = await Promise.all([
+      page.waitForEvent('popup', { timeout: 5_000 }),
+      diceLink.click(),
+    ])
+    dicePage = popup
   }).toPass({ timeout: 30_000, intervals: [500, 1_000] })
 
   try {
@@ -329,9 +347,11 @@ async function assertFinalReport(page: Page, playerPlans: PlayerPlan[]) {
   // report URL) and the last one is asserted.
   let reportPage!: Page
   await expect(async () => {
-    const popupPromise = page.waitForEvent('popup', { timeout: 5_000 })
-    await page.getByRole('button', { name: 'Report' }).click()
-    reportPage = await popupPromise
+    const [popup] = await Promise.all([
+      page.waitForEvent('popup', { timeout: 5_000 }),
+      page.getByRole('button', { name: 'Report' }).click(),
+    ])
+    reportPage = popup
   }).toPass({ timeout: 30_000, intervals: [500, 1_000] })
 
   try {
