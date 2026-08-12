@@ -40,14 +40,15 @@
     "typescript-native": "npm:typescript@7.0.2"
   },
   "scripts": {
+    "bootstrap": "bash .devcontainer/bootstrap-host.sh",
     "build": "turbo run build",
     "check:ts:quartz": "node_modules/typescript-native/bin/tsc --project tsconfig.quartz.json --noEmit",
     "check:ts:quartz:typescript6": "node_modules/typescript/bin/tsc --project tsconfig.quartz.json --noEmit",
-    "dev": "nodemon -w packages/platform/public --ext graphql --exec turbo run dev",
+    "dev": "bash .devcontainer/dev-host.sh",
+    "dev:all": "nodemon -w packages/platform/public --ext graphql --exec turbo run dev",
     "dev-web": "turbo run dev-web",
     "format": "turbo run format",
     "prisma:setup": "pnpm run --filter @gbl-uzh/demo-game prisma:setup",
-    "setup:host": "bash .devcontainer/setup-host.sh",
     "publish": "turbo run publish",
     "release": "standard-version --no-verify",
     "release:alpha": "standard-version --prerelease alpha --no-verify",
@@ -71,12 +72,5 @@
     "node": "24.16.0",
     "pnpm": "11.6.0"
   },
-  "packageManager": "pnpm@11.6.0",
-  "pnpm": {
-    "overrides": {
-      "@fortawesome/fontawesome-common-types": "6.7.2",
-      "react-dice-complete>react": "^19.0.0",
-      "react-dice-complete>react-dom": "^19.0.0"
-    }
-  }
+  "packageManager": "pnpm@11.6.0"
 }

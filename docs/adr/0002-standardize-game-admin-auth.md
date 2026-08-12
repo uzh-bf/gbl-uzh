@@ -9,8 +9,8 @@ All in-repository games use the platform's shared admin OIDC resolver so local m
 ## Considered Options
 
 - Keep fake `AUTH0_*` aliases for Central Bank and Rate Wars: rejected because aliases hide a second authentication contract and can outlive their migration purpose.
-- Keep native mock startup demo-game-only: rejected because the same committed `.env.development` defaults and a game-parameterized `setup:host` cover every game, and Prisma provisions each game's database on push.
+- Keep native mock startup demo-game-only: rejected because the same committed `.env.development` defaults and game-parameterized host commands cover every game, and Prisma provisions each game's database on push.
 
 ## Consequences
 
-Starter, devrouter, CI, and native host mode use `GBL_AUTH_MODE=mock` with `GBL_MOCK_OIDC_*` for every game; select the native game with `GBL_GAME_TARGET`. A native run may use a real tenant with explicit `GBL_AUTH_MODE=auth0`; production uses real `AUTH0_*` values and cannot select mock mode.
+Starter, devrouter, CI, and native host mode use `GBL_AUTH_MODE=mock` with `GBL_MOCK_OIDC_*` for every game; select the native game with an argument to `pnpm bootstrap` / `pnpm dev`, or with `GBL_GAME_TARGET`. A native run may use a real tenant with explicit `GBL_AUTH_MODE=auth0`; production uses real `AUTH0_*` values and cannot select mock mode.
