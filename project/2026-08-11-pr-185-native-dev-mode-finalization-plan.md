@@ -4,133 +4,130 @@
 
 - Plan: `project/2026-08-11-pr-185-native-dev-mode-finalization-plan.md`
 - Branch: `enhance/native-dev-mode`
-- Worktree: `trees/enhance/native-dev-mode`
+- Worktree: `/Users/rschlae/Git/gbl/gbl-uzh/trees/enhance/native-dev-mode`
 - Target: `dev`
 - Pull request: [#185](https://github.com/uzh-bf/gbl-uzh/pull/185)
-- Ceremony: full path; the branch changes authentication policy and a public platform export.
-- History: commits `7e5c27f..7b05db3` predate this retrospective contract. The 2026-08-05 review covered only `254606c..ff31321`; it is historical evidence, not a current-head gate.
+- Ceremony: full path; the branch changes authentication policy and exports a public platform resolver.
+- Pre-extension checkpoint: `8f4cbea` passed the original package's local modes, reviews, CI, and Sonar on 2026-08-11. Those final gates are historical after the approved extension below; the global handoff records the current post-plan SHA.
 
 ## Goal
 
-- Problem: the draft adds native demo-game development and shared mock OIDC configuration, but head `7b05db3` breaks the CI auth topology, leaves example games on inconsistent auth contracts, permits a smoke false positive, adds unexplained generated GraphQL output, and fails Sonar's new-code duplication gate.
-- Goal: make native host, starter-devcontainer, devrouter-devcontainer, and three-game CI paths coherent and proven, then make PR #185 review-ready.
-- Non-goals: migrate example games to the new auth resolver; add native host mode for example games; upgrade devrouter; merge the PR; remove verification containers or worktrees.
-- Decision: keep the new fail-closed resolver for demo-game, restore central-bank's legacy auth contract, and provide fake local `AUTH0_*` aliases so central-bank and rate-wars remain supported in devcontainers and CI. See ADR-0001.
-- Base evidence: `dev` is eight commits ahead only through a merge-and-revert sequence; `git diff 254606c..origin/dev` is empty, so no base update changes the tree.
+- Problem: Central Bank and Rate Wars reach the local OIDC mock through copied fake `AUTH0_*` aliases while demo-game uses `resolveAdminOidcConfig()`. The compatibility bridge leaves in-repository games on different authentication contracts and can drift from the platform's production fail-closed policy.
+- Goal: make all three games consume the shared resolver, make `GBL_MOCK_OIDC_*` the only local mock contract, preserve real `AUTH0_*` production behavior, and return PR #185 to an exact-head reviewed and green state.
+- Non-goals: add native mock startup or root Compose support for the example games; modify or rebase the open tRPC example stack; add an auth provider or dependency; merge the PR; remove containers, volumes, branches, or worktrees.
+- Decision: starter, devrouter, and CI run every game with `GBL_AUTH_MODE=mock` and `GBL_MOCK_OIDC_*`. Native mock startup remains demo-game-only. A manual native example may use a real tenant only with explicit `GBL_AUTH_MODE=auth0` and ignored `AUTH0_*` values. Production defaults to real `AUTH0_*` and rejects mock mode. ADR-0002 supersedes ADR-0001's temporary rollout boundary while retaining its fail-closed policy.
 
-## Research and Reviews
+## Evidence and planning review
 
-- Live PR evidence: head `7b05db3` is draft and mergeable; demo-game and central-bank Playwright jobs fail; Sonar reports 10.4% duplication on new code.
-- CI evidence: demo-game reaches `OAuthSignin`; central-bank exits because `GBL_MOCK_OIDC_ISSUER` is absent.
-- Sonar evidence: duplicated new lines are the matching demo/central-bank Prisma and auth adapter changes.
-- External review evidence: `.devcontainer/smoke.sh` accepts any successful `/admin/login` response without checking the expected sign-in UI.
-- Standards review: full-path plan and final gates were missing.
-- Spec review: central-bank migration and generated `GameWithoutFacts` output exceed the demo-only host package; devrouter was not re-proven.
-- Planning-stage reviewers: Codex planner passes on 2026-08-11. Accepted findings: preserve both auth namespaces for supported targets; use one exact CI app hostname and the `oidc` service alias; add ADR-0001; audit all 31 files; require live proof in all three local modes.
-- Limitation: static configuration and rendered Compose are not runtime proof. Each mode records static, local process, live browser, and CI evidence separately.
+- Head `8f4cbea` already exports and tests `resolveAdminOidcConfig()`; demo-game is the reference consumer.
+- Both examples already depend on `@gbl-uzh/platform`, so adoption needs no dependency or lockfile change.
+- Both example `authOptions.ts` files directly read `AUTH0_*`; `.devcontainer/devcontainer.env`, `.devcontainer/starter/starter.env`, and the Playwright workflow duplicate fake aliases only for them.
+- The open tRPC example stack does not modify either `authOptions.ts`, but it modifies the workflow and both example READMEs. PR #185 owns the auth semantics; the later stack rebase owns conflict integration.
+- Planning-stage reviewer `019ff4c4-bb41-72d2-877a-c74106b9c870` returned `NEEDS_REVISION` on 2026-08-12. All six findings are accepted here: replace the obsolete contract, supersede ADR-0001, keep native mock examples out of scope, add example workflow triggers, run final reviews before push, and name tRPC-stack conflict ownership.
 
-## Commit `7b05db3` Acceptance Ledger
+## Owned files
 
-| File | Decision | Required evidence or correction |
+| File | Required change | Completion criterion |
 | --- | --- | --- |
-| `.agents/skills/gbl-environment-doctor/SKILL.md` | Rework | Add native-host routing and mode-specific smoke guidance. |
-| `.agents/skills/gbl-playwright-e2e/SKILL.md` | Rework | Match job-service CI and namespaced devrouter proof. |
-| `.devcontainer/README.md` | Rework if needed | State demo resolver versus legacy example aliases accurately. |
-| `.devcontainer/devcontainer.env` | Rework | Add fake legacy `AUTH0_*` aliases for example targets. |
-| `.devcontainer/docker-compose.yml` | Keep | Prove routed issuer DNS, TLS, and CA path live. |
-| `.devcontainer/post-create.sh` | Verify or reduce | Retain heap/pnpm changes only when fresh lifecycle evidence requires them. |
-| `.devcontainer/post-start.sh` | Verify or reduce | Keep workspace URL rewrite; justify unrelated pnpm setting. |
-| `.devcontainer/smoke.sh` | Rework | Assert sign-in content, add bounded discovery, and resolve selected game package. |
-| `.devcontainer/starter/starter.env` | Rework | Add fake legacy `AUTH0_*` aliases for example targets. |
-| `README.md` | Rework | Separate host, starter, and container-side devrouter commands. |
-| `apps/demo-game/.env.development` | Keep | Prove native mock defaults and process-env precedence. |
-| `apps/demo-game/.env.local.template` | Keep | Preserve explicit real-Auth0 opt-in. |
-| `apps/demo-game/README.md` | Rework if needed | Match the proven mode matrix. |
-| `apps/demo-game/src/graphql/generated/ops.ts` | Regenerate and bound | Remove `GameWithoutFacts` if no source operation reproduces it; exclude unrelated historical generator drift. |
-| `apps/demo-game/src/lib/authOptions.ts` | Keep | Shared resolver consumer. |
-| `apps/demo-game/src/lib/prisma.ts` | Keep | Standalone Next-style environment bootstrap. |
-| `docker-compose.yml` | Keep | Prove conflict-safe native overrides. |
-| `docs/building-with-an-agent.md` | Rework if needed | Match starter proof and auth split. |
-| `docs/deploying-a-game.md` | Keep | Production Auth0 contract. |
-| `docs/developing-a-game.md` | Rework | Scope standalone bootstrap to demo-game. |
-| `docs/log.md` | Rework | Record the final verified scope, not intended standardization. |
-| `examples/central-bank/README.md` | Revert | Example migration is out of scope. |
-| `examples/central-bank/src/lib/authOptions.ts` | Revert | Preserve legacy contract. |
-| `examples/central-bank/src/lib/prisma.ts` | Revert | Native bootstrap is not needed for this example. |
-| `packages/platform/package.json` | Keep | Focused auth test command. |
-| `packages/platform/src/index.ts` | Keep | ADR-governed public resolver export. |
-| `packages/platform/src/lib/auth.test.ts` | Keep and extend only if needed | Protect mode selection and production fail-closed behavior. |
-| `packages/platform/src/lib/auth.ts` | Keep | ADR-governed policy. |
-| `playwright/README.md` | Keep | Focused auth command and exact hostname guidance. |
-| `playwright/package.json` | Keep | Focused auth setup command. |
-| `playwright/playwright.config.ts` | Keep pending live proof | Scoped HTTPS `.localhost` resolver. |
+| `examples/central-bank/src/lib/authOptions.ts` | Import and use `resolveAdminOidcConfig()` exactly as demo-game does. | No direct `process.env.AUTH0_*` read remains. |
+| `examples/rate-wars/src/lib/authOptions.ts` | Same shared resolver adoption. | No direct `process.env.AUTH0_*` read remains. |
+| `.devcontainer/devcontainer.env` | Remove fake `AUTH0_*` aliases and legacy comment. | Only `GBL_AUTH_MODE=mock` and `GBL_MOCK_OIDC_*` configure mock auth. |
+| `.devcontainer/starter/starter.env` | Remove fake `AUTH0_*` aliases and legacy comment. | Same canonical mock contract as devrouter. |
+| `.devcontainer/post-start.sh` | Remove the runtime `AUTH0_ISSUER` rewrite. | The routed issuer is written only to `GBL_MOCK_OIDC_ISSUER`. |
+| `.github/workflows/playwright-testing.yml` | Remove fake `AUTH0_*`; add both `examples/**` directories to PR path triggers. | Example-only auth changes trigger all three matrix jobs. |
+| Both example `.env.local.template` files | Add explicit `GBL_AUTH_MODE=auth0`; retain real `AUTH0_*` placeholders. | Template does not promise native mock support. |
+| Both example `README.md` files | State container mock defaults and explicit manual native Auth0. | README points at the shared resolver contract without duplicating long setup. |
+| `.devcontainer/README.md`, `docs/developing-a-game.md`, `docs/deploying-a-game.md`, `docs/log.md` | Remove compatibility-alias claims and state all-game resolver adoption. | Every current auth claim matches code and the mode matrix below. |
+| `docs/adr/0001-fail-closed-production-admin-auth.md` | Mark superseded by ADR-0002. | Historical decision remains readable. |
+| `docs/adr/0002-standardize-game-admin-auth.md` | Record the all-game contract and native boundary. | Active plan references the accepted ADR. |
 
-## Mode Matrix
+Do not edit example `.env.development` files or root Compose to imply native mock support. Do not edit the tRPC stack worktree.
 
-| Mode | App and issuer | Environment path | Required proof |
+## Mode matrix
+
+| Mode | Supported target and contract | Required proof |
+| --- | --- | --- |
+| Native mock | Demo-game only, using its committed `GBL_MOCK_OIDC_*` defaults and root Compose. | Existing `8f4cbea` proof remains valid unless native files change. |
+| Manual native Auth0 | Any game with its own app/database setup; ignored `.env.local` sets `GBL_AUTH_MODE=auth0` and real `AUTH0_*`. | Static template/doc check; real-tenant proof is outside this PR. |
+| Starter container | Selected game at `http://localhost:3000`; mock issuer `http://localhost:8090/default`; `GBL_*` only. | Fresh Central Bank lifecycle, smoke, OAuth callback, authenticated admin page. |
+| Devrouter container | Selected game on namespaced HTTPS app/OIDC routes; `GBL_*` only. | Rate Wars route probes, smoke, OAuth callback, authenticated admin page. |
+| CI | Every matrix game uses `GBL_AUTH_MODE=mock` and `GBL_MOCK_OIDC_*`; no fake `AUTH0_*`. | All three jobs and merged report pass on exact head. |
+
+## Test portfolio
+
+| Risk | Obligation | Primary seam | Distinct failure |
 | --- | --- | --- | --- |
-| Native host | `http://localhost:<app-port>` and `http://localhost:<oidc-port>/default` | demo `.env.development`; explicit process overrides for conflict-safe ports | root Compose, `setup:host`, smoke, Playwright auth, browser callback |
-| Starter devcontainer | `http://localhost:3000` and `http://localhost:8090/default` | `starter.env`, re-sourced by lifecycle scripts | fresh lifecycle logs, in-container smoke, host Playwright callback and authenticated screenshot |
-| Devrouter devcontainer | namespaced HTTPS app/OIDC routes; app remains `http://localhost:3000` in-container | `devcontainer.env`, workspace rewrite in `post-start.sh`, mounted CA | `workspace ensure`, route probes, container smoke, host Playwright and browser callback |
-| CI | `http://localhost:3000` app and `http://oidc:8090/default` issuer | workflow provides demo `GBL_*` and legacy example `AUTH0_*` variables | all three matrix jobs and Sonar green on exact head |
-
-## Test Portfolio
-
-| Risk | Obligation | Stable seam | Distinct failure | Slice |
-| --- | --- | --- | --- | --- |
-| Mock/Auth0 selection and production fail-closed | Extend existing only if uncovered | platform `test:auth` | mock accepted in production or stale Auth0 silently selected | S2 |
-| CI app/issuer coherence | No new test | existing browser callback in game matrix | `OAuthSignin` or missing variable | S2/S3 |
-| Smoke false positive | No test file | positive UI-body probe plus negative wrong-body probe | unrelated 200 response passes | S2 |
-| Standalone environment loading | No unit test | demo `build:nexus` | resolver runs before env files load | S2 |
-| Compose validity | Existing checks | all three rendered Compose combinations | invalid mounts, env, or networking | S2 |
-| Authenticated callback in each local mode | Existing Playwright setup | `test:auth` plus browser session | discovery works but OAuth callback fails | S3 |
-| Example-game compatibility | Existing CI and source comparison | central-bank/rate-wars flows | mixed namespace breaks supported target | S2/S4 |
-| Generated output integrity | Regenerate against the current sources | Exact pre-Jakob baseline plus absence of `GameWithoutFacts` | generated API with no source operation | S2 |
+| Production fail-closed policy | Existing | `pnpm -F @gbl-uzh/platform test:auth` | Production accepts mock mode or silently selects stale Auth0 locally. |
+| Shared resolver adoption | No new test | source audit, example type checks/builds, three-game browser matrix | An example still reads `AUTH0_*` directly or cannot start from `GBL_*`. |
+| Alias removal | No new test | targeted `rg`, starter callback, devrouter callback, CI | A hidden dependency on fake `AUTH0_*` survives. |
+| Example workflow triggering | Extend workflow only | pull-request `paths` and exact-head matrix | An example-only auth regression skips Playwright. |
+| Local issuer topology | Existing | Central Bank starter and Rate Wars devrouter callbacks | Discovery works but browser/server issuer mismatch breaks OAuth. |
+| Native boundary clarity | No runtime test | templates, READMEs, mode matrix | Docs promise unsupported native mock startup for examples. |
 
 ## Slices
 
-### S1: Retrospective contract and auth-policy ADR
+### S1-S3: Original package through live proof
 
-- Do: commit this plan, then ADR-0001 separately.
-- Check: plan names PR, branch, target, worktree, ledger, matrix, portfolio, and stop gates; ADR passes the three-part decision gate.
-- Commit: `docs(project): add PR 185 finalization plan`; `docs(adr): record production admin auth policy`.
+- Complete at `8f4cbea`. Historical commits and evidence remain in Git history and `project/_local/reviews/`.
+- Do not rerun original native demo proof unless a native-owned file changes.
 
-### S2: Corrective tracer bullet
+### S4: Revised contract and junior checkpoint
 
-- Do: correct CI variables and app hostname; add local legacy aliases; harden smoke; restore central-bank; regenerate GraphQL output; keep or remove lifecycle edits by evidence; align directly affected docs and skills.
-- Check: platform auth tests; app/platform type, lint, and build checks; `bash -n`; all Compose renderings; codegen cleanliness; Playwright list; `git diff --check`; data hygiene.
-- Review: immutable corrective commit gets the dedicated simplifier and one auth/CI intermediate reviewer. Resolve verified findings before S3.
-- Commit: `fix(devcontainer): restore auth compatibility across development modes`.
+- Do: return PR #185 to draft; replace this plan; supersede ADR-0001 with ADR-0002; write the junior handoff. Leave all implementation files unchanged.
+- Check: `git diff --check`; inspect the exact documentation diff; verify PR draft state and clean worktree before the plan edit.
+- Planning gate: reviewer `019ff4c4-bb41-72d2-877a-c74106b9c870`; all findings integrated. A main-session correction check is sufficient because the edits implement that review's requested contract.
+- Commit: `docs(project): extend PR 185 auth plan`; include both ADR files in the same approved contract checkpoint.
 
-### S3: Live mode proof
+### S5: All games use the shared resolver
 
-- Do: verify native host, canonical starter, and namespaced devrouter serially. Temporarily stop and restart the approved `gbl-trpc-examples` app container only for canonical starter ports. Preserve every environment after proof unless cleanup is separately approved.
-- Check: each mode records lifecycle output, smoke, Playwright auth, and browser callback. Static rendering cannot substitute for runtime proof.
-- Commit: plan progress and evidence only after runtime behavior is confirmed.
+- Do: make only the owned implementation and documentation changes above.
+- Check, in order:
+  1. `pnpm -F @gbl-uzh/platform test:auth`
+  2. `pnpm -F @gbl-uzh/platform build`
+  3. `pnpm -F @gbl-uzh/central-bank check:ts && pnpm -F @gbl-uzh/rate-wars check:ts`
+  4. `pnpm -F @gbl-uzh/central-bank lint && pnpm -F @gbl-uzh/rate-wars lint`
+  5. Build each example with safe dummy production values: `GBL_AUTH_MODE=auth0 AUTH0_ISSUER=https://example.invalid/ AUTH0_CLIENT_ID=dummy AUTH0_CLIENT_SECRET=dummy pnpm -F <package> build`
+  6. `bash -n .devcontainer/post-start.sh`; render starter and devrouter Compose; run `git diff --check`.
+  7. Audit active code/config: no example `authOptions.ts`, container env, post-start script, or CI env block directly supplies fake `AUTH0_*`.
+- Test delta: no new test file; existing platform tests and browser flows are the stable seams.
+- Commit: `enhance(auth): standardize example OIDC configuration`.
+- Intermediate gates after commit: run one native `simplifier` and one native `intermediate-reviewer` on the same immutable commit. The reviewer focuses on auth boundary, environment precedence, production failure, workflow triggering, docs, and test strategy. Resolve verified findings before S6; one correction rerun is the default limit.
 
-### S4: Exact-head PR and final gates
+### S6: Local proof, final gates, and exact-head PR
 
-- Do: push the existing draft, wait for exact-head CI and Sonar, finish evidence-backed docs/skills, compute substantive size, and update plan progress.
-- Check: bounded code-level security review, strict maintainability review, and integrated final outcome review on the exact final range; repeat applicable gates after behavioral changes.
-- Publish: update the existing PR body and mark ready only when all checks, Sonar <=3%, three local modes, and review findings are closed.
-- Stop: never merge.
+- Starter proof: reuse the preserved `gbl-pr185-starter` stack with `GBL_GAME_TARGET=central-bank`. The approved conflicting `c7004b836d72_gbl-trpc-examples-app-1` may be stopped only for canonical ports and must be restarted on its original ports afterward. Re-run the lifecycle when changing target; smoke the app and issuer; run Playwright auth and confirm an authenticated admin page.
+- Devrouter proof: reuse DevPod workspace `enhance-native-dev-mode` and its namespaced routes with `GBL_GAME_TARGET=rate-wars`. Re-run the lifecycle when changing target; probe app/OIDC routes, smoke, run Playwright auth, and confirm an authenticated admin page.
+- Run all three local Playwright flows where the existing test command supports the selected app. Record exact commands and results in Progress; preserve environments after proof.
+- Commit final docs/progress and compute substantive size.
+- Before push, run the applicable bounded security review, strict maintainability review, and integrated final outcome review on the final committed scope. Resolve findings and rerun only affected gates within the correction limit.
+- Push the exact reviewed SHA. Require exact-head CI, all three Playwright jobs and merged report, Sonar <=3%, and no unresolved review finding.
+- Update the whole-branch PR body with current size and evidence. Mark ready only when the reviewed SHA equals the green CI SHA.
+- Stop before merge.
+
+## Coordination with the open tRPC example stack
+
+- PR #185 owns `authOptions.ts`, auth templates and README wording, alias removal, and example-directory Playwright triggers.
+- Pull requests [#201](https://github.com/uzh-bf/gbl-uzh/pull/201), [#202](https://github.com/uzh-bf/gbl-uzh/pull/202), [#204](https://github.com/uzh-bf/gbl-uzh/pull/204), and [#205](https://github.com/uzh-bf/gbl-uzh/pull/205) remain unchanged and unmerged. Do not edit, rebase, push, or change their PR state in this package.
+- Expected later conflicts: `.github/workflows/playwright-testing.yml`, both example `README.md` files, and `.devcontainer/starter/starter.env`. A later bottom-up stack rebase must preserve PR #185's auth semantics and path triggers together with the stack's tRPC commands and docs.
+- After that later rebase, rerun all three Playwright matrices. That reconciliation is outside PR #185.
 
 ## Progress
 
-- [x] Live PR, branch, base, CI, Sonar, comments, and historical review reconciled.
-- [x] Standards/spec reviews and exhaustive 31-file audit complete.
-- [x] User approved preserving legacy example-game auth and temporarily stopping/restarting the conflicting starter app container.
-- [x] Planning-stage reviews complete; accepted findings are integrated above.
-- [x] S1 plan and ADR committed (`27547ca`, `6ccc5c9`).
-- [x] S2 corrective tracer bullet committed (`703694f`) and locally verified. The intermediate reviewer requested restoration of the configurable fresh-install heap guard; that adjustment and its shell and Compose checks are included in the follow-up commit. The configured native simplifier role is unavailable in this client, so its result is recorded as `BLOCKED` without substitution. Fresh evidence: auth tests 7/7; platform/demo/central-bank/rate-wars/Playwright type checks; platform/UI/demo production builds; all three app linters with pre-existing warnings only; all Nexus builds; shell syntax; three Compose renderings; Playwright lists all five tests; Prettier and OKF checks. `actionlint` is not installed; exact-head GitHub Actions remains the workflow parser gate.
-- [x] S3 native, starter, and devrouter live proof complete. Native used isolated ports `13000`/`18090`/`55433` and passed `setup:host`, smoke, Playwright auth, and an independent browser callback. Devrouter completed a fresh empty-store lifecycle, namespaced host and container route probes, smoke, warmed Playwright auth, and an independent HTTPS browser callback. Starter completed an independent fresh lifecycle, smoke, Playwright auth, and an authenticated Playwright screenshot on the canonical localhost ports. The initial mode switch exposed a shared `.next` cache stall; per-project container cache volumes now isolate Linux artifacts from the host, and both container modes passed smoke and Playwright auth again from empty cache volumes. Agent-browser 0.32.2 with Chrome 149 could render starter HTML but its Next 16 HMR client did not activate the sign-in control; Playwright 1.61.1 completed the same live callback and authenticated page. The approved `gbl-trpc-examples` app container was stopped for starter proof and restarted on its original ports afterward.
-- [x] The first integrated final review on `029dd88` found two documentation-contract regressions: starter commands selected the new native Compose file, and container Auth0 opt-in was claimed through an overridden `.env.local`. All current starter instructions now select `.devcontainer/starter/docker-compose.yml` explicitly, including the first-game brief. A second review confirmed that correction and found one equivalent Auth0 sentence in the canonical development wiki; the wiki and all onboarding sources now scope real Auth0 opt-in to native host mode. A third review closed those findings and found native diagnostics still hard-coded port 3000; the environment doctor and README now pass the selected app and issuer URLs. The corrected range requires a fresh final review before publication.
-- [ ] S4 exact-head CI/Sonar and final gates complete; PR body current and ready.
+- [x] Original corrective implementation and live native, starter, and devrouter proof complete through `8f4cbea`.
+- [x] Pre-extension head `8f4cbea` passed security, maintainability, integrated review, exact-head CI, and Sonar on 2026-08-11.
+- [x] User approved all-game resolver adoption on 2026-08-12.
+- [x] PR #185 returned to draft; worktree was clean and synchronized with its remote before S4.
+- [x] Revised planning review completed; all six findings integrated.
+- [x] S4 revised contract and ADR reviewed; PR #185 is draft.
+- [ ] S5 implementation, focused verification, simplifier, and intermediate review complete.
+- [ ] S6 local proof, final reviews, push, exact-head CI/Sonar, PR body, and ready transition complete.
 
-## Stop Gates
+## Stop gates
 
-- Stop before publication if any local mode lacks live callback proof.
+- Stop if the worktree contains unrelated edits or the tRPC example stack changes.
+- Stop before stopping any environment other than the explicitly approved conflicting starter app.
+- Stop if Central Bank starter or Rate Wars devrouter lacks a real OAuth callback.
+- Stop if a required reviewer is unavailable, or if more than one correction rerun remains unresolved.
+- Stop if review range, pushed head, and CI head differ.
 - Stop if exact-head CI or Sonar is red.
-- Stop if a required reviewer is unavailable.
-- Stop before stopping another environment unless its exact stop/restart was approved.
 - Stop before cleanup, deployment, publication outside the existing draft PR, or merge without separate authority.
