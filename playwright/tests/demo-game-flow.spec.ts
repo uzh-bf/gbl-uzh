@@ -142,6 +142,7 @@ async function joinPlayer(
   const context = await browser.newContext({
     baseURL,
     ignoreHTTPSErrors: true,
+    storageState: { cookies: [], origins: [] },
   })
   const page = await context.newPage()
 
@@ -149,7 +150,7 @@ async function joinPlayer(
   await page.waitForURL('**/play/welcome')
   await input(page, 'name').fill(plan.name)
   await Promise.all([
-    page.waitForURL('**/play/cockpit'),
+    page.waitForURL('**/play/cockpit', { waitUntil: 'domcontentloaded' }),
     page.getByRole('button', { name: 'Start Game' }).click(),
   ])
 
@@ -199,9 +200,28 @@ async function advanceGame(
     expectedStatus: string
   }
 ) {
+  const detail = page.getByTestId('game-detail')
   const button = page.getByRole('button', { name: action })
   await expect(button).toBeEnabled()
-  await button.click()
+  // A React re-render (e.g. the query invalidation from the previous step)
+  // can swap the action button's subtree between mousedown and mouseup, which
+  // swallows the click without an error — so the click needs a retry. But the
+  // action buttons drive a state machine: a re-click after the first click DID
+  // land fires the next transition and over-advances the game (players then
+  // see e.g. CONSOLIDATION while the test fills the RUNNING form). Only
+  // re-click while the status still shows the pre-click value; once it moved,
+  // just wait for the admin page (15s poll) to catch up to expectedStatus.
+  const statusBeforeClick = await detail.getAttribute('data-game-status')
+  await expect(async () => {
+    const status = await detail.getAttribute('data-game-status')
+    if (status === expectedStatus) return
+    if (status === statusBeforeClick) {
+      await page.getByRole('button', { name: action }).click()
+    }
+    await expect
+      .poll(() => detail.getAttribute('data-game-status'), { timeout: 5_000 })
+      .toBe(expectedStatus)
+  }).toPass({ timeout: 60_000, intervals: [500, 1_000, 2_000] })
   await expectGameStatusEventually(page, expectedStatus)
 }
 
@@ -285,10 +305,12 @@ async function assertDicePage(page: Page) {
     .locator('a[href*="/admin/dice/"]')
   await expect(diceLink).toBeVisible()
 
-  const [dicePage] = await Promise.all([
-    page.waitForEvent('popup'),
-    diceLink.click(),
-  ])
+  let dicePage!: Page
+  await expect(async () => {
+    const popupPromise = page.waitForEvent('popup', { timeout: 5_000 })
+    await diceLink.click()
+    dicePage = await popupPromise
+  }).toPass({ timeout: 30_000, intervals: [500, 1_000] })
 
   try {
     await expect(dicePage.getByText('1. Month')).toBeVisible({ timeout: 30_000 })
@@ -301,10 +323,16 @@ async function assertDicePage(page: Page) {
 }
 
 async function assertFinalReport(page: Page, playerPlans: PlayerPlan[]) {
-  const [reportPage] = await Promise.all([
-    page.waitForEvent('popup'),
-    page.getByRole('button', { name: 'Report' }).click(),
-  ])
+  // The same mid-click re-render that advanceGame guards against can swallow
+  // the Report click (button inside a target=_blank Link), leaving no popup.
+  // Re-click until a popup actually appears; extra popups are harmless (same
+  // report URL) and the last one is asserted.
+  let reportPage!: Page
+  await expect(async () => {
+    const popupPromise = page.waitForEvent('popup', { timeout: 5_000 })
+    await page.getByRole('button', { name: 'Report' }).click()
+    reportPage = await popupPromise
+  }).toPass({ timeout: 30_000, intervals: [500, 1_000] })
 
   try {
     await expect(reportPage.getByTestId('report-loaded')).toBeVisible({
@@ -479,7 +507,7 @@ test('trading actions submit one validated modifier and reset after success', as
     }
   })
 
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
 
   const volume = page.getByRole('spinbutton', { name: 'Volume' })
   const buy = page.getByRole('button', { name: 'Buy' })
