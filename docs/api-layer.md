@@ -71,6 +71,10 @@ This follows the official [Pages Router setup](https://trpc.io/docs/client/nextj
 [HTTP batch link](https://trpc.io/docs/client/links/httpBatchLink), and
 [transformer](https://trpc.io/docs/server/data-transformers) guidance.
 
+The browser client does not need `NEXT_PUBLIC_API_URL` because it uses the
+same-origin relative route. Server-side construction uses the deployed Vercel
+origin, a configured API origin, or the local development origin as a fallback.
+
 ## Cache and realtime semantics
 
 Realtime is notify-then-refetch. The server publishes small global and per-user

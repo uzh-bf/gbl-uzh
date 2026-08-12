@@ -70,21 +70,21 @@ Then set the project so Vercel builds only your app out of the workspace. In the
 
 Set these in Vercel (Production or Preview scope), **not** in the committed `.env.production` files:
 
-| Variable                                                   | Value                                      | Notes                                  |
-| ---------------------------------------------------------- | ------------------------------------------ | -------------------------------------- |
-| `DATABASE_URL`                                             | Neon **pooled** string                     | app runtime                            |
-| `NEXTAUTH_URL`                                             | `https://<your-vercel-domain>`             | must match the deployed origin exactly |
-| `NEXTAUTH_SECRET`                                          | `openssl rand -base64 32`                  | required in production                 |
-| `NEXT_PUBLIC_API_URL`                                      | `https://<your-vercel-domain>/api/graphql` | **build-time baked** (see warning)     |
-| `NEXT_PUBLIC_APP_URL`                                      | `https://<your-vercel-domain>`             | **build-time baked**                   |
-| `AUTH0_CLIENT_ID` / `AUTH0_CLIENT_SECRET` / `AUTH0_ISSUER` | from your OIDC tenant                      | see Step 5                             |
+| Variable                                                   | Value                                   | Notes                                          |
+| ---------------------------------------------------------- | --------------------------------------- | ---------------------------------------------- |
+| `DATABASE_URL`                                             | Neon **pooled** string                  | app runtime                                    |
+| `NEXTAUTH_URL`                                             | `https://<your-vercel-domain>`          | must match the deployed origin exactly         |
+| `NEXTAUTH_SECRET`                                          | `openssl rand -base64 32`               | required in production                         |
+| `NEXT_PUBLIC_API_URL`                                      | `https://<your-vercel-domain>/api/trpc` | server-side fallback; browser uses `/api/trpc` |
+| `NEXT_PUBLIC_APP_URL`                                      | `https://<your-vercel-domain>`          | **build-time baked**                           |
+| `AUTH0_CLIENT_ID` / `AUTH0_CLIENT_SECRET` / `AUTH0_ISSUER` | from your OIDC tenant                   | see Step 5                                     |
 
 ```bash
 printf 'https://<your-vercel-domain>' | vercel env add NEXT_PUBLIC_APP_URL production
 # ...repeat per variable, or use `vercel env pull` to sync a local file
 ```
 
-> **WARNING:** The committed `apps/<game>/.env.production` is demo-game leftover. When a game is scaffolded by copying `apps/demo-game`, these files still point `NEXT_PUBLIC_*` and `NEXTAUTH_URL` at `demo-game.stg.env.bf-app.ch`. Vercel dashboard env vars override them at build time, but fix or empty the committed files anyway so nobody deploys the wrong origin from the k8s path. `NEXT_PUBLIC_*` values are **inlined into the client bundle at build time** - changing them requires a redeploy, not just a restart.
+> **WARNING:** A copied game can retain demo-game deployment origins. Vercel dashboard values override committed production values at build time, but fix or empty copied files so another deployment cannot target the wrong origin. The browser tRPC client always uses the same-origin `/api/trpc` route; `NEXT_PUBLIC_API_URL` is only an absolute server-side fallback and must still end in `/api/trpc` when configured.
 
 ## Step 4 - Initialise the schema + seed (against Neon)
 
@@ -121,10 +121,10 @@ Open `https://<your-vercel-domain>/admin/login`, sign in through your OIDC tenan
 
 ## Gotchas
 
-| Symptom                                                       | Cause                                                                  | Fix                                                                                      |
-| ------------------------------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Build fails at `prisma:copy` (`schema.prisma` not found)      | Workspace packages not built before the app                            | Use the `--filter @gbl-uzh/<game>...` selector so `@gbl-uzh/platform` builds first       |
-| App loads but every query hangs on `loading`                  | `NEXT_PUBLIC_API_URL` points at the wrong origin (stale demo-game URL) | Set it to `https://<your-vercel-domain>/api/graphql` and **redeploy** (build-time baked) |
-| Admin login redirects then errors with a state/cookie failure | `NEXTAUTH_URL` does not match the deployed origin                      | Set `NEXTAUTH_URL` to the exact `https://` domain, redeploy                              |
-| Too many database connections under light load                | App using the direct (non-pooled) Neon string                          | Point `DATABASE_URL` at the **pooled** string; keep direct only for migrate/seed         |
-| `prisma migrate deploy` hangs or errors on Neon               | Running migrations through the pooler                                  | Run migrations with the **direct** connection string                                     |
+| Symptom                                                       | Cause                                                                                        | Fix                                                                                              |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Build fails at `prisma:copy` (`schema.prisma` not found)      | Workspace packages not built before the app                                                  | Use the `--filter @gbl-uzh/<game>...` selector so `@gbl-uzh/platform` builds first               |
+| Server-rendered API calls target the wrong origin             | `NEXT_PUBLIC_API_URL` is stale and neither `VERCEL_URL` nor a correct local fallback applies | Set it to `https://<your-vercel-domain>/api/trpc` and redeploy; browser calls remain same-origin |
+| Admin login redirects then errors with a state/cookie failure | `NEXTAUTH_URL` does not match the deployed origin                                            | Set `NEXTAUTH_URL` to the exact `https://` domain, redeploy                                      |
+| Too many database connections under light load                | App using the direct (non-pooled) Neon string                                                | Point `DATABASE_URL` at the **pooled** string; keep direct only for migrate/seed                 |
+| `prisma migrate deploy` hangs or errors on Neon               | Running migrations through the pooler                                                        | Run migrations with the **direct** connection string                                             |

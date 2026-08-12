@@ -11,7 +11,7 @@
 
 ## 2026-08-10
 
-- **Update**: `api-layer.md`, `developing-a-game.md`, and `index.md` - made tRPC v11 the supported game API, documented the official Pages Router wrapper, bounded batching, SSE/SuperJSON links, typed authorization, targeted invalidation, and the deprecation-first GraphQL compatibility boundary.
+- **Update**: `api-layer.md`, `developing-a-game.md`, and deployment/building guidance - made tRPC v11 the supported game API, documented the official Pages Router wrapper, bounded batching, SSE/SuperJSON links, typed authorization, targeted invalidation, and same-origin browser routing.
 
 ## 2026-07-11
 

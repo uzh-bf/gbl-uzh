@@ -120,8 +120,14 @@ There is no generic frontend — each game builds its own Next.js pages (Pages R
 
 The cockpit pattern (from `apps/demo-game/src/pages/play/cockpit.tsx`):
 
-1. A `GameLayout` wrapper fetches **one aggregate query** (player result + previous results + current game with active period/segment + attached content + self).
-2. It subscribes to global events and, on `PERIOD_ACTIVATED` / `SEGMENT_ACTIVATED` / `COUNTDOWN_UPDATED`, **refetches that query** — events are a poke, never a data source.
+1. A `GameLayout` wrapper composes the player-facing `play.result` and
+   `play.self` queries. Result data carries the current game, active
+   period/segment, attached content, current and past results, and the safe
+   co-player identity list.
+2. It subscribes to `events.global` and, on relevant lifecycle or countdown
+   changes, invalidates only the affected tRPC query through
+   `trpc.useUtils()`. Subscribe to `events.user` as well only when the game
+   handles personalized notifications. Events are a poke, never a data source.
 3. The layout renders the shared chrome: nav, player display, Ready toggle, countdown widget, learning-element sidebar, blocking story-element popups.
 4. The page body is a `switch (game.status)`: decision form under `RUNNING`, read-only results under `PAUSED`/`CONSOLIDATION`, period report under `RESULTS`, placeholders otherwise ([game-lifecycle.md](game-lifecycle.md) lists the expected view per status).
 
@@ -135,6 +141,10 @@ The cockpit pattern (from `apps/demo-game/src/pages/play/cockpit.tsx`):
 > and `AppRouter` imports in browser-reachable files.
 
 Your game-specific work is almost entirely: the decision form (validate with yup: same constraints as your `Actions.apply`), the results/report visualizations (the demo game uses recharts), and the admin authoring forms for your period/segment facts.
+
+The player-facing co-player list intentionally exposes only `id` and `name`.
+It is enough to label leaderboards; do not depend on another player's facts or
+admin-only game queries from the player UI.
 
 ## Verification loop
 
