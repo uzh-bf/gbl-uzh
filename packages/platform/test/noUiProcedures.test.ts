@@ -5,8 +5,8 @@
 // prisma fixture, read off the exact prisma calls in the underlying router
 // and service.
 import { beforeEach, describe, expect, it } from '@jest/globals'
-import { createCallerFactory } from '../src/trpc/init.js'
 import { createPlatformRouter } from '../src/trpc/createPlatformRouter.js'
+import { createCallerFactory } from '../src/trpc/init.js'
 import { UserRole } from '../src/types.js'
 import { createMockPrisma, createTestContext } from './helpers.js'
 
@@ -114,7 +114,11 @@ describe('play.saveConsolidationDecision (player, no game-id input)', () => {
       caller.play.saveConsolidationDecision({
         payload: JSON.stringify({ choice: 'A' }),
       })
-    ).resolves.toEqual({ id: 5, type: 'CONSOLIDATION', facts: { choice: 'A' } })
+    ).resolves.toEqual({
+      id: 5,
+      type: 'CONSOLIDATION',
+      facts: { choice: 'A' },
+    })
   })
 })
 
@@ -151,6 +155,7 @@ describe('results.listForCurrentGame (player, no input)', () => {
         facts: { score: 1 },
         period: { id: 10, index: 0 },
         segment: { id: 100, index: 0 },
+        player: { id: 'player-1', name: 'Team 1' },
       },
     ])
     const caller = createCaller(
@@ -165,6 +170,7 @@ describe('results.listForCurrentGame (player, no input)', () => {
         id: 1,
         type: 'SEGMENT_END',
         facts: { score: 1 },
+        player: { id: 'player-1', name: 'Team 1' },
         period: { id: 10, index: 0 },
         segment: { id: 100, index: 0 },
       },

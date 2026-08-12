@@ -47,6 +47,7 @@ export interface PlayerResultDto {
   currentGame: {
     id: number
     status: DB.GameStatus
+    players: ResultPlayerDto[]
     nextAutoContinueAt?: Date | null
     periods: ResultPeriodSummaryDto[]
     activePeriod?: ResultPeriodSummaryDto & {
@@ -123,6 +124,23 @@ interface ActiveSegmentSummaryDto {
   countdownDurationMs?: number | null
   learningElements?: LearningElementRefDto[]
   storyElements?: StoryElementDto[]
+}
+
+function toResultPlayerDto(player: unknown): ResultPlayerDto | null {
+  if (!player || typeof player !== 'object') return null
+
+  const id = (player as { id?: unknown }).id
+  const name = (player as { name?: unknown }).name
+  if (
+    (typeof id !== 'string' && typeof id !== 'number') ||
+    typeof name !== 'string'
+  ) {
+    return null
+  }
+
+  // Player-facing game results intentionally expose only leaderboard-safe
+  // identity. Join tokens, facts, and progress stay private to play.self.
+  return { id: String(id), name }
 }
 
 function toLearningElementRefDto(
@@ -311,6 +329,7 @@ export function toPlayerResultDto(
           } | null
           activePeriodIx?: number
           activeSegmentIx?: number
+          players?: unknown
         } | null
         playerResult?: any
         previousResults?: any
@@ -341,6 +360,11 @@ export function toPlayerResultDto(
     currentGame: {
       id: currentGameId,
       status: currentGameStatus,
+      players: Array.isArray(rawCurrentGame.players)
+        ? rawCurrentGame.players
+            .map(toResultPlayerDto)
+            .filter((player): player is ResultPlayerDto => player !== null)
+        : [],
       nextAutoContinueAt: rawCurrentGame.nextAutoContinueAt,
       periods,
       activePeriod: activePeriod

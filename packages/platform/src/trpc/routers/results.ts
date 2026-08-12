@@ -9,11 +9,7 @@ import {
 import { UserRole } from '../../types.js'
 import { gameIdSchema, playerResultTypeSchema } from '../schemas.js'
 import * as PlayService from '../../services/PlayService.js'
-import {
-  toPastResultDto,
-  toSpecificResultDto,
-  toPlayerResultCoreDto,
-} from '../dto/results.js'
+import { toPastResultDto, toSpecificResultDto } from '../dto/results.js'
 
 const specificInput = z.object({
   gameId: gameIdSchema,
@@ -30,7 +26,7 @@ export function createResultsRouter() {
       const results = await PlayService.getPlayerResults({}, ctx as any)
 
       return (results ?? [])
-        .map((result: any) => toPlayerResultCoreDto(result))
+        .map((result: any) => toSpecificResultDto(result))
         .filter(present)
     }),
 
