@@ -2,13 +2,29 @@
 
 Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
-Status: Gate 3 approved for review; the user accepted the duplication-only
-SonarCloud failures on PRs #202 and #204 as non-blocking process exceptions;
-all pull requests remain open and unmerged
+Status: draft stack rewritten locally on 2026-08-12; exact-tip verification
+and a fresh integrated final review are pending; all pull requests remain
+draft, open, and unmerged
 Provider: GitHub stacked changes
 Base: `trpc-stack/03-ci-devcontainer-docs-collateral` at `2f363c1`
 Worktree: `trees/trpc-examples-stack`
 Mode: guided, with a review pause after every layer
+
+## 2026-08-12 refresh status
+
+The examples stack is now layered directly on the refreshed original tRPC
+stack rooted at `dev` commit `5852341`. The refresh includes PR #185's native
+mock-auth contract. Late corrections were folded into the earliest owning
+layers instead of remaining as repairs in this final layer: canonical guidance
+in #201, Rate Wars corrections in #202, Central Bank corrections in #204, and
+the shared platform result contract in #196.
+
+The prior execution and Gate 3 record below remains historical evidence for the
+pre-refresh commit identities. It is not current readiness evidence. The
+rewritten branches have not been pushed; every PR is draft. Full exact-tip
+verification, one integrated final review, atomic stack push, and GitHub
+readback must precede a fresh Gate 3 decision. No merge, publication,
+deployment, branch deletion, or worktree cleanup is authorized.
 
 ## Execution status (2026-08-11)
 
