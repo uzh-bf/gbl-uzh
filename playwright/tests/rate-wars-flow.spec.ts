@@ -153,7 +153,6 @@ async function joinPlayer(
   const context = await browser.newContext({
     baseURL,
     ignoreHTTPSErrors: true,
-    storageState: { cookies: [], origins: [] },
   })
   const page = await context.newPage()
 
