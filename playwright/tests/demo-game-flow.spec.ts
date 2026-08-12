@@ -7,8 +7,6 @@ import {
   type Page,
 } from '@playwright/test'
 
-import { expectGameStatusEventually } from './support/waits'
-
 test.setTimeout(300_000)
 
 type DecisionValues = {
@@ -203,26 +201,28 @@ async function advanceGame(
   const detail = page.getByTestId('game-detail')
   const button = page.getByRole('button', { name: action })
   await expect(button).toBeEnabled()
-  // A React re-render (e.g. the query invalidation from the previous step)
-  // can swap the action button's subtree between mousedown and mouseup, which
-  // swallows the click without an error — so the click needs a retry. But the
-  // action buttons drive a state machine: a re-click after the first click DID
-  // land fires the next transition and over-advances the game (players then
-  // see e.g. CONSOLIDATION while the test fills the RUNNING form). Only
-  // re-click while the status still shows the pre-click value; once it moved,
-  // just wait for the admin page (15s poll) to catch up to expectedStatus.
-  const statusBeforeClick = await detail.getAttribute('data-game-status')
+  // A React re-render can replace the button between mousedown and mouseup,
+  // swallowing the click without an error. Retry only until the matching tRPC
+  // mutation is sent; after that, another click could advance the
+  // state machine twice while the invalidated game query is still refreshing.
   await expect(async () => {
-    const status = await detail.getAttribute('data-game-status')
-    if (status === expectedStatus) return
-    if (status === statusBeforeClick) {
-      await page.getByRole('button', { name: action }).click()
-    }
-    await expect
-      .poll(() => detail.getAttribute('data-game-status'), { timeout: 5_000 })
-      .toBe(expectedStatus)
+    const requestPromise = page
+      .waitForRequest(
+        (request) =>
+          request.method() === 'POST' &&
+          /\/api\/trpc\/game\.activateNext(?:Period|Segment)$/.test(
+            new URL(request.url()).pathname
+          ),
+        { timeout: 5_000 }
+      )
+      .catch(() => null)
+
+    await page.getByRole('button', { name: action }).click()
+    expect(await requestPromise).not.toBeNull()
   }).toPass({ timeout: 60_000, intervals: [500, 1_000, 2_000] })
-  await expectGameStatusEventually(page, expectedStatus)
+  await expect(detail).toHaveAttribute('data-game-status', expectedStatus, {
+    timeout: 30_000,
+  })
 }
 
 async function assertPlayerDecisionForm(sessions: PlayerSession[]) {
