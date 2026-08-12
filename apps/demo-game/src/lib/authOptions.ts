@@ -21,9 +21,7 @@ interface ExtendedSession extends DefaultSession {
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
-  providers: [
-    Auth0Provider(oidcConfig),
-  ],
+  providers: [Auth0Provider(oidcConfig)],
   session: {
     strategy: 'jwt',
   },
