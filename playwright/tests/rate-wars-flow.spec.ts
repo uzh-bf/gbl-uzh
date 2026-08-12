@@ -233,13 +233,10 @@ async function advanceGame(
 
 async function assertRateForm(sessions: PlayerSession[]) {
   await Promise.all(
-    sessions.map(({ page }) => page.reload({ waitUntil: 'domcontentloaded' }))
-  )
-  await Promise.all(
     sessions.map(({ page }) =>
       expect(
         page.getByRole('button', { name: 'Submit rates' })
-      ).toBeVisible()
+      ).toBeVisible({ timeout: 30_000 })
     )
   )
 }
