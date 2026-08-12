@@ -63,6 +63,11 @@ final pushed top-tip generation on commit `c254d20f` passed Docker run
 `31648405436`, and merged reports in job `94288353440`. Gate 3 CI evidence is
 complete. No PR was marked ready or merged.
 
+Commit `691b92c4` is a documentation-only reconciliation on that verified
+executable tip. Its exact-tip Docker run `31649181311`, TypeScript run
+`31649181302`, and Playwright run `31649181376` also passed, including merged
+reports in job `94290745474`; no executable stack behavior changed.
+
 The earlier #205 failed run and failed-job rerun remain recorded as historical
 infrastructure evidence: they did not fail a game assertion, and the fresh
 generation independently uploaded and merged a new artifact set.
@@ -85,9 +90,9 @@ both terminating client links. This matches the official [Pages Router setup](ht
   commit `6bab3ed` through executable code head `786ed47`; the lower-layer
   remote heads are `321a958` (#197), `8140600` (#196), `dd26b0f` (#195),
   `2e36f98` (#194), `d392283` (#201), `e2738dd` (#202), and `786ed47` (#204).
-  The top branch carries the current reconciled ledger. The last verified
-  top-tip commit is `c254d20f`; every local and remote layer reports
-  `needsRebase: false`.
+  The top branch carries the current reconciled ledger. The executable tip
+  `c254d20f` and the documentation-only reconciliation `691b92c4` both passed
+  their exact-tip CI; every local and remote layer reports `needsRebase: false`.
 - PR #206 landed while the first refreshed CI cycle was running. Its native
   development changes were incorporated at the trunk boundary, not patched at
   the top of the stack. The only semantic conflicts preserved PR #206's
