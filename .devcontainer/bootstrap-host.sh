@@ -13,9 +13,15 @@ resolve_gbl_game_target "${1:-}"
 # Docker Desktop does not bring the stack back after a restart, so make sure
 # Postgres and the OIDC mock answer before Prisma talks to them. The container
 # run modes ship their own services and have no docker socket.
-if [ ! -f /.dockerenv ] && command -v docker >/dev/null 2>&1; then
+if [ -f /.dockerenv ]; then
+  : # already inside a run mode that ships its own services
+elif command -v docker >/dev/null 2>&1; then
   echo "[bootstrap] Starting Postgres and the OIDC mock"
   docker compose up -d --wait
+else
+  echo "[bootstrap] No docker CLI found — start Postgres and the OIDC mock" >&2
+  echo "[bootstrap] yourself, or point DATABASE_URL at your own database." >&2
+  echo "[bootstrap] Otherwise the Prisma steps below fail minutes from now." >&2
 fi
 
 echo "[bootstrap] Building shared packages"

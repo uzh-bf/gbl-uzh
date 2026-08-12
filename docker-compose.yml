@@ -7,7 +7,7 @@
 #
 #   pnpm install
 #   pnpm bootstrap [game]              # also runs `docker compose up -d --wait`
-#   pnpm dev [game]                    # then open http://localhost:3000
+#   pnpm dev [game]                    # ditto, then open http://localhost:3000
 #
 # Ports are overridable when 5432/8090 are taken on your machine (e.g. by a
 # local Postgres or by devrouter's Traefik): GBL_DB_PORT / GBL_OIDC_PORT.

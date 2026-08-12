@@ -10,10 +10,18 @@ set -euo pipefail
 resolve_gbl_game_target "${1:-}"
 
 # Docker Desktop does not bring the stack back after a restart, so make sure
-# Postgres and the OIDC mock answer before the game tries to reach them. The
+# Postgres and the OIDC mock answer before the game tries to reach them. Say so,
+# because this also re-creates a stack you stopped on purpose — and it uses the
+# default ports unless GBL_DB_PORT / GBL_OIDC_PORT are set here too. The
 # container run modes ship their own services and have no docker socket.
-if [ ! -f /.dockerenv ] && command -v docker >/dev/null 2>&1; then
+if [ -f /.dockerenv ]; then
+  : # already inside a run mode that ships its own services
+elif command -v docker >/dev/null 2>&1; then
+  echo "[dev] Making sure Postgres and the OIDC mock are up"
   docker compose up -d --wait
+else
+  echo "[dev] No docker CLI found — expecting Postgres and the OIDC mock" >&2
+  echo "[dev] to be reachable at the URLs in the game's .env files." >&2
 fi
 
 # The trailing `...` in the filter also starts the watch builds of the shared

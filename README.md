@@ -40,9 +40,9 @@ All three modes share the same OIDC mock config, database image, and schema/seed
    - Either way, verify: `pnpm --version` inside the repo must print `11.6.0`.
 3. `pnpm install`
 4. `pnpm bootstrap` — starts Postgres and the local login mock (replaces Auth0, no account needed), builds the shared packages, then prepares and seeds the database. Run it once per game.
-5. `pnpm dev`
+5. `pnpm dev` — also brings the two services back up if they are not running.
 6. Open <http://localhost:3000/admin/login> and click the login button — no password; you are the dev admin `gbl-dev@df.uzh.ch`.
-7. If something seems off, `bash .devcontainer/smoke.sh` tells you whether the login mock, the app, or your setup is at fault (it checks the demo game unless you set `GBL_GAME_TARGET`).
+7. If something seems off, `bash .devcontainer/smoke.sh` tells you whether the login mock, the app, or your setup is at fault. Its third argument names the game, so an example game is `bash .devcontainer/smoke.sh '' '' central-bank`.
 
 #### Running an example game natively
 
