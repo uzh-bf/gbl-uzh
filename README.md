@@ -29,9 +29,9 @@ All three modes share the same OIDC mock config, database image, and schema/seed
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
 | **Starter devcontainer**                                                | First-time users, game builders — works natively with the VS Code Dev Containers extension | Open in VS Code, pick **GBL Starter**; app on <http://localhost:3000> ([walkthrough](docs/getting-started.md))                          |
 | **Devcontainer + [devrouter](https://github.com/rschlaefli/devrouter)** | Maintainers running many projects side by side                                             | `dev up`, then `dev workspace ensure .` for a linked worktree; use `dev ls` for its namespaced URL ([details](.devcontainer/README.md)) |
-| **Native `pnpm dev`** (demo-game)                                       | Developers who prefer the host toolchain (Node 24+, PNPM 11)                               | [Native quickstart](#native-quickstart-demo-game) below; app on <http://localhost:3000>                                                 |
+| **Native `pnpm dev`**                                                   | Developers who prefer the host toolchain (Node 24+, PNPM 11)                               | [Native quickstart](#native-quickstart) below; app on <http://localhost:3000>                                                          |
 
-#### Native quickstart (demo-game)
+#### Native quickstart
 
 1. Make sure Docker is running and ports **5432, 8090, 3000** are free.
 2. Get the pinned pnpm (`11.6.0`) — an older pnpm exits fine but leaves a stale `node_modules` behind:
@@ -44,12 +44,21 @@ All three modes share the same OIDC mock config, database image, and schema/seed
 6. Open <http://localhost:3000/admin/login> and click the login button — no password; you are the dev admin `gbl-dev@df.uzh.ch`.
 7. If something seems off, `bash .devcontainer/smoke.sh` tells you whether the login mock, the app, or your setup is at fault.
 
-If a default port is taken, every override needs its app-side counterpart (the app reads defaults from `apps/demo-game/.env*`): `GBL_DB_PORT` also needs `DATABASE_URL`/`SHADOW_DATABASE_URL`, `GBL_OIDC_PORT` also needs `GBL_MOCK_OIDC_ISSUER`, and `PORT` also needs `NEXTAUTH_URL`/`NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_API_URL` — see the header of [docker-compose.yml](docker-compose.yml). Pass the resulting URLs to the diagnostic, for example `bash .devcontainer/smoke.sh http://localhost:13000 http://localhost:18090/default`. Native mode is currently wired for the demo game only; the example games still assume a devcontainer. Login against a real Auth0 tenant instead of the mock requires `GBL_AUTH_MODE=auth0` in `apps/demo-game/.env.local` (see `.env.local.template`).
+If a default port is taken, every override needs its app-side counterpart (the app reads defaults from `apps/demo-game/.env*`): `GBL_DB_PORT` also needs `DATABASE_URL`/`SHADOW_DATABASE_URL`, `GBL_OIDC_PORT` also needs `GBL_MOCK_OIDC_ISSUER`, and `PORT` also needs `NEXTAUTH_URL`/`NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_API_URL` — see the header of [docker-compose.yml](docker-compose.yml). Pass the resulting URLs to the diagnostic, for example `bash .devcontainer/smoke.sh http://localhost:13000 http://localhost:18090/default`. Login against a real Auth0 tenant instead of the mock requires `GBL_AUTH_MODE=auth0` in the game's `.env.local` (see `.env.local.template`).
+
+To run an example game instead, select it with `GBL_GAME_TARGET` — the same steps otherwise, and Prisma creates that game's database on first push:
+
+```bash
+GBL_GAME_TARGET=central-bank pnpm run setup:host
+pnpm -F @gbl-uzh/central-bank dev
+```
+
+Supported targets are `demo`, `central-bank`, and `rate-wars`. All three default to port 3000, so running them at the same time needs the `PORT` override and its counterparts.
 
 ## Requirements
 
 - Building a game with the starter devcontainer: only Docker Desktop, VS Code, and the Dev Containers extension — see [Getting Started](docs/getting-started.md).
-- Working on the codebase outside a devcontainer: Docker / Podman, Node.js 24+, PNPM 11. The repo pins both (`volta` field and `packageManager`); see step 2 of the [native quickstart](#native-quickstart-demo-game) for making the pnpm pin actually apply (Volta needs `VOLTA_FEATURE_PNPM=1`).
+- Working on the codebase outside a devcontainer: Docker / Podman, Node.js 24+, PNPM 11. The repo pins both (`volta` field and `packageManager`); see step 2 of the [native quickstart](#native-quickstart) for making the pnpm pin actually apply (Volta needs `VOLTA_FEATURE_PNPM=1`).
 
 ## Contributing
 

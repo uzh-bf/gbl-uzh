@@ -103,8 +103,8 @@ trusts the mkcert CA via `NODE_EXTRA_CA_CERTS` (see `docker-compose.yml`).
 All in-repo games use the platform's shared `resolveAdminOidcConfig()` resolver.
 Starter, devrouter, and CI use mock OIDC through `GBL_AUTH_MODE=mock` and
 `GBL_MOCK_OIDC_*`. These container variables override `.env.local`, so container
-modes support mock login only; native host mock startup is unsupported for the
-example packages. A native host real-tenant run requires explicit
+modes support mock login only; native host mode runs every game against the same
+mock through its committed `.env.development`. A native host real-tenant run requires explicit
 `GBL_AUTH_MODE=auth0` with real `AUTH0_*` values in ignored `.env.local`.
 Production defaults to real `AUTH0_*` and forbids mock mode.
 
