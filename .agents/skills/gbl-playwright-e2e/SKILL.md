@@ -119,7 +119,6 @@ adapt it to GBL's smaller stack:
   - `NEXTAUTH_URL=http://localhost:3000`
   - `GBL_AUTH_MODE=mock`
   - `GBL_MOCK_OIDC_ISSUER=http://oidc:8090/default`
-  - `AUTH0_ISSUER=http://oidc:8090/default` while example games retain their legacy provider wiring
 - Build `@gbl-uzh/platform` and `@gbl-uzh/ui` before starting the selected game.
 - Prepare Prisma with `prisma:copy`, `prisma:generate`, `prisma:push`, and
   `prisma:seed`.

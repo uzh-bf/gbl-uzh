@@ -3,14 +3,15 @@
 # agree on the issuer. Works identically in all three run modes — pass or
 # export the URLs of the mode under test:
 #
-#   host mode (defaults):  bash .devcontainer/smoke.sh
+#   host mode (defaults follow PORT / GBL_OIDC_PORT overrides):
+#                          bash .devcontainer/smoke.sh
 #   starter devcontainer:  bash .devcontainer/smoke.sh   # env carries the URLs
 #   devrouter (container): bash .devcontainer/smoke.sh http://localhost:3000 \
 #                            https://oidc.demo-game.localhost/default
 set -euo pipefail
 
-APP_URL="${1:-http://localhost:3000}"
-ISSUER="${2:-${GBL_MOCK_OIDC_ISSUER:-http://localhost:8090/default}}"
+APP_URL="${1:-http://localhost:${PORT:-3000}}"
+ISSUER="${2:-${GBL_MOCK_OIDC_ISSUER:-http://localhost:${GBL_OIDC_PORT:-8090}/default}}"
 . .devcontainer/game-target.sh
 resolve_gbl_game_target
 GAME_PACKAGE="${GBL_GAME_PACKAGE}"
