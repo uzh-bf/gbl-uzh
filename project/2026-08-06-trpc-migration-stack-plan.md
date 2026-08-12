@@ -7,6 +7,15 @@ Base: `dev` @ `254606c` (6 commits ahead of the branch merge-base `5cac12c`; all
 Provider: GitHub (stacks preview enabled — repo stack #179 exists).
 Worktree: new `trees/trpc-migration-stack` (one stack, one worktree). Source worktree `.claude/worktrees/modest-rosalind-8e36bd` stays untouched.
 
+## 2026-08-10 continuation note
+
+This plan's extraction was replaced by the still-open draft PR stack #194-#197
+at commits `1e19f05`, `d704da8`, `c2d972d`, and `2f363c1`. A second draft
+stack builds on #194 to apply the official Pages Router client pattern and
+migrate Rate Wars and Central Bank. See
+`project/2026-08-10-pr-205-trpc-examples-stack-plan.md` for current execution state.
+No layer from either stack has been merged.
+
 ## 1. Reconcile live state (verified 2026-08-06)
 
 | Item | State |
