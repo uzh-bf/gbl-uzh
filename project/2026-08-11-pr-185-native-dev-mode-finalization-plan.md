@@ -125,8 +125,10 @@ Do not edit example `.env.development` files or root Compose to imply native moc
 - [x] S6 local proof complete: Central Bank starter smoke and full flow passed; Rate Wars devrouter route, smoke, and full flow passed; all three local Playwright flows passed; preserved environments restored.
 - [x] Bounded final security review passed on `8b71911..8614c65`; no high-confidence vulnerabilities or ADR conflicts.
 - [x] Strict maintainability review passed on `8b71911..8614c65`; no actionable structural findings.
-- [x] Integrated final outcome review passed on `8b71911..0fe92fe`; the retained browser evidence correction closed the only finding.
-- [ ] S6 is active: push the reviewed branch, wait for exact-head CI/Sonar, update the whole-branch PR body, and mark the draft ready; stop before merge.
+- [x] Integrated final outcome review passed on `8b71911..0fe92fe`; the retained browser evidence correction closed the only finding. That range was superseded by the Sonar correction below.
+- [x] Exact-head CI passed on `231c82f` for typecheck, lint, both image architectures, all three Playwright jobs, and the merged report; Sonar failed only its new-code duplication gate at 4.9% versus the required 3%.
+- [x] Sonar correction committed at `2c79c6a`: all three game consumers pass `oidcConfig` directly to `Auth0Provider`, removing the measured five-line duplicate mapping without changing the resolver or provider contract. Platform auth tests, all three game TypeScript checks, platform build, both example production builds, and diff/lockfile hygiene pass.
+- [ ] S6 is active: rerun the final security, strict maintainability, and integrated outcome gates on the corrected exact scope, then push and wait for fresh CI/Sonar before updating readiness.
 
 ### S6 local proof evidence
 
