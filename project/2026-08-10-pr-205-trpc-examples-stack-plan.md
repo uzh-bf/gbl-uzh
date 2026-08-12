@@ -4,9 +4,11 @@ Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
 Status: shared CI install ownership was moved into the bottom layer and
 propagated through the draft stack on 2026-08-12; both integrated final passes
-are closed and their findings are corrected in the owning platform layer;
-atomic push/readback and fresh CI are pending, so Gate 3 remains pending;
-all pull requests remain draft, open, and unmerged
+are closed and their findings are corrected in the owning platform layer; the
+corrected eight-branch stack was atomically pushed and read back; fresh CI is
+partially terminal with PR #197 fully green, so Gate 3 remains pending until
+every current-generation layer has a terminal status readback; all pull
+requests remain draft, open, and unmerged
 Provider: GitHub stacked changes
 Base: `dev` at `6bab3ed`
 Worktree: `trees/trpc-examples-stack`
@@ -25,21 +27,39 @@ corrections in #204, and the shared platform result contract in #196.
 The prior execution and Gate 3 record below remains historical evidence for the
 pre-refresh commit identities. It is not current readiness evidence. The
 rewritten branches were pushed and read back once before PR #206 landed, and
-the latest-`dev` rebase was pushed and read back once before this CI ownership
-correction. Every PR remains draft. The shared demo-game workflow's
+the latest-`dev` rebase plus the ownership correction were then pushed and read
+back atomically. Every PR remains draft. The shared demo-game workflow's
 deterministic install now belongs to the bottom toolchain layer (#197), so
 lower platform and example layers inherit the same `--ignore-scripts` install;
-#194 retains its independent same-origin and workflow-path corrections. The
-corrected stack still requires one final atomic push/readback and fresh CI
-before the fresh Gate 3 decision. No merge, publication, deployment, branch
-deletion, or worktree cleanup is authorized.
+#194 retains its independent same-origin and workflow-path corrections. No
+merge, publication, deployment, branch deletion, or worktree cleanup is
+authorized.
+
+### Fresh CI readback (2026-08-12)
+
+The corrected push started a new CI generation for every layer. PR #197's
+workflow run `31638659737` is fully green: arm64 and amd64 image builds, lint,
+and manifest merge all passed. The platform type gate passed in run
+`31638659837`; the demo-game migration's type gate passed in run
+`31638660256`, its browser job passed the demo-game shard in run
+`31638660452`, and its Docker workflow passed lint and both image builds before
+manifest aggregation. The CI/docs layer's TypeScript run passed, and its
+current-generation browser run passed all three game shards and merged reports
+in `31638660726`. The example runs observed before status readback throttling
+showed Central Bank's three browser shards passing and its TypeScript gate
+passing; the remaining example Docker, browser aggregation, and canonical
+pattern runs were still in progress when the GitHub core API rate limit reached
+zero. Gate 3 therefore remains pending: current CI is not yet a complete
+terminal evidence set, and no PR was marked ready or merged.
 
 ### Refreshed exact-tip verification (2026-08-12)
 
-- The eight-layer local stack is clean and contiguous from `dev` commit
-  `6bab3ed` through executable code head `786ed47`; the final pre-ledger tip
-  `f69c93b` contains only later documentation and verification-ledger changes.
-  Every local layer reports `needsRebase: false`.
+- The eight-layer local and remote stack is clean and contiguous from `dev`
+  commit `6bab3ed` through executable code head `786ed47`; the final
+  documentation and verification-ledger tip is `576ddf6`. The exact remote
+  heads are `321a958` (#197), `8140600` (#196), `dd26b0f` (#195), `2e36f98`
+  (#194), `d392283` (#201), `e2738dd` (#202), `786ed47` (#204), and
+  `576ddf6` (#205). Every local and remote layer reports `needsRebase: false`.
 - PR #206 landed while the first refreshed CI cycle was running. Its native
   development changes were incorporated at the trunk boundary, not patched at
   the top of the stack. The only semantic conflicts preserved PR #206's
@@ -72,9 +92,12 @@ deletion, or worktree cleanup is authorized.
   TypeScript 7 and 6, 53/53 tests, platform build, and both TypeScript compilers
   for all three games pass at the new final tip. The full no-retry browser
   evidence remains reusable because PR #206 does not change game runtime code,
-  tRPC wiring, browser tests, or the CI game servers. The latest red bottom and
-  platform checks were both the same inherited `sharp@0.32.6` install failure;
-  the corrected lower-layer workflow needs a fresh CI generation after push.
+  tRPC wiring, browser tests, or the CI game servers. The fresh corrected-stack
+  generation then showed #197's arm64 build, amd64 build, lint, and manifest
+  merge all passing; the platform type gate passed; the demo-game and Central
+  Bank browser jobs observed so far passed; and the remaining layers were still
+  completing when the GitHub core API rate limit was exhausted. This is a
+  status-readback gap, not a passing Gate 3 result.
 - Browser proof found two synchronization defects in the example specs. Rate
   Wars still reloaded all player pages concurrently before its live form
   assertion; commit `f9b55a1` removes those reloads. Central Bank both waited
@@ -96,11 +119,11 @@ deletion, or worktree cleanup is authorized.
 - The initial integrated final review found two cross-player privacy gaps in
   the platform layer: historical results included private progression fields,
   and the tRPC SSE subscription consumed one repository-wide event channel.
-  Both corrections now live in PR #196 at `0e7ae11`: historical result DTOs
+  Both corrections now live in PR #196 at `8140600`: historical result DTOs
   expose only player id and name, and tRPC subscriptions derive the game scope
   from the authenticated context while the deprecated GraphQL bridge retains
   its aggregate compatibility stream. The platform passes both TypeScript
-  compilers, 52/52 tests, package build, and 8/8 auth
+  compilers, 53/53 tests, package build, and 8/8 auth
   tests. The simplifier's redundant-assertion reduction was applied, and the
   risk-selected correction review returned `DONE` with no findings.
 - The integrated correction review confirmed both privacy findings were
