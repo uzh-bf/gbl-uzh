@@ -117,7 +117,9 @@ adapt it to GBL's smaller stack:
 - In CI, do not use devrouter/TLS. Use:
   - `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000`
   - `NEXTAUTH_URL=http://127.0.0.1:3000`
-  - `AUTH0_ISSUER=http://oidc:8090/default`
+  - `GBL_AUTH_MODE=mock`
+  - `GBL_MOCK_OIDC_ISSUER=http://oidc:8090/default`
+  - matching `GBL_MOCK_OIDC_CLIENT_ID` and `GBL_MOCK_OIDC_CLIENT_SECRET`
 - Build `@gbl-uzh/platform` and `@gbl-uzh/ui` before starting `demo-game`.
 - Prepare Prisma with `prisma:copy`, `prisma:generate`, `prisma:push`, and
   `prisma:seed`.
@@ -234,7 +236,10 @@ The demo-game spec (`playwright/tests/demo-game-flow.spec.ts`) is the template f
   next-period pointer safely; the lifecycle spec should prove that the real last
   period reaches `RESULTS` without a fabricated extra period.
 - **Keep the admin flow**: `createGame` -> `addPeriod` -> `addSegment` (per period) -> join players -> advance transitions. The state-transition sequence is game-agnostic.
-- **Keep `expectGameStatusEventually`** (or equivalent reload-aware polling) for admin status assertions - UI data lags mutations.
+- **Prove transition mutations without reloads.** Arm exact tRPC request and
+  response waits before the click, require a successful response, then assert
+  the durable `data-game-status` update. Reload fallbacks hide broken targeted
+  invalidation.
 - **Segment count via stable child content**: count real segments by a child that only exists after `SegmentService.initialize` (e.g. `text=Roll:`), not by placeholder card count.
 - **One browser context per player**, close in `finally`, submit decisions sequentially.
 
