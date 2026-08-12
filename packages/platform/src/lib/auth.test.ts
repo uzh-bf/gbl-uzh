@@ -49,6 +49,20 @@ test('explicit Auth0 mode uses the real provider variables', () => {
   )
 })
 
+test('auth0 mode rejects cleartext http issuers', () => {
+  assert.throws(
+    () =>
+      resolveAdminOidcConfig({
+        NODE_ENV: 'development',
+        GBL_AUTH_MODE: 'auth0',
+        AUTH0_ISSUER: 'http://example.eu.auth0.com/',
+        AUTH0_CLIENT_ID: 'real-client',
+        AUTH0_CLIENT_SECRET: 'real-secret',
+      }),
+    /must use https/,
+  )
+})
+
 test('production defaults to Auth0', () => {
   assert.equal(
     resolveAdminOidcConfig({

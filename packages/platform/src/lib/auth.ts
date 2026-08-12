@@ -21,7 +21,11 @@ function requiredEnvironmentVariable(
   return value
 }
 
-function validateIssuer(issuer: string, variableName: string): string {
+function validateIssuer(
+  issuer: string,
+  variableName: string,
+  requireHttps: boolean,
+): string {
   let parsed: URL
   try {
     parsed = new URL(issuer)
@@ -34,6 +38,14 @@ function validateIssuer(issuer: string, variableName: string): string {
   if (!['http:', 'https:'].includes(parsed.protocol) || !parsed.hostname) {
     throw new Error(
       `Invalid OIDC issuer in environment variable: ${variableName}`,
+    )
+  }
+
+  // A real tenant exchange carries the client secret and authorization codes,
+  // so cleartext issuers are only acceptable for the local mock.
+  if (requireHttps && parsed.protocol !== 'https:') {
+    throw new Error(
+      `OIDC issuer in environment variable ${variableName} must use https`,
     )
   }
 
@@ -73,6 +85,7 @@ export function resolveAdminOidcConfig(
     issuer: validateIssuer(
       requiredEnvironmentVariable(env, issuerVariable),
       issuerVariable,
+      mode === 'auth0',
     ),
     clientId: requiredEnvironmentVariable(env, clientIdVariable),
     clientSecret: requiredEnvironmentVariable(env, clientSecretVariable),
