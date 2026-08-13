@@ -13,6 +13,81 @@ Base: `dev` at `6bab3ed`
 Worktree: `trees/trpc-examples-stack`
 Mode: guided, with a review pause after every layer
 
+## 2026-08-13 platform contract correction propagation (current)
+
+Problem: the architect review required the remaining platform tRPC boundary
+corrections to live in the lower platform layer and then be re-verified across
+the existing example-game stack. The lower layer was updated locally and the
+dependent branches were rebased, but these new heads have not yet replaced the
+published heads or started fresh remote CI.
+
+Evidence: PR #196 now contains the plan boundary `2936f4a1`, the platform
+implementation `ea51006f`, and the plan/review disposition `05b4f344`. It adds
+explicit StoryElement and achievement projections, Zod 3.23.8-compatible
+runtime DTO contracts, targeted `.output()` validators, and fail-closed
+`ActionFactsSchema` enforcement. The focused platform callers pass 35/35; the
+full platform suite passes 54/54; both TypeScript modes pass; the platform
+build passes with the existing tRPC declaration-portability and circular-
+dependency warnings.
+
+Decision: PR #196 owns all executable and platform-test changes. PR #205 owns
+this continuation record only. The existing topology remains unchanged; the
+separate example games remain separate stacked layers above the canonical
+Pages Router layer. The resolved central-bank conflict retains the canonical
+inferred result contract and the existing player-identity privacy correction.
+
+Current local rebased heads:
+
+| Layer | Local head | Responsibility |
+| --- | --- | --- |
+| #197 | `5173e193` | shared dev/toolchain foundation |
+| #196 | `05b4f344` | platform plan, contract correction, and review disposition |
+| #195 | `b3ebd0c1` | demo-game migration |
+| #194 | `49bc50bb` | CI, devcontainer, and docs collateral |
+| #201 | `1be26169` | canonical Pages Router pattern |
+| #202 | `71175ea1` | Rate Wars tRPC migration |
+| #204 | `bc9d9565` | Central Bank tRPC migration |
+| #205 | `8723d108` | compatibility and reconciliation documentation, pending this record |
+
+Review disposition:
+
+- Planning-stage review: `DONE_WITH_CONCERNS`; exact output fields,
+  nullability, procedure allowlist, and plan ownership were incorporated.
+- Slice review: the native role was unavailable, so the documented generic
+  Terra/high fallback ran read-only and returned `NEEDS_REVISION` for the
+  missing primitive-impact record. That record is now in the first-slice plan;
+  no source finding remained above threshold.
+- Simplifier: the correction attempt returned `DONE_WITH_CONCERNS` and
+  suggested removing the two content mappers. That reduction was rejected
+  because the approved contract names mappers as the projection boundary and
+  they normalize/filter persistence values before strict output validation.
+
+Do:
+
+1. Commit this propagation record on PR #205.
+2. Run the full current-tip local verification: platform tests, both platform
+   TypeScript modes, platform build, UI checks, and both TypeScript modes for
+   demo-game, Rate Wars, and Central Bank.
+3. Publish the complete stack so every PR receives fresh CI against its new
+   exact head. Re-read branch ancestry, checks, and `needsRebase` after the
+   publish. Keep all PRs unmerged and do not change ready/draft state here.
+4. Stop at the fresh-CI and human-final-review boundary. The historical
+   integrated-final budget is exhausted and no exact-current-head integrated
+   verdict exists.
+
+Risk: CI attached to the former published heads is stale after this rebase and
+does not prove the contract correction or downstream compatibility. The local
+platform build still emits the pre-existing tRPC inferred-declaration and
+circular-dependency warnings; they remain warnings, not newly introduced
+failures.
+
+Check: the stack must remain contiguous with `needsRebase: false`; the focused
+contract regressions and full package checks must pass at the top exact head;
+fresh remote per-layer checks must be read back after publication. No merge is
+part of this plan update.
+
+Commit: `docs(project): record platform correction propagation` on PR #205.
+
 ## 2026-08-13 first-slice plan reconciliation
 
 The first-slice plan in
