@@ -47,7 +47,7 @@ Current local rebased heads:
 | #201 | `1be26169` | canonical Pages Router pattern |
 | #202 | `71175ea1` | Rate Wars tRPC migration |
 | #204 | `bc9d9565` | Central Bank tRPC migration |
-| #205 | `8723d108` | compatibility and reconciliation documentation, pending this record |
+| #205 | `30d93545` | compatibility and reconciliation documentation, including this record |
 
 Review disposition:
 
@@ -82,11 +82,22 @@ circular-dependency warnings; they remain warnings, not newly introduced
 failures.
 
 Check: the stack must remain contiguous with `needsRebase: false`; the focused
-contract regressions and full package checks must pass at the top exact head;
-fresh remote per-layer checks must be read back after publication. No merge is
-part of this plan update.
+contract regressions and full package checks pass at the current top exact head;
+fresh remote per-layer checks are running against the published correction
+heads and must be read back before final readiness. No merge is part of this
+plan update.
 
 Commit: `docs(project): record platform correction propagation` on PR #205.
+
+## 2026-08-13 published correction state (current)
+
+The complete rebased stack was published with `gh stack submit --auto
+--remote origin`. GitHub reports stack #198 synchronized with all eight
+existing PRs; no PR was created, merged, queued, or moved between draft and
+ready states by this action. The remote heads are the exact values in the
+table above. Current checks on #196 are in progress and checks on #205 are
+queued or in progress; all checks attached to the former heads are stale for
+this correction.
 
 ## 2026-08-13 first-slice plan reconciliation
 
