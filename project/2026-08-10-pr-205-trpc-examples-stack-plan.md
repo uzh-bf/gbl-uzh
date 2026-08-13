@@ -128,12 +128,11 @@ jobs for every layer where those checks apply. SonarCloud Code Analysis is
 intentionally not a gate for #202 or #204 under the user's explicit direction;
 their ordinary SonarCloud checks pass.
 
-These checks belong to the prior published heads above; the lower-layer plan
-correction changed their ancestry, so fresh checks are required for the current
-candidate heads. No merge, queue, ready/draft transition, branch deletion, or
-worktree cleanup has occurred.
+This table is the final current-head readback before the top plan-only ledger
+commit. No merge, queue, ready/draft transition, branch deletion, or worktree
+cleanup has occurred.
 
-## 2026-08-13 reconciled published state (fresh checks running)
+## 2026-08-13 reconciled published state (fresh checks read back)
 
 The owning first-slice plan correction is committed on #197, propagated through
 the stack, and published to the eight existing PRs. The current published heads
