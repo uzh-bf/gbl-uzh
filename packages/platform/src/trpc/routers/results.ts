@@ -10,6 +10,10 @@ import { UserRole } from '../../types.js'
 import { gameIdSchema, playerResultTypeSchema } from '../schemas.js'
 import * as PlayService from '../../services/PlayService.js'
 import { toPastResultDto, toSpecificResultDto } from '../dto/results.js'
+import {
+  pastResultDtoSchema,
+  specificResultDtoSchema,
+} from '../dto/contracts.js'
 
 const specificInput = z.object({
   gameId: gameIdSchema,
@@ -22,16 +26,19 @@ function present<T>(value: T | null): value is T {
 
 export function createResultsRouter() {
   return createTRPCRouter({
-    listForCurrentGame: playerProcedure.query(async ({ ctx }) => {
-      const results = await PlayService.getPlayerResults({}, ctx as any)
+    listForCurrentGame: playerProcedure
+      .output(z.array(specificResultDtoSchema))
+      .query(async ({ ctx }) => {
+        const results = await PlayService.getPlayerResults({}, ctx as any)
 
-      return (results ?? [])
-        .map((result: any) => toSpecificResultDto(result))
-        .filter(present)
-    }),
+        return (results ?? [])
+          .map((result: any) => toSpecificResultDto(result))
+          .filter(present)
+      }),
 
     specific: protectedProcedure
       .input(specificInput)
+      .output(z.array(specificResultDtoSchema))
       .query(async ({ input, ctx }) => {
         // Players may only read results for their own game; admins (reports)
         // may only read results for games they own.
@@ -54,13 +61,15 @@ export function createResultsRouter() {
           .filter(present)
       }),
 
-    pastForPlayer: playerProcedure.query(async ({ ctx }) => {
-      const results = await PlayService.getPastResults({}, ctx as any)
-      if (!results) return []
+    pastForPlayer: playerProcedure
+      .output(z.array(pastResultDtoSchema))
+      .query(async ({ ctx }) => {
+        const results = await PlayService.getPastResults({}, ctx as any)
+        if (!results) return []
 
-      return results
-        .map((result: any) => toPastResultDto(result))
-        .filter(present)
-    }),
+        return results
+          .map((result: any) => toPastResultDto(result))
+          .filter(present)
+      }),
   })
 }

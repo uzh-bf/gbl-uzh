@@ -1,64 +1,21 @@
 import * as DB from '../../generated/prisma/client.js'
+import type {
+  ActiveSegmentDto,
+  AdminGameDto,
+  AdminPlayerDto,
+  GameListItemDto,
+  PeriodDto,
+  StoryElementRefDto,
+} from './contracts.js'
 
-export interface StoryElementRefDto {
-  id: string
-  title: string
-}
-
-export interface ActiveSegmentDto {
-  id: number
-  index: number
-  countdownExpiresAt: Date | null
-  countdownDurationMs: number | null
-  facts: unknown
-  learningElements?: StoryElementRefDto[]
-  storyElements?: StoryElementRefDto[]
-}
-
-export interface PeriodDto {
-  id: number
-  index: number
-  activeSegmentIx: number | null
-  facts: unknown
-  segmentCount?: number | null
-  segments: ActiveSegmentDto[]
-  activeSegment?: ActiveSegmentDto | null
-}
-
-export interface AdminPlayerDto {
-  id: string
-  isReady: boolean
-  role: string | null
-  number: number
-  name: string
-  facts: unknown
-  experience: number
-  experienceToNext: number
-  token: string
-}
-
-export interface GameListItemDto {
-  id: number
-  status: DB.GameStatus
-  name: string
-  activePeriodIx: number
-  activeSegmentIx: number | null
-  facts: unknown
-  playersCount: number
-}
-
-export interface AdminGameDto {
-  id: number
-  status: DB.GameStatus
-  name: string
-  version: number
-  facts: unknown
-  activePeriodIx: number
-  activeSegmentIx: number | null
-  players: AdminPlayerDto[]
-  periods: PeriodDto[]
-  activePeriod: PeriodDto | null
-}
+export type {
+  ActiveSegmentDto,
+  AdminGameDto,
+  AdminPlayerDto,
+  GameListItemDto,
+  PeriodDto,
+  StoryElementRefDto,
+} from './contracts.js'
 
 function asId(value: unknown): string | null {
   if (typeof value === 'string' || typeof value === 'number') {
@@ -86,9 +43,7 @@ function normalizeNumber(value: unknown): number | null {
   return null
 }
 
-function toStoryElementRef(
-  element: unknown
-): StoryElementRefDto | null {
+function toStoryElementRef(element: unknown): StoryElementRefDto | null {
   if (!element || typeof element !== 'object') return null
 
   const id = asId((element as { id?: unknown }).id)
@@ -101,7 +56,9 @@ function toStoryElementRef(
   return { id, title }
 }
 
-function toStoryElementRefs(elements: unknown): StoryElementRefDto[] | undefined {
+function toStoryElementRefs(
+  elements: unknown
+): StoryElementRefDto[] | undefined {
   if (!Array.isArray(elements) || elements.length === 0) {
     return undefined
   }
@@ -176,10 +133,12 @@ export function toPeriodDto(
     activeSegmentIx:
       period.activeSegmentIx === null
         ? null
-        : normalizeNumber(period.activeSegmentIx) ?? null,
+        : (normalizeNumber(period.activeSegmentIx) ?? null),
     facts: period.facts,
     segmentCount:
-      period.segmentCount === null ? null : normalizeNumber(period.segmentCount),
+      period.segmentCount === null
+        ? null
+        : normalizeNumber(period.segmentCount),
     segments,
     activeSegment: toActiveSegmentDto(period.activeSegment as any),
   }
@@ -272,16 +231,15 @@ export function toAdminGameDto(
     activeSegmentIx:
       game.activeSegmentIx === null
         ? null
-        : normalizeNumber(game.activeSegmentIx) ??
+        : (normalizeNumber(game.activeSegmentIx) ??
           normalizeNumber((game.activePeriod as any)?.activeSegmentIx) ??
-          null,
+          null),
     players: Array.isArray(game.players)
-      ? game.players
-          .map((player) =>
-            mapAdminPlayer(
-              typeof player === 'object' && player !== null ? (player as any) : {}
-            )
+      ? game.players.map((player) =>
+          mapAdminPlayer(
+            typeof player === 'object' && player !== null ? (player as any) : {}
           )
+        )
       : [],
     periods,
     activePeriod: toPeriodDto(game.activePeriod as any),

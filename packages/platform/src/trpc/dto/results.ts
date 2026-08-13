@@ -1,117 +1,30 @@
 import * as DB from '../../generated/prisma/client.js'
 import { toDate } from './game.js'
+import type {
+  ActiveSegmentSummaryDto,
+  PastResultDto,
+  PlayerResultCoreDto,
+  PlayerResultDto,
+  PlayerTransactionDto,
+  ResultPeriodSummaryDto,
+  ResultPlayerDto,
+  SpecificResultDto,
+  LearningElementRefDto,
+  StoryElementDto,
+} from './contracts.js'
 
-export interface ResultPlayerDto {
-  id: string
-  name: string
-}
-
-export interface PlayerResultCoreDto {
-  id: number
-  type: DB.PlayerResultType
-  facts: unknown
-  // period/segment expose only id+index here; their `facts` hold operator-only
-  // simulation parameters and were never part of the player-facing result shape.
-  period: {
-    id: number
-    index: number
-  }
-  segment?: {
-    id: number
-    index: number
-  } | null
-}
-
-export interface PlayerTransactionDto {
-  id: number
-  periodIx: number
-  segmentIx: number | null
-  type: string
-  facts?: unknown
-}
-
-interface LearningElementRefDto {
-  id: string
-  title: string
-}
-
-interface StoryElementDto {
-  id: string
-  title: string
-  type?: DB.StoryElementType
-  content?: string | null
-  contentRole?: unknown
-}
-
-export interface PlayerResultDto {
-  currentGame: {
-    id: number
-    status: DB.GameStatus
-    players: ResultPlayerDto[]
-    nextAutoContinueAt?: Date | null
-    periods: ResultPeriodSummaryDto[]
-    activePeriod?: ResultPeriodSummaryDto & {
-      activeSegment?: {
-        id: number
-        index: number
-        facts?: unknown
-        countdownExpiresAt?: Date | null
-        countdownDurationMs?: number | null
-        learningElements?: LearningElementRefDto[]
-        storyElements?: StoryElementDto[]
-      } | null
-    }
-  }
-  playerResult: PlayerResultCoreDto | null
-  previousResults: PlayerResultCoreDto[]
-  transactions: PlayerTransactionDto[]
-}
-
-export interface SpecificResultDto {
-  id: number
-  type: DB.PlayerResultType
-  facts: unknown
-  period: {
-    id: number
-    index: number
-  }
-  segment?: {
-    id: number
-    index: number
-  } | null
-  player: ResultPlayerDto
-}
-
-export interface PastResultDto extends Omit<SpecificResultDto, 'player'> {
-  period: {
-    id: number
-    index: number
-  }
-  segment?: {
-    id: number
-    index: number
-  } | null
-  player: ResultPlayerDto
-}
-
-interface ResultPeriodSummaryDto {
-  id: number
-  index: number
-  activeSegmentIx: number | null
-  facts: unknown
-  segmentCount?: number | null
-  segments: ActiveSegmentSummaryDto[]
-}
-
-interface ActiveSegmentSummaryDto {
-  id: number
-  index: number
-  facts: unknown
-  countdownExpiresAt?: Date | null
-  countdownDurationMs?: number | null
-  learningElements?: LearningElementRefDto[]
-  storyElements?: StoryElementDto[]
-}
+export type {
+  ActiveSegmentSummaryDto,
+  PastResultDto,
+  PlayerResultCoreDto,
+  PlayerResultDto,
+  PlayerTransactionDto,
+  ResultPeriodSummaryDto,
+  ResultPlayerDto,
+  SpecificResultDto,
+  LearningElementRefDto,
+  StoryElementDto,
+} from './contracts.js'
 
 function toResultPlayerDto(player: unknown): ResultPlayerDto | null {
   if (!player || typeof player !== 'object') return null

@@ -254,7 +254,19 @@ describe('learning.questAchievements (player, no input)', () => {
   it('returns the non-learning-element quest achievements', async () => {
     const prisma = createMockPrisma()
     prisma.achievement.findMany.mockResolvedValue([
-      { id: 'FIRST_TRADE', name: 'First Trade' },
+      {
+        id: 'FIRST_TRADE',
+        name: 'First Trade',
+        namesByRole: null,
+        description: 'Complete your first trade',
+        descriptionsByRole: null,
+        image: null,
+        when: 'FIRST',
+        scope: 'GAME',
+        activePeriods: [0],
+        reward: { experience: 10 },
+        conditions: { private: true },
+      },
     ])
     const caller = createCaller(
       createTestContext({
@@ -264,10 +276,75 @@ describe('learning.questAchievements (player, no input)', () => {
     )
 
     await expect(caller.learning.questAchievements()).resolves.toEqual([
-      { id: 'FIRST_TRADE', name: 'First Trade' },
+      {
+        id: 'FIRST_TRADE',
+        name: 'First Trade',
+        namesByRole: null,
+        description: 'Complete your first trade',
+        descriptionsByRole: null,
+        image: null,
+        when: 'FIRST',
+        scope: 'GAME',
+        activePeriods: [0],
+        reward: { experience: 10 },
+      },
     ])
     expect(prisma.achievement.findMany).toHaveBeenCalledWith({
       where: { id: { notIn: ['LEARNING_ELEMENT_SOLVED'] } },
+      select: {
+        id: true,
+        name: true,
+        namesByRole: true,
+        description: true,
+        descriptionsByRole: true,
+        image: true,
+        when: true,
+        scope: true,
+        activePeriods: true,
+        reward: true,
+      },
+    })
+  })
+})
+
+describe('story.list (protected, no input)', () => {
+  it('projects only the public story-element contract', async () => {
+    const prisma = createMockPrisma()
+    prisma.storyElement.findMany.mockResolvedValue([
+      {
+        id: 'story-1',
+        type: 'GENERIC',
+        title: 'A public story',
+        content: 'Story text',
+        contentRole: { role: 'PLAYER' },
+        reward: { experience: 100 },
+        createdAt: new Date(),
+      },
+    ])
+    const caller = createCaller(
+      createTestContext({
+        prisma,
+        user: { sub: 'player-1', role: UserRole.PLAYER },
+      })
+    )
+
+    await expect(caller.story.list()).resolves.toEqual([
+      {
+        id: 'story-1',
+        type: 'GENERIC',
+        title: 'A public story',
+        content: 'Story text',
+        contentRole: { role: 'PLAYER' },
+      },
+    ])
+    expect(prisma.storyElement.findMany).toHaveBeenCalledWith({
+      select: {
+        id: true,
+        type: true,
+        title: true,
+        content: true,
+        contentRole: true,
+      },
     })
   })
 })

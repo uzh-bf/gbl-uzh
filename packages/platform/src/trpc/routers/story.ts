@@ -5,14 +5,31 @@ import {
   protectedProcedure,
 } from '../init.js'
 import { idSchema } from '../schemas.js'
-import * as GameService from '../../services/GameService.js'
 import * as PlayService from '../../services/PlayService.js'
+import { storyElementDtoSchema, toStoryElementDto } from '../dto/content.js'
 
 export function createStoryRouter() {
   return createTRPCRouter({
-    list: protectedProcedure.query(({ ctx }) =>
-      GameService.getStoryElements({}, ctx as any)
-    ),
+    list: protectedProcedure
+      .output(z.array(storyElementDtoSchema))
+      .query(async ({ ctx }) => {
+        const elements = await ctx.prisma.storyElement.findMany({
+          select: {
+            id: true,
+            type: true,
+            title: true,
+            content: true,
+            contentRole: true,
+          },
+        })
+
+        return (elements ?? [])
+          .map((element: any) => toStoryElementDto(element))
+          .filter(
+            (element): element is NonNullable<typeof element> =>
+              element !== null
+          )
+      }),
 
     markVisited: playerProcedure
       .input(z.object({ elementId: idSchema }))

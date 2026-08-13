@@ -14,6 +14,10 @@ import {
   toLearningElementListDto,
   toLearningElementStateDto,
 } from '../dto/learning.js'
+import {
+  questAchievementDtoSchema,
+  toQuestAchievementDto,
+} from '../dto/content.js'
 
 const byIdInput = z.object({ id: idSchema })
 
@@ -81,16 +85,35 @@ export function createLearningRouter() {
         }
       }),
 
-    questAchievements: playerProcedure.query(async ({ ctx }) => {
-      const achievements = await ctx.prisma.achievement.findMany({
-        where: {
-          id: {
-            notIn: ['LEARNING_ELEMENT_SOLVED'],
+    questAchievements: playerProcedure
+      .output(z.array(questAchievementDtoSchema))
+      .query(async ({ ctx }) => {
+        const achievements = await ctx.prisma.achievement.findMany({
+          where: {
+            id: {
+              notIn: ['LEARNING_ELEMENT_SOLVED'],
+            },
           },
-        },
-      })
+          select: {
+            id: true,
+            name: true,
+            namesByRole: true,
+            description: true,
+            descriptionsByRole: true,
+            image: true,
+            when: true,
+            scope: true,
+            activePeriods: true,
+            reward: true,
+          },
+        })
 
-      return achievements ?? []
-    }),
+        return (achievements ?? [])
+          .map((achievement: any) => toQuestAchievementDto(achievement))
+          .filter(
+            (achievement): achievement is NonNullable<typeof achievement> =>
+              achievement !== null
+          )
+      }),
   })
 }

@@ -6,6 +6,11 @@ import * as GameService from '../../services/GameService.js'
 import * as PlayService from '../../services/PlayService.js'
 import { toPlayerSelfDto } from '../dto/player.js'
 import { toPlayerResultCoreDto, toPlayerResultDto } from '../dto/results.js'
+import {
+  playerResultCoreDtoSchema,
+  playerResultDtoSchema,
+  playerSelfDtoSchema,
+} from '../dto/contracts.js'
 import { createTRPCRouter, playerProcedure } from '../init.js'
 import { requireFactsSchema } from '../schemas.js'
 
@@ -13,8 +18,8 @@ type RouterDeps = {
   services?: Record<string, unknown>
   schemas?: {
     PlayerFactsSchema?: any
-    // Game-specific yup schema for the parsed performAction payload; when
-    // provided, invalid player input fails as BAD_REQUEST before it reaches
+    // Game-specific yup schema for the parsed performAction payload; it is
+    // required so invalid player input fails as BAD_REQUEST before it reaches
     // the game's action reducer.
     ActionFactsSchema?: any
   }
@@ -61,28 +66,32 @@ export function createPlayRouter({
   schemas = {},
 }: RouterDeps = {}) {
   return createTRPCRouter({
-    self: playerProcedure.query(async ({ ctx }) => {
-      const player = await PlayService.getPlayerData(
-        { playerId: ctx.user.sub },
-        ctx as any
-      )
+    self: playerProcedure
+      .output(playerSelfDtoSchema.nullable())
+      .query(async ({ ctx }) => {
+        const player = await PlayService.getPlayerData(
+          { playerId: ctx.user.sub },
+          ctx as any
+        )
 
-      return toPlayerSelfDto(player as any)
-    }),
+        return toPlayerSelfDto(player as any)
+      }),
 
-    result: playerProcedure.query(async ({ ctx }) => {
-      const gameId = ctx.user.gameId
-      if (typeof gameId !== 'number') {
-        return null
-      }
+    result: playerProcedure
+      .output(playerResultDtoSchema.nullable())
+      .query(async ({ ctx }) => {
+        const gameId = ctx.user.gameId
+        if (typeof gameId !== 'number') {
+          return null
+        }
 
-      const result = await PlayService.getPlayerResult(
-        { gameId, playerId: ctx.user.sub },
-        ctx as any
-      )
+        const result = await PlayService.getPlayerResult(
+          { gameId, playerId: ctx.user.sub },
+          ctx as any
+        )
 
-      return toPlayerResultDto(result as any)
-    }),
+        return toPlayerResultDto(result as any)
+      }),
 
     updateReadyState: playerProcedure
       .input(z.object({ isReady: z.boolean() }))
@@ -97,6 +106,7 @@ export function createPlayRouter({
 
     updatePlayerData: playerProcedure
       .input(updatePlayerDataInput)
+      .output(playerSelfDtoSchema.nullable())
       .mutation(async ({ input, ctx }) => {
         const previousPlayer = await ctx.prisma.player.findUnique({
           where: {
@@ -158,17 +168,20 @@ export function createPlayRouter({
           payload: z.string(),
         })
       )
+      .output(playerResultCoreDtoSchema.nullable())
       .mutation(async ({ input, ctx }) => {
         const currentGame = await GameService.getGameFromContext(ctx as any)
 
         if (!currentGame?.activePeriod) return null
 
         const facts = parsePayload(input.payload)
-        if (schemas.ActionFactsSchema) {
-          // yup ValidationError maps to BAD_REQUEST in the shared
-          // service-error middleware (init.ts).
-          await schemas.ActionFactsSchema.validate(facts)
-        }
+        const actionFactsSchema = requireFactsSchema(
+          schemas.ActionFactsSchema,
+          'ActionFactsSchema'
+        )
+        // yup ValidationError maps to BAD_REQUEST in the shared
+        // service-error middleware (init.ts).
+        await actionFactsSchema.validate(facts)
 
         const actionResult = await PlayService.performActionWithRetry(
           {

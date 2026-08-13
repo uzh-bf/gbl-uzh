@@ -1,4 +1,8 @@
-import { adminProcedure, assertGameOwnership, createTRPCRouter } from '../init.js'
+import {
+  adminProcedure,
+  assertGameOwnership,
+  createTRPCRouter,
+} from '../init.js'
 import {
   gameIdSchema,
   jsonObjectSchema,
@@ -9,6 +13,7 @@ import {
   toGameListItemDto,
   type GameListItemDto,
 } from '../dto/game.js'
+import { adminGameDtoSchema, gameListItemDtoSchema } from '../dto/contracts.js'
 import * as GameService from '../../services/GameService.js'
 import * as PlayService from '../../services/PlayService.js'
 import { z } from 'zod'
@@ -52,26 +57,35 @@ export function createGameRouter({
   const nextPeriodInput = z.object({ gameId: gameIdSchema })
 
   return createTRPCRouter({
-    list: adminProcedure.query(async ({ ctx }) => {
-      const games = await GameService.getGames({}, ctx as any)
+    list: adminProcedure
+      .output(z.array(gameListItemDtoSchema))
+      .query(async ({ ctx }) => {
+        const games = await GameService.getGames({}, ctx as any)
 
-      return games
-        .map((game: any) => toGameListItemDto(game))
-        .filter((game): game is GameListItemDto => game !== null)
-    }),
+        return games
+          .map((game: any) => toGameListItemDto(game))
+          .filter((game): game is GameListItemDto => game !== null)
+      }),
 
-    byId: adminProcedure.input(byIdInput).query(async ({ input, ctx }) => {
-      await assertGameOwnership(ctx, input.id)
-      const game = await GameService.getGame(input, ctx as any)
+    byId: adminProcedure
+      .input(byIdInput)
+      .output(adminGameDtoSchema.nullable())
+      .query(async ({ input, ctx }) => {
+        await assertGameOwnership(ctx, input.id)
+        const game = await GameService.getGame(input, ctx as any)
 
-      return toAdminGameDto(game as any)
-    }),
+        return toAdminGameDto(game as any)
+      }),
 
     create: adminProcedure
       .input(createGameInput)
+      .output(adminGameDtoSchema.nullable())
       .mutation(async ({ input, ctx }) => {
         const game = await GameService.createGame(input as any, ctx as any, {
-          schema: requireFactsSchema(schemas.GameFactsSchema, 'GameFactsSchema'),
+          schema: requireFactsSchema(
+            schemas.GameFactsSchema,
+            'GameFactsSchema'
+          ),
           roleAssigner,
         })
 
@@ -80,22 +94,32 @@ export function createGameRouter({
 
     activateNextPeriod: adminProcedure
       .input(nextPeriodInput)
+      .output(adminGameDtoSchema.nullable())
       .mutation(async ({ input, ctx }) => {
         await assertGameOwnership(ctx, input.gameId)
-        const game = await GameService.activateNextPeriod(input, ctx as any, {
-          services,
-        } as any)
+        const game = await GameService.activateNextPeriod(
+          input,
+          ctx as any,
+          {
+            services,
+          } as any
+        )
 
         return toAdminGameDto(firstResult(game as any))
       }),
 
     activateNextSegment: adminProcedure
       .input(nextPeriodInput)
+      .output(adminGameDtoSchema.nullable())
       .mutation(async ({ input, ctx }) => {
         await assertGameOwnership(ctx, input.gameId)
-        const game = await GameService.activateNextSegment(input, ctx as any, {
-          services,
-        } as any)
+        const game = await GameService.activateNextSegment(
+          input,
+          ctx as any,
+          {
+            services,
+          } as any
+        )
 
         return toAdminGameDto(firstResult(game as any))
       }),

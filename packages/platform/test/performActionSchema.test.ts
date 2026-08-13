@@ -38,7 +38,49 @@ function buildCaller(
   )
 }
 
+function buildCallerWithoutActionFactsSchema(
+  prisma: ReturnType<typeof createMockPrisma>,
+  actionsApply: ReturnType<typeof jest.fn>
+) {
+  const router = createPlatformRouter({
+    services: {
+      Actions: {
+        apply: actionsApply,
+      },
+    },
+  })
+  const createCaller = createCallerFactory(router)
+
+  return createCaller(
+    createTestContext({
+      prisma,
+      user: { sub: 'player-1', role: UserRole.PLAYER, gameId: 1 },
+    })
+  )
+}
+
 describe('play.performAction schema seam', () => {
+  it('fails closed when the game-specific action schema is not injected', async () => {
+    const prisma = createMockPrisma()
+    prisma.game.findUnique.mockResolvedValue({
+      id: 1,
+      activePeriod: { id: 10, index: 0 },
+      activePeriodIx: 0,
+    })
+    const actionsApply = jest.fn()
+    const caller = buildCallerWithoutActionFactsSchema(prisma, actionsApply)
+
+    await expect(
+      caller.play.performAction({
+        type: 'DO_THING',
+        payload: JSON.stringify({ amount: 5 }),
+      })
+    ).rejects.toMatchObject({ code: 'INTERNAL_SERVER_ERROR' })
+
+    expect(prisma.$transaction).not.toHaveBeenCalled()
+    expect(actionsApply).not.toHaveBeenCalled()
+  })
+
   it('rejects an invalid payload with BAD_REQUEST before reaching the service layer', async () => {
     const prisma = createMockPrisma()
     // GameService.getGameFromContext must resolve a game with an active

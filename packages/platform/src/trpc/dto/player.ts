@@ -1,52 +1,7 @@
 import * as DB from '../../generated/prisma/client.js'
+import type { PlayerSelfDto } from './contracts.js'
 
-interface GameInfoForPlayerDto {
-  id: number
-  name: string
-  status: DB.GameStatus
-  facts: unknown
-  activePeriod?: {
-    index: number
-    activeSegmentIx: number
-  }
-}
-
-interface PlayerAchievementInstanceDto {
-  id: number
-  count: number
-  periodIx: number
-  achievement: {
-    id: string
-    name: string
-    description: string
-    image: string | null
-    when: DB.AchievementFrequency
-    scope: DB.AchievementScope
-    activePeriods: number[]
-    reward: unknown
-  }
-}
-
-export interface PlayerSelfDto {
-  id: string
-  isReady: boolean
-  number: number
-  name: string
-  role?: string | null
-  facts: unknown
-  experience: number
-  experienceToNext: number
-  tutorialCompleted: boolean
-  achievementKeys: string[]
-  achievements: PlayerAchievementInstanceDto[]
-  level: {
-    id: number
-    index: number
-  }
-  game: GameInfoForPlayerDto
-  completedLearningElementIds: string[]
-  visitedStoryElementIds: string[]
-}
+export type { PlayerSelfDto } from './contracts.js'
 
 export function toPlayerSelfDto(
   player:
@@ -76,8 +31,8 @@ export function toPlayerSelfDto(
         completedLearningElementIds?: string[]
         visitedStoryElementIds?: string[]
       }
-  | null
-  | undefined
+    | null
+    | undefined
 ): PlayerSelfDto | null {
   if (!player) return null
 
