@@ -2,24 +2,26 @@
 
 Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
-Status: the first-slice plan now includes the comment-audit reconciliation in
-local #197 at `8e81af87`; the corrected local heads are recorded below and have
-not yet replaced the previously pushed remote heads. All eight PRs remain open,
-ready for review, and unmerged. Fresh per-layer CI is required after publishing
-the corrected heads. The integrated final-review budget is exhausted on earlier
-ranges and no exact-current-head verdict exists.
+Status: the first-slice plan includes the comment-audit and platform-contract
+reconciliation. The complete eight-layer stack is published with the exact
+heads recorded in the current-state table below. All eight PRs remain open,
+ready for review, and unmerged. Current non-Sonar checks are green; the known
+SonarCloud Code Analysis exceptions on #202 and #204 remain intentionally
+outside the approved check gate. The exact-current-head integrated final review
+is the remaining review gate.
 Provider: GitHub stacked changes
 Base: `dev` at `6bab3ed`
 Worktree: `trees/trpc-examples-stack`
 Mode: guided, with a review pause after every layer
 
-## 2026-08-13 platform contract correction propagation (current)
+## 2026-08-13 platform contract correction propagation (execution record)
 
 Problem: the architect review required the remaining platform tRPC boundary
 corrections to live in the lower platform layer and then be re-verified across
-the existing example-game stack. The lower layer was updated locally and the
-dependent branches were rebased, but these new heads have not yet replaced the
-published heads or started fresh remote CI.
+the existing example-game stack. The lower layer was updated in #196, the
+dependent branches were rebased, and the complete stack was subsequently
+published and verified. The publication and current remote-check readback are
+recorded in the current-state section below.
 
 Evidence: PR #196 now contains the plan boundary `2936f4a1`, the platform
 implementation `ea51006f`, and the plan/review disposition `05b4f344`. It adds
@@ -71,9 +73,9 @@ Do:
 3. Publish the complete stack so every PR receives fresh CI against its new
    exact head. Re-read branch ancestry, checks, and `needsRebase` after the
    publish. Keep all PRs unmerged and do not change ready/draft state here.
-4. Stop at the fresh-CI and human-final-review boundary. The historical
-   integrated-final budget is exhausted and no exact-current-head integrated
-   verdict exists.
+4. Stop at the exact-current-head integrated final-review boundary. The
+   historical integrated-final budget is exhausted; this correction package
+   uses its own registered exact-current-head review tuple.
 
 Risk: CI attached to the former published heads is stale after this rebase and
 does not prove the contract correction or downstream compatibility. The local
@@ -81,25 +83,58 @@ platform build still emits the pre-existing tRPC inferred-declaration and
 circular-dependency warnings; they remain warnings, not newly introduced
 failures.
 
-Check: the stack must remain contiguous with `needsRebase: false`; the focused
+Check: the stack remains contiguous with `needsRebase: false`; the focused
 contract regressions and full package checks pass at the current top exact head;
-fresh remote per-layer checks are running against the published correction
-heads and must be read back before final readiness. No merge is part of this
-plan update.
+fresh remote per-layer checks have been read back against the published
+correction heads. No merge is part of this plan update.
 
 Commit: `docs(project): record platform correction propagation` on PR #205.
 
-## 2026-08-13 published correction state (current)
+## 2026-08-13 published correction state (historical checkpoint)
 
 The complete rebased stack was published with `gh stack submit --auto
---remote origin`. GitHub reports stack #198 synchronized with all eight
+--remote origin`. GitHub reported stack #198 synchronized with all eight
 existing PRs; no PR was created, merged, queued, or moved between draft and
-ready states by this action. The remote heads are the exact values in the
-table above. Current checks on #196 are in progress and checks on #205 are
-queued or in progress; all checks attached to the former heads are stale for
-this correction.
+ready states by this action. The current-state section below records the
+final remote heads and check readback. The later plan-only status correction is
+owned by the same top-layer plan and is recorded in the next stack update.
 
-## 2026-08-13 first-slice plan reconciliation
+## 2026-08-13 current published state and verification
+
+The active stack is contiguous and published with `needsRebase: false` for
+every layer. All eight PRs are OPEN, ready for review, and unmerged:
+
+| PR | Published head | Current required checks |
+| --- | --- | --- |
+| #197 | `5173e193` | pass |
+| #196 | `05b4f344` | pass |
+| #195 | `b3ebd0c1` | pass |
+| #194 | `49bc50bb` | pass after ARM build rerun; the original failure was a transient Google Fonts fetch error |
+| #201 | `1be26169` | pass |
+| #202 | `71175ea1` | pass; SonarCloud Code Analysis is the approved skipped exception |
+| #204 | `bc9d9565` | pass; SonarCloud Code Analysis is the approved skipped exception |
+| #205 | `254602a6` | pass |
+
+The local verification at the exact top head passed platform tests (55/55),
+both platform TypeScript modes, the platform build, UI TypeScript checks in
+both modes, and both TypeScript modes for demo-game, Rate Wars, and Central
+Bank. `git diff --check` and the repository-formatted Prettier check passed.
+The platform build retains the known inferred-tRPC-declaration portability and
+circular-dependency warnings; no new build failure remains.
+
+The remote verification passed the per-layer typecheck, lint, AMD64/ARM64
+builds, merge, merge-reports, Greptile, Vercel, and all three game Playwright
+jobs for every layer where those checks apply. SonarCloud Code Analysis is
+intentionally not a gate for #202 or #204 under the user's explicit direction;
+their ordinary SonarCloud checks pass.
+
+The required exact-current-head integrated final review is still pending. Its
+review range is
+`6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99..254602a699f0a27754dea4741b719711eed9cc73`.
+No merge, queue, ready/draft transition, branch deletion, or worktree cleanup
+has occurred.
+
+## 2026-08-13 first-slice plan reconciliation (historical checkpoint)
 
 The first-slice plan in
 [`project/2026-08-06-trpc-migration-stack-plan.md`](2026-08-06-trpc-migration-stack-plan.md)
