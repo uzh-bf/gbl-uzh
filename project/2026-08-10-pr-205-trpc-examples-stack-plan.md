@@ -41,18 +41,18 @@ separate example games remain separate stacked layers above the canonical
 Pages Router layer. The resolved central-bank conflict retains the canonical
 inferred result contract and the existing player-identity privacy correction.
 
-Published executable heads before this final plan-only closure:
+Current rebased executable heads before this final plan-only closure:
 
 | Layer | Local head | Responsibility |
 | --- | --- | --- |
-| #197 | `5919b722` | shared dev/toolchain foundation and package boundary |
-| #196 | `407cd382` | platform plan, contract correction, and review disposition |
-| #195 | `035aa7c5` | demo-game migration and final-period lifecycle proof |
-| #194 | `c424843c` | CI, devcontainer, and docs collateral |
-| #201 | `7ad2bf53` | canonical Pages Router pattern |
-| #202 | `0ccfee35` | Rate Wars tRPC migration |
-| #204 | `234ba829` | Central Bank tRPC migration and final-period lifecycle proof |
-| #205 | `19335130` | compatibility and reconciliation documentation, including this record |
+| #197 | `6b6c3650` | shared dev/toolchain foundation and package boundary |
+| #196 | `030b0c55` | platform plan, contract correction, and review disposition |
+| #195 | `c115a99c` | demo-game migration and final-period lifecycle proof |
+| #194 | `25118b1e` | CI, devcontainer, and docs collateral |
+| #201 | `54dabef5` | canonical Pages Router pattern |
+| #202 | `07576e04` | Rate Wars tRPC migration |
+| #204 | `c1f770e6` | Central Bank tRPC migration and final-period lifecycle proof |
+| #205 | `f8b0f606` | compatibility and reconciliation documentation, including this record |
 
 Review disposition:
 
@@ -99,7 +99,7 @@ platform suite passes 57/57; TypeScript, build, lint, merge, and all three
 remote Playwright checks pass on the final top head; and the final review
 reports plus gate register are present. No merge is part of this plan update.
 
-Commit: `docs(project): finalize correction review state` on PR #205.
+Commit: `docs(project): finalize corrected stack review state` on PR #205.
 
 ## Progress
 
@@ -134,7 +134,7 @@ review remains the next action; merging is not included.
       "evidence": [
         {"kind": "command", "identity": "platform-jest-57-of-57", "path": ""},
         {"kind": "command", "identity": "all-package-ts6-ts7-and-build", "path": ""},
-        {"kind": "command", "identity": "exact-final-head-19335130-remote-checks", "path": ""},
+        {"kind": "command", "identity": "exact-final-head-f8b0f606-remote-checks", "path": ""},
         {"kind": "command", "identity": "git-diff-check-final-head", "path": ""}
       ]
     },
@@ -165,7 +165,7 @@ review remains the next action; merging is not included.
   "active_workers": [],
   "parking": null,
   "git": {
-    "head": "193351309ae2bdafdb20035f9f15516f0b8b2719",
+    "head": "e260df53301bd778a1dfc40b01fc265f97064b5a",
     "base": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99",
     "branch": "rs/trpc-examples/03-graphql-deprecation-docs",
     "worktree": "/Users/rschlae/Git/gbl/gbl-uzh/trees/trpc-examples-stack"
