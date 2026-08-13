@@ -11,10 +11,10 @@ Worktree: new `trees/trpc-migration-stack` (one stack, one worktree). Source wor
 > the first-slice execution plan committed in PR #197; it is now a historical
 > predecessor and is not the active execution contract. The active plan is
 > [`project/2026-08-10-pr-205-trpc-examples-stack-plan.md`](2026-08-10-pr-205-trpc-examples-stack-plan.md).
-> Plan provenance: PR #197 first added this file in commit `7cfd562`; it is
-> published at current head `5173e193`. The mutable full-stack SHA table belongs
-> in the active plan and was read from live stack metadata after the lower-layer
-> propagation; the historical SHA table below is not current evidence.
+> Plan provenance: PR #197 first added this file in commit `7cfd562`. The
+> mutable full-stack SHA table belongs in the active plan and must be read from
+> live stack metadata after each lower-layer propagation; the historical SHA
+> table below is not current evidence.
 >
 > The audit restored non-obvious domain and safety rationale in the owning
 > layers: achievement scope and deduplication in #196; the deferred
@@ -23,8 +23,9 @@ Worktree: new `trees/trpc-migration-stack` (one stack, one worktree). Source wor
 > configuration rationale plus the next-segment lifecycle guard in #204; and
 > the token-free player projection boundary in #201. Dead logging, generated
 > output, removed GraphQL wiring, and comments whose code was deleted remain
-> intentionally absent. Fresh per-layer CI has been read back on the corrected
-> published heads; no merge or cleanup is authorized by this plan.
+> intentionally absent. Fresh per-layer CI is read back in the active plan
+> after each corrected publication; no merge or cleanup is authorized by this
+> plan.
 
 ## 2026-08-13 current-state addendum
 
