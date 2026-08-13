@@ -301,13 +301,6 @@ test('admin and players complete central-bank flow', async ({
   await addSegment(page, { periodIndex: 0 })
   await addSegment(page, { periodIndex: 0 })
 
-  // Add Period 2 (sentinel period as required by GBL platform for CONSOLIDATION -> RESULTS transition)
-  await addPeriod(page, {
-    name: 'Period 2 (Sentinel)',
-    segmentCount: '1',
-    index: 1,
-  })
-
   const playerSessions: PlayerSession[] = []
 
   try {
