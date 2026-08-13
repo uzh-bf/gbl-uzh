@@ -3,12 +3,12 @@
 Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
 Status: the first-slice plan includes the comment-audit and platform-contract
-reconciliation. The complete eight-layer stack is published and the latest
-current-tip CI readback is green for all eight PRs. All eight PRs remain open,
-ready for review, and unmerged. The known SonarCloud Code Analysis exceptions
-on #202 and #204 remain intentionally outside the approved check gate. The
-exact-current-head integrated final review remains the final review gate after
-this check readback.
+reconciliation. The stack has been corrected after integrated review findings;
+the current local chain is rebased and the next publication will trigger fresh
+per-layer checks. All eight PRs remain open, ready for review, and unmerged.
+The known SonarCloud Code Analysis exceptions on #202 and #204 remain
+intentionally outside the approved check gate. The correction review remains
+the final review gate after the fresh check readback.
 Provider: GitHub stacked changes
 Base: `dev` at `6bab3ed`
 Worktree: `trees/trpc-examples-stack`
@@ -23,14 +23,15 @@ dependent branches were rebased, and the complete stack was subsequently
 published and verified. The publication and current remote-check readback are
 recorded in the current-state section below.
 
-Evidence: PR #196 now contains the plan boundary `2936f4a1`, the platform
-implementation `ea51006f`, and the plan/review disposition `05b4f344`. It adds
-explicit StoryElement and achievement projections, Zod 3.23.8-compatible
-runtime DTO contracts, targeted `.output()` validators, and fail-closed
-`ActionFactsSchema` enforcement. The focused platform callers pass 35/35; the
-full platform suite passes 54/54; both TypeScript modes pass; the platform
-build passes with the existing tRPC declaration-portability and circular-
-dependency warnings.
+Evidence: PR #196 now contains the rebased plan boundary `1501f0ff`, platform
+implementation `3b7021ee`, review disposition `ed3544cd`, and the correction
+`8479ed4b`. It adds explicit StoryElement and achievement projections,
+Zod 3.23.8-compatible runtime DTO contracts, targeted `.output()` validators,
+fail-closed `ActionFactsSchema` enforcement, and propagation of Yup’s validated
+action facts. The focused platform callers pass 35/35 before the latest
+correction; the current full platform suite and correction tests are rerun
+after this stack update. Both TypeScript modes and the platform build retain
+the existing tRPC declaration-portability and circular-dependency warnings.
 
 Decision: PR #196 owns all executable and platform-test changes. PR #205 owns
 this continuation record only. The existing topology remains unchanged; the
@@ -38,18 +39,18 @@ separate example games remain separate stacked layers above the canonical
 Pages Router layer. The resolved central-bank conflict retains the canonical
 inferred result contract and the existing player-identity privacy correction.
 
-Current published heads:
+Current local rebased heads (next publication):
 
 | Layer | Local head | Responsibility |
 | --- | --- | --- |
-| #197 | `ce0bd12c` | shared dev/toolchain foundation |
-| #196 | `c64914a3` | platform plan, contract correction, and review disposition |
-| #195 | `8d4eae31` | demo-game migration |
-| #194 | `61af3f9b` | CI, devcontainer, and docs collateral |
-| #201 | `b183a5f9` | canonical Pages Router pattern |
-| #202 | `12fc83ce` | Rate Wars tRPC migration |
-| #204 | `e3808a0d` | Central Bank tRPC migration |
-| #205 | current top branch | compatibility and reconciliation documentation, including this record |
+| #197 | `5919b722` | shared dev/toolchain foundation and package boundary |
+| #196 | `407cd382` | platform plan, contract correction, and review disposition |
+| #195 | `035aa7c5` | demo-game migration and final-period lifecycle proof |
+| #194 | `c424843c` | CI, devcontainer, and docs collateral |
+| #201 | `7ad2bf53` | canonical Pages Router pattern |
+| #202 | `0ccfee35` | Rate Wars tRPC migration |
+| #204 | `234ba829` | Central Bank tRPC migration and final-period lifecycle proof |
+| #205 | `1c7d413e` | compatibility and reconciliation documentation, including this record |
 
 Review disposition:
 
@@ -66,7 +67,7 @@ Review disposition:
 
 Do:
 
-1. Commit this propagation record on PR #205.
+1. Record the correction disposition and package boundary on PR #205.
 2. Run the full current-tip local verification: platform tests, both platform
    TypeScript modes, platform build, UI checks, and both TypeScript modes for
    demo-game, Rate Wars, and Central Bank.
@@ -88,7 +89,71 @@ contract regressions and full package checks pass at the current top exact head;
 fresh remote per-layer checks have been read back against the published
 correction heads. No merge is part of this plan update.
 
-Commit: `docs(project): record platform correction propagation` on PR #205.
+Commit: `docs(project): record correction review disposition` on PR #205.
+
+## Progress
+
+The correction package is in progress: verified integrated-review findings are
+assigned to their owning layers, the stack is locally rebased, and fresh
+publication checks remain outstanding. The next step is full local
+verification, publication, and one correction-package integrated review on the
+immutable post-check range.
+
+### Package boundary
+
+```json
+{
+  "schema": "PackageBoundary/v1",
+  "package_key": "trpc-platform-contract-correction",
+  "roadmap": {
+    "path": "project/2026-07-29-trpc-migration-finalization-roadmap.md",
+    "w_item": "W7"
+  },
+  "state": "in_progress",
+  "required_delivery": "reviewed",
+  "achieved_delivery": "unreviewed",
+  "slices": {
+    "completed": ["S0", "S1", "S2"],
+    "remaining": ["S3"]
+  },
+  "gates": {
+    "verification": {
+      "required": true,
+      "state": "missing",
+      "evidence": []
+    },
+    "simplification": {
+      "required": true,
+      "state": "terminal",
+      "evidence": [
+        {"kind": "report", "identity": "platform-contract-correction-simplifier", "path": "project/_local/reviews/2026-08-13-platform-contract-correction-simplifier-correction.md"}
+      ]
+    },
+    "slice_review": {
+      "required": true,
+      "state": "terminal",
+      "evidence": [
+        {"kind": "report", "identity": "platform-contract-correction-slice-review", "path": "project/_local/reviews/2026-08-13-platform-contract-correction-slice-review.md"}
+      ]
+    },
+    "integrated_final": {
+      "required": true,
+      "state": "reserved",
+      "evidence": [
+        {"kind": "register_tuple", "identity": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99..327c0c81dc7fda7324a72c83d3ce080bb467189e", "path": "project/_local/reviews/trpc-stack-198-refresh-gate-register.md"}
+      ]
+    }
+  },
+  "active_workers": [],
+  "parking": null,
+  "git": {
+    "head": "1c7d413e317352a47c853afe123d82e0183b7dc3",
+    "base": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99",
+    "branch": "rs/trpc-examples/03-graphql-deprecation-docs",
+    "worktree": "/Users/rschlae/Git/gbl/gbl-uzh/trees/trpc-examples-stack"
+  }
+}
+```
 
 ## 2026-08-13 published correction state (historical checkpoint)
 
