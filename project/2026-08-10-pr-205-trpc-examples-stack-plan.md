@@ -31,7 +31,7 @@ a local rebase; the resulting local heads are:
 | #201 canonical Pages Router | `b835637` |
 | #202 Rate Wars | `b2231b1` |
 | #204 Central Bank | `8ae07e7` |
-| #205 compatibility/reconciliation | `fe9524e` |
+| #205 compatibility/reconciliation | `8731bf1` |
 
 The local chain remains rooted at `dev 6bab3ed`. These rewritten heads are
 not yet the remote PR heads; the remote stack still has the previously pushed
@@ -50,7 +50,7 @@ focused verification, but no exact-current-head integrated-final verdict
 exists. The stack is ready for a fresh human final review after current-head
 CI, not ready to merge.
 
-## 2026-08-12 refresh status
+## 2026-08-12 refresh status (historical remote generation)
 
 The examples stack is now layered directly on the refreshed original tRPC
 stack rooted at `dev` commit `6bab3ed`. The refresh includes PR #185's native
@@ -76,7 +76,7 @@ new-code duplication is 48.4% and #204's is 38.0%, against the 3% threshold.
 Both PRs remain `UNSTABLE` because `SonarCloud Code Analysis` is red; the
 exception neither skips nor turns that check green.
 
-### Fresh CI readback (2026-08-12)
+### Historical fresh CI readback (2026-08-12; prior remote heads)
 
 The corrected push started a new CI generation for every layer. PR #197's
 workflow run `31638659737` is fully green: arm64 and amd64 image builds, lint,
