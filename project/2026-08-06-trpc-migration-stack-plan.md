@@ -7,25 +7,25 @@ Base: `dev` @ `254606c` (6 commits ahead of the branch merge-base `5cac12c`; all
 Provider: GitHub (stacks preview enabled — repo stack #179 exists).
 Worktree: new `trees/trpc-migration-stack` (one stack, one worktree). Source worktree `.claude/worktrees/modest-rosalind-8e36bd` stays untouched.
 
-> **Current-state pointer (2026-08-13):** This document is the first-slice
-> execution plan committed in PR #197; it is now a historical predecessor and
-> is not the active execution contract. The active plan is
+> **Current-state pointer (2026-08-13, comment-audit pass):** This document is
+> the first-slice execution plan committed in PR #197; it is now a historical
+> predecessor and is not the active execution contract. The active plan is
 > [`project/2026-08-10-pr-205-trpc-examples-stack-plan.md`](2026-08-10-pr-205-trpc-examples-stack-plan.md).
 > Plan provenance: PR #197 first added this file in commit `7cfd562`; its
-> current head is `321a958`. The later continuation ledger is absent from #197
-> and lives in the upper #205 layer.
-> The live chain is `dev 6bab3ed` → `#197 321a958` → `#196 8140600` →
-> `#195 dd26b0f` → `#194 2e36f98` → `#201 d392283` → `#202 e2738dd` →
-> `#204 786ed47` → `#205 2957beb`. Git ancestry and live PR base/head
-> metadata agree; all eight PRs are open, draft, mergeable, and unmerged.
-> Current #205 CI passed TypeScript run `31651590153`, Docker run
-> `31651590156`, and Playwright run `31651590169`, including merged reports
-> in job `94298057262`. PRs #202 and #204 remain `UNSTABLE` because
-> `SonarCloud Code Analysis` fails only on new-code duplication: 48.4% and
-> 38.0%, respectively, against the 3% threshold. The accepted exception is a
-> non-blocking process waiver; it does not skip or turn either check green.
-> The #195 dependency-install failure and #205 blob-report aggregation failure
-> are closed by fresh reruns. No PR is ready-marked or merged.
+> current local head before this reconciliation commit is `c8d16eec`. The
+> mutable full-stack SHA table belongs in the active plan and must be read from
+> the live stack metadata after each lower-layer propagation; the historical
+> SHA table below is not current evidence.
+>
+> The audit restored non-obvious domain and safety rationale in the owning
+> layers: achievement scope and deduplication in #196; the deferred
+> `auth.loginAsTeam` rate-limit gap in #201; Formik integer normalization and
+> explicit-development-mode behavior in #202; the same normalization and
+> configuration rationale plus the next-segment lifecycle guard in #204; and
+> the token-free player projection boundary in #201. Dead logging, generated
+> output, removed GraphQL wiring, and comments whose code was deleted remain
+> intentionally absent. Fresh per-layer CI is required after the corrected
+> stack is pushed; no merge or cleanup is authorized by this plan.
 
 ## 2026-08-13 current-state addendum
 
