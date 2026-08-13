@@ -171,9 +171,6 @@ export function createPlayRouter({
       .output(playerResultCoreDtoSchema.nullable())
       .mutation(async ({ input, ctx }) => {
         const currentGame = await GameService.getGameFromContext(ctx as any)
-
-        if (!currentGame?.activePeriod) return null
-
         const facts = parsePayload(input.payload)
         const actionFactsSchema = requireFactsSchema(
           schemas.ActionFactsSchema,
@@ -181,7 +178,9 @@ export function createPlayRouter({
         )
         // yup ValidationError maps to BAD_REQUEST in the shared
         // service-error middleware (init.ts).
-        await actionFactsSchema.validate(facts)
+        const validatedFacts = await actionFactsSchema.validate(facts)
+
+        if (!currentGame?.activePeriod) return null
 
         const actionResult = await PlayService.performActionWithRetry(
           {
@@ -190,7 +189,7 @@ export function createPlayRouter({
             playerId: ctx.user.sub,
             periodIx: currentGame.activePeriodIx,
             segmentIx: currentGame.activePeriod.activeSegmentIx,
-            facts,
+            facts: validatedFacts,
           } as any,
           ctx as any,
           {

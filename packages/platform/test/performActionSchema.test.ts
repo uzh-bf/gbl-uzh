@@ -83,8 +83,6 @@ describe('play.performAction schema seam', () => {
 
   it('rejects an invalid payload with BAD_REQUEST before reaching the service layer', async () => {
     const prisma = createMockPrisma()
-    // GameService.getGameFromContext must resolve a game with an active
-    // period, or the router short-circuits to `null` before validation runs.
     prisma.game.findUnique.mockResolvedValue({
       id: 1,
       activePeriod: { id: 10, index: 0 },
@@ -103,6 +101,26 @@ describe('play.performAction schema seam', () => {
     // The schema rejection must short-circuit before the transaction /
     // service reducer ever runs.
     expect(prisma.$transaction).not.toHaveBeenCalled()
+    expect(actionsApply).not.toHaveBeenCalled()
+  })
+
+  it('validates before returning null when no active period exists', async () => {
+    const prisma = createMockPrisma()
+    prisma.game.findUnique.mockResolvedValue({
+      id: 1,
+      activePeriod: null,
+      activePeriodIx: 0,
+    })
+    const actionsApply = jest.fn()
+    const caller = buildCaller(prisma, actionsApply)
+
+    await expect(
+      caller.play.performAction({
+        type: 'DO_THING',
+        payload: JSON.stringify({ amount: 'not-a-number' }),
+      })
+    ).rejects.toMatchObject({ code: 'BAD_REQUEST' })
+
     expect(actionsApply).not.toHaveBeenCalled()
   })
 
@@ -153,6 +171,50 @@ describe('play.performAction schema seam', () => {
       previousResult.facts,
       expect.objectContaining({
         type: 'DO_THING',
+        payload: expect.objectContaining({ playerArgs: { amount: 5 } }),
+      })
+    )
+  })
+
+  it('passes yup-coerced facts to the service layer', async () => {
+    const prisma = createMockPrisma()
+    prisma.game.findUnique.mockResolvedValue({
+      id: 1,
+      activePeriod: { id: 10, index: 0 },
+      activePeriodIx: 0,
+    })
+
+    const previousResult = {
+      facts: { total: 0 },
+      game: { id: 1, status: 'RUNNING' },
+      segment: { facts: {}, index: 0, id: 100 },
+      period: { facts: {}, index: 0, segmentCount: 1, id: 10 },
+      player: {
+        id: 'player-1',
+        role: 'PLAYER',
+        achievementKeys: [],
+        experience: 0,
+        levelIx: 0,
+      },
+    }
+    const tx = createMockPrisma()
+    tx.playerResult.findUnique.mockResolvedValue(previousResult)
+    prisma.$transaction.mockImplementation((fn: any) => fn(tx))
+
+    const actionsApply = jest.fn().mockReturnValue({
+      result: { total: 5 },
+      isDirty: false,
+    })
+    const caller = buildCaller(prisma, actionsApply)
+
+    await caller.play.performAction({
+      type: 'DO_THING',
+      payload: JSON.stringify({ amount: '5' }),
+    })
+
+    expect(actionsApply).toHaveBeenCalledWith(
+      previousResult.facts,
+      expect.objectContaining({
         payload: expect.objectContaining({ playerArgs: { amount: 5 } }),
       })
     )
