@@ -31,7 +31,7 @@ a local rebase; the resulting local heads are:
 | #201 canonical Pages Router | `b835637` |
 | #202 Rate Wars | `b2231b1` |
 | #204 Central Bank | `8ae07e7` |
-| #205 compatibility/reconciliation | `8731bf1` |
+| #205 compatibility/reconciliation | current local top (`HEAD`) |
 
 The local chain remains rooted at `dev 6bab3ed`. These rewritten heads are
 not yet the remote PR heads; the remote stack still has the previously pushed
