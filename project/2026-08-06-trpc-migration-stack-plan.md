@@ -1,4 +1,4 @@
-# tRPC Migration — Stack Plan (Gate 1 draft)
+# tRPC Migration — Stack Plan (historical predecessor)
 
 Date: 2026-08-06
 Source branch: `codex/trpc-migration-work-packages` @ `c25e0a7f`
@@ -6,6 +6,48 @@ Source PR: [#144 feat(trpc): migrate platform and demo-game from GraphQL to tRPC
 Base: `dev` @ `254606c` (6 commits ahead of the branch merge-base `5cac12c`; all merged Aug 1, all toolchain).
 Provider: GitHub (stacks preview enabled — repo stack #179 exists).
 Worktree: new `trees/trpc-migration-stack` (one stack, one worktree). Source worktree `.claude/worktrees/modest-rosalind-8e36bd` stays untouched.
+
+> **Current-state pointer (2026-08-13):** This document is the first-slice
+> execution plan committed in PR #197; it is now a historical predecessor and
+> is not the active execution contract. The active plan is
+> [`project/2026-08-10-pr-205-trpc-examples-stack-plan.md`](2026-08-10-pr-205-trpc-examples-stack-plan.md).
+> Plan provenance: PR #197 first added this file in commit `7cfd562`; its
+> current head is `321a958`. The later continuation ledger is absent from #197
+> and lives in the upper #205 layer.
+> The live chain is `dev 6bab3ed` → `#197 321a958` → `#196 8140600` →
+> `#195 dd26b0f` → `#194 2e36f98` → `#201 d392283` → `#202 e2738dd` →
+> `#204 786ed47` → `#205 2957beb`. Git ancestry and live PR base/head
+> metadata agree; all eight PRs are open, draft, mergeable, and unmerged.
+> Current #205 CI passed TypeScript run `31651590153`, Docker run
+> `31651590156`, and Playwright run `31651590169`, including merged reports
+> in job `94298057262`. PRs #202 and #204 remain `UNSTABLE` because
+> `SonarCloud Code Analysis` fails only on new-code duplication: 48.4% and
+> 38.0%, respectively, against the 3% threshold. The accepted exception is a
+> non-blocking process waiver; it does not skip or turn either check green.
+> The #195 dependency-install failure and #205 blob-report aggregation failure
+> are closed by fresh reruns. No PR is ready-marked or merged.
+
+## 2026-08-13 current-state addendum
+
+The first-slice plan remains the authoritative plan for PR #197's responsibility
+and provenance, but its original Gate 1 design sections below are historical.
+The implemented stack expanded into the eight-layer chain recorded in the active
+continuation plan. The shared CI install is owned by #197; platform privacy and
+compatibility corrections are in #196; demo-game lifecycle proof is in #195;
+#194 owns its independent CI, devcontainer, and auth-origin corrections; #201
+owns the canonical Pages Router pattern; #202 and #204 own their game-specific
+transition fixes; and #205 owns the compatibility boundary, verification
+fixtures, and reconciliation ledger.
+
+The game-runtime migration tip is #204 (`786ed47`), but #205 is code-bearing
+through `a0f6d52`, including workflow, package-verification, configuration, and
+compatibility-source changes. Only commits from `cf67aa4` through current head
+`2957beb` are documentation, agent-instruction, or plan-only. The integrated
+final initial and correction reviews both returned `DONE_WITH_CONCERNS` on
+earlier ranges; the allowed two-review budget is exhausted. Their findings are
+recorded as closed through owning-layer corrections plus focused verification,
+but no exact-current-head integrated-final verdict exists. Gate 3 evidence is
+complete; the stack remains draft and reviewable, not merge-authorized.
 
 ## 2026-08-10 continuation note
 
@@ -16,20 +58,16 @@ migrate Rate Wars and Central Bank. See
 `project/2026-08-10-pr-205-trpc-examples-stack-plan.md` for current execution state.
 No layer from either stack has been merged.
 
-## 2026-08-12 base-refresh note
+## 2026-08-12 base-refresh note (superseded by the active plan)
 
-The eight draft layers are now one local stack rooted at `dev` commit
-`5852341`. The refresh incorporates the native mock-auth work from PR #185 and
-folds late review corrections into their owning layers: the platform result
-contract in #196, demo-game lifecycle proof in #195, canonical Pages Router
-guidance in #201, and game-specific corrections in #202 and #204. #194 owns
-the resulting CI, devcontainer, auth-variable, and pnpm-pin integration.
-
-All eight pull requests are drafts. The rewritten branches have not been
-pushed, and the previous Gate 3 decision does not apply to their new commit
-identities. Exact-tip verification and one integrated final review must pass
-before a fresh Gate 3 decision. No merge, publication, deployment, branch
-deletion, or worktree cleanup is authorized.
+The earlier refresh snapshot was rooted at `dev` commit `5852341` and said the
+rewritten branches were not yet pushed. That snapshot was superseded by the
+latest-`dev` refresh and ownership correction documented in the active plan.
+The current stack has been pushed and read back with `needsRebase: false`; the
+integrated final and correction reviews are closed under the two-review budget.
+The current Gate 3 evidence is the fresh CI readback in the active plan, not
+the historical status sections below. No merge, publication, deployment,
+branch deletion, or worktree cleanup is authorized.
 
 ## 1. Reconcile live state (verified 2026-08-06)
 
