@@ -40,7 +40,8 @@ and does not intentionally change runtime behavior. Fresh CI for every layer
 is required after the rewritten stack is pushed.
 
 The game-runtime migration tip remains #204 (`786ed47`), while #205 contains
-code-bearing compatibility and verification work through `a0f6d52`. Only the
+code-bearing compatibility and verification work through rebased commit
+`687fd33c` (the prior remote equivalent was `a0f6d52`). Only the
 later #205 commits from `cf67aa4` through the current local tip are
 documentation, agent-instruction, or plan-only. The initial and correction
 integrated-final reviews returned `DONE_WITH_CONCERNS` on earlier ranges that
@@ -132,7 +133,8 @@ both terminating client links. This matches the official [Pages Router setup](ht
   through executable code head `786ed47`; its lower-layer heads were `321a958`
   (#197), `8140600` (#196), `dd26b0f` (#195), `2e36f98` (#194), `d392283`
   (#201), `e2738dd` (#202), and `786ed47` (#204). The code-bearing portion of
-  #205 reached `a0f6d52`; only later #205 commits from `cf67aa4` onward were
+  #205 reached rebased commit `687fd33c` (prior remote equivalent `a0f6d52`);
+  only later #205 commits from `a137916a` onward were
   documentation, agent-instruction, or plan-only. Exact-tip CI passed for the
   later documentation generations `e7c0ba08` and `de91cddd`; those results do
   not cover the newly rebased local heads above.
