@@ -1,5 +1,9 @@
 # Log
 
+## 2026-08-13
+
+- **Update**: `developing-a-game.md`, the example READMEs, and native host guidance - aligned the new-game architecture and local-auth guidance with the three tRPC Pages Router apps: native host mode uses committed mock defaults, and GraphQL/Nexus generation is not part of game scaffolding.
+
 ## 2026-08-12
 
 - **Update**: example auth consumers, container environments, CI, and current auth documentation - all in-repo games now use `resolveAdminOidcConfig()`, starter/devrouter/CI use only `GBL_AUTH_MODE=mock` and `GBL_MOCK_OIDC_*`, native example mock startup remains unsupported, and production forbids mock mode.
