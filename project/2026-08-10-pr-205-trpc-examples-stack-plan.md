@@ -2,18 +2,52 @@
 
 Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
-Status: shared CI install ownership was moved into the bottom layer and
-propagated through the draft stack on 2026-08-12; both integrated final passes
-are closed and their findings are corrected in the owning platform layer; the
-corrected eight-branch stack was atomically pushed and read back; fresh CI is
-terminal and green for every layer, including a fresh top-tip artifact
-generation; Gate 3 evidence is complete with the accepted SonarCloud
-duplication exceptions explicitly skipped; all pull
+Status: the first-slice plan was reconciled in #197 as `c8d16eec` and rebased
+through the dependent stack; the rewritten local heads are recorded in the
+2026-08-13 addendum below and have not yet replaced the remote heads; fresh
+per-layer CI is required after that push; the integrated final-review budget is
+exhausted on earlier ranges and no exact-current-head verdict exists; all pull
 requests remain draft, open, and unmerged
 Provider: GitHub stacked changes
 Base: `dev` at `6bab3ed`
 Worktree: `trees/trpc-examples-stack`
 Mode: guided, with a review pause after every layer
+
+## 2026-08-13 first-slice plan reconciliation
+
+The first-slice plan in
+[`project/2026-08-06-trpc-migration-stack-plan.md`](2026-08-06-trpc-migration-stack-plan.md)
+was first added by commit `7cfd562` and is now current in PR #197 at
+`c8d16eec`. Its document-only update was propagated through the dependent
+stack by a local rebase; the resulting local heads are:
+
+| Layer | Local head |
+| --- | --- |
+| #197 bottom toolchain | `c8d16eec` |
+| #196 platform kernel | `de892bec` |
+| #195 demo-game migration | `b7905ae` |
+| #194 CI/devcontainer/docs | `5410ae2` |
+| #201 canonical Pages Router | `b835637` |
+| #202 Rate Wars | `b2231b1` |
+| #204 Central Bank | `8ae07e7` |
+| #205 compatibility/reconciliation | `7989c90` |
+
+The local chain remains rooted at `dev 6bab3ed`. These rewritten heads are
+not yet the remote PR heads; the remote stack still has the previously pushed
+heads through #205 `2957beb`. The rebase carries the first-slice plan update
+and does not intentionally change runtime behavior. Fresh CI for every layer
+is required after the rewritten stack is pushed.
+
+The game-runtime migration tip remains #204 (`786ed47`), while #205 contains
+code-bearing compatibility and verification work through `a0f6d52`. Only the
+later #205 commits from `cf67aa4` through the current local tip are
+documentation, agent-instruction, or plan-only. The initial and correction
+integrated-final reviews returned `DONE_WITH_CONCERNS` on earlier ranges that
+are no longer the current ancestry; the allowed two-review budget is exhausted.
+Their findings are recorded as closed through owning-layer corrections and
+focused verification, but no exact-current-head integrated-final verdict
+exists. The stack is ready for a fresh human final review after current-head
+CI, not ready to merge.
 
 ## 2026-08-12 refresh status
 
@@ -35,6 +69,11 @@ lower platform and example layers inherit the same `--ignore-scripts` install;
 #194 retains its independent same-origin and workflow-path corrections. No
 merge, publication, deployment, branch deletion, or worktree cleanup is
 authorized.
+
+The current remote Sonar state remains an accepted process exception: #202's
+new-code duplication is 48.4% and #204's is 38.0%, against the 3% threshold.
+Both PRs remain `UNSTABLE` because `SonarCloud Code Analysis` is red; the
+exception neither skips nor turns that check green.
 
 ### Fresh CI readback (2026-08-12)
 
@@ -86,17 +125,16 @@ both terminating client links. This matches the official [Pages Router setup](ht
 [HTTP batch](https://trpc.io/docs/client/links/httpBatchLink), and
 [data transformer](https://trpc.io/docs/server/data-transformers) guidance.
 
-### Refreshed exact-tip verification (2026-08-12)
+### Historical exact-tip verification (2026-08-12; prior remote heads)
 
-- The eight-layer local and remote stack is clean and contiguous from `dev`
-  commit `6bab3ed` through executable code head `786ed47`; the lower-layer
-  remote heads are `321a958` (#197), `8140600` (#196), `dd26b0f` (#195),
-  `2e36f98` (#194), `d392283` (#201), `e2738dd` (#202), and `786ed47` (#204).
-  The top branch carries the current reconciled ledger. The code-bearing stack
-  ends at #204 (`786ed47`); every #205 commit is documentation-only. Exact-tip
-  CI is green for both the `e7c0ba08` and `de91cddd` documentation generations;
-  the final plan-only continuation cannot change runtime behavior. Every local
-  and remote layer reports `needsRebase: false`.
+- The prior remote stack was clean and contiguous from `dev` commit `6bab3ed`
+  through executable code head `786ed47`; its lower-layer heads were `321a958`
+  (#197), `8140600` (#196), `dd26b0f` (#195), `2e36f98` (#194), `d392283`
+  (#201), `e2738dd` (#202), and `786ed47` (#204). The code-bearing portion of
+  #205 reached `a0f6d52`; only later #205 commits from `cf67aa4` onward were
+  documentation, agent-instruction, or plan-only. Exact-tip CI passed for the
+  later documentation generations `e7c0ba08` and `de91cddd`; those results do
+  not cover the newly rebased local heads above.
 - PR #206 landed while the first refreshed CI cycle was running. Its native
   development changes were incorporated at the trunk boundary, not patched at
   the top of the stack. The only semantic conflicts preserved PR #206's
@@ -174,15 +212,18 @@ both terminating client links. This matches the official [Pages Router setup](ht
   stale code-head SHA in this ledger; the reproducible executable and final
   documentation tips above replace it. These are reviewer-requested closure
   changes with no new behavior beyond restoring the published compatibility
-  contract, so the two-review budget closes with focused verification.
+  contract. Both integrated-final attempts reviewed earlier ranges and returned
+  `DONE_WITH_CONCERNS`; the allowed initial-plus-correction budget is exhausted.
+  Findings are recorded as closed through owning-layer corrections and focused
+  verification, but no exact-current-head integrated-final verdict exists.
 
 ## Historical execution status (2026-08-11, pre-refresh)
 
 | Layer                               | Branch / pull request                                                                               | Verified state                                                                                           |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | 00 canonical Pages Router pattern   | `rs/trpc-examples/00-pages-router-pattern` / [#201](https://github.com/uzh-bf/gbl-uzh/pull/201)     | Commit `a7ac89a`; checks, lifecycle proof, and intermediate review passed                                |
-| 01 Rate Wars                        | `rs/trpc-examples/01-rate-wars-trpc` / [#202](https://github.com/uzh-bf/gbl-uzh/pull/202)           | Commit `10fcc62`; lifecycle and review passed; the 46.4% duplication-only SonarCloud failure is accepted |
-| 02 Central Bank                     | `rs/trpc-examples/02-central-bank-trpc` / [#204](https://github.com/uzh-bf/gbl-uzh/pull/204)        | Commit `4a1271d`; lifecycle and review passed; the 38.1% duplication-only SonarCloud failure is accepted |
+| 01 Rate Wars                        | `rs/trpc-examples/01-rate-wars-trpc` / [#202](https://github.com/uzh-bf/gbl-uzh/pull/202)           | Historical commit `10fcc62`; lifecycle and review passed; the 48.4% duplication-only SonarCloud failure is accepted |
+| 02 Central Bank                     | `rs/trpc-examples/02-central-bank-trpc` / [#204](https://github.com/uzh-bf/gbl-uzh/pull/204)        | Historical commit `4a1271d`; lifecycle and review passed; the 38.0% duplication-only SonarCloud failure is accepted |
 | 03 compatibility and reconciliation | `rs/trpc-examples/03-graphql-deprecation-docs` / [#205](https://github.com/uzh-bf/gbl-uzh/pull/205) | Implementation and final-review closure through `79c7042`; all local gates complete                      |
 
 The user approved opening pull requests #201, #202, #204, and #205 for review
@@ -194,11 +235,11 @@ remains unchanged and unmerged.
 
 - [Rate Wars PR #202](https://github.com/uzh-bf/gbl-uzh/pull/202) passes
   Greptile, Vercel, and the Sonar GitHub check, but SonarCloud's code-analysis
-  quality gate rejects 46.4% new-code duplication against a 3% limit. The main
+  quality gate rejects 48.4% new-code duplication against a 3% limit. The main
   contributors are the intentionally template-aligned `GameLayout`, learning
   hook, tRPC client, and administrator detail page.
 - [Central Bank PR #204](https://github.com/uzh-bf/gbl-uzh/pull/204) has the
-  same check profile, with 38.1% new-code duplication. Its largest contributors
+  same check profile, with 38.0% new-code duplication. Its largest contributors
   are `GameLayout`, join/welcome pages, the facts helper, game list, learning
   hook, and administrator detail page.
 - Reliability, security, maintainability, and reviewed-hotspot conditions pass
@@ -271,10 +312,11 @@ example games away from GraphQL/Apollo/Nexus; and reconcile every active wiki,
 skill, README, workflow, devcontainer, package, and project-plan claim with the
 implemented state.
 
-The existing four-PR tRPC stack remains unchanged. This plan creates a second
-stack on its top branch. It authorizes implementation, draft branches, draft
-pull requests, and pushes for review. It does not authorize merge, publication,
-deployment, closing pull requests, deleting branches, or removing worktrees.
+The original four-PR tRPC stack was extended by the example-game layers and is
+now one eight-layer stack. This plan records that continuation and authorizes
+implementation, draft branches, draft pull requests, and pushes for review. It
+does not authorize merge, publication, deployment, closing pull requests,
+deleting branches, or removing worktrees.
 
 ## Approved decisions
 
