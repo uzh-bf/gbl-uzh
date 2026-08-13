@@ -7,6 +7,7 @@ import { appRouter } from '../../../server/trpc/router'
 export default createNextApiHandler({
   router: appRouter,
   createContext,
+  maxBatchSize: 10,
   // Without this, server-side exceptions (incl. ones outside throwAsTRPCError,
   // e.g. context/middleware bugs) are invisible in prod. Log the full error
   // server-side; the client still gets the genericized message from the

@@ -1,4 +1,4 @@
-import { OutputFacts, PayloadSegment } from '@gbl-uzh/platform'
+import type { OutputFacts, PayloadSegment } from '@gbl-uzh/platform'
 import {
   computeScenarioOutcome,
   debugLog,

@@ -1,6 +1,6 @@
-import { PlayerResultType } from 'src/generated/prisma/enums'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
+import { PlayerResultType } from 'src/generated/prisma/enums'
 
 import {
   Card,

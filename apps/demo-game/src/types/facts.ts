@@ -1,4 +1,4 @@
-import { OutputFacts } from '@gbl-uzh/platform'
+import type { OutputFacts } from '@gbl-uzh/platform'
 import * as yup from 'yup'
 
 // Lives here (not in services/ActionsReducer) so client pages can reference

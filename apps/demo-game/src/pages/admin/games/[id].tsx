@@ -7,12 +7,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { MultiSelect } from '@gbl-uzh/ui'
-import { GameStatus } from 'src/generated/prisma/enums'
 import { Button, H3, H4, Modal } from '@uzh-bf/design-system'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { GameStatus } from 'src/generated/prisma/enums'
 import { twMerge } from 'tailwind-merge'
 
 import {
@@ -548,8 +548,7 @@ function ManageGame() {
                         segmentStatus === STATUS.COMPLETED
 
                       const segmentFacts = segment?.facts as
-                        | PeriodSegmentFacts
-                        | undefined
+                        PeriodSegmentFacts | undefined
                       const diceBonds = segmentFacts?.diceRolls?.map(
                         (dice) => dice.bonds
                       )
