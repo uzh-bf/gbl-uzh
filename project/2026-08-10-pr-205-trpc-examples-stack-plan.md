@@ -3,9 +3,10 @@
 Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
 Status: the first-slice plan includes the comment-audit and platform-contract
-reconciliation. The stack has been corrected after integrated review findings;
-the current local chain is rebased and the next publication will trigger fresh
-per-layer checks. All eight PRs remain open, ready for review, and unmerged.
+reconciliation. The stack has been corrected after integrated review findings
+and is published at the rebased layer heads below; fresh per-layer checks are
+now the remaining remote verification. All eight PRs remain open, ready for
+review, and unmerged.
 The known SonarCloud Code Analysis exceptions on #202 and #204 remain
 intentionally outside the approved check gate. The correction review remains
 the final review gate after the fresh check readback.
@@ -50,7 +51,7 @@ Current local rebased heads (next publication):
 | #201 | `7ad2bf53` | canonical Pages Router pattern |
 | #202 | `0ccfee35` | Rate Wars tRPC migration |
 | #204 | `234ba829` | Central Bank tRPC migration and final-period lifecycle proof |
-| #205 | `1c7d413e` | compatibility and reconciliation documentation, including this record |
+| #205 | current top branch (plan-only successor) | compatibility and reconciliation documentation, including this record |
 
 Review disposition:
 
@@ -140,14 +141,14 @@ immutable post-check range.
       "required": true,
       "state": "reserved",
       "evidence": [
-        {"kind": "register_tuple", "identity": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99..327c0c81dc7fda7324a72c83d3ce080bb467189e", "path": "project/_local/reviews/trpc-stack-198-refresh-gate-register.md"}
+        {"kind": "register_tuple", "identity": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99..fbf6695d11c0ff10cb26f5f5a75a02ae4f960e2a", "path": "project/_local/reviews/trpc-stack-198-refresh-gate-register.md"}
       ]
     }
   },
   "active_workers": [],
   "parking": null,
   "git": {
-    "head": "1c7d413e317352a47c853afe123d82e0183b7dc3",
+    "head": "fbf6695d11c0ff10cb26f5f5a75a02ae4f960e2a",
     "base": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99",
     "branch": "rs/trpc-examples/03-graphql-deprecation-docs",
     "worktree": "/Users/rschlae/Git/gbl/gbl-uzh/trees/trpc-examples-stack"
