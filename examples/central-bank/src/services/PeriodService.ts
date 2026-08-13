@@ -1,12 +1,12 @@
-import {
+import type {
   OutputFacts,
   PayloadPeriodConsolidation,
   PayloadPeriodInitialisation,
 } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
-import { GameFacts } from '../types/Game'
-import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
+import type { GameFacts } from '../types/Game'
+import type { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
 type InputPeriodFacts = PeriodFacts
 type OutputPeriodFacts = OutputFacts<InputPeriodFacts, any, any>

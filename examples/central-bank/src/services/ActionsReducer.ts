@@ -1,9 +1,9 @@
-import { Action } from '@gbl-uzh/platform'
+import type { Action } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
-import { PrismaClient } from 'src/generated/prisma/client'
 import { produce } from 'immer'
-import { Decisions } from '../types/facts'
-import { GameFacts, PeriodFacts, PeriodSegmentFacts } from '../types/index'
+import type { PrismaClient } from 'src/generated/prisma/client'
+import type { Decisions } from '../types/facts'
+import type { GameFacts, PeriodFacts, PeriodSegmentFacts } from '../types/index'
 
 export enum ActionTypes {
   NONE = '',

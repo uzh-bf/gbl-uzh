@@ -1,10 +1,11 @@
-import { OutputFacts, PayloadSegmentResult } from '@gbl-uzh/platform'
+import type { OutputFacts, PayloadSegmentResult } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
-import { DEFAULT_RATE, NEUTRAL_RATE, PlayerRole } from '../settings/Constants'
-import { GameFacts } from '../types/Game'
+import type { PlayerRole } from '../settings/Constants'
+import { DEFAULT_RATE, NEUTRAL_RATE } from '../settings/Constants'
+import type { GameFacts } from '../types/Game'
 import type { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
-import { OutputResultFacts, ResultFacts } from '../types/facts'
+import type { OutputResultFacts, ResultFacts } from '../types/facts'
 
 type SegmentResultFactsInit = ResultFacts
 

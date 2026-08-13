@@ -35,13 +35,7 @@ if [[ "${GBL_DEV_MODE:-}" != "starter" ]]; then
   fi
   export NEXTAUTH_URL="https://${app_host}"
   export NEXT_PUBLIC_APP_URL="https://${app_host}"
-  # Central Bank still runs GraphQL until its migration layer; demo-game and
-  # Rate Wars use tRPC.
-  if [[ "${GBL_GAME_TARGET}" = "demo" || "${GBL_GAME_TARGET}" = "rate-wars" ]]; then
-    export NEXT_PUBLIC_API_URL="https://${app_host}/api/trpc"
-  else
-    export NEXT_PUBLIC_API_URL="https://${app_host}/api/graphql"
-  fi
+  export NEXT_PUBLIC_API_URL="https://${app_host}/api/trpc"
   export GBL_MOCK_OIDC_ISSUER="https://${oidc_host}/default"
 fi
 
