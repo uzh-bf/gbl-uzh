@@ -72,17 +72,38 @@
     "react": "^18.3.1 || ^19.0.0",
     "yup": "^1.6.1"
   },
+  "peerDependenciesMeta": {
+    "@apollo/client": {
+      "optional": true
+    },
+    "graphql": {
+      "optional": true
+    },
+    "graphql-scalars": {
+      "optional": true
+    },
+    "graphql-sse": {
+      "optional": true
+    },
+    "graphql-yoga": {
+      "optional": true
+    },
+    "nexus": {
+      "optional": true
+    }
+  },
   "scripts": {
-    "build": "run-s generate build:nexus build:ts build:dts",
+    "build": "run-s generate build:ts build:dts",
     "build:dts": "tsc --project tsconfig.build.json",
-    "build:nexus": "tsx src/nexus.ts",
     "build:ts": "cross-env NODE_ENV=production rollup -c",
     "check:ts": "../../node_modules/typescript-native/bin/tsc --project tsconfig.json --noEmit",
     "check:ts:typescript6": "node_modules/typescript/bin/tsc --project tsconfig.json --noEmit",
     "test:auth": "tsx --test src/lib/auth.test.ts",
     "dev": "cross-env NODE_ENV=development rollup -c --watch",
     "generate": "prisma generate",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "verify:consumer": "node scripts/verify-consumer.mjs",
+    "verify:package": "node scripts/verify-package.mjs"
   },
   "engines": {
     "node": ">=24"

@@ -76,6 +76,11 @@ function parseLearningOptions(solution: string | null | undefined): number[] {
   }
 }
 
+/**
+ * @deprecated New games keep a small app-local tRPC learning hook so its
+ * procedure types and cache invalidation remain tied to the app's AppRouter.
+ * Retained for published GraphQL consumers until their usage is confirmed.
+ */
 export function useLearningActivities<
   TLearningElementData extends LearningElementQueryData,
 >({

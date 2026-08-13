@@ -1,5 +1,12 @@
 # Major dependency upgrade stack
 
+> **Historical note (2026-08-10):** Version numbers, GraphQL endpoint values,
+> and Playwright outcomes below describe this dependency stack at execution
+> time. Current game API wiring is tRPC v11 for demo-game, Rate Wars, and
+> Central Bank; current package-manager and Playwright pins are `pnpm@11.6.0`
+> and Playwright `1.61.1`. See
+> `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`.
+
 ## Goal
 
 - Problem: The active workspace spans incompatible formatter generations and remains on pre-native TypeScript, the website's legacy React/Next pair, and Prisma 6.

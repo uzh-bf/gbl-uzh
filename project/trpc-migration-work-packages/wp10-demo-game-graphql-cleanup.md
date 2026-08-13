@@ -2,6 +2,11 @@
 
 Status: serial cleanup after `WP5`, `WP6`, `WP7`, `WP8`, and `WP9`.
 
+Outcome (2026-08-10): complete. Demo-game has no active Apollo provider,
+GraphQL endpoint, Nexus schema, generated GraphQL client, or codegen command;
+its supported API is tRPC v11. This file remains the historical execution
+contract.
+
 Depends on: `WP5`, `WP6`, `WP7`, `WP8`, `WP9`.
 
 Unblocks: `WP11`.

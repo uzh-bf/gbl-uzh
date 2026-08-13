@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: "2026-08-12T00:00:00Z"
+timestamp: "2026-08-13T00:00:00Z"
 ---
 
 # Developing a Game
@@ -29,7 +29,8 @@ Before writing any code or scaffolding an app, use the `gbl-game-design` skill t
 All in-repo games use the shared `resolveAdminOidcConfig()` resolver
 (`packages/platform/src/lib/auth.ts:resolveAdminOidcConfig`). The starter and
 devrouter containers, plus CI, use mock OIDC through `GBL_AUTH_MODE=mock` and
-`GBL_MOCK_OIDC_*`. Native host mock startup is unsupported for example packages.
+`GBL_MOCK_OIDC_*`. Native host mode uses the same mock defaults from each
+game's committed `.env.development` when the local OIDC service is reachable.
 
 Native host real-tenant opt-in requires explicit `GBL_AUTH_MODE=auth0` with real
 `AUTH0_*` values in an ignored `.env.local`. Production defaults to real
@@ -44,9 +45,14 @@ There is no generator. The supported path is copying the reference game inside a
 2. Keep the Prisma setup as-is: `prisma/copy.ts` copies the platform schema to `prisma/schema/platform.prisma` on every build/dev run (never edit that file); `prisma/schema/specific.prisma` is yours for game-specific tables (the demo game's is an unused stub).
 3. Replace the game logic: `src/services/` (computations, below), `src/types/` (facts shapes + yup schemas), `prisma/seed.ts` (levels/content), and the pages under `src/pages/`.
 4. The workspace glob `apps/*` picks the package up automatically; run from the repo root with turbo or from the app directory.
-5. Local dev environment: the **starter** config (`.devcontainer/starter/`, published localhost ports) and the **devrouter** config (`.devcontainer/README.md`, namespaced maintainer routing) select `demo`, `central-bank`, or `rate-wars` through `GBL_GAME_TARGET`. Both use the shared mock OIDC contract described above, and so does native host mode — it selects the same games with an argument to `pnpm bootstrap` / `pnpm dev`, or with `GBL_GAME_TARGET`.
+5. Local dev environment: the **starter** config (`.devcontainer/starter/`, published localhost ports) and the **devrouter** config (`.devcontainer/README.md`, namespaced maintainer routing) select `demo`, `central-bank`, or `rate-wars` through `GBL_GAME_TARGET`. Both inject the shared mock OIDC contract described above. Native host mode uses the same game target and mock defaults from `.env.development`; `pnpm bootstrap [game]` prepares the database and `pnpm dev [game]` starts the selected app. Set `GBL_AUTH_MODE=auth0` explicitly for a native real-tenant run.
 
-Demo-game's standalone Nexus and GraphQL scripts run before Next.js can load environment files. Its Prisma bootstrap loads `.env.<mode>.local`, `.env.local`, `.env.<mode>`, and `.env` in Next's precedence order before authentication is resolved (`apps/demo-game/src/lib/prisma.ts:default`). Existing process or container variables still take priority.
+Each game's Prisma bootstrap loads `.env.<mode>.local`, `.env.local`,
+`.env.<mode>`, and `.env` in Next's precedence order before authentication is
+resolved (`apps/demo-game/src/lib/prisma.ts:default`). Existing process or
+container variables still take priority. The game apps do not run GraphQL or
+Nexus code generation; the retained GraphQL files are published compatibility
+surfaces in `@gbl-uzh/platform`, not part of the new-game scaffold.
 
 > **WARNING:** Decontaminate the copy. `cp -R apps/demo-game apps/<your-game>` also copies the demo game's domain logic, and the build will not fail on residue you leave behind. After step 3, hunt down demo-game leftovers: `.env.production` URLs still pointing at `demo-game.stg.env.bf-app.ch`, the `src/pages/index.tsx` trading showcase, dead `src/lib/analysis.ts` portfolio code, demo time constants (`MONTHS`/`NUM_MONTHS`), and the `GameFacts.myInt` stub. The full hit-list and a "definition of done" are in the `gbl-new-game-app` skill. Grep your `src/` for `assetsWithReturns`, `spotPrice`, `bank`/`bonds`/`stocks` — any hit is residue.
 

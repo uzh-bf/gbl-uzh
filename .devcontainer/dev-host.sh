@@ -25,8 +25,8 @@ else
 fi
 
 # The trailing `...` in the filter also starts the watch builds of the shared
-# platform and ui packages, so edits there reach the running game. Only the
-# game's own GraphQL documents are watched by codegen, so nodemon restarts the
-# whole task when the platform's shared operations change.
+# platform and ui packages, so edits there reach the running game. The platform
+# public GraphQL compatibility documents are watched, so nodemon restarts the
+# selected app when those shared inputs change.
 exec nodemon -w packages/platform/public --ext graphql \
   --exec "turbo run dev --filter=${GBL_GAME_PACKAGE}..."

@@ -1,0 +1,32 @@
+{
+  "name": "gbl-platform-trpc-consumer",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.6.0",
+  "scripts": {
+    "check": "tsc --project tsconfig.json",
+    "smoke": "node --import tsx index.ts"
+  },
+  "dependencies": {
+    "@gbl-uzh/platform": "0.0.0-package-verifier",
+    "@prisma/client": "7.9.1",
+    "@trpc/server": "11.18.0",
+    "dayjs": "1.11.13",
+    "jsonwebtoken": "9.0.2",
+    "next": "16.2.9",
+    "next-auth": "4.24.14",
+    "nookies": "2.5.2",
+    "prisma": "7.9.1",
+    "ramda": "0.30.1",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "yup": "1.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.2",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "tsx": "4.19.3",
+    "typescript": "6.0.2"
+  }
+}

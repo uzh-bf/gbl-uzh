@@ -1,5 +1,9 @@
 # Log
 
+## 2026-08-13
+
+- **Update**: `developing-a-game.md`, the example READMEs, and native host guidance - aligned the new-game architecture and local-auth guidance with the three tRPC Pages Router apps: native host mode uses committed mock defaults, and GraphQL/Nexus generation is not part of game scaffolding.
+
 ## 2026-08-12
 
 - **Update**: example auth consumers, container environments, CI, and current auth documentation - all in-repo games now use `resolveAdminOidcConfig()`, starter/devrouter/CI use only `GBL_AUTH_MODE=mock` and `GBL_MOCK_OIDC_*`, native example mock startup remains unsupported, and production forbids mock mode.
@@ -13,6 +17,7 @@
 
 - **Update**: `api-layer.md`, `developing-a-game.md`, and deployment/building guidance - made tRPC v11 the supported game API, documented the official Pages Router wrapper, bounded batching, SSE/SuperJSON links, typed authorization, targeted invalidation, and same-origin browser routing.
 - **Update**: `api-layer.md` and `index.md` - recorded Rate Wars as a complete tRPC example after its admin, player, report, learning, story, and realtime paths passed the real two-year lifecycle.
+- **Decision**: `adr/0001-deprecate-graphql-compatibility.md` - retained published platform GraphQL exports and the UI Apollo hook as deprecated compatibility until external-consumer removal evidence exists; all repository games now use tRPC.
 
 ## 2026-07-11
 
