@@ -3,12 +3,12 @@
 Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
 Status: the first-slice plan includes the comment-audit and platform-contract
-reconciliation. The complete eight-layer stack has been reconciled locally and
-the current candidate heads are recorded below for publication and fresh CI.
-All eight PRs remain open, ready for review, and unmerged. The known SonarCloud
-Code Analysis exceptions on #202 and #204 remain intentionally outside the
-approved check gate. The exact-current-head integrated final review remains the
-final review gate after publication.
+reconciliation. The complete eight-layer stack is published with the exact
+heads recorded below, and fresh CI is running against those heads. All eight
+PRs remain open, ready for review, and unmerged. The known SonarCloud Code
+Analysis exceptions on #202 and #204 remain intentionally outside the approved
+check gate. The exact-current-head integrated final review remains the final
+review gate after the fresh check readback.
 Provider: GitHub stacked changes
 Base: `dev` at `6bab3ed`
 Worktree: `trees/trpc-examples-stack`
@@ -38,7 +38,7 @@ separate example games remain separate stacked layers above the canonical
 Pages Router layer. The resolved central-bank conflict retains the canonical
 inferred result contract and the existing player-identity privacy correction.
 
-Current local rebased heads for the next publication:
+Current published heads:
 
 | Layer | Local head | Responsibility |
 | --- | --- | --- |
@@ -49,7 +49,7 @@ Current local rebased heads for the next publication:
 | #201 | `84f8970b` | canonical Pages Router pattern |
 | #202 | `c776471a` | Rate Wars tRPC migration |
 | #204 | `f2f904a5` | Central Bank tRPC migration |
-| #205 | `c8d64c9a` | compatibility and reconciliation documentation, including this record |
+| #205 | `999f4a5c` | compatibility and reconciliation documentation, including this record |
 
 Review disposition:
 
@@ -133,24 +133,25 @@ correction changed their ancestry, so fresh checks are required for the current
 candidate heads. No merge, queue, ready/draft transition, branch deletion, or
 worktree cleanup has occurred.
 
-## 2026-08-13 reconciled candidate state (pending publication)
+## 2026-08-13 reconciled published state (fresh checks running)
 
-The owning first-slice plan correction is committed on #197 and propagated
-through the stack. The candidate heads are:
+The owning first-slice plan correction is committed on #197, propagated through
+the stack, and published to the eight existing PRs. The current published heads
+are:
 
 | PR | Candidate head | Fresh remote checks |
 | --- | --- | --- |
-| #197 | `775176cd` | pending publication |
-| #196 | `35cad61d` | pending publication |
-| #195 | `c161e01a` | pending publication |
-| #194 | `3bdc93ae` | pending publication |
-| #201 | `84f8970b` | pending publication |
-| #202 | `c776471a` | pending publication; SonarCloud remains an approved skipped exception |
-| #204 | `f2f904a5` | pending publication; SonarCloud remains an approved skipped exception |
-| #205 | `c8d64c9a` | pending publication |
+| #197 | `775176cd` | fresh checks running |
+| #196 | `35cad61d` | fresh checks running |
+| #195 | `c161e01a` | fresh checks running |
+| #194 | `3bdc93ae` | fresh checks running |
+| #201 | `84f8970b` | fresh checks running |
+| #202 | `c776471a` | fresh checks running; SonarCloud remains an approved skipped exception |
+| #204 | `f2f904a5` | fresh checks running; SonarCloud remains an approved skipped exception |
+| #205 | `999f4a5c` | fresh checks running |
 
-The top review range for the next exact-current-head review is
-`6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99..c8d64c9a`.
+The top review range for the exact-current-head review is
+`6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99..999f4a5c`.
 
 ## 2026-08-13 first-slice plan reconciliation (historical checkpoint)
 
