@@ -3,12 +3,12 @@
 Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
 Status: the first-slice plan includes the comment-audit and platform-contract
-reconciliation. The complete eight-layer stack is published with the exact
-heads recorded below, and fresh CI is running against those heads. All eight
-PRs remain open, ready for review, and unmerged. The known SonarCloud Code
-Analysis exceptions on #202 and #204 remain intentionally outside the approved
-check gate. The exact-current-head integrated final review remains the final
-review gate after the fresh check readback.
+reconciliation. The complete eight-layer stack is published and the latest
+current-tip CI readback is green for all eight PRs. All eight PRs remain open,
+ready for review, and unmerged. The known SonarCloud Code Analysis exceptions
+on #202 and #204 remain intentionally outside the approved check gate. The
+exact-current-head integrated final review remains the final review gate after
+this check readback.
 Provider: GitHub stacked changes
 Base: `dev` at `6bab3ed`
 Worktree: `trees/trpc-examples-stack`
@@ -147,10 +147,14 @@ are:
 | #201 | `b183a5f9` | pass |
 | #202 | `12fc83ce` | pass; SonarCloud remains an approved skipped exception |
 | #204 | `e3808a0d` | pass; SonarCloud remains an approved skipped exception |
-| #205 | `15eb84ef` | pass |
+| #205 | current top branch | pass |
 
-The exact-current-head review range is
-`6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99..15eb84efe66f8049bad103f7b044a0a495957038`.
+The earlier exact range ending at `15eb84ef` is historical because the active
+plan received later document-only ledger corrections. The required
+correction-package review uses the immutable range from the published
+`origin/dev` base to the live #205 head read back immediately before dispatch;
+that exact range is recorded in the review register and integrated-final
+report, not duplicated here where the plan commit would make it stale again.
 
 ## 2026-08-13 first-slice plan reconciliation (historical checkpoint)
 
