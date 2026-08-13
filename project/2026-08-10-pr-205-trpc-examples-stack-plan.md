@@ -134,7 +134,7 @@ review remains the next action; merging is not included.
       "evidence": [
         {"kind": "command", "identity": "platform-jest-57-of-57", "path": ""},
         {"kind": "command", "identity": "all-package-ts6-ts7-and-build", "path": ""},
-        {"kind": "command", "identity": "exact-final-head-f8b0f606-remote-checks", "path": ""},
+        {"kind": "command", "identity": "exact-final-head-203381ab-remote-checks", "path": ""},
         {"kind": "command", "identity": "git-diff-check-final-head", "path": ""}
       ]
     },
@@ -165,7 +165,7 @@ review remains the next action; merging is not included.
   "active_workers": [],
   "parking": null,
   "git": {
-    "head": "f8b0f606e9785313d327b8a64be52745e5762a9b",
+    "head": "203381abd76f47ef871cd56a5233c43f15cfd587",
     "base": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99",
     "branch": "rs/trpc-examples/03-graphql-deprecation-docs",
     "worktree": "/Users/rschlae/Git/gbl/gbl-uzh/trees/trpc-examples-stack"
