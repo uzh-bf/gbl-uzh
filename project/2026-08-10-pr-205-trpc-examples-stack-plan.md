@@ -2,12 +2,12 @@
 
 Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
-Status: the first-slice plan was reconciled in #197 as `c8d16eec` and rebased
-through the dependent stack; the rewritten local heads are recorded in the
-2026-08-13 addendum below and have not yet replaced the remote heads; fresh
-per-layer CI is required after that push; the integrated final-review budget is
-exhausted on earlier ranges and no exact-current-head verdict exists; all pull
-requests remain draft, open, and unmerged
+Status: the first-slice plan now includes the comment-audit reconciliation in
+local #197 at `8e81af87`; the corrected local heads are recorded below and have
+not yet replaced the previously pushed remote heads. All eight PRs remain open,
+ready for review, and unmerged. Fresh per-layer CI is required after publishing
+the corrected heads. The integrated final-review budget is exhausted on earlier
+ranges and no exact-current-head verdict exists.
 Provider: GitHub stacked changes
 Base: `dev` at `6bab3ed`
 Worktree: `trees/trpc-examples-stack`
@@ -18,26 +18,54 @@ Mode: guided, with a review pause after every layer
 The first-slice plan in
 [`project/2026-08-06-trpc-migration-stack-plan.md`](2026-08-06-trpc-migration-stack-plan.md)
 was first added by commit `7cfd562` and is now current in the local #197 layer
-at `c8d16eec`; remote PR #197 remains at `321a958` until the rewritten stack is
-pushed. Its document-only update was propagated through the dependent stack by
-a local rebase; the resulting local heads are:
+at `8e81af87`; remote PR #197 remains at the previously pushed `c8d16eec`
+until the corrected stack is pushed. Its document-only updates and the
+comment-audit corrections were propagated through the dependent stack by local
+rebases; the resulting local heads are:
 
 | Layer | Local head |
 | --- | --- |
-| #197 bottom toolchain | `c8d16eec` |
-| #196 platform kernel | `de892bec` |
-| #195 demo-game migration | `b7905ae` |
-| #194 CI/devcontainer/docs | `5410ae2` |
-| #201 canonical Pages Router | `b835637` |
-| #202 Rate Wars | `b2231b1` |
-| #204 Central Bank | `8ae07e7` |
-| #205 compatibility/reconciliation | current local top (`HEAD`) |
+| #197 bottom toolchain | `8e81af87` |
+| #196 platform kernel | `f298e604` |
+| #195 demo-game migration | `7540ebe9` |
+| #194 CI/devcontainer/docs | `0b6b243f` |
+| #201 canonical Pages Router | `b7c91e0f` |
+| #202 Rate Wars | `cc0278f9` |
+| #204 Central Bank | `7fe57bb4` |
+| #205 compatibility/reconciliation | `7123fef2` |
 
-The local chain remains rooted at `dev 6bab3ed`. These rewritten heads are
-not yet the remote PR heads; the remote stack still has the previously pushed
-heads through #205 `2957beb`. The rebase carries the first-slice plan update
-and does not intentionally change runtime behavior. Fresh CI for every layer
-is required after the rewritten stack is pushed.
+The local chain remains rooted at `dev 6bab3ed`. These corrected heads are not
+yet the remote PR heads; the remote stack still has the previously pushed
+heads through #205 `ff0b3396`. The audit changes are comments, agent guidance,
+and plan reconciliation only; they do not intentionally change runtime
+behavior. Fresh CI for every layer is required after the corrected stack is
+pushed.
+
+## 2026-08-13 comment-audit reconciliation
+
+The user-requested review checked every deleted comment line in the eight PR
+diffs against the surviving code and current repository guidance. The following
+non-obvious rationale was restored in the owning layer:
+
+| Layer | Restored rationale |
+| --- | --- |
+| #196 platform kernel | Achievement condition filtering; GAME/PERIOD scope lookup; GAME- and PERIOD-scoped FIRST deduplication. |
+| #201 Pages Router pattern | Deferred `auth.loginAsTeam` rate-limit gap and the token-free player projection boundary. |
+| #202 Rate Wars | Formik numeric-field normalization and the explicit-development-mode configuration guard. |
+| #204 Central Bank | Formik numeric-field normalization, the explicit-development-mode configuration guard, and the next-segment lifecycle guard. |
+
+The audit intentionally left out dead logging, generated GraphQL output,
+comments whose code was removed, and stale GraphQL-era explanations. The
+deployment-guide candidates were not restored because the current guide already
+covers the active origin failure mode and the environment-precedence guidance
+lives in the devcontainer configuration; duplicating those rows would risk
+drift. The frontend skill edit was moved from #204 to #201 so the review diff
+matches ownership.
+
+No behavior change is intended by this reconciliation. `git diff --check`,
+targeted source searches, and stack-topology checks pass locally. The stack is
+ready for a fresh per-layer CI generation after the corrected heads are pushed;
+it remains unmerged and no merge, queue, or cleanup action is authorized.
 
 The game-runtime migration tip remains #204 (`786ed47`), while #205 contains
 code-bearing compatibility and verification work through rebased commit
