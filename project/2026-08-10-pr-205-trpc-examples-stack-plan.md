@@ -3,12 +3,12 @@
 Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
 Status: the first-slice plan includes the comment-audit and platform-contract
-reconciliation. The complete eight-layer stack is published with the exact
-heads recorded in the current-state table below. All eight PRs remain open,
-ready for review, and unmerged. Current non-Sonar checks are green; the known
-SonarCloud Code Analysis exceptions on #202 and #204 remain intentionally
-outside the approved check gate. The exact-current-head integrated final review
-is the remaining review gate.
+reconciliation. The complete eight-layer stack has been reconciled locally and
+the current candidate heads are recorded below for publication and fresh CI.
+All eight PRs remain open, ready for review, and unmerged. The known SonarCloud
+Code Analysis exceptions on #202 and #204 remain intentionally outside the
+approved check gate. The exact-current-head integrated final review remains the
+final review gate after publication.
 Provider: GitHub stacked changes
 Base: `dev` at `6bab3ed`
 Worktree: `trees/trpc-examples-stack`
@@ -38,7 +38,7 @@ separate example games remain separate stacked layers above the canonical
 Pages Router layer. The resolved central-bank conflict retains the canonical
 inferred result contract and the existing player-identity privacy correction.
 
-Current local rebased heads before the final plan-only reconciliation:
+Current local rebased heads for the next publication:
 
 | Layer | Local head | Responsibility |
 | --- | --- | --- |
@@ -49,7 +49,7 @@ Current local rebased heads before the final plan-only reconciliation:
 | #201 | `84f8970b` | canonical Pages Router pattern |
 | #202 | `c776471a` | Rate Wars tRPC migration |
 | #204 | `f2f904a5` | Central Bank tRPC migration |
-| #205 | `4a19d09c` | compatibility and reconciliation documentation, including this record |
+| #205 | `c8d64c9a` | compatibility and reconciliation documentation, including this record |
 
 Review disposition:
 
@@ -99,7 +99,7 @@ ready states by this action. The current-state section below records the
 final remote heads and check readback. The later plan-only status correction is
 owned by the same top-layer plan and is recorded in the next stack update.
 
-## 2026-08-13 current published state and verification
+## 2026-08-13 previously published state and verification (historical)
 
 The active stack is contiguous and published with `needsRebase: false` for
 every layer. All eight PRs are OPEN, ready for review, and unmerged:
@@ -128,11 +128,29 @@ jobs for every layer where those checks apply. SonarCloud Code Analysis is
 intentionally not a gate for #202 or #204 under the user's explicit direction;
 their ordinary SonarCloud checks pass.
 
-The required exact-current-head integrated final review is still pending. Its
-review range after the propagation is
-`6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99..4a19d09c90093b4a7b007c50f9f6530e230f039e`.
-No merge, queue, ready/draft transition, branch deletion, or worktree cleanup
-has occurred.
+These checks belong to the prior published heads above; the lower-layer plan
+correction changed their ancestry, so fresh checks are required for the current
+candidate heads. No merge, queue, ready/draft transition, branch deletion, or
+worktree cleanup has occurred.
+
+## 2026-08-13 reconciled candidate state (pending publication)
+
+The owning first-slice plan correction is committed on #197 and propagated
+through the stack. The candidate heads are:
+
+| PR | Candidate head | Fresh remote checks |
+| --- | --- | --- |
+| #197 | `775176cd` | pending publication |
+| #196 | `35cad61d` | pending publication |
+| #195 | `c161e01a` | pending publication |
+| #194 | `3bdc93ae` | pending publication |
+| #201 | `84f8970b` | pending publication |
+| #202 | `c776471a` | pending publication; SonarCloud remains an approved skipped exception |
+| #204 | `f2f904a5` | pending publication; SonarCloud remains an approved skipped exception |
+| #205 | `c8d64c9a` | pending publication |
+
+The top review range for the next exact-current-head review is
+`6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99..c8d64c9a`.
 
 ## 2026-08-13 first-slice plan reconciliation (historical checkpoint)
 
