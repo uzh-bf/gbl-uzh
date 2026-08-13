@@ -411,10 +411,6 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
   await expect(page.getByRole('button', { name: 'Add period' })).toBeDisabled()
   await addSegment(page, { periodIndex: 1 })
   await expect(page.getByRole('button', { name: 'Add segment' })).toBeDisabled()
-  // TODO: remove sentinel when final-period consolidation no longer connects
-  // the next period.
-  await addPeriod(page, { segmentCount: '1', index: 2 })
-
   const playerSessions: PlayerSession[] = []
 
   try {
