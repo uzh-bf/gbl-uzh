@@ -253,6 +253,8 @@ function ManageGame() {
             </Button>
           )
         }
+        // The next segment may not exist yet even while the period is running.
+        // Keep the transition disabled until the admin adds that segment.
         const disabled = activePeriod.activeSegmentIx === segments.length - 1
         return (
           <Button
