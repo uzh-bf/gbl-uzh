@@ -7,15 +7,14 @@ Base: `dev` @ `254606c` (6 commits ahead of the branch merge-base `5cac12c`; all
 Provider: GitHub (stacks preview enabled — repo stack #179 exists).
 Worktree: new `trees/trpc-migration-stack` (one stack, one worktree). Source worktree `.claude/worktrees/modest-rosalind-8e36bd` stays untouched.
 
-> **Current-state pointer (2026-08-13, comment-audit pass):** This document is
+> **Current-state pointer (2026-08-13, reconciled):** This document is
 > the first-slice execution plan committed in PR #197; it is now a historical
 > predecessor and is not the active execution contract. The active plan is
 > [`project/2026-08-10-pr-205-trpc-examples-stack-plan.md`](2026-08-10-pr-205-trpc-examples-stack-plan.md).
-> Plan provenance: PR #197 first added this file in commit `7cfd562`; its
-> current local head before this reconciliation commit is `8e81af87`. The
-> mutable full-stack SHA table belongs in the active plan and must be read from
-> the live stack metadata after each lower-layer propagation; the historical
-> SHA table below is not current evidence.
+> Plan provenance: PR #197 first added this file in commit `7cfd562`; it is
+> published at current head `5173e193`. The mutable full-stack SHA table belongs
+> in the active plan and was read from live stack metadata after the lower-layer
+> propagation; the historical SHA table below is not current evidence.
 >
 > The audit restored non-obvious domain and safety rationale in the owning
 > layers: achievement scope and deduplication in #196; the deferred
@@ -24,8 +23,8 @@ Worktree: new `trees/trpc-migration-stack` (one stack, one worktree). Source wor
 > configuration rationale plus the next-segment lifecycle guard in #204; and
 > the token-free player projection boundary in #201. Dead logging, generated
 > output, removed GraphQL wiring, and comments whose code was deleted remain
-> intentionally absent. Fresh per-layer CI is required after the corrected
-> stack is pushed; no merge or cleanup is authorized by this plan.
+> intentionally absent. Fresh per-layer CI has been read back on the corrected
+> published heads; no merge or cleanup is authorized by this plan.
 
 ## 2026-08-13 current-state addendum
 
@@ -44,10 +43,11 @@ through `a0f6d52`, including workflow, package-verification, configuration, and
 compatibility-source changes. Only commits from `cf67aa4` through current head
 `2957beb` are documentation, agent-instruction, or plan-only. The integrated
 final initial and correction reviews both returned `DONE_WITH_CONCERNS` on
-earlier ranges; the allowed two-review budget is exhausted. Their findings are
-recorded as closed through owning-layer corrections plus focused verification,
-but no exact-current-head integrated-final verdict exists. Gate 3 evidence is
-complete; the stack remains draft and reviewable, not merge-authorized.
+earlier ranges; their historical budget is exhausted. Their findings are
+recorded as closed through owning-layer corrections plus focused verification.
+The correction package has a separate exact-current-head integrated-review
+tuple pending; Gate 3 evidence is complete. The PRs remain ready and
+reviewable, not merge-authorized.
 
 ## 2026-08-10 continuation note
 
