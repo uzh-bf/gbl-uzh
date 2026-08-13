@@ -141,7 +141,7 @@ immutable post-check range.
       "required": true,
       "state": "reserved",
       "evidence": [
-        {"kind": "register_tuple", "identity": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99..fbf6695d11c0ff10cb26f5f5a75a02ae4f960e2a", "path": "project/_local/reviews/trpc-stack-198-refresh-gate-register.md"}
+        {"kind": "register_tuple", "identity": "correction-package-integrated-final", "path": "project/_local/reviews/trpc-stack-198-refresh-gate-register.md"}
       ]
     }
   },
