@@ -42,14 +42,14 @@ Current published heads:
 
 | Layer | Local head | Responsibility |
 | --- | --- | --- |
-| #197 | `775176cd` | shared dev/toolchain foundation |
-| #196 | `35cad61d` | platform plan, contract correction, and review disposition |
-| #195 | `c161e01a` | demo-game migration |
-| #194 | `3bdc93ae` | CI, devcontainer, and docs collateral |
-| #201 | `84f8970b` | canonical Pages Router pattern |
-| #202 | `c776471a` | Rate Wars tRPC migration |
-| #204 | `f2f904a5` | Central Bank tRPC migration |
-| #205 | `999f4a5c` | compatibility and reconciliation documentation, including this record |
+| #197 | `ce0bd12c` | shared dev/toolchain foundation |
+| #196 | `c64914a3` | platform plan, contract correction, and review disposition |
+| #195 | `8d4eae31` | demo-game migration |
+| #194 | `61af3f9b` | CI, devcontainer, and docs collateral |
+| #201 | `b183a5f9` | canonical Pages Router pattern |
+| #202 | `12fc83ce` | Rate Wars tRPC migration |
+| #204 | `e3808a0d` | Central Bank tRPC migration |
+| #205 | current top branch | compatibility and reconciliation documentation, including this record |
 
 Review disposition:
 
@@ -106,14 +106,14 @@ every layer. All eight PRs are OPEN, ready for review, and unmerged:
 
 | PR | Published head | Current required checks |
 | --- | --- | --- |
-| #197 | `775176cd` | fresh CI required after propagation |
-| #196 | `35cad61d` | fresh CI required after propagation |
-| #195 | `c161e01a` | fresh CI required after propagation |
-| #194 | `3bdc93ae` | fresh CI required after propagation |
-| #201 | `84f8970b` | fresh CI required after propagation |
-| #202 | `c776471a` | fresh CI required after propagation; SonarCloud remains an approved skipped exception |
-| #204 | `f2f904a5` | fresh CI required after propagation; SonarCloud remains an approved skipped exception |
-| #205 | `4a19d09c` | fresh CI required after propagation |
+| #197 | `ce0bd12c` | fresh checks require readback |
+| #196 | `c64914a3` | fresh checks require readback |
+| #195 | `8d4eae31` | fresh checks require readback |
+| #194 | `61af3f9b` | fresh checks require readback |
+| #201 | `b183a5f9` | fresh checks require readback |
+| #202 | `12fc83ce` | fresh checks require readback; SonarCloud remains an approved skipped exception |
+| #204 | `e3808a0d` | fresh checks require readback; SonarCloud remains an approved skipped exception |
+| #205 | current top branch | fresh checks require readback |
 
 The local verification at the exact top head passed platform tests (55/55),
 both platform TypeScript modes, the platform build, UI TypeScript checks in
@@ -150,8 +150,9 @@ are:
 | #204 | `f2f904a5` | fresh checks running; SonarCloud remains an approved skipped exception |
 | #205 | `999f4a5c` | fresh checks running |
 
-The top review range for the exact-current-head review is
-`6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99..999f4a5c`.
+The exact-current-head review range starts at
+`6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99` and ends at the live top branch
+head recorded by `gh stack view --json` immediately before review dispatch.
 
 ## 2026-08-13 first-slice plan reconciliation (historical checkpoint)
 
