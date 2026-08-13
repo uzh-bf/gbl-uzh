@@ -1,7 +1,7 @@
-import { OutputFactsGame, PayloadGame } from '@gbl-uzh/platform'
+import type { OutputFactsGame, PayloadGame } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
-import { GameFacts } from '../types/Game'
+import type { GameFacts } from '../types/Game'
 
 type OutputGameFacts = OutputFactsGame<GameFacts, any, any>
 

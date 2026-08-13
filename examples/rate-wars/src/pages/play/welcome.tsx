@@ -1,4 +1,3 @@
-import { useMutation, useQuery } from '@apollo/client'
 import { COLORS } from '@gbl-uzh/platform/src/lib/constants'
 import { Logo, LogoSelector } from '@gbl-uzh/ui'
 import {
@@ -9,12 +8,10 @@ import {
 import { Form, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import {
-  SelfDocument,
-  UpdatePlayerDataDocument,
-} from 'src/graphql/generated/ops'
 import { AVATARS, LOCATIONS } from 'src/lib/constants'
 import * as Yup from 'yup'
+import { getFacts } from '~/lib/facts'
+import { trpc } from '~/lib/trpc'
 
 import {
   Card,
@@ -43,28 +40,11 @@ const Schema = Yup.object().shape({
 function Welcome() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { data, loading, error } = useQuery(SelfDocument, {
-    // fetchPolicy: 'network-cache',
-    onError: (error) => {
-      console.error('Error fetching player data:', error)
-    },
-    onCompleted: (data) => {
-      if (!data.self) {
-        console.warn('No player data found - user may not be authenticated')
-      }
-    },
-  })
-
-  const [updatePlayerData] = useMutation(UpdatePlayerDataDocument, {
-    optimisticResponse: {
-      updatePlayerData: {
-        name: data?.self?.name,
-        facts: JSON.stringify({
-          color: data?.self?.facts?.color,
-          avatar: data?.self?.facts?.avatar,
-          location: data?.self?.facts?.location,
-        }),
-      } as any,
+  const { data: player, isLoading, error } = trpc.play.self.useQuery()
+  const utils = trpc.useUtils()
+  const updatePlayerData = trpc.play.updatePlayerData.useMutation({
+    onSuccess: async () => {
+      await utils.play.self.invalidate()
     },
     onError: (error) => {
       console.error('Error updating player data:', error)
@@ -72,12 +52,11 @@ function Welcome() {
     },
   })
 
-  if (loading) return null
+  if (isLoading) return null
   if (error) return `Error! ${error}`
 
   const gameName = 'Rate Wars'
 
-  const player = data?.self
   if (!player) {
     return (
       <div className="m-auto w-full max-w-4xl p-8">
@@ -87,31 +66,43 @@ function Welcome() {
     )
   }
 
+  const playerFacts = getFacts(player.facts)
+
   return (
     <div className="m-auto w-full max-w-4xl p-8">
       <Formik
         initialValues={{
           name: player.name,
-          color: player.facts.color ?? Object.keys(COLORS)[0],
-          location: player.facts.location ?? LOCATIONS.Trader[0],
+          color:
+            typeof playerFacts.color === 'string'
+              ? playerFacts.color
+              : Object.keys(COLORS)[0],
+          location:
+            typeof playerFacts.location === 'string'
+              ? playerFacts.location
+              : LOCATIONS.Trader[0],
           imgPathAvatar:
-            player.facts.avatar ?? '/avatars/avatar_placeholder.png',
+            typeof playerFacts.avatar === 'string'
+              ? playerFacts.avatar
+              : '/avatars/avatar_placeholder.png',
         }}
         validationSchema={Schema}
         onSubmit={async (values) => {
           setIsSubmitting(true)
 
-          await updatePlayerData({
-            variables: {
+          try {
+            await updatePlayerData.mutateAsync({
               name: values.name,
               facts: JSON.stringify({
                 color: values.color,
                 avatar: values.imgPathAvatar,
                 location: values.location,
               }),
-            },
-          })
-          router.replace('/play/cockpit')
+            })
+            await router.replace('/play/cockpit')
+          } catch {
+            // The mutation's onError callback keeps the form available.
+          }
         }}
       >
         {({ values, errors, touched, setFieldValue }) => (
@@ -138,7 +129,11 @@ function Welcome() {
                       families come to you for loans. Your rivals across the
                       street want both.
                     </div>
-                    <img src="/images/welcome.jpg" className="w-full" />
+                    <img
+                      src="/images/welcome.jpg"
+                      className="w-full"
+                      alt="Retail bank office"
+                    />
                     <div className="pt-10">
                       <span className="pb-2 text-2xl font-medium">Task</span>
                       <div>

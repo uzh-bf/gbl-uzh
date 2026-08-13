@@ -28,5 +28,5 @@ An [Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-cata
 ## Caveats (check before trusting details)
 
 - `apps/demo-game` is the only game built on the platform - generic-contract claims are inferred from one worked example plus platform source
-- Demo-game is the current tRPC reference. Rate Wars and Central Bank retain deprecated GraphQL compatibility until their migration layers are complete; do not copy their API wiring into a new game.
+- Demo-game is the canonical tRPC reference and Rate Wars is a second complete example. Central Bank retains deprecated GraphQL compatibility until its migration layer is complete; do not copy its API wiring into a new game.
 - Pages cite `path:Symbol` instead of line numbers; if a symbol moved, search for it

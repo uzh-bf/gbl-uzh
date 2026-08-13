@@ -12,6 +12,7 @@
 ## 2026-08-10
 
 - **Update**: `api-layer.md`, `developing-a-game.md`, and deployment/building guidance - made tRPC v11 the supported game API, documented the official Pages Router wrapper, bounded batching, SSE/SuperJSON links, typed authorization, targeted invalidation, and same-origin browser routing.
+- **Update**: `api-layer.md` and `index.md` - recorded Rate Wars as a complete tRPC example after its admin, player, report, learning, story, and realtime paths passed the real two-year lifecycle.
 
 ## 2026-07-11
 

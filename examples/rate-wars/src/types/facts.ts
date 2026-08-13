@@ -1,4 +1,5 @@
-import { OutputFacts } from '@gbl-uzh/platform'
+import type { OutputFacts } from '@gbl-uzh/platform'
+import * as yup from 'yup'
 
 // All rates are stored as percent numbers (2.5 === 2.5%) and divided by 100
 // only inside computations.
@@ -7,6 +8,11 @@ export type RateDecision = {
   depositRate: number
   loanRate: number
 }
+
+export const RateDecisionSchema = yup.object({
+  depositRate: yup.number().min(0).max(8).required(),
+  loanRate: yup.number().min(0).max(15).required(),
+})
 
 export type IncomeStatement = {
   interestIncome: number
