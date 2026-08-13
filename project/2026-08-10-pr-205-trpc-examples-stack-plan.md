@@ -38,18 +38,18 @@ separate example games remain separate stacked layers above the canonical
 Pages Router layer. The resolved central-bank conflict retains the canonical
 inferred result contract and the existing player-identity privacy correction.
 
-Current local rebased heads:
+Current local rebased heads before the final plan-only reconciliation:
 
 | Layer | Local head | Responsibility |
 | --- | --- | --- |
-| #197 | `5173e193` | shared dev/toolchain foundation |
-| #196 | `05b4f344` | platform plan, contract correction, and review disposition |
-| #195 | `b3ebd0c1` | demo-game migration |
-| #194 | `49bc50bb` | CI, devcontainer, and docs collateral |
-| #201 | `1be26169` | canonical Pages Router pattern |
-| #202 | `71175ea1` | Rate Wars tRPC migration |
-| #204 | `bc9d9565` | Central Bank tRPC migration |
-| #205 | `30d93545` | compatibility and reconciliation documentation, including this record |
+| #197 | `775176cd` | shared dev/toolchain foundation |
+| #196 | `35cad61d` | platform plan, contract correction, and review disposition |
+| #195 | `c161e01a` | demo-game migration |
+| #194 | `3bdc93ae` | CI, devcontainer, and docs collateral |
+| #201 | `84f8970b` | canonical Pages Router pattern |
+| #202 | `c776471a` | Rate Wars tRPC migration |
+| #204 | `f2f904a5` | Central Bank tRPC migration |
+| #205 | `4a19d09c` | compatibility and reconciliation documentation, including this record |
 
 Review disposition:
 
@@ -106,14 +106,14 @@ every layer. All eight PRs are OPEN, ready for review, and unmerged:
 
 | PR | Published head | Current required checks |
 | --- | --- | --- |
-| #197 | `5173e193` | pass |
-| #196 | `05b4f344` | pass |
-| #195 | `b3ebd0c1` | pass |
-| #194 | `49bc50bb` | pass after ARM build rerun; the original failure was a transient Google Fonts fetch error |
-| #201 | `1be26169` | pass |
-| #202 | `71175ea1` | pass; SonarCloud Code Analysis is the approved skipped exception |
-| #204 | `bc9d9565` | pass; SonarCloud Code Analysis is the approved skipped exception |
-| #205 | `254602a6` | pass |
+| #197 | `775176cd` | fresh CI required after propagation |
+| #196 | `35cad61d` | fresh CI required after propagation |
+| #195 | `c161e01a` | fresh CI required after propagation |
+| #194 | `3bdc93ae` | fresh CI required after propagation |
+| #201 | `84f8970b` | fresh CI required after propagation |
+| #202 | `c776471a` | fresh CI required after propagation; SonarCloud remains an approved skipped exception |
+| #204 | `f2f904a5` | fresh CI required after propagation; SonarCloud remains an approved skipped exception |
+| #205 | `4a19d09c` | fresh CI required after propagation |
 
 The local verification at the exact top head passed platform tests (55/55),
 both platform TypeScript modes, the platform build, UI TypeScript checks in
@@ -129,8 +129,8 @@ intentionally not a gate for #202 or #204 under the user's explicit direction;
 their ordinary SonarCloud checks pass.
 
 The required exact-current-head integrated final review is still pending. Its
-review range is
-`6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99..254602a699f0a27754dea4741b719711eed9cc73`.
+review range after the propagation is
+`6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99..4a19d09c90093b4a7b007c50f9f6530e230f039e`.
 No merge, queue, ready/draft transition, branch deletion, or worktree cleanup
 has occurred.
 
