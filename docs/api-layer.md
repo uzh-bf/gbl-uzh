@@ -71,6 +71,11 @@ This follows the official [Pages Router setup](https://trpc.io/docs/client/nextj
 [HTTP batch link](https://trpc.io/docs/client/links/httpBatchLink), and
 [transformer](https://trpc.io/docs/server/data-transformers) guidance.
 
+Known deferred gaps remain: the event bus has no cross-instance delivery or
+SSE reconnect replay, `auth.loginAsTeam` is not rate-limited, and procedure
+behavior still relies primarily on the real Playwright lifecycle rather than
+dedicated behavioral tests for every procedure.
+
 The browser client does not need `NEXT_PUBLIC_API_URL` because it uses the
 same-origin relative route. Server-side construction uses the deployed Vercel
 origin, a configured API origin, or the local development origin as a fallback.
