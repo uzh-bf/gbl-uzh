@@ -150,6 +150,15 @@ Date fields remain `Date` values and are serialized by the existing SuperJSON
 transformer. No output validator is added to a procedure whose output is not
 yet represented by a stable DTO schema.
 
+Primitive impact:
+
+| Product primitive | Disposition | Contract delta | Affected compositions and consumers | Evidence or open ruling |
+| --- | --- | --- | --- | --- |
+| Game content and achievement catalog | extend | Preserve the existing content meaning while making the tRPC transport projection explicit and GraphQL-compatible; no new content state or ownership is introduced | platform story/learning procedures compose persistence records with player and admin clients; old GraphQL operations remain independent compatibility evidence | `FStoryElementData.graphql`, `QQuestAchievements.graphql`, and the platform DTO mappers |
+| Player result and progress view | reuse | Keep the existing player-facing privacy boundary and add runtime output validation; no new result meaning or state transition | play and results procedures compose existing PlayService results with player clients; admin facts remain outside the player DTO | existing result DTO mappers and the D3 fact-withholding corrections in this layer |
+| Player action submission | extend | Make the existing game-specific `ActionFactsSchema` invariant fail closed when configuration is missing; action semantics and reducer ownership remain unchanged | play.performAction composes the injected game schema with the existing PlayService reducer and transaction | all three game routers inject the schema; missing-schema regression test proves no transaction/reducer call |
+| tRPC transport contract | extend | Add targeted strict runtime DTO validators for named stable/sensitive procedures; preserve `unknown` game JSON and SuperJSON `Date` transport | Pages Router example clients and separate games consume inferred RouterOutputs from the platform router | official tRPC validator/transformer guidance and the current client stack |
+
 Delegation Map: S0 plan boundary — main session; S1 platform contract and test
 changes — main session (`critical-path coupling`, because the mappers, schema
 source types, router allowlist, and caller-level tests must change as one
