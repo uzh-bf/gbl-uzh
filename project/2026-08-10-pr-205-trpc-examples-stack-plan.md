@@ -17,29 +17,26 @@ Mode: guided, with a review pause after every layer
 
 The first-slice plan in
 [`project/2026-08-06-trpc-migration-stack-plan.md`](2026-08-06-trpc-migration-stack-plan.md)
-was first added by commit `7cfd562` and is now current in the local #197 layer
-at `8e81af87`; remote PR #197 remains at the previously pushed `c8d16eec`
-until the corrected stack is pushed. Its document-only updates and the
-comment-audit corrections were propagated through the dependent stack by local
-rebases; the resulting local heads are:
+was first added by commit `7cfd562` and is now published in PR #197 at
+`5173e193`. Its document-only updates and the comment-audit corrections were
+propagated through the dependent stack by local rebases and published together;
+the resulting remote heads are:
 
-| Layer | Local head |
+| Layer | Published head |
 | --- | --- |
-| #197 bottom toolchain | `8e81af87` |
-| #196 platform kernel | `f298e604` |
-| #195 demo-game migration | `7540ebe9` |
-| #194 CI/devcontainer/docs | `0b6b243f` |
-| #201 canonical Pages Router | `b7c91e0f` |
-| #202 Rate Wars | `cc0278f9` |
-| #204 Central Bank | `7fe57bb4` |
-| #205 compatibility/reconciliation | `7123fef2` |
+| #197 bottom toolchain | `5173e193` |
+| #196 platform kernel | `47191939` |
+| #195 demo-game migration | `22dce843` |
+| #194 CI/devcontainer/docs | `1f526388` |
+| #201 canonical Pages Router | `6a7ee9fb` |
+| #202 Rate Wars | `18bd79ed` |
+| #204 Central Bank | `93ae05b7` |
+| #205 compatibility/reconciliation | `3a3f7741` |
 
-The local chain remains rooted at `dev 6bab3ed`. These corrected heads are not
-yet the remote PR heads; the remote stack still has the previously pushed
-heads through #205 `ff0b3396`. The audit changes are comments, agent guidance,
-and plan reconciliation only; they do not intentionally change runtime
-behavior. Fresh CI for every layer is required after the corrected stack is
-pushed.
+The published chain remains rooted at `dev 6bab3ed`; `gh stack view --json`
+reports `needsRebase: false` for every layer. The audit changes are comments,
+agent guidance, and plan reconciliation only; they do not intentionally change
+runtime behavior. Fresh CI is now running for every published head.
 
 ## 2026-08-13 comment-audit reconciliation
 
@@ -63,9 +60,9 @@ drift. The frontend skill edit was moved from #204 to #201 so the review diff
 matches ownership.
 
 No behavior change is intended by this reconciliation. `git diff --check`,
-targeted source searches, and stack-topology checks pass locally. The stack is
-ready for a fresh per-layer CI generation after the corrected heads are pushed;
-it remains unmerged and no merge, queue, or cleanup action is authorized.
+targeted source searches, and stack-topology checks pass locally. The stack
+remains ready for human review and unmerged; no merge, queue, or cleanup action
+is authorized.
 
 The game-runtime migration tip remains #204 (`786ed47`), while #205 contains
 code-bearing compatibility and verification work through rebased commit
