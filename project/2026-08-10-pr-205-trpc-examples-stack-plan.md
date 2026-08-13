@@ -172,7 +172,7 @@ review remains the next action; merging is not included.
       "required": false,
       "state": "terminal",
       "evidence": [
-        {"kind": "report", "identity": "agy-gemini-3.7-flash-high-docs-pass-6cfeb61b", "path": "project/_local/reviews/2026-08-13-trpc-docs-agy-gemini37-flash-high.md"}
+        {"kind": "report", "identity": "agy-gemini-3.7-flash-high-final-layer-pass-36cb5b87", "path": "project/_local/reviews/2026-08-13-trpc-final-layer-agy-gemini37-flash-high.md"}
       ]
     }
   },
