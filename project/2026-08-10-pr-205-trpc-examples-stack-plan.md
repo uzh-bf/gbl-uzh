@@ -12,18 +12,30 @@ intentionally outside the approved check gate. The final correction review
 found only pre-closure plan metadata contradictions; those are now resolved in
 this plan and the local gate register.
 
-The final layer now has local history through `c295af7a`, on top of the last
+The final layer's reviewed content is through `47a430f3`, on top of the last
 published #205 head `7515ea2a`. The substantive documentation commit is
 `6cfeb61b` (`docs(trpc): align final architecture guidance`); the following
 plan-only commits reconcile its boundary and review evidence. It updates the
 canonical `docs/` OKF bundle, example README guidance, and the native-host
 watcher comment. A focused Agy review using Gemini 3.7 Flash High passed with
-no actionable findings. These local commits are not yet pushed; no publication
-or merge is implied by this plan update.
+no actionable findings. The complete eight-branch stack has now been pushed
+to `origin`; this plan-only continuation does not merge or change PR review
+state.
 Provider: GitHub stacked changes
 Base: `dev` at `6bab3ed`
 Worktree: `trees/trpc-examples-stack`
 Mode: guided, with a review pause after every layer
+
+## 2026-08-13 final pushed state
+
+The complete stack was pushed with `gh stack push --remote origin`. The remote
+stack is contiguous: all eight PRs are open and unmerged, every layer reports
+`needsRebase: false`, and no branch was queued or moved between draft and
+ready state by the push. PR #205 points to the final documentation and plan
+reconciliation content at `47a430f3`; the metadata-only continuation recorded
+by this plan remains part of the same review package. CI for the pushed top
+head is the current external verification gate. No merge, release, or
+deployment is authorized by this record.
 
 ## 2026-08-13 platform contract correction propagation (execution record)
 
@@ -181,7 +193,7 @@ review remains the next action; merging is not included.
   "active_workers": [],
   "parking": null,
   "git": {
-    "head": "c295af7add7640af1acb3428f8763ca6aaba0bf5",
+    "head": "47a430f319ebb4383a6ff8a0bf94f438b1397ddf",
     "base": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99",
     "branch": "rs/trpc-examples/03-graphql-deprecation-docs",
     "worktree": "/Users/rschlae/Git/gbl/gbl-uzh/trees/trpc-examples-stack"
