@@ -42,7 +42,8 @@ fixtures, and reconciliation ledger.
 This addendum is provenance for PR #197 only. The mutable eight-layer head
 table, current code-bearing classification, fresh CI readback, and integrated
 review state belong to the active continuation plan. The first-slice package
-is currently published at `ce0bd12c`; the lower platform and example-game
+was previously published at `ce0bd12c`; this boundary correction is now
+committed locally as the package tip. The lower platform and example-game
 corrections are owned by their downstream layers and must not be copied into
 this foundation branch. The PRs remain ready and reviewable, not
 merge-authorized.
