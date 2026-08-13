@@ -31,9 +31,9 @@ Mode: guided, with a review pause after every layer
 The complete stack was pushed with `gh stack push --remote origin`. The remote
 stack is contiguous: all eight PRs are open and unmerged, every layer reports
 `needsRebase: false`, and no branch was queued or moved between draft and
-ready state by the push. PR #205 points to the final documentation and plan
-reconciliation content at `47a430f3`; the metadata-only continuation recorded
-by this plan remains part of the same review package. CI for the pushed top
+ready state by the push. PR #205 contains the final documentation boundary at
+`47a430f3`, followed by the metadata-only plan closure recorded by this file.
+CI for the pushed top
 head is the current external verification gate. No merge, release, or
 deployment is authorized by this record.
 
