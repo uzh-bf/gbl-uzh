@@ -3,13 +3,14 @@
 Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
 Status: the first-slice plan includes the comment-audit and platform-contract
-reconciliation. The stack has been corrected after integrated review findings
-and is published at the rebased layer heads below; fresh per-layer checks are
-now the remaining remote verification. All eight PRs remain open, ready for
-review, and unmerged.
+reconciliation. The stack has been corrected after integrated review findings,
+published at the rebased layer heads below, and reconciled through the final
+correction-review boundary. All eight PRs remain open, ready for review, and
+unmerged.
 The known SonarCloud Code Analysis exceptions on #202 and #204 remain
-intentionally outside the approved check gate. The correction review remains
-the final review gate after the fresh check readback.
+intentionally outside the approved check gate. The final correction review
+found only pre-closure plan metadata contradictions; those are now resolved in
+this plan and the local gate register.
 Provider: GitHub stacked changes
 Base: `dev` at `6bab3ed`
 Worktree: `trees/trpc-examples-stack`
@@ -29,10 +30,10 @@ implementation `3b7021ee`, review disposition `ed3544cd`, and the correction
 `8479ed4b`. It adds explicit StoryElement and achievement projections,
 Zod 3.23.8-compatible runtime DTO contracts, targeted `.output()` validators,
 fail-closed `ActionFactsSchema` enforcement, and propagation of Yup’s validated
-action facts. The focused platform callers pass 35/35 before the latest
-correction; the current full platform suite and correction tests are rerun
-after this stack update. Both TypeScript modes and the platform build retain
-the existing tRPC declaration-portability and circular-dependency warnings.
+action facts. The full platform suite passes 57/57; both TypeScript modes,
+the platform build, and the example-game checks pass. The platform build
+retains the existing tRPC declaration-portability and circular-dependency
+warnings.
 
 Decision: PR #196 owns all executable and platform-test changes. PR #205 owns
 this continuation record only. The existing topology remains unchanged; the
@@ -40,7 +41,7 @@ separate example games remain separate stacked layers above the canonical
 Pages Router layer. The resolved central-bank conflict retains the canonical
 inferred result contract and the existing player-identity privacy correction.
 
-Current local rebased heads (next publication):
+Published executable heads before this final plan-only closure:
 
 | Layer | Local head | Responsibility |
 | --- | --- | --- |
@@ -51,7 +52,7 @@ Current local rebased heads (next publication):
 | #201 | `7ad2bf53` | canonical Pages Router pattern |
 | #202 | `0ccfee35` | Rate Wars tRPC migration |
 | #204 | `234ba829` | Central Bank tRPC migration and final-period lifecycle proof |
-| #205 | current top branch (plan-only successor) | compatibility and reconciliation documentation, including this record |
+| #205 | `19335130` | compatibility and reconciliation documentation, including this record |
 
 Review disposition:
 
@@ -65,40 +66,49 @@ Review disposition:
   suggested removing the two content mappers. That reduction was rejected
   because the approved contract names mappers as the projection boundary and
   they normalize/filter persistence values before strict output validation.
+- Integrated final correction review: the initial correction review returned
+  `NEEDS_REVISION` for the runtime validation bypass, the obsolete lifecycle
+  sentinel, and stale/unclassified plan evidence. Those runtime and test
+  findings were corrected in #196, #195, and #204. The correction review of
+  `6bab3ed..1774d716` returned `NEEDS_REVISION` only because the active plan
+  still had contradictory verification metadata at dispatch time; the reports
+  and gate register now record that review and this plan closes the metadata
+  gap without another review, as permitted for metadata-only closure.
 
 Do:
 
-1. Record the correction disposition and package boundary on PR #205.
-2. Run the full current-tip local verification: platform tests, both platform
-   TypeScript modes, platform build, UI checks, and both TypeScript modes for
-   demo-game, Rate Wars, and Central Bank.
-3. Publish the complete stack so every PR receives fresh CI against its new
-   exact head. Re-read branch ancestry, checks, and `needsRebase` after the
-   publish. Keep all PRs unmerged and do not change ready/draft state here.
-4. Stop at the exact-current-head integrated final-review boundary. The
-   historical integrated-final budget is exhausted; this correction package
-   uses its own registered exact-current-head review tuple.
+1. Done: apply the platform validation correction in #196, remove the obsolete
+   sentinel lifecycle fixtures in #195 and #204, and propagate the stack.
+2. Done: run the full local verification and read back fresh remote checks on
+   the published exact heads.
+3. Done: persist the integrated-review reports, reconcile the gate register,
+   and mark this package boundary as reviewed and terminal.
+4. Remaining outside this task: human final review and any later merge
+   decision. No merge, queue, ready/draft transition, branch deletion, or
+   worktree cleanup is authorized here.
 
-Risk: CI attached to the former published heads is stale after this rebase and
-does not prove the contract correction or downstream compatibility. The local
-platform build still emits the pre-existing tRPC inferred-declaration and
-circular-dependency warnings; they remain warnings, not newly introduced
-failures.
+Risk: the known SonarCloud Code Analysis exceptions on #202 and #204 remain
+intentionally outside the approved check gate. The platform build retains
+pre-existing tRPC inferred-declaration and circular-dependency warnings; they
+are warnings, not newly introduced failures. Local package wrappers can emit
+Node 26/pnpm relink noise, while direct installed binaries and CI provide the
+passing verification evidence.
 
-Check: the stack remains contiguous with `needsRebase: false`; the focused
-contract regressions and full package checks pass at the current top exact head;
-fresh remote per-layer checks have been read back against the published
-correction heads. No merge is part of this plan update.
+Check: the stack remains contiguous with `needsRebase: false`; the full
+platform suite passes 57/57; TypeScript, build, lint, merge, and all three
+remote Playwright checks pass on the final top head; and the final review
+reports plus gate register are present. No merge is part of this plan update.
 
-Commit: `docs(project): record correction review disposition` on PR #205.
+Commit: `docs(project): finalize correction review state` on PR #205.
 
 ## Progress
 
-The correction package is in progress: verified integrated-review findings are
-assigned to their owning layers, the stack is locally rebased, and fresh
-publication checks remain outstanding. The next step is full local
-verification, publication, and one correction-package integrated review on the
-immutable post-check range.
+The correction package is terminal through the integrated-review boundary:
+runtime findings were corrected in their owning layers, the stack is published
+and contiguous, local and remote verification is green, and the two review
+reports are persisted. The active plan and register now classify the package as
+`integrated_review_passed` with achieved delivery `reviewed`. Human final
+review remains the next action; merging is not included.
 
 ### Package boundary
 
@@ -110,18 +120,23 @@ immutable post-check range.
     "path": "project/2026-07-29-trpc-migration-finalization-roadmap.md",
     "w_item": "W7"
   },
-  "state": "in_progress",
+  "state": "integrated_review_passed",
   "required_delivery": "reviewed",
-  "achieved_delivery": "unreviewed",
+  "achieved_delivery": "reviewed",
   "slices": {
-    "completed": ["S0", "S1", "S2"],
-    "remaining": ["S3"]
+    "completed": ["S0", "S1", "S2", "S3"],
+    "remaining": []
   },
   "gates": {
     "verification": {
       "required": true,
-      "state": "missing",
-      "evidence": []
+      "state": "terminal",
+      "evidence": [
+        {"kind": "command", "identity": "platform-jest-57-of-57", "path": ""},
+        {"kind": "command", "identity": "all-package-ts6-ts7-and-build", "path": ""},
+        {"kind": "command", "identity": "exact-final-head-19335130-remote-checks", "path": ""},
+        {"kind": "command", "identity": "git-diff-check-final-head", "path": ""}
+      ]
     },
     "simplification": {
       "required": true,
@@ -139,16 +154,18 @@ immutable post-check range.
     },
     "integrated_final": {
       "required": true,
-      "state": "reserved",
+      "state": "terminal",
       "evidence": [
-        {"kind": "register_tuple", "identity": "correction-package-integrated-final", "path": "project/_local/reviews/trpc-stack-198-refresh-gate-register.md"}
+        {"kind": "report", "identity": "integrated-final-initial-6bab3ed..7b45c6e", "path": "project/_local/reviews/2026-08-13-platform-contract-correction-integrated-final.md"},
+        {"kind": "report", "identity": "integrated-final-correction-6bab3ed..1774d716", "path": "project/_local/reviews/2026-08-13-platform-contract-correction-integrated-final-correction.md"},
+        {"kind": "register_tuple", "identity": "6bab3ed..1774d716", "path": "project/_local/reviews/trpc-stack-198-refresh-gate-register.md"}
       ]
     }
   },
   "active_workers": [],
   "parking": null,
   "git": {
-    "head": "fbf6695d11c0ff10cb26f5f5a75a02ae4f960e2a",
+    "head": "193351309ae2bdafdb20035f9f15516f0b8b2719",
     "base": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99",
     "branch": "rs/trpc-examples/03-graphql-deprecation-docs",
     "worktree": "/Users/rschlae/Git/gbl/gbl-uzh/trees/trpc-examples-stack"
