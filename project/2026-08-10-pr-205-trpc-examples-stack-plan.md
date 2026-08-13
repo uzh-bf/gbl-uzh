@@ -11,6 +11,13 @@ The known SonarCloud Code Analysis exceptions on #202 and #204 remain
 intentionally outside the approved check gate. The final correction review
 found only pre-closure plan metadata contradictions; those are now resolved in
 this plan and the local gate register.
+
+The final layer also contains local commit `6cfeb61b` (`docs(trpc): align
+final architecture guidance`) on top of the last published #205 head
+`7515ea2a`. It updates the canonical `docs/` OKF bundle, example README
+guidance, and the native-host watcher comment. A focused Agy review using
+Gemini 3.7 Flash High passed with no actionable findings. This local commit is
+not yet pushed; no publication or merge is implied by this plan update.
 Provider: GitHub stacked changes
 Base: `dev` at `6bab3ed`
 Worktree: `trees/trpc-examples-stack`
@@ -134,7 +141,7 @@ review remains the next action; merging is not included.
       "evidence": [
         {"kind": "command", "identity": "platform-jest-57-of-57", "path": ""},
         {"kind": "command", "identity": "all-package-ts6-ts7-and-build", "path": ""},
-        {"kind": "command", "identity": "exact-final-head-203381ab-remote-checks", "path": ""},
+        {"kind": "command", "identity": "exact-final-head-7515ea2a-remote-checks", "path": ""},
         {"kind": "command", "identity": "git-diff-check-final-head", "path": ""}
       ]
     },
@@ -160,12 +167,19 @@ review remains the next action; merging is not included.
         {"kind": "report", "identity": "integrated-final-correction-6bab3ed..1774d716", "path": "project/_local/reviews/2026-08-13-platform-contract-correction-integrated-final-correction.md"},
         {"kind": "register_tuple", "identity": "6bab3ed..1774d716", "path": "project/_local/reviews/trpc-stack-198-refresh-gate-register.md"}
       ]
+    },
+    "independent_review": {
+      "required": false,
+      "state": "terminal",
+      "evidence": [
+        {"kind": "report", "identity": "agy-gemini-3.7-flash-high-docs-pass-6cfeb61b", "path": "project/_local/reviews/2026-08-13-trpc-docs-agy-gemini37-flash-high.md"}
+      ]
     }
   },
   "active_workers": [],
   "parking": null,
   "git": {
-    "head": "203381abd76f47ef871cd56a5233c43f15cfd587",
+    "head": "6cfeb61b4c4113d394684743990e1057bda19a04",
     "base": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99",
     "branch": "rs/trpc-examples/03-graphql-deprecation-docs",
     "worktree": "/Users/rschlae/Git/gbl/gbl-uzh/trees/trpc-examples-stack"
