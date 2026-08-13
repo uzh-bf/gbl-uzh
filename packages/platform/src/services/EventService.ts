@@ -148,12 +148,14 @@ export async function receiveEvent(
     }
 
     for (const achievement of matchingEvent.achievements) {
+      // Skip events whose facts do not satisfy this achievement's conditions.
       if (!evaluateConditions(achievement.conditions, event.facts)) {
         continue
       }
 
       const isPeriodScoped = achievement.scope === DB.AchievementScope.PERIOD
 
+      // GAME-scoped FIRST achievements are awarded only once per player.
       if (
         !isPeriodScoped &&
         achievement.when === DB.AchievementFrequency.FIRST &&
@@ -164,6 +166,7 @@ export async function receiveEvent(
 
       let existingInstance
       if (isPeriodScoped) {
+        // PERIOD scope is unique per achievement, player, and period.
         existingInstance = await prisma.achievementInstance.findUnique({
           where: {
             achievementId_playerId_periodIx: {
@@ -174,6 +177,7 @@ export async function receiveEvent(
           },
         })
 
+        // PERIOD-scoped FIRST achievements are awarded only once per period.
         if (
           achievement.when === DB.AchievementFrequency.FIRST &&
           existingInstance
@@ -181,6 +185,7 @@ export async function receiveEvent(
           continue
         }
       } else {
+        // GAME scope looks up the player's achievement across all periods.
         existingInstance = await prisma.achievementInstance.findFirst({
           where: {
             achievement: {
