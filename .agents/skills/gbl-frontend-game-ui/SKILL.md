@@ -111,8 +111,9 @@ Tailwind v4, CSS-only config. Copy `apps/demo-game/src/globals.css` + `postcss.c
 The player's `play.result` query exposes a **token-free** co-player list at
 `currentGame.players` containing only `id` and `name` — use it to resolve
 display names for leaderboards. Result facts from computations carry only
-`playerId`s. Do not depend on another player's facts or call admin-only
-`game` procedures from player pages.
+`playerId`s. Keep player pages on this token-free projection: admin-only game
+procedures expose the full player shape, including login tokens, and must not
+be called from player pages.
 
 ## Conventions + verify
 
