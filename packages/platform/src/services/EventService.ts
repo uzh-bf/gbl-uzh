@@ -1,6 +1,9 @@
 import * as DB from '../generated/prisma/client.js'
-import log from '../lib/logger.js'
-import { getPubSub } from '../lib/pubsub.js'
+import {
+  publishGlobalNotificationAggregateRealtime,
+  publishGlobalNotificationRealtime,
+  publishUserNotificationRealtime,
+} from '../lib/realtime.js'
 import type { Event as PlatformEvent } from '../types.js'
 import { BaseUserNotificationType as UserNotificationType } from '../types.js'
 
@@ -132,9 +135,7 @@ export async function receiveEvent(
   prisma
 ) {
   const matchingEvent = definedEvents.find((item) => item.id === event.type)
-  // console.warn(event, matchingEvent)
 
-  // if there is a matching event and it awards achievements, process each
   if (matchingEvent && matchingEvent.achievements?.length > 0) {
     const awardedAchievements: {
       achievements: { achievement: any; achievementInstance: any }[]
@@ -147,14 +148,14 @@ export async function receiveEvent(
     }
 
     for (const achievement of matchingEvent.achievements) {
-      // skip if event facts don't match achievement conditions
+      // Skip events whose facts do not satisfy this achievement's conditions.
       if (!evaluateConditions(achievement.conditions, event.facts)) {
         continue
       }
 
       const isPeriodScoped = achievement.scope === DB.AchievementScope.PERIOD
 
-      // For GAME-scoped FIRST achievements, skip if already earned globally
+      // GAME-scoped FIRST achievements are awarded only once per player.
       if (
         !isPeriodScoped &&
         achievement.when === DB.AchievementFrequency.FIRST &&
@@ -165,7 +166,7 @@ export async function receiveEvent(
 
       let existingInstance
       if (isPeriodScoped) {
-        // PERIOD scope: look up by (achievementId, playerId, periodIx)
+        // PERIOD scope is unique per achievement, player, and period.
         existingInstance = await prisma.achievementInstance.findUnique({
           where: {
             achievementId_playerId_periodIx: {
@@ -176,7 +177,7 @@ export async function receiveEvent(
           },
         })
 
-        // For PERIOD-scoped FIRST achievements, skip if already earned this period
+        // PERIOD-scoped FIRST achievements are awarded only once per period.
         if (
           achievement.when === DB.AchievementFrequency.FIRST &&
           existingInstance
@@ -184,7 +185,7 @@ export async function receiveEvent(
           continue
         }
       } else {
-        // GAME scope: look up by (achievementId, playerId) ignoring period
+        // GAME scope looks up the player's achievement across all periods.
         existingInstance = await prisma.achievementInstance.findFirst({
           where: {
             achievement: {
@@ -332,17 +333,28 @@ export async function receiveEvent(
   return []
 }
 
-export function publishGlobalNotification(event: PlatformEvent<any>) {
-  try {
-    getPubSub().publish('global:events', event)
-    log.info('[EventService] Published to "global:events".', {
-      gameId: event?.facts?.gameId ?? null,
-      type: event?.type ?? null,
-      version: event?.facts?.version ?? null,
-    })
-  } catch (e) {
-    log.error('[EventService] Error during pubSub.publish:', e)
+export function publishGlobalNotification(event: PlatformEvent<any>): void
+export function publishGlobalNotification(
+  gameId: number,
+  event: PlatformEvent<any>
+): void
+export function publishGlobalNotification(
+  gameIdOrEvent: number | PlatformEvent<any>,
+  scopedEvent?: PlatformEvent<any>
+): void {
+  if (typeof gameIdOrEvent === 'number') {
+    publishGlobalNotificationRealtime(gameIdOrEvent, scopedEvent!)
+    return
   }
+
+  const legacyEvent = gameIdOrEvent
+  const gameId = legacyEvent.facts?.gameId
+  if (Number.isInteger(gameId) && gameId > 0) {
+    publishGlobalNotificationRealtime(gameId, legacyEvent)
+    return
+  }
+
+  publishGlobalNotificationAggregateRealtime(legacyEvent)
 }
 
 export function publishUserNotification(
@@ -350,7 +362,6 @@ export function publishUserNotification(
   events?: any
 ) {
   if (events && events.length > 0) {
-    // console.log(events)
-    getPubSub().publish('user:events', ctx.user.sub, events as any)
+    publishUserNotificationRealtime(ctx.user.sub, events as any)
   }
 }

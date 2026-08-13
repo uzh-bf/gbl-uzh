@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "dist", "src/scripts", "instrumented", "test"],
+  "compilerOptions": {
+    "rootDir": "./src",
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "composite": false,
+    "incremental": false,
+    "tsBuildInfoFile": null,
+    "outDir": "./dist"
+  }
+}
