@@ -12,7 +12,7 @@ Worktree: new `trees/trpc-migration-stack` (one stack, one worktree). Source wor
 > predecessor and is not the active execution contract. The active plan is
 > [`project/2026-08-10-pr-205-trpc-examples-stack-plan.md`](2026-08-10-pr-205-trpc-examples-stack-plan.md).
 > Plan provenance: PR #197 first added this file in commit `7cfd562`; its
-> current local head before this reconciliation commit is `c8d16eec`. The
+> current local head before this reconciliation commit is `f256d912`. The
 > mutable full-stack SHA table belongs in the active plan and must be read from
 > the live stack metadata after each lower-layer propagation; the historical
 > SHA table below is not current evidence.
