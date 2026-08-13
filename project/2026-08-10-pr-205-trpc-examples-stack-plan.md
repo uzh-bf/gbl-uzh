@@ -17,9 +17,10 @@ Mode: guided, with a review pause after every layer
 
 The first-slice plan in
 [`project/2026-08-06-trpc-migration-stack-plan.md`](2026-08-06-trpc-migration-stack-plan.md)
-was first added by commit `7cfd562` and is now current in PR #197 at
-`c8d16eec`. Its document-only update was propagated through the dependent
-stack by a local rebase; the resulting local heads are:
+was first added by commit `7cfd562` and is now current in the local #197 layer
+at `c8d16eec`; remote PR #197 remains at `321a958` until the rewritten stack is
+pushed. Its document-only update was propagated through the dependent stack by
+a local rebase; the resulting local heads are:
 
 | Layer | Local head |
 | --- | --- |
@@ -30,7 +31,7 @@ stack by a local rebase; the resulting local heads are:
 | #201 canonical Pages Router | `b835637` |
 | #202 Rate Wars | `b2231b1` |
 | #204 Central Bank | `8ae07e7` |
-| #205 compatibility/reconciliation | `7989c90` |
+| #205 compatibility/reconciliation | `fe9524e` |
 
 The local chain remains rooted at `dev 6bab3ed`. These rewritten heads are
 not yet the remote PR heads; the remote stack still has the previously pushed
