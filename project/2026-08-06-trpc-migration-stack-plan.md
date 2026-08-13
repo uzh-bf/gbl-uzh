@@ -42,17 +42,19 @@ fixtures, and reconciliation ledger.
 This addendum is provenance for PR #197 only. The mutable eight-layer head
 table, current code-bearing classification, fresh CI readback, and integrated
 review state belong to the active continuation plan. The first-slice package
-was previously published at `ce0bd12c`; this boundary correction is now
-committed locally as the package tip. The lower platform and example-game
-corrections are owned by their downstream layers and must not be copied into
-this foundation branch. The PRs remain ready and reviewable, not
+was published at `5919b722` after its boundary metadata correction. The lower
+platform and example-game corrections are owned by their downstream
+layers and must not be copied into this foundation branch. The integrated
+review is recorded in the active continuation plan; this foundation slice has
+no separate remaining work. The PRs remain ready and reviewable, not
 merge-authorized.
 
 ## Progress
 
-The foundation slice is complete as an independently published layer. The
-full-stack continuation remains tracked by the active plan linked above; this
-record stays classified while the current correction-package review is open.
+The foundation slice is complete as an independently published and reviewed
+layer. The full-stack continuation remains tracked by the active plan linked
+above; the integrated review evidence is recorded there because it covers the
+complete eight-layer stack.
 
 ### Package boundary
 
@@ -64,9 +66,9 @@ record stays classified while the current correction-package review is open.
     "path": "project/2026-07-29-trpc-migration-finalization-roadmap.md",
     "w_item": "W1"
   },
-  "state": "in_progress",
+  "state": "integrated_review_passed",
   "required_delivery": "reviewed",
-  "achieved_delivery": "unreviewed",
+  "achieved_delivery": "reviewed",
   "slices": {
     "completed": ["L00"],
     "remaining": []
@@ -76,7 +78,7 @@ record stays classified while the current correction-package review is open.
       "required": true,
       "state": "terminal",
       "evidence": [
-        {"kind": "command", "identity": "pr-197-checks-ce0bd12c", "path": ""}
+        {"kind": "command", "identity": "pr-197-checks-5919b722", "path": ""}
       ]
     },
     "simplification": {
@@ -91,14 +93,17 @@ record stays classified while the current correction-package review is open.
     },
     "integrated_final": {
       "required": true,
-      "state": "missing",
-      "evidence": []
+      "state": "terminal",
+      "evidence": [
+        {"kind": "report", "identity": "integrated-final-correction-6bab3ed..1774d716", "path": "project/_local/reviews/2026-08-13-platform-contract-correction-integrated-final-correction.md"},
+        {"kind": "register_tuple", "identity": "6bab3ed..1774d716", "path": "project/_local/reviews/trpc-stack-198-refresh-gate-register.md"}
+      ]
     }
   },
   "active_workers": [],
   "parking": null,
   "git": {
-    "head": "ce0bd12c904f27da231d6904d674ba72c55d7dd6",
+    "head": "5919b72265643a60db6000a05601acc9bff1191b",
     "base": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99",
     "branch": "trpc-stack/00-absorb-dev-toolchain",
     "worktree": "/Users/rschlae/Git/gbl/gbl-uzh/trees/trpc-examples-stack"
