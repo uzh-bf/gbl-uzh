@@ -55,6 +55,8 @@ function Games() {
           },
         }}
         onSubmit={async (variables, { resetForm }) => {
+          // Formik keeps the number field as text; normalize it to the integer
+          // required by the platform procedure before sending the mutation.
           await createGame.mutateAsync({
             ...variables,
             playerCount: parseInt(String(variables.playerCount), 10),
