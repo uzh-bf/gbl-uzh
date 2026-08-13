@@ -39,16 +39,71 @@ owns the canonical Pages Router pattern; #202 and #204 own their game-specific
 transition fixes; and #205 owns the compatibility boundary, verification
 fixtures, and reconciliation ledger.
 
-The game-runtime migration tip is #204 (`786ed47`), but #205 is code-bearing
-through `a0f6d52`, including workflow, package-verification, configuration, and
-compatibility-source changes. Only commits from `cf67aa4` through current head
-`2957beb` are documentation, agent-instruction, or plan-only. The integrated
-final initial and correction reviews both returned `DONE_WITH_CONCERNS` on
-earlier ranges; their historical budget is exhausted. Their findings are
-recorded as closed through owning-layer corrections plus focused verification.
-The correction package has a separate exact-current-head integrated-review
-tuple pending; Gate 3 evidence is complete. The PRs remain ready and
-reviewable, not merge-authorized.
+This addendum is provenance for PR #197 only. The mutable eight-layer head
+table, current code-bearing classification, fresh CI readback, and integrated
+review state belong to the active continuation plan. The first-slice package
+is currently published at `ce0bd12c`; the lower platform and example-game
+corrections are owned by their downstream layers and must not be copied into
+this foundation branch. The PRs remain ready and reviewable, not
+merge-authorized.
+
+## Progress
+
+The foundation slice is complete as an independently published layer. The
+full-stack continuation remains tracked by the active plan linked above; this
+record stays classified while the current correction-package review is open.
+
+### Package boundary
+
+```json
+{
+  "schema": "PackageBoundary/v1",
+  "package_key": "trpc-stack-197-first-slice",
+  "roadmap": {
+    "path": "project/2026-07-29-trpc-migration-finalization-roadmap.md",
+    "w_item": "W1"
+  },
+  "state": "in_progress",
+  "required_delivery": "reviewed",
+  "achieved_delivery": "unreviewed",
+  "slices": {
+    "completed": ["L00"],
+    "remaining": []
+  },
+  "gates": {
+    "verification": {
+      "required": true,
+      "state": "terminal",
+      "evidence": [
+        {"kind": "command", "identity": "pr-197-checks-ce0bd12c", "path": ""}
+      ]
+    },
+    "simplification": {
+      "required": false,
+      "state": "skipped",
+      "evidence": []
+    },
+    "slice_review": {
+      "required": false,
+      "state": "skipped",
+      "evidence": []
+    },
+    "integrated_final": {
+      "required": true,
+      "state": "missing",
+      "evidence": []
+    }
+  },
+  "active_workers": [],
+  "parking": null,
+  "git": {
+    "head": "ce0bd12c904f27da231d6904d674ba72c55d7dd6",
+    "base": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99",
+    "branch": "trpc-stack/00-absorb-dev-toolchain",
+    "worktree": "/Users/rschlae/Git/gbl/gbl-uzh/trees/trpc-examples-stack"
+  }
+}
+```
 
 ## 2026-08-10 continuation note
 
