@@ -35,6 +35,10 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/.pnpm-store \
 
 COPY --from=prune /app/out/full/ .
 
+# Existing builds retain their current URLs; the new ARM staging job opts in.
+ARG APP_ENV=production
+COPY apps/demo-game/.env.${APP_ENV} apps/demo-game/.env.production
+
 RUN pnpm build
 
 
