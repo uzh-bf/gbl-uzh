@@ -59,6 +59,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -79,17 +80,19 @@ jobs:
           file: apps/demo-game/Dockerfile
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=${{ github.event_name == 'push' }}
           cache-from: type=gha,scope=demo-game-${{ matrix.architecture }}
           cache-to: type=gha,mode=max,scope=demo-game-${{ matrix.architecture }}
 
       - name: Export image digest
+        if: github.event_name == 'push'
         run: |
           mkdir -p "${{ runner.temp }}/digests"
           digest="${{ steps.build.outputs.digest }}"
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
 
       - name: Upload image digest
+        if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: digests-${{ matrix.architecture }}
@@ -132,6 +135,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=demo-game-startinvest-arm64
 
   merge:
+    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
     permissions:
