@@ -1,5 +1,9 @@
 # Log
 
+## 2026-09-07
+
+- **Update**: `deploying-a-game.md` - document an isolated Startinvest ARM staging image while preserving existing build URLs and multi-architecture tags.
+
 ## 2026-08-12
 
 - **Update**: example auth consumers, container environments, CI, and current auth documentation - all in-repo games now use `resolveAdminOidcConfig()`, starter/devrouter/CI use only `GBL_AUTH_MODE=mock` and `GBL_MOCK_OIDC_*`, native example mock startup remains unsupported, and production forbids mock mode.

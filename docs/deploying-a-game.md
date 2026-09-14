@@ -8,7 +8,7 @@ tags:
   - vercel
   - neon
   - prisma
-timestamp: "2026-08-12T00:00:00Z"
+timestamp: "2026-09-07T00:00:00Z"
 ---
 
 # Deploying a Game to Staging (Vercel + Neon)
@@ -67,6 +67,22 @@ Then set the project so Vercel builds only your app out of the workspace. In the
 - **Output**: Next.js is auto-detected; the app already sets `output: "standalone"` in `next.config.ts`, which Vercel handles.
 
 ## Step 3 - Set environment variables
+
+### Isolated Startinvest ARM staging image
+
+The additional `build_startinvest_arm64` workflow job selects
+`apps/demo-game/.env.staging-arm64` with Docker build argument
+`APP_ENV=staging-arm64`. It sets `NEXT_PUBLIC_APP_URL` and `NEXTAUTH_URL` to
+`https://startinvest.stg.df-app.ch`, and `NEXT_PUBLIC_API_URL` to that origin
+plus `/api/graphql`. The job validates dev pull requests without publishing;
+pushes to dev publish only `ghcr.io/uzh-bf/gbl-uzh/demo-game:dev-startinvest-arm64`.
+It runs on `ubuntu-24.04-arm` and does not contribute to the existing
+multi-architecture manifest. Existing builds retain `APP_ENV=production`,
+the original `.env.production`, and their current tags and deployment URLs.
+The new helm-charts staging deployment should pin a verified digest from the
+Startinvest variant after merge; no existing deployment is switched here.
+
+### Vercel configuration
 
 Set these in Vercel (Production or Preview scope), **not** in the committed `.env.production` files:
 
