@@ -1,18 +1,12 @@
-import * as Dialog from '@radix-ui/react-dialog'
 import { Button } from '@uzh-bf/design-system'
 import { useFormik } from 'formik'
-import {
-  ArrowLeft,
-  Check,
-  ChevronRight,
-  Info,
-  MapPin,
-  UserRound,
-} from 'lucide-react'
+import { ArrowLeft, ChevronRight, Info, MapPin, UserRound } from 'lucide-react'
+import Image from 'next/image'
 import { useRef, useState, type ReactElement } from 'react'
 import type { SelfQuery } from 'src/graphql/generated/ops'
 import { AVATARS, COLORS, LOCATIONS } from 'src/lib/constants'
 import * as yup from 'yup'
+import OptionPicker, { type Option } from './OptionPicker'
 import styles from './WelcomeSetup.module.css'
 
 const avatarNames: Record<string, string> = {
@@ -22,7 +16,7 @@ const avatarNames: Record<string, string> = {
   spargecko: 'Gecko',
   spargeier: 'Vulture',
   sparhai: 'Shark',
-  sparheuschrecke: 'Grasshopper',
+  sparheuschrecke: 'Locust',
   sparhund_1: 'Dog 1',
   sparhund_2: 'Dog 2',
   sparhund_3: 'Dog 3',
@@ -41,18 +35,15 @@ const cantonNames: Record<string, string> = {
   TI: 'Ticino',
   ZH: 'Zürich',
 }
-type Option = { value: string; label: string; image?: string }
 const avatars: Option[] = Object.entries(AVATARS)
   .filter(([key]) => key !== 'avatar_placeholder')
   .map(([key, value]) => ({
     value,
     label: avatarNames[key] ?? key,
-    image: value,
   }))
 const locations: Option[] = LOCATIONS.Trader.map((value) => ({
   value,
   label: `${cantonNames[value]} (${value})`,
-  image: `/locations/${value}.svg`,
 }))
 
 // Player facts can arrive as JSON, including legacy double-encoded values.
@@ -83,107 +74,6 @@ const schema = yup.object({
   location: yup.string().oneOf(LOCATIONS.Trader).required(),
 })
 
-function OptionPicker({
-  title,
-  value,
-  options,
-  onChange,
-  children,
-  searchable = false,
-}: {
-  title: string
-  value: string
-  options: Option[]
-  onChange: (value: string) => void
-  children: ReactElement
-  searchable?: boolean
-}) {
-  const [open, setOpen] = useState(false)
-  const [pending, setPending] = useState(value)
-  const [search, setSearch] = useState('')
-  const selected = options.find((option) => option.value === pending)
-  const filtered = options.filter((option) =>
-    option.label.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())
-  )
-
-  return (
-    <Dialog.Root
-      open={open}
-      onOpenChange={(next) => {
-        if (next) {
-          setPending(value)
-          setSearch('')
-        }
-        setOpen(next)
-      }}
-    >
-      <Dialog.Trigger asChild>{children}</Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Overlay className={styles.overlay} />
-        <Dialog.Content className={styles.sheet}>
-          <div className={styles.sheetHeader}>
-            <Dialog.Title>{title}</Dialog.Title>
-            <Dialog.Close className={styles.textButton}>Cancel</Dialog.Close>
-          </div>
-          <Dialog.Description className={styles.srOnly}>
-            Choose an option, then confirm your selection below.
-          </Dialog.Description>
-          {searchable && (
-            <input
-              className={styles.input}
-              aria-label="Search canton"
-              placeholder="Search canton"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
-          )}
-          <div
-            className={searchable ? styles.cantonList : styles.avatarGrid}
-            aria-label={title}
-          >
-            {filtered.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={
-                  searchable ? styles.cantonOption : styles.avatarOption
-                }
-                aria-pressed={pending === option.value}
-                onClick={() => setPending(option.value)}
-              >
-                {!searchable && <img src={option.image} alt="" />}
-                <span>{option.label}</span>
-                {searchable && pending === option.value && (
-                  <Check size={20} aria-hidden="true" />
-                )}
-              </button>
-            ))}
-            {filtered.length === 0 && (
-              <p role="status" className={styles.muted}>
-                No cantons found. Try a name or abbreviation.
-              </p>
-            )}
-          </div>
-          <Button
-            type="button"
-            primary
-            disabled={!selected}
-            className={{ root: styles.primaryButton }}
-            onClick={() => {
-              if (selected) {
-                onChange(selected.value)
-                setOpen(false)
-              }
-            }}
-          >
-            Use {selected?.label ?? (searchable ? 'canton' : 'avatar')}
-          </Button>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
-  )
-}
-
 export default function WelcomeSetup({
   player,
   onStart,
@@ -193,6 +83,7 @@ export default function WelcomeSetup({
 }) {
   const [step, setStep] = useState<'intro' | 'setup' | 'review'>('intro')
   const [submitError, setSubmitError] = useState('')
+  const content = useRef<HTMLElement>(null)
   const heading = useRef<HTMLHeadingElement>(null)
   const nameInput = useRef<HTMLInputElement>(null)
   const facts = parsePlayerFacts(player.facts)
@@ -204,6 +95,7 @@ export default function WelcomeSetup({
         locations.find(({ value }) => value === facts.location)?.value ?? '',
     },
     validationSchema: schema,
+    validateOnMount: true,
     onSubmit: async (values) => {
       if (step === 'setup') {
         goTo('review')
@@ -216,7 +108,8 @@ export default function WelcomeSetup({
           avatar: values.avatar,
           location: values.location,
           color:
-            typeof facts.color === 'string' && facts.color in COLORS
+            typeof facts.color === 'string' &&
+            Object.hasOwn(COLORS, facts.color)
               ? facts.color
               : 'Blue',
         })
@@ -229,15 +122,15 @@ export default function WelcomeSetup({
   })
   const avatar = avatars.find(({ value }) => value === form.values.avatar)
   const location = locations.find(({ value }) => value === form.values.location)
-  const canContinue = schema.isValidSync(form.values)
+  const canContinue = form.isValid && !form.isValidating
 
   function goTo(next: typeof step, editName = false) {
     setStep(next)
+    setSubmitError('')
     requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, behavior: 'instant' })
-      ;(editName ? nameInput.current : heading.current)?.focus({
-        preventScroll: true,
-      })
+      content.current?.scrollTo({ top: 0, behavior: 'instant' })
+      const target = editName ? nameInput.current : heading.current
+      target?.focus({ preventScroll: true })
     })
   }
 
@@ -284,13 +177,17 @@ export default function WelcomeSetup({
         </span>
       </header>
       <form className={styles.form} onSubmit={form.handleSubmit} noValidate>
-        <main className={styles.content}>
+        <main ref={content} className={styles.content}>
           {step === 'intro' ? (
             <>
-              <img
+              <Image
                 className={styles.hero}
                 src="/images/welcome.jpg"
                 alt="A winning lottery ticket surrounded by coins and a piggy bank"
+                width={720}
+                height={360}
+                sizes="(max-width: 720px) calc(100vw - 32px), 654px"
+                loading="eager"
               />
               <h1 ref={heading} tabIndex={-1}>
                 You just won the lottery
@@ -370,8 +267,13 @@ export default function WelcomeSetup({
                       className={styles.picker}
                       aria-labelledby="avatar-label avatar-value"
                     >
-                      {avatar ? (
-                        <img src={avatar.image} alt="" />
+                      {avatar?.value ? (
+                        <Image
+                          src={avatar.value}
+                          alt=""
+                          width={32}
+                          height={32}
+                        />
                       ) : (
                         <UserRound aria-hidden="true" />
                       )}
@@ -414,7 +316,9 @@ export default function WelcomeSetup({
               </h1>
               <p className={styles.lead}>Check it once, then start.</p>
               <div className={styles.bankCard}>
-                <img src={avatar?.image} alt="" />
+                {avatar?.value && (
+                  <Image src={avatar.value} alt="" width={56} height={56} />
+                )}
                 <div>
                   <strong>{form.values.name.trim()}</strong>
                   <p>
@@ -431,6 +335,7 @@ export default function WelcomeSetup({
                     type="button"
                     className={styles.textButton}
                     aria-label="Edit bank name"
+                    disabled={form.isSubmitting}
                     onClick={() => goTo('setup', true)}
                   >
                     Edit
@@ -444,6 +349,7 @@ export default function WelcomeSetup({
                       type="button"
                       className={styles.textButton}
                       aria-label="Edit avatar"
+                      disabled={form.isSubmitting}
                     >
                       Edit
                     </button>
@@ -457,6 +363,7 @@ export default function WelcomeSetup({
                       type="button"
                       className={styles.textButton}
                       aria-label="Edit location"
+                      disabled={form.isSubmitting}
                     >
                       Edit
                     </button>

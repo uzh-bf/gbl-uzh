@@ -115,9 +115,9 @@ There is no generic frontend — each game builds its own Next.js pages (Pages R
 
 ### Demo-game welcome flow
 
-`apps/demo-game/src/components/welcome/WelcomeSetup.tsx:WelcomeSetup` implements a responsive welcome flow: lottery introduction → bank setup → review. The mobile layout follows the references in `apps/demo-game/design/`, with bottom-sheet avatar and searchable canton pickers and a fixed footer. Options use the existing supported assets from `src/lib/constants.ts`.
+`apps/demo-game/src/components/welcome/WelcomeSetup.tsx:WelcomeSetup` implements a responsive welcome flow: lottery introduction → bank setup → review. The mobile layout follows the references in `apps/demo-game/design/`, with bottom-sheet avatar and searchable canton pickers and a footer that stays below the scrolling content without covering it. Options use the existing supported assets from `src/lib/constants.ts`.
 
-Setup uses Formik + yup and requires a trimmed bank name of 2–20 characters, an avatar, and a canton. Picker changes remain drafts until confirmed; Cancel or Escape discards them. Players can edit all three choices from the review. The final **Start the game** action persists the name and facts through the existing mutation, preserves the saved color (defaults to Blue when absent or invalid), and navigates to `/play/cockpit`. Failed saves retain the choices and show a retry message. The route handles loading, query failures, and missing player sessions (`apps/demo-game/src/pages/play/welcome.tsx:Welcome`).
+Setup uses Formik + yup and requires a trimmed bank name of 2–20 characters, an avatar, and a canton. Picker changes remain drafts until confirmed; Cancel or Escape discards them. Players can edit all three choices from the review. The final **Start the game** action persists the name and facts through the existing mutation, preserves the saved color (defaults to Blue when absent or invalid), and navigates to `/play/cockpit`. Review controls are disabled while saving. Failed saves retain the choices and show a retry message. The route handles loading, query failures, and missing player sessions (`apps/demo-game/src/pages/play/welcome.tsx:Welcome`).
 
 The cockpit pattern (from `apps/demo-game/src/pages/play/cockpit.tsx`):
 
