@@ -1,5 +1,9 @@
 # Log
 
+## 2026-09-15
+
+- **Update**: `developing-a-game.md` - document the mobile welcome introduction, bank setup and review, confirmed avatar/canton pickers, validation, and save behavior.
+
 ## 2026-09-07
 
 - **Update**: `deploying-a-game.md` - document an isolated Startinvest ARM staging image while preserving existing build URLs and multi-architecture tags.

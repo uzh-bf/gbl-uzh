@@ -147,13 +147,90 @@ async function joinPlayer(
 
   await page.goto(joinUrl)
   await page.waitForURL('**/play/welcome')
-  await input(page, 'name').fill(plan.name)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect(
+    page.getByRole('heading', { name: 'You just won the lottery' })
+  ).toBeVisible()
+  await page.screenshot({
+    path: test.info().outputPath(`${plan.name}-welcome.png`),
+  })
+  await page
+    .getByRole('button', { name: 'Set up your bank', exact: true })
+    .click()
+  await page.getByLabel('Bank name', { exact: true }).fill(' ')
+  await expect(
+    page.getByRole('button', { name: 'Review your bank' })
+  ).toBeDisabled()
+  await page.getByLabel('Bank name', { exact: true }).fill(plan.name)
+  await page.getByRole('button', { name: /^Avatar / }).click()
+  await page.getByRole('button', { name: 'Bear', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Use Bear', exact: true })).toBeEnabled()
+  await page.screenshot({
+    path: test.info().outputPath(`${plan.name}-avatars.png`),
+  })
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(
+    page.getByRole('button', { name: 'Avatar Choose an animal' })
+  ).toBeFocused()
+  await page.getByRole('button', { name: /^Avatar / }).click()
+  await page.getByRole('button', { name: 'Bear', exact: true }).click()
+  await page.getByRole('button', { name: 'Use Bear', exact: true }).click()
+  await page.getByRole('button', { name: /^Location / }).click()
+  await page
+    .getByRole('textbox', { name: 'Search canton' })
+    .fill('not-a-canton')
+  await expect(page.getByRole('status')).toContainText('No cantons found')
+  await page.getByRole('textbox', { name: 'Search canton' }).fill('AG')
+  await page.getByRole('button', { name: 'Aargau (AG)', exact: true }).click()
+  await page.screenshot({
+    path: test.info().outputPath(`${plan.name}-cantons.png`),
+  })
+  await page
+    .getByRole('button', { name: 'Use Aargau (AG)', exact: true })
+    .click()
+  await expect(page.getByRole('button', { name: 'Review your bank' })).toBeEnabled()
+  await page.screenshot({
+    path: test.info().outputPath(`${plan.name}-setup.png`),
+  })
+  await page.getByRole('button', { name: 'Review your bank' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Your bank', exact: true })
+  ).toBeVisible()
+  await page
+    .getByRole('button', { name: 'Edit bank name', exact: true })
+    .click()
+  await expect(page.getByLabel('Bank name', { exact: true })).toHaveValue(
+    plan.name
+  )
+  await page.getByRole('button', { name: 'Review your bank' }).click()
+  await page.getByRole('button', { name: 'Edit avatar', exact: true }).click()
+  await expect(
+    page.getByRole('button', { name: 'Bear', exact: true })
+  ).toHaveAttribute('aria-pressed', 'true')
+  await page.keyboard.press('Escape')
+  await expect(
+    page.getByRole('button', { name: 'Edit avatar', exact: true })
+  ).toBeFocused()
+  await page.screenshot({
+    path: test.info().outputPath(`${plan.name}-review.png`),
+  })
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.screenshot({
+    path: test.info().outputPath(`${plan.name}-desktop.png`),
+  })
   await Promise.all([
     page.waitForURL('**/play/cockpit'),
-    page.getByRole('button', { name: 'Start Game' }).click(),
+    page.getByRole('button', { name: 'Start the game', exact: true }).click(),
   ])
 
-  await expect(page.getByText('Game is scheduled.')).toBeVisible({ timeout: 30_000 })
+  await expect(page.getByText('Game is scheduled.')).toBeVisible({
+    timeout: 30_000,
+  })
 
   return { context, page, plan }
 }
