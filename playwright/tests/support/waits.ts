@@ -9,7 +9,7 @@ export async function expectGameStatusEventually(page: Page, status: string) {
           .getAttribute('data-game-status')
 
         if (currentStatus !== status) {
-          await page.reload()
+          await page.reload({ waitUntil: 'domcontentloaded' })
           return page
             .getByTestId('game-detail')
             .getAttribute('data-game-status')

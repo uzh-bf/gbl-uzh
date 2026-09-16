@@ -6,7 +6,7 @@ tags:
   - lifecycle
   - state-machine
   - admin
-timestamp: "2026-07-03T00:00:00Z"
+timestamp: "2026-09-15T00:00:00Z"
 ---
 
 # Game Lifecycle
@@ -55,15 +55,15 @@ Notes:
 
 The player cockpit is a single page that switches on `game.status` (`apps/demo-game/src/pages/play/cockpit.tsx`):
 
-| Status                 | Player view                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------------- |
-| SCHEDULED              | "Game is scheduled" placeholder                                                         |
-| PREPARATION            | Header only — waiting while the admin sets up                                           |
-| RUNNING                | The decision form (game-specific), plus a Ready toggle                                  |
+| Status                 | Player view                                                                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| SCHEDULED              | "Game is scheduled" placeholder                                                                                                |
+| PREPARATION            | Header only — waiting while the admin sets up                                                                                  |
+| RUNNING                | The decision form (game-specific), plus a Ready toggle                                                                         |
 | PAUSED / CONSOLIDATION | Read-only segment results OR active period consolidation forms (e.g. investing in factories, setting dividends for the period) |
-| RESULTS                | Period-end report: aggregate charts across the period(s)                                |
+| RESULTS                | Period-end report: aggregate charts across the period(s)                                                                       |
 
-Independent of status: story elements attached to a newly activated segment appear as blocking popups until acknowledged; learning elements sit in a sidebar list; achievements/level-ups arrive as notifications.
+Independent of status: story elements attached to a newly activated segment appear as blocking popups until acknowledged; demo-game learning elements sit in the Team tab (other games may use a sidebar); achievements/level-ups arrive as notifications.
 
 ## Coordination mechanics (all advisory)
 

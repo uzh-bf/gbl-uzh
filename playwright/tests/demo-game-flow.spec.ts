@@ -32,7 +32,7 @@ const players: PlayerPlan[] = [
   {
     name: 'Playwright Bank One',
     decisions: [
-      { savings: '40', bonds: '30', stocks: '30' },
+      { savings: '33.3', bonds: '33.3', stocks: '33.4' },
       { savings: '35', bonds: '35', stocks: '30' },
       { savings: '30', bonds: '45', stocks: '25' },
       { savings: '45', bonds: '25', stocks: '30' },
@@ -100,12 +100,14 @@ async function createGame(
   page: Page,
   { name, playerCount }: { name: string; playerCount: number }
 ) {
-  await page.goto('/admin/games')
+  await page.goto('/admin/games', { waitUntil: 'domcontentloaded' })
   await input(page, 'name').fill(name)
   await input(page, 'playerCount').fill(String(playerCount))
   await page.getByRole('button', { name: 'Create Game' }).click()
   await page.getByRole('link', { name: new RegExp(name) }).click()
-  await expect(page.getByTestId('game-detail')).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('game-detail')).toBeVisible({
+    timeout: 20_000,
+  })
 }
 
 async function addPeriod(
@@ -121,15 +123,43 @@ async function addPeriod(
   await expect(page.getByTestId(`period-${index}`)).toBeVisible()
 }
 
-async function addSegment(page: Page, { periodIndex }: { periodIndex: number }) {
+async function addSegment(
+  page: Page,
+  {
+    periodIndex,
+    withContent = false,
+  }: { periodIndex: number; withContent?: boolean }
+) {
   const segmentIndex = await page
     .getByTestId(`period-${periodIndex}`)
     .locator('a[href*="/admin/dice/"]')
     .count()
 
   await page.getByRole('button', { name: 'Add segment' }).click()
+  if (withContent) {
+    const dialog = page.getByRole('dialog', {
+      name: 'Add Segment',
+      exact: true,
+    })
+    await dialog.getByRole('combobox').first().click()
+    await dialog
+      .getByRole('option', { name: 'bank_account', exact: true })
+      .click()
+    await dialog
+      .getByRole('heading', { name: 'Add Segment', exact: true })
+      .click()
+    await dialog.getByRole('combobox').nth(1).click()
+    await dialog
+      .getByRole('option', { name: 'bonds_intro', exact: true })
+      .click()
+    await dialog
+      .getByRole('heading', { name: 'Add Segment', exact: true })
+      .click()
+  }
   await page.getByRole('button', { name: 'Submit' }).click()
-  const segment = page.getByTestId(`period-${periodIndex}-segment-${segmentIndex}`)
+  const segment = page.getByTestId(
+    `period-${periodIndex}-segment-${segmentIndex}`
+  )
   await expect(segment.locator('a[href*="/admin/dice/"]')).toBeVisible()
 }
 
@@ -145,8 +175,8 @@ async function joinPlayer(
   })
   const page = await context.newPage()
 
-  await page.goto(joinUrl)
-  await page.waitForURL('**/play/welcome')
+  await page.goto(joinUrl, { waitUntil: 'domcontentloaded' })
+  await page.waitForURL('**/play/welcome', { waitUntil: 'domcontentloaded' })
   await page.setViewportSize({ width: 390, height: 844 })
   await expect(
     page.getByRole('heading', { name: 'You just won the lottery' })
@@ -210,7 +240,7 @@ async function joinPlayer(
   ).toBe(true)
   await page.setViewportSize({ width: 1280, height: 900 })
   await Promise.all([
-    page.waitForURL('**/play/cockpit'),
+    page.waitForURL('**/play/cockpit', { waitUntil: 'domcontentloaded' }),
     page.getByRole('button', { name: 'Start the game', exact: true }).click(),
   ])
 
@@ -241,15 +271,232 @@ async function joinPlayers(
   return sessions
 }
 
+async function assertCoveringHandle(front: Locator, back: Locator) {
+  const frontBounds = await front.boundingBox()
+  const backBounds = await back.boundingBox()
+  if (!frontBounds || !backBounds) throw new Error('Missing slider handles')
+  expect(Math.abs(frontBounds.x - backBounds.x)).toBeLessThan(1)
+  expect(Math.abs(frontBounds.y - backBounds.y)).toBeLessThan(1)
+  expect(
+    await front.evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      return (
+        document
+          .elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+          ?.closest('[role="slider"]') === element
+      )
+    })
+  ).toBe(true)
+}
+
+async function assertAllocationControls(page: Page, admin: Page) {
+  const savings = page.getByRole('spinbutton', {
+    name: 'Savings',
+    exact: true,
+  })
+  const bonds = page.getByRole('spinbutton', { name: 'Bonds', exact: true })
+  const stocks = page.getByRole('spinbutton', { name: 'Stocks', exact: true })
+  const left = page.getByRole('slider', { name: 'Savings boundary' })
+  const right = page.getByRole('slider', { name: 'Stocks boundary' })
+  const submit = page.getByRole('button', {
+    name: 'Submit allocation',
+    exact: true,
+  })
+  await savings.fill('33.3')
+  await bonds.fill('33.3')
+  await stocks.fill('33.4')
+  await expect(submit).toBeEnabled()
+  await expect(left).toHaveAttribute('aria-valuenow', '33.3')
+  await expect(page.getByTestId('allocation-bank')).toContainText(
+    "3'330.00 CHF"
+  )
+  await savings.fill('33.2')
+  await expect(submit).toBeDisabled()
+  await expect(left).toBeDisabled()
+  await expect(page.locator('#allocation-feedback')).toContainText(
+    '0.1% remaining'
+  )
+  await savings.fill('33.33')
+  await expect(savings).toHaveAttribute('aria-invalid', 'true')
+  await savings.fill('33.3')
+  await page.getByRole('link', { name: 'Market outlook' }).click()
+  await expect(page).toHaveURL(/tab=market/)
+  await expect(
+    page.getByRole('heading', { name: 'Market', exact: true })
+  ).toBeVisible()
+  await expect(submit).toBeHidden()
+  await page.getByRole('link', { name: 'History', exact: true }).click()
+  await expect(
+    page.getByRole('heading', { name: 'History', exact: true })
+  ).toBeVisible()
+  await page.getByRole('link', { name: 'Team', exact: true }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Learning Activities' })
+  ).toBeVisible()
+  await expect(page.getByTestId('ready-switch')).toBeHidden()
+  await page.getByRole('button', { name: 'Bonds', exact: true }).click()
+  const learning = page.getByRole('dialog', {
+    name: 'Learning Activity',
+    exact: true,
+  })
+  await expect(learning).toBeVisible()
+  await learning
+    .getByRole('button', {
+      name: 'Eine Anleihe beinhaltet ein geringeres erwartetes Risiko als eine Aktie.',
+    })
+    .click()
+  await learning.getByRole('button', { name: 'Submit', exact: true }).click()
+  await expect(learning.getByText('SOLVED', { exact: true })).toBeVisible()
+  // The footer action precedes the modal's top-right Close icon.
+  await learning
+    .getByRole('button', { name: 'Close', exact: true })
+    .first()
+    .click()
+  await page.getByRole('link', { name: 'Cockpit', exact: true }).click()
+  await expect(savings).toHaveValue('33.3')
+  await setCountdown(admin, '300')
+  await assertCountdownVisible(page)
+  await expect(savings).toHaveValue('33.3')
+  await left.focus()
+  await left.press('ArrowRight')
+  await expect(savings).toHaveValue('33.4')
+  await left.press('Shift+ArrowLeft')
+  await expect(savings).toHaveValue('32.4')
+  await left.press('End')
+  await expect(savings).toHaveValue('100')
+  await expect(bonds).toHaveValue('0')
+  await expect(stocks).toHaveValue('0')
+  await assertCoveringHandle(left, right)
+  await right.focus()
+  await right.press('ArrowLeft')
+  await expect(savings).toHaveValue('99.9')
+  await expect(stocks).toHaveValue('0.1')
+  await left.press('ArrowLeft')
+  await expect(bonds).toHaveValue('0.1')
+  await right.press('Home')
+  await expect(stocks).toHaveValue('100')
+  await assertCoveringHandle(right, left)
+  await right.press('ArrowRight')
+  await expect(bonds).toHaveValue('0.1')
+
+  // Either boundary can be selected from the same overlapping pointer target.
+  for (const direction of [-1, 1]) {
+    await savings.fill('50')
+    await bonds.fill('0')
+    await stocks.fill('50')
+    await right.scrollIntoViewIfNeeded()
+    const overlap = await right.boundingBox()
+    const rail = await page.getByTestId('allocation-slider').boundingBox()
+    if (!overlap || !rail) throw new Error('Missing slider bounds')
+    const x = overlap.x + overlap.width / 2
+    const y = overlap.y + overlap.height / 2
+    await page.mouse.move(x, y)
+    await page.mouse.down()
+    await page.mouse.move(x + direction * rail.width * 0.1, y, { steps: 8 })
+    await expect(savings).toHaveValue(direction < 0 ? '40' : '50')
+    await expect(bonds).toHaveValue('10')
+    await expect(stocks).toHaveValue(direction < 0 ? '50' : '40')
+    const selected = direction < 0 ? left : right
+    await expect(selected).toBeFocused()
+    await expect(selected).toHaveCSS('z-index', '2')
+    const moved = await selected.boundingBox()
+    expect(moved?.y).toBe(overlap.y)
+    await page.mouse.up()
+  }
+
+  await savings.fill('55')
+  await bonds.fill('35')
+  await stocks.fill('10')
+  await left.scrollIntoViewIfNeeded()
+  const track = await page.getByTestId('allocation-slider').boundingBox()
+  const thumb = await left.boundingBox()
+  if (!track || !thumb) throw new Error('Allocation slider has no bounds')
+  await page.mouse.move(thumb.x + thumb.width / 2, thumb.y + thumb.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(
+    track.x + track.width * 0.95,
+    thumb.y + thumb.height / 2,
+    { steps: 8 }
+  )
+  await page.mouse.up()
+  await expect(bonds).toHaveValue('0')
+  await expect(left).toHaveAttribute(
+    'aria-valuenow',
+    (await right.getAttribute('aria-valuenow')) ?? ''
+  )
+
+  // Failed mutations retain the draft and expose a retry, without changing Ready.
+  const rejectAction = async (route: import('@playwright/test').Route) => {
+    if (route.request().postData()?.includes('PerformAction')) {
+      await route.fulfill({
+        json: { errors: [{ message: 'Test save failure' }] },
+      })
+    } else await route.continue()
+  }
+  await page.route('**/api/graphql', rejectAction)
+  await submit.click()
+  await expect(
+    page
+      .getByRole('alert')
+      .filter({ hasText: 'Could not save your allocation' })
+  ).toBeVisible()
+  await expect(bonds).toHaveValue('0')
+  await page.unroute('**/api/graphql', rejectAction)
+  await savings.fill('55')
+  await bonds.fill('35')
+  await stocks.fill('10')
+  await page.getByRole('heading', { name: 'Your mix' }).click()
+  for (const { name, width, height } of [
+    { name: 'reference', width: 784, height: 1694 },
+    { name: 'mobile', width: 390, height: 844 },
+    { name: 'desktop', width: 1440, height: 1000 },
+  ]) {
+    await page.setViewportSize({ width, height })
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth
+        )
+      )
+      .toBe(true)
+    await page.screenshot({
+      path: test.info().outputPath(`cockpit-${name}.png`),
+      fullPage: true,
+      animations: 'disabled',
+      style:
+        'nextjs-portal, [aria-label="Notifications (F8)"] { visibility: hidden !important; }',
+    })
+  }
+}
+
 async function submitDecision(page: Page, values: DecisionValues) {
-  const submitButton = page.getByRole('button', { name: 'Submit' })
+  const submitButton = page.getByRole('button', {
+    name: 'Submit allocation',
+    exact: true,
+  })
   await page.getByRole('spinbutton', { name: 'Savings' }).fill(values.savings)
   await page.getByRole('spinbutton', { name: 'Bonds' }).fill(values.bonds)
   await page.getByRole('spinbutton', { name: 'Stocks' }).fill(values.stocks)
   await submitButton.click()
   await expect(submitButton).toBeEnabled()
+  await expect(
+    page.getByText('Allocation submitted.', { exact: true })
+  ).toBeVisible()
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await expect(
+    page.getByRole('spinbutton', { name: 'Savings', exact: true })
+  ).toHaveValue(values.savings)
+  await expect(
+    page.getByRole('spinbutton', { name: 'Bonds', exact: true })
+  ).toHaveValue(values.bonds)
+  await expect(
+    page.getByRole('spinbutton', { name: 'Stocks', exact: true })
+  ).toHaveValue(values.stocks)
   await expect(page.getByTestId('ready-switch')).toBeVisible()
-  await page.getByTestId('ready-switch').click()
+  await page.getByRole('switch', { name: 'Ready', exact: true }).click()
+  await expect(
+    page.getByRole('switch', { name: 'Ready', exact: true })
+  ).toBeChecked()
 }
 
 async function advanceGame(
@@ -264,14 +511,24 @@ async function advanceGame(
 ) {
   const button = page.getByRole('button', { name: action })
   await expect(button).toBeEnabled()
+  // Await the transition response before any status-check reload can cancel it.
+  const responsePromise = page.waitForResponse(
+    (response) =>
+      response.url().includes('/api/graphql') &&
+      /ActivateNext(Period|Segment)/.test(response.request().postData() ?? '')
+  )
   await button.click()
+  const response = await responsePromise
+  expect(await response.json()).not.toHaveProperty('errors')
   await expectGameStatusEventually(page, expectedStatus)
 }
 
 async function assertPlayerDecisionForm(sessions: PlayerSession[]) {
   await Promise.all(
     sessions.map(({ page }) =>
-      expect(page.getByRole('button', { name: 'Submit' })).toBeVisible({
+      expect(
+        page.getByRole('button', { name: 'Submit allocation', exact: true })
+      ).toBeVisible({
         timeout: 15_000,
       })
     )
@@ -279,11 +536,12 @@ async function assertPlayerDecisionForm(sessions: PlayerSession[]) {
 }
 
 async function assertPlayerPortfolio(page: Page, timeout = 10_000) {
-  await expect(page.getByText('Assets Overview').first()).toBeVisible({ timeout })
+  await expect(page.getByText('To allocate', { exact: true })).toBeVisible({
+    timeout,
+  })
   await expect(page.getByText('Savings').first()).toBeVisible({ timeout })
   await expect(page.getByText('Bonds').first()).toBeVisible({ timeout })
   await expect(page.getByText('Stocks').first()).toBeVisible({ timeout })
-  await expect(page.getByText('Total').first()).toBeVisible({ timeout })
 }
 
 async function setCountdown(page: Page, seconds: string) {
@@ -349,14 +607,21 @@ async function assertDicePage(page: Page) {
   await expect(diceLink).toBeVisible()
 
   const [dicePage] = await Promise.all([
-    page.waitForEvent('popup'),
+    // Popup events wait for the initial response, including a cold dev build.
+    page.waitForEvent('popup', { timeout: 30_000 }),
     diceLink.click(),
   ])
 
   try {
-    await expect(dicePage.getByText('1. Month')).toBeVisible({ timeout: 30_000 })
-    await expect(dicePage.getByText('2. Month')).toBeVisible({ timeout: 30_000 })
-    await expect(dicePage.getByText('3. Month')).toBeVisible({ timeout: 30_000 })
+    await expect(dicePage.getByText('1. Month')).toBeVisible({
+      timeout: 30_000,
+    })
+    await expect(dicePage.getByText('2. Month')).toBeVisible({
+      timeout: 30_000,
+    })
+    await expect(dicePage.getByText('3. Month')).toBeVisible({
+      timeout: 30_000,
+    })
     await expect(dicePage.getByRole('button', { name: 'Roll' })).toHaveCount(3)
   } finally {
     await dicePage.close()
@@ -365,7 +630,7 @@ async function assertDicePage(page: Page) {
 
 async function assertFinalReport(page: Page, playerPlans: PlayerPlan[]) {
   const [reportPage] = await Promise.all([
-    page.waitForEvent('popup'),
+    page.waitForEvent('popup', { timeout: 30_000 }),
     page.getByRole('button', { name: 'Report' }).click(),
   ])
 
@@ -375,9 +640,7 @@ async function assertFinalReport(page: Page, playerPlans: PlayerPlan[]) {
     })
 
     for (const { name } of playerPlans) {
-      await expect(
-        reportPage.getByRole('columnheader', { name })
-      ).toBeVisible()
+      await expect(reportPage.getByRole('columnheader', { name })).toBeVisible()
     }
 
     await expect(reportPage.getByText('Player Decisions')).toBeVisible()
@@ -396,6 +659,74 @@ async function assertFinalReport(page: Page, playerPlans: PlayerPlan[]) {
   }
 }
 
+test('cockpit allocation controls, navigation, and decimal persistence', async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  const appBaseURL = requireBaseURL(baseURL)
+  await createGame(page, {
+    name: `Cockpit controls ${Date.now()}`,
+    playerCount: 1,
+  })
+  await addPeriod(page, { segmentCount: '2', index: 0 })
+  await addSegment(page, { periodIndex: 0, withContent: true })
+  await addSegment(page, { periodIndex: 0 })
+  const session = await joinPlayer(
+    browser,
+    appBaseURL,
+    await playerJoinUrl(page, appBaseURL, 0),
+    players[0]
+  )
+  try {
+    await advanceGame(page, {
+      action: 'Start Period',
+      expectedStatus: 'PREPARATION',
+    })
+    await advanceGame(page, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    const story = session.page.getByRole('dialog', {
+      name: 'A. About the Savings Account',
+      exact: true,
+    })
+    await expect(story).toBeVisible()
+    await story.getByRole('button', { name: 'Continue', exact: true }).click()
+    await expect(story).toBeHidden()
+    await assertAllocationControls(session.page, page)
+    await submitDecision(session.page, players[0].decisions[0])
+    await session.page
+      .getByRole('spinbutton', { name: 'Savings', exact: true })
+      .fill('50')
+    await session.page
+      .getByRole('spinbutton', { name: 'Bonds', exact: true })
+      .fill('25')
+    await session.page
+      .getByRole('spinbutton', { name: 'Stocks', exact: true })
+      .fill('25')
+    await advanceGame(page, {
+      action: 'Segment Results',
+      expectedStatus: 'PAUSED',
+    })
+    await expect(
+      session.page.getByRole('button', {
+        name: 'Submit allocation',
+        exact: true,
+      })
+    ).toBeHidden()
+    await advanceGame(page, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    await expect(
+      session.page.getByRole('spinbutton', { name: 'Savings', exact: true })
+    ).toHaveValue('33.3')
+  } finally {
+    await session.context.close()
+  }
+})
+
 test('admin and players complete multi-team multi-period demo-game flow', async ({
   page,
   browser,
@@ -405,12 +736,16 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
   const gameName = `Playwright breadth ${Date.now()}`
 
   await createGame(page, { name: gameName, playerCount: players.length })
-  await expect(page.getByRole('button', { name: 'Start Period' })).toBeDisabled()
+  await expect(
+    page.getByRole('button', { name: 'Start Period' })
+  ).toBeDisabled()
 
   const joinUrls = await assertUniqueJoinUrls(page, appBaseURL, players.length)
 
   await addPeriod(page, { segmentCount: '2', index: 0 })
-  await expect(page.getByRole('button', { name: 'Start Period' })).toBeDisabled()
+  await expect(
+    page.getByRole('button', { name: 'Start Period' })
+  ).toBeDisabled()
   await expect(page.getByRole('button', { name: 'Add period' })).toBeDisabled()
   await addSegment(page, { periodIndex: 0 })
   await expect(page.getByRole('button', { name: 'Add period' })).toBeDisabled()
@@ -584,9 +919,9 @@ test('trading actions submit one validated modifier and reset after success', as
   await expect.poll(() => tradeSubmissions(page)).toEqual([])
 
   await buy.click()
-  await expect.poll(() => tradeSubmissions(page)).toEqual([
-    { volume: 2, modifier: 1 },
-  ])
+  await expect
+    .poll(() => tradeSubmissions(page))
+    .toEqual([{ volume: 2, modifier: 1 }])
   await expect(volume).toHaveValue('0')
 
   await volume.fill('')
@@ -596,9 +931,11 @@ test('trading actions submit one validated modifier and reset after success', as
 
   await volume.fill('3')
   await sell.click()
-  await expect.poll(() => tradeSubmissions(page)).toEqual([
-    { volume: 2, modifier: 1 },
-    { volume: 3, modifier: -1 },
-  ])
+  await expect
+    .poll(() => tradeSubmissions(page))
+    .toEqual([
+      { volume: 2, modifier: 1 },
+      { volume: 3, modifier: -1 },
+    ])
   await expect(volume).toHaveValue('0')
 })

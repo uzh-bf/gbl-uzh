@@ -1,6 +1,14 @@
 # Log
 
+## 2026-09-16
+
+- **Update**: [Developing a Game](developing-a-game.md) - document compact cockpit sizing on tablet and desktop, preserving mobile control sizes and the centered, bounded layout.
+
+- **Update**: [Developing a Game](developing-a-game.md) - document the final centered slider labels and handles, directional selection when handles coincide, and endpoint stacking. Simplify cockpit state handling and consolidate browser screenshots under each test's output directory.
+
 ## 2026-09-15
+
+**Update**: [Developing a Game](developing-a-game.md), [Game Lifecycle](game-lifecycle.md) — document the demo-game cockpit design, bottom navigation, Team profile/learning activities, and shared decimal allocation validation.
 
 - **Update**: `developing-a-game.md` - clarify the welcome footer layout and locked review controls during saving.
 

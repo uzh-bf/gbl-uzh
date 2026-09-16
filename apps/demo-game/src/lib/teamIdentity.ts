@@ -1,0 +1,26 @@
+export const avatarNames: Record<string, string> = {
+  sparbaer: 'Bear',
+  sparbulle: 'Bull',
+  sparfalken: 'Falcon',
+  spargecko: 'Gecko',
+  spargeier: 'Vulture',
+  sparhai: 'Shark',
+  sparheuschrecke: 'Locust',
+  sparhund_1: 'Dog 1',
+  sparhund_2: 'Dog 2',
+  sparhund_3: 'Dog 3',
+  sparmaeuse: 'Mice',
+  sparpegasus: 'Pegasus',
+  sparschaf: 'Sheep',
+  sparschwein: 'Pig',
+}
+export const cantonNames: Record<string, string> = {
+  AG: 'Aargau',
+  AI: 'Appenzell Innerrhoden',
+  BE: 'Bern',
+  FR: 'Fribourg',
+  GR: 'Graubünden',
+  JU: 'Jura',
+  TI: 'Ticino',
+  ZH: 'Zürich',
+}

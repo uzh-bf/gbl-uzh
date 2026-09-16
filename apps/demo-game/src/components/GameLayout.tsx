@@ -1,17 +1,18 @@
-import { useMutation, useQuery, useSubscription } from '@apollo/client'
+import { useMutation, useSubscription } from '@apollo/client'
 import {
-  GameSidebar,
   getCountdownNotification,
-  Layout,
   LearningActivitiesList,
   LearningActivityModal,
+  PlayerDisplay,
   shouldRefetchGameResult,
   StoryElements,
   useLearningActivities,
 } from '@gbl-uzh/ui'
-import { Button } from '@uzh-bf/design-system'
+import { Button, Switch } from '@uzh-bf/design-system'
 import dayjs from 'dayjs'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useEffect, useMemo, useRef } from 'react'
 import {
   AttemptLearningElementDocument,
   GlobalEventsDocument,
@@ -19,38 +20,68 @@ import {
   MarkStoryElementDocument,
   ResultDocument,
   UpdateReadyStateDocument,
+  type ResultQuery,
 } from 'src/graphql/generated/ops'
+import { avatarNames, cantonNames } from '~/lib/teamIdentity'
+import styles from './cockpit/Cockpit.module.css'
+import CompactCountdown from './cockpit/CompactCountdown'
 import { useToast } from './ui/use-toast'
 
-const tabs = [
-  { name: 'Welcome', href: '/play/welcome' },
-  { name: 'Cockpit', href: '/play/cockpit' },
-]
+const tabs = ['Cockpit', 'Market', 'History', 'Team']
 
-function GameLayout({ children }: { children: React.ReactNode }) {
-  const { data, refetch: refetchResult } = useQuery(ResultDocument, {
-    fetchPolicy: 'cache-and-network',
-  })
+function parseFacts(raw: unknown): Record<string, any> {
+  try {
+    let value = raw
+    for (let i = 0; i < 2 && typeof value === 'string'; i++)
+      value = JSON.parse(value)
+    return value && typeof value === 'object' && !Array.isArray(value)
+      ? value
+      : {}
+  } catch {
+    return {}
+  }
+}
 
-  const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument)
+function GameLayout({
+  children,
+  action,
+  data,
+  refetchResult,
+}: {
+  children: React.ReactNode
+  action?: React.ReactNode
+  data: ResultQuery
+  refetchResult: () => Promise<unknown>
+}) {
+  const { self, result } = data
+  const currentGame = result?.currentGame
+  const activePeriod = currentGame?.activePeriod
+  const activeSegment = activePeriod?.activeSegment
+  const player = result?.playerResult?.player
+  const router = useRouter()
+  const tab =
+    typeof router.query.tab === 'string' &&
+    tabs.some((name) => name.toLowerCase() === router.query.tab)
+      ? router.query.tab
+      : 'cockpit'
+  const [updateReadyState, { loading }] = useMutation(
+    UpdateReadyStateDocument,
+    {
+      refetchQueries: [ResultDocument],
+      awaitRefetchQueries: true,
+    }
+  )
   const [markStoryElement] = useMutation(MarkStoryElementDocument, {
     refetchQueries: [ResultDocument],
   })
 
   const { toast } = useToast()
 
-  const [countdownNotifications, setCountdownNotifications] = useState({
+  const countdownNotifications = useRef({
     '60': false,
     '180': false,
   })
   const previousCountdownSeconds = useRef<number | null>(null)
-
-  const completedLearningElementIds =
-    data?.result?.playerResult?.player?.completedLearningElementIds ?? []
-  const allPeriods = data?.result?.currentGame?.periods ?? []
-  const currentLearningElements =
-    data?.result?.currentGame?.activePeriod?.activeSegment?.learningElements ??
-    []
 
   const {
     activeLearningId,
@@ -68,13 +99,13 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     learningElementDocument: LearningElementDocument,
     attemptLearningElementDocument: AttemptLearningElementDocument,
     resultDocument: ResultDocument,
-    completedLearningElementIds,
-    activeSegmentLearningElements: currentLearningElements,
-    allPeriods,
+    completedLearningElementIds: player?.completedLearningElementIds ?? [],
+    activeSegmentLearningElements: activeSegment?.learningElements ?? [],
+    allPeriods: currentGame?.periods ?? [],
     toast,
   })
 
-  const currentGameId = parseInt(data?.result?.currentGame?.id)
+  const currentGameId = parseInt(currentGame?.id)
 
   useSubscription(GlobalEventsDocument, {
     skip: !currentGameId,
@@ -88,10 +119,9 @@ function GameLayout({ children }: { children: React.ReactNode }) {
     },
   })
 
-  const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
-    ?.countdownExpiresAt as string | null
-  const countdownDurationMs = data?.result?.currentGame?.activePeriod
-    ?.activeSegment?.countdownDurationMs as number | null
+  const strExpiresAt = activeSegment?.countdownExpiresAt as string | null
+  const countdownDurationMs = activeSegment?.countdownDurationMs as
+    number | null
 
   const expiresAtDate = useMemo(() => {
     return strExpiresAt ? dayjs(strExpiresAt).toDate() : null
@@ -111,93 +141,81 @@ function GameLayout({ children }: { children: React.ReactNode }) {
       })
     }
 
-    setCountdownNotifications({ '60': false, '180': false })
-  }, [strExpiresAt, countdownDurationMs])
+    countdownNotifications.current = { '60': false, '180': false }
+  }, [strExpiresAt, countdownDurationMs, toast])
 
-  if (!data?.self || !data?.result?.currentGame) {
+  if (!self || !currentGame) {
     return null
   }
 
+  const facts = parseFacts(self.facts)
   const playerInfo = {
-    name: data.self.name,
-    color: data.self.facts.color,
-    location: data.self.facts.location,
-    level: data.self.level.index,
-    xp: data.self.experience,
-    xpMax: data.self.experienceToNext,
-    achievements: data.self.achievements,
-    imgPathAvatar: data.self.facts.avatar,
-    imgPathLocation: `/locations/${data.self.facts.location}.svg`,
+    name: self.name,
+    color: facts.color,
+    location: facts.location,
+    level: self.level?.index ?? 0,
+    achievements: self.achievements,
+    imgPathAvatar: facts.avatar,
+    imgPathLocation: `/locations/${facts.location}.svg`,
   }
-
-  const sidebar = (
-    <GameSidebar
-      playerInfo={playerInfo}
-      readySwitch={
-        data?.self
-          ? {
-              checked: data.self.isReady,
-              disabled: loading,
-              onCheckedChange: async () => {
-                await updateReadyState({
-                  variables: {
-                    isReady: !data.self.isReady,
-                  },
-                })
-              },
-            }
-          : undefined
-      }
-      countdown={
-        countdownDurationMs !== null && expiresAtDate !== null
-          ? {
-              expiresAt: expiresAtDate,
-              totalDuration: countdownDurationMs / 1000,
-              onUpdate: (secondsLeft) => {
-                const previousSecondsLeft = previousCountdownSeconds.current
-                previousCountdownSeconds.current = secondsLeft
-                if (previousSecondsLeft === null) return
-
-                const notification = getCountdownNotification(
-                  secondsLeft,
-                  previousSecondsLeft,
-                  countdownNotifications
-                )
-                if (!notification) return
-
-                toast({
-                  title: 'Countdown Update',
-                  description: `Less than ${notification.friendlyMinutes} min remaining! Please press ready.`,
-                })
-                setCountdownNotifications((prevState) => ({
-                  ...prevState,
-                  [notification.secondsKey]: true,
-                }))
-              },
-              onExpire: () => {},
-            }
-          : undefined
-      }
-    >
-      <LearningActivitiesList
-        openElements={openLearningElements}
-        completedElements={completedLearningElements}
-        onElementClick={(id) => setActiveLearningId(id)}
-      />
-    </GameSidebar>
-  )
-
-  const activeSegment = data?.result?.currentGame?.activePeriod?.activeSegment
+  const segmentIndex = activePeriod?.activeSegment?.index
+  const segmentCount =
+    currentGame.periods.find((period) => period.id === activePeriod?.id)
+      ?.segmentCount ?? 0
+  const running = currentGame.status === 'RUNNING'
+  const done =
+    segmentIndex == null
+      ? 0
+      : running
+        ? segmentIndex
+        : ['PAUSED', 'CONSOLIDATION', 'RESULTS'].includes(currentGame.status)
+          ? segmentIndex + 1
+          : 0
+  const status = {
+    RUNNING: 'Allocation open',
+    PAUSED: 'Allocation closed',
+    CONSOLIDATION: 'Allocation closed',
+    RESULTS: 'Period results',
+    PREPARATION: 'Preparing',
+    SCHEDULED: 'Scheduled',
+    COMPLETED: 'Completed',
+  }[currentGame.status]
+  const initials =
+    self.name
+      ?.trim()
+      .split(/\s+/)
+      .map((word) => word[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase() || 'T'
+  const avatarKey = String(facts.avatar ?? '')
+    .split('/')
+    .pop()
+    ?.split('.')[0]
+  const handleCountdownUpdate = (secondsLeft: number) => {
+    const previousSecondsLeft = previousCountdownSeconds.current
+    previousCountdownSeconds.current = secondsLeft
+    if (previousSecondsLeft === null) return
+    const notification = getCountdownNotification(
+      secondsLeft,
+      previousSecondsLeft,
+      countdownNotifications.current
+    )
+    if (!notification) return
+    toast({
+      title: 'Countdown Update',
+      description: `Less than ${notification.friendlyMinutes} min remaining! Please press ready.`,
+    })
+    countdownNotifications.current[notification.secondsKey] = true
+  }
 
   return (
     <>
       <StoryElements
         key={activeSegment?.id}
         activeStoryElements={activeSegment?.storyElements ?? []}
-        visitedStoryElementIds={
-          data?.result?.playerResult?.player?.visitedStoryElementIds ?? []
-        }
-        playerRole={data.self.role}
+        visitedStoryElementIds={player?.visitedStoryElementIds ?? []}
+        playerRole={self.role}
         onMarkElementVisited={async (id) => {
           await markStoryElement({
             variables: {
@@ -206,9 +224,139 @@ function GameLayout({ children }: { children: React.ReactNode }) {
           })
         }}
       />
-      <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
-        {children}
-      </Layout>
+      <div className={styles.shell}>
+        <header className={styles.header}>
+          <div className={styles.badge} aria-hidden="true">
+            {initials}
+          </div>
+          <div className={styles.identity}>
+            <strong>{self.name}</strong>
+            <p>
+              {avatarNames[avatarKey] ?? 'Team'} · HQ{' '}
+              {cantonNames[facts.location] ?? facts.location ?? '—'}
+            </p>
+          </div>
+          <div className={styles.clock}>
+            {expiresAtDate && Number.isFinite(expiresAtDate.getTime()) ? (
+              <CompactCountdown
+                expiresAt={expiresAtDate}
+                onUpdate={handleCountdownUpdate}
+              />
+            ) : (
+              <span aria-label="No countdown">—</span>
+            )}
+          </div>
+        </header>
+        <section
+          className={styles.progress}
+          aria-label="Game progress"
+          data-game-status={currentGame.status}
+        >
+          <div className={styles.progressHeading}>
+            <h2>
+              {activePeriod
+                ? `Period ${activePeriod.index + 1}${segmentIndex == null ? '' : ` · Segment ${segmentIndex + 1} of ${segmentCount}`}`
+                : 'Waiting for the game'}
+            </h2>
+            <span>{status}</span>
+          </div>
+          {segmentCount > 0 && (
+            <>
+              <div className={styles.segments} aria-hidden="true">
+                {Array.from({ length: segmentCount }, (_, index) => (
+                  <span
+                    key={index}
+                    className={styles.segment}
+                    data-state={
+                      running && index === segmentIndex
+                        ? 'active'
+                        : index < done
+                          ? 'done'
+                          : 'upcoming'
+                    }
+                  />
+                ))}
+              </div>
+              <p>
+                {done} {done === 1 ? 'segment' : 'segments'} done
+                {running && segmentIndex != null
+                  ? ` · segment ${segmentIndex + 1} running`
+                  : ''}{' '}
+                · {Math.max(0, segmentCount - done - (running ? 1 : 0))} to come
+              </p>
+            </>
+          )}
+        </section>
+        <main className={styles.body}>
+          <div
+            hidden={tab !== 'cockpit'}
+            className={running ? undefined : styles.report}
+          >
+            {children}
+          </div>
+          <section hidden={tab !== 'market'} className={styles.tabPanel}>
+            <h1>Market</h1>
+          </section>
+          <section hidden={tab !== 'history'} className={styles.tabPanel}>
+            <h1>History</h1>
+          </section>
+          <section hidden={tab !== 'team'} className={styles.tabPanel}>
+            <h1>Team</h1>
+            <PlayerDisplay {...playerInfo} />
+            <div className={styles.teamActivities}>
+              <LearningActivitiesList
+                openElements={openLearningElements}
+                completedElements={completedLearningElements}
+                onElementClick={(id) => setActiveLearningId(id)}
+              />
+            </div>
+          </section>
+        </main>
+        <div className={styles.bottom}>
+          {tab === 'cockpit' && (
+            <div className={styles.footer}>
+              {action}
+              <div className={styles.ready} data-cy="ready-switch">
+                <label htmlFor="isReady" className={styles.readyLabel}>
+                  Ready
+                </label>
+                <Switch
+                  id="isReady"
+                  checked={self.isReady}
+                  disabled={loading}
+                  size="lg"
+                  className={{
+                    element: styles.readyTrack,
+                    thumb: styles.readyThumb,
+                  }}
+                  onCheckedChange={async (isReady) => {
+                    try {
+                      await updateReadyState({ variables: { isReady } })
+                    } catch {
+                      toast({
+                        title: 'Could not update Ready',
+                        description: 'Please try again.',
+                      })
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          <nav className={styles.nav} aria-label="Player navigation">
+            {tabs.map((name) => (
+              <Link
+                key={name}
+                href={`/play/cockpit?tab=${name.toLowerCase()}`}
+                shallow
+                aria-current={tab === name.toLowerCase() ? 'page' : undefined}
+              >
+                {name}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      </div>
       <LearningActivityModal
         open={!!activeLearningId}
         onClose={() => setActiveLearningId(null)}

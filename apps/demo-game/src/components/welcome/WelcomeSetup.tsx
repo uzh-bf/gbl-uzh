@@ -6,35 +6,10 @@ import { useRef, useState, type ReactElement } from 'react'
 import type { SelfQuery } from 'src/graphql/generated/ops'
 import { AVATARS, COLORS, LOCATIONS } from 'src/lib/constants'
 import * as yup from 'yup'
+import { avatarNames, cantonNames } from '~/lib/teamIdentity'
 import OptionPicker, { type Option } from './OptionPicker'
 import styles from './WelcomeSetup.module.css'
 
-const avatarNames: Record<string, string> = {
-  sparbaer: 'Bear',
-  sparbulle: 'Bull',
-  sparfalken: 'Falcon',
-  spargecko: 'Gecko',
-  spargeier: 'Vulture',
-  sparhai: 'Shark',
-  sparheuschrecke: 'Locust',
-  sparhund_1: 'Dog 1',
-  sparhund_2: 'Dog 2',
-  sparhund_3: 'Dog 3',
-  sparmaeuse: 'Mice',
-  sparpegasus: 'Pegasus',
-  sparschaf: 'Sheep',
-  sparschwein: 'Pig',
-}
-const cantonNames: Record<string, string> = {
-  AG: 'Aargau',
-  AI: 'Appenzell Innerrhoden',
-  BE: 'Bern',
-  FR: 'Fribourg',
-  GR: 'Graubünden',
-  JU: 'Jura',
-  TI: 'Ticino',
-  ZH: 'Zürich',
-}
 const avatars: Option[] = Object.entries(AVATARS)
   .filter(([key]) => key !== 'avatar_placeholder')
   .map(([key, value]) => ({

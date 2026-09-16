@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: "2026-09-15T00:00:00Z"
+timestamp: "2026-09-16T00:00:00Z"
 ---
 
 # Developing a Game
@@ -121,10 +121,18 @@ Setup uses Formik + yup and requires a trimmed bank name of 2–20 characters, a
 
 The cockpit pattern (from `apps/demo-game/src/pages/play/cockpit.tsx`):
 
-1. A `GameLayout` wrapper fetches **one aggregate query** (player result + previous results + current game with active period/segment + attached content + self).
-2. It subscribes to global events and, on `PERIOD_ACTIVATED` / `SEGMENT_ACTIVATED` / `COUNTDOWN_UPDATED`, **refetches that query** — events are a poke, never a data source.
-3. The layout renders the shared chrome: nav, player display, Ready toggle, countdown widget, learning-element sidebar, blocking story-element popups.
+1. The cockpit page fetches **one aggregate query** and passes its data/refetch function to the `GameLayout` wrapper (player result + previous results + current game with active period/segment + attached content + self).
+2. `GameLayout` subscribes to global events and, on `PERIOD_ACTIVATED` / `SEGMENT_ACTIVATED` / `COUNTDOWN_UPDATED`, **refetches that query** — events are a poke, never a data source.
+3. The demo-game layout renders a compact team header, live countdown, active-period/segment progress, and bottom navigation. `/play/cockpit?tab=cockpit|market|history|team` selects the tab without discarding the allocation draft. Ready stays in Cockpit; Team holds the profile and learning activities. Market and History currently contain only headings. Blocking story popups remain global.
 4. The page body is a `switch (game.status)`: decision form under `RUNNING`, read-only results under `PAUSED`/`CONSOLIDATION`, period report under `RESULTS`, placeholders otherwise ([game-lifecycle.md](game-lifecycle.md) lists the expected view per status).
+
+The RUNNING allocation screen follows `apps/demo-game/design/cockpit.png`:
+
+- **Responsive sizing** (`apps/demo-game/src/components/cockpit/Cockpit.module.css`): mobile control sizes are the baseline. Above 600px, spacing and headings increase modestly while the slider, submit button, and Ready switch retain their compact sizes. The single-column shell stays centered and capped at 784px; wider screens do not enlarge the mobile PNG to its native pixel dimensions.
+- **Slider** (`apps/demo-game/src/components/cockpit/AllocationSlider.tsx:AllocationSlider`): two boundaries in integer tenths define Savings, Bonds (the gap), and Stocks (the remainder). Handles stay vertically centered and push each other on contact. Starting a new drag from coincident handles selects the left handle for leftward movement or the right handle for rightward movement, keeping that selection until release. At rest, the left handle covers the right at 100%, and the right covers the left at 0%. Both are keyboard-focusable: arrows move 0.1%, Shift+Arrow moves 1%. Labels are centered within each colored section.
+- **Validation** (`apps/demo-game/src/lib/allocation.ts:allocationSchema`): the client and server share finite, 0–100% validation in 0.1% steps, totaling 1000 integer tenths. Server validation is strict; the mutation remains `{ bank, bonds, stocks }` with numeric percentages.
+- **Drafts** (`apps/demo-game/src/components/cockpit/useAllocationForm.ts:useAllocationForm`): fields edit independently. Invalid inputs freeze the last valid slider preview and disable dragging/submission, with a live total and difference. Drafts survive tab switches, unrelated refetches, and failed saves; changing rounds resets them. Submission does not set Ready.
+- **Context** (`apps/demo-game/src/components/cockpit/AllocationForm.tsx:AllocationForm`): CHF previews follow draft percentages and available assets; Market outlook uses the active scenario. Closed-round segment results and period reports remain in Cockpit.
 
 > [!WARNING]
 >

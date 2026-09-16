@@ -1,16 +1,10 @@
 import { useMutation, useQuery } from '@apollo/client'
-import {
-  EventLog,
-  Form,
-  ProbabilityChart,
-  ReusableFormField,
-} from '@gbl-uzh/ui'
+import { EventLog } from '@gbl-uzh/ui'
 import {
   Button,
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
   ChartContainer,
@@ -25,8 +19,7 @@ import {
   ShadcnTableHeader as TableHeader,
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
-import { useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useEffect, useState } from 'react'
 import {
   Area,
   AreaChart,
@@ -53,6 +46,9 @@ import {
 } from 'src/graphql/generated/ops'
 import { getSegmentEndResults } from 'src/lib/analysis'
 import GameLayout from '~/components/GameLayout'
+import AllocationForm from '~/components/cockpit/AllocationForm'
+import styles from '~/components/cockpit/Cockpit.module.css'
+import { useAllocationForm } from '~/components/cockpit/useAllocationForm'
 
 const LABEL_MAP = {
   accTotalAssetsReturn: 'Total Assets Return',
@@ -139,66 +135,27 @@ const months = [
 ]
 const numMonths = months.length
 
-type PortfolioFormValues = {
-  savings: number
-  bonds: number
-  stocks: number
-}
-
 function Cockpit() {
   const [period, setPeriod] = useState<number>(null)
 
-  const { loading, error, data } = useQuery(ResultDocument, {
-    fetchPolicy: 'cache-first',
+  const { loading, error, data, refetch } = useQuery(ResultDocument, {
+    fetchPolicy: 'cache-and-network',
   })
 
-  const [performAction, updatedPlayerResult] = useMutation(
-    PerformActionDocument,
-    {
-      refetchQueries: [ResultDocument],
-    }
-  )
-
-  const form = useForm<PortfolioFormValues>({
-    defaultValues: {
-      savings: 0,
-      bonds: 0,
-      stocks: 0,
-    },
+  const [performAction] = useMutation(PerformActionDocument, {
+    refetchQueries: [ResultDocument],
+    awaitRefetchQueries: true,
   })
-  const {
-    register,
-    handleSubmit,
-    watch,
-    control,
-    reset,
-    formState: { errors, isSubmitting },
-  } = form
 
-  const watchSavings = watch('savings')
-  const watchBonds = watch('bonds')
-  const watchStocks = watch('stocks')
-
-  const sum = useMemo(() => {
-    return (
-      Number(watchSavings || 0) +
-      Number(watchBonds || 0) +
-      Number(watchStocks || 0)
-    )
-  }, [watchSavings, watchBonds, watchStocks])
-
-  const isSumValid = sum === 100
-
-  const resultFactsDecisions = data?.result?.playerResult?.facts?.decisions
-  useEffect(() => {
-    if (resultFactsDecisions) {
-      reset({
-        savings: resultFactsDecisions.bank,
-        bonds: resultFactsDecisions.bonds,
-        stocks: resultFactsDecisions.stocks,
+  const currentRound = `${data?.result?.currentGame?.id ?? ''}:${data?.result?.currentGame?.activePeriod?.id ?? ''}:${data?.result?.currentGame?.activePeriod?.activeSegment?.id ?? ''}`
+  const allocationController = useAllocationForm(
+    data?.result?.playerResult?.facts?.decisions,
+    currentRound,
+    (values) =>
+      performAction({
+        variables: { type: '', payload: JSON.stringify(values) },
       })
-    }
-  }, [resultFactsDecisions, reset])
+  )
 
   useEffect(() => {
     if (data?.result?.currentGame?.periods?.length > 0) {
@@ -206,8 +163,8 @@ function Cockpit() {
     }
   }, [data?.result?.currentGame?.periods?.length])
 
-  if (loading) return null
-  if (error) return `Error! ${error}`
+  if (loading && !data) return null
+  if (error && !data) return `Error! ${error}`
 
   const playerDataResult = data.result
   if (!playerDataResult) return null
@@ -222,7 +179,7 @@ function Cockpit() {
     case 'PREPARATION':
     case 'COMPLETED':
       return (
-        <GameLayout>
+        <GameLayout data={data} refetchResult={refetch}>
           <div className="w-full">
             <GameHeader currentGame={currentGame} />
           </div>
@@ -265,7 +222,7 @@ function Cockpit() {
       }
 
       return (
-        <GameLayout>
+        <GameLayout data={data} refetchResult={refetch}>
           <div className="w-full">
             <GameHeader currentGame={currentGame} />
             <div className="mt-4 flex w-full flex-row gap-4">
@@ -367,7 +324,7 @@ function Cockpit() {
 
     case 'SCHEDULED':
       return (
-        <GameLayout>
+        <GameLayout data={data} refetchResult={refetch}>
           <div> Game is scheduled. </div>
         </GameLayout>
       )
@@ -479,7 +436,7 @@ function Cockpit() {
       ]
 
       return (
-        <GameLayout>
+        <GameLayout data={data} refetchResult={refetch}>
           <div className="flex w-full flex-col">
             <div>
               <GameHeader currentGame={currentGame} />
@@ -710,265 +667,32 @@ function Cockpit() {
     }
 
     case 'RUNNING': {
-      const resultFacts = playerDataResult.playerResult.facts
-      const assets = resultFacts.assets
-      const resultFactsDecisions = resultFacts.decisions
-      const previousResults = playerDataResult.previousResults
-
-      const segmentEndResults = formatSegmentEndResults(previousResults)
-
-      const columns_portfolio = [
-        { label: 'Assets', accessor: 'category', sortable: false },
-        {
-          label: 'Value before decisions',
-          accessor: 'currentValue',
-          sortable: false,
-        },
-        {
-          label: 'Value after decisions',
-          accessor: 'futureValue',
-          sortable: false,
-        },
-      ]
-
-      const data_portfolio = [
-        {
-          category: 'Savings',
-          currentValue: `${assets.bank.toFixed(2)} CHF`,
-          futureValue: `${(
-            assets.totalAssets *
-            resultFactsDecisions.bank *
-            0.01
-          ).toFixed(2)} CHF`,
-        },
-        {
-          category: 'Bonds',
-          currentValue: `${assets.bonds.toFixed(2)} CHF`,
-          futureValue: `${(
-            assets.totalAssets *
-            resultFactsDecisions.bonds *
-            0.01
-          ).toFixed(2)} CHF`,
-        },
-        {
-          category: 'Stocks',
-          currentValue: `${assets.stocks.toFixed(2)} CHF`,
-          futureValue: `${(
-            assets.totalAssets *
-            resultFactsDecisions.stocks *
-            0.01
-          ).toFixed(2)} CHF`,
-        },
-        {
-          category: 'Total',
-          currentValue: `${assets.totalAssets.toFixed(2)} CHF`,
-          futureValue: `${assets.totalAssets.toFixed(2)} CHF`,
-        },
-      ]
-
-      const decisions = [
-        {
-          name: 'Savings',
-        },
-        {
-          name: 'Bonds',
-        },
-        {
-          name: 'Stocks',
-        },
-      ]
-
+      const resultFacts = playerDataResult.playerResult?.facts
       return (
-        <GameLayout>
-          <div className="flex w-full grid-cols-2 flex-col gap-4 xl:grid">
-            <GameHeader currentGame={currentGame} />
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Portfolio</CardTitle>
-                <CardDescription>The assets in your portfolio.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Assets Overview</CardTitle>
-                    <CardDescription>
-                      Assets of the last month of the previous segment, and of
-                      the next months of the current segment.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            {columns_portfolio.map((column, ix) => (
-                              <TableHead key={column.accessor}>
-                                <div
-                                  className={`${
-                                    ix === 0 ? '' : 'max-w-36 text-right'
-                                  }`}
-                                >
-                                  {column.label}
-                                </div>
-                              </TableHead>
-                            ))}
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {data_portfolio.map((row, rowIx) => {
-                            return (
-                              <TableRow
-                                key={row.category}
-                                className={`${
-                                  row.category === 'Total' ? 'font-bold' : ''
-                                }`}
-                              >
-                                {[
-                                  'category',
-                                  'currentValue',
-                                  'futureValue',
-                                ].map((key, ix) => {
-                                  return (
-                                    <TableCell key={key}>
-                                      <div
-                                        className={`${
-                                          ix > 0 ? 'max-w-36 text-right' : ''
-                                        }`}
-                                      >
-                                        {row[key]}
-                                      </div>
-                                    </TableCell>
-                                  )
-                                })}
-                              </TableRow>
-                            )
-                          })}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <div className="mt-8">
-                  <Form<PortfolioFormValues> {...form}>
-                    <form
-                      onSubmit={handleSubmit(async (values) => {
-                        const savings = parseInt(String(values.savings), 10)
-                        const bonds = parseInt(String(values.bonds), 10)
-                        const stocks = parseInt(String(values.stocks), 10)
-
-                        await performAction({
-                          variables: {
-                            type: '',
-                            payload: JSON.stringify({
-                              bank: savings,
-                              bonds,
-                              stocks,
-                            }),
-                          },
-                        })
-                      })}
-                    >
-                      <div className="mb-4 flex gap-4">
-                        <div className="w-24">
-                          <ReusableFormField
-                            control={control}
-                            name="savings"
-                            label="Savings"
-                            type="number"
-                            min={0}
-                            max={100}
-                          />
-                        </div>
-                        <div className="w-24">
-                          <ReusableFormField
-                            control={control}
-                            name="bonds"
-                            label="Bonds"
-                            type="number"
-                            min={0}
-                            max={100}
-                          />
-                        </div>
-                        <div className="w-24">
-                          <ReusableFormField
-                            control={control}
-                            name="stocks"
-                            label="Stocks"
-                            type="number"
-                            min={0}
-                            max={100}
-                          />
-                        </div>
-                      </div>
-                      {!isSumValid && (
-                        <div className="mb-4 text-sm text-red-500">
-                          The sum of the input values must be{' '}
-                          <span className="font-bold">100</span>! (Current:{' '}
-                          {sum}%)
-                        </div>
-                      )}
-                      <Button
-                        type="submit"
-                        disabled={!isSumValid || isSubmitting}
-                      >
-                        Submit
-                      </Button>
-                    </form>
-                  </Form>
-                </div>
-              </CardContent>
-              <CardFooter className="text-slate-500">
-                The assets put in savings yield a continuous return of{' '}
-                {currentGame.periods[period]?.facts.scenario.interestBank * 100}
-                % per month. The return of bonds and stocks is determined by the
-                market expectation and simulated by two dice.
-              </CardFooter>
-            </Card>
-
-            <DecisionHistoryLog data={segmentEndResults} />
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Expectation for Bonds</CardTitle>
-                <CardDescription>
-                  The expected value of and possible fluctuations in the bond
-                  price.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ProbabilityChart
-                  trendE={
-                    currentGame.periods[period]?.facts.scenario.trendBonds
-                  }
-                  trendGap={
-                    currentGame.periods[period]?.facts.scenario.gapBonds
-                  }
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Expectation for Stocks</CardTitle>
-                <CardDescription>
-                  The expected value of and possible fluctuations in the stock
-                  price.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ProbabilityChart
-                  trendE={
-                    currentGame.periods[period]?.facts.scenario.trendStocks
-                  }
-                  trendGap={
-                    currentGame.periods[period]?.facts.scenario.gapStocks
-                  }
-                />
-              </CardContent>
-            </Card>
-          </div>
+        <GameLayout
+          data={data}
+          refetchResult={refetch}
+          action={
+            <Button
+              type="submit"
+              form="allocation-form"
+              className={{ root: styles.submit }}
+              disabled={
+                !allocationController.valid ||
+                allocationController.form.isSubmitting
+              }
+            >
+              {allocationController.form.isSubmitting
+                ? 'Submitting…'
+                : 'Submit allocation'}
+            </Button>
+          }
+        >
+          <AllocationForm
+            controller={allocationController}
+            assets={resultFacts?.assets?.totalAssets ?? 0}
+            scenario={currentGame.activePeriod?.facts?.scenario}
+          />
         </GameLayout>
       )
     }

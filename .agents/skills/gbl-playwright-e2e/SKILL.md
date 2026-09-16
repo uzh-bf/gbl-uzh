@@ -219,8 +219,7 @@ Return the post-reload status in the same poll cycle.
   dice animation coverage.
 - Countdown: set countdown, assert player widget appears, never wait for expiry
   in CI.
-- Player cockpit: assert form/result states (`Submit`, `Assets Overview`,
-  `Savings`, `Bonds`, `Stocks`, `Total`) rather than chart pixels.
+- Demo-game cockpit: assert `Submit allocation`, `To allocate`, and the named Savings/Bonds/Stocks spinbuttons. Allocation sliders are named `Savings boundary` and `Stocks boundary`. Check decimal persistence, invalid totals, pushing/keyboard behavior, tab draft retention, and failed-save recovery; preserve existing result-screen assertions. Ready is only visible in Cockpit, and learning activities live in Team.
 
 ## Adapting the demo-game spec to your game
 
@@ -228,7 +227,7 @@ The demo-game spec (`playwright/tests/demo-game-flow.spec.ts`) is the template f
 
 - **Decision form**: swap the demo's allocation inputs (`bank` / `bonds` / `stocks` summing to 100) for your game's single decision. Update the input locator (e.g. `getByPlaceholder`, `input[name=...]`), the yup validation values, and the submit button name. Mirror the constraints your `Actions.apply` reducer enforces.
 - **Player plan**: replace the `decisions` array with your game's per-segment decision values (e.g. `[{ rate: '6.0' }, { rate: '5.5' }]`).
-- **Dashboard assertions**: replace demo-game metric labels (`Assets Overview`, `Savings`, `Bonds`, `Stocks`, `Total`) with your game's (`Current Inflation`, `Unemployment`, `GDP Growth`, `Cumulative Loss`). Assert durable headings, not chart pixels or transient numbers.
+- **Dashboard assertions**: replace demo-game metric labels (`To allocate`, `Savings`, `Bonds`, `Stocks`) with your game's (`Current Inflation`, `Unemployment`, `GDP Growth`, `Cumulative Loss`). Assert durable headings, not chart pixels or transient numbers.
 - **Keep the sentinel period** (see the WARNING above). Add one unplayed period after your last played period.
 - **Keep the admin flow**: `createGame` -> `addPeriod` -> `addSegment` (per period) -> join players -> advance transitions. The state-transition sequence is game-agnostic.
 - **Keep `expectGameStatusEventually`** (or equivalent reload-aware polling) for admin status assertions - UI data lags mutations.

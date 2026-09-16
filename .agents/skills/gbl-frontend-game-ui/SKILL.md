@@ -27,12 +27,14 @@ One page, four layers — keep this shape:
 
 1. **One aggregate query** for everything the player sees (result + game + active period/segment + content + self).
 2. **Realtime = poke, then refetch.** Subscribe to global events; on `PERIOD_ACTIVATED` / `SEGMENT_ACTIVATED` / `COUNTDOWN_UPDATED` (filtered by your game id) refetch/invalidate the aggregate query. Never render data out of the event payload.
-3. **Shared chrome** in a `GameLayout` wrapper: nav + player display + Ready toggle + countdown widget + learning-element sidebar + blocking story-element popups.
+3. **Shared chrome** in a `GameLayout` wrapper: nav + team identity + Ready toggle + countdown + learning activities + blocking story-element popups. The demo game uses bottom tabs at `/play/cockpit?tab=cockpit|market|history|team`: Ready stays in Cockpit, profile and learning activities live in Team, and Market/History are heading-only placeholders. Other games may retain a sidebar.
 4. **Body = `switch (game.status)`**: `RUNNING` → decision form; `PAUSED`/`CONSOLIDATION` → read-only segment results; `RESULTS` → period report; other statuses → placeholders. Full per-status expectations: [docs/game-lifecycle.md](../../../docs/game-lifecycle.md). **Important:** narrative context from the `RUNNING` state (event banners, shock descriptions, scenario headlines) must persist into `PAUSED`/`CONSOLIDATION`/`RESULTS` — players need to see _what happened_ while reviewing _why_ their numbers moved. Extract the event display into a shared component rendered across all post-decision states.
 
 > [!WARNING]
 >
 > **Do not import `@prisma/client` in frontend code — not even indirectly.** If a shared utility (e.g. from `@gbl-uzh/platform`) uses Prisma enums like `DB.GameStatus`, those will be `undefined` in the browser and crash. Compare game status against string literals (`'RUNNING'`, `'PAUSED'`, `'RESULTS'`, etc.) or the generated GraphQL enum (`GameStatus` from `src/graphql/generated/ops.ts`).
+
+The demo-game allocation form uses `src/lib/allocation.ts:allocationSchema` on both client and server: numeric percentages in 0.1% steps totaling 1000 integer tenths. Two slider boundaries push each other on contact; independent typed edits temporarily disable the slider and submission until valid. Preserve dirty drafts across tab switches/refetches, reset on round changes, and keep decimal values in the mutation payload.
 
 The decision form validates with a yup schema mirroring the constraints your `Actions.apply` reducer enforces server-side, and submits via the perform-action mutation. **Ensure the decision screen surfaces enough information** (forecasts, trend indicators, current state, target values) for the player to make a theory-informed decision — not guess randomly.
 
@@ -66,7 +68,7 @@ Design the RESULTS screen to enable the facilitator to draw **didactical conclus
 The platform supports two types of content overlays that integrate learning into gameplay:
 
 - **Story elements** (blocking narrative popups): shown at segment activation, before the player decides. They contextualise the round ("A supply shock has hit the market…") and build the game's narrative arc. Seeded as `StoryElement` rows per segment. Render with `StoryElements` from `@gbl-uzh/ui`; it blocks interaction until dismissed.
-- **Learning elements** (sidebar quizzes): optional MC questions or reflection prompts shown alongside the cockpit. They reinforce the theory behind the game mechanic ("According to the Phillips Curve, what happens to unemployment when inflation rises?"). Seeded as `LearningElement` rows. Compose `LearningActivitiesList`, `LearningActivityModal`, and `useLearningActivities` from `@gbl-uzh/ui` with the game's generated GraphQL documents.
+- **Learning elements** (Team tab in demo-game; sidebar in other games): optional MC questions or reflection prompts available during play. They reinforce the theory behind the game mechanic ("According to the Phillips Curve, what happens to unemployment when inflation rises?"). Seeded as `LearningElement` rows. Compose `LearningActivitiesList`, `LearningActivityModal`, and `useLearningActivities` from `@gbl-uzh/ui` with the game's generated GraphQL documents.
 
 Both are selected by the admin in the add-segment dialog and attached to specific segments. Plan the content in the game design phase (`gbl-game-design` Step 6) and seed it in `prisma/seed.ts`.
 
