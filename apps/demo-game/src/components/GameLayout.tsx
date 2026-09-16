@@ -19,7 +19,6 @@ import {
   LearningElementDocument,
   MarkStoryElementDocument,
   ResultDocument,
-  UpdateReadyStateDocument,
   type ResultQuery,
 } from 'src/graphql/generated/ops'
 import { avatarNames, cantonNames } from '~/lib/teamIdentity'
@@ -28,6 +27,8 @@ import CompactCountdown from './cockpit/CompactCountdown'
 import { useToast } from './ui/use-toast'
 
 const tabs = ['Cockpit', 'Market', 'History', 'Team']
+// The reference timeline starts in 2026; each platform period is one year.
+const FIRST_GAME_YEAR = 2026
 
 function parseFacts(raw: unknown): Record<string, any> {
   try {
@@ -47,11 +48,18 @@ function GameLayout({
   action,
   data,
   refetchResult,
+  allocationView,
+  readyControl,
 }: {
   children: React.ReactNode
   action?: React.ReactNode
   data: ResultQuery
   refetchResult: () => Promise<unknown>
+  allocationView?: 'editing' | 'submitted' | 'ready'
+  readyControl: {
+    disabled: boolean
+    onChange: (isReady: boolean) => Promise<void>
+  }
 }) {
   const { self, result } = data
   const currentGame = result?.currentGame
@@ -64,13 +72,6 @@ function GameLayout({
     tabs.some((name) => name.toLowerCase() === router.query.tab)
       ? router.query.tab
       : 'cockpit'
-  const [updateReadyState, { loading }] = useMutation(
-    UpdateReadyStateDocument,
-    {
-      refetchQueries: [ResultDocument],
-      awaitRefetchQueries: true,
-    }
-  )
   const [markStoryElement] = useMutation(MarkStoryElementDocument, {
     refetchQueries: [ResultDocument],
   })
@@ -232,8 +233,14 @@ function GameLayout({
           <div className={styles.identity}>
             <strong>{self.name}</strong>
             <p>
-              {avatarNames[avatarKey] ?? 'Team'} · HQ{' '}
-              {cantonNames[facts.location] ?? facts.location ?? '—'}
+              {allocationView === 'submitted' || allocationView === 'ready' ? (
+                `${FIRST_GAME_YEAR + (activePeriod?.index ?? 0)} · Quarter ${(segmentIndex ?? 0) + 1}`
+              ) : (
+                <>
+                  {avatarNames[avatarKey] ?? 'Team'} · HQ{' '}
+                  {cantonNames[facts.location] ?? facts.location ?? '—'}
+                </>
+              )}
             </p>
           </div>
           <div className={styles.clock}>
@@ -255,10 +262,10 @@ function GameLayout({
           <div className={styles.progressHeading}>
             <h2>
               {activePeriod
-                ? `Period ${activePeriod.index + 1}${segmentIndex == null ? '' : ` · Segment ${segmentIndex + 1} of ${segmentCount}`}`
+                ? `${FIRST_GAME_YEAR + activePeriod.index}${segmentIndex == null ? '' : ` · Quarter ${segmentIndex + 1} of ${segmentCount}`}`
                 : 'Waiting for the game'}
             </h2>
-            <span>{status}</span>
+            {!running && <span>{status}</span>}
           </div>
           {segmentCount > 0 && (
             <>
@@ -277,13 +284,12 @@ function GameLayout({
                   />
                 ))}
               </div>
-              <p>
-                {done} {done === 1 ? 'segment' : 'segments'} done
-                {running && segmentIndex != null
-                  ? ` · segment ${segmentIndex + 1} running`
-                  : ''}{' '}
-                · {Math.max(0, segmentCount - done - (running ? 1 : 0))} to come
-              </p>
+              {!running && (
+                <p>
+                  {done} {done === 1 ? 'quarter' : 'quarters'} done ·{' '}
+                  {Math.max(0, segmentCount - done)} to come
+                </p>
+              )}
             </>
           )}
         </section>
@@ -316,29 +322,25 @@ function GameLayout({
           {tab === 'cockpit' && (
             <div className={styles.footer}>
               {action}
-              <div className={styles.ready} data-cy="ready-switch">
+              <div
+                className={styles.ready}
+                data-cy="ready-switch"
+                data-ready={self.isReady}
+                data-disabled={readyControl.disabled}
+              >
                 <label htmlFor="isReady" className={styles.readyLabel}>
                   Ready
                 </label>
                 <Switch
                   id="isReady"
                   checked={self.isReady}
-                  disabled={loading}
+                  disabled={readyControl.disabled}
                   size="lg"
                   className={{
                     element: styles.readyTrack,
                     thumb: styles.readyThumb,
                   }}
-                  onCheckedChange={async (isReady) => {
-                    try {
-                      await updateReadyState({ variables: { isReady } })
-                    } catch {
-                      toast({
-                        title: 'Could not update Ready',
-                        description: 'Please try again.',
-                      })
-                    }
-                  }}
+                  onCheckedChange={readyControl.onChange}
                 />
               </div>
             </div>

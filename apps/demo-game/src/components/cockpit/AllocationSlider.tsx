@@ -6,6 +6,7 @@ import {
   type Allocation,
   type Boundaries,
 } from '~/lib/allocation'
+import AllocationBar from './AllocationBar'
 import styles from './Cockpit.module.css'
 
 export default function AllocationSlider({
@@ -65,29 +66,7 @@ export default function AllocationSlider({
         data-cy="allocation-slider"
         aria-disabled={disabled}
       >
-        <div className={styles.sliderTrack}>
-          {(['bank', 'bonds', 'stocks'] as const).map((key, i) => (
-            <div
-              key={key}
-              className={styles.mixSegment}
-              data-asset={key}
-              style={{ width: `${value[key]}%` }}
-            >
-              {value[key] >= 8 && (
-                <div
-                  className={
-                    value[key] < 20 ? styles.smallMixLabel : styles.mixLabel
-                  }
-                >
-                  <strong>{value[key]}%</strong>
-                  {value[key] >= 20 && (
-                    <span>{['Savings', 'Bonds', 'Stocks'][i]}</span>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        <AllocationBar value={value} />
         {([0, 1] as const).map((handle) => (
           <button
             key={handle}

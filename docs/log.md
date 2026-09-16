@@ -2,6 +2,8 @@
 
 ## 2026-09-16
 
+- **Update**: [Developing a Game](developing-a-game.md), [Game Lifecycle](game-lifecycle.md) - document persisted allocation submission, reversible Ready locking, instructor-controlled results, year/quarter labels, and shared cockpit sizing and allocation-bar rendering aligned with the revised references.
+
 - **Update**: [Developing a Game](developing-a-game.md) - document compact cockpit sizing on tablet and desktop, preserving mobile control sizes and the centered, bounded layout.
 
 - **Update**: [Developing a Game](developing-a-game.md) - document the final centered slider labels and handles, directional selection when handles coincide, and endpoint stacking. Simplify cockpit state handling and consolidate browser screenshots under each test's output directory.

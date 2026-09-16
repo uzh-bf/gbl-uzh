@@ -36,6 +36,8 @@ One page, four layers — keep this shape:
 
 The demo-game allocation form uses `src/lib/allocation.ts:allocationSchema` on both client and server: numeric percentages in 0.1% steps totaling 1000 integer tenths. Two slider boundaries push each other on contact; independent typed edits temporarily disable the slider and submission until valid. Preserve dirty drafts across tab switches/refetches, reset on round changes, and keep decimal values in the mutation payload.
 
+The demo-game RUNNING flow has editing, submitted, and Ready views. `allocationSubmitted` in result facts distinguishes explicit submissions from carried-forward allocations and resets in both segment entry hooks. After submission, render `AllocationSummary` using saved percentages; Ready is disabled while editing until resubmission. Ready locks the cockpit controls and keeps the countdown visible; switching it off returns to the summary. Player-facing periods map to years starting in 2026, and segments are quarters. RUNNING progress shows just the year/quarter heading and bars, without redundant status or completion text. Use shared chrome and action-button sizing across all three states; `AllocationBar` provides the common proportional bar and asset labels. This is UI-only enforcement, and results still require instructor advancement.
+
 The decision form validates with a yup schema mirroring the constraints your `Actions.apply` reducer enforces server-side, and submits via the perform-action mutation. **Ensure the decision screen surfaces enough information** (forecasts, trend indicators, current state, target values) for the player to make a theory-informed decision — not guess randomly.
 
 ## The two chart layers (PAUSED vs RESULTS)

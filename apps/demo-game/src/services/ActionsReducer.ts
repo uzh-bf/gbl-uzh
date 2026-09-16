@@ -19,6 +19,7 @@ type PayloadType = {
 
 type State = {
   decisions: Decisions
+  allocationSubmitted?: boolean
 }
 
 type Actions = Action<ActionTypes.NONE, PayloadType, PrismaClient>
@@ -37,6 +38,7 @@ export function apply(state: State, action: Actions) {
     allocationSchema.validateSync(action.payload.playerArgs, { strict: true })
 
     draft.result.decisions = action.payload.playerArgs
+    draft.result.allocationSubmitted = true
 
     // This is only to test the game facts
     // TODO(JJ): Change to gameFactsToUpdate

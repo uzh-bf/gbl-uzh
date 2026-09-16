@@ -43,7 +43,9 @@ export function initialize(
 
   const resultFacts: OutputSegmentResultFactsInit = produce(
     basefacts,
-    (draft: OutputSegmentResultFactsInit) => {}
+    (draft: OutputSegmentResultFactsInit) => {
+      draft.resultFacts.allocationSubmitted = false
+    }
   )
 
   debugLog('SegmentResultInitialize', facts, payload, resultFacts)
@@ -65,7 +67,9 @@ export function start(
 
   const resultFacts: OutputResultFacts = produce(
     basefacts,
-    (draft: OutputResultFacts) => {}
+    (draft: OutputResultFacts) => {
+      draft.resultFacts.allocationSubmitted = false
+    }
   )
 
   debugLog('SegmentResultStart', facts, payload, resultFacts)

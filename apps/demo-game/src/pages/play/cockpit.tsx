@@ -19,7 +19,7 @@ import {
   ShadcnTableHeader as TableHeader,
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Area,
   AreaChart,
@@ -43,12 +43,15 @@ import {
 import {
   PerformActionDocument,
   ResultDocument,
+  UpdateReadyStateDocument,
 } from 'src/graphql/generated/ops'
 import { getSegmentEndResults } from 'src/lib/analysis'
 import GameLayout from '~/components/GameLayout'
 import AllocationForm from '~/components/cockpit/AllocationForm'
+import AllocationSummary from '~/components/cockpit/AllocationSummary'
 import styles from '~/components/cockpit/Cockpit.module.css'
 import { useAllocationForm } from '~/components/cockpit/useAllocationForm'
+import { useToast } from '~/components/ui/use-toast'
 
 const LABEL_MAP = {
   accTotalAssetsReturn: 'Total Assets Return',
@@ -148,14 +151,48 @@ function Cockpit() {
   })
 
   const currentRound = `${data?.result?.currentGame?.id ?? ''}:${data?.result?.currentGame?.activePeriod?.id ?? ''}:${data?.result?.currentGame?.activePeriod?.activeSegment?.id ?? ''}`
+  const roundRef = useRef(currentRound)
+  useEffect(() => {
+    roundRef.current = currentRound
+  }, [currentRound])
+  const { toast } = useToast()
+  const [updateReadyState, { loading: updatingReady }] = useMutation(
+    UpdateReadyStateDocument,
+    {
+      refetchQueries: [ResultDocument],
+      awaitRefetchQueries: true,
+    }
+  )
   const allocationController = useAllocationForm(
     data?.result?.playerResult?.facts?.decisions,
     currentRound,
     (values) =>
       performAction({
         variables: { type: '', payload: JSON.stringify(values) },
-      })
+      }),
+    data?.result?.playerResult?.facts?.allocationSubmitted === true,
+    data?.self?.isReady === true
   )
+
+  const readyControl = {
+    disabled:
+      updatingReady ||
+      allocationController.form.isSubmitting ||
+      (data?.result?.currentGame?.status === 'RUNNING' &&
+        allocationController.view === 'editing'),
+    onChange: async (isReady: boolean) => {
+      const changingRound = currentRound
+      try {
+        await updateReadyState({ variables: { isReady } })
+      } catch {
+        if (roundRef.current === changingRound)
+          toast({
+            title: 'Could not update Ready',
+            description: 'Please try again.',
+          })
+      }
+    },
+  }
 
   useEffect(() => {
     if (data?.result?.currentGame?.periods?.length > 0) {
@@ -179,7 +216,11 @@ function Cockpit() {
     case 'PREPARATION':
     case 'COMPLETED':
       return (
-        <GameLayout data={data} refetchResult={refetch}>
+        <GameLayout
+          data={data}
+          refetchResult={refetch}
+          readyControl={readyControl}
+        >
           <div className="w-full">
             <GameHeader currentGame={currentGame} />
           </div>
@@ -222,7 +263,11 @@ function Cockpit() {
       }
 
       return (
-        <GameLayout data={data} refetchResult={refetch}>
+        <GameLayout
+          data={data}
+          refetchResult={refetch}
+          readyControl={readyControl}
+        >
           <div className="w-full">
             <GameHeader currentGame={currentGame} />
             <div className="mt-4 flex w-full flex-row gap-4">
@@ -324,7 +369,11 @@ function Cockpit() {
 
     case 'SCHEDULED':
       return (
-        <GameLayout data={data} refetchResult={refetch}>
+        <GameLayout
+          data={data}
+          refetchResult={refetch}
+          readyControl={readyControl}
+        >
           <div> Game is scheduled. </div>
         </GameLayout>
       )
@@ -436,7 +485,11 @@ function Cockpit() {
       ]
 
       return (
-        <GameLayout data={data} refetchResult={refetch}>
+        <GameLayout
+          data={data}
+          refetchResult={refetch}
+          readyControl={readyControl}
+        >
           <div className="flex w-full flex-col">
             <div>
               <GameHeader currentGame={currentGame} />
@@ -668,31 +721,62 @@ function Cockpit() {
 
     case 'RUNNING': {
       const resultFacts = playerDataResult.playerResult?.facts
+      const { view, form } = allocationController
       return (
         <GameLayout
           data={data}
           refetchResult={refetch}
+          readyControl={readyControl}
+          allocationView={view}
           action={
-            <Button
-              type="submit"
-              form="allocation-form"
-              className={{ root: styles.submit }}
-              disabled={
-                !allocationController.valid ||
-                allocationController.form.isSubmitting
-              }
-            >
-              {allocationController.form.isSubmitting
-                ? 'Submitting…'
-                : 'Submit allocation'}
-            </Button>
+            view === 'editing' ? (
+              <Button
+                key="submit-allocation"
+                type="submit"
+                form="allocation-form"
+                className={{ root: `${styles.footerAction} ${styles.submit}` }}
+                disabled={
+                  !allocationController.valid ||
+                  form.isSubmitting ||
+                  updatingReady
+                }
+              >
+                {form.isSubmitting ? 'Submitting…' : 'Submit allocation'}
+              </Button>
+            ) : (
+              <Button
+                key="change-allocation"
+                type="button"
+                className={{
+                  root: `${styles.footerAction} ${styles.changeAllocation}`,
+                }}
+                disabled={
+                  view === 'ready' || form.isSubmitting || updatingReady
+                }
+                onClick={allocationController.beginEditing}
+              >
+                Change allocation
+              </Button>
+            )
           }
         >
-          <AllocationForm
-            controller={allocationController}
-            assets={resultFacts?.assets?.totalAssets ?? 0}
-            scenario={currentGame.activePeriod?.facts?.scenario}
-          />
+          {view === 'editing' ? (
+            <AllocationForm
+              controller={allocationController}
+              disabled={updatingReady}
+              assets={resultFacts?.assets?.totalAssets ?? 0}
+              scenario={currentGame.activePeriod?.facts?.scenario}
+            />
+          ) : (
+            <AllocationSummary
+              allocation={allocationController.saved}
+              assets={resultFacts?.assets?.totalAssets ?? 0}
+              quarterNumber={
+                (currentGame.activePeriod?.activeSegment?.index ?? 0) + 1
+              }
+              ready={view === 'ready'}
+            />
+          )}
         </GameLayout>
       )
     }

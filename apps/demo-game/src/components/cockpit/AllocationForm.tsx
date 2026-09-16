@@ -5,6 +5,7 @@ import {
   formatCHF,
   toTenths,
 } from '~/lib/allocation'
+import { assetLabels } from './AllocationBar'
 import AllocationSlider from './AllocationSlider'
 import styles from './Cockpit.module.css'
 import type { useAllocationForm } from './useAllocationForm'
@@ -13,8 +14,10 @@ export default function AllocationForm({
   controller,
   assets,
   scenario,
+  disabled = false,
 }: {
   controller: ReturnType<typeof useAllocationForm>
+  disabled?: boolean
   assets: number
   scenario: { trendBonds?: number; trendStocks?: number }
 }) {
@@ -38,12 +41,12 @@ export default function AllocationForm({
       </div>
       <AllocationSlider
         value={preview}
-        disabled={!valid || form.isSubmitting}
+        disabled={disabled || !valid || form.isSubmitting}
         onChange={(value) => setDraft(allocationDraft(value))}
       />
       <div>
-        {ALLOCATION_KEYS.map((key, i) => {
-          const label = ['Savings', 'Bonds', 'Stocks'][i]
+        {ALLOCATION_KEYS.map((key) => {
+          const label = assetLabels[key].name
           const fieldValid = toTenths(allocation[key]) !== null
           return (
             <div
@@ -57,7 +60,7 @@ export default function AllocationForm({
                 className={styles.assetLabel}
               >
                 {label}
-                <span>{['No risk', 'Some risk', 'High risk'][i]}</span>
+                <span>{assetLabels[key].risk}</span>
               </label>
               <span className={styles.assetAmount}>
                 {fieldValid ? formatCHF((assets * allocation[key]) / 100) : '—'}
@@ -73,7 +76,7 @@ export default function AllocationForm({
                   max="100"
                   step="0.1"
                   value={form.values[key]}
-                  disabled={form.isSubmitting}
+                  disabled={disabled || form.isSubmitting}
                   aria-invalid={!fieldValid}
                   aria-describedby={
                     !fieldValid
@@ -114,7 +117,6 @@ export default function AllocationForm({
           </p>
         )}
         {form.status?.error && <p role="alert">{form.status.error}</p>}
-        {form.status?.success && <p>{form.status.success}</p>}
       </div>
       <Link
         href="/play/cockpit?tab=market"

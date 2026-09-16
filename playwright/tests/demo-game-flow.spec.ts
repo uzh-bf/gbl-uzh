@@ -469,6 +469,164 @@ async function assertAllocationControls(page: Page, admin: Page) {
   }
 }
 
+const cockpitViewports = [
+  { name: 'mobile', width: 390, height: 844 },
+  { name: 'tablet', width: 784, height: 1024 },
+] as const
+
+async function cockpitControlSizes(page: Page, action: Locator) {
+  return Promise.all(
+    [
+      action,
+      page.getByTestId('ready-switch'),
+      page.locator('header'),
+      page.getByRole('navigation', { name: 'Player navigation' }),
+    ].map(async (locator) => {
+      const box = await locator.boundingBox()
+      return { width: Math.round(box!.width), height: Math.round(box!.height) }
+    })
+  )
+}
+
+async function assertSubmittedStates(page: Page, admin: Page) {
+  const ready = page.getByRole('switch', { name: 'Ready', exact: true })
+  const submit = page.getByRole('button', {
+    name: 'Submit allocation',
+    exact: true,
+  })
+  const change = page.getByRole('button', { name: 'Change allocation' })
+  await expect(ready).toBeDisabled()
+  const editingSizes = new Map<
+    number,
+    Awaited<ReturnType<typeof cockpitControlSizes>>
+  >()
+  for (const viewport of cockpitViewports) {
+    await page.setViewportSize(viewport)
+    await expect
+      .poll(() => page.evaluate(() => innerWidth))
+      .toBe(viewport.width)
+    editingSizes.set(viewport.width, await cockpitControlSizes(page, submit))
+  }
+  await submit.click()
+  await expect(
+    page.getByText('Allocation submitted', { exact: true })
+  ).toBeVisible()
+  await expect(page.getByTestId('submitted-bank')).toContainText('55%')
+  await expect(page.getByTestId('submitted-bank')).toContainText("5'500.00 CHF")
+  await expect(ready).toBeEnabled()
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await expect(
+    page.getByText('Allocation submitted', { exact: true })
+  ).toBeVisible()
+  for (const state of ['submitted', 'ready']) {
+    if (state === 'ready') {
+      const rejectReady = async (route: import('@playwright/test').Route) => {
+        if (route.request().postData()?.includes('UpdateReadyState')) {
+          await route.fulfill({
+            json: { errors: [{ message: 'Test Ready failure' }] },
+          })
+        } else await route.continue()
+      }
+      await page.route('**/api/graphql', rejectReady)
+      await ready.click()
+      await expect(
+        page.getByText('Could not update Ready', { exact: true })
+      ).toBeVisible()
+      await expect(ready).not.toBeChecked()
+      await expect(change).toBeEnabled()
+      await page.unroute('**/api/graphql', rejectReady)
+      await ready.click()
+      await expect(ready).toBeChecked()
+      await expect(change).toBeDisabled()
+      await expect(page.getByText(/Locked mix for quarter/)).toBeVisible()
+      await expect(page.getByTestId('countdown')).toBeVisible()
+      await expectGameStatusEventually(admin, 'RUNNING')
+    }
+    await expect(page.getByRole('spinbutton')).toHaveCount(0)
+    await expect(page.getByRole('slider')).toHaveCount(0)
+    for (const tab of ['Market', 'History']) {
+      await page.getByRole('link', { name: tab, exact: true }).click()
+      await expect(
+        page.getByRole('heading', { name: tab, exact: true })
+      ).toBeVisible()
+    }
+    await page.getByRole('link', { name: 'Cockpit', exact: true }).click()
+    for (const { name, width, height } of cockpitViewports) {
+      await page.setViewportSize({ width, height })
+      await expect
+        .poll(() => cockpitControlSizes(page, change))
+        .toEqual(editingSizes.get(width))
+      await expect
+        .poll(() =>
+          page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth
+          )
+        )
+        .toBe(true)
+      await page.screenshot({
+        path: test.info().outputPath(`cockpit-${state}-${name}.png`),
+        animations: 'disabled',
+        style:
+          'nextjs-portal, [aria-label="Notifications (F8)"] { visibility: hidden !important; }',
+      })
+    }
+  }
+  await ready.click()
+  await expect(change).toBeEnabled()
+  await change.click()
+  await expect(ready).toBeDisabled()
+  await expect(
+    page.getByRole('spinbutton', { name: 'Savings', exact: true })
+  ).toHaveValue('55')
+  // An unchanged resubmission also returns to the saved summary.
+  await submit.click()
+  await expect(
+    page.getByText('Allocation submitted', { exact: true })
+  ).toBeVisible()
+  await change.click()
+  await page.getByRole('link', { name: 'Market', exact: true }).click()
+  await setCountdown(admin, '300')
+  await page.getByRole('link', { name: 'Cockpit', exact: true }).click()
+  await expect(submit).toBeVisible()
+  await expect(ready).toBeDisabled()
+  for (const [name, values] of [
+    ['all-savings', ['100', '0', '0']],
+    ['decimal', ['33.3', '33.3', '33.4']],
+  ] as const) {
+    for (const [index, label] of ['Savings', 'Bonds', 'Stocks'].entries()) {
+      await page
+        .getByRole('spinbutton', { name: label, exact: true })
+        .fill(values[index])
+    }
+    await submit.click()
+    await expect(
+      page.getByText('Allocation submitted', { exact: true })
+    ).toBeVisible()
+    await page.setViewportSize({ width: 320, height: 844 })
+    await expect
+      .poll(() =>
+        page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)
+      )
+      .toBe(true)
+    await page.screenshot({
+      path: test.info().outputPath(`cockpit-submitted-${name}.png`),
+      animations: 'disabled',
+      style:
+        'nextjs-portal, [aria-label="Notifications (F8)"] { visibility: hidden !important; }',
+    })
+    await ready.click()
+    await expect(ready).toBeChecked()
+    await page.screenshot({
+      path: test.info().outputPath(`cockpit-ready-${name}.png`),
+      animations: 'disabled',
+      style:
+        'nextjs-portal, [aria-label="Notifications (F8)"] { visibility: hidden !important; }',
+    })
+    await ready.click()
+    await change.click()
+  }
+}
+
 async function submitDecision(page: Page, values: DecisionValues) {
   const submitButton = page.getByRole('button', {
     name: 'Submit allocation',
@@ -478,20 +636,19 @@ async function submitDecision(page: Page, values: DecisionValues) {
   await page.getByRole('spinbutton', { name: 'Bonds' }).fill(values.bonds)
   await page.getByRole('spinbutton', { name: 'Stocks' }).fill(values.stocks)
   await submitButton.click()
-  await expect(submitButton).toBeEnabled()
   await expect(
-    page.getByText('Allocation submitted.', { exact: true })
+    page.getByText('Allocation submitted', { exact: true })
   ).toBeVisible()
   await page.reload({ waitUntil: 'domcontentloaded' })
-  await expect(
-    page.getByRole('spinbutton', { name: 'Savings', exact: true })
-  ).toHaveValue(values.savings)
-  await expect(
-    page.getByRole('spinbutton', { name: 'Bonds', exact: true })
-  ).toHaveValue(values.bonds)
-  await expect(
-    page.getByRole('spinbutton', { name: 'Stocks', exact: true })
-  ).toHaveValue(values.stocks)
+  await expect(page.getByTestId('submitted-bank')).toContainText(
+    `${values.savings}%`
+  )
+  await expect(page.getByTestId('submitted-bonds')).toContainText(
+    `${values.bonds}%`
+  )
+  await expect(page.getByTestId('submitted-stocks')).toContainText(
+    `${values.stocks}%`
+  )
   await expect(page.getByTestId('ready-switch')).toBeVisible()
   await page.getByRole('switch', { name: 'Ready', exact: true }).click()
   await expect(
@@ -608,7 +765,7 @@ async function assertDicePage(page: Page) {
 
   const [dicePage] = await Promise.all([
     // Popup events wait for the initial response, including a cold dev build.
-    page.waitForEvent('popup', { timeout: 30_000 }),
+    page.waitForEvent('popup', { timeout: 60_000 }),
     diceLink.click(),
   ])
 
@@ -630,7 +787,7 @@ async function assertDicePage(page: Page) {
 
 async function assertFinalReport(page: Page, playerPlans: PlayerPlan[]) {
   const [reportPage] = await Promise.all([
-    page.waitForEvent('popup', { timeout: 30_000 }),
+    page.waitForEvent('popup', { timeout: 60_000 }),
     page.getByRole('button', { name: 'Report' }).click(),
   ])
 
@@ -695,7 +852,27 @@ test('cockpit allocation controls, navigation, and decimal persistence', async (
     await story.getByRole('button', { name: 'Continue', exact: true }).click()
     await expect(story).toBeHidden()
     await assertAllocationControls(session.page, page)
+    await assertSubmittedStates(session.page, page)
     await submitDecision(session.page, players[0].decisions[0])
+    await expect(
+      session.page.getByRole('button', { name: 'Change allocation' })
+    ).toBeDisabled()
+    await expect(session.page.getByRole('spinbutton')).toHaveCount(0)
+    await expect(session.page.getByRole('slider')).toHaveCount(0)
+    await session.page.reload({ waitUntil: 'domcontentloaded' })
+    await expect(session.page.getByText(/Locked mix for quarter/)).toBeVisible()
+    await session.page
+      .getByRole('switch', { name: 'Ready', exact: true })
+      .click()
+    await expect(
+      session.page.getByText('Allocation submitted', { exact: true })
+    ).toBeVisible()
+    await session.page
+      .getByRole('button', { name: 'Change allocation' })
+      .click()
+    await expect(
+      session.page.getByRole('switch', { name: 'Ready', exact: true })
+    ).toBeDisabled()
     await session.page
       .getByRole('spinbutton', { name: 'Savings', exact: true })
       .fill('50')
@@ -705,6 +882,17 @@ test('cockpit allocation controls, navigation, and decimal persistence', async (
     await session.page
       .getByRole('spinbutton', { name: 'Stocks', exact: true })
       .fill('25')
+    // Keep an old-round response pending while a new quarter starts.
+    const pendingActions: import('@playwright/test').Route[] = []
+    await session.page.route('**/api/graphql', async (route) => {
+      if (route.request().postData()?.includes('PerformAction'))
+        pendingActions.push(route)
+      else await route.continue()
+    })
+    await session.page
+      .getByRole('button', { name: 'Submit allocation', exact: true })
+      .click()
+    await expect.poll(() => pendingActions.length).toBe(1)
     await advanceGame(page, {
       action: 'Segment Results',
       expectedStatus: 'PAUSED',
@@ -722,6 +910,42 @@ test('cockpit allocation controls, navigation, and decimal persistence', async (
     await expect(
       session.page.getByRole('spinbutton', { name: 'Savings', exact: true })
     ).toHaveValue('33.3')
+    await session.page
+      .getByRole('button', { name: 'Submit allocation', exact: true })
+      .click()
+    await expect.poll(() => pendingActions.length).toBe(2)
+    await pendingActions[0].fulfill({
+      json: { errors: [{ message: 'Late old-quarter failure' }] },
+    })
+    // Let the old response settle without completing the new submission.
+    await session.page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        )
+    )
+    await expect(
+      session.page.getByRole('button', { name: 'Submitting…', exact: true })
+    ).toBeDisabled()
+    await expect(
+      session.page.getByText(
+        'Could not save your allocation. Please try submitting again.'
+      )
+    ).toBeHidden()
+    await pendingActions[1].fulfill({
+      json: { errors: [{ message: 'Current-quarter failure' }] },
+    })
+    await expect(
+      session.page.getByText(
+        'Could not save your allocation. Please try submitting again.'
+      )
+    ).toBeVisible()
+    await expect(
+      session.page.getByRole('button', {
+        name: 'Submit allocation',
+        exact: true,
+      })
+    ).toBeEnabled()
   } finally {
     await session.context.close()
   }
@@ -732,6 +956,9 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
   browser,
   baseURL,
 }) => {
+  // Cold local report compilation exceeded the 30s popup wait after ~250s
+  // of valid multi-team play. Allow the complete flow plus report rendering.
+  test.setTimeout(420_000)
   const appBaseURL = requireBaseURL(baseURL)
   const gameName = `Playwright breadth ${Date.now()}`
 
