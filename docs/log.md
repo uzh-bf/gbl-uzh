@@ -1,6 +1,12 @@
 # Log
 
+## 2026-09-17
+
+- **Update**: [UI Building Blocks](ui-components.md), [Developing a Game](developing-a-game.md) - remove the welcome CSS Module, use shared player tokens and welcome-local Tailwind controls across setup, portaled pickers, and loading/error views, and document responsive and failure/retry browser coverage.
+
 ## 2026-09-16
+
+- **Update**: [UI Building Blocks](ui-components.md), [Developing a Game](developing-a-game.md) - replace the cockpit CSS Module with Tailwind utilities and app-local action, notice, and allocation-row components; centralize player tokens and unify welcome/cockpit primary and asset colors while preserving responsive dimensions.
 
 - **Update**: [Developing a Game](developing-a-game.md), [Game Lifecycle](game-lifecycle.md) - document persisted allocation submission, reversible Ready locking, instructor-controlled results, year/quarter labels, and shared cockpit sizing and allocation-bar rendering aligned with the revised references.
 

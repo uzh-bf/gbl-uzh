@@ -58,3 +58,45 @@ html {
   --theme-color-secondary-40: #f1bfa9;
   --theme-color-secondary-20: #f8dfd4;
 }
+
+/* Shared player UI tokens, including welcome's portaled dialogs.
+ * Pixel dimensions in player components deliberately preserve the design at
+ * the app's 14px root size; do not change the global spacing scale. */
+@theme inline {
+  --color-player-primary: var(--theme-color-primary);
+  --font-player: var(--source-sans-pro), sans-serif;
+}
+
+@theme static {
+  --color-player-primary-hover: #001f82;
+  --color-player-savings: #1ba6be;
+  --color-player-bonds: #20376e;
+  --color-player-stocks: #5889f3;
+  --color-player-text: #151515;
+  --color-player-body: #414141;
+  --color-player-muted: #707070;
+  --color-player-border: #e9e9e9;
+  --color-player-divider: #d8d8d8;
+  --color-player-input: #dedede;
+  --color-player-progress: #bfcaea;
+  --color-player-progress-done: #7890ff;
+  --color-player-feedback: #f5f7ff;
+  --color-player-invalid: #b42318;
+  --color-player-error: #a51c14;
+  --color-player-switch: #e7e7e7;
+  --color-player-success: #557018;
+  --color-player-success-surface: #edf6d6;
+  --color-player-warning: #b17b00;
+  --color-player-warning-surface: #fff5dc;
+  --color-player-disabled: #a2a2a2;
+  --color-player-disabled-surface: #f8f8f8;
+}
+
+@layer components {
+  /* Native steppers interfere with the compact percentage field on WebKit. */
+  .player-number-input::-webkit-inner-spin-button,
+  .player-number-input::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+}

@@ -470,8 +470,15 @@ async function assertAllocationControls(page: Page, admin: Page) {
 }
 
 const cockpitViewports = [
+  { name: 'narrow', width: 320, height: 844 },
+  { name: 'small-boundary', width: 360, height: 844 },
+  { name: 'above-small', width: 361, height: 844 },
   { name: 'mobile', width: 390, height: 844 },
+  { name: 'mobile-boundary', width: 600, height: 1024 },
+  { name: 'above-mobile', width: 601, height: 1024 },
   { name: 'tablet', width: 784, height: 1024 },
+  { name: 'shell-boundary', width: 785, height: 1024 },
+  { name: 'desktop', width: 1440, height: 1000 },
 ] as const
 
 async function cockpitControlSizes(page: Page, action: Locator) {
@@ -505,7 +512,18 @@ async function assertSubmittedStates(page: Page, admin: Page) {
     await expect
       .poll(() => page.evaluate(() => innerWidth))
       .toBe(viewport.width)
+    await expect
+      .poll(() =>
+        page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)
+      )
+      .toBe(true)
     editingSizes.set(viewport.width, await cockpitControlSizes(page, submit))
+    await page.screenshot({
+      path: test.info().outputPath(`cockpit-editing-${viewport.name}.png`),
+      animations: 'disabled',
+      style:
+        'nextjs-portal, [aria-label="Notifications (F8)"] { visibility: hidden !important; }',
+    })
   }
   await submit.click()
   await expect(
@@ -538,6 +556,12 @@ async function assertSubmittedStates(page: Page, admin: Page) {
       await ready.click()
       await expect(ready).toBeChecked()
       await expect(change).toBeDisabled()
+      // Disabled hover must retain the locked action's surface, not the
+      // design-system outline button's default hover background.
+      await change.hover()
+      await expect(change).toHaveCSS('background-color', 'rgb(248, 248, 248)')
+      await expect(change).toHaveCSS('color', 'rgb(162, 162, 162)')
+      await page.getByRole('navigation', { name: 'Player navigation' }).hover()
       await expect(page.getByText(/Locked mix for quarter/)).toBeVisible()
       await expect(page.getByTestId('countdown')).toBeVisible()
       await expectGameStatusEventually(admin, 'RUNNING')

@@ -7,7 +7,6 @@ import {
   type Boundaries,
 } from '~/lib/allocation'
 import AllocationBar from './AllocationBar'
-import styles from './Cockpit.module.css'
 
 export default function AllocationSlider({
   value,
@@ -55,14 +54,16 @@ export default function AllocationSlider({
   }
 
   return (
-    <div className={styles.mix}>
-      <div className={styles.mixHeading}>
-        <h2>Your mix</h2>
+    <div className="border-player-border border-b p-[16px] min-[601px]:px-[24px] min-[601px]:pt-[20px] min-[601px]:pb-[24px]">
+      <div className="text-player-muted mb-[16px] flex items-baseline justify-between gap-[12px] text-[17px] min-[601px]:mb-[20px]">
+        <h2 className="m-0 text-[15px] font-semibold tracking-[1.5px] uppercase">
+          Your mix
+        </h2>
         <span>Drag a handle</span>
       </div>
       <div
         ref={track}
-        className={styles.slider}
+        className="relative h-[44px] min-[601px]:h-[64px]"
         data-cy="allocation-slider"
         aria-disabled={disabled}
       >
@@ -86,7 +87,7 @@ export default function AllocationSlider({
             }
             aria-orientation="horizontal"
             aria-describedby="allocation-help"
-            className={styles.handle}
+            className="focus-visible:outline-player-text absolute top-1/2 z-[1] size-[44px] -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none rounded-full border-0 bg-transparent p-[6px] focus-visible:z-[2] focus-visible:outline-[3px] focus-visible:outline-offset-[3px] disabled:cursor-not-allowed disabled:opacity-60"
             disabled={disabled}
             style={{
               left: `${bounds[handle] / 10}%`,
@@ -149,11 +150,11 @@ export default function AllocationSlider({
               onChange(fromBoundaries(moveBoundary(bounds, handle, target)))
             }}
           >
-            <span />
+            <span className="border-player-primary after:bg-player-primary relative block size-full rounded-full border-[3px] bg-white after:absolute after:top-1/2 after:left-1/2 after:h-[13px] after:w-[3px] after:-translate-x-1/2 after:-translate-y-1/2 after:rounded-[4px] after:content-['']" />
           </button>
         ))}
       </div>
-      <p id="allocation-help" className={styles.srOnly}>
+      <p id="allocation-help" className="sr-only">
         Use arrow keys for 0.1%, or Shift and arrow keys for 1%. When handles
         meet, they push each other. Start a new drag left or right to separate
         overlapping handles. Use the percentage fields for exact values.

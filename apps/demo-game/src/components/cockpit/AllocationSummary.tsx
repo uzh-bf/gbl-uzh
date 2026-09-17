@@ -1,7 +1,8 @@
-import { Check, Clock3, Info, LockKeyhole } from 'lucide-react'
+import { LockKeyhole } from 'lucide-react'
 import { ALLOCATION_KEYS, formatCHF, type Allocation } from '~/lib/allocation'
-import AllocationBar, { assetLabels } from './AllocationBar'
-import styles from './Cockpit.module.css'
+import AllocationBar from './AllocationBar'
+import AllocationNotice from './AllocationNotice'
+import AllocationRow from './AllocationRow'
 
 export default function AllocationSummary({
   allocation,
@@ -17,81 +18,63 @@ export default function AllocationSummary({
   return (
     <div data-cy="allocation-summary">
       {!ready && (
-        <div className={styles.noticeSection}>
-          <div
-            className={`${styles.notice} ${styles.successNotice}`}
-            role="status"
-          >
-            <Check aria-hidden="true" />
-            <div>
-              <strong>Allocation submitted</strong>
-              <p>
-                Stored for quarter {quarterNumber}. Change it as often as you
-                like until you mark yourself ready.
-              </p>
-            </div>
-          </div>
-        </div>
+        <AllocationNotice variant="success" title="Allocation submitted">
+          Stored for quarter {quarterNumber}. Change it as often as you like
+          until you mark yourself ready.
+        </AllocationNotice>
       )}
-      <section className={styles.summaryMix} aria-label="Submitted allocation">
-        <div className={styles.summaryHeading}>
+      <section
+        className="border-player-border border-b p-[16px] min-[601px]:p-[24px]"
+        aria-label="Submitted allocation"
+      >
+        <div className="mb-[16px] flex flex-wrap items-baseline justify-between gap-[12px] min-[601px]:mb-[20px]">
           {ready ? (
-            <span className={styles.lockedLabel}>
-              <LockKeyhole aria-hidden="true" />
+            <span className="text-player-muted flex items-center gap-[8px] text-[14px] min-[601px]:gap-[10px] min-[601px]:text-[17px]">
+              <LockKeyhole
+                aria-hidden="true"
+                className="size-[20px] shrink-0 min-[601px]:size-[22px]"
+              />
               Locked mix for quarter {quarterNumber}
             </span>
           ) : (
-            <h2>Submitted mix</h2>
+            <h2 className="text-player-muted m-0 text-[15px] font-semibold tracking-[1px] uppercase">
+              Submitted mix
+            </h2>
           )}
-          <strong>{formatCHF(assets)}</strong>
+          <strong className="text-[24px] tabular-nums min-[601px]:text-[30px]">
+            {formatCHF(assets)}
+          </strong>
         </div>
-        <AllocationBar value={allocation} className={styles.summaryBar} />
+        <AllocationBar
+          value={allocation}
+          className="h-[44px] min-[601px]:h-[64px]"
+        />
       </section>
-      <dl className={styles.summaryRows}>
+      <dl className="m-0">
         {ALLOCATION_KEYS.map((key) => (
-          <div
-            className={`${styles.allocationRow} ${styles.summaryRow}`}
+          <AllocationRow
             key={key}
-            data-cy={`submitted-${key}`}
+            asset={key}
+            amount={(assets * allocation[key]) / 100}
+            saved
           >
-            <span
-              className={styles.swatch}
-              data-asset={key}
-              aria-hidden="true"
-            />
-            <dt className={styles.assetLabel}>
-              {assetLabels[key].name}
-              <span>{assetLabels[key].risk}</span>
-            </dt>
-            <dd className={styles.assetAmount}>
-              {formatCHF((assets * allocation[key]) / 100)}
+            <dd className="m-0 text-right text-[18px] font-bold tabular-nums min-[601px]:text-[20px]">
+              {allocation[key]}%
             </dd>
-            <dd className={styles.savedPercentage}>{allocation[key]}%</dd>
-          </div>
+          </AllocationRow>
         ))}
       </dl>
-      <div className={styles.noticeSection}>
-        {ready ? (
-          <div className={`${styles.notice} ${styles.waitingNotice}`}>
-            <Info aria-hidden="true" />
-            <p>
-              Results appear automatically when the instructor closes the
-              quarter. Market and History stay open while you wait.
-            </p>
-          </div>
-        ) : (
-          <div className={`${styles.notice} ${styles.pendingNotice}`}>
-            <Clock3 aria-hidden="true" />
-            <div>
-              <strong>Not ready yet</strong>
-              <p>
-                Turning Ready on tells the instructor you are done. The quarter
-                can then close early.
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
+      {ready ? (
+        <AllocationNotice variant="informational">
+          Results appear automatically when the instructor closes the quarter.
+          Market and History stay open while you wait.
+        </AllocationNotice>
+      ) : (
+        <AllocationNotice variant="pending" title="Not ready yet">
+          Turning Ready on tells the instructor you are done. The quarter can
+          then close early.
+        </AllocationNotice>
+      )}
     </div>
   )
 }

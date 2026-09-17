@@ -6,8 +6,8 @@ import {
   toTenths,
 } from '~/lib/allocation'
 import { assetLabels } from './AllocationBar'
+import AllocationRow from './AllocationRow'
 import AllocationSlider from './AllocationSlider'
-import styles from './Cockpit.module.css'
 import type { useAllocationForm } from './useAllocationForm'
 
 export default function AllocationForm({
@@ -35,9 +35,11 @@ export default function AllocationForm({
 
   return (
     <form id="allocation-form" onSubmit={form.handleSubmit} noValidate>
-      <div className={styles.balance}>
-        <span>To allocate</span>
-        <strong>{formatCHF(assets)}</strong>
+      <div className="border-player-border flex items-baseline justify-between gap-[12px] border-b p-[16px] min-[601px]:px-[24px] min-[601px]:py-[20px]">
+        <span className="text-player-muted text-[18px]">To allocate</span>
+        <strong className="text-[24px] leading-[1.5] font-bold tabular-nums min-[601px]:text-[30px]">
+          {formatCHF(assets)}
+        </strong>
       </div>
       <AllocationSlider
         value={preview}
@@ -49,24 +51,14 @@ export default function AllocationForm({
           const label = assetLabels[key].name
           const fieldValid = toTenths(allocation[key]) !== null
           return (
-            <div
-              className={styles.allocationRow}
+            <AllocationRow
               key={key}
-              data-cy={`allocation-${key}`}
+              asset={key}
+              amount={fieldValid ? (assets * allocation[key]) / 100 : null}
             >
-              <span className={styles.swatch} data-asset={key} />
-              <label
-                htmlFor={`allocation-${key}`}
-                className={styles.assetLabel}
-              >
-                {label}
-                <span>{assetLabels[key].risk}</span>
-              </label>
-              <span className={styles.assetAmount}>
-                {fieldValid ? formatCHF((assets * allocation[key]) / 100) : '—'}
-              </span>
-              <div className={styles.percentageInput}>
+              <div className="border-player-input focus-within:outline-player-primary has-[[aria-invalid=true]]:border-player-invalid flex h-[44px] items-center justify-center rounded-[13px] border-2 px-[8px] text-[18px] font-bold focus-within:outline-2 focus-within:outline-offset-2 min-[601px]:h-[56px] min-[601px]:text-[22px]">
                 <input
+                  className="player-number-input w-full min-w-0 [appearance:textfield] border-0 bg-transparent p-0 text-right text-inherit outline-0 [font:inherit] focus:shadow-none"
                   id={`allocation-${key}`}
                   name={key}
                   aria-label={label}
@@ -91,21 +83,28 @@ export default function AllocationForm({
                 <span aria-hidden="true">%</span>
               </div>
               {!fieldValid && (
-                <p id={`error-${key}`} className={styles.fieldError}>
+                <p
+                  id={`error-${key}`}
+                  className="text-player-error col-[2/-1] m-0 text-[16px]"
+                >
                   Enter 0–100%, in steps of 0.1%.
                 </p>
               )}
-            </div>
+            </AllocationRow>
           )
         })}
       </div>
       <div
         id="allocation-feedback"
         aria-live="polite"
-        className={!valid || form.status ? styles.feedback : styles.srOnly}
+        className={
+          !valid || form.status
+            ? 'border-player-border bg-player-feedback border-b p-[16px] text-[15px] min-[601px]:px-[24px] min-[601px]:py-[20px]'
+            : 'sr-only'
+        }
       >
         {!valid && (
-          <p>
+          <p className="m-0">
             Total: {Math.round(total * 10) / 10}%.{' '}
             {difference > 0
               ? `${difference}% remaining.`
@@ -116,19 +115,28 @@ export default function AllocationForm({
             and submit.
           </p>
         )}
-        {form.status?.error && <p role="alert">{form.status.error}</p>}
+        {form.status?.error && (
+          <p role="alert" className="text-player-error m-0">
+            {form.status.error}
+          </p>
+        )}
       </div>
       <Link
         href="/play/cockpit?tab=market"
         shallow
-        className={styles.marketOutlook}
+        className="focus-visible:outline-player-primary flex items-center gap-[10px] px-[16px] py-[22px] text-[15px] text-inherit no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] min-[601px]:px-[24px] min-[601px]:py-[20px] min-[601px]:text-[17px] [@media(max-width:360px)]:flex-wrap"
       >
-        <strong>Market outlook</strong>
-        <span>
+        <strong className="mr-auto text-[19px] min-[601px]:text-[21px]">
+          Market outlook
+        </strong>
+        <span className="text-player-muted">
           Bonds {expectation(scenario?.trendBonds)} · Stocks{' '}
           {expectation(scenario?.trendStocks)}
         </span>
-        <span aria-hidden="true" className={styles.chevron}>
+        <span
+          aria-hidden="true"
+          className="text-player-primary text-[28px] leading-none"
+        >
           ›
         </span>
       </Link>

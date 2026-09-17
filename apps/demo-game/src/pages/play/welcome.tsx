@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from '@apollo/client'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { WelcomeMessage } from 'src/components/welcome/WelcomeControls'
 import WelcomeSetup from 'src/components/welcome/WelcomeSetup'
-import styles from 'src/components/welcome/WelcomeSetup.module.css'
 import {
   SelfDocument,
   UpdatePlayerDataDocument,
@@ -14,24 +14,29 @@ function Welcome() {
   const [updatePlayerData] = useMutation(UpdatePlayerDataDocument)
 
   if (loading)
-    return (
-      <main className={styles.message} role="status">
-        Loading your bank…
-      </main>
-    )
+    return <WelcomeMessage role="status">Loading your bank…</WelcomeMessage>
 
   if (error || !data?.self) {
     return (
-      <main className={styles.message}>
+      <WelcomeMessage>
         <h1>We couldn’t load your bank</h1>
         <p role="alert">
           {error
             ? 'Please try again. Your bank details have not been changed.'
             : 'Open the join link from your instructor to set up your bank.'}
         </p>
-        {error && <button onClick={() => void refetch()}>Try again</button>}
-        <Link href="/">Back to Minigame</Link>
-      </main>
+        {error && (
+          <button
+            className="text-player-primary"
+            onClick={() => void refetch()}
+          >
+            Try again
+          </button>
+        )}
+        <Link href="/" className="text-player-primary">
+          Back to Minigame
+        </Link>
+      </WelcomeMessage>
     )
   }
 

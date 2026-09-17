@@ -1,5 +1,6 @@
 import { useMutation, useSubscription } from '@apollo/client'
 import {
+  cn,
   getCountdownNotification,
   LearningActivitiesList,
   LearningActivityModal,
@@ -12,7 +13,7 @@ import { Button, Switch } from '@uzh-bf/design-system'
 import dayjs from 'dayjs'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, type ReactNode } from 'react'
 import {
   AttemptLearningElementDocument,
   GlobalEventsDocument,
@@ -22,7 +23,6 @@ import {
   type ResultQuery,
 } from 'src/graphql/generated/ops'
 import { avatarNames, cantonNames } from '~/lib/teamIdentity'
-import styles from './cockpit/Cockpit.module.css'
 import CompactCountdown from './cockpit/CompactCountdown'
 import { useToast } from './ui/use-toast'
 
@@ -225,14 +225,19 @@ function GameLayout({
           })
         }}
       />
-      <div className={styles.shell}>
-        <header className={styles.header}>
-          <div className={styles.badge} aria-hidden="true">
+      <div className="font-player text-player-text min-[785px]:border-player-border mx-auto flex h-dvh w-full max-w-[784px] flex-col bg-white text-[16px] min-[785px]:border-x [&_*]:box-border">
+        <header className="border-player-divider flex shrink-0 items-center gap-[12px] border-b px-[16px] py-[10px] min-[601px]:gap-[16px] min-[601px]:px-[24px] min-[601px]:py-[16px]">
+          <div
+            className="bg-player-progress text-player-primary grid size-[40px] shrink-0 place-items-center rounded-[6px] text-[17px] font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]"
+            aria-hidden="true"
+          >
             {initials}
           </div>
-          <div className={styles.identity}>
-            <strong>{self.name}</strong>
-            <p>
+          <div className="min-w-0 flex-1">
+            <strong className="block text-[18px] leading-[1.15] font-bold [overflow-wrap:anywhere] min-[601px]:text-[22px]">
+              {self.name}
+            </strong>
+            <p className="text-player-muted m-0 text-[14px] min-[601px]:text-[16px]">
               {allocationView === 'submitted' || allocationView === 'ready' ? (
                 `${FIRST_GAME_YEAR + (activePeriod?.index ?? 0)} · Quarter ${(segmentIndex ?? 0) + 1}`
               ) : (
@@ -243,7 +248,7 @@ function GameLayout({
               )}
             </p>
           </div>
-          <div className={styles.clock}>
+          <div className="shrink-0 [font-family:monospace] text-[25px] font-bold tabular-nums min-[601px]:text-[28px]">
             {expiresAtDate && Number.isFinite(expiresAtDate.getTime()) ? (
               <CompactCountdown
                 expiresAt={expiresAtDate}
@@ -255,25 +260,35 @@ function GameLayout({
           </div>
         </header>
         <section
-          className={styles.progress}
+          className="border-player-divider shrink-0 border-b px-[16px] py-[14px] min-[601px]:px-[24px] min-[601px]:py-[20px]"
           aria-label="Game progress"
           data-game-status={currentGame.status}
         >
-          <div className={styles.progressHeading}>
-            <h2>
+          <div className="flex items-baseline justify-between gap-[12px] text-[17px] [@media(max-width:360px)]:items-start">
+            <h2 className="text-player-muted m-0 text-[12px] font-semibold tracking-[0.8px] uppercase min-[601px]:text-[14px]">
               {activePeriod
                 ? `${FIRST_GAME_YEAR + activePeriod.index}${segmentIndex == null ? '' : ` · Quarter ${segmentIndex + 1} of ${segmentCount}`}`
                 : 'Waiting for the game'}
             </h2>
-            {!running && <span>{status}</span>}
+            {!running && (
+              <span className="font-semibold [@media(max-width:360px)]:whitespace-nowrap">
+                {status}
+              </span>
+            )}
           </div>
           {segmentCount > 0 && (
             <>
-              <div className={styles.segments} aria-hidden="true">
+              <div
+                className={cn(
+                  'mt-[12px] flex gap-[8px] min-[601px]:mt-[16px]',
+                  !running && 'mb-[12px] min-[601px]:mb-[16px]'
+                )}
+                aria-hidden="true"
+              >
                 {Array.from({ length: segmentCount }, (_, index) => (
                   <span
                     key={index}
-                    className={styles.segment}
+                    className="bg-player-progress data-[state=done]:bg-player-progress-done data-[state=active]:bg-player-primary h-[8px] min-w-0 flex-1 rounded-[6px] min-[601px]:h-[10px]"
                     data-state={
                       running && index === segmentIndex
                         ? 'active'
@@ -285,7 +300,7 @@ function GameLayout({
                 ))}
               </div>
               {!running && (
-                <p>
+                <p className="text-player-muted m-0 text-[16px]">
                   {done} {done === 1 ? 'quarter' : 'quarters'} done ·{' '}
                   {Math.max(0, segmentCount - done)} to come
                 </p>
@@ -293,42 +308,50 @@ function GameLayout({
             </>
           )}
         </section>
-        <main className={styles.body}>
+        <main className="min-h-0 flex-1 overflow-auto">
           <div
             hidden={tab !== 'cockpit'}
-            className={running ? undefined : styles.report}
+            className={cn(
+              tab !== 'cockpit' && 'hidden',
+              !running && 'p-[16px] min-[601px]:px-[24px] min-[601px]:py-[20px]'
+            )}
           >
             {children}
           </div>
-          <section hidden={tab !== 'market'} className={styles.tabPanel}>
-            <h1>Market</h1>
-          </section>
-          <section hidden={tab !== 'history'} className={styles.tabPanel}>
-            <h1>History</h1>
-          </section>
-          <section hidden={tab !== 'team'} className={styles.tabPanel}>
-            <h1>Team</h1>
+          <PlayerTabPanel title="Market" hidden={tab !== 'market'} />
+          <PlayerTabPanel title="History" hidden={tab !== 'history'} />
+          <PlayerTabPanel title="Team" hidden={tab !== 'team'}>
             <PlayerDisplay {...playerInfo} />
-            <div className={styles.teamActivities}>
+            <div className="mt-[24px]">
               <LearningActivitiesList
                 openElements={openLearningElements}
                 completedElements={completedLearningElements}
                 onElementClick={(id) => setActiveLearningId(id)}
               />
             </div>
-          </section>
+          </PlayerTabPanel>
         </main>
-        <div className={styles.bottom}>
+        <div className="relative z-[3] shrink-0 bg-white">
           {tab === 'cockpit' && (
-            <div className={styles.footer}>
+            <div className="border-player-divider flex min-h-[78px] items-center justify-between gap-[12px] border-t px-[16px] py-[12px] min-[601px]:min-h-[96px] min-[601px]:px-[24px] min-[601px]:py-[16px]">
               {action}
               <div
-                className={styles.ready}
+                className="ml-auto flex items-center gap-[10px]"
                 data-cy="ready-switch"
                 data-ready={self.isReady}
                 data-disabled={readyControl.disabled}
               >
-                <label htmlFor="isReady" className={styles.readyLabel}>
+                <label
+                  htmlFor="isReady"
+                  className={cn(
+                    'text-[17px] font-semibold',
+                    readyControl.disabled
+                      ? 'text-player-disabled'
+                      : self.isReady
+                        ? 'text-player-success'
+                        : 'text-player-primary'
+                  )}
+                >
                   Ready
                 </label>
                 <Switch
@@ -337,20 +360,32 @@ function GameLayout({
                   disabled={readyControl.disabled}
                   size="lg"
                   className={{
-                    element: styles.readyTrack,
-                    thumb: styles.readyThumb,
+                    element: cn(
+                      'h-[30px] w-[52px]',
+                      self.isReady
+                        ? 'bg-player-success disabled:bg-player-success'
+                        : 'bg-player-switch disabled:bg-player-switch'
+                    ),
+                    thumb: cn(
+                      'ml-[3px] size-[24px] shadow-[0_1px_3px_#0002] [&>svg]:invisible',
+                      self.isReady ? 'translate-x-[22px]' : 'translate-x-0'
+                    ),
                   }}
                   onCheckedChange={readyControl.onChange}
                 />
               </div>
             </div>
           )}
-          <nav className={styles.nav} aria-label="Player navigation">
+          <nav
+            className="border-player-border grid grid-cols-4 border-t pb-[env(safe-area-inset-bottom)]"
+            aria-label="Player navigation"
+          >
             {tabs.map((name) => (
               <Link
                 key={name}
                 href={`/play/cockpit?tab=${name.toLowerCase()}`}
                 shallow
+                className="text-player-muted aria-[current=page]:border-player-primary aria-[current=page]:text-player-primary focus-visible:outline-player-primary flex min-h-[56px] items-center justify-center border-t-[3px] border-transparent text-[17px] no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] aria-[current=page]:font-bold min-[601px]:min-h-[60px]"
                 aria-current={tab === name.toLowerCase() ? 'page' : undefined}
               >
                 {name}
@@ -377,3 +412,26 @@ function GameLayout({
 }
 
 export default GameLayout
+
+function PlayerTabPanel({
+  title,
+  hidden,
+  children,
+}: {
+  title: string
+  hidden: boolean
+  children?: ReactNode
+}) {
+  return (
+    <section
+      hidden={hidden}
+      className={cn(
+        'p-[16px] min-[601px]:px-[24px] min-[601px]:py-[20px]',
+        hidden && 'hidden'
+      )}
+    >
+      <h1 className="m-0 mb-[24px] text-[28px] font-bold">{title}</h1>
+      {children}
+    </section>
+  )
+}

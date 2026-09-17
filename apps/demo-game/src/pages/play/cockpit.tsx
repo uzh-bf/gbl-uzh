@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { EventLog } from '@gbl-uzh/ui'
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
@@ -49,7 +48,7 @@ import { getSegmentEndResults } from 'src/lib/analysis'
 import GameLayout from '~/components/GameLayout'
 import AllocationForm from '~/components/cockpit/AllocationForm'
 import AllocationSummary from '~/components/cockpit/AllocationSummary'
-import styles from '~/components/cockpit/Cockpit.module.css'
+import PlayerActionButton from '~/components/cockpit/PlayerActionButton'
 import { useAllocationForm } from '~/components/cockpit/useAllocationForm'
 import { useToast } from '~/components/ui/use-toast'
 
@@ -730,11 +729,10 @@ function Cockpit() {
           allocationView={view}
           action={
             view === 'editing' ? (
-              <Button
+              <PlayerActionButton
                 key="submit-allocation"
                 type="submit"
                 form="allocation-form"
-                className={{ root: `${styles.footerAction} ${styles.submit}` }}
                 disabled={
                   !allocationController.valid ||
                   form.isSubmitting ||
@@ -742,21 +740,19 @@ function Cockpit() {
                 }
               >
                 {form.isSubmitting ? 'Submitting…' : 'Submit allocation'}
-              </Button>
+              </PlayerActionButton>
             ) : (
-              <Button
+              <PlayerActionButton
                 key="change-allocation"
                 type="button"
-                className={{
-                  root: `${styles.footerAction} ${styles.changeAllocation}`,
-                }}
+                variant="secondary"
                 disabled={
                   view === 'ready' || form.isSubmitting || updatingReady
                 }
                 onClick={allocationController.beginEditing}
               >
                 Change allocation
-              </Button>
+              </PlayerActionButton>
             )
           }
         >

@@ -1,4 +1,4 @@
-import { Button } from '@uzh-bf/design-system'
+import { cn } from '@gbl-uzh/ui'
 import { useFormik } from 'formik'
 import { ArrowLeft, ChevronRight, Info, MapPin, UserRound } from 'lucide-react'
 import Image from 'next/image'
@@ -8,7 +8,27 @@ import { AVATARS, COLORS, LOCATIONS } from 'src/lib/constants'
 import * as yup from 'yup'
 import { avatarNames, cantonNames } from '~/lib/teamIdentity'
 import OptionPicker, { type Option } from './OptionPicker'
-import styles from './WelcomeSetup.module.css'
+import {
+  WelcomeActionButton,
+  WelcomeTextButton,
+  WelcomeTextInput,
+} from './WelcomeControls'
+
+const steps = {
+  intro: {
+    title: 'You just won the lottery',
+    description:
+      "You picked five correct numbers. After spending a little, CHF 10'000 is left and you want to invest it.",
+  },
+  setup: {
+    title: 'Set up your bank',
+    description: 'Three things to choose. Make your bank your own.',
+  },
+  review: {
+    title: 'Your bank',
+    description: 'Check it once, then start.',
+  },
+}
 
 const avatars: Option[] = Object.entries(AVATARS)
   .filter(([key]) => key !== 'avatar_placeholder')
@@ -56,7 +76,7 @@ export default function WelcomeSetup({
   player: NonNullable<SelfQuery['self']>
   onStart: (name: string, facts: Record<string, unknown>) => Promise<void>
 }) {
-  const [step, setStep] = useState<'intro' | 'setup' | 'review'>('intro')
+  const [step, setStep] = useState<keyof typeof steps>('intro')
   const [submitError, setSubmitError] = useState('')
   const content = useRef<HTMLElement>(null)
   const heading = useRef<HTMLHeadingElement>(null)
@@ -136,14 +156,21 @@ export default function WelcomeSetup({
   }
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.brand}>
-          <strong>Minigame</strong>
-          <span title={player.game.name}>{player.game.name}</span>
+    <div className="font-player text-player-text min-[721px]:border-player-input mx-auto flex h-dvh max-w-[720px] flex-col bg-white text-[16px] leading-[1.5] min-[721px]:border-x">
+      <header className="border-player-input flex min-h-[54px] shrink-0 items-center justify-between gap-[12px] border-b px-[16px] py-[12px] min-[721px]:px-[32px]">
+        <div className="flex min-w-0 items-baseline gap-[10px]">
+          <strong className="text-[18px]">Minigame</strong>
+          <span className="text-player-muted truncate" title={player.game.name}>
+            {player.game.name}
+          </span>
         </div>
         <span
-          className={step === 'review' ? styles.complete : styles.step}
+          className={cn(
+            'shrink-0 rounded-[5px] px-[11px] py-[3px] text-[13px] font-bold',
+            step === 'review'
+              ? 'bg-player-success-surface text-player-success'
+              : 'bg-player-border'
+          )}
           aria-live="polite"
         >
           {step === 'review'
@@ -151,70 +178,96 @@ export default function WelcomeSetup({
             : `Step ${step === 'intro' ? 1 : 2} of 2`}
         </span>
       </header>
-      <form className={styles.form} onSubmit={form.handleSubmit} noValidate>
-        <main ref={content} className={styles.content}>
+      <form
+        className="flex min-h-0 flex-1 flex-col"
+        onSubmit={form.handleSubmit}
+        noValidate
+      >
+        <main
+          ref={content}
+          className="flex-1 overflow-y-auto p-[16px] min-[721px]:px-[32px] min-[721px]:py-[28px]"
+        >
+          {step === 'intro' && (
+            <Image
+              className="border-player-input mb-[14px] aspect-[2/1] h-auto w-full rounded-[12px] border object-cover"
+              src="/images/welcome.jpg"
+              alt="A winning lottery ticket surrounded by coins and a piggy bank"
+              width={720}
+              height={360}
+              sizes="(max-width: 720px) calc(100vw - 32px), 654px"
+              loading="eager"
+            />
+          )}
+          <h1
+            ref={heading}
+            tabIndex={-1}
+            className="m-0 mb-[8px] text-[24px] leading-[1.25] font-bold tracking-[-0.3px] focus:outline-none"
+          >
+            {steps[step].title}
+          </h1>
+          <p className="text-player-body m-0 leading-[1.65]">
+            {steps[step].description}
+          </p>
           {step === 'intro' ? (
             <>
-              <Image
-                className={styles.hero}
-                src="/images/welcome.jpg"
-                alt="A winning lottery ticket surrounded by coins and a piggy bank"
-                width={720}
-                height={360}
-                sizes="(max-width: 720px) calc(100vw - 32px), 654px"
-                loading="eager"
-              />
-              <h1 ref={heading} tabIndex={-1}>
-                You just won the lottery
-              </h1>
-              <p className={styles.lead}>
-                You picked five correct numbers. After spending a little, CHF
-                10&apos;000 is left and you want to invest it.
-              </p>
-              <section className={styles.task} aria-labelledby="your-task">
-                <h2 id="your-task">Your task</h2>
-                <p>
+              <section
+                className="border-player-primary mt-[16px] mb-[14px] border-l-[3px] pl-[14px]"
+                aria-labelledby="your-task"
+              >
+                <h2
+                  id="your-task"
+                  className="text-player-muted m-0 mb-[5px] text-[13px] font-bold tracking-[1px] uppercase"
+                >
+                  Your task
+                </h2>
+                <p className="m-0 leading-[1.6]">
                   Decide how much goes into savings, bonds and stocks. You
                   repeat that decision every segment.
                 </p>
               </section>
-              <ul className={styles.assets}>
-                <li>
-                  <i className={styles.savings} />
-                  <strong>Savings</strong>
-                  <span>No risk</span>
-                </li>
-                <li>
-                  <i className={styles.bonds} />
-                  <strong>Bonds</strong>
-                  <span>Some risk</span>
-                </li>
-                <li>
-                  <i className={styles.stocks} />
-                  <strong>Stocks</strong>
-                  <span>High risk</span>
-                </li>
+              <ul className="m-0 mb-[14px] grid list-none gap-[8px] p-0">
+                {[
+                  {
+                    name: 'Savings',
+                    risk: 'No risk',
+                    color: 'bg-player-savings',
+                  },
+                  {
+                    name: 'Bonds',
+                    risk: 'Some risk',
+                    color: 'bg-player-bonds',
+                  },
+                  {
+                    name: 'Stocks',
+                    risk: 'High risk',
+                    color: 'bg-player-stocks',
+                  },
+                ].map(({ name, risk, color }) => (
+                  <li
+                    key={name}
+                    className="border-player-input grid grid-cols-[10px_78px_1fr] items-center gap-[10px] rounded-[12px] border px-[12px] py-[11px]"
+                  >
+                    <i className={cn('size-[10px] rounded-[2px]', color)} />
+                    <strong>{name}</strong>
+                    <span className="text-player-muted">{risk}</span>
+                  </li>
+                ))}
               </ul>
-              <p className={styles.note}>
+              <p className="text-player-muted m-0 text-[14px] leading-[1.65]">
                 Savings pay 0.2% a month. Bonds and stocks follow the market
                 expectation, simulated by two dice.
               </p>
             </>
           ) : step === 'setup' ? (
             <>
-              <h1 ref={heading} tabIndex={-1}>
-                Set up your bank
-              </h1>
-              <p className={styles.lead}>
-                Three things to choose. Make your bank your own.
-              </p>
-              <div className={styles.fields}>
-                <div className={styles.field}>
-                  <label htmlFor="bank-name">Bank name</label>
-                  <input
+              <div className="mt-[20px] grid gap-[20px]">
+                <div className="flex flex-col gap-[8px]">
+                  <label className="font-bold" htmlFor="bank-name">
+                    Bank name
+                  </label>
+                  <WelcomeTextInput
                     ref={nameInput}
                     id="bank-name"
-                    className={styles.input}
                     {...form.getFieldProps('name')}
                     placeholder="e.g. Team 1"
                     autoComplete="organization"
@@ -223,131 +276,163 @@ export default function WelcomeSetup({
                     )}
                     aria-describedby="bank-name-help bank-name-error"
                   />
-                  <p id="bank-name-help" className={styles.note}>
+                  <p
+                    id="bank-name-help"
+                    className="text-player-muted m-0 mt-[6px] text-[14px] leading-[1.65]"
+                  >
                     Shown on the ranking and the projector.
                   </p>
                   <p
                     id="bank-name-error"
-                    className={styles.error}
+                    className="text-player-invalid m-0 text-[14px] empty:hidden"
                     aria-live="polite"
                   >
                     {form.touched.name && form.errors.name}
                   </p>
                 </div>
-                <div className={styles.field}>
-                  <span id="avatar-label">Avatar</span>
+                <div className="flex flex-col gap-[8px]">
+                  <span className="font-bold" id="avatar-label">
+                    Avatar
+                  </span>
                   {avatarPicker(
                     <button
                       type="button"
-                      className={styles.picker}
+                      className="border-player-input text-player-muted focus-visible:outline-player-primary flex min-h-[62px] w-full items-center gap-[16px] rounded-[12px] border bg-white px-[20px] py-[12px] text-left [font:inherit] focus-visible:outline-2 focus-visible:outline-offset-[3px]"
                       aria-labelledby="avatar-label avatar-value"
                     >
                       {avatar?.value ? (
                         <Image
                           src={avatar.value}
                           alt=""
+                          className="size-[32px] rounded-[6px] object-cover"
                           width={32}
                           height={32}
                         />
                       ) : (
-                        <UserRound aria-hidden="true" />
+                        <UserRound
+                          aria-hidden="true"
+                          className="w-[20px] shrink-0"
+                        />
                       )}
-                      <span id="avatar-value">
+                      <span className="flex-1" id="avatar-value">
                         {avatar?.label ?? 'Choose an animal'}
                       </span>
-                      <ChevronRight aria-hidden="true" />
+                      <ChevronRight
+                        aria-hidden="true"
+                        className="w-[20px] shrink-0"
+                      />
                     </button>
                   )}
                 </div>
-                <div className={styles.field}>
-                  <span id="location-label">Location</span>
+                <div className="flex flex-col gap-[8px]">
+                  <span className="font-bold" id="location-label">
+                    Location
+                  </span>
                   {locationPicker(
                     <button
                       type="button"
-                      className={styles.picker}
+                      className="border-player-input text-player-muted focus-visible:outline-player-primary flex min-h-[62px] w-full items-center gap-[16px] rounded-[12px] border bg-white px-[20px] py-[12px] text-left [font:inherit] focus-visible:outline-2 focus-visible:outline-offset-[3px]"
                       aria-labelledby="location-label location-value"
                     >
-                      <MapPin aria-hidden="true" />
-                      <span id="location-value">
+                      <MapPin
+                        aria-hidden="true"
+                        className="w-[20px] shrink-0"
+                      />
+                      <span className="flex-1" id="location-value">
                         {location?.label ?? 'Choose a canton'}
                       </span>
-                      <ChevronRight aria-hidden="true" />
+                      <ChevronRight
+                        aria-hidden="true"
+                        className="w-[20px] shrink-0"
+                      />
                     </button>
                   )}
                 </div>
               </div>
-              <div className={styles.capital}>
+              <div className="border-player-input mt-[24px] flex items-center justify-between gap-[14px] border-t pt-[16px]">
                 <div>
-                  <span>Starting capital</span>
-                  <strong>10&apos;000.00 CHF</strong>
+                  <span className="text-player-body text-[14px]">
+                    Starting capital
+                  </span>
+                  <strong className="block text-[22px] leading-[1.3] whitespace-nowrap">
+                    10&apos;000.00 CHF
+                  </strong>
                 </div>
-                <span>Same for every team</span>
+                <span className="text-player-body text-right text-[14px]">
+                  Same for every team
+                </span>
               </div>
             </>
           ) : (
             <>
-              <h1 ref={heading} tabIndex={-1}>
-                Your bank
-              </h1>
-              <p className={styles.lead}>Check it once, then start.</p>
-              <div className={styles.bankCard}>
+              <div className="border-player-input mt-[18px] mb-[16px] flex items-center gap-[14px] rounded-[16px] border px-[20px] py-[15px] shadow-[0_1px_3px_#00000014]">
                 {avatar?.value && (
-                  <Image src={avatar.value} alt="" width={56} height={56} />
+                  <Image
+                    src={avatar.value}
+                    alt=""
+                    width={56}
+                    height={56}
+                    className="size-[56px] rounded-[12px] object-cover"
+                  />
                 )}
-                <div>
-                  <strong>{form.values.name.trim()}</strong>
-                  <p>
+                <div className="min-w-0">
+                  <strong className="text-[20px] [overflow-wrap:anywhere]">
+                    {form.values.name.trim()}
+                  </strong>
+                  <p className="text-player-muted m-0 text-[14px]">
                     {avatar?.label} · HQ {location?.label}
                   </p>
-                  <p>10&apos;000.00 CHF to invest</p>
+                  <p className="text-player-muted m-0 text-[14px]">
+                    10&apos;000.00 CHF to invest
+                  </p>
                 </div>
               </div>
-              <div className={styles.reviewRows}>
-                <div>
-                  <span>Bank name</span>
-                  <strong>{form.values.name.trim()}</strong>
-                  <button
-                    type="button"
-                    className={styles.textButton}
-                    aria-label="Edit bank name"
-                    disabled={form.isSubmitting}
-                    onClick={() => goTo('setup', true)}
-                  >
-                    Edit
-                  </button>
-                </div>
-                <div>
-                  <span>Avatar</span>
-                  <strong>{avatar?.label}</strong>
-                  {avatarPicker(
-                    <button
-                      type="button"
-                      className={styles.textButton}
-                      aria-label="Edit avatar"
+              <div className="grid gap-[8px]">
+                {[
+                  {
+                    label: 'Bank name',
+                    value: form.values.name.trim(),
+                  },
+                  {
+                    label: 'Avatar',
+                    value: avatar?.label,
+                    picker: avatarPicker,
+                  },
+                  {
+                    label: 'Location',
+                    value: location?.label,
+                    picker: locationPicker,
+                  },
+                ].map(({ label, value, picker }) => {
+                  const editButton = (
+                    <WelcomeTextButton
+                      aria-label={`Edit ${label.toLowerCase()}`}
                       disabled={form.isSubmitting}
+                      onClick={picker ? undefined : () => goTo('setup', true)}
                     >
                       Edit
-                    </button>
-                  )}
-                </div>
-                <div>
-                  <span>Location</span>
-                  <strong>{location?.label}</strong>
-                  {locationPicker(
-                    <button
-                      type="button"
-                      className={styles.textButton}
-                      aria-label="Edit location"
-                      disabled={form.isSubmitting}
+                    </WelcomeTextButton>
+                  )
+                  return (
+                    <div
+                      key={label}
+                      className="border-player-input flex min-h-[54px] items-center gap-[10px] rounded-[12px] border px-[14px] py-[5px]"
                     >
-                      Edit
-                    </button>
-                  )}
-                </div>
+                      <span className="flex-1">{label}</span>
+                      <strong className="max-w-[48%] text-right [overflow-wrap:anywhere]">
+                        {value}
+                      </strong>
+                      {picker ? picker(editButton) : editButton}
+                    </div>
+                  )
+                })}
               </div>
-              <div className={styles.notice}>
-                <Info aria-hidden="true" />
-                <p>
+              <div className="border-player-input text-player-body mt-[16px] flex gap-[12px] rounded-[12px] border p-[14px]">
+                <Info
+                  aria-hidden="true"
+                  className="text-player-primary mt-[3px] w-[18px] shrink-0"
+                />
+                <p className="m-0">
                   {player.game.status === 'SCHEDULED' ||
                   player.game.status === 'PREPARATION'
                     ? 'Starting now puts you in the waiting room until the instructor opens segment 1.'
@@ -357,34 +442,35 @@ export default function WelcomeSetup({
             </>
           )}
         </main>
-        <footer className={styles.footer}>
+        <footer className="border-player-input shrink-0 border-t bg-white px-[16px] pt-[12px] pb-[max(12px,env(safe-area-inset-bottom))] min-[721px]:px-[32px]">
           {submitError && (
-            <p role="alert" className={styles.error}>
+            <p
+              role="alert"
+              className="text-player-invalid m-0 mb-[10px] text-[14px] empty:hidden"
+            >
               {submitError}
             </p>
           )}
-          <div className={styles.footerActions}>
+          <div className="flex items-center gap-[12px]">
             {step === 'intro' ? (
               <>
-                <div className={styles.dots} aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
+                <div className="flex gap-[5px]" aria-hidden="true">
+                  <i className="bg-player-primary size-[7px] rounded-full" />
+                  <i className="bg-player-progress-done size-[7px] rounded-full" />
+                  <i className="bg-player-progress size-[7px] rounded-full" />
                 </div>
-                <Button
+                <WelcomeActionButton
                   type="button"
-                  primary
-                  className={{ root: styles.primaryButton }}
                   onClick={() => goTo('setup')}
                 >
                   Set up your bank
-                </Button>
+                </WelcomeActionButton>
               </>
             ) : (
               <>
                 <button
                   type="button"
-                  className={styles.back}
+                  className="border-player-input text-player-primary focus-visible:outline-player-primary grid min-h-[48px] min-w-[44px] cursor-pointer place-items-center rounded-[6px] border bg-white focus-visible:outline-2 focus-visible:outline-offset-[3px]"
                   aria-label={
                     step === 'setup'
                       ? 'Back to introduction'
@@ -395,23 +481,24 @@ export default function WelcomeSetup({
                 >
                   <ArrowLeft aria-hidden="true" />
                 </button>
-                <Button
+                <WelcomeActionButton
                   type="submit"
-                  primary
                   disabled={!canContinue || form.isSubmitting}
-                  className={{ root: `${styles.primaryButton} ${styles.grow}` }}
+                  className="flex-1"
                 >
                   {form.isSubmitting
                     ? 'Starting…'
                     : step === 'setup'
                       ? 'Review your bank'
                       : 'Start the game'}
-                </Button>
+                </WelcomeActionButton>
               </>
             )}
           </div>
           {step === 'setup' && !canContinue && (
-            <p className={styles.footerHint}>Choose all three to continue</p>
+            <p className="text-player-muted m-0 mt-[8px] text-center text-[14px]">
+              Choose all three to continue
+            </p>
           )}
         </footer>
       </form>
