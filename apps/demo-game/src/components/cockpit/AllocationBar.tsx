@@ -14,9 +14,11 @@ export const assetLabels = {
 export default function AllocationBar({
   value,
   className,
+  compact = false,
 }: {
   value: Allocation
   className?: string
+  compact?: boolean
 }) {
   return (
     <div
@@ -27,13 +29,14 @@ export default function AllocationBar({
         <div
           key={key}
           className={cn(
-            '@container relative min-w-0 overflow-hidden not-first:shadow-[inset_2px_0_white]',
+            '@container relative min-w-0 overflow-hidden',
+            !compact && 'not-first:shadow-[inset_2px_0_white]',
             assetLabels[key].color
           )}
           data-asset={key}
           style={{ width: `${value[key]}%` }}
         >
-          {value[key] < 20 ? (
+          {compact ? null : value[key] < 20 ? (
             <div className="grid h-full place-items-center px-[8px] text-[13px] [@container(max-width:30px)]:invisible [@container(max-width:56px)]:px-0 [@container(max-width:56px)]:text-[11px]">
               <strong>{value[key]}%</strong>
             </div>

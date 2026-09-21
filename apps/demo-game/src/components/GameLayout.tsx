@@ -26,6 +26,7 @@ import { marketPeriod } from '~/lib/market'
 import { queueRefetch } from '~/lib/queuedRefetch'
 import { avatarNames, cantonNames } from '~/lib/teamIdentity'
 import CompactCountdown from './cockpit/CompactCountdown'
+import HistoryPanel from './history/HistoryPanel'
 import MarketPanel from './market/MarketPanel'
 import { useToast } from './ui/use-toast'
 
@@ -75,6 +76,7 @@ function GameLayout({
     tabs.some((name) => name.toLowerCase() === router.query.tab)
       ? router.query.tab
       : 'cockpit'
+  const detailTab = tab === 'market' || tab === 'history'
   const [markStoryElement] = useMutation(MarkStoryElementDocument, {
     refetchQueries: [ResultDocument],
   })
@@ -262,15 +264,14 @@ function GameLayout({
         <header
           className={cn(
             'border-player-divider flex shrink-0 items-center gap-[12px] border-b px-[16px] py-[10px] min-[601px]:gap-[16px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
-            tab === 'market' &&
+            detailTab &&
               'min-[601px]:gap-[20px] min-[601px]:px-[32px] min-[601px]:py-[24px]'
           )}
         >
           <div
             className={cn(
               'bg-player-progress text-player-primary grid size-[40px] shrink-0 place-items-center rounded-[6px] text-[17px] font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]',
-              tab === 'market' &&
-                'min-[601px]:size-[60px] min-[601px]:text-[24px]'
+              detailTab && 'min-[601px]:size-[60px] min-[601px]:text-[24px]'
             )}
             aria-hidden="true"
           >
@@ -280,11 +281,13 @@ function GameLayout({
             <div
               className={cn(
                 'block text-[18px] leading-[1.15] font-bold [overflow-wrap:anywhere] min-[601px]:text-[22px]',
-                tab === 'market' && 'min-[601px]:text-[28px]'
+                detailTab && 'min-[601px]:text-[28px]'
               )}
             >
-              {tab === 'market' ? (
-                <h1 className="m-0 text-inherit">Market</h1>
+              {detailTab ? (
+                <h1 className="m-0 text-inherit">
+                  {tab === 'history' ? 'History' : 'Market'}
+                </h1>
               ) : (
                 self.name
               )}
@@ -292,10 +295,12 @@ function GameLayout({
             <p
               className={cn(
                 'text-player-muted m-0 text-[14px] min-[601px]:text-[16px]',
-                tab === 'market' && 'min-[601px]:text-[22px]'
+                detailTab && 'min-[601px]:text-[22px]'
               )}
             >
-              {tab === 'market' ? (
+              {tab === 'history' ? (
+                `${self.name} · since quarter 1`
+              ) : tab === 'market' ? (
                 marketActivePeriod ? (
                   `${FIRST_GAME_YEAR + marketActivePeriod.index} · Quarter ${Math.max(0, marketActivePeriod.activeSegmentIx ?? 0) + 1}`
                 ) : (
@@ -315,7 +320,7 @@ function GameLayout({
           <div
             className={cn(
               'shrink-0 [font-family:monospace] text-[25px] font-bold tabular-nums min-[601px]:text-[28px]',
-              tab === 'market' && 'min-[601px]:text-[36px]'
+              detailTab && 'min-[601px]:text-[36px]'
             )}
           >
             {expiresAtDate && Number.isFinite(expiresAtDate.getTime()) ? (
@@ -329,7 +334,7 @@ function GameLayout({
           </div>
         </header>
         <section
-          hidden={tab === 'market'}
+          hidden={detailTab}
           className="border-player-divider shrink-0 border-b px-[16px] py-[14px] min-[601px]:px-[24px] min-[601px]:py-[20px]"
           aria-label="Game progress"
           data-game-status={currentGame.status}
@@ -394,7 +399,16 @@ function GameLayout({
           >
             <MarketPanel data={data} />
           </div>
-          <PlayerTabPanel title="History" hidden={tab !== 'history'} />
+          <div
+            hidden={tab !== 'history'}
+            className={cn(tab !== 'history' && 'hidden')}
+          >
+            <HistoryPanel
+              key={currentGame.id}
+              data={data}
+              active={tab === 'history'}
+            />
+          </div>
           <PlayerTabPanel title="Team" hidden={tab !== 'team'}>
             <PlayerDisplay {...playerInfo} />
             <div className="mt-[24px]">

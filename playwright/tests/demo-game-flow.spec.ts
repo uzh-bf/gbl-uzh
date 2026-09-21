@@ -1468,3 +1468,223 @@ test('Market shows fixed admin reveals to two players during allocation', async 
     await Promise.all(sessions.map(({ context }) => context.close()))
   }
 })
+
+test('History follows settled quarters, filters years and preserves hidden dice', async ({
+  page,
+  browser,
+  baseURL,
+}, testInfo) => {
+  const appBaseURL = requireBaseURL(baseURL)
+  await createGame(page, { name: `History ${Date.now()}`, playerCount: 1 })
+  await addPeriod(page, { segmentCount: '2', index: 0 })
+  await addSegment(page, { periodIndex: 0 })
+  await addSegment(page, { periodIndex: 0 })
+  await addPeriod(page, { segmentCount: '1', index: 1 })
+  await addSegment(page, { periodIndex: 1 })
+  const session = await joinPlayer(
+    browser,
+    appBaseURL,
+    await playerJoinUrl(page, appBaseURL, 0),
+    players[0]
+  )
+  const player = session.page
+  const panel = player.getByTestId('history-panel')
+  const quarters = panel.locator('[data-cy^="history-quarter-"]')
+  const openHistory = () =>
+    player.getByRole('link', { name: 'History', exact: true }).click()
+  try {
+    await advanceGame(page, {
+      action: 'Start Period',
+      expectedStatus: 'PREPARATION',
+    })
+    await advanceGame(page, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    await player
+      .getByRole('spinbutton', { name: 'Savings', exact: true })
+      .fill('50')
+    await player
+      .getByRole('spinbutton', { name: 'Bonds', exact: true })
+      .fill('30')
+    await player
+      .getByRole('spinbutton', { name: 'Stocks', exact: true })
+      .fill('20')
+    await openHistory()
+    await expect(panel).toContainText(
+      'Your history will appear after the first quarter closes.'
+    )
+    await expect(panel.getByTestId('history-value')).toHaveText("10'000.00")
+    await expect(
+      panel.getByRole('button', { name: '2027', exact: true })
+    ).toHaveCount(0)
+    await player.getByRole('link', { name: 'Cockpit', exact: true }).click()
+    await expect(
+      player.getByRole('spinbutton', { name: 'Savings', exact: true })
+    ).toHaveValue('50')
+    await player
+      .getByRole('button', { name: 'Submit allocation', exact: true })
+      .click()
+    await expect(player.getByTestId('allocation-summary')).toBeVisible()
+    await openHistory()
+    await advanceGame(page, {
+      action: 'Segment Results',
+      expectedStatus: 'PAUSED',
+    })
+    await expect(quarters).toHaveCount(1)
+    const expand = panel.getByRole('button', {
+      name: '2026 Quarter 1 monthly details',
+    })
+    await expand.focus()
+    await player.keyboard.press('Enter')
+    await expect(expand).toHaveAttribute('aria-expanded', 'true')
+    const monthly = panel.getByRole('table', {
+      name: '2026 Quarter 1 monthly results',
+    })
+    await expect(
+      monthly.getByText('Not revealed', { exact: true })
+    ).toHaveCount(3)
+    const segmentLink = await page
+      .getByTestId('period-0-segment-0')
+      .locator('a[href*="/admin/dice/"]')
+      .first()
+      .getAttribute('href')
+    if (!segmentLink) throw new Error('Missing quarter dice link')
+    const segmentId = Number(segmentLink.split('/')[3])
+    const reveal = await page.request.post('/api/graphql', {
+      data: {
+        query:
+          'mutation RevealMarketRoll($segmentId:Int!,$rollIndex:Int!){revealMarketRoll(segmentId:$segmentId,rollIndex:$rollIndex){id facts}}',
+        variables: { segmentId, rollIndex: 0 },
+      },
+    })
+    expect(await reveal.json()).not.toHaveProperty('errors')
+    await expect(
+      monthly.getByText('Not revealed', { exact: true })
+    ).toHaveCount(2)
+    await advanceGame(page, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    await expect(quarters).toHaveCount(1)
+    await advanceGame(page, {
+      action: 'Consolidate',
+      expectedStatus: 'CONSOLIDATION',
+    })
+    await expect(quarters).toHaveCount(2)
+    await advanceGame(page, {
+      action: 'Period Results',
+      expectedStatus: 'RESULTS',
+    })
+    await expect(quarters).toHaveCount(2)
+    await expect(
+      panel.getByRole('button', { name: '2027', exact: true })
+    ).toHaveCount(0)
+    await advanceGame(page, {
+      action: 'Next Period',
+      expectedStatus: 'PREPARATION',
+    })
+    await expect(
+      panel.getByRole('button', { name: '2027', exact: true })
+    ).toBeVisible()
+    // Selection survives refetches and tabs, while a fresh page defaults to the latest started year.
+    await expect(
+      panel.getByRole('button', { name: '2026', exact: true })
+    ).toHaveAttribute('aria-pressed', 'true')
+    await player.reload()
+    await expect(
+      panel.getByRole('button', { name: '2027', exact: true })
+    ).toHaveAttribute('aria-pressed', 'true')
+    await expect(panel).toContainText('No completed quarters in 2027 yet.')
+    await advanceGame(page, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    await expect(quarters).toHaveCount(0)
+    await advanceGame(page, {
+      action: 'Consolidate',
+      expectedStatus: 'CONSOLIDATION',
+    })
+    await expect(quarters).toHaveCount(1)
+    await advanceGame(page, {
+      action: 'Period Results',
+      expectedStatus: 'RESULTS',
+    })
+    await expect(quarters).toHaveCount(1)
+    const value = await panel.getByTestId('history-value').innerText()
+    await panel.getByRole('button', { name: '2026', exact: true }).click()
+    await expect(quarters).toHaveCount(2)
+    await expect(panel.getByTestId('history-value')).toHaveText(value)
+    await expect(
+      panel
+        .getByRole('list', { name: 'Quarterly portfolio values' })
+        .getByRole('listitem')
+    ).toHaveCount(3)
+    await player.getByRole('link', { name: 'Market', exact: true }).click()
+    await openHistory()
+    await expect(
+      panel.getByRole('button', { name: '2026', exact: true })
+    ).toHaveAttribute('aria-pressed', 'true')
+    for (const width of [784, 390, 320]) {
+      await player.setViewportSize({
+        width,
+        height: width === 784 ? 1692 : 844,
+      })
+      await expect
+        .poll(() =>
+          player.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth
+          )
+        )
+        .toBe(true)
+      const breakdown = panel.getByRole('region', {
+        name: 'Quarterly results',
+        exact: true,
+      })
+      await breakdown.evaluate((element) => {
+        element.scrollLeft = 0
+      })
+      await player.getByRole('main').evaluate((element) => {
+        element.scrollTop = 0
+      })
+      await expect(
+        player.getByRole('link', { name: 'Team', exact: true })
+      ).toBeInViewport()
+      await player.screenshot({
+        path: testInfo.outputPath(`history-${width}.png`),
+      })
+      await panel
+        .getByRole('button', { name: '2026 Quarter 1 monthly details' })
+        .click()
+      await panel
+        .getByRole('button', { name: '2026 Quarter 1 monthly details' })
+        .evaluate((element) =>
+          element.scrollIntoView({ block: 'center', inline: 'nearest' })
+        )
+      await breakdown.evaluate((element) => {
+        element.scrollLeft = 0
+      })
+      await player.screenshot({
+        path: testInfo.outputPath(`history-${width}-expanded.png`),
+      })
+      if (width < 600) {
+        await breakdown.focus()
+        await player.keyboard.press('ArrowRight')
+        await expect
+          .poll(() => breakdown.evaluate((element) => element.scrollLeft))
+          .toBeGreaterThan(0)
+        await breakdown.evaluate((element) => {
+          element.scrollLeft = element.scrollWidth
+        })
+        await player.screenshot({
+          path: testInfo.outputPath(`history-${width}-results.png`),
+        })
+      }
+      await panel
+        .getByRole('button', { name: '2026 Quarter 1 monthly details' })
+        .click()
+    }
+  } finally {
+    await session.context.close()
+  }
+})

@@ -7,7 +7,7 @@ tags:
   - design-system
   - tailwind
   - components
-timestamp: '2026-09-17T00:00:00Z'
+timestamp: '2026-09-21T00:00:00Z'
 ---
 
 # UI Building Blocks
@@ -86,7 +86,7 @@ Copy the demo game's setup (`apps/demo-game/src/globals.css`, `postcss.config.js
 
 The demo-game cockpit and welcome flow use colocated Tailwind utilities, with shared player colors and font tokens in `apps/demo-game/src/globals.css`. Primary actions use the UZH primary token; Savings, Bonds, and Stocks use named asset tokens shared with the welcome screen. The welcome screen's portaled pickers apply their font, size, line height, and colors directly to dialog content. Welcome-local controls in `apps/demo-game/src/components/welcome/WelcomeControls.tsx` reuse design-system buttons with 48px minimum heights and forward native props and refs; text inputs and Edit/Cancel buttons share utility classes. Welcome and cockpit retain separate action dimensions, while sharing palette tokens, including welcome's primary hover shade.
 
-Reuse structure and styles through app-local components: `PlayerActionButton` provides primary/secondary actions with shared responsive dimensions; `AllocationNotice` provides success/pending/informational notices; `AllocationRow` shares asset identity and amounts between editing and saved summaries. `AllocationBar` owns proportional sections and container-query label visibility. These components live in `apps/demo-game/src/components/cockpit/`; promote them to the shared UI package only when another game needs them.
+Reuse structure and styles through app-local components: `PlayerActionButton` provides primary/secondary actions with shared responsive dimensions; `AllocationNotice` provides success/pending/informational notices; `AllocationRow` shares asset identity and amounts between editing and saved summaries. `AllocationBar` owns proportional sections and container-query label visibility; its optional `compact` presentation suppresses labels and internal separators for History table mixes, whose wrappers provide accessible percentages. These components live in `apps/demo-game/src/components/cockpit/`; promote them to the shared UI package only when another game needs them.
 
 Preserve the current pixel dimensions and explicit viewport thresholds when adapting these designs: the app root is **14px**, so default rem-based Tailwind spacing is not a pixel-equivalent replacement. Dynamic widths and slider positions remain inline styles. Custom CSS in the converted cockpit is limited to the WebKit number-input stepper reset in the components layer; ordinary layout, responsive rules, and interaction states belong in utilities. Supply control overrides through the design system's class slots rather than CSS Module selectors and blanket `!important` rules.
 

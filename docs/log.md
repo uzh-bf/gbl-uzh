@@ -1,5 +1,9 @@
 # Log
 
+## 2026-09-21
+
+- **Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — implement the History tab with cumulative portfolio values, year-filtered expandable quarters, lifecycle-aware settlement, instructor-controlled dice visibility, and responsive browser coverage.
+
 ## 2026-09-17
 
 - **Update**: Market tab — restored scenario-based probability charts in the mobile design, added persisted admin monthly dice reveals and player refresh, and documented the distinction between current outlook and historical returns. Updated developing-a-game, UI components, API, and lifecycle guidance.

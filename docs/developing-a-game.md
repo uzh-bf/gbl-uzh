@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: '2026-09-17T00:00:00Z'
+timestamp: '2026-09-21T00:00:00Z'
 ---
 
 # Developing a Game
@@ -123,7 +123,7 @@ The cockpit pattern (from `apps/demo-game/src/pages/play/cockpit.tsx`):
 
 1. The cockpit page fetches **one aggregate query** and passes its data/refetch function to the `GameLayout` wrapper (player result + previous results + current game with active period/segment + attached content + self).
 2. `GameLayout` subscribes to global events and, on `PERIOD_ACTIVATED` / `SEGMENT_ACTIVATED` / `COUNTDOWN_UPDATED`, **refetches that query** — events are a poke, never a data source.
-3. The demo-game layout renders a compact team header, live countdown, active-period/segment progress, and bottom navigation. `/play/cockpit?tab=cockpit|market|history|team` selects the tab without discarding the allocation draft. Ready stays in Cockpit; Team holds the profile and learning activities. Market shows the active scenario’s outlook and the latest admin-revealed monthly result; History remains a heading-only placeholder. Blocking story popups remain global.
+3. The demo-game layout renders a compact team header, live countdown, active-period/segment progress, and bottom navigation. `/play/cockpit?tab=cockpit|market|history|team` selects the tab without discarding the allocation draft. Ready stays in Cockpit; Team holds the profile and learning activities. Market shows the active scenario’s outlook and the latest admin-revealed monthly result; History shows cumulative portfolio values and expandable quarterly results, with a year selector that filters only the breakdown table. Blocking story popups remain global.
 4. The page body is a `switch (game.status)`: decision form under `RUNNING`, read-only results under `PAUSED`/`CONSOLIDATION`, period report under `RESULTS`, placeholders otherwise ([game-lifecycle.md](game-lifecycle.md) lists the expected view per status).
 
 The RUNNING allocation flow follows `apps/demo-game/design/cockpit.png`, `cockpit_after_submission.png`, and `cockpit_ready.png`:
@@ -146,6 +146,14 @@ The RUNNING allocation flow follows `apps/demo-game/design/cockpit.png`, `cockpi
 > **Prisma enum trap:** `@prisma/client` exports runtime enum objects (`GameStatus`, etc.) that Next.js strips from client bundles. Code like `DB.GameStatus.RESULTS` will be `undefined` in the browser. In the cockpit `switch` and any shared utility reachable from the frontend, compare against string literals (`'RUNNING'`, `'PAUSED'`, etc.) or the GraphQL-generated enum from `src/graphql/generated/ops.ts`. Use `import type` for Prisma imports in shared files.
 
 Your game-specific work is almost entirely: the decision form (validate with yup: same constraints as your `Actions.apply`), the results/report visualizations (the demo game uses recharts), and the admin authoring forms for your period/segment facts.
+
+### Demo-game History tab
+
+`apps/demo-game/src/components/history/HistoryPanel.tsx:HistoryPanel` follows the player History reference: shared header/countdown, year pills, cumulative CHF value and gain, quarterly portfolio bars, and a year-filtered breakdown. The latest started year is selected on first load; selection persists across tabs and refetches. Future years stay hidden. Each quarter expands into monthly asset returns, portfolio CHF changes, and dice totals. Dice remain “Not revealed” until the instructor publishes that month, even when the quarter has closed; settled financial results remain visible.
+
+`apps/demo-game/src/lib/history.ts:buildHistory` adapts the existing aggregate result query without another API. It uses `PERIOD_END` records and active-quarter lifecycle state to identify completed `SEGMENT_END` records: the latter also exist during allocation with carried-forward facts. It handles an upcoming active period during between-year `RESULTS` and a disconnected final-period pointer. Portfolio amounts and monthly changes come from persisted `assetsWithReturns`; quarterly bond/stock rates compound the monthly market rates, not allocation-dependent asset changes. Missing values render as dashes; before the first completed quarter, known initial capital appears with an empty state. Chart and table scroll independently on narrow screens.
+
+The History lifecycle browser test covers two years, quarter completion, delayed dice reveals, year filtering, selection and allocation-draft retention, final results, keyboard expansion, and screenshots at 784px, 390px, and 320px.
 
 ## Verification loop
 
