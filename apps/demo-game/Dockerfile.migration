@@ -1,0 +1,47 @@
+FROM node:24.16-alpine AS dependencies
+
+RUN apk add --no-cache libc6-compat openssl \
+  && npm install -g pnpm@11.6.0
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+# This image runs migrations only; prevent dependency installation from
+# generating the application client in the disposable dependency stage.
+ENV PRISMA_SKIP_POSTINSTALL_GENERATE=true
+RUN pnpm config set store-dir $PNPM_HOME/.pnpm-store
+
+WORKDIR /app
+
+# Keep this install pinned to the repository lockfile. Copying the complete
+# workspace gives pnpm every manifest and lifecycle-script input it needs.
+COPY . .
+
+RUN --mount=type=cache,id=pnpm,target=/pnpm/.pnpm-store \
+  pnpm install --frozen-lockfile --filter @gbl-uzh/demo-game...
+
+
+FROM node:24.16-alpine AS runner
+
+RUN apk add --no-cache libc6-compat openssl \
+  && addgroup --system --gid 1001 prisma \
+  && adduser --system --uid 1001 --ingroup prisma prisma
+
+WORKDIR /app/apps/demo-game
+
+# The final-stage source is restricted to Prisma's locked dependency tree,
+# config, and checked-in schema/migrations. It deliberately excludes generated
+# clients and seed code; later Helm jobs own their seed SQL execution.
+COPY --from=dependencies --chown=prisma:prisma /app/node_modules /app/node_modules
+COPY --from=dependencies --chown=prisma:prisma /app/apps/demo-game/node_modules ./node_modules
+COPY --chown=prisma:prisma apps/demo-game/package.json ./package.json
+COPY --chown=prisma:prisma apps/demo-game/prisma.config.ts ./prisma.config.ts
+COPY --chown=prisma:prisma apps/demo-game/prisma/schema ./prisma/schema
+
+ENV NODE_ENV=production
+
+USER prisma
+
+# Helm hooks inherit this working directory and can override CMD with:
+# ["db", "execute", "--config=prisma.config.ts", "--stdin"]
+ENTRYPOINT ["./node_modules/.bin/prisma"]
+CMD ["migrate", "deploy", "--config=prisma.config.ts"]
