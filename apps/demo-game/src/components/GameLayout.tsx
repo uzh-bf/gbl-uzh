@@ -22,8 +22,11 @@ import {
   ResultDocument,
   type ResultQuery,
 } from 'src/graphql/generated/ops'
+import { marketPeriod } from '~/lib/market'
+import { queueRefetch } from '~/lib/queuedRefetch'
 import { avatarNames, cantonNames } from '~/lib/teamIdentity'
 import CompactCountdown from './cockpit/CompactCountdown'
+import MarketPanel from './market/MarketPanel'
 import { useToast } from './ui/use-toast'
 
 const tabs = ['Cockpit', 'Market', 'History', 'Team']
@@ -107,18 +110,47 @@ function GameLayout({
   })
 
   const currentGameId = parseInt(currentGame?.id)
+  const queuedRefetch = useMemo(
+    () => queueRefetch(refetchResult),
+    [refetchResult]
+  )
 
   useSubscription(GlobalEventsDocument, {
     skip: !currentGameId,
     onData: ({ data: subData }) => {
       if (subData?.data?.eventsGlobal) {
         const event = subData.data.eventsGlobal
-        if (shouldRefetchGameResult(event, currentGameId)) {
-          refetchResult()
+        if (
+          shouldRefetchGameResult(event, currentGameId) ||
+          (event.type === 'MARKET_ROLL_REVEALED' &&
+            event.facts?.gameId === currentGameId)
+        ) {
+          void queuedRefetch().catch(() => {})
         }
       }
     },
   })
+
+  useEffect(() => {
+    const refresh = () => {
+      void queuedRefetch().catch(() => {
+        /* Retry on the next focus, reconnect, or refresh. */
+      })
+    }
+    const timer =
+      tab === 'market'
+        ? window.setInterval(() => {
+            if (document.visibilityState === 'visible') refresh()
+          }, 30_000)
+        : undefined
+    window.addEventListener('focus', refresh)
+    window.addEventListener('online', refresh)
+    return () => {
+      window.clearInterval(timer)
+      window.removeEventListener('focus', refresh)
+      window.removeEventListener('online', refresh)
+    }
+  }, [queuedRefetch, tab])
 
   const strExpiresAt = activeSegment?.countdownExpiresAt as string | null
   const countdownDurationMs = activeSegment?.countdownDurationMs as
@@ -163,6 +195,7 @@ function GameLayout({
   const segmentCount =
     currentGame.periods.find((period) => period.id === activePeriod?.id)
       ?.segmentCount ?? 0
+  const marketActivePeriod = marketPeriod(currentGame)
   const running = currentGame.status === 'RUNNING'
   const done =
     segmentIndex == null
@@ -226,19 +259,50 @@ function GameLayout({
         }}
       />
       <div className="font-player text-player-text min-[785px]:border-player-border mx-auto flex h-dvh w-full max-w-[784px] flex-col bg-white text-[16px] min-[785px]:border-x [&_*]:box-border">
-        <header className="border-player-divider flex shrink-0 items-center gap-[12px] border-b px-[16px] py-[10px] min-[601px]:gap-[16px] min-[601px]:px-[24px] min-[601px]:py-[16px]">
+        <header
+          className={cn(
+            'border-player-divider flex shrink-0 items-center gap-[12px] border-b px-[16px] py-[10px] min-[601px]:gap-[16px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
+            tab === 'market' &&
+              'min-[601px]:gap-[20px] min-[601px]:px-[32px] min-[601px]:py-[24px]'
+          )}
+        >
           <div
-            className="bg-player-progress text-player-primary grid size-[40px] shrink-0 place-items-center rounded-[6px] text-[17px] font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]"
+            className={cn(
+              'bg-player-progress text-player-primary grid size-[40px] shrink-0 place-items-center rounded-[6px] text-[17px] font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]',
+              tab === 'market' &&
+                'min-[601px]:size-[60px] min-[601px]:text-[24px]'
+            )}
             aria-hidden="true"
           >
             {initials}
           </div>
           <div className="min-w-0 flex-1">
-            <strong className="block text-[18px] leading-[1.15] font-bold [overflow-wrap:anywhere] min-[601px]:text-[22px]">
-              {self.name}
-            </strong>
-            <p className="text-player-muted m-0 text-[14px] min-[601px]:text-[16px]">
-              {allocationView === 'submitted' || allocationView === 'ready' ? (
+            <div
+              className={cn(
+                'block text-[18px] leading-[1.15] font-bold [overflow-wrap:anywhere] min-[601px]:text-[22px]',
+                tab === 'market' && 'min-[601px]:text-[28px]'
+              )}
+            >
+              {tab === 'market' ? (
+                <h1 className="m-0 text-inherit">Market</h1>
+              ) : (
+                self.name
+              )}
+            </div>
+            <p
+              className={cn(
+                'text-player-muted m-0 text-[14px] min-[601px]:text-[16px]',
+                tab === 'market' && 'min-[601px]:text-[22px]'
+              )}
+            >
+              {tab === 'market' ? (
+                marketActivePeriod ? (
+                  `${FIRST_GAME_YEAR + marketActivePeriod.index} · Quarter ${Math.max(0, marketActivePeriod.activeSegmentIx ?? 0) + 1}`
+                ) : (
+                  'Waiting for the game'
+                )
+              ) : allocationView === 'submitted' ||
+                allocationView === 'ready' ? (
                 `${FIRST_GAME_YEAR + (activePeriod?.index ?? 0)} · Quarter ${(segmentIndex ?? 0) + 1}`
               ) : (
                 <>
@@ -248,7 +312,12 @@ function GameLayout({
               )}
             </p>
           </div>
-          <div className="shrink-0 [font-family:monospace] text-[25px] font-bold tabular-nums min-[601px]:text-[28px]">
+          <div
+            className={cn(
+              'shrink-0 [font-family:monospace] text-[25px] font-bold tabular-nums min-[601px]:text-[28px]',
+              tab === 'market' && 'min-[601px]:text-[36px]'
+            )}
+          >
             {expiresAtDate && Number.isFinite(expiresAtDate.getTime()) ? (
               <CompactCountdown
                 expiresAt={expiresAtDate}
@@ -260,6 +329,7 @@ function GameLayout({
           </div>
         </header>
         <section
+          hidden={tab === 'market'}
           className="border-player-divider shrink-0 border-b px-[16px] py-[14px] min-[601px]:px-[24px] min-[601px]:py-[20px]"
           aria-label="Game progress"
           data-game-status={currentGame.status}
@@ -318,7 +388,12 @@ function GameLayout({
           >
             {children}
           </div>
-          <PlayerTabPanel title="Market" hidden={tab !== 'market'} />
+          <div
+            hidden={tab !== 'market'}
+            className={cn(tab !== 'market' && 'hidden')}
+          >
+            <MarketPanel data={data} />
+          </div>
           <PlayerTabPanel title="History" hidden={tab !== 'history'} />
           <PlayerTabPanel title="Team" hidden={tab !== 'team'}>
             <PlayerDisplay {...playerInfo} />

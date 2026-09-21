@@ -152,6 +152,19 @@ export interface NexusGenObjects {
     solution?: string | null; // String
     state?: string | null; // String
   }
+  MarketDice: { // root type
+    canReveal: boolean; // Boolean!
+    facts: NexusGenScalars['JSONObject']; // JSONObject!
+    gameId: number; // Int!
+    id: number; // Int!
+    index: number; // Int!
+    periodFacts: NexusGenScalars['JSONObject']; // JSONObject!
+    periodIx: number; // Int!
+  }
+  MarketRollReveal: { // root type
+    facts: NexusGenScalars['JSONObject']; // JSONObject!
+    id: number; // Int!
+  }
   Mutation: {};
   Period: { // root type
     actions: NexusGenRootTypes['PlayerAction'][]; // [PlayerAction!]!
@@ -326,6 +339,19 @@ export interface NexusGenFieldTypes {
     solution: string | null; // String
     state: string | null; // String
   }
+  MarketDice: { // field return type
+    canReveal: boolean; // Boolean!
+    facts: NexusGenScalars['JSONObject']; // JSONObject!
+    gameId: number; // Int!
+    id: number; // Int!
+    index: number; // Int!
+    periodFacts: NexusGenScalars['JSONObject']; // JSONObject!
+    periodIx: number; // Int!
+  }
+  MarketRollReveal: { // field return type
+    facts: NexusGenScalars['JSONObject']; // JSONObject!
+    id: number; // Int!
+  }
   Mutation: { // field return type
     activateNextPeriod: NexusGenRootTypes['Game'] | null; // Game
     activateNextSegment: NexusGenRootTypes['Game'] | null; // Game
@@ -338,6 +364,7 @@ export interface NexusGenFieldTypes {
     logoutAsTeam: boolean | null; // Boolean
     markStoryElement: NexusGenRootTypes['Player'] | null; // Player
     performAction: NexusGenRootTypes['PlayerResult'] | null; // PlayerResult
+    revealMarketRoll: NexusGenRootTypes['MarketRollReveal'] | null; // MarketRollReveal
     saveConsolidationDecision: NexusGenRootTypes['PlayerDecision'] | null; // PlayerDecision
     toggleSwitch: boolean | null; // Boolean
     updatePlayerData: NexusGenRootTypes['Player'] | null; // Player
@@ -434,6 +461,7 @@ export interface NexusGenFieldTypes {
     games: NexusGenRootTypes['Game'][] | null; // [Game!]
     learningElement: NexusGenRootTypes['LearningElementState'] | null; // LearningElementState
     learningElements: NexusGenRootTypes['LearningElement'][] | null; // [LearningElement!]
+    marketDice: NexusGenRootTypes['MarketDice'] | null; // MarketDice
     pastResults: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
     questAchievements: NexusGenRootTypes['Achievement'][] | null; // [Achievement!]
     result: NexusGenRootTypes['PlayerState'] | null; // PlayerState
@@ -522,6 +550,19 @@ export interface NexusGenFieldTypeNames {
     solution: 'String'
     state: 'String'
   }
+  MarketDice: { // field return type name
+    canReveal: 'Boolean'
+    facts: 'JSONObject'
+    gameId: 'Int'
+    id: 'Int'
+    index: 'Int'
+    periodFacts: 'JSONObject'
+    periodIx: 'Int'
+  }
+  MarketRollReveal: { // field return type name
+    facts: 'JSONObject'
+    id: 'Int'
+  }
   Mutation: { // field return type name
     activateNextPeriod: 'Game'
     activateNextSegment: 'Game'
@@ -534,6 +575,7 @@ export interface NexusGenFieldTypeNames {
     logoutAsTeam: 'Boolean'
     markStoryElement: 'Player'
     performAction: 'PlayerResult'
+    revealMarketRoll: 'MarketRollReveal'
     saveConsolidationDecision: 'PlayerDecision'
     toggleSwitch: 'Boolean'
     updatePlayerData: 'Player'
@@ -630,6 +672,7 @@ export interface NexusGenFieldTypeNames {
     games: 'Game'
     learningElement: 'LearningElementState'
     learningElements: 'LearningElement'
+    marketDice: 'MarketDice'
     pastResults: 'PlayerResult'
     questAchievements: 'Achievement'
     result: 'PlayerState'
@@ -695,6 +738,10 @@ export interface NexusGenArgTypes {
       payload: string; // String!
       type: string; // String!
     }
+    revealMarketRoll: { // args
+      rollIndex: number; // Int!
+      segmentId: number; // Int!
+    }
     saveConsolidationDecision: { // args
       payload: string; // String!
     }
@@ -716,6 +763,9 @@ export interface NexusGenArgTypes {
     }
     learningElement: { // args
       id: string; // ID!
+    }
+    marketDice: { // args
+      segmentId: number; // Int!
     }
     specificResults: { // args
       gameId: number; // Int!

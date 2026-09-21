@@ -129,6 +129,23 @@ export type LearningElementState = {
   state?: Maybe<Scalars['String']['output']>;
 };
 
+export type MarketDice = {
+  __typename?: 'MarketDice';
+  canReveal: Scalars['Boolean']['output'];
+  facts: Scalars['JSONObject']['output'];
+  gameId: Scalars['Int']['output'];
+  id: Scalars['Int']['output'];
+  index: Scalars['Int']['output'];
+  periodFacts: Scalars['JSONObject']['output'];
+  periodIx: Scalars['Int']['output'];
+};
+
+export type MarketRollReveal = {
+  __typename?: 'MarketRollReveal';
+  facts: Scalars['JSONObject']['output'];
+  id: Scalars['Int']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   activateNextPeriod?: Maybe<Game>;
@@ -142,6 +159,7 @@ export type Mutation = {
   logoutAsTeam?: Maybe<Scalars['Boolean']['output']>;
   markStoryElement?: Maybe<Player>;
   performAction?: Maybe<PlayerResult>;
+  revealMarketRoll?: Maybe<MarketRollReveal>;
   saveConsolidationDecision?: Maybe<PlayerDecision>;
   toggleSwitch?: Maybe<Scalars['Boolean']['output']>;
   updatePlayerData?: Maybe<Player>;
@@ -207,6 +225,12 @@ export type MutationMarkStoryElementArgs = {
 export type MutationPerformActionArgs = {
   payload: Scalars['String']['input'];
   type: Scalars['String']['input'];
+};
+
+
+export type MutationRevealMarketRollArgs = {
+  rollIndex: Scalars['Int']['input'];
+  segmentId: Scalars['Int']['input'];
 };
 
 
@@ -371,6 +395,7 @@ export type Query = {
   games?: Maybe<Array<Game>>;
   learningElement?: Maybe<LearningElementState>;
   learningElements?: Maybe<Array<LearningElement>>;
+  marketDice?: Maybe<MarketDice>;
   pastResults?: Maybe<Array<PlayerResult>>;
   questAchievements?: Maybe<Array<Achievement>>;
   result?: Maybe<PlayerState>;
@@ -388,6 +413,11 @@ export type QueryGameArgs = {
 
 export type QueryLearningElementArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryMarketDiceArgs = {
+  segmentId: Scalars['Int']['input'];
 };
 
 
@@ -633,6 +663,21 @@ export type UserEventsSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 export type UserEventsSubscription = { __typename?: 'Subscription', eventsUser?: Array<{ __typename?: 'Event', type?: string | null }> | null };
 
+export type MarketDiceQueryVariables = Exact<{
+  segmentId: Scalars['Int']['input'];
+}>;
+
+
+export type MarketDiceQuery = { __typename?: 'Query', marketDice?: { __typename?: 'MarketDice', id: number, gameId: number, periodIx: number, index: number, facts: any, periodFacts: any, canReveal: boolean } | null };
+
+export type RevealMarketRollMutationVariables = Exact<{
+  segmentId: Scalars['Int']['input'];
+  rollIndex: Scalars['Int']['input'];
+}>;
+
+
+export type RevealMarketRollMutation = { __typename?: 'Mutation', revealMarketRoll?: { __typename?: 'MarketRollReveal', id: number, facts: any } | null };
+
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -723,6 +768,8 @@ export type ResolversTypes = {
   LearningElement: ResolverTypeWrapper<LearningElement>;
   LearningElementAttempt: ResolverTypeWrapper<LearningElementAttempt>;
   LearningElementState: ResolverTypeWrapper<LearningElementState>;
+  MarketDice: ResolverTypeWrapper<MarketDice>;
+  MarketRollReveal: ResolverTypeWrapper<MarketRollReveal>;
   Mutation: ResolverTypeWrapper<{}>;
   Period: ResolverTypeWrapper<Period>;
   PeriodFactsInput: PeriodFactsInput;
@@ -763,6 +810,8 @@ export type ResolversParentTypes = {
   LearningElement: LearningElement;
   LearningElementAttempt: LearningElementAttempt;
   LearningElementState: LearningElementState;
+  MarketDice: MarketDice;
+  MarketRollReveal: MarketRollReveal;
   Mutation: {};
   Period: Period;
   PeriodFactsInput: PeriodFactsInput;
@@ -874,6 +923,23 @@ export type LearningElementStateResolvers<ContextType = any, ParentType extends 
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type MarketDiceResolvers<ContextType = any, ParentType extends ResolversParentTypes['MarketDice'] = ResolversParentTypes['MarketDice']> = {
+  canReveal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  facts?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
+  gameId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  index?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  periodFacts?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
+  periodIx?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MarketRollRevealResolvers<ContextType = any, ParentType extends ResolversParentTypes['MarketRollReveal'] = ResolversParentTypes['MarketRollReveal']> = {
+  facts?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   activateNextPeriod?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<MutationActivateNextPeriodArgs, 'gameId'>>;
   activateNextSegment?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<MutationActivateNextSegmentArgs, 'gameId'>>;
@@ -886,6 +952,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   logoutAsTeam?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   markStoryElement?: Resolver<Maybe<ResolversTypes['Player']>, ParentType, ContextType, RequireFields<MutationMarkStoryElementArgs, 'elementId'>>;
   performAction?: Resolver<Maybe<ResolversTypes['PlayerResult']>, ParentType, ContextType, RequireFields<MutationPerformActionArgs, 'payload' | 'type'>>;
+  revealMarketRoll?: Resolver<Maybe<ResolversTypes['MarketRollReveal']>, ParentType, ContextType, RequireFields<MutationRevealMarketRollArgs, 'rollIndex' | 'segmentId'>>;
   saveConsolidationDecision?: Resolver<Maybe<ResolversTypes['PlayerDecision']>, ParentType, ContextType, RequireFields<MutationSaveConsolidationDecisionArgs, 'payload'>>;
   toggleSwitch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationToggleSwitchArgs, 'gameId' | 'toggle'>>;
   updatePlayerData?: Resolver<Maybe<ResolversTypes['Player']>, ParentType, ContextType, Partial<MutationUpdatePlayerDataArgs>>;
@@ -999,6 +1066,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   games?: Resolver<Maybe<Array<ResolversTypes['Game']>>, ParentType, ContextType>;
   learningElement?: Resolver<Maybe<ResolversTypes['LearningElementState']>, ParentType, ContextType, RequireFields<QueryLearningElementArgs, 'id'>>;
   learningElements?: Resolver<Maybe<Array<ResolversTypes['LearningElement']>>, ParentType, ContextType>;
+  marketDice?: Resolver<Maybe<ResolversTypes['MarketDice']>, ParentType, ContextType, RequireFields<QueryMarketDiceArgs, 'segmentId'>>;
   pastResults?: Resolver<Maybe<Array<ResolversTypes['PlayerResult']>>, ParentType, ContextType>;
   questAchievements?: Resolver<Maybe<Array<ResolversTypes['Achievement']>>, ParentType, ContextType>;
   result?: Resolver<Maybe<ResolversTypes['PlayerState']>, ParentType, ContextType>;
@@ -1035,6 +1103,8 @@ export type Resolvers<ContextType = any> = {
   LearningElement?: LearningElementResolvers<ContextType>;
   LearningElementAttempt?: LearningElementAttemptResolvers<ContextType>;
   LearningElementState?: LearningElementStateResolvers<ContextType>;
+  MarketDice?: MarketDiceResolvers<ContextType>;
+  MarketRollReveal?: MarketRollRevealResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Period?: PeriodResolvers<ContextType>;
   PeriodSegment?: PeriodSegmentResolvers<ContextType>;
@@ -1087,6 +1157,8 @@ export const SpecificResultsDocument = {"kind":"Document","definitions":[{"kind"
 export const StoryElementsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"StoryElements"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"storyElements"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"StoryElementData"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"StoryElementData"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"StoryElement"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"contentRole"}}]}}]} as unknown as DocumentNode<StoryElementsQuery, StoryElementsQueryVariables>;
 export const GlobalEventsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"GlobalEvents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"eventsGlobal"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"sub"}},{"kind":"Field","name":{"kind":"Name","value":"facts"}}]}}]}}]} as unknown as DocumentNode<GlobalEventsSubscription, GlobalEventsSubscriptionVariables>;
 export const UserEventsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"UserEvents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"eventsUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}}]}}]}}]} as unknown as DocumentNode<UserEventsSubscription, UserEventsSubscriptionVariables>;
+export const MarketDiceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"MarketDice"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"segmentId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"marketDice"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"segmentId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"segmentId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"gameId"}},{"kind":"Field","name":{"kind":"Name","value":"periodIx"}},{"kind":"Field","name":{"kind":"Name","value":"index"}},{"kind":"Field","name":{"kind":"Name","value":"facts"}},{"kind":"Field","name":{"kind":"Name","value":"periodFacts"}},{"kind":"Field","name":{"kind":"Name","value":"canReveal"}}]}}]}}]} as unknown as DocumentNode<MarketDiceQuery, MarketDiceQueryVariables>;
+export const RevealMarketRollDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RevealMarketRoll"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"segmentId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"rollIndex"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"revealMarketRoll"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"segmentId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"segmentId"}}},{"kind":"Argument","name":{"kind":"Name","value":"rollIndex"},"value":{"kind":"Variable","name":{"kind":"Name","value":"rollIndex"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"facts"}}]}}]}}]} as unknown as DocumentNode<RevealMarketRollMutation, RevealMarketRollMutationVariables>;
 
       export interface PossibleTypesResultData {
         possibleTypes: {

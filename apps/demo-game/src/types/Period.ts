@@ -83,13 +83,18 @@ export const PeriodFactsInput = inputObjectType({
 //   })
 // }
 
-export const PeriodSegmentFactsSchema = yup.object({})
+export const PeriodSegmentFactsSchema = yup.object({
+  revealedRollIndices: yup
+    .array()
+    .of(yup.number().integer().min(0).required())
+    .optional(),
+})
 
 export interface PeriodSegmentFacts extends yup.InferType<
   typeof PeriodSegmentFactsSchema
 > {
   returns: { bank: number; bonds: number; stocks: number }[]
-  diceRolls: { bonds: number; stocks: number }[]
+  diceRolls: { shared: number; bonds: number; stocks: number }[]
 }
 
 export const PeriodSegmentFactsInput = inputObjectType({

@@ -112,13 +112,19 @@ async function createGame(
 
 async function addPeriod(
   page: Page,
-  { segmentCount, index }: { segmentCount: string; index: number }
+  {
+    segmentCount,
+    index,
+    scenario,
+  }: { segmentCount: string; index: number; scenario?: Record<string, string> }
 ) {
   await page.getByRole('button', { name: 'Add period' }).click()
   const dialog = page.getByRole('dialog', { name: 'Add Period' })
   await dialog
     .getByRole('spinbutton', { name: 'Number of segments' })
     .fill(segmentCount)
+  for (const [key, value] of Object.entries(scenario ?? {}))
+    await input(dialog, key).fill(value)
   await dialog.getByRole('button', { name: 'Submit' }).click()
   await expect(page.getByTestId(`period-${index}`)).toBeVisible()
 }
@@ -1189,4 +1195,276 @@ test('trading actions submit one validated modifier and reset after success', as
       { volume: 3, modifier: -1 },
     ])
   await expect(volume).toHaveValue('0')
+})
+
+test('Market shows fixed admin reveals to two players during allocation', async ({
+  page,
+  browser,
+  baseURL,
+}, testInfo) => {
+  const appBaseURL = requireBaseURL(baseURL)
+  await createGame(page, {
+    name: `Market reveals ${Date.now()}`,
+    playerCount: 2,
+  })
+  await addPeriod(page, { segmentCount: '2', index: 0 })
+  await addSegment(page, { periodIndex: 0 })
+  await addSegment(page, { periodIndex: 0 })
+  const sessions = await joinPlayers(
+    browser,
+    appBaseURL,
+    players.slice(0, 2),
+    await assertUniqueJoinUrls(page, appBaseURL, 2)
+  )
+  let dicePage: Page | undefined
+  const revealQuery =
+    'mutation RevealMarketRoll($segmentId:Int!,$rollIndex:Int!){revealMarketRoll(segmentId:$segmentId,rollIndex:$rollIndex){id facts}}'
+  try {
+    await advanceGame(page, {
+      action: 'Start Period',
+      expectedStatus: 'PREPARATION',
+    })
+    await advanceGame(page, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    const player = sessions[0].page
+    await player
+      .getByRole('spinbutton', { name: 'Savings', exact: true })
+      .fill('50')
+    await player
+      .getByRole('spinbutton', { name: 'Bonds', exact: true })
+      .fill('30')
+    await player
+      .getByRole('spinbutton', { name: 'Stocks', exact: true })
+      .fill('20')
+    for (const session of sessions) {
+      await session.page
+        .getByRole('link', { name: 'Market', exact: true })
+        .click()
+      await expect(session.page.getByTestId('market-comparison')).toHaveCount(0)
+      await expect(
+        session.page
+          .getByTestId('market-panel')
+          .locator('[data-highlighted="true"]')
+      ).toHaveCount(0)
+    }
+    const link = page
+      .getByTestId('period-0-segment-0')
+      .locator('a[href*="/admin/dice/"]')
+    const segmentId = Number((await link.getAttribute('href'))!.split('/')[3])
+    const query =
+      'query MarketDice($segmentId:Int!){marketDice(segmentId:$segmentId){facts periodFacts}}'
+    const authoritative = await (
+      await page.request.post('/api/graphql', {
+        data: { query, variables: { segmentId } },
+      })
+    ).json()
+    const original = authoritative.data.marketDice.facts
+    const forbidden = await (
+      await player.request.post('/api/graphql', {
+        data: { query: revealQuery, variables: { segmentId, rollIndex: 0 } },
+      })
+    ).json()
+    expect(forbidden.errors).toHaveLength(1)
+    expect(forbidden.data?.revealMarketRoll).toBeNull()
+    const futureId = Number(
+      (await page
+        .getByTestId('period-0-segment-1')
+        .locator('a[href*="/admin/dice/"]')
+        .getAttribute('href'))!.split('/')[3]
+    )
+    const future = await (
+      await page.request.post('/api/graphql', {
+        data: {
+          query: revealQuery,
+          variables: { segmentId: futureId, rollIndex: 0 },
+        },
+      })
+    ).json()
+    expect(future.errors).toHaveLength(1)
+    expect(future.data?.revealMarketRoll).toBeNull()
+    ;[dicePage] = await Promise.all([
+      page.waitForEvent('popup', { timeout: 60_000 }),
+      link.click(),
+    ])
+    await expect(dicePage.getByText('1. Month')).toBeVisible({
+      timeout: 30_000,
+    })
+    let failOnce = true
+    await dicePage.route('**/api/graphql', async (route) => {
+      if (
+        failOnce &&
+        route.request().postData()?.includes('mutation RevealMarketRoll')
+      ) {
+        failOnce = false
+        await route.fulfill({
+          json: { errors: [{ message: 'Temporary publication failure' }] },
+        })
+      } else await route.continue()
+    })
+    const first = dicePage.getByTestId('admin-roll-0')
+    await first.getByRole('button', { name: 'Roll', exact: true }).click()
+    await expect(first.getByRole('alert')).toContainText('Could not publish')
+    await expect(player.getByTestId('market-comparison')).toHaveCount(0)
+    await first.getByRole('button', { name: 'Retry publishing' }).click()
+    await expect(first.getByRole('status')).toHaveText('Revealed to players')
+    const checkRoll = async (index: number) => {
+      for (const session of sessions) {
+        await expect(
+          session.page.getByTestId('market-comparison')
+        ).toContainText(`2026 · Quarter 1 · Month ${index + 1}`)
+        for (const asset of ['bonds', 'stocks']) {
+          const chart = session.page.getByTestId(`market-${asset}`)
+          const dice = original.diceRolls[index]
+          await expect(
+            chart.locator('[data-highlighted="true"]')
+          ).toHaveAttribute(
+            'data-roll',
+            String(original.diceRolls[index][asset])
+          )
+          await expect(chart).toContainText(
+            `= ${original.diceRolls[index][asset]}`
+          )
+          await expect(
+            chart.getByRole('img', {
+              name: `Shared die: ${dice.shared}`,
+              exact: true,
+            })
+          ).toBeVisible()
+          await expect(
+            chart.getByRole('img', {
+              name: `${asset === 'bonds' ? 'Bonds' : 'Stocks'} die: ${dice[asset] - dice.shared}`,
+              exact: true,
+            })
+          ).toBeVisible()
+          const value = original.returns[index][asset] * 100
+          await expect(
+            session.page.getByTestId(`market-return-${asset}`)
+          ).toContainText(`${value > 0 ? '+' : ''}${value.toFixed(1)}%`)
+        }
+      }
+    }
+    await checkRoll(0)
+    await player.getByRole('link', { name: 'Cockpit', exact: true }).click()
+    await expect(
+      player.getByRole('spinbutton', { name: 'Savings', exact: true })
+    ).toHaveValue('50')
+    await expect(
+      player.getByRole('spinbutton', { name: 'Bonds', exact: true })
+    ).toHaveValue('30')
+    await expect(
+      player.getByRole('spinbutton', { name: 'Stocks', exact: true })
+    ).toHaveValue('20')
+    await player.getByRole('link', { name: 'Market', exact: true }).click()
+    // Concurrent persistence must merge both markers; replaying month 1 cannot
+    // replace month 3 as the latest result.
+    const responses = await Promise.all(
+      [1, 2].map((rollIndex) =>
+        page.request.post('/api/graphql', {
+          data: { query: revealQuery, variables: { segmentId, rollIndex } },
+        })
+      )
+    )
+    for (const response of responses)
+      expect((await response.json()).errors).toBeUndefined()
+    await checkRoll(2)
+    await first.getByRole('button', { name: 'Roll', exact: true }).click()
+    await expect(first.getByRole('status')).toHaveText('Revealed to players')
+    await checkRoll(2)
+    const after = await (
+      await page.request.post('/api/graphql', {
+        data: { query, variables: { segmentId } },
+      })
+    ).json()
+    expect(after.data.marketDice.facts).toEqual({
+      ...original,
+      revealedRollIndices: [0, 1, 2],
+    })
+    await dicePage.reload()
+    await expect(
+      dicePage.getByText('Revealed to players', { exact: true })
+    ).toHaveCount(3)
+    await player.reload()
+    await checkRoll(2)
+    for (const width of [360, 390, 784]) {
+      await player.setViewportSize({
+        width,
+        height: width === 784 ? 1694 : 844,
+      })
+      await expect(player.getByTestId('market-panel')).toBeVisible()
+      expect(
+        await player.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth
+        )
+      ).toBe(true)
+      await player.locator('main').evaluate((element) => {
+        element.scrollTop = 0
+      })
+      await player.screenshot({
+        path: testInfo.outputPath(`market-${width}.png`),
+      })
+      if (width < 600) {
+        await player.getByTestId('market-comparison').scrollIntoViewIfNeeded()
+        await player.screenshot({
+          path: testInfo.outputPath(`market-${width}-results.png`),
+        })
+      }
+    }
+    await advanceGame(page, {
+      action: 'Segment Results',
+      expectedStatus: 'PAUSED',
+    })
+    await advanceGame(page, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    await checkRoll(2)
+    await advanceGame(page, {
+      action: 'Consolidate',
+      expectedStatus: 'CONSOLIDATION',
+    })
+    await advanceGame(page, {
+      action: 'Period Results',
+      expectedStatus: 'RESULTS',
+    })
+    // Closing an unrevealed quarter does not publish its precomputed outcomes.
+    await checkRoll(2)
+    await addPeriod(page, {
+      segmentCount: '1',
+      index: 1,
+      scenario: {
+        trendStocks: '0.012',
+        gapStocks: '0.04',
+        interestBank: '0.008',
+      },
+    })
+    await addSegment(page, { periodIndex: 1 })
+    await advanceGame(page, {
+      action: 'Next Period',
+      expectedStatus: 'PREPARATION',
+    })
+    await advanceGame(page, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    await checkRoll(2)
+    for (const session of sessions) {
+      await expect(session.page.getByTestId('market-stocks')).toContainText(
+        'Expected +1.20%'
+      )
+      await expect(session.page.getByTestId('market-stocks')).toContainText(
+        'Trend gap 4.00%'
+      )
+      await expect(session.page.getByTestId('market-stocks')).toContainText(
+        'Volatility 19.32%'
+      )
+      await expect(session.page.getByTestId('market-comparison')).toContainText(
+        '+0.2%'
+      )
+    }
+  } finally {
+    await dicePage?.close()
+    await Promise.all(sessions.map(({ context }) => context.close()))
+  }
 })

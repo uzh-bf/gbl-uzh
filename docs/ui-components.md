@@ -78,6 +78,10 @@ Copy the demo game's setup (`apps/demo-game/src/globals.css`, `postcss.config.js
 3. `@layer utilities { .aspect-video { ... } }` is manually patched in because the design system's `ChartContainer` needs it but the shipped CSS doesn't emit it.
 4. Theming = CSS custom properties on `:root` (`--theme-color-primary`, `--theme-color-secondary`, with `-80/-60/-40/-20` shades).
 
+### Market probability charts
+
+`packages/ui/src/components/ProbabilityChart.tsx:ProbabilityChart` keeps its existing admin presentation by default. `variant="market"` adds the compact player presentation with optional `title`, `titleContent`, and `highlightLabel`; `totalEyes` selects an actual revealed total, with no automatic highlight of 7. Expected return, trend gap, and volatility share a compact row with matching text sizes. `highlightLabel` accepts React content so the player view can emphasize the month number. `titleContent` places the latest revealed dice beneath each asset title; these compact dice use stored outcomes and asset colors. The shared `probabilityDistribution` calculation preserves the reference game's rounded probability weights and volatility convention. All values derive from supplied scenario inputs, not screenshot constants. The Market SVG has an accessible description and per-roll descriptions; only the chart scrolls on narrow screens.
+
 ### Player styling convention
 
 The demo-game cockpit and welcome flow use colocated Tailwind utilities, with shared player colors and font tokens in `apps/demo-game/src/globals.css`. Primary actions use the UZH primary token; Savings, Bonds, and Stocks use named asset tokens shared with the welcome screen. The welcome screen's portaled pickers apply their font, size, line height, and colors directly to dialog content. Welcome-local controls in `apps/demo-game/src/components/welcome/WelcomeControls.tsx` reuse design-system buttons with 48px minimum heights and forward native props and refs; text inputs and Edit/Cancel buttons share utility classes. Welcome and cockpit retain separate action dimensions, while sharing palette tokens, including welcome's primary hover shade.

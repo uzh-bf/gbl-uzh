@@ -2,6 +2,8 @@
 
 ## 2026-09-17
 
+- **Update**: Market tab — restored scenario-based probability charts in the mobile design, added persisted admin monthly dice reveals and player refresh, and documented the distinction between current outlook and historical returns. Updated developing-a-game, UI components, API, and lifecycle guidance.
+
 - **Update**: [UI Building Blocks](ui-components.md), [Developing a Game](developing-a-game.md) - remove the welcome CSS Module, use shared player tokens and welcome-local Tailwind controls across setup, portaled pickers, and loading/error views, and document responsive and failure/retry browser coverage.
 
 ## 2026-09-16

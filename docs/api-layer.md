@@ -7,7 +7,7 @@ tags:
   - graphql
   - trpc
   - realtime
-timestamp: "2026-07-03T00:00:00Z"
+timestamp: "2026-09-17T00:00:00Z"
 ---
 
 # API Layer and Realtime
@@ -31,6 +31,8 @@ These hold in both worlds and are what game code should rely on:
 - Game wiring: `generateBaseMutations({ services, schemas, inputTypes })` from the platform, called in `apps/demo-game/src/graphql/index.ts`.
 - Client: Apollo Client with a split link — subscriptions over `graphql-sse` (`packages/platform/src/lib/SSELink.ts`), everything else over HTTP. Shared operation documents ship with the platform (`packages/platform/public/ops/*.graphql`); each game runs codegen against them for typed hooks.
 - If you are building a new game while this is still current: copy the demo game's `src/graphql/` + `codegen.ts` wholesale and do not invest in custom GraphQL; it will be removed when the tRPC branch merges.
+
+The demo game extends the base GraphQL schema with ADMIN/MASTER-only `marketDice(segmentId)` and `revealMarketRoll(segmentId, rollIndex)` fields (`apps/demo-game/src/graphql/market.ts`). The query reads authoritative precomputed outcomes; the mutation persists reveal indices without rerolling. Its `MARKET_ROLL_REVEALED` global event carries only `gameId`; the player refetches its existing aggregate result. Game-local operation documents in `src/graphql/ops/` are included alongside platform operations by the demo-game codegen config.
 
 ## Upcoming: tRPC (branch `codex/trpc-migration-work-packages`, not merged)
 

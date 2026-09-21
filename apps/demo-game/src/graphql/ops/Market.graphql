@@ -1,0 +1,18 @@
+query MarketDice($segmentId: Int!) {
+  marketDice(segmentId: $segmentId) {
+    id
+    gameId
+    periodIx
+    index
+    facts
+    periodFacts
+    canReveal
+  }
+}
+
+mutation RevealMarketRoll($segmentId: Int!, $rollIndex: Int!) {
+  revealMarketRoll(segmentId: $segmentId, rollIndex: $rollIndex) {
+    id
+    facts
+  }
+}

@@ -23,6 +23,7 @@ export function initialize(
   const baseFacts: OutputSegmentFacts = {
     resultFacts: {
       ...facts,
+      revealedRollIndices: [],
       diceRolls: [],
       returns: [],
     },
