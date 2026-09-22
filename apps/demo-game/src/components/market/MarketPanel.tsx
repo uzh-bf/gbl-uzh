@@ -120,17 +120,7 @@ export default function MarketPanel({ data }: { data: ResultQuery }) {
               trendE={scenario[asset.trend]}
               trendGap={scenario[asset.gap]}
               totalEyes={roll ? String(roll.dice[asset.key]) : undefined}
-              highlightLabel={
-                roll ? (
-                  <>
-                    Highlighted: {2026 + latest.periodIndex} · Quarter{' '}
-                    {latest.segmentIndex + 1} · Month{' '}
-                    <strong className="text-player-text">
-                      {latest.index + 1}
-                    </strong>
-                  </>
-                ) : undefined
-              }
+              month={roll ? latest.index + 1 : undefined}
             />
           </div>
         ))
@@ -144,7 +134,7 @@ export default function MarketPanel({ data }: { data: ResultQuery }) {
           aria-live="polite"
         >
           <p className="text-player-muted m-0 mb-[24px] text-[18px] min-[601px]:text-[24px]">
-            Monthly returns side by side · {latest.label}
+            Monthly returns · Month {latest.index + 1}
           </p>
           <div className="grid gap-[18px]">
             {assets.map(({ key, label, color }) => {

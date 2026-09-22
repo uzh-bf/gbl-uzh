@@ -2,6 +2,10 @@
 
 ## 2026-09-22
 
+**Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — shortened the comparison heading to “Monthly returns · Month N”; retained existing Market results across quarter and year changes.
+
+**Update**: [UI Building Blocks](ui-components.md) — Market charts show the revealed month below Expected and remove the highlighted year/quarter/month footer.
+
 **Update**: [UI Building Blocks](ui-components.md) — Market probability charts now fit all 11 outcomes without horizontal scrolling at 400px, with narrower bars and compact labels.
 
 **Update**: Demo-game Team and content sheets — documented settled team statistics, released-story rereading and skip semantics, browser-local activity views, accessible responsive sheets, and shared learning-hook draft/error support. Review consolidated quiz drafts and feedback, removed the redundant story-read cache, exposed row status/metadata to screen readers, and fixed stale quiz data after successful submissions finish in the background.

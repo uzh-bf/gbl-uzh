@@ -27,7 +27,7 @@ function ProbabilityChart({
   variant = 'default',
   title,
   titleContent,
-  highlightLabel,
+  month,
 }: {
   trendE: number
   trendGap: number
@@ -35,7 +35,7 @@ function ProbabilityChart({
   variant?: 'default' | 'market'
   title?: string
   titleContent?: ReactNode
-  highlightLabel?: ReactNode
+  month?: number
 }) {
   const { data, vola } = useMemo(() => {
     const { data, volatility } = probabilityDistribution(trendE, trendGap)
@@ -70,6 +70,11 @@ function ProbabilityChart({
               >
                 {signedPercent(trendE, 2)}
               </strong>
+              {month !== undefined && (
+                <span className="mt-[4px] block text-[14px] min-[601px]:text-[16px]">
+                  Month {month}
+                </span>
+              )}
             </span>
             <span>
               Trend gap{' '}
@@ -161,11 +166,6 @@ function ProbabilityChart({
             })}
           </svg>
         </div>
-        {highlightLabel && (
-          <p className="m-0 mt-[6px] text-[14px] text-[var(--color-player-muted,#707070)]">
-            {highlightLabel}
-          </p>
-        )}
       </div>
     )
   }

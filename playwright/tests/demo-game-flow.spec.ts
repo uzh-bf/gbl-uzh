@@ -1329,10 +1329,14 @@ test('Market shows fixed admin reveals to two players during allocation', async 
       for (const session of sessions) {
         await expect(
           session.page.getByTestId('market-comparison')
-        ).toContainText(`2026 · Quarter 1 · Month ${index + 1}`)
+        ).toContainText(`Monthly returns · Month ${index + 1}`)
         for (const asset of ['bonds', 'stocks']) {
           const chart = session.page.getByTestId(`market-${asset}`)
           const dice = original.diceRolls[index]
+          await expect(
+            chart.getByText(`Month ${index + 1}`, { exact: true })
+          ).toBeVisible()
+          await expect(chart).not.toContainText('Highlighted:')
           await expect(
             chart.locator('[data-highlighted="true"]')
           ).toHaveAttribute(
