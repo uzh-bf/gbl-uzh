@@ -86,20 +86,19 @@ function ProbabilityChart({
           </div>
         </div>
         <div
-          className="mt-[20px] overflow-x-auto"
+          className="mt-[20px]"
           role="region"
           aria-label={`${title} return probabilities`}
-          tabIndex={0}
         >
           <svg
-            viewBox="0 0 716 258"
-            className="block w-full min-w-[440px]"
+            viewBox="0 0 726 258"
+            className="block w-full"
             role="img"
             aria-label={`${title}: bar height is probability; labels show return. ${totalEyes ? `Latest revealed total: ${totalEyes}.` : 'No roll revealed.'}`}
           >
             <line
               x1="0"
-              x2="716"
+              x2="726"
               y1="211"
               y2="211"
               stroke="var(--color-player-border, #e9e9e9)"
@@ -107,7 +106,7 @@ function ProbabilityChart({
             {data.map((item, index) => {
               const selected = item.eyes === totalEyes
               const height = (item.prob / 0.1667) * 168
-              const x = index * 66
+              const x = index * 66 + 7
               return (
                 <g
                   key={item.eyes}
@@ -118,7 +117,7 @@ function ProbabilityChart({
                   <rect
                     x={x}
                     y={200 - height}
-                    width="58"
+                    width="52"
                     height={height}
                     rx="8"
                     fill={
@@ -128,7 +127,7 @@ function ProbabilityChart({
                     }
                   />
                   <text
-                    x={x + 29}
+                    x={x + 26}
                     y={188 - height}
                     textAnchor="middle"
                     fontSize="16"
@@ -143,11 +142,11 @@ function ProbabilityChart({
                     {signedPercent(item.value).replace('%', '')}
                   </text>
                   <text
-                    x={x + 29}
+                    x={x + 26}
                     y="244"
                     textAnchor="middle"
                     fontSize="18"
-                    className="max-[600px]:text-[24px]"
+                    className="max-[600px]:text-[22px]"
                     fontWeight={selected ? 700 : 400}
                     fill={
                       selected

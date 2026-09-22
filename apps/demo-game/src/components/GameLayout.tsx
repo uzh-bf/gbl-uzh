@@ -6,6 +6,7 @@ import {
 } from '@gbl-uzh/ui'
 import { Switch } from '@uzh-bf/design-system'
 import dayjs from 'dayjs'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useRef } from 'react'
@@ -180,10 +181,8 @@ function GameLayout({
       .slice(0, 2)
       .join('')
       .toUpperCase() || 'T'
-  const avatarKey = String(facts.avatar ?? '')
-    .split('/')
-    .pop()
-    ?.split('.')[0]
+  const avatar = typeof facts.avatar === 'string' ? facts.avatar : ''
+  const avatarKey = avatar.split('/').pop()?.split('.')[0]
   const handleCountdownUpdate = (secondsLeft: number) => {
     const previousSecondsLeft = previousCountdownSeconds.current
     previousCountdownSeconds.current = secondsLeft
@@ -213,12 +212,22 @@ function GameLayout({
         >
           <div
             className={cn(
-              'bg-player-progress text-player-primary grid size-[40px] shrink-0 place-items-center rounded-[6px] text-[17px] font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]',
+              'bg-player-progress text-player-primary grid size-[40px] shrink-0 place-items-center overflow-hidden rounded-full text-[17px] font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]',
               detailTab && 'min-[601px]:size-[60px] min-[601px]:text-[24px]'
             )}
             aria-hidden="true"
           >
-            {initials}
+            {avatar ? (
+              <Image
+                src={avatar}
+                width={60}
+                height={60}
+                alt=""
+                className="size-full object-cover"
+              />
+            ) : (
+              initials
+            )}
           </div>
           <div className="min-w-0 flex-1">
             <div

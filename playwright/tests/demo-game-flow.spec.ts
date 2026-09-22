@@ -1403,12 +1403,26 @@ test('Market shows fixed admin reveals to two players during allocation', async 
     ).toHaveCount(3)
     await player.reload()
     await checkRoll(2)
-    for (const width of [360, 390, 784]) {
+    for (const width of [360, 390, 400, 784]) {
       await player.setViewportSize({
         width,
         height: width === 784 ? 1694 : 844,
       })
       await expect(player.getByTestId('market-panel')).toBeVisible()
+      for (const asset of ['Bonds', 'Stocks']) {
+        const chart = player.getByRole('region', {
+          name: `${asset} return probabilities`,
+        })
+        await expect(chart).toBeVisible()
+        await expect
+          .poll(() =>
+            chart.evaluate(
+              (element) => element.scrollWidth <= element.clientWidth
+            )
+          )
+          .toBe(true)
+        await expect(chart.locator('[data-roll]')).toHaveCount(11)
+      }
       expect(
         await player.evaluate(
           () => document.documentElement.scrollWidth <= window.innerWidth
