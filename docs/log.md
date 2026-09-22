@@ -2,6 +2,10 @@
 
 ## 2026-09-22
 
+**Update**: [Developing a Game](developing-a-game.md) — reviewed and simplified result adapters and state rendering; shared settlement/sample parsing with History, and fixed year-end progress and opening-balance handling for missing records.
+
+**Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md), [Game Lifecycle](game-lifecycle.md) — replace the demo cockpit's quarter, consolidation, and year-end reports with the supplied designs; document settled result selection, cumulative chart semantics, annual asset returns, and advisory Ready behavior.
+
 **Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — shortened the comparison heading to “Monthly returns · Month N”; retained existing Market results across quarter and year changes.
 
 **Update**: [UI Building Blocks](ui-components.md) — Market charts show the revealed month below Expected and remove the highlighted year/quarter/month footer.

@@ -16,6 +16,7 @@ import {
 } from 'src/graphql/generated/ops'
 import { marketPeriod } from '~/lib/market'
 import { queueRefetch } from '~/lib/queuedRefetch'
+import type { ResultView } from '~/lib/results'
 import { avatarNames, cantonNames } from '~/lib/teamIdentity'
 import CompactCountdown from './cockpit/CompactCountdown'
 import HistoryPanel from './history/HistoryPanel'
@@ -47,12 +48,14 @@ function GameLayout({
   refetchResult,
   allocationView,
   readyControl,
+  resultView,
 }: {
   children: React.ReactNode
   action?: React.ReactNode
   data: ResultQuery
   refetchResult: () => Promise<unknown>
   allocationView?: 'editing' | 'submitted' | 'ready'
+  resultView?: ResultView | null
   readyControl: {
     disabled: boolean
     onChange: (isReady: boolean) => Promise<void>
@@ -69,6 +72,8 @@ function GameLayout({
       ? router.query.tab
       : 'cockpit'
   const detailTab = tab !== 'cockpit'
+  const resultScreen = !!resultView && !detailTab
+  const expandedHeader = detailTab || resultScreen
   const { toast } = useToast()
 
   const countdownNotifications = useRef({
@@ -150,10 +155,14 @@ function GameLayout({
   }
 
   const facts = parseFacts(self.facts)
-  const segmentIndex = activePeriod?.activeSegment?.index
+  const segmentIndex = resultView
+    ? resultView.quarter - 1
+    : activePeriod?.activeSegment?.index
   const segmentCount =
+    resultView?.segmentCount ??
     currentGame.periods.find((period) => period.id === activePeriod?.id)
-      ?.segmentCount ?? 0
+      ?.segmentCount ??
+    0
   const marketActivePeriod = marketPeriod(currentGame)
   const running = currentGame.status === 'RUNNING'
   const done =
@@ -173,6 +182,25 @@ function GameLayout({
     SCHEDULED: 'Scheduled',
     COMPLETED: 'Completed',
   }[currentGame.status]
+  const resultCopy =
+    resultView &&
+    {
+      PAUSED: {
+        heading: `Game ${currentGame.id} · ${resultView.year} · Quarter ${resultView.quarter} closed`,
+        detail: resultView.monthRange,
+        footer: `Quarter ${resultView.quarter + 1} opens when everyone is ready`,
+      },
+      CONSOLIDATION: {
+        heading: `After quarter ${resultView.quarter}`,
+        detail: 'Consolidation · held',
+        footer: `${resultView.year} closes when everyone is ready`,
+      },
+      RESULTS: {
+        heading: `${resultView.year} closed`,
+        detail: 'All quarters closed',
+        footer: `${resultView.year + 1} opens when everyone is ready`,
+      },
+    }[resultView.status]
   const initials =
     self.name
       ?.trim()
@@ -206,14 +234,16 @@ function GameLayout({
         <header
           className={cn(
             'border-player-divider flex shrink-0 items-center gap-[12px] border-b px-[16px] py-[10px] min-[601px]:gap-[16px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
-            detailTab &&
+            expandedHeader &&
               'min-[601px]:gap-[20px] min-[601px]:px-[32px] min-[601px]:py-[24px]'
           )}
         >
           <div
             className={cn(
               'bg-player-progress text-player-primary grid size-[40px] shrink-0 place-items-center overflow-hidden rounded-full text-[17px] font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]',
-              detailTab && 'min-[601px]:size-[60px] min-[601px]:text-[24px]'
+              expandedHeader &&
+                'min-[601px]:size-[60px] min-[601px]:text-[24px]',
+              resultScreen && 'rounded-[8px]'
             )}
             aria-hidden="true"
           >
@@ -233,7 +263,7 @@ function GameLayout({
             <div
               className={cn(
                 'block text-[18px] leading-[1.15] font-bold [overflow-wrap:anywhere] min-[601px]:text-[22px]',
-                detailTab && 'min-[601px]:text-[28px]'
+                expandedHeader && 'min-[601px]:text-[28px]'
               )}
             >
               {detailTab ? (
@@ -247,7 +277,7 @@ function GameLayout({
             <p
               className={cn(
                 'text-player-muted m-0 text-[14px] min-[601px]:text-[16px]',
-                detailTab && 'min-[601px]:text-[22px]'
+                expandedHeader && 'leading-[1.25] min-[601px]:text-[22px]'
               )}
             >
               {tab === 'team' ? (
@@ -283,25 +313,41 @@ function GameLayout({
                 onUpdate={handleCountdownUpdate}
               />
             ) : (
-              <span aria-label="No countdown">—</span>
+              !resultScreen && <span aria-label="No countdown">—</span>
             )}
           </div>
         </header>
         <section
           hidden={detailTab}
-          className="border-player-divider shrink-0 border-b px-[16px] py-[14px] min-[601px]:px-[24px] min-[601px]:py-[20px]"
+          className={cn(
+            'border-player-divider shrink-0 border-b px-[16px] py-[14px] min-[601px]:px-[24px] min-[601px]:py-[20px]',
+            resultScreen && 'min-[601px]:px-[32px] min-[601px]:py-[28px]'
+          )}
           aria-label="Game progress"
           data-game-status={currentGame.status}
         >
-          <div className="flex items-baseline justify-between gap-[12px] text-[17px] [@media(max-width:360px)]:items-start">
-            <h2 className="text-player-muted m-0 text-[12px] font-semibold tracking-[0.8px] uppercase min-[601px]:text-[14px]">
-              {activePeriod
-                ? `${FIRST_GAME_YEAR + activePeriod.index}${segmentIndex == null ? '' : ` · Quarter ${segmentIndex + 1} of ${segmentCount}`}`
-                : 'Waiting for the game'}
+          <div className="flex flex-wrap items-baseline justify-between gap-x-[12px] gap-y-[4px] text-[17px] [@media(max-width:360px)]:items-start">
+            <h2
+              className={cn(
+                'text-player-muted m-0 text-[12px] font-semibold tracking-[0.8px] uppercase min-[601px]:text-[14px]',
+                resultScreen && 'min-[601px]:text-[22px]'
+              )}
+            >
+              {resultView
+                ? resultCopy.heading
+                : activePeriod
+                  ? `${FIRST_GAME_YEAR + activePeriod.index}${segmentIndex == null ? '' : ` · Quarter ${segmentIndex + 1} of ${segmentCount}`}`
+                  : 'Waiting for the game'}
             </h2>
             {!running && (
-              <span className="font-semibold [@media(max-width:360px)]:whitespace-nowrap">
-                {status}
+              <span
+                className={cn(
+                  'font-semibold [@media(max-width:360px)]:whitespace-nowrap',
+                  resultScreen &&
+                    'text-player-body text-[15px] min-[601px]:text-[24px]'
+                )}
+              >
+                {resultView ? resultCopy.detail : status}
               </span>
             )}
           </div>
@@ -310,16 +356,20 @@ function GameLayout({
               <div
                 className={cn(
                   'mt-[12px] flex gap-[8px] min-[601px]:mt-[16px]',
-                  !running && 'mb-[12px] min-[601px]:mb-[16px]'
+                  !running && !resultView && 'mb-[12px] min-[601px]:mb-[16px]'
                 )}
                 aria-hidden="true"
               >
                 {Array.from({ length: segmentCount }, (_, index) => (
                   <span
                     key={index}
-                    className="bg-player-progress data-[state=done]:bg-player-progress-done data-[state=active]:bg-player-primary h-[8px] min-w-0 flex-1 rounded-[6px] min-[601px]:h-[10px]"
+                    className={cn(
+                      'bg-player-progress data-[state=done]:bg-player-progress-done data-[state=active]:bg-player-primary h-[8px] min-w-0 flex-1 rounded-[6px] min-[601px]:h-[10px]',
+                      resultScreen && 'min-[601px]:h-[16px]'
+                    )}
                     data-state={
-                      running && index === segmentIndex
+                      (running || resultView?.status === 'PAUSED') &&
+                      index === segmentIndex
                         ? 'active'
                         : index < done
                           ? 'done'
@@ -328,7 +378,7 @@ function GameLayout({
                   />
                 ))}
               </div>
-              {!running && (
+              {!running && !resultView && (
                 <p className="text-player-muted m-0 text-[16px]">
                   {done} {done === 1 ? 'quarter' : 'quarters'} done ·{' '}
                   {Math.max(0, segmentCount - done)} to come
@@ -342,7 +392,9 @@ function GameLayout({
             hidden={tab !== 'cockpit'}
             className={cn(
               tab !== 'cockpit' && 'hidden',
-              !running && 'p-[16px] min-[601px]:px-[24px] min-[601px]:py-[20px]'
+              !running &&
+                !resultView &&
+                'p-[16px] min-[601px]:px-[24px] min-[601px]:py-[20px]'
             )}
           >
             {children}
@@ -372,8 +424,19 @@ function GameLayout({
         </main>
         <div className="relative z-[3] shrink-0 bg-white">
           {tab === 'cockpit' && (
-            <div className="border-player-divider flex min-h-[78px] items-center justify-between gap-[12px] border-t px-[16px] py-[12px] min-[601px]:min-h-[96px] min-[601px]:px-[24px] min-[601px]:py-[16px]">
-              {action}
+            <div
+              className={cn(
+                'border-player-divider flex min-h-[78px] items-center justify-between gap-[12px] border-t px-[16px] py-[12px] min-[601px]:min-h-[96px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
+                resultScreen && 'min-[601px]:px-[32px]'
+              )}
+            >
+              {resultView ? (
+                <p className="text-player-muted m-0 text-[15px] min-[601px]:text-[24px]">
+                  {resultCopy.footer}
+                </p>
+              ) : (
+                action
+              )}
               <div
                 className="ml-auto flex items-center gap-[10px]"
                 data-cy="ready-switch"
@@ -384,11 +447,14 @@ function GameLayout({
                   htmlFor="isReady"
                   className={cn(
                     'text-[17px] font-semibold',
+                    resultScreen && 'min-[601px]:text-[24px]',
                     readyControl.disabled
                       ? 'text-player-disabled'
                       : self.isReady
                         ? 'text-player-success'
-                        : 'text-player-primary'
+                        : resultScreen
+                          ? 'text-player-text'
+                          : 'text-player-primary'
                   )}
                 >
                   Ready
@@ -401,13 +467,21 @@ function GameLayout({
                   className={{
                     element: cn(
                       'h-[30px] w-[52px]',
+                      resultScreen &&
+                        'shrink-0 min-[601px]:h-[44px] min-[601px]:w-[80px]',
                       self.isReady
                         ? 'bg-player-success disabled:bg-player-success'
                         : 'bg-player-switch disabled:bg-player-switch'
                     ),
                     thumb: cn(
                       'ml-[3px] size-[24px] shadow-[0_1px_3px_#0002] [&>svg]:invisible',
-                      self.isReady ? 'translate-x-[22px]' : 'translate-x-0'
+                      resultScreen && 'min-[601px]:size-[36px]',
+                      self.isReady
+                        ? cn(
+                            'translate-x-[22px]',
+                            resultScreen && 'min-[601px]:translate-x-[36px]'
+                          )
+                        : 'translate-x-0'
                     ),
                   }}
                   onCheckedChange={readyControl.onChange}
@@ -424,7 +498,11 @@ function GameLayout({
                 key={name}
                 href={`/play/cockpit?tab=${name.toLowerCase()}`}
                 shallow
-                className="text-player-muted aria-[current=page]:border-player-primary aria-[current=page]:text-player-primary focus-visible:outline-player-primary flex min-h-[56px] items-center justify-center border-t-[3px] border-transparent text-[17px] no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] aria-[current=page]:font-bold min-[601px]:min-h-[60px]"
+                className={cn(
+                  'text-player-muted aria-[current=page]:border-player-primary aria-[current=page]:text-player-primary focus-visible:outline-player-primary flex min-h-[56px] items-center justify-center border-t-[3px] border-transparent text-[17px] no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] aria-[current=page]:font-bold min-[601px]:min-h-[60px]',
+                  resultScreen &&
+                    'min-[601px]:min-h-[108px] min-[601px]:text-[24px]'
+                )}
                 aria-current={tab === name.toLowerCase() ? 'page' : undefined}
               >
                 {name}

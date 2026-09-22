@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: '2026-09-22T00:00:00Z'
+timestamp: "2026-09-22T00:00:00Z"
 ---
 
 # Developing a Game
@@ -142,7 +142,19 @@ The RUNNING allocation flow follows `apps/demo-game/design/cockpit.png`, `cockpi
 - **Admin reveals** (`apps/demo-game/src/services/MarketRevealService.ts:revealMarketRoll`): dice and returns are generated when a segment is created. The admin animation publishes an existing monthly outcome through the app-local ADMIN/MASTER-only mutation, including while allocations are open. Optional `revealedRollIndices` in segment facts persist visibility; serializable transactions with conflict retries merge concurrent reveals. Replaying a month cannot reroll outcomes or replace a later result. Future segments cannot be revealed; closing a quarter does not reveal it automatically. `MARKET_ROLL_REVEALED` tells players to refetch the aggregate query. `apps/demo-game/src/lib/queuedRefetch.ts:queueRefetch` schedules another read when a notification arrives during an in-flight refresh, so Apollo deduplication cannot drop the newer reveal. Market also refreshes on focus/reconnect and every 30 seconds while visible. These markers control the Market UI, not access to raw facts or existing cockpit result timing.
 
 > [!WARNING]
->
+
+### Cockpit result screens
+
+The three review states follow `segment_end.png`, `consolidation.png`, and `period_end.png` in the demo game's design folder. `apps/demo-game/src/components/cockpit/ResultPanels.tsx` provides distinct quarter, consolidation, and year panels in the shared player shell:
+
+- **PAUSED:** closing assets and quarter gain, opening/monthly balances with holdings mixes, current-year portfolio/benchmark balances, and accumulated return by month since initial capital. The allocation legend shows the submitted percentages; monthly mixes reflect actual holdings after returns.
+- **CONSOLIDATION:** quarter-close versus current holdings, their CHF difference, current asset shares/amounts, and the completed quarter's benchmark history. The current consolidation hook carries balances unchanged.
+- **RESULTS:** stacked assets and CHF gains for completed years, cumulative portfolio return from game start, and closing asset amounts alongside each asset's compounded market return for the completed year. Reallocation-dependent result-facts returns do not supply these rates.
+
+`apps/demo-game/src/lib/results.ts:buildResultView` uses the existing aggregate query, sharing settled-row selection (`readResultHistory`) and sample validation (`readBalanceSamples`) with History in `apps/demo-game/src/lib/history.ts`. `PERIOD_END` identifies the displayed completed year, even when the active period points ahead or disconnects. Persisted monthly samples supply balances and benchmarks; repeated opening samples are excluded from the year timeline. Missing/malformed values remain unavailable, and negative returns remain visible. A missing final-quarter result does not move year-end progress backward; annual gains require the period opening record or quarter 1’s opening balance. Dice reveal markers do not gate these settled result screens.
+
+`apps/demo-game/src/components/GameLayout.tsx:GameLayout` renders state-specific progress and the reference readiness wording, retaining instructor-controlled advancement. Result screens hide the empty countdown placeholder, retain a configured timer, and keep the footer/navigation accessible while their body scrolls. The RUNNING editor, submitted summary, and Ready lock retain their existing layout.
+
 > **Prisma enum trap:** `@prisma/client` exports runtime enum objects (`GameStatus`, etc.) that Next.js strips from client bundles. Code like `DB.GameStatus.RESULTS` will be `undefined` in the browser. In the cockpit `switch` and any shared utility reachable from the frontend, compare against string literals (`'RUNNING'`, `'PAUSED'`, etc.) or the GraphQL-generated enum from `src/graphql/generated/ops.ts`. Use `import type` for Prisma imports in shared files.
 
 Your game-specific work is almost entirely: the decision form (validate with yup: same constraints as your `Actions.apply`), the results/report visualizations (the demo game uses recharts), and the admin authoring forms for your period/segment facts.

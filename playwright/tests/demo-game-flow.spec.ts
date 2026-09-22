@@ -2159,3 +2159,164 @@ test('Team stories and learning sheets preserve progress, drafts and released co
     await session.context.close()
   }
 })
+
+test('cockpit result designs follow settled quarters, consolidation and completed years', async ({
+  page,
+  browser,
+  baseURL,
+}, testInfo) => {
+  const appBaseURL = requireBaseURL(baseURL)
+  await createGame(page, {
+    name: `Result designs ${Date.now()}`,
+    playerCount: 1,
+  })
+  const joinUrl = await playerJoinUrl(page, appBaseURL, 0)
+  for (let periodIndex = 0; periodIndex < 2; periodIndex++) {
+    await addPeriod(page, { segmentCount: '4', index: periodIndex })
+    for (let quarter = 0; quarter < 4; quarter++)
+      await addSegment(page, { periodIndex })
+  }
+  const session = await joinPlayer(browser, appBaseURL, joinUrl, players[0])
+  const player = session.page
+  const errors: string[] = []
+  player.on('pageerror', (error) => errors.push(error.message))
+  const ready = player.getByRole('switch', { name: 'Ready', exact: true })
+  const progress = player.getByRole('region', { name: 'Game progress' })
+  const capture = async (state: string) => {
+    for (const { name, width, height } of [
+      { name: 'reference', width: 784, height: 1694 },
+      { name: 'mobile', width: 390, height: 844 },
+      { name: 'narrow', width: 320, height: 844 },
+    ]) {
+      await player.setViewportSize({ width, height })
+      await expect
+        .poll(() =>
+          player.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth
+          )
+        )
+        .toBe(true)
+      await player.locator('main').evaluate((element) => {
+        element.scrollTop = 0
+      })
+      await expect(ready).toBeInViewport()
+      await player.screenshot({
+        path: testInfo.outputPath(`${state}-${name}.png`),
+        animations: 'disabled',
+      })
+      if (width < 600) {
+        await player.locator('main').evaluate((element) => {
+          element.scrollTop = element.scrollHeight
+        })
+        await player.screenshot({
+          path: testInfo.outputPath(`${state}-${name}-bottom.png`),
+          animations: 'disabled',
+        })
+      }
+    }
+    await player.setViewportSize({ width: 784, height: 1694 })
+  }
+  const checkReady = async (status: string) => {
+    await expect(ready).not.toBeChecked()
+    await ready.click()
+    await expect(ready).toBeChecked()
+    // All teams are ready, but only the instructor can advance.
+    await expect(progress).toHaveAttribute('data-game-status', status)
+    await ready.click()
+    await expect(ready).not.toBeChecked()
+  }
+  try {
+    for (let periodIndex = 0; periodIndex < 2; periodIndex++) {
+      await advanceGame(page, {
+        action: periodIndex === 0 ? 'Start Period' : 'Next Period',
+        expectedStatus: 'PREPARATION',
+      })
+      for (let quarter = 1; quarter <= 4; quarter++) {
+        await advanceGame(page, {
+          action: 'Next Segment',
+          expectedStatus: 'RUNNING',
+        })
+        await expect(
+          player.getByRole('button', {
+            name: 'Submit allocation',
+            exact: true,
+          })
+        ).toBeVisible()
+        await submitDecision(player, {
+          savings: '55',
+          bonds: '35',
+          stocks: '10',
+        })
+        const finalQuarter = quarter === 4
+        await advanceGame(page, {
+          action: finalQuarter ? 'Consolidate' : 'Segment Results',
+          expectedStatus: finalQuarter ? 'CONSOLIDATION' : 'PAUSED',
+        })
+        await expect(
+          player.getByTestId(
+            finalQuarter ? 'consolidation-results' : 'quarter-results'
+          )
+        ).toBeVisible()
+        await expect(player.getByTestId('result-total')).toContainText('CHF')
+        await expect(player.getByTestId('result-total')).not.toContainText('—')
+        await expect(player.getByLabel('No countdown')).toHaveCount(0)
+        if (!finalQuarter) {
+          await expect(progress).toContainText(
+            `${2026 + periodIndex} · Quarter ${quarter} closed`
+          )
+          await expect(
+            player.getByText(
+              `Quarter ${quarter + 1} opens when everyone is ready`
+            )
+          ).toBeVisible()
+        } else {
+          await expect(progress).toContainText('Consolidation · held')
+          await expect(player.getByTestId('result-total')).toContainText('0.00')
+        }
+        if (periodIndex === 1 && quarter === 3) {
+          await checkReady('PAUSED')
+          await capture('segment-end')
+          await player
+            .getByRole('link', { name: 'History', exact: true })
+            .click()
+          await expect(player.getByTestId('history-panel')).toBeVisible()
+          await player
+            .getByRole('link', { name: 'Cockpit', exact: true })
+            .click()
+          await expect(player.getByTestId('quarter-results')).toBeVisible()
+        }
+        if (periodIndex === 1 && finalQuarter) {
+          await checkReady('CONSOLIDATION')
+          await capture('consolidation')
+        }
+      }
+      await advanceGame(page, {
+        action: 'Period Results',
+        expectedStatus: 'RESULTS',
+      })
+      await expect(player.getByTestId('year-results')).toBeVisible()
+      await expect(progress).toContainText(`${2026 + periodIndex} closed`)
+      await expect(progress).toContainText('All quarters closed')
+      await expect(
+        player.getByText(`${2027 + periodIndex} opens when everyone is ready`)
+      ).toBeVisible()
+      await expect(player.getByTestId('result-yearly-assets')).toContainText(
+        String(2026 + periodIndex)
+      )
+      await checkReady('RESULTS')
+      if (periodIndex === 1) {
+        // There is no upcoming authored period: the active pointer disconnects.
+        await player.reload({ waitUntil: 'domcontentloaded' })
+        await expect(player.getByTestId('year-results')).toBeVisible()
+        await expect(progress).toContainText('2027 closed')
+        await expect(player.getByTestId('result-yearly-assets')).toContainText(
+          '2026'
+        )
+        await capture('period-end')
+      }
+    }
+    expect(errors).toEqual([])
+  } finally {
+    await session.context.close()
+  }
+})

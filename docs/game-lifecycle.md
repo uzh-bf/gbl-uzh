@@ -6,7 +6,7 @@ tags:
   - lifecycle
   - state-machine
   - admin
-timestamp: "2026-09-17T00:00:00Z"
+timestamp: "2026-09-22T00:00:00Z"
 ---
 
 # Game Lifecycle
@@ -55,13 +55,14 @@ Notes:
 
 The player cockpit is a single page that switches on `game.status` (`apps/demo-game/src/pages/play/cockpit.tsx`):
 
-| Status                 | Player view                                                                                                                    |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| SCHEDULED              | "Game is scheduled" placeholder                                                                                                |
-| PREPARATION            | Header only — waiting while the admin sets up                                                                                  |
-| RUNNING                | Demo game: allocation editor → submitted summary → reversible Ready lock                                                       |
-| PAUSED / CONSOLIDATION | Read-only segment results OR active period consolidation forms (e.g. investing in factories, setting dividends for the period) |
-| RESULTS                | Period-end report: aggregate charts across the period(s)                                                                       |
+| Status        | Player view                                                                                           |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| SCHEDULED     | "Game is scheduled" placeholder                                                                       |
+| PREPARATION   | Header only — waiting while the admin sets up                                                         |
+| RUNNING       | Demo game: allocation editor → submitted summary → reversible Ready lock                              |
+| PAUSED        | Demo game: closed-quarter balances, benchmark history, and accumulated monthly returns                |
+| CONSOLIDATION | Demo game: carried-over holdings, change since quarter close, and benchmark history                   |
+| RESULTS       | Demo game: completed-year asset totals, accumulated portfolio return, and annual asset market returns |
 
 Independent of status: story elements attached to a newly activated segment appear as blocking popups until acknowledged; demo-game learning elements sit in the Team tab (other games may use a sidebar); achievements/level-ups arrive as notifications.
 

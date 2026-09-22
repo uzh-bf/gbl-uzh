@@ -39,8 +39,20 @@ function compounded(months: HistoryMonth[], asset: 'bonds' | 'stocks') {
   )
 }
 
+/** Require a contiguous series starting with the pre-return balance. */
+export function readBalanceSamples(raw: unknown) {
+  const facts = parseMarketFacts(raw)
+  const samples = Array.isArray(facts.assetsWithReturns)
+    ? facts.assetsWithReturns.map(parseMarketFacts)
+    : []
+  return samples.length > 1 &&
+    samples.every((sample, index) => sample.ix === index)
+    ? samples
+    : []
+}
+
 /** SEGMENT_END is also the live decision record; lifecycle state proves settlement. */
-export function buildHistory(data: ResultQuery) {
+export function readResultHistory(data: ResultQuery) {
   const game = data.result?.currentGame
   const results = (data.result?.previousResults ?? [])
     .map((row) => ({ ...row, facts: parseMarketFacts(row.facts) }))
@@ -71,59 +83,63 @@ export function buildHistory(data: ResultQuery) {
       row.period.id === active?.id &&
       row.segment.index <= lastClosedIndex)
 
-  const quarters: HistoryQuarter[] = results
-    .filter((row) => row.type === 'SEGMENT_END' && row.segment && settled(row))
-    .map((row) => {
-      const { facts } = row
-      const segment = game?.periods
-        .find((period) => period.id === row.period.id)
-        ?.segments.find((segment) => segment.id === row.segment.id)
-      const revealed = revealedIndices(segment?.facts)
-      const samples = Array.isArray(facts.assetsWithReturns)
-        ? facts.assetsWithReturns.map(parseMarketFacts)
-        : []
-      // Require contiguous monthly samples starting at the pre-return balance.
-      const validSamples =
-        samples.length > 1 && samples.every((sample, ix) => sample.ix === ix)
-      const months: HistoryMonth[] = validSamples
-        ? samples.slice(1).map((sample, index) => {
-            const isRevealed = revealed.includes(index)
-            return {
-              index,
-              bank: finite(sample.bankReturn),
-              bonds: finite(sample.bondsReturn),
-              stocks: finite(sample.stocksReturn),
-              gain: difference(
-                finite(sample.totalAssets),
-                finite(samples[index].totalAssets)
-              ),
-              dice: isRevealed
-                ? (readMarketRoll(segment?.facts, index)?.dice ?? null)
-                : null,
-              revealed: isRevealed,
-            }
-          })
-        : []
-      const value = validSamples ? finite(samples.at(-1)?.totalAssets) : null
-      const decisions = parseMarketFacts(facts.decisions)
-      const allocation = {
-        bank: finite(decisions.bank),
-        bonds: finite(decisions.bonds),
-        stocks: finite(decisions.stocks),
-      }
+  return {
+    results,
+    settled: results.filter(
+      (row) => row.type === 'SEGMENT_END' && row.segment && settled(row)
+    ),
+    inPeriod,
+  }
+}
+
+export function buildHistory(data: ResultQuery) {
+  const game = data.result?.currentGame
+  const active = game?.activePeriod
+  const { results, settled, inPeriod } = readResultHistory(data)
+  const quarters: HistoryQuarter[] = settled.map((row) => {
+    const { facts } = row
+    const segment = game?.periods
+      .find((period) => period.id === row.period.id)
+      ?.segments.find((segment) => segment.id === row.segment.id)
+    const revealed = revealedIndices(segment?.facts)
+    const samples = readBalanceSamples(facts)
+    const months: HistoryMonth[] = samples.slice(1).map((sample, index) => {
+      const isRevealed = revealed.includes(index)
       return {
-        id: row.id,
-        year: 2026 + row.period.index,
-        quarter: row.segment.index + 1,
-        label: `${String(2026 + row.period.index).slice(-2)} Q${row.segment.index + 1}`,
-        allocation: isAllocationValid(allocation) ? allocation : null,
-        value,
-        gain: difference(value, finite(samples[0]?.totalAssets)),
-        bonds: compounded(months, 'bonds'),
-        stocks: compounded(months, 'stocks'),
-        months,
+        index,
+        bank: finite(sample.bankReturn),
+        bonds: finite(sample.bondsReturn),
+        stocks: finite(sample.stocksReturn),
+        gain: difference(
+          finite(sample.totalAssets),
+          finite(samples[index].totalAssets)
+        ),
+        dice: isRevealed
+          ? (readMarketRoll(segment?.facts, index)?.dice ?? null)
+          : null,
+        revealed: isRevealed,
       }
     })
+    const value = finite(samples.at(-1)?.totalAssets)
+    const decisions = parseMarketFacts(facts.decisions)
+    const allocation = {
+      bank: finite(decisions.bank),
+      bonds: finite(decisions.bonds),
+      stocks: finite(decisions.stocks),
+    }
+    return {
+      id: row.id,
+      year: 2026 + row.period.index,
+      quarter: row.segment.index + 1,
+      label: `${String(2026 + row.period.index).slice(-2)} Q${row.segment.index + 1}`,
+      allocation: isAllocationValid(allocation) ? allocation : null,
+      value,
+      gain: difference(value, finite(samples[0]?.totalAssets)),
+      bonds: compounded(months, 'bonds'),
+      stocks: compounded(months, 'stocks'),
+      months,
+    }
+  })
   const years = [
     ...new Set([
       ...results
