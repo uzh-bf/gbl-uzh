@@ -129,7 +129,6 @@ function Cockpit() {
           data={data}
           refetchResult={refetch}
           readyControl={readyControl}
-          allocationView={view}
           action={
             view === 'editing' ? (
               <PlayerActionButton

@@ -19,7 +19,7 @@ function Welcome() {
   if (error || !data?.self) {
     return (
       <WelcomeMessage>
-        <h1>We couldn’t load your bank</h1>
+        <h1 className="mobile:app-heading">We couldn’t load your bank</h1>
         <p role="alert">
           {error
             ? 'Please try again. Your bank details have not been changed.'
@@ -27,13 +27,13 @@ function Welcome() {
         </p>
         {error && (
           <button
-            className="text-player-primary"
+            className="text-player-primary mobile:app-control"
             onClick={() => void refetch()}
           >
             Try again
           </button>
         )}
-        <Link href="/" className="text-player-primary">
+        <Link href="/" className="text-player-primary mobile:app-control">
           Back to Minigame
         </Link>
       </WelcomeMessage>

@@ -341,14 +341,10 @@ async function assertAllocationControls(page: Page, admin: Page) {
   await savings.fill('33.3')
   await page.getByRole('link', { name: 'Market outlook' }).click()
   await expect(page).toHaveURL(/tab=market/)
-  await expect(
-    page.getByRole('heading', { name: 'Market', exact: true })
-  ).toBeVisible()
+  await expect(page.getByTestId('market-panel')).toBeVisible()
   await expect(submit).toBeHidden()
   await page.getByRole('link', { name: 'History', exact: true }).click()
-  await expect(
-    page.getByRole('heading', { name: 'History', exact: true })
-  ).toBeVisible()
+  await expect(page.getByTestId('history-panel')).toBeVisible()
   await page.getByRole('link', { name: 'Team', exact: true }).click()
   await expect(
     page.getByRole('heading', { name: 'Learning Activities' })
@@ -593,7 +589,7 @@ async function assertSubmittedStates(page: Page, admin: Page) {
     for (const tab of ['Market', 'History']) {
       await page.getByRole('link', { name: tab, exact: true }).click()
       await expect(
-        page.getByRole('heading', { name: tab, exact: true })
+        page.getByTestId(`${tab.toLowerCase()}-panel`)
       ).toBeVisible()
     }
     await page.getByRole('link', { name: 'Cockpit', exact: true }).click()
@@ -1646,6 +1642,27 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     })
     await expect(quarters).toHaveCount(1)
     const value = await panel.getByTestId('history-value').innerText()
+    await panel.getByRole('button', { name: 'All', exact: true }).click()
+    await expect(quarters).toHaveCount(3)
+    await expect(quarters.first()).toContainText('2026 · Q1')
+    await expect(quarters.last()).toContainText('2027 · Q1')
+    await expect(panel.getByTestId('history-value')).toHaveText(value)
+    const header = player.locator('header')
+    for (const tab of ['Cockpit', 'Market', 'Team', 'History']) {
+      await player.getByRole('link', { name: tab, exact: true }).click()
+      await expect(header.getByRole('heading', { level: 1 })).toHaveText(
+        players[0].name
+      )
+      await expect(header.locator('p')).toHaveText('HQ Aargau')
+      await expect(header.locator('img')).toHaveCount(1)
+      if (tab === 'Team')
+        await expect(
+          player.getByTestId('team-panel').locator('img')
+        ).toHaveCount(0)
+    }
+    await expect(
+      panel.getByRole('button', { name: 'All', exact: true })
+    ).toHaveAttribute('aria-pressed', 'true')
     await panel.getByRole('button', { name: '2026', exact: true }).click()
     await expect(quarters).toHaveCount(2)
     await expect(panel.getByTestId('history-value')).toHaveText(value)

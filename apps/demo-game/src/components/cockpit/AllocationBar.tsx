@@ -37,15 +37,15 @@ export default function AllocationBar({
           style={{ width: `${value[key]}%` }}
         >
           {compact ? null : value[key] < 20 ? (
-            <div className="grid h-full place-items-center px-[8px] text-[13px] [@container(max-width:30px)]:invisible [@container(max-width:56px)]:px-0 [@container(max-width:56px)]:text-[11px]">
+            <div className="mobile:px-app-2 mobile:app-annotation grid h-full place-items-center px-[8px] text-[13px] [@container(max-width:30px)]:invisible [@container(max-width:56px)]:px-0 [@container(max-width:56px)]:text-[11px]">
               <strong>{value[key]}%</strong>
             </div>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center px-[12px] text-center leading-[1.1] whitespace-nowrap [@container(max-width:56px)]:invisible [@container(max-width:80px)]:px-0">
-              <strong className="text-[18px] min-[601px]:text-[21px]">
+            <div className="mobile:px-app-3 flex h-full flex-col items-center justify-center px-[12px] text-center leading-[1.1] whitespace-nowrap [@container(max-width:56px)]:invisible [@container(max-width:80px)]:px-0">
+              <strong className="mobile:app-body mobile:leading-[var(--app-leading-value)] min-[601px]:text-[21px]">
                 {value[key]}%
               </strong>
-              <span className="mt-[4px] text-[13px] font-semibold min-[601px]:text-[15px] [@container(max-width:80px)]:hidden">
+              <span className="mobile:mt-app-1 mobile:app-annotation mt-[4px] font-semibold min-[601px]:text-[15px] [@container(max-width:80px)]:hidden">
                 {assetLabels[key].name}
               </span>
             </div>

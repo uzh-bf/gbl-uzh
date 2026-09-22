@@ -156,17 +156,17 @@ export default function WelcomeSetup({
   }
 
   return (
-    <div className="font-player text-player-text min-[721px]:border-player-input mx-auto flex h-dvh max-w-[720px] flex-col bg-white text-[16px] leading-[1.5] min-[721px]:border-x">
-      <header className="border-player-input flex min-h-[54px] shrink-0 items-center justify-between gap-[12px] border-b px-[16px] py-[12px] min-[721px]:px-[32px]">
-        <div className="flex min-w-0 items-baseline gap-[10px]">
-          <strong className="text-[18px]">Minigame</strong>
+    <div className="font-player text-player-text min-[721px]:border-player-input mobile:app-body mx-auto flex h-dvh max-w-[720px] flex-col bg-white text-[16px] leading-[1.5] min-[721px]:border-x">
+      <header className="border-player-input mobile:gap-app-3 mobile:px-app-4 mobile:py-app-3 flex min-h-[54px] shrink-0 items-center justify-between gap-[12px] border-b px-[16px] py-[12px] min-[721px]:px-[32px]">
+        <div className="mobile:gap-app-3 flex min-w-0 items-baseline gap-[10px]">
+          <strong className="mobile:app-body text-[18px]">Minigame</strong>
           <span className="text-player-muted truncate" title={player.game.name}>
             {player.game.name}
           </span>
         </div>
         <span
           className={cn(
-            'shrink-0 rounded-[5px] px-[11px] py-[3px] text-[13px] font-bold',
+            'mobile:px-app-3 mobile:py-app-1 mobile:app-caption shrink-0 rounded-[5px] px-[11px] py-[3px] text-[13px] font-bold',
             step === 'review'
               ? 'bg-player-success-surface text-player-success'
               : 'bg-player-border'
@@ -185,11 +185,11 @@ export default function WelcomeSetup({
       >
         <main
           ref={content}
-          className="flex-1 overflow-y-auto p-[16px] min-[721px]:px-[32px] min-[721px]:py-[28px]"
+          className="mobile:p-app-4 flex-1 overflow-y-auto p-[16px] min-[721px]:px-[32px] min-[721px]:py-[28px]"
         >
           {step === 'intro' && (
             <Image
-              className="border-player-input mb-[14px] aspect-[2/1] h-auto w-full rounded-[12px] border object-cover"
+              className="border-player-input mobile:mb-app-3 mb-[14px] aspect-[2/1] h-auto w-full rounded-[12px] border object-cover"
               src="/images/welcome.jpg"
               alt="A winning lottery ticket surrounded by coins and a piggy bank"
               width={720}
@@ -201,7 +201,7 @@ export default function WelcomeSetup({
           <h1
             ref={heading}
             tabIndex={-1}
-            className="m-0 mb-[8px] text-[24px] leading-[1.25] font-bold tracking-[-0.3px] focus:outline-none"
+            className="mobile:mb-app-2 mobile:app-heading m-0 mb-[8px] text-[24px] leading-[1.25] font-bold tracking-[-0.3px] focus:outline-none"
           >
             {steps[step].title}
           </h1>
@@ -211,12 +211,12 @@ export default function WelcomeSetup({
           {step === 'intro' ? (
             <>
               <section
-                className="border-player-primary mt-[16px] mb-[14px] border-l-[3px] pl-[14px]"
+                className="border-player-primary mobile:mt-app-4 mobile:mb-app-3 mobile:pl-app-3 mt-[16px] mb-[14px] border-l-[3px] pl-[14px]"
                 aria-labelledby="your-task"
               >
                 <h2
                   id="your-task"
-                  className="text-player-muted m-0 mb-[5px] text-[13px] font-bold tracking-[1px] uppercase"
+                  className="text-player-muted mobile:mb-app-2 mobile:app-caption m-0 mb-[5px] text-[13px] font-bold tracking-[1px] uppercase"
                 >
                   Your task
                 </h2>
@@ -225,7 +225,7 @@ export default function WelcomeSetup({
                   repeat that decision every segment.
                 </p>
               </section>
-              <ul className="m-0 mb-[14px] grid list-none gap-[8px] p-0">
+              <ul className="mobile:mb-app-3 mobile:gap-app-2 m-0 mb-[14px] grid list-none gap-[8px] p-0">
                 {[
                   {
                     name: 'Savings',
@@ -245,7 +245,7 @@ export default function WelcomeSetup({
                 ].map(({ name, risk, color }) => (
                   <li
                     key={name}
-                    className="border-player-input grid grid-cols-[10px_78px_1fr] items-center gap-[10px] rounded-[12px] border px-[12px] py-[11px]"
+                    className="border-player-input mobile:gap-app-3 mobile:px-app-3 mobile:py-app-3 grid grid-cols-[10px_78px_1fr] items-center gap-[10px] rounded-[12px] border px-[12px] py-[11px]"
                   >
                     <i className={cn('size-[10px] rounded-[2px]', color)} />
                     <strong>{name}</strong>
@@ -253,15 +253,15 @@ export default function WelcomeSetup({
                   </li>
                 ))}
               </ul>
-              <p className="text-player-muted m-0 text-[14px] leading-[1.65]">
+              <p className="text-player-muted mobile:app-caption m-0 text-[14px] leading-[1.65]">
                 Savings pay 0.2% a month. Bonds and stocks follow the market
                 expectation, simulated by two dice.
               </p>
             </>
           ) : step === 'setup' ? (
             <>
-              <div className="mt-[20px] grid gap-[20px]">
-                <div className="flex flex-col gap-[8px]">
+              <div className="mobile:mt-app-4 mobile:gap-app-3 mt-[20px] grid gap-[20px]">
+                <div className="mobile:gap-app-2 flex flex-col gap-[8px]">
                   <label className="font-bold" htmlFor="bank-name">
                     Bank name
                   </label>
@@ -278,26 +278,26 @@ export default function WelcomeSetup({
                   />
                   <p
                     id="bank-name-help"
-                    className="text-player-muted m-0 mt-[6px] text-[14px] leading-[1.65]"
+                    className="text-player-muted mobile:mt-app-2 mobile:app-caption m-0 mt-[6px] text-[14px] leading-[1.65]"
                   >
                     Shown on the ranking and the projector.
                   </p>
                   <p
                     id="bank-name-error"
-                    className="text-player-invalid m-0 text-[14px] empty:hidden"
+                    className="text-player-invalid mobile:app-caption m-0 text-[14px] empty:hidden"
                     aria-live="polite"
                   >
                     {form.touched.name && form.errors.name}
                   </p>
                 </div>
-                <div className="flex flex-col gap-[8px]">
+                <div className="mobile:gap-app-2 flex flex-col gap-[8px]">
                   <span className="font-bold" id="avatar-label">
                     Avatar
                   </span>
                   {avatarPicker(
                     <button
                       type="button"
-                      className="border-player-input text-player-muted focus-visible:outline-player-primary flex min-h-[62px] w-full items-center gap-[16px] rounded-[12px] border bg-white px-[20px] py-[12px] text-left [font:inherit] focus-visible:outline-2 focus-visible:outline-offset-[3px]"
+                      className="border-player-input text-player-muted focus-visible:outline-player-primary mobile:app-control mobile:gap-app-3 flex min-h-[62px] w-full items-center gap-[16px] rounded-[12px] border bg-white px-[20px] py-[12px] text-left [font:inherit] focus-visible:outline-2 focus-visible:outline-offset-[3px]"
                       aria-labelledby="avatar-label avatar-value"
                     >
                       {avatar?.value ? (
@@ -324,14 +324,14 @@ export default function WelcomeSetup({
                     </button>
                   )}
                 </div>
-                <div className="flex flex-col gap-[8px]">
+                <div className="mobile:gap-app-2 flex flex-col gap-[8px]">
                   <span className="font-bold" id="location-label">
                     Location
                   </span>
                   {locationPicker(
                     <button
                       type="button"
-                      className="border-player-input text-player-muted focus-visible:outline-player-primary flex min-h-[62px] w-full items-center gap-[16px] rounded-[12px] border bg-white px-[20px] py-[12px] text-left [font:inherit] focus-visible:outline-2 focus-visible:outline-offset-[3px]"
+                      className="border-player-input text-player-muted focus-visible:outline-player-primary mobile:app-control mobile:gap-app-3 flex min-h-[62px] w-full items-center gap-[16px] rounded-[12px] border bg-white px-[20px] py-[12px] text-left [font:inherit] focus-visible:outline-2 focus-visible:outline-offset-[3px]"
                       aria-labelledby="location-label location-value"
                     >
                       <MapPin
@@ -349,23 +349,23 @@ export default function WelcomeSetup({
                   )}
                 </div>
               </div>
-              <div className="border-player-input mt-[24px] flex items-center justify-between gap-[14px] border-t pt-[16px]">
+              <div className="border-player-input mobile:mt-app-4 mobile:gap-app-3 mobile:pt-app-4 mt-[24px] flex items-center justify-between gap-[14px] border-t pt-[16px]">
                 <div>
-                  <span className="text-player-body text-[14px]">
+                  <span className="text-player-body mobile:app-caption text-[14px]">
                     Starting capital
                   </span>
-                  <strong className="block text-[22px] leading-[1.3] whitespace-nowrap">
+                  <strong className="mobile:app-value block text-[22px] leading-[1.3] whitespace-nowrap">
                     10&apos;000.00 CHF
                   </strong>
                 </div>
-                <span className="text-player-body text-right text-[14px]">
+                <span className="text-player-body mobile:app-caption text-right text-[14px]">
                   Same for every team
                 </span>
               </div>
             </>
           ) : (
             <>
-              <div className="border-player-input mt-[18px] mb-[16px] flex items-center gap-[14px] rounded-[16px] border px-[20px] py-[15px] shadow-[0_1px_3px_#00000014]">
+              <div className="border-player-input mobile:mt-app-4 mobile:mb-app-4 mobile:gap-app-3 mobile:px-app-4 mobile:py-app-4 mt-[18px] mb-[16px] flex items-center gap-[14px] rounded-[16px] border px-[20px] py-[15px] shadow-[0_1px_3px_#00000014]">
                 {avatar?.value && (
                   <Image
                     src={avatar.value}
@@ -376,18 +376,18 @@ export default function WelcomeSetup({
                   />
                 )}
                 <div className="min-w-0">
-                  <strong className="text-[20px] [overflow-wrap:anywhere]">
+                  <strong className="mobile:app-heading text-[20px] [overflow-wrap:anywhere]">
                     {form.values.name.trim()}
                   </strong>
-                  <p className="text-player-muted m-0 text-[14px]">
+                  <p className="text-player-muted mobile:app-caption m-0 text-[14px]">
                     {avatar?.label} · HQ {location?.label}
                   </p>
-                  <p className="text-player-muted m-0 text-[14px]">
+                  <p className="text-player-muted mobile:app-caption m-0 text-[14px]">
                     10&apos;000.00 CHF to invest
                   </p>
                 </div>
               </div>
-              <div className="grid gap-[8px]">
+              <div className="mobile:gap-app-2 grid gap-[8px]">
                 {[
                   {
                     label: 'Bank name',
@@ -416,7 +416,7 @@ export default function WelcomeSetup({
                   return (
                     <div
                       key={label}
-                      className="border-player-input flex min-h-[54px] items-center gap-[10px] rounded-[12px] border px-[14px] py-[5px]"
+                      className="border-player-input mobile:gap-app-3 mobile:px-app-3 mobile:py-app-2 flex min-h-[54px] items-center gap-[10px] rounded-[12px] border px-[14px] py-[5px]"
                     >
                       <span className="flex-1">{label}</span>
                       <strong className="max-w-[48%] text-right [overflow-wrap:anywhere]">
@@ -427,10 +427,10 @@ export default function WelcomeSetup({
                   )
                 })}
               </div>
-              <div className="border-player-input text-player-body mt-[16px] flex gap-[12px] rounded-[12px] border p-[14px]">
+              <div className="border-player-input text-player-body mobile:mt-app-4 mobile:gap-app-3 mobile:p-app-3 mt-[16px] flex gap-[12px] rounded-[12px] border p-[14px]">
                 <Info
                   aria-hidden="true"
-                  className="text-player-primary mt-[3px] w-[18px] shrink-0"
+                  className="text-player-primary mobile:mt-app-1 mt-[3px] w-[18px] shrink-0"
                 />
                 <p className="m-0">
                   {player.game.status === 'SCHEDULED' ||
@@ -442,19 +442,22 @@ export default function WelcomeSetup({
             </>
           )}
         </main>
-        <footer className="border-player-input shrink-0 border-t bg-white px-[16px] pt-[12px] pb-[max(12px,env(safe-area-inset-bottom))] min-[721px]:px-[32px]">
+        <footer className="border-player-input mobile:px-app-4 mobile:pt-app-3 shrink-0 border-t bg-white px-[16px] pt-[12px] pb-[max(12px,env(safe-area-inset-bottom))] min-[721px]:px-[32px]">
           {submitError && (
             <p
               role="alert"
-              className="text-player-invalid m-0 mb-[10px] text-[14px] empty:hidden"
+              className="text-player-invalid mobile:mb-app-3 mobile:app-caption m-0 mb-[10px] text-[14px] empty:hidden"
             >
               {submitError}
             </p>
           )}
-          <div className="flex items-center gap-[12px]">
+          <div className="mobile:gap-app-3 flex items-center gap-[12px]">
             {step === 'intro' ? (
               <>
-                <div className="flex gap-[5px]" aria-hidden="true">
+                <div
+                  className="mobile:gap-app-2 flex gap-[5px]"
+                  aria-hidden="true"
+                >
                   <i className="bg-player-primary size-[7px] rounded-full" />
                   <i className="bg-player-progress-done size-[7px] rounded-full" />
                   <i className="bg-player-progress size-[7px] rounded-full" />
@@ -496,7 +499,7 @@ export default function WelcomeSetup({
             )}
           </div>
           {step === 'setup' && !canContinue && (
-            <p className="text-player-muted m-0 mt-[8px] text-center text-[14px]">
+            <p className="text-player-muted mobile:mt-app-2 mobile:app-caption m-0 mt-[8px] text-center text-[14px]">
               Choose all three to continue
             </p>
           )}

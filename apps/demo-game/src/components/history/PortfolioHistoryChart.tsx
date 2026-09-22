@@ -27,7 +27,7 @@ export default function PortfolioHistoryChart({
                 color: 'var(--color-player-primary)',
               },
             }}
-            className="aspect-auto h-[260px] w-full min-[601px]:h-[300px]"
+            className="mobile:h-app-chart-history aspect-auto w-full min-[601px]:h-[300px]"
           >
             <BarChart
               accessibilityLayer
@@ -44,7 +44,7 @@ export default function PortfolioHistoryChart({
                 tickMargin={14}
                 tick={{
                   fill: 'var(--color-player-muted)',
-                  fontSize: 16,
+                  fontSize: 'var(--history-axis-size, 16px)',
                 }}
               />
               <YAxis hide domain={[0, 'dataMax']} />

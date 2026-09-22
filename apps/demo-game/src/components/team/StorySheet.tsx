@@ -84,18 +84,18 @@ export default function StorySheet({
       }
     >
       <h2
-        className={`m-0 pb-[20px] text-[24px] leading-[1.25] font-bold min-[601px]:pb-[32px] min-[601px]:text-[36px] ${sheetPadding}`}
+        className={`mobile:pb-app-4 mobile:app-heading m-0 pb-[20px] text-[24px] leading-[1.25] font-bold min-[601px]:pb-[32px] min-[601px]:text-[36px] ${sheetPadding}`}
       >
         {story.title}
       </h2>
       <div
-        className={`border-player-border flex flex-wrap items-center justify-between gap-[12px] border-y py-[16px] min-[601px]:py-[24px] ${sheetPadding}`}
+        className={`border-player-border mobile:gap-app-3 mobile:py-app-4 flex flex-wrap items-center justify-between gap-[12px] border-y py-[16px] min-[601px]:py-[24px] ${sheetPadding}`}
       >
-        <span className="text-[17px] font-semibold min-[601px]:text-[26px]">
+        <span className="mobile:app-body font-semibold min-[601px]:text-[26px]">
           Card {index + 1} of {sequence.stories.length}
         </span>
         <div
-          className="flex max-w-[50%] flex-wrap gap-[8px]"
+          className="mobile:gap-app-2 flex max-w-[50%] flex-wrap gap-[8px]"
           aria-hidden="true"
         >
           {sequence.stories.map((item, ix) => (
@@ -115,7 +115,7 @@ export default function StorySheet({
       </div>
       <div
         key={story.id}
-        className={`py-[16px] min-[601px]:py-[24px] ${sheetPadding}`}
+        className={`mobile:py-app-4 py-[16px] min-[601px]:py-[24px] ${sheetPadding}`}
       >
         <div className={contentProse}>
           <Markdown>
@@ -127,7 +127,7 @@ export default function StorySheet({
         {error && (
           <p
             role="alert"
-            className="text-player-error text-[17px] min-[601px]:text-[24px]"
+            className="text-player-error mobile:app-body min-[601px]:text-[24px]"
           >
             Could not save your progress. Select Continue to try again.
           </p>

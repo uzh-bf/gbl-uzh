@@ -21,7 +21,7 @@ export default function PlayerActionButton({
       {...props}
       className={{
         root: cn(
-          'min-h-[50px] w-[180px] min-w-0 shrink rounded-[9px] px-[14px] py-[10px] text-[18px] font-normal transition-[background-color,opacity] duration-150 min-[601px]:min-h-[60px] min-[601px]:w-[220px] min-[601px]:px-[20px] min-[601px]:py-[12px] min-[601px]:text-[20px]',
+          'mobile:app-control w-[180px] min-w-0 shrink rounded-[9px] font-normal transition-[background-color,opacity] duration-150 min-[601px]:min-h-[60px] min-[601px]:w-[220px] min-[601px]:px-[20px] min-[601px]:py-[12px] min-[601px]:text-[20px]',
           variants[variant],
           className
         ),

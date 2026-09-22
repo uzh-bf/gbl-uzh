@@ -1,12 +1,10 @@
 import { cn } from '@gbl-uzh/ui'
 import { BookOpen, ChevronRight, Lightbulb } from 'lucide-react'
-import Image from 'next/image'
 import { useId, type ReactNode } from 'react'
 import type { ResultQuery } from '~/graphql/generated/ops'
 import { historyAmount, historyPercent } from '~/lib/history'
 import { parseMarketFacts } from '~/lib/market'
 import { learningXP, teamStatistics, type StoryEntry } from '~/lib/team'
-import { avatarNames, cantonNames } from '~/lib/teamIdentity'
 
 type Activity = { id: string; title: string; reward?: unknown }
 
@@ -43,35 +41,8 @@ export default function TeamPanel({
     threshold > 0 ? Math.min(100, (experience / threshold) * 100) : 0
   return (
     <section data-cy="team-panel">
-      <div className="border-player-border flex items-center gap-[20px] border-b px-[16px] py-[24px] min-[601px]:gap-[28px] min-[601px]:p-[32px]">
-        <div className="bg-player-progress text-player-primary grid size-[72px] shrink-0 place-items-center overflow-hidden rounded-full min-[601px]:size-[112px]">
-          {avatar ? (
-            <Image
-              src={avatar}
-              width={112}
-              height={112}
-              alt=""
-              className="size-full object-cover"
-            />
-          ) : (
-            <span aria-hidden="true" className="text-[32px] font-bold">
-              {self?.name?.trim().slice(0, 1) || 'T'}
-            </span>
-          )}
-        </div>
-        <div className="min-w-0">
-          <h2 className="m-0 text-[28px] font-bold [overflow-wrap:anywhere] min-[601px]:text-[40px]">
-            {self?.name}
-          </h2>
-          <p className="text-player-muted mt-[4px] text-[17px] min-[601px]:text-[26px]">
-            {avatarNames[avatarKey] ?? 'Team'} · HQ{' '}
-            {cantonNames[location] ?? (location || '—')}
-            {cantonNames[location] ? ` (${location})` : ''}
-          </p>
-        </div>
-      </div>
-      <div className="border-player-border border-b px-[16px] py-[20px] min-[601px]:px-[32px] min-[601px]:py-[28px]">
-        <div className="mb-[16px] flex flex-wrap justify-between gap-[8px] text-[18px] min-[601px]:text-[26px]">
+      <div className="border-player-border mobile:px-app-4 mobile:py-app-4 border-b min-[601px]:px-[32px] min-[601px]:py-[28px]">
+        <div className="mobile:mb-app-4 mobile:gap-app-2 mobile:app-body mb-[16px] flex flex-wrap justify-between gap-[8px] min-[601px]:text-[26px]">
           <span className="font-semibold">Level {self?.level?.index ?? 0}</span>
           <span className="text-player-muted">
             {experience} / {threshold > 0 ? threshold : '—'} XP
@@ -128,7 +99,7 @@ export default function TeamPanel({
               description={`Quiz${xp !== null ? ` · ${xp} XP` : ''}`}
               state={state}
               onClick={() => onLearning(activity.id)}
-              icon={<Lightbulb size={26} />}
+              icon={<Lightbulb size={26} className="mobile:size-app-icon" />}
             />
           )
         })}
@@ -145,7 +116,7 @@ export default function TeamPanel({
             description={`Card ${entry.index + 1} of ${entry.sequence.stories.length} · ${entry.sequence.year} · Q${entry.sequence.quarter}`}
             state={visited.has(entry.story.id) ? 'Read' : 'New'}
             onClick={() => onStory(entry)}
-            icon={<BookOpen size={26} />}
+            icon={<BookOpen size={26} className="mobile:size-app-icon" />}
           />
         ))}
         {!stories.length && (
@@ -168,14 +139,14 @@ function Statistic({
   testId: string
 }) {
   return (
-    <div className="border-player-border min-w-0 px-[16px] py-[20px] first:border-r min-[601px]:p-[32px]">
-      <dt className="text-player-muted text-[13px] font-semibold tracking-[1px] uppercase min-[601px]:text-[22px]">
+    <div className="border-player-border mobile:px-app-4 mobile:py-app-4 min-w-0 px-[16px] py-[20px] first:border-r min-[601px]:p-[32px]">
+      <dt className="text-player-muted mobile:app-caption font-semibold tracking-[1px] uppercase min-[601px]:text-[22px]">
         {title}
       </dt>
       <dd
         data-cy={testId}
         className={cn(
-          'm-0 mt-[8px] text-[25px] font-bold [overflow-wrap:anywhere] tabular-nums min-[601px]:text-[40px]',
+          'mobile:mt-app-2 mobile:app-value m-0 mt-[8px] font-bold [overflow-wrap:anywhere] tabular-nums min-[601px]:text-[40px]',
           color
         )}
       >
@@ -186,12 +157,12 @@ function Statistic({
 }
 function SectionHeading({ title, note }: { title: string; note?: string }) {
   return (
-    <div className="border-player-border flex flex-wrap items-center justify-between gap-[8px] border-b px-[16px] pt-[24px] pb-[16px] min-[601px]:px-[32px] min-[601px]:pt-[36px] min-[601px]:pb-[22px]">
-      <h2 className="text-player-muted m-0 text-[14px] font-semibold tracking-[1px] uppercase min-[601px]:text-[24px]">
+    <div className="border-player-border mobile:gap-app-2 mobile:px-app-4 mobile:pt-app-4 mobile:pb-app-4 flex flex-wrap items-center justify-between gap-[8px] border-b min-[601px]:px-[32px] min-[601px]:pt-[36px] min-[601px]:pb-[22px]">
+      <h2 className="text-player-muted mobile:app-caption m-0 font-semibold tracking-[1px] uppercase min-[601px]:text-[24px]">
         {title}
       </h2>
       {note && (
-        <span className="text-player-muted text-[15px] min-[601px]:text-[24px]">
+        <span className="text-player-muted mobile:app-caption min-[601px]:text-[24px]">
           {note}
         </span>
       )}
@@ -220,7 +191,7 @@ function ContentRow({
         aria-label={title}
         aria-describedby={`${descriptionId} ${stateId}`}
         onClick={onClick}
-        className="focus-visible:outline-player-primary hover:bg-player-feedback flex w-full items-center gap-[12px] px-[16px] py-[20px] text-left focus-visible:outline-2 focus-visible:outline-offset-[-3px] min-[601px]:gap-[20px] min-[601px]:px-[32px] min-[601px]:py-[26px]"
+        className="focus-visible:outline-player-primary hover:bg-player-feedback mobile:gap-app-3 mobile:px-app-4 mobile:py-app-4 flex w-full items-center text-left focus-visible:outline-2 focus-visible:outline-offset-[-3px] min-[601px]:gap-[20px] min-[601px]:px-[32px] min-[601px]:py-[26px]"
       >
         <span
           aria-hidden="true"
@@ -234,19 +205,19 @@ function ContentRow({
           {icon}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[19px] leading-[1.2] font-semibold [overflow-wrap:anywhere] min-[601px]:text-[28px]">
+          <span className="mobile:app-body block leading-[1.2] font-semibold [overflow-wrap:anywhere] min-[601px]:text-[28px]">
             {title}
           </span>
           <span
             id={descriptionId}
-            className="text-player-muted mt-[4px] block text-[15px] min-[601px]:text-[24px]"
+            className="text-player-muted mobile:mt-app-1 mobile:app-caption mt-[4px] block min-[601px]:text-[24px]"
           >
             {description}
           </span>
         </span>
         <span
           id={stateId}
-          className="text-player-body text-[15px] font-semibold min-[601px]:text-[24px]"
+          className="text-player-body mobile:app-caption font-semibold min-[601px]:text-[24px]"
         >
           {state}
         </span>
@@ -260,7 +231,7 @@ function ContentRow({
 }
 function Empty({ children }: { children: ReactNode }) {
   return (
-    <li className="text-player-muted px-[16px] py-[24px] text-[17px] min-[601px]:px-[32px] min-[601px]:text-[24px]">
+    <li className="text-player-muted mobile:px-app-4 mobile:py-app-4 mobile:app-body py-[24px] min-[601px]:px-[32px] min-[601px]:text-[24px]">
       {children}
     </li>
   )

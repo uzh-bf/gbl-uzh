@@ -9,7 +9,7 @@ import {
 } from '~/lib/market'
 
 const sectionClass =
-  'border-player-border border-b px-[16px] py-[24px] min-[601px]:px-[32px] min-[601px]:py-[28px]'
+  'border-player-border border-b mobile:px-app-4 mobile:py-app-4 min-[601px]:px-[32px] min-[601px]:py-[28px]'
 const marketAssets = [
   {
     key: 'bonds',
@@ -54,7 +54,7 @@ function StaticDie({
     <span
       role="img"
       aria-label={`${label}: ${value}`}
-      className={`grid size-[36px] shrink-0 grid-cols-3 grid-rows-3 gap-[3px] rounded-[8px] p-[6px] ${color}`}
+      className={`mobile:size-app-die mobile:gap-[2px] mobile:p-app-1 grid size-[36px] shrink-0 grid-cols-3 grid-rows-3 gap-[3px] rounded-[8px] p-[6px] ${color}`}
     >
       {Array.from({ length: 9 }, (_, index) => (
         <span
@@ -74,7 +74,7 @@ function AssetDice({
   asset: (typeof marketAssets)[number]
 }) {
   return (
-    <div className="flex items-center gap-[6px]">
+    <div className="mobile:gap-app-2 flex items-center gap-[6px]">
       <StaticDie
         value={dice.shared}
         color="bg-[#e85c24] text-white"
@@ -85,7 +85,7 @@ function AssetDice({
         color={asset.dieColor}
         label={`${asset.label} die`}
       />
-      <strong className="text-player-body min-w-[32px] text-[18px]">
+      <strong className="text-player-body mobile:app-body min-w-[32px] text-[18px]">
         = {dice[asset.key]}
       </strong>
     </div>
@@ -133,21 +133,21 @@ export default function MarketPanel({ data }: { data: ResultQuery }) {
           data-cy="market-comparison"
           aria-live="polite"
         >
-          <p className="text-player-muted m-0 mb-[24px] text-[18px] min-[601px]:text-[24px]">
+          <p className="text-player-muted mobile:mb-app-4 mobile:app-caption m-0 mb-[24px] min-[601px]:text-[24px]">
             Monthly returns · Month {latest.index + 1}
           </p>
-          <div className="grid gap-[18px]">
+          <div className="mobile:gap-app-3 grid gap-[18px]">
             {assets.map(({ key, label, color }) => {
               const value = roll.returns[key]
               const end = ((value - min) / span) * 100
               return (
                 <div
-                  className="grid grid-cols-[90px_1fr_65px] items-center gap-[12px] min-[601px]:grid-cols-[160px_1fr_80px]"
+                  className="mobile:gap-app-3 grid grid-cols-[90px_1fr_65px] items-center gap-[12px] min-[601px]:grid-cols-[160px_1fr_80px]"
                   key={key}
                   data-cy={`market-return-${key}`}
                   aria-label={`${label}: ${formatMarketReturn(value)}`}
                 >
-                  <div className="text-player-body flex items-center gap-[10px] text-[18px] min-[601px]:gap-[20px] min-[601px]:text-[26px]">
+                  <div className="text-player-body mobile:gap-app-3 mobile:app-body flex items-center min-[601px]:gap-[20px] min-[601px]:text-[26px]">
                     <span
                       className={`size-[14px] shrink-0 rounded-[4px] min-[601px]:size-[20px] ${color}`}
                     />
@@ -171,7 +171,7 @@ export default function MarketPanel({ data }: { data: ResultQuery }) {
                       />
                     )}
                   </div>
-                  <strong className="text-right text-[18px] min-[601px]:text-[24px]">
+                  <strong className="mobile:app-caption text-right min-[601px]:text-[24px]">
                     {formatMarketReturn(value)}
                   </strong>
                 </div>

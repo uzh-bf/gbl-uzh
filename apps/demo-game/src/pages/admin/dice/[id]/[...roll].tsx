@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import { ProbabilityChart, shouldRefetchGameResult } from '@gbl-uzh/ui'
-import { Button } from '@uzh-bf/design-system'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -20,12 +19,13 @@ import {
 import { queueRefetch } from '~/lib/queuedRefetch'
 
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@uzh-bf/design-system'
+} from '~/components/admin/AdminControls'
 
 const Die = dynamic(() => import('@gbl-uzh/ui').then((mod) => mod.Die), {
   ssr: false,
@@ -234,7 +234,7 @@ const Forecast = () => {
     return <p>Market data is unavailable.</p>
   const indices = revealedIndices(segment.facts)
   return (
-    <div className="flex flex-col gap-4 px-8 py-8">
+    <div className="mobile:app-panel mobile:app-body flex flex-col gap-4 px-8 py-8">
       <h1>
         {2026 + segment.periodIx} · Quarter {segment.index + 1}
       </h1>

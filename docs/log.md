@@ -2,6 +2,10 @@
 
 ## 2026-09-22
 
+**Update**: [UI Building Blocks](ui-components.md) — added rounded, scrolling History filters with All; unified player header identity and removed the duplicate Team avatar; tightened annual-chart spacing and reference labels, colored accumulated-return percentages, and distinguished completed progress from Stocks.
+
+**Update**: [UI Building Blocks](ui-components.md) — central demo-game mobile sizing roles now cover player tabs, welcome, admin, and portaled content while preserving desktop layouts and the updated cockpit results. Review removed redundant size declarations and unchanged component re-exports, corrected mobile portal fonts, and aligned History padding and allocation hit areas with the sizing contract.
+
 **Update**: [Developing a Game](developing-a-game.md) — reviewed and simplified result adapters and state rendering; shared settlement/sample parsing with History, and fixed year-end progress and opening-balance handling for missing records.
 
 **Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md), [Game Lifecycle](game-lifecycle.md) — replace the demo cockpit's quarter, consolidation, and year-end reports with the supplied designs; document settled result selection, cumulative chart semantics, annual asset returns, and advisory Ready behavior.

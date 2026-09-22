@@ -35,9 +35,11 @@ export default function AllocationForm({
 
   return (
     <form id="allocation-form" onSubmit={form.handleSubmit} noValidate>
-      <div className="border-player-border flex items-baseline justify-between gap-[12px] border-b p-[16px] min-[601px]:px-[24px] min-[601px]:py-[20px]">
-        <span className="text-player-muted text-[18px]">To allocate</span>
-        <strong className="text-[24px] leading-[1.5] font-bold tabular-nums min-[601px]:text-[30px]">
+      <div className="border-player-border mobile:gap-app-3 mobile:p-app-4 flex items-baseline justify-between gap-[12px] border-b p-[16px] min-[601px]:px-[24px] min-[601px]:py-[20px]">
+        <span className="text-player-muted mobile:app-body text-[18px]">
+          To allocate
+        </span>
+        <strong className="mobile:app-value leading-[1.5] font-bold tabular-nums min-[601px]:text-[30px]">
           {formatCHF(assets)}
         </strong>
       </div>
@@ -56,7 +58,10 @@ export default function AllocationForm({
               asset={key}
               amount={fieldValid ? (assets * allocation[key]) / 100 : null}
             >
-              <div className="border-player-input focus-within:outline-player-primary has-[[aria-invalid=true]]:border-player-invalid flex h-[44px] items-center justify-center rounded-[13px] border-2 px-[8px] text-[18px] font-bold focus-within:outline-2 focus-within:outline-offset-2 min-[601px]:h-[56px] min-[601px]:text-[22px]">
+              <label
+                htmlFor={`allocation-${key}`}
+                className="border-player-input focus-within:outline-player-primary has-[[aria-invalid=true]]:border-player-invalid mobile:px-app-2 mobile:app-body mobile:min-h-app-control mobile:rounded-app-control flex items-center justify-center rounded-[13px] border-2 px-[8px] font-bold focus-within:outline-2 focus-within:outline-offset-2 min-[601px]:h-[56px] min-[601px]:text-[22px]"
+              >
                 <input
                   className="player-number-input w-full min-w-0 [appearance:textfield] border-0 bg-transparent p-0 text-right text-inherit outline-0 [font:inherit] focus:shadow-none"
                   id={`allocation-${key}`}
@@ -81,11 +86,11 @@ export default function AllocationForm({
                   }}
                 />
                 <span aria-hidden="true">%</span>
-              </div>
+              </label>
               {!fieldValid && (
                 <p
                   id={`error-${key}`}
-                  className="text-player-error col-[2/-1] m-0 text-[16px]"
+                  className="text-player-error mobile:app-body col-[2/-1] m-0 text-[16px]"
                 >
                   Enter 0–100%, in steps of 0.1%.
                 </p>
@@ -99,7 +104,7 @@ export default function AllocationForm({
         aria-live="polite"
         className={
           !valid || form.status
-            ? 'border-player-border bg-player-feedback border-b p-[16px] text-[15px] min-[601px]:px-[24px] min-[601px]:py-[20px]'
+            ? 'border-player-border bg-player-feedback mobile:p-app-4 mobile:app-caption border-b p-[16px] text-[15px] min-[601px]:px-[24px] min-[601px]:py-[20px]'
             : 'sr-only'
         }
       >
@@ -124,9 +129,9 @@ export default function AllocationForm({
       <Link
         href="/play/cockpit?tab=market"
         shallow
-        className="focus-visible:outline-player-primary flex items-center gap-[10px] px-[16px] py-[22px] text-[15px] text-inherit no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] min-[601px]:px-[24px] min-[601px]:py-[20px] min-[601px]:text-[17px] [@media(max-width:360px)]:flex-wrap"
+        className="focus-visible:outline-player-primary mobile:gap-app-3 mobile:px-app-4 mobile:py-app-4 mobile:app-caption flex items-center gap-[10px] text-inherit no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] min-[601px]:px-[24px] min-[601px]:py-[20px] min-[601px]:text-[17px] [@media(max-width:360px)]:flex-wrap"
       >
-        <strong className="mr-auto text-[19px] min-[601px]:text-[21px]">
+        <strong className="mobile:app-body mr-auto min-[601px]:text-[21px]">
           Market outlook
         </strong>
         <span className="text-player-muted">
@@ -135,7 +140,7 @@ export default function AllocationForm({
         </span>
         <span
           aria-hidden="true"
-          className="text-player-primary text-[28px] leading-none"
+          className="text-player-primary mobile:app-value text-[28px] leading-none"
         >
           ›
         </span>

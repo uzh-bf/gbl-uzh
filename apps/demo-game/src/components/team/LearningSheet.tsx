@@ -52,7 +52,7 @@ export default function LearningSheet({
       label={
         <>
           <span>Learning activity</span>
-          <span className="bg-player-success-surface text-player-success rounded-[8px] px-[16px] py-[6px] tracking-normal normal-case">
+          <span className="bg-player-success-surface text-player-success mobile:px-app-4 mobile:py-app-2 rounded-[8px] px-[16px] py-[6px] tracking-normal normal-case">
             {solved ? 'Solved' : isNew ? 'New' : 'Open'}
           </span>
         </>
@@ -78,10 +78,10 @@ export default function LearningSheet({
       }
     >
       <div
-        className={`border-player-border flex items-start gap-[12px] border-b pt-[4px] pb-[24px] ${sheetPadding}`}
+        className={`border-player-border mobile:gap-app-3 mobile:pt-app-1 mobile:pb-app-4 flex items-start gap-[12px] border-b pt-[4px] pb-[24px] ${sheetPadding}`}
       >
         <div className="min-w-0 flex-1">
-          <h2 className="m-0 text-[24px] leading-[1.25] font-bold min-[601px]:text-[36px]">
+          <h2 className="mobile:app-heading m-0 leading-[1.25] font-bold min-[601px]:text-[36px]">
             {element?.title ?? title}
           </h2>
           {element && !queryError && (
@@ -91,17 +91,19 @@ export default function LearningSheet({
           )}
         </div>
         {xp !== null && (
-          <div className="bg-player-success-surface text-player-success shrink-0 rounded-[18px] px-[12px] py-[14px] text-center min-[601px]:px-[20px]">
-            <span className="block text-[12px] font-semibold tracking-[1px] uppercase min-[601px]:text-[22px]">
+          <div className="bg-player-success-surface text-player-success mobile:px-app-3 mobile:py-app-3 mobile:rounded-app-card shrink-0 rounded-[18px] py-[14px] text-center min-[601px]:px-[20px]">
+            <span className="mobile:app-caption block font-semibold tracking-[1px] uppercase min-[601px]:text-[22px]">
               {solved ? 'Reward' : 'Awards'}
             </span>
-            <span className="text-[22px] font-bold min-[601px]:text-[32px]">
+            <span className="mobile:app-heading font-bold min-[601px]:text-[32px]">
               {xp} XP
             </span>
           </div>
         )}
       </div>
-      <div className={`py-[20px] min-[601px]:py-[28px] ${sheetPadding}`}>
+      <div
+        className={`mobile:py-app-4 py-[20px] min-[601px]:py-[28px] ${sheetPadding}`}
+      >
         {loading ? (
           <p role="status">Loading activity…</p>
         ) : queryError ? (
@@ -115,14 +117,14 @@ export default function LearningSheet({
           <>
             <fieldset
               disabled={solved || saving}
-              className="m-0 flex min-w-0 flex-col gap-[16px] border-0 p-0 min-[601px]:gap-[20px]"
+              className="mobile:gap-app-3 m-0 flex min-w-0 flex-col border-0 p-0 min-[601px]:gap-[20px]"
             >
               <legend className="sr-only">Choose one answer</legend>
               {element.options.map((option, ix) => (
                 <label
                   key={ix}
                   className={cn(
-                    'border-player-input flex cursor-pointer items-start gap-[16px] rounded-[18px] border-2 p-[16px] min-[601px]:gap-[24px] min-[601px]:rounded-[24px] min-[601px]:p-[28px]',
+                    'border-player-input mobile:gap-app-3 mobile:p-app-4 mobile:rounded-app-card flex cursor-pointer items-start rounded-[18px] border-2 min-[601px]:gap-[24px] min-[601px]:rounded-[24px] min-[601px]:p-[28px]',
                     selection.includes(ix) && 'border-player-primary',
                     (solved || saving) && 'cursor-default'
                   )}
@@ -133,9 +135,9 @@ export default function LearningSheet({
                     value={ix}
                     checked={selection.includes(ix)}
                     onChange={() => onSelect([ix])}
-                    className="border-player-divider checked:border-player-primary checked:before:bg-player-primary focus-visible:outline-player-primary relative mt-[3px] size-[30px] shrink-0 appearance-none rounded-full border-[3px] bg-white before:absolute before:inset-[5px] before:rounded-full focus-visible:outline-2 focus-visible:outline-offset-[4px] min-[601px]:size-[48px] min-[601px]:border-[4px] min-[601px]:before:inset-[9px]"
+                    className="border-player-divider checked:border-player-primary checked:before:bg-player-primary focus-visible:outline-player-primary mobile:mt-app-1 relative mt-[3px] size-[30px] shrink-0 appearance-none rounded-full border-[3px] bg-white before:absolute before:inset-[5px] before:rounded-full focus-visible:outline-2 focus-visible:outline-offset-[4px] min-[601px]:size-[48px] min-[601px]:border-[4px] min-[601px]:before:inset-[9px]"
                   />
-                  <span className="text-[18px] leading-[1.5] min-[601px]:text-[28px]">
+                  <span className="mobile:app-body leading-[1.5] min-[601px]:text-[28px]">
                     <Markdown
                       components={{
                         p: ({ children }) => <span>{children}</span>,
@@ -147,7 +149,7 @@ export default function LearningSheet({
                 </label>
               ))}
             </fieldset>
-            <p className="text-player-muted mt-[20px] mb-0 text-[16px] min-[601px]:text-[24px]">
+            <p className="text-player-muted mobile:mt-app-4 mobile:app-body mt-[20px] mb-0 min-[601px]:text-[24px]">
               One answer.
               {!solved && expiresAt && Number.isFinite(expiresAt.getTime()) && (
                 <>
@@ -164,7 +166,7 @@ export default function LearningSheet({
             {state === 'ATTEMPTED' && (
               <p
                 role="status"
-                className="text-player-error mt-[16px] text-[17px] min-[601px]:text-[24px]"
+                className="text-player-error mobile:mt-app-4 mobile:app-body mt-[16px] min-[601px]:text-[24px]"
               >
                 That answer is not correct. Try again.
               </p>
@@ -172,13 +174,13 @@ export default function LearningSheet({
             {attemptError && (
               <p
                 role="alert"
-                className="text-player-error mt-[16px] text-[17px] min-[601px]:text-[24px]"
+                className="text-player-error mobile:mt-app-4 mobile:app-body mt-[16px] min-[601px]:text-[24px]"
               >
                 {attemptError}
               </p>
             )}
             {solved && (
-              <div className="mt-[24px]" role="status">
+              <div className="mobile:mt-app-4 mt-[24px]" role="status">
                 <p className="text-player-success font-semibold">
                   Correct answer
                 </p>

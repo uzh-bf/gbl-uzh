@@ -1,20 +1,20 @@
-import { Button } from '@uzh-bf/design-system'
 import { signIn, signOut, useSession } from 'next-auth/react'
+import { Button } from '~/components/admin/AdminControls'
 
 function Login() {
   const { data: session } = useSession()
 
   if (session?.user) {
     return (
-      <>
+      <main className="mobile:app-panel mobile:app-body">
         Signed in as {session.user.email} <br />
         <Button onClick={() => signOut()}>Sign out</Button>
-      </>
+      </main>
     )
   }
 
   return (
-    <>
+    <main className="mobile:app-panel mobile:app-body">
       Not signed in <br />
       <Button
         onClick={() =>
@@ -25,7 +25,7 @@ function Login() {
       >
         Sign in
       </Button>
-    </>
+    </main>
   )
 }
 

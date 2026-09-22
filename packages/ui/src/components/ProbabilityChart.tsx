@@ -53,12 +53,12 @@ function ProbabilityChart({
       <div>
         <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
           <div>
-            <h2 className="m-0 text-[24px] font-bold min-[601px]:text-[30px]">
+            <h2 className="m-0 text-[length:var(--market-heading-size,24px)] leading-[var(--market-heading-leading,inherit)] font-bold min-[601px]:text-[30px]">
               {title}
             </h2>
             {titleContent && <div className="mt-[8px]">{titleContent}</div>}
           </div>
-          <div className="grid grid-cols-3 items-baseline gap-x-[12px] text-[15px] text-[var(--color-player-muted,#707070)] min-[601px]:gap-x-[20px] min-[601px]:text-[20px]">
+          <div className="grid grid-cols-3 items-baseline gap-x-[12px] text-[length:var(--market-metric-size,15px)] leading-[var(--market-metric-leading,inherit)] text-[var(--color-player-muted,#707070)] min-[601px]:gap-x-[20px] min-[601px]:text-[20px]">
             <span>
               Expected{' '}
               <strong
@@ -91,7 +91,7 @@ function ProbabilityChart({
           </div>
         </div>
         <div
-          className="mt-[20px]"
+          className="mt-[var(--market-chart-gap,20px)]"
           role="region"
           aria-label={`${title} return probabilities`}
         >

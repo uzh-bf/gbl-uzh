@@ -14,10 +14,9 @@ import {
   GlobalEventsDocument,
   type ResultQuery,
 } from 'src/graphql/generated/ops'
-import { marketPeriod } from '~/lib/market'
 import { queueRefetch } from '~/lib/queuedRefetch'
 import type { ResultView } from '~/lib/results'
-import { avatarNames, cantonNames } from '~/lib/teamIdentity'
+import { cantonNames } from '~/lib/teamIdentity'
 import CompactCountdown from './cockpit/CompactCountdown'
 import HistoryPanel from './history/HistoryPanel'
 import MarketPanel from './market/MarketPanel'
@@ -46,7 +45,6 @@ function GameLayout({
   action,
   data,
   refetchResult,
-  allocationView,
   readyControl,
   resultView,
 }: {
@@ -54,7 +52,6 @@ function GameLayout({
   action?: React.ReactNode
   data: ResultQuery
   refetchResult: () => Promise<unknown>
-  allocationView?: 'editing' | 'submitted' | 'ready'
   resultView?: ResultView | null
   readyControl: {
     disabled: boolean
@@ -163,7 +160,6 @@ function GameLayout({
     currentGame.periods.find((period) => period.id === activePeriod?.id)
       ?.segmentCount ??
     0
-  const marketActivePeriod = marketPeriod(currentGame)
   const running = currentGame.status === 'RUNNING'
   const done =
     segmentIndex == null
@@ -210,7 +206,6 @@ function GameLayout({
       .join('')
       .toUpperCase() || 'T'
   const avatar = typeof facts.avatar === 'string' ? facts.avatar : ''
-  const avatarKey = avatar.split('/').pop()?.split('.')[0]
   const handleCountdownUpdate = (secondsLeft: number) => {
     const previousSecondsLeft = previousCountdownSeconds.current
     previousCountdownSeconds.current = secondsLeft
@@ -230,20 +225,19 @@ function GameLayout({
 
   return (
     <>
-      <div className="font-player text-player-text min-[785px]:border-player-border mx-auto flex h-dvh w-full max-w-[784px] flex-col bg-white text-[16px] min-[785px]:border-x [&_*]:box-border">
+      <div className="font-player text-player-text min-[785px]:border-player-border mobile:app-body mx-auto flex h-dvh w-full max-w-[784px] flex-col bg-white text-[16px] min-[785px]:border-x [&_*]:box-border">
         <header
           className={cn(
-            'border-player-divider flex shrink-0 items-center gap-[12px] border-b px-[16px] py-[10px] min-[601px]:gap-[16px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
+            'border-player-divider mobile:gap-app-3 mobile:px-app-4 mobile:py-app-3 flex shrink-0 items-center border-b min-[601px]:gap-[16px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
             expandedHeader &&
               'min-[601px]:gap-[20px] min-[601px]:px-[32px] min-[601px]:py-[24px]'
           )}
         >
           <div
             className={cn(
-              'bg-player-progress text-player-primary grid size-[40px] shrink-0 place-items-center overflow-hidden rounded-full text-[17px] font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]',
+              'bg-player-progress text-player-primary mobile:size-app-header-avatar mobile:app-body grid shrink-0 place-items-center overflow-hidden rounded-full font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]',
               expandedHeader &&
-                'min-[601px]:size-[60px] min-[601px]:text-[24px]',
-              resultScreen && 'rounded-[8px]'
+                'min-[601px]:size-[60px] min-[601px]:text-[24px]'
             )}
             aria-hidden="true"
           >
@@ -262,48 +256,24 @@ function GameLayout({
           <div className="min-w-0 flex-1">
             <div
               className={cn(
-                'block text-[18px] leading-[1.15] font-bold [overflow-wrap:anywhere] min-[601px]:text-[22px]',
+                'mobile:app-body block leading-[1.15] font-bold [overflow-wrap:anywhere] min-[601px]:text-[22px]',
                 expandedHeader && 'min-[601px]:text-[28px]'
               )}
             >
-              {detailTab ? (
-                <h1 className="m-0 text-inherit">
-                  {tabs.find((name) => name.toLowerCase() === tab)}
-                </h1>
-              ) : (
-                self.name
-              )}
+              <h1 className="m-0 text-inherit">{self.name}</h1>
             </div>
             <p
               className={cn(
-                'text-player-muted m-0 text-[14px] min-[601px]:text-[16px]',
+                'text-player-muted mobile:app-caption m-0 min-[601px]:text-[16px]',
                 expandedHeader && 'leading-[1.25] min-[601px]:text-[22px]'
               )}
             >
-              {tab === 'team' ? (
-                `${self.name} · HQ ${cantonNames[facts.location] ?? facts.location ?? '—'}`
-              ) : tab === 'history' ? (
-                `${self.name} · since quarter 1`
-              ) : tab === 'market' ? (
-                marketActivePeriod ? (
-                  `${FIRST_GAME_YEAR + marketActivePeriod.index} · Quarter ${Math.max(0, marketActivePeriod.activeSegmentIx ?? 0) + 1}`
-                ) : (
-                  'Waiting for the game'
-                )
-              ) : allocationView === 'submitted' ||
-                allocationView === 'ready' ? (
-                `${FIRST_GAME_YEAR + (activePeriod?.index ?? 0)} · Quarter ${(segmentIndex ?? 0) + 1}`
-              ) : (
-                <>
-                  {avatarNames[avatarKey] ?? 'Team'} · HQ{' '}
-                  {cantonNames[facts.location] ?? facts.location ?? '—'}
-                </>
-              )}
+              HQ {cantonNames[facts.location] ?? facts.location ?? '—'}
             </p>
           </div>
           <div
             className={cn(
-              'shrink-0 [font-family:monospace] text-[25px] font-bold tabular-nums min-[601px]:text-[28px]',
+              'mobile:app-value shrink-0 [font-family:monospace] font-bold tabular-nums min-[601px]:text-[28px]',
               detailTab && 'min-[601px]:text-[36px]'
             )}
           >
@@ -320,16 +290,16 @@ function GameLayout({
         <section
           hidden={detailTab}
           className={cn(
-            'border-player-divider shrink-0 border-b px-[16px] py-[14px] min-[601px]:px-[24px] min-[601px]:py-[20px]',
+            'border-player-divider mobile:px-app-4 mobile:py-app-3 shrink-0 border-b min-[601px]:px-[24px] min-[601px]:py-[20px]',
             resultScreen && 'min-[601px]:px-[32px] min-[601px]:py-[28px]'
           )}
           aria-label="Game progress"
           data-game-status={currentGame.status}
         >
-          <div className="flex flex-wrap items-baseline justify-between gap-x-[12px] gap-y-[4px] text-[17px] [@media(max-width:360px)]:items-start">
+          <div className="mobile:gap-x-app-3 mobile:gap-y-app-1 mobile:app-body flex flex-wrap items-baseline justify-between gap-x-[12px] gap-y-[4px] text-[17px] [@media(max-width:360px)]:items-start">
             <h2
               className={cn(
-                'text-player-muted m-0 text-[12px] font-semibold tracking-[0.8px] uppercase min-[601px]:text-[14px]',
+                'text-player-muted mobile:app-caption m-0 font-semibold tracking-[0.8px] uppercase min-[601px]:text-[14px]',
                 resultScreen && 'min-[601px]:text-[22px]'
               )}
             >
@@ -344,7 +314,7 @@ function GameLayout({
                 className={cn(
                   'font-semibold [@media(max-width:360px)]:whitespace-nowrap',
                   resultScreen &&
-                    'text-player-body text-[15px] min-[601px]:text-[24px]'
+                    'text-player-body mobile:app-caption min-[601px]:text-[24px]'
                 )}
               >
                 {resultView ? resultCopy.detail : status}
@@ -355,8 +325,10 @@ function GameLayout({
             <>
               <div
                 className={cn(
-                  'mt-[12px] flex gap-[8px] min-[601px]:mt-[16px]',
-                  !running && !resultView && 'mb-[12px] min-[601px]:mb-[16px]'
+                  'mobile:mt-app-3 mobile:gap-app-2 flex gap-[8px] min-[601px]:mt-[16px]',
+                  !running &&
+                    !resultView &&
+                    'mobile:mb-app-3 min-[601px]:mb-[16px]'
                 )}
                 aria-hidden="true"
               >
@@ -379,7 +351,7 @@ function GameLayout({
                 ))}
               </div>
               {!running && !resultView && (
-                <p className="text-player-muted m-0 text-[16px]">
+                <p className="text-player-muted mobile:app-body m-0 text-[16px]">
                   {done} {done === 1 ? 'quarter' : 'quarters'} done ·{' '}
                   {Math.max(0, segmentCount - done)} to come
                 </p>
@@ -394,7 +366,7 @@ function GameLayout({
               tab !== 'cockpit' && 'hidden',
               !running &&
                 !resultView &&
-                'p-[16px] min-[601px]:px-[24px] min-[601px]:py-[20px]'
+                'mobile:p-app-4 p-[16px] min-[601px]:px-[24px] min-[601px]:py-[20px]'
             )}
           >
             {children}
@@ -426,19 +398,19 @@ function GameLayout({
           {tab === 'cockpit' && (
             <div
               className={cn(
-                'border-player-divider flex min-h-[78px] items-center justify-between gap-[12px] border-t px-[16px] py-[12px] min-[601px]:min-h-[96px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
+                'border-player-divider mobile:min-h-0 mobile:gap-app-3 mobile:px-app-4 mobile:py-app-3 flex items-center justify-between gap-[12px] border-t min-[601px]:min-h-[96px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
                 resultScreen && 'min-[601px]:px-[32px]'
               )}
             >
               {resultView ? (
-                <p className="text-player-muted m-0 text-[15px] min-[601px]:text-[24px]">
+                <p className="text-player-muted mobile:app-caption m-0 min-[601px]:text-[24px]">
                   {resultCopy.footer}
                 </p>
               ) : (
                 action
               )}
               <div
-                className="ml-auto flex items-center gap-[10px]"
+                className="mobile:gap-app-3 ml-auto flex items-center gap-[10px]"
                 data-cy="ready-switch"
                 data-ready={self.isReady}
                 data-disabled={readyControl.disabled}
@@ -446,7 +418,7 @@ function GameLayout({
                 <label
                   htmlFor="isReady"
                   className={cn(
-                    'text-[17px] font-semibold',
+                    'mobile:app-body text-[17px] font-semibold',
                     resultScreen && 'min-[601px]:text-[24px]',
                     readyControl.disabled
                       ? 'text-player-disabled'
@@ -466,7 +438,7 @@ function GameLayout({
                   size="lg"
                   className={{
                     element: cn(
-                      'h-[30px] w-[52px]',
+                      'mobile:app-switch-target h-[30px] w-[52px]',
                       resultScreen &&
                         'shrink-0 min-[601px]:h-[44px] min-[601px]:w-[80px]',
                       self.isReady
@@ -499,7 +471,7 @@ function GameLayout({
                 href={`/play/cockpit?tab=${name.toLowerCase()}`}
                 shallow
                 className={cn(
-                  'text-player-muted aria-[current=page]:border-player-primary aria-[current=page]:text-player-primary focus-visible:outline-player-primary flex min-h-[56px] items-center justify-center border-t-[3px] border-transparent text-[17px] no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] aria-[current=page]:font-bold min-[601px]:min-h-[60px]',
+                  'text-player-muted aria-[current=page]:border-player-primary aria-[current=page]:text-player-primary focus-visible:outline-player-primary mobile:min-h-app-nav mobile:app-body flex items-center justify-center border-t-[3px] border-transparent text-[17px] no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] aria-[current=page]:font-bold min-[601px]:min-h-[60px]',
                   resultScreen &&
                     'min-[601px]:min-h-[108px] min-[601px]:text-[24px]'
                 )}

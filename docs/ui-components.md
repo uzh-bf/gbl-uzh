@@ -84,13 +84,39 @@ Copy the demo game's setup (`apps/demo-game/src/globals.css`, `postcss.config.js
 
 ### Player styling convention
 
-The demo-game cockpit and welcome flow use colocated Tailwind utilities, with shared player colors and font tokens in `apps/demo-game/src/globals.css`. Primary actions use the UZH primary token; Savings, Bonds, and Stocks use named asset tokens shared with the welcome screen. The welcome screen's portaled pickers apply their font, size, line height, and colors directly to dialog content. Welcome-local controls in `apps/demo-game/src/components/welcome/WelcomeControls.tsx` reuse design-system buttons with 48px minimum heights and forward native props and refs; text inputs and Edit/Cancel buttons share utility classes. Welcome and cockpit retain separate action dimensions, while sharing palette tokens, including welcome's primary hover shade.
+The demo-game cockpit and welcome flow use colocated Tailwind utilities, with shared player colors and font tokens in `apps/demo-game/src/globals.css`. Primary actions use the UZH primary token; Savings, Bonds, and Stocks use named asset tokens shared with the welcome screen. The welcome screen's portaled pickers apply their font, size, line height, and colors directly to dialog content. Welcome-local controls in `apps/demo-game/src/components/welcome/WelcomeControls.tsx` reuse design-system buttons with 44px mobile / 48px desktop minimum heights and forward native props and refs; text inputs and Edit/Cancel buttons share utility classes. Welcome and cockpit retain separate action dimensions, while sharing palette tokens, including welcome's primary hover shade.
 
 Reuse structure and styles through app-local components: `PlayerActionButton` provides primary/secondary actions with shared responsive dimensions; `AllocationNotice` provides success/pending/informational notices; `AllocationRow` shares asset identity and amounts between editing and saved summaries. `AllocationBar` owns proportional sections and container-query label visibility; its optional `compact` presentation suppresses labels and internal separators for History table mixes, whose wrappers provide accessible percentages. These components live in `apps/demo-game/src/components/cockpit/`; promote them to the shared UI package only when another game needs them.
 
 Demo-game result panels (`apps/demo-game/src/components/cockpit/ResultPanels.tsx`) share total-asset summaries, monthly balance rows, asset breakdowns, and benchmark charts. Compact `AllocationBar` segments encode actual holdings; accessible descriptions expose the mix. Recharts provides monthly cumulative-return bars, stacked year-end assets with an initial-capital reference, and cumulative year-end returns. Shared player colors distinguish Savings/Bonds/Stocks, and gains/losses use success/error tokens. The 784px reference layout scales down to 320px; multi-year charts scroll within their own sections. Screen-reader tables/lists expose monthly chart values.
 
 Preserve the current pixel dimensions and explicit viewport thresholds when adapting these designs: the app root is **14px**, so default rem-based Tailwind spacing is not a pixel-equivalent replacement. Dynamic widths and slider positions remain inline styles. Custom CSS in the converted cockpit is limited to the WebKit number-input stepper reset in the components layer; ordinary layout, responsive rules, and interaction states belong in utilities. Supply control overrides through the design system's class slots rather than CSS Module selectors and blanket `!important` rules.
+
+### Demo-game sizing contract
+
+`apps/demo-game/src/globals.css` centrally defines the demo-game sizing roles. Apply the `mobile:` variant (below **601px**) to opt a component into this scale; existing base and desktop utilities preserve the previous desktop appearance. Keep the **14px document root**, welcome's 359px avatar-grid boundary and 721px shell boundary, and the player shell's existing desktop widths.
+
+| Role                     | Mobile value                     | Usage                                        |
+| ------------------------ | -------------------------------- | -------------------------------------------- |
+| `app-annotation`         | 12px / 1.25                      | Dense chart and allocation-bar labels        |
+| `app-caption`            | 14px / 1.4                       | Metadata, legends, section labels            |
+| `app-body`               | 16px / 1.5                       | Body text, fields, buttons, tables           |
+| `app-heading`            | 20px / 1.25                      | Page, card and dialog headings               |
+| `app-value`              | 24px / 1.2                       | Primary balances and countdown               |
+| `app-control`            | Minimum 44px, 8px corners        | Controls that can grow when their text wraps |
+| `app-touch`              | Minimum 44 × 44px                | Icon buttons and quarter expansion           |
+| `app-panel` / `app-card` | 16px / 12px padding              | Sections and cards; cards use 12px corners   |
+| `app-cell`               | 16px text, 10px vertical padding | Dense result tables                          |
+
+The `app-1/2/3/4/6` spacing tokens provide 4/8/12/16/24px for gap, padding and margin utilities. Named dimensions cover navigation (48px), header avatars (40px), dice (28px), allocation mixes (88px), and chart heights: monthly 130px, benchmark 150px, accumulated return 160px, History 180px, annual assets 200px, admin reports 240px. Choose by content; do not shrink probability SVG coordinates as though they were screen pixels.
+
+Use semantic roles such as `mobile:app-heading`, `mobile:app-control` and `mobile:h-app-chart-history` instead of introducing new mobile pixel literals. Pair them with explicit desktop overrides; omit base size literals when those two rules already cover every viewport. Controls include the body-text and touch-target roles, so do not repeat those classes. The mobile variant repeats only its explicitly opted-in class selector to take precedence over later bundled design-system utilities, without `!important` or global element selectors. Root variables reach portaled dialogs; `RootLayout` supplies the resolved mobile font family, and font/role classes still belong on the portal content itself.
+
+Existing player and welcome controls consume these roles. `apps/demo-game/src/components/admin/AdminControls.tsx` applies them through design-system class slots for admin buttons, cards, headings, tables and dialogs. Components without app sizing changes are imported directly from the design system. Shared `ProbabilityChart`, `MultiSelect`, and `PlayerCompact` consume optional `--market-*` / `--gbl-*` sizing variables with their previous styles as fallbacks; only demo-game defines those overrides on mobile. Other games and desktop retain their existing presentation.
+
+The resize preserves the result-view computations, lifecycle copy and Ready behavior. History uses fully rounded year filters in a keyboard-focusable horizontal scroll region, plus an All filter with year-qualified quarter rows. A fresh page selects the latest started year; the selected filter survives refetches and tab switches. Its 180px chart always shows cumulative data.
+
+`GameLayout` shows the team name and HQ location in every tab header, alongside the single shared avatar and countdown. `TeamPanel` keeps its profile text and statistics without repeating the avatar. Stocks retain their blue asset token; completed segments and other completed progress markers use `player-progress-done`, mapped to UZH secondary orange, to distinguish progress from portfolio composition. Annual assets use a compact heading gap and a numeric initial-capital reference label; accumulated-return axis percentages use success/error/neutral colors by sign.
 
 ### Demo-game content presentation
 

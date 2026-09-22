@@ -54,9 +54,9 @@ export default function AllocationSlider({
   }
 
   return (
-    <div className="border-player-border border-b p-[16px] min-[601px]:px-[24px] min-[601px]:pt-[20px] min-[601px]:pb-[24px]">
-      <div className="text-player-muted mb-[16px] flex items-baseline justify-between gap-[12px] text-[17px] min-[601px]:mb-[20px]">
-        <h2 className="m-0 text-[15px] font-semibold tracking-[1.5px] uppercase">
+    <div className="border-player-border mobile:p-app-4 border-b p-[16px] min-[601px]:px-[24px] min-[601px]:pt-[20px] min-[601px]:pb-[24px]">
+      <div className="text-player-muted mobile:mb-app-4 mobile:gap-app-3 mobile:app-body flex items-baseline justify-between gap-[12px] text-[17px] min-[601px]:mb-[20px]">
+        <h2 className="mobile:app-caption m-0 text-[15px] font-semibold tracking-[1.5px] uppercase">
           Your mix
         </h2>
         <span>Drag a handle</span>
@@ -87,7 +87,7 @@ export default function AllocationSlider({
             }
             aria-orientation="horizontal"
             aria-describedby="allocation-help"
-            className="focus-visible:outline-player-text absolute top-1/2 z-[1] size-[44px] -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none rounded-full border-0 bg-transparent p-[6px] focus-visible:z-[2] focus-visible:outline-[3px] focus-visible:outline-offset-[3px] disabled:cursor-not-allowed disabled:opacity-60"
+            className="focus-visible:outline-player-text mobile:p-app-2 absolute top-1/2 z-[1] size-[44px] -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none rounded-full border-0 bg-transparent p-[6px] focus-visible:z-[2] focus-visible:outline-[3px] focus-visible:outline-offset-[3px] disabled:cursor-not-allowed disabled:opacity-60"
             disabled={disabled}
             style={{
               left: `${bounds[handle] / 10}%`,

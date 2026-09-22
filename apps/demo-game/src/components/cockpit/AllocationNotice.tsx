@@ -34,13 +34,13 @@ export default function AllocationNotice({
   return (
     <div
       className={cn(
-        'p-[16px] min-[601px]:p-[24px]',
+        'mobile:p-app-4 min-[601px]:p-[24px]',
         variant === 'success' && 'border-player-border border-b'
       )}
     >
       <div
         className={cn(
-          'flex items-start gap-[10px] rounded-[14px] border p-[14px] text-[14px] leading-[1.5] min-[601px]:gap-[18px] min-[601px]:rounded-[18px] min-[601px]:p-[24px] min-[601px]:text-[21px]',
+          'mobile:gap-app-3 mobile:p-app-3 mobile:app-caption mobile:rounded-app-card flex items-start rounded-[14px] border leading-[1.5] min-[601px]:gap-[18px] min-[601px]:rounded-[18px] min-[601px]:p-[24px] min-[601px]:text-[21px]',
           className
         )}
         role={variant === 'success' ? 'status' : undefined}
@@ -48,13 +48,13 @@ export default function AllocationNotice({
         <Icon
           aria-hidden="true"
           className={cn(
-            'mt-[3px] size-[20px] shrink-0 min-[601px]:size-[24px]',
+            'mobile:mt-app-1 mt-[3px] size-[20px] shrink-0 min-[601px]:size-[24px]',
             iconClassName
           )}
         />
         <div>
           {title && (
-            <strong className="mb-[4px] block text-[18px] leading-[1.3] min-[601px]:text-[24px]">
+            <strong className="mobile:mb-app-1 mobile:app-body mb-[4px] block leading-[1.3] min-[601px]:text-[24px]">
               {title}
             </strong>
           )}
