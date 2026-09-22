@@ -1,7 +1,24 @@
-import { useState, useEffect, useMemo } from 'react'
-import { useQuery, useMutation, type DocumentNode, type TypedDocumentNode } from '@apollo/client'
+import {
+  useMutation,
+  useQuery,
+  type DocumentNode,
+  type TypedDocumentNode,
+} from '@apollo/client'
+import {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  type SetStateAction,
+} from 'react'
 
 export type LearningState = 'ATTEMPTED' | 'SOLVED' | null
+
+type LearningDraft = {
+  options?: number[]
+  state?: LearningState
+  error?: string
+}
 
 interface LearningElementQueryData {
   learningElement?: {
@@ -30,6 +47,7 @@ interface AttemptLearningElementVariables {
 interface LearningActivityListItem {
   id: string
   title: string
+  reward?: unknown
 }
 
 function compareLearningTitles(
@@ -58,10 +76,13 @@ export interface UseLearningActivitiesProps<
       learningElements?: readonly LearningActivityListItem[]
     }[]
   }[]
+  preserveDrafts?: boolean
   toast: (options: { title: string; description: string }) => void
 }
 
-function normalizeLearningState(state: string | null | undefined): LearningState {
+function normalizeLearningState(
+  state: string | null | undefined
+): LearningState {
   return state === 'SOLVED' || state === 'ATTEMPTED' ? state : null
 }
 
@@ -85,65 +106,142 @@ export function useLearningActivities<
   completedLearningElementIds,
   activeSegmentLearningElements,
   allPeriods,
+  preserveDrafts = false,
   toast,
 }: UseLearningActivitiesProps<TLearningElementData>) {
-  const [activeLearningId, setActiveLearningId] = useState<string | null>(null)
-  const [learningElementState, setLearningElementState] = useState<LearningState>(null)
-  const [activeLearningOptions, setActiveLearningOptions] = useState<number[]>([])
-
-  const { data: learningElementData, loading: learningElementLoading } = useQuery<
-    TLearningElementData,
-    LearningElementQueryVariables
-  >(learningElementDocument, {
-    variables: { id: activeLearningId ?? '' },
-    skip: !activeLearningId,
+  // Query data owns persisted progress; this map contains only local edits
+  // and attempt feedback. No effect is needed to copy query data into state.
+  const [drafts, setDrafts] = useState<Record<string, LearningDraft>>({})
+  const [selection, setSelection] = useState<{ id: string | null }>({
+    id: null,
   })
+  const currentSelection = useRef(selection)
+  const inFlight = useRef(false)
+  const activeLearningId = selection.id
 
-  useEffect(() => {
-    const learningElement = learningElementData?.learningElement
-    const isActiveLearningElement = learningElement?.id === activeLearningId
-    setLearningElementState(
-      normalizeLearningState(isActiveLearningElement ? learningElement.state : null)
-    )
-    setActiveLearningOptions(
-      parseLearningOptions(isActiveLearningElement ? learningElement.solution : null)
-    )
-  }, [learningElementData, activeLearningId])
+  const updateDraft = (id: string, change: Partial<LearningDraft>) => {
+    setDrafts((previous) => ({
+      ...previous,
+      [id]: { ...previous[id], ...change },
+    }))
+  }
+
+  const setActiveLearningId = useCallback(
+    (value: SetStateAction<string | null>) => {
+      const previousId = currentSelection.current.id
+      const id = typeof value === 'function' ? value(previousId) : value
+      if (id === previousId) return
+      const next = { id }
+      currentSelection.current = next
+      setSelection(next)
+      setDrafts((previous) => {
+        const nextDrafts = { ...previous }
+        if (!preserveDrafts && previousId) delete nextDrafts[previousId]
+        if (id && nextDrafts[id]?.error) {
+          nextDrafts[id] = { ...nextDrafts[id], error: undefined }
+        }
+        return nextDrafts
+      })
+    },
+    [preserveDrafts]
+  )
+
+  const {
+    data,
+    loading: learningElementLoading,
+    error: learningElementError,
+    refetch: retryLearningElement,
+  } = useQuery<TLearningElementData, LearningElementQueryVariables>(
+    learningElementDocument,
+    {
+      variables: { id: activeLearningId ?? '' },
+      skip: !activeLearningId,
+    }
+  )
+  // Apollo can retain the previous query's data while the next ID loads.
+  const learningElementData =
+    data?.learningElement?.id === activeLearningId ? data : undefined
+  const element = learningElementData?.learningElement
+  const serverState = normalizeLearningState(element?.state)
+  const draft = activeLearningId ? drafts[activeLearningId] : undefined
+  const learningElementState =
+    serverState === 'SOLVED' ? serverState : (draft?.state ?? serverState)
+  const activeLearningOptions =
+    serverState === 'SOLVED'
+      ? parseLearningOptions(element?.solution)
+      : (draft?.options ?? parseLearningOptions(element?.solution))
+  const learningAttemptError = draft?.error ?? null
+
+  const setActiveLearningOptions = (value: SetStateAction<number[]>) => {
+    const id = activeLearningId
+    if (!id || learningElementState === 'SOLVED') return
+    setDrafts((previous) => ({
+      ...previous,
+      [id]: {
+        ...previous[id],
+        options:
+          typeof value === 'function'
+            ? value(previous[id]?.options ?? activeLearningOptions)
+            : value,
+        error: undefined,
+      },
+    }))
+  }
 
   const [attemptLearningElement, { loading: attemptingLearning }] = useMutation(
-    attemptLearningElementDocument,
-    {
-      refetchQueries: [resultDocument, learningElementDocument],
-    }
+    attemptLearningElementDocument
   )
 
   const handleAttemptLearning = async () => {
-    if (!activeLearningId) return
+    const requestSelection = currentSelection.current
+    const id = requestSelection.id
+    if (
+      !id ||
+      inFlight.current ||
+      !activeLearningOptions.length ||
+      learningElementState === 'SOLVED'
+    )
+      return
+    inFlight.current = true
+    updateDraft(id, { error: undefined })
     try {
       const result = await attemptLearningElement({
         variables: {
-          elementId: activeLearningId,
+          elementId: id,
           selection: JSON.stringify(activeLearningOptions),
         },
+        // Refresh the submitted activity even if another one is now open.
+        refetchQueries: [
+          resultDocument,
+          { query: learningElementDocument, variables: { id } },
+        ],
       })
-      const resData = result.data?.attemptLearningElement
-      if (resData) {
-        if (
-          typeof resData.pointsAchieved === 'number' &&
-          typeof resData.pointsMax === 'number' &&
-          resData.pointsAchieved === resData.pointsMax
-        ) {
-          setLearningElementState('SOLVED')
-        } else {
-          setLearningElementState('ATTEMPTED')
-          toast({
-            title: 'Wrong answer',
-            description: 'Try again!',
-          })
-        }
+      const attempt = result.data?.attemptLearningElement
+      if (
+        !attempt ||
+        typeof attempt.pointsAchieved !== 'number' ||
+        typeof attempt.pointsMax !== 'number'
+      ) {
+        throw new Error('No attempt result returned')
       }
-    } catch (error) {
-      console.error(error)
+      const state =
+        attempt.pointsAchieved === attempt.pointsMax ? 'SOLVED' : 'ATTEMPTED'
+      // Completion belongs to this activity even after switching away. Only
+      // transient feedback depends on the original selection still being open.
+      if (state === 'SOLVED') {
+        updateDraft(id, { state, options: activeLearningOptions })
+      } else if (currentSelection.current === requestSelection) {
+        updateDraft(id, { state })
+        toast({ title: 'Wrong answer', description: 'Try again!' })
+      }
+    } catch {
+      if (currentSelection.current === requestSelection) {
+        updateDraft(id, {
+          error: 'Could not submit your answer. Please try again.',
+        })
+      }
+    } finally {
+      inFlight.current = false
     }
   }
 
@@ -151,7 +249,9 @@ export function useLearningActivities<
     const seen = new Set<string>()
     return allPeriods
       .flatMap((period) =>
-        (period.segments ?? []).flatMap((segment) => segment.learningElements ?? [])
+        (period.segments ?? []).flatMap(
+          (segment) => segment.learningElements ?? []
+        )
       )
       .filter((element) => completedLearningElementIds.includes(element.id))
       .filter((element) => {
@@ -164,9 +264,9 @@ export function useLearningActivities<
 
   const openLearningElements = useMemo(
     () =>
-      activeSegmentLearningElements.filter(
-        (element) => !completedLearningElementIds.includes(element.id)
-      ).sort(compareLearningTitles),
+      activeSegmentLearningElements
+        .filter((element) => !completedLearningElementIds.includes(element.id))
+        .sort(compareLearningTitles),
     [activeSegmentLearningElements, completedLearningElementIds]
   )
 
@@ -178,6 +278,9 @@ export function useLearningActivities<
     setActiveLearningOptions,
     learningElementData,
     learningElementLoading,
+    learningElementError,
+    learningAttemptError,
+    retryLearningElement,
     attemptingLearning,
     handleAttemptLearning,
     completedLearningElements,

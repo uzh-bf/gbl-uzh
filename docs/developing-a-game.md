@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: '2026-09-21T00:00:00Z'
+timestamp: '2026-09-22T00:00:00Z'
 ---
 
 # Developing a Game
@@ -123,7 +123,7 @@ The cockpit pattern (from `apps/demo-game/src/pages/play/cockpit.tsx`):
 
 1. The cockpit page fetches **one aggregate query** and passes its data/refetch function to the `GameLayout` wrapper (player result + previous results + current game with active period/segment + attached content + self).
 2. `GameLayout` subscribes to global events and, on `PERIOD_ACTIVATED` / `SEGMENT_ACTIVATED` / `COUNTDOWN_UPDATED`, **refetches that query** — events are a poke, never a data source.
-3. The demo-game layout renders a compact team header, live countdown, active-period/segment progress, and bottom navigation. `/play/cockpit?tab=cockpit|market|history|team` selects the tab without discarding the allocation draft. Ready stays in Cockpit; Team holds the profile and learning activities. Market shows the active scenario’s outlook and the latest admin-revealed monthly result; History shows cumulative portfolio values and expandable quarterly results, with a year selector that filters only the breakdown table. Blocking story popups remain global.
+3. The demo-game layout renders a compact team header, live countdown, active-period/segment progress, and bottom navigation. `/play/cockpit?tab=cockpit|market|history|team` selects the tab without discarding the allocation draft. Ready stays in Cockpit; Team shows the profile, level/XP, settled portfolio statistics, learning activities, and a library of released stories. Market shows the active scenario’s outlook and the latest admin-revealed monthly result; History shows cumulative portfolio values and expandable quarterly results, with a year selector that filters only the breakdown table. Blocking story popups remain global.
 4. The page body is a `switch (game.status)`: decision form under `RUNNING`, read-only results under `PAUSED`/`CONSOLIDATION`, period report under `RESULTS`, placeholders otherwise ([game-lifecycle.md](game-lifecycle.md) lists the expected view per status).
 
 The RUNNING allocation flow follows `apps/demo-game/design/cockpit.png`, `cockpit_after_submission.png`, and `cockpit_ready.png`:
@@ -154,6 +154,16 @@ Your game-specific work is almost entirely: the decision form (validate with yup
 `apps/demo-game/src/lib/history.ts:buildHistory` adapts the existing aggregate result query without another API. It uses `PERIOD_END` records and active-quarter lifecycle state to identify completed `SEGMENT_END` records: the latter also exist during allocation with carried-forward facts. It handles an upcoming active period during between-year `RESULTS` and a disconnected final-period pointer. Portfolio amounts and monthly changes come from persisted `assetsWithReturns`; quarterly bond/stock rates compound the monthly market rates, not allocation-dependent asset changes. Missing values render as dashes; before the first completed quarter, known initial capital appears with an empty state. Chart and table scroll independently on narrow screens.
 
 The History lifecycle browser test covers two years, quarter completion, delayed dice reveals, year filtering, selection and allocation-draft retention, final results, keyboard expansion, and screenshots at 784px, 390px, and 320px.
+
+### Demo-game Team and content sheets
+
+`apps/demo-game/src/components/team/TeamContent.tsx:TeamContent` coordinates the Team panel and one active content sheet. Team uses the same expanded header as Market/History and hides cockpit progress. It preserves the mounted allocation editor while tabs and overlays change. `src/lib/team.ts:teamStatistics` reuses settled History balances; Last quarter is that quarter’s gain divided by its starting balance, with a dash before settlement or when unavailable. Level and cumulative XP use the stored player fields; lesson badges display only finite, nonnegative `reward.xp` values. The demo seed has no configured lesson rewards, so these badges are normally absent.
+
+`src/lib/team.ts:storyLibrary` lists released stories, deduplicated by ID with first-release quarter metadata, newest release first and title order within each quarter. Future segments stay hidden, and finished-year stories remain available in final results. `StorySheet` renders the existing generic or role-specific Markdown and images. Unread active-quarter cards open automatically in title order. Continue persists Read status and advances; Close, Escape, and Skip stories dismiss the sequence for this page visit without marking skipped cards Read. Clicking outside does not dismiss. Library entries can reopen any card in its original sequence, including Read cards. Failed progress writes keep the card open for retry. A newly activated unread story preempts a learning sheet.
+
+`LearningSheet` retains the existing single-answer quiz and server scoring rules. Incorrect answers can be retried; solved answers are read-only with feedback and motivation. The shared `useLearningActivities` hook uses `preserveDrafts` for page-visit answer retention and guards against stale query/submission responses. New becomes Open when first opened; viewed IDs are remembered in browser storage per game/team, with an in-memory fallback. Solved is server-backed. Active-quarter unsolved and previously solved lessons retain their existing eligibility. The sheet shows advisory quarter time remaining, never a timer-based submission cutoff. Loading, unavailable content, query retry, and failed submissions have explicit states.
+
+The sheets share an app-local, accessible dialog shell with a 784px width cap, a 90dvh height cap, scrollable content, visible footer actions, safe-area padding, focus trapping and restoration. The Team lifecycle browser test covers story skip/read/reopen, query and mutation failures, quiz states and drafts, a new quarter preempting an activity, final-result archives, and screenshots at 784px, 390px, and 320px.
 
 ## Verification loop
 

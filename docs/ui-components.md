@@ -7,7 +7,7 @@ tags:
   - design-system
   - tailwind
   - components
-timestamp: '2026-09-21T00:00:00Z'
+timestamp: '2026-09-22T00:00:00Z'
 ---
 
 # UI Building Blocks
@@ -89,6 +89,12 @@ The demo-game cockpit and welcome flow use colocated Tailwind utilities, with sh
 Reuse structure and styles through app-local components: `PlayerActionButton` provides primary/secondary actions with shared responsive dimensions; `AllocationNotice` provides success/pending/informational notices; `AllocationRow` shares asset identity and amounts between editing and saved summaries. `AllocationBar` owns proportional sections and container-query label visibility; its optional `compact` presentation suppresses labels and internal separators for History table mixes, whose wrappers provide accessible percentages. These components live in `apps/demo-game/src/components/cockpit/`; promote them to the shared UI package only when another game needs them.
 
 Preserve the current pixel dimensions and explicit viewport thresholds when adapting these designs: the app root is **14px**, so default rem-based Tailwind spacing is not a pixel-equivalent replacement. Dynamic widths and slider positions remain inline styles. Custom CSS in the converted cockpit is limited to the WebKit number-input stepper reset in the components layer; ordinary layout, responsive rules, and interaction states belong in utilities. Supply control overrides through the design system's class slots rather than CSS Module selectors and blanket `!important` rules.
+
+### Demo-game content presentation
+
+The demo game keeps Team-specific presentation in `apps/demo-game/src/components/team/`: `TeamPanel`, `ContentSheet`, `StorySheet`, and `LearningSheet`, coordinated by `TeamContent`. These reuse player tokens and action buttons without changing the shared `StoryElements` or learning-modal defaults used by other games. The local story reader adds archive navigation around the existing mark-visited mutation. GraphQL aggregate fragments select historical story bodies, lesson rewards, and self read/completion IDs; this requires operation regeneration but no database migration.
+
+`packages/ui/src/hooks/useLearningActivities.ts:useLearningActivities` adds optional `preserveDrafts` (default false), optional list-item reward metadata, and query/submission errors plus a query retry function. Query data is exposed only for the selected activity ID; transient submission feedback cannot alter a newer selection. Mutations refresh the submitted activity by ID even after it closes, preserving solved answers and explanations on reopening. Persisted progress is derived directly from the query, while one per-activity draft map stores local selections and attempt feedback, avoiding synchronization effects and duplicate state. Demo-game opts into per-activity answer drafts for the current page visit. Its direct Markdown rendering uses the same React 19 JSX compatibility bridge as the shared UI package.
 
 ## Gaps a new game will hit
 

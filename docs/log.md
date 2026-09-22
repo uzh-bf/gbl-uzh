@@ -1,5 +1,9 @@
 # Log
 
+## 2026-09-22
+
+**Update**: Demo-game Team and content sheets — documented settled team statistics, released-story rereading and skip semantics, browser-local activity views, accessible responsive sheets, and shared learning-hook draft/error support. Review consolidated quiz drafts and feedback, removed the redundant story-read cache, exposed row status/metadata to screen readers, and fixed stale quiz data after successful submissions finish in the background.
+
 ## 2026-09-21
 
 - **Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — implement the History tab with cumulative portfolio values, year-filtered expandable quarters, lifecycle-aware settlement, instructor-controlled dice visibility, and responsive browser coverage.

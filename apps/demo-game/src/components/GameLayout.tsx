@@ -1,25 +1,16 @@
-import { useMutation, useSubscription } from '@apollo/client'
+import { useSubscription } from '@apollo/client'
 import {
   cn,
   getCountdownNotification,
-  LearningActivitiesList,
-  LearningActivityModal,
-  PlayerDisplay,
   shouldRefetchGameResult,
-  StoryElements,
-  useLearningActivities,
 } from '@gbl-uzh/ui'
-import { Button, Switch } from '@uzh-bf/design-system'
+import { Switch } from '@uzh-bf/design-system'
 import dayjs from 'dayjs'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useRef, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import {
-  AttemptLearningElementDocument,
   GlobalEventsDocument,
-  LearningElementDocument,
-  MarkStoryElementDocument,
-  ResultDocument,
   type ResultQuery,
 } from 'src/graphql/generated/ops'
 import { marketPeriod } from '~/lib/market'
@@ -28,6 +19,7 @@ import { avatarNames, cantonNames } from '~/lib/teamIdentity'
 import CompactCountdown from './cockpit/CompactCountdown'
 import HistoryPanel from './history/HistoryPanel'
 import MarketPanel from './market/MarketPanel'
+import TeamContent from './team/TeamContent'
 import { useToast } from './ui/use-toast'
 
 const tabs = ['Cockpit', 'Market', 'History', 'Team']
@@ -69,18 +61,13 @@ function GameLayout({
   const currentGame = result?.currentGame
   const activePeriod = currentGame?.activePeriod
   const activeSegment = activePeriod?.activeSegment
-  const player = result?.playerResult?.player
   const router = useRouter()
   const tab =
     typeof router.query.tab === 'string' &&
     tabs.some((name) => name.toLowerCase() === router.query.tab)
       ? router.query.tab
       : 'cockpit'
-  const detailTab = tab === 'market' || tab === 'history'
-  const [markStoryElement] = useMutation(MarkStoryElementDocument, {
-    refetchQueries: [ResultDocument],
-  })
-
+  const detailTab = tab !== 'cockpit'
   const { toast } = useToast()
 
   const countdownNotifications = useRef({
@@ -88,28 +75,6 @@ function GameLayout({
     '180': false,
   })
   const previousCountdownSeconds = useRef<number | null>(null)
-
-  const {
-    activeLearningId,
-    setActiveLearningId,
-    learningElementState,
-    activeLearningOptions,
-    setActiveLearningOptions,
-    learningElementData,
-    learningElementLoading,
-    attemptingLearning,
-    handleAttemptLearning,
-    completedLearningElements,
-    openLearningElements,
-  } = useLearningActivities({
-    learningElementDocument: LearningElementDocument,
-    attemptLearningElementDocument: AttemptLearningElementDocument,
-    resultDocument: ResultDocument,
-    completedLearningElementIds: player?.completedLearningElementIds ?? [],
-    activeSegmentLearningElements: activeSegment?.learningElements ?? [],
-    allPeriods: currentGame?.periods ?? [],
-    toast,
-  })
 
   const currentGameId = parseInt(currentGame?.id)
   const queuedRefetch = useMemo(
@@ -184,15 +149,6 @@ function GameLayout({
   }
 
   const facts = parseFacts(self.facts)
-  const playerInfo = {
-    name: self.name,
-    color: facts.color,
-    location: facts.location,
-    level: self.level?.index ?? 0,
-    achievements: self.achievements,
-    imgPathAvatar: facts.avatar,
-    imgPathLocation: `/locations/${facts.location}.svg`,
-  }
   const segmentIndex = activePeriod?.activeSegment?.index
   const segmentCount =
     currentGame.periods.find((period) => period.id === activePeriod?.id)
@@ -247,19 +203,6 @@ function GameLayout({
 
   return (
     <>
-      <StoryElements
-        key={activeSegment?.id}
-        activeStoryElements={activeSegment?.storyElements ?? []}
-        visitedStoryElementIds={player?.visitedStoryElementIds ?? []}
-        playerRole={self.role}
-        onMarkElementVisited={async (id) => {
-          await markStoryElement({
-            variables: {
-              elementId: id,
-            },
-          })
-        }}
-      />
       <div className="font-player text-player-text min-[785px]:border-player-border mx-auto flex h-dvh w-full max-w-[784px] flex-col bg-white text-[16px] min-[785px]:border-x [&_*]:box-border">
         <header
           className={cn(
@@ -286,7 +229,7 @@ function GameLayout({
             >
               {detailTab ? (
                 <h1 className="m-0 text-inherit">
-                  {tab === 'history' ? 'History' : 'Market'}
+                  {tabs.find((name) => name.toLowerCase() === tab)}
                 </h1>
               ) : (
                 self.name
@@ -298,7 +241,9 @@ function GameLayout({
                 detailTab && 'min-[601px]:text-[22px]'
               )}
             >
-              {tab === 'history' ? (
+              {tab === 'team' ? (
+                `${self.name} · HQ ${cantonNames[facts.location] ?? facts.location ?? '—'}`
+              ) : tab === 'history' ? (
                 `${self.name} · since quarter 1`
               ) : tab === 'market' ? (
                 marketActivePeriod ? (
@@ -409,16 +354,12 @@ function GameLayout({
               active={tab === 'history'}
             />
           </div>
-          <PlayerTabPanel title="Team" hidden={tab !== 'team'}>
-            <PlayerDisplay {...playerInfo} />
-            <div className="mt-[24px]">
-              <LearningActivitiesList
-                openElements={openLearningElements}
-                completedElements={completedLearningElements}
-                onElementClick={(id) => setActiveLearningId(id)}
-              />
-            </div>
-          </PlayerTabPanel>
+          <TeamContent
+            key={`${currentGame.id}:${self.id}`}
+            data={data}
+            active={tab === 'team'}
+            expiresAt={expiresAtDate}
+          />
         </main>
         <div className="relative z-[3] shrink-0 bg-white">
           {tab === 'cockpit' && (
@@ -483,44 +424,8 @@ function GameLayout({
           </nav>
         </div>
       </div>
-      <LearningActivityModal
-        open={!!activeLearningId}
-        onClose={() => setActiveLearningId(null)}
-        element={learningElementData?.learningElement?.element}
-        state={learningElementState}
-        activeElements={activeLearningOptions}
-        setActiveElements={setActiveLearningOptions}
-        onSubmit={handleAttemptLearning}
-        loading={attemptingLearning || learningElementLoading}
-        returnButton={
-          <Button onClick={() => setActiveLearningId(null)}>Close</Button>
-        }
-      />
     </>
   )
 }
 
 export default GameLayout
-
-function PlayerTabPanel({
-  title,
-  hidden,
-  children,
-}: {
-  title: string
-  hidden: boolean
-  children?: ReactNode
-}) {
-  return (
-    <section
-      hidden={hidden}
-      className={cn(
-        'p-[16px] min-[601px]:px-[24px] min-[601px]:py-[20px]',
-        hidden && 'hidden'
-      )}
-    >
-      <h1 className="m-0 mb-[24px] text-[28px] font-bold">{title}</h1>
-      {children}
-    </section>
-  )
-}

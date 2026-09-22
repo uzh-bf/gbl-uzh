@@ -134,7 +134,14 @@ async function addSegment(
   {
     periodIndex,
     withContent = false,
-  }: { periodIndex: number; withContent?: boolean }
+    storyIds,
+    learningIds,
+  }: {
+    periodIndex: number
+    withContent?: boolean
+    storyIds?: string[]
+    learningIds?: string[]
+  }
 ) {
   const segmentIndex = await page
     .getByTestId(`period-${periodIndex}`)
@@ -142,25 +149,23 @@ async function addSegment(
     .count()
 
   await page.getByRole('button', { name: 'Add segment' }).click()
-  if (withContent) {
+  if (withContent || storyIds || learningIds) {
     const dialog = page.getByRole('dialog', {
       name: 'Add Segment',
       exact: true,
     })
-    await dialog.getByRole('combobox').first().click()
-    await dialog
-      .getByRole('option', { name: 'bank_account', exact: true })
-      .click()
-    await dialog
-      .getByRole('heading', { name: 'Add Segment', exact: true })
-      .click()
-    await dialog.getByRole('combobox').nth(1).click()
-    await dialog
-      .getByRole('option', { name: 'bonds_intro', exact: true })
-      .click()
-    await dialog
-      .getByRole('heading', { name: 'Add Segment', exact: true })
-      .click()
+    for (const [picker, ids] of [
+      [0, storyIds ?? (withContent ? ['bank_account'] : [])],
+      [1, learningIds ?? (withContent ? ['bonds_intro'] : [])],
+    ] as const) {
+      for (const id of ids) {
+        await dialog.getByRole('combobox').nth(picker).click()
+        await dialog.getByRole('option', { name: id, exact: true }).click()
+        await dialog
+          .getByRole('heading', { name: 'Add Segment', exact: true })
+          .click()
+      }
+    }
   }
   await page.getByRole('button', { name: 'Submit' }).click()
   const segment = page.getByTestId(
@@ -180,6 +185,15 @@ async function joinPlayer(
     ignoreHTTPSErrors: true,
   })
   const page = await context.newPage()
+  // Next's development toolbar can cover mobile footer controls. It is not
+  // part of the player UI; keep it out of pointer and screenshot checks.
+  await page.addInitScript(() => {
+    document.addEventListener('DOMContentLoaded', () => {
+      const style = document.createElement('style')
+      style.textContent = 'nextjs-portal { display: none; }'
+      document.head.append(style)
+    })
+  })
 
   await page.goto(joinUrl, { waitUntil: 'domcontentloaded' })
   await page.waitForURL('**/play/welcome', { waitUntil: 'domcontentloaded' })
@@ -347,13 +361,15 @@ async function assertAllocationControls(page: Page, admin: Page) {
   })
   await expect(learning).toBeVisible()
   await learning
-    .getByRole('button', {
+    .getByRole('radio', {
       name: 'Eine Anleihe beinhaltet ein geringeres erwartetes Risiko als eine Aktie.',
     })
     .click()
-  await learning.getByRole('button', { name: 'Submit', exact: true }).click()
-  await expect(learning.getByText('SOLVED', { exact: true })).toBeVisible()
-  // The footer action precedes the modal's top-right Close icon.
+  await learning
+    .getByRole('button', { name: 'Submit answer', exact: true })
+    .click()
+  await expect(learning.getByText('Solved', { exact: true })).toBeVisible()
+  // Both the sheet header and solved footer can close the activity.
   await learning
     .getByRole('button', { name: 'Close', exact: true })
     .first()
@@ -1684,6 +1700,443 @@ test('History follows settled quarters, filters years and preserves hidden dice'
         .getByRole('button', { name: '2026 Quarter 1 monthly details' })
         .click()
     }
+  } finally {
+    await session.context.close()
+  }
+})
+
+test('Team stories and learning sheets preserve progress, drafts and released content', async ({
+  page: admin,
+  browser,
+  baseURL,
+}, testInfo) => {
+  const appBaseURL = requireBaseURL(baseURL)
+  await createGame(admin, {
+    name: `Team content ${Date.now()}`,
+    playerCount: 1,
+  })
+  await addPeriod(admin, { segmentCount: '2', index: 0 })
+  await addSegment(admin, {
+    periodIndex: 0,
+    storyIds: ['bank_account', 'bonds'],
+    learningIds: ['bonds_intro', 'investments_risks'],
+  })
+  await addSegment(admin, {
+    periodIndex: 0,
+    storyIds: ['bank_account', 'stocks'],
+    learningIds: ['investments_risks', 'stocks_intro'],
+  })
+  const session = await joinPlayer(
+    browser,
+    appBaseURL,
+    await playerJoinUrl(admin, appBaseURL, 0),
+    { name: 'Team 1', decisions: players[0].decisions }
+  )
+  const player = session.page
+  const pageErrors: string[] = []
+  player.on('pageerror', (error) => pageErrors.push(error.message))
+  const story = () =>
+    player
+      .getByRole('dialog')
+      .filter({ has: player.getByText(/Story element ·/) })
+  const quiz = () =>
+    player.getByRole('dialog', { name: 'Learning Activity', exact: true })
+  const team = player.getByTestId('team-panel')
+  const teamTab = () =>
+    player.getByRole('link', { name: 'Team', exact: true }).click()
+  const capture = async (state: string) => {
+    for (const width of [784, 390, 320]) {
+      await player.setViewportSize({
+        width,
+        height: width === 784 ? 1692 : 844,
+      })
+      await expect
+        .poll(() =>
+          player.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth
+          )
+        )
+        .toBe(true)
+      const dialog = player.getByRole('dialog')
+      if (await dialog.count()) {
+        const bounds = await dialog.boundingBox()
+        expect(bounds!.y).toBeGreaterThanOrEqual(0)
+        await expect(dialog.getByRole('button').last()).toBeInViewport()
+      }
+      await player.screenshot({
+        path: testInfo.outputPath(`team-${state}-${width}.png`),
+        animations: 'disabled',
+        style:
+          'nextjs-portal, [aria-label="Notifications (F8)"] { visibility: hidden !important; }',
+      })
+    }
+    await player.setViewportSize({ width: 390, height: 844 })
+  }
+  try {
+    await teamTab()
+    await expect(
+      team.getByText('Stories will appear when a quarter begins.')
+    ).toBeVisible()
+    await expect(
+      team.getByText('No learning activities available yet.')
+    ).toBeVisible()
+    await expect(
+      player.getByRole('region', { name: 'Game progress' })
+    ).toBeHidden()
+    await advanceGame(admin, {
+      action: 'Start Period',
+      expectedStatus: 'PREPARATION',
+    })
+    await advanceGame(admin, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    await expect(story()).toBeVisible()
+    await expect(story().getByText('Card 1 of 2')).toBeVisible()
+    await capture('story')
+    // Outside pointer interactions must not skip the sequence.
+    await player.mouse.click(4, 4)
+    await expect(story()).toBeVisible()
+    await story().getByRole('button', { name: 'Continue', exact: true }).click()
+    await expect(story().getByText('Card 2 of 2')).toBeVisible()
+    await story().getByRole('button', { name: 'Skip stories' }).click()
+    await expect(story()).toBeHidden()
+    await expect(
+      team.getByRole('button', {
+        name: 'A. About the Savings Account',
+        exact: true,
+      })
+    ).toContainText('Read')
+    const bondStory = team.getByRole('button', {
+      name: 'B. About Bonds',
+      exact: true,
+    })
+    await expect(bondStory).toContainText('New')
+    await expect(bondStory).toHaveAccessibleDescription(
+      'Card 2 of 2 · 2026 · Q1 New'
+    )
+    await expect(
+      team.getByRole('button', { name: 'C. About Stocks', exact: true })
+    ).toHaveCount(0)
+    await expect(team.getByTestId('team-value')).toHaveText("10'000.00")
+    await expect(team.getByTestId('team-last-quarter')).toHaveText('—')
+    await capture('panel')
+    await bondStory.click()
+    await expect(story().getByText('Card 2 of 2')).toBeVisible()
+    await player.keyboard.press('Escape')
+    await expect(bondStory).toBeFocused()
+    await expect(bondStory).toContainText('New')
+    await bondStory.click()
+    let rejectMark = true
+    await player.route('**/api/graphql', async (route) => {
+      if (
+        route.request().postDataJSON()?.operationName === 'MarkStoryElement' &&
+        rejectMark
+      ) {
+        rejectMark = false
+        await route.fulfill({
+          json: { errors: [{ message: 'Injected mark failure' }] },
+        })
+      } else await route.fallback()
+    })
+    await story().getByRole('button', { name: 'Continue', exact: true }).click()
+    await expect(story().getByRole('alert')).toContainText(
+      'Could not save your progress'
+    )
+    await story().getByRole('button', { name: 'Continue', exact: true }).click()
+    await expect(story()).toBeHidden()
+    await expect(bondStory).toContainText('Read')
+    await player
+      .getByRole('link', { name: 'Cockpit', exact: true })
+      .press('Enter')
+    const savings = player.getByRole('spinbutton', {
+      name: 'Savings',
+      exact: true,
+    })
+    // Keep an invalid edit alive through content requests and switching tabs.
+    await savings.fill('42.1')
+    await teamTab()
+    const bonds = team.getByRole('button', { name: 'Bonds', exact: true })
+    await expect(bonds).toHaveAccessibleDescription('Quiz New')
+    await bonds.click()
+    await expect(quiz().getByRole('radio')).toHaveCount(3)
+    await expect(
+      quiz().getByRole('button', { name: 'Submit answer' })
+    ).toBeDisabled()
+    await quiz().getByRole('radio').nth(1).check()
+    await capture('learning')
+    await quiz().getByRole('button', { name: 'Later', exact: true }).click()
+    await expect(bonds).toBeFocused()
+    await expect(bonds).toHaveAccessibleDescription('Quiz Open')
+    await bonds.click()
+    await expect(quiz().getByRole('radio').nth(1)).toBeChecked()
+    let rejectAnswer = true
+    await player.route('**/api/graphql', async (route) => {
+      if (
+        route.request().postDataJSON()?.operationName ===
+          'AttemptLearningElement' &&
+        rejectAnswer
+      ) {
+        rejectAnswer = false
+        await route.fulfill({
+          json: { data: { attemptLearningElement: null } },
+        })
+      } else await route.fallback()
+    })
+    await quiz().getByRole('button', { name: 'Submit answer' }).click()
+    await expect(quiz().getByRole('alert')).toContainText('Could not submit')
+    await expect(quiz().getByRole('radio').nth(1)).toBeChecked()
+    await quiz().getByRole('radio').first().check()
+    await quiz().getByRole('button', { name: 'Submit answer' }).click()
+    await expect(
+      quiz().getByText('That answer is not correct. Try again.')
+    ).toBeVisible()
+    await quiz().getByRole('radio').nth(1).check()
+    await quiz().getByRole('button', { name: 'Submit answer' }).click()
+    await expect(quiz().getByText('Solved', { exact: true })).toBeVisible()
+    await expect(quiz().getByRole('radio').nth(1)).toBeChecked()
+    await expect(quiz().getByRole('radio').nth(1)).toBeDisabled()
+    await expect(
+      quiz().getByRole('heading', { name: 'Explanation' })
+    ).toBeVisible()
+    await quiz()
+      .getByRole('button', { name: 'Close', exact: true })
+      .first()
+      .click()
+    await expect(bonds).toHaveAccessibleDescription('Quiz Solved')
+    await player
+      .getByRole('link', { name: 'Cockpit', exact: true })
+      .press('Enter')
+    await expect(savings).toHaveValue('42.1')
+    await teamTab()
+    const risks = team.getByRole('button', {
+      name: 'Investment Risks',
+      exact: true,
+    })
+    let rejectLoad = true
+    await player.route('**/api/graphql', async (route) => {
+      if (
+        route.request().postDataJSON()?.operationName === 'LearningElement' &&
+        rejectLoad
+      ) {
+        rejectLoad = false
+        await route.fulfill({
+          json: { errors: [{ message: 'Injected loading failure' }] },
+        })
+      } else await route.fallback()
+    })
+    await risks.click()
+    await expect(quiz().getByRole('alert')).toContainText(
+      'Could not load this activity'
+    )
+    await expect(quiz().getByRole('radio')).toHaveCount(0)
+    await quiz().getByRole('button', { name: 'Try again' }).click()
+    await expect(quiz().getByRole('radio')).toHaveCount(3)
+    await quiz().getByRole('button', { name: 'Later' }).click()
+    await player.reload()
+    await expect(story()).toBeHidden()
+    await expect(risks).toContainText('Open')
+    await expect(bonds).toContainText('Solved')
+    await expect(bondStory).toContainText('Read')
+    await setCountdown(admin, '0')
+    await risks.click()
+    await quiz().getByRole('radio').nth(2).check()
+    await expect(
+      quiz().getByRole('button', { name: 'Submit answer' })
+    ).toBeEnabled()
+    // Instructor progression preempts the open activity with the newly released story.
+    await advanceGame(admin, {
+      action: 'Segment Results',
+      expectedStatus: 'PAUSED',
+    })
+    await advanceGame(admin, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    await expect(story()).toBeVisible()
+    await expect(quiz()).toHaveCount(0)
+    await expect(story().getByText('Card 2 of 2')).toBeVisible()
+    await expect(
+      story()
+        .getByRole('heading', { name: 'C. About Stocks', exact: true })
+        .last()
+    ).toBeVisible()
+    await story().getByRole('button', { name: 'Continue', exact: true }).click()
+    await expect(
+      team.getByRole('button', {
+        name: 'A. About the Savings Account',
+        exact: true,
+      })
+    ).toContainText('2026 · Q1')
+    await expect(
+      team.getByRole('button', {
+        name: 'A. About the Savings Account',
+        exact: true,
+      })
+    ).toHaveCount(1)
+    await expect(
+      team.getByRole('button', { name: 'C. About Stocks', exact: true })
+    ).toContainText('2026 · Q2')
+    await expect(team.getByTestId('team-last-quarter')).not.toHaveText('—')
+    await risks.click()
+    await expect(quiz().getByRole('radio').nth(2)).toBeChecked()
+    await quiz().getByRole('button', { name: 'Later' }).click()
+    // A query finishing after switching activities must not replace the
+    // current title, options or solved state; null content stays explicit.
+    let releaseQuery: (() => void) | undefined
+    let queryReleased = false
+    await player.route('**/api/graphql', async (route) => {
+      const request = route.request().postDataJSON()
+      if (
+        request?.operationName === 'LearningElement' &&
+        request.variables.id === 'stocks_intro'
+      ) {
+        await new Promise<void>((resolve) => {
+          releaseQuery = resolve
+        })
+        await route.fulfill({ json: { data: { learningElement: null } } })
+        queryReleased = true
+      } else await route.fallback()
+    })
+    const stocks = team.getByRole('button', { name: 'Stocks', exact: true })
+    await stocks.click()
+    await expect(quiz().getByText('Loading activity…')).toBeVisible()
+    await expect.poll(() => !!releaseQuery).toBe(true)
+    await quiz().getByRole('button', { name: 'Later' }).click()
+    await bonds.click()
+    releaseQuery!()
+    // Closing can cancel the fetch, so a response event is not guaranteed.
+    await expect.poll(() => queryReleased).toBe(true)
+    await expect(
+      quiz().getByRole('heading', { name: 'Bonds', exact: true })
+    ).toBeVisible()
+    await expect(quiz().getByText('Solved', { exact: true })).toBeVisible()
+    await quiz()
+      .getByRole('button', { name: 'Close', exact: true })
+      .first()
+      .click()
+    // Allow subsequent requests for the unavailable lesson to resolve directly.
+    await player.route('**/api/graphql', async (route) => {
+      const request = route.request().postDataJSON()
+      if (
+        request?.operationName === 'LearningElement' &&
+        request.variables.id === 'stocks_intro'
+      ) {
+        await route.fulfill({ json: { data: { learningElement: null } } })
+      } else await route.fallback()
+    })
+    await stocks.click()
+    await expect(
+      quiz().getByText('This activity is unavailable.')
+    ).toBeVisible()
+    await expect(
+      quiz().getByRole('button', { name: 'Submit answer' })
+    ).toBeDisabled()
+    await quiz().getByRole('button', { name: 'Later' }).click()
+
+    let releaseAttempt: (() => void) | undefined
+    await player.route('**/api/graphql', async (route) => {
+      if (
+        route.request().postDataJSON()?.operationName ===
+        'AttemptLearningElement'
+      ) {
+        await new Promise<void>((resolve) => {
+          releaseAttempt = resolve
+        })
+        await route.fulfill({
+          json: { errors: [{ message: 'Delayed attempt failure' }] },
+        })
+      } else await route.fallback()
+    })
+    await risks.click()
+    await quiz().getByRole('button', { name: 'Submit answer' }).click()
+    await expect.poll(() => !!releaseAttempt).toBe(true)
+    await quiz().getByRole('button', { name: 'Later' }).click()
+    await bonds.click()
+    const attemptResponse = player.waitForResponse(
+      (response) =>
+        response.url().includes('/api/graphql') &&
+        response.request().postDataJSON()?.operationName ===
+          'AttemptLearningElement'
+    )
+    releaseAttempt!()
+    await (await attemptResponse).finished()
+    await expect(quiz().getByText('Solved', { exact: true })).toBeVisible()
+    await expect(quiz().getByRole('alert')).toHaveCount(0)
+    await quiz()
+      .getByRole('button', { name: 'Close', exact: true })
+      .first()
+      .click()
+    // Successful late submissions refresh the submitted activity, even while
+    // a different activity is open, including its answer and explanation.
+    let releaseSuccess: (() => void) | undefined
+    await player.route('**/api/graphql', async (route) => {
+      if (
+        route.request().postDataJSON()?.operationName ===
+        'AttemptLearningElement'
+      ) {
+        await new Promise<void>((resolve) => {
+          releaseSuccess = resolve
+        })
+        await route.continue()
+      } else await route.fallback()
+    })
+    await risks.click()
+    await expect(quiz().getByRole('radio').nth(2)).toBeChecked()
+    await quiz().getByRole('button', { name: 'Submit answer' }).click()
+    await expect.poll(() => !!releaseSuccess).toBe(true)
+    await quiz().getByRole('button', { name: 'Later' }).click()
+    await bonds.click()
+    const submittedActivityRefresh = player.waitForResponse((response) => {
+      const request = response.request().postDataJSON()
+      return (
+        response.url().includes('/api/graphql') &&
+        request?.operationName === 'LearningElement' &&
+        request.variables.id === 'investments_risks'
+      )
+    })
+    releaseSuccess!()
+    await (await submittedActivityRefresh).finished()
+    await expect(
+      quiz().getByRole('heading', { name: 'Bonds', exact: true })
+    ).toBeVisible()
+    await expect(quiz().getByRole('radio').nth(1)).toBeChecked()
+    await expect(quiz().getByRole('alert')).toHaveCount(0)
+    await quiz()
+      .getByRole('button', { name: 'Close', exact: true })
+      .first()
+      .click()
+    await expect(risks).toHaveAccessibleDescription('Quiz Solved')
+    await risks.click()
+    await expect(quiz().getByRole('radio').nth(2)).toBeChecked()
+    await expect(quiz().getByRole('radio').nth(2)).toBeDisabled()
+    await expect(
+      quiz().getByRole('heading', { name: 'Explanation' })
+    ).toBeVisible()
+    await expect(
+      quiz().getByRole('button', { name: 'Submit answer' })
+    ).toHaveCount(0)
+    await quiz()
+      .getByRole('button', { name: 'Close', exact: true })
+      .first()
+      .click()
+    await advanceGame(admin, {
+      action: 'Consolidate',
+      expectedStatus: 'CONSOLIDATION',
+    })
+    await advanceGame(admin, {
+      action: 'Period Results',
+      expectedStatus: 'RESULTS',
+    })
+    await teamTab()
+    await expect(
+      team.getByRole('button', { name: 'B. About Bonds', exact: true })
+    ).toBeVisible()
+    await bondStory.click()
+    await expect(story().getByText('Card 2 of 2')).toBeVisible()
+    await story().getByRole('button', { name: 'Continue', exact: true }).click()
+    await expect(story()).toBeHidden()
+    expect(pageErrors).toEqual([])
   } finally {
     await session.context.close()
   }
