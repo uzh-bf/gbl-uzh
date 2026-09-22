@@ -33,23 +33,25 @@ export function initialize(
     baseFacts,
     (draft: OutputSegmentFacts) => {
       const periodFacts = payload.periodFacts
-      const segmentIx = payload.segmentIx
+      const scenario = periodFacts.scenario
 
-      // TODO(JJ): Should also take periodIx into account?
+      const seed = scenario.seed
+      const periodIx = payload.periodIx
+      const segmentIx = payload.segmentIx
+      const seedAndIndices = [seed, periodIx, segmentIx]
+
       const diceRolls = R.range(0, periodFacts.rollsPerSegment).map(
         (rollIx: number) => {
-          const seed = periodFacts.scenario.seed
-          const bondsAndStocks = diceRoll([seed, segmentIx, rollIx, 0])
+          const bondsAndStocks = diceRoll([...seedAndIndices, rollIx, 0])
           return {
             shared: bondsAndStocks,
-            bonds: diceRoll([seed, segmentIx, rollIx, 1]) + bondsAndStocks,
-            stocks: diceRoll([seed, segmentIx, rollIx, 2]) + bondsAndStocks,
+            bonds: diceRoll([...seedAndIndices, rollIx, 1]) + bondsAndStocks,
+            stocks: diceRoll([...seedAndIndices, rollIx, 2]) + bondsAndStocks,
           }
         }
       )
 
       const returns = diceRolls.map((rolls) => {
-        const scenario = payload.periodFacts.scenario
         return {
           bank: scenario.interestBank,
           bonds: computeScenarioOutcome(
