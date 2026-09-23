@@ -1768,7 +1768,7 @@ test('Team stories and learning sheets preserve progress, drafts and released co
     await savings.fill('42.1')
     await teamTab()
     const bonds = team.getByRole('button', { name: 'Bonds', exact: true })
-    await expect(bonds).toHaveAccessibleDescription('Quiz · 20 XP New')
+    await expect(bonds).toHaveAccessibleDescription('Quiz New')
     await bonds.click()
     await expect(quiz().getByRole('radio')).toHaveCount(3)
     await expect(
@@ -1778,7 +1778,7 @@ test('Team stories and learning sheets preserve progress, drafts and released co
     await capture('learning')
     await quiz().getByRole('button', { name: 'Later', exact: true }).click()
     await expect(bonds).toBeFocused()
-    await expect(bonds).toHaveAccessibleDescription('Quiz · 20 XP Open')
+    await expect(bonds).toHaveAccessibleDescription('Quiz Open')
     await bonds.click()
     await expect(quiz().getByRole('radio').nth(1)).toBeChecked()
     let rejectAnswer = true
@@ -1814,11 +1814,7 @@ test('Team stories and learning sheets preserve progress, drafts and released co
       .getByRole('button', { name: 'Close', exact: true })
       .first()
       .click()
-    await expect(bonds).toHaveAccessibleDescription('Quiz · 20 XP Solved')
-    await expect(team.getByRole('progressbar')).toHaveAttribute(
-      'aria-valuenow',
-      '20'
-    )
+    await expect(bonds).toHaveAccessibleDescription('Quiz Solved')
     await player
       .getByRole('link', { name: 'Decisions', exact: true })
       .press('Enter')
@@ -1852,10 +1848,6 @@ test('Team stories and learning sheets preserve progress, drafts and released co
     await expect(story()).toBeHidden()
     await expect(risks).toContainText('Open')
     await expect(bonds).toContainText('Solved')
-    await expect(team.getByRole('progressbar')).toHaveAttribute(
-      'aria-valuenow',
-      '20'
-    )
     await expect(bondStory).toContainText('Read')
     await setCountdown(admin, '0')
     await risks.click()
@@ -2025,7 +2017,7 @@ test('Team stories and learning sheets preserve progress, drafts and released co
       .getByRole('button', { name: 'Close', exact: true })
       .first()
       .click()
-    await expect(risks).toHaveAccessibleDescription('Quiz · 20 XP Solved')
+    await expect(risks).toHaveAccessibleDescription('Quiz Solved')
     await risks.click()
     await expect(quiz().getByRole('radio').nth(2)).toBeChecked()
     await expect(quiz().getByRole('radio').nth(2)).toBeDisabled()

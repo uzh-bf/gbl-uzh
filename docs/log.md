@@ -2,6 +2,8 @@
 
 ## 2026-09-23
 
+**Update**: [Game Model](game-model.md), [Developing a Game](developing-a-game.md) — revert the XP work from `a11456d6`: restore achievement-only computation, remove seeded lesson rewards and their tests, and restore prior reward-badge validation. Both platform services return to their pre-commit versions. Calendar, countdown, cleanup, and later changes are preserved, as are existing database XP and lesson rewards. Earlier XP implementation and correction entries below remain as historical records.
+
 **Update**: [Developing a Game](developing-a-game.md), [Game Lifecycle](game-lifecycle.md), [UI Building Blocks](ui-components.md) — rename Cockpit to Decisions without changing URLs; show editing-only, side-by-side Bonds/Stocks forecasts with expected-value colors matching Market and no extra navigation link. Limit Ready and readiness reminders to active segments; review screens wait for the instructor.
 
 **Update**: [Developing a Game](developing-a-game.md) — migrate demo-game, platform, and UI tests to Vitest 5 with independent commands, preserve opt-in learning integration coverage, and update UI’s compatible Vite tooling while retaining its browser targets and package exports.

@@ -1,5 +1,4 @@
 import { PrismaClient } from '../src/generated/prisma/client'
-import { LEARNING_ACTIVITY_XP } from '../src/lib/constants'
 import prismaClient from '../src/lib/prisma'
 
 // TODO(JJ): Maybe add images
@@ -164,11 +163,7 @@ Dies zu tun erfordert ein grundlegendes Verständnis für den Zeitwert des Gelde
 -	Die Inflation kann die Kaufkraft des Geldes über die Zeit mindern. `,
     motivation: 'TBD',
   },
-].map((elem) => ({
-  ...elem,
-  reward: { xp: LEARNING_ACTIVITY_XP },
-  options: { create: elem.options },
-}))
+].map((elem) => ({ ...elem, options: { create: elem.options } }))
 
 const LEVELS = [
   {

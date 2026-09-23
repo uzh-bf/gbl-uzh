@@ -76,10 +76,5 @@ export function teamStatistics(data: ResultQuery) {
 export function learningXP(reward: unknown): number | null {
   const xp =
     reward && typeof reward === 'object' && 'xp' in reward ? reward.xp : null
-  return typeof xp === 'number' &&
-    Number.isInteger(xp) &&
-    xp >= 0 &&
-    xp <= 2147483647
-    ? xp
-    : null
+  return typeof xp === 'number' && Number.isFinite(xp) && xp >= 0 ? xp : null
 }

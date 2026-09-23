@@ -2,7 +2,6 @@
 export const FIRST_GAME_YEAR = new Date().getFullYear()
 export const NUM_MONTHS_PER_SEGMENT = 3
 
-export const LEARNING_ACTIVITY_XP = 20
 export const INITIAL_CAPITAL = 10000
 export const DEFAULT_SEED = 1
 export const GAP_STOCKS = 0.025

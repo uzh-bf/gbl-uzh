@@ -49,45 +49,7 @@ export function buildGameRealtimeFacts(
   }
 }
 
-/** XP is stored as a PostgreSQL Int; invalid content must not break completion. */
-export function rewardXP(reward: unknown): number {
-  const xp =
-    reward && typeof reward === 'object' && 'xp' in reward ? reward.xp : null
-  return typeof xp === 'number' &&
-    Number.isInteger(xp) &&
-    xp >= 0 &&
-    xp <= 2147483647
-    ? xp
-    : 0
-}
-
-export function experienceUpdate(
-  player: { experience: number; levelIx: number },
-  xp: number,
-  levels: { index: number; requiredXP: number }[]
-) {
-  const experience = player.experience + xp
-  const sorted = [...levels].sort((a, b) => a.index - b.index)
-  const levelIx = sorted.reduce(
-    (index, level) =>
-      level.requiredXP <= experience ? Math.max(index, level.index) : index,
-    player.levelIx
-  )
-  return {
-    experience: { increment: xp },
-    level: { connect: { index: levelIx } },
-    experienceToNext:
-      sorted.find((level) => level.index > levelIx)?.requiredXP ?? 0,
-  }
-}
-
-export async function receiveEvents({
-  events,
-  ctx,
-  prisma,
-  notify = publishUserNotification,
-  inTransaction = false,
-}) {
+export async function receiveEvents({ events, ctx, prisma }) {
   if (!Array.isArray(events) || events.length === 0) return []
 
   const definedEvents = await prisma.event.findMany({
@@ -100,13 +62,7 @@ export async function receiveEvents({
 
   const perEventOps = await Promise.all(
     events.map(async (event) =>
-      receiveEvent(
-        { ...event, ctx },
-        definedEvents,
-        definedLevels,
-        prisma,
-        notify
-      )
+      receiveEvent({ ...event, ctx }, definedEvents, definedLevels, prisma)
     )
   )
 
@@ -115,7 +71,7 @@ export async function receiveEvents({
 
   const transaction = (prisma as any)?.$transaction
   const results =
-    !inTransaction && typeof transaction === 'function'
+    typeof transaction === 'function'
       ? transaction.call(prisma, ops)
       : Promise.all(ops)
 
@@ -173,8 +129,7 @@ export async function receiveEvent(
   event,
   definedEvents,
   definedLevels,
-  prisma,
-  notify = publishUserNotification
+  prisma
 ) {
   const matchingEvent = definedEvents.find((item) => item.id === event.type)
   // console.warn(event, matchingEvent)
@@ -276,31 +231,99 @@ export async function receiveEvent(
       awardedAchievements.rewards = {
         ...awardedAchievements.rewards,
         xp:
-          (awardedAchievements.rewards.xp ?? 0) + rewardXP(achievement.reward),
+          (awardedAchievements.rewards.xp ?? 0) + (achievement.reward?.xp ?? 0),
       }
     }
 
+    const currentLevelPlus1 = definedLevels.find(
+      (level) => level.index === event.ctx.currentLevelIx + 1
+    )
+
+    const currentLevelPlus2 = definedLevels.find(
+      (level) => level.index === event.ctx.currentLevelIx + 2
+    )
+
     if (awardedAchievements.achievements.length > 0) {
-      const update = experienceUpdate(
-        { experience: event.ctx.experience, levelIx: event.ctx.currentLevelIx },
-        awardedAchievements.rewards.xp ?? 0,
-        definedLevels
-      )
-      const notifications = [
-        { type: UserNotificationType.ACHIEVEMENT_RECEIVED },
-      ]
-      if (update.level.connect.index > event.ctx.currentLevelIx)
-        notifications.push({ type: UserNotificationType.LEVEL_UP })
-      notify({ user: { sub: event.ctx.args.playerId } }, notifications)
-      return [
-        prisma.player.update({
-          where: { id: event.ctx.args.playerId },
-          data: {
-            ...update,
-            achievementKeys: { push: awardedAchievements.achievementKeys },
+      if (
+        event.ctx.experience + awardedAchievements.rewards.xp >=
+        currentLevelPlus1.requiredXP
+      ) {
+        publishUserNotification(
+          {
+            user: {
+              sub: event.ctx.args.playerId,
+            },
           },
-        }),
-      ]
+          [
+            {
+              type: UserNotificationType.ACHIEVEMENT_RECEIVED,
+            },
+          ]
+        )
+        publishUserNotification(
+          {
+            user: {
+              sub: event.ctx.args.playerId,
+            },
+          },
+          [
+            {
+              type: UserNotificationType.LEVEL_UP,
+            },
+          ]
+        )
+
+        return [
+          prisma.player.update({
+            where: {
+              id: event.ctx.args.playerId,
+            },
+            data: {
+              experience: {
+                increment: awardedAchievements.rewards.xp,
+              },
+              experienceToNext: currentLevelPlus2.requiredXP,
+              level: {
+                connect: {
+                  index: currentLevelPlus1.index,
+                },
+              },
+              achievementKeys: {
+                push: awardedAchievements.achievementKeys,
+              },
+            },
+          }),
+        ]
+      } else {
+        publishUserNotification(
+          {
+            user: {
+              sub: event.ctx.args.playerId,
+            },
+          },
+          [
+            {
+              type: UserNotificationType.ACHIEVEMENT_RECEIVED,
+            },
+          ]
+        )
+
+        return [
+          prisma.player.update({
+            where: {
+              id: event.ctx.args.playerId,
+            },
+            data: {
+              experience: {
+                increment: awardedAchievements.rewards.xp,
+              },
+              achievementKeys: {
+                push: awardedAchievements.achievementKeys,
+              },
+            },
+          }),
+        ]
+      }
     }
 
     return []

@@ -6,7 +6,7 @@ tags:
   - prisma
   - data-model
   - facts
-timestamp: '2026-09-23T00:00:00Z'
+timestamp: "2026-09-23T14:38:48Z"
 ---
 
 # Game Model (Data Model)
@@ -73,13 +73,13 @@ Fully platform-owned (`EventService.ts`); games only provide data and emit event
 - **`Achievement`** — attached to an event: `when` (`FIRST`/`EACH`), `scope` (`GAME`/`PERIOD`), `activePeriods`, optional `conditions` (JSON array of `{fact, op, value}` checked against the event's facts; ops `gt|gte|lt|lte|eq|neq`), optional `reward` (e.g. `{ "xp": 100 }`), and role-based names/descriptions.
 - **`AchievementInstance`** — an award record per player (+count), unique per achievement+player+period.
 
-Any reducer output can include `events`; the platform matches them to achievements, awards XP, and pushes `ACHIEVEMENT_RECEIVED` notifications; a `LEVEL_UP` notification fires only when the accumulated XP crosses the next `PlayerLevel.requiredXP` threshold. The demo game seeds no `Event`/`Achievement` rows; its learning XP comes directly from lesson rewards. Achievement rewards remain additional. `EventService.ts:experienceUpdate` supports multiple level crossings and sets `experienceToNext` to 0 at the highest level.
+Any reducer output can include `events`; the platform matches them to achievements, sums their `reward.xp`, increments cumulative player experience, and pushes `ACHIEVEMENT_RECEIVED` notifications (`EventService.ts:receiveEvent`). Each event can advance at most one level when its reward reaches the next `PlayerLevel.requiredXP` threshold; `experienceToNext` stores the following cumulative threshold, not remaining XP. The implementation assumes the next two levels exist and does not safely handle the top of the ladder. Events in a batch use the same starting player context, so their combined rewards can leave the level behind accumulated XP. The demo game seeds no `Event`/`Achievement` rows, so this engine is dormant with fresh demo seed data.
 
 ## Learning content
 
 Attachable to segments at creation time, delivered by the platform without game code:
 
-- **`LearningElement`** — a multiple-choice quiz item (`question`, `options` with `correct` + `feedback`, `motivation`, optional `reward`). Players open them from a sidebar list; `PlayService.ts:attemptLearningElement` scores them and emits solved/incorrect events. Completion is tracked on `Player.completedLearningElementIds`. On first correct completion, `PlayService.ts:attemptLearningElement` applies a nonnegative integer `reward.xp` directly, with completion, XP, levels, and any achievements in one serializable transaction. Duplicate submissions do not award again; notifications publish after commit. The existing completion IDs and relation prevent repeats; no separate reward ledger or schema migration is needed. Missing or invalid XP rewards do not block completion.
+- **`LearningElement`** — a multiple-choice quiz item (`question`, `options` with `correct` + `feedback`, `motivation`, optional `reward`). `PlayService.ts:attemptLearningElement` scores the answer, records correct completion in the relation and `Player.completedLearningElementIds`, and dispatches a solved event to the achievement engine; incorrect answers publish an incorrect notification. The lesson's own `reward.xp` is not applied. Repeated correct submissions can append duplicate completion IDs and retrigger repeatable achievements. Completion and achievement rewards are not atomic, notifications may precede committed XP, and the returned player snapshot precedes achievement rewards.
 - **`StoryElement`** — a narrative/markdown popup. `type` `GENERIC` (single `content`) or `ROLE_BASED` (`contentRole` JSON keyed by player role). Unseen story elements attached to the active segment block the player's screen until acknowledged (`markStoryElement`). Tracked on `Player.visitedStoryElementIds`.
 
 Both are M:N with `PeriodSegment` and get selected in the admin's "add segment" dialog. Seed examples: `apps/demo-game/prisma/seed.ts`.
