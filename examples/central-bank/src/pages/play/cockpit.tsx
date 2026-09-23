@@ -1,4 +1,3 @@
-import { useMutation, useQuery } from '@apollo/client'
 import {
   Button,
   Card,
@@ -15,7 +14,7 @@ import {
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
 import { Form, Formik } from 'formik'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import {
   Bar,
   BarChart,
@@ -29,15 +28,14 @@ import {
   YAxis,
 } from 'recharts'
 import * as yup from 'yup'
+import { getFacts, getNumber } from '~/lib/facts'
+import { trpc } from '~/lib/trpc'
 import { DEFAULT_RATE, NEUTRAL_RATE, TREND_GROWTH } from '~/settings/Constants'
+import type { CurrentGameResult } from '~/types/api'
+import type { ResultFacts } from '~/types/facts'
+import type { PeriodFacts } from '~/types/Period'
 import GameLayout from '../../components/GameLayout'
 import { useToast } from '../../components/ui/use-toast'
-
-import {
-  PerformActionDocument,
-  ResultDocument,
-  ResultsDocument,
-} from 'src/graphql/generated/ops'
 
 function GameHeader({ currentGame }) {
   return (
@@ -102,6 +100,16 @@ function renderDeviationMeter(val: number, target: number, range: number) {
       ></div>
     </div>
   )
+}
+
+function getResultFacts(value: unknown) {
+  if (typeof value !== 'string') return getFacts(value)
+
+  try {
+    return getFacts(JSON.parse(value))
+  } catch {
+    return {}
+  }
 }
 
 function NewsflashBanner({ activeSegmentFacts }: { activeSegmentFacts: any }) {
@@ -285,21 +293,15 @@ function HistoryChart({ history }) {
 }
 
 function Leaderboard() {
-  const { data, refetch } = useQuery(ResultsDocument, {
-    fetchPolicy: 'cache-and-network',
+  const { data = [] } = trpc.results.listForCurrentGame.useQuery(undefined, {
+    refetchInterval: 5000,
   })
 
-  // Refetch leaderboard periodically
-  useEffect(() => {
-    const timer = setInterval(() => refetch(), 5000)
-    return () => clearInterval(timer)
-  }, [refetch])
-
   const leaderboard = useMemo(() => {
-    if (!data?.results) return []
+    if (!data) return []
 
-    const latestResultByPlayer: Record<string, any> = {}
-    data.results.forEach((res: any) => {
+    const latestResultByPlayer: Record<string, CurrentGameResult> = {}
+    data.forEach((res) => {
       const playerId = res.player.id
       const current = latestResultByPlayer[playerId]
       if (!current) {
@@ -319,14 +321,17 @@ function Leaderboard() {
     })
 
     return Object.values(latestResultByPlayer)
-      .map((res: any) => ({
-        id: res.player.id,
-        name: res.player.name,
-        cumulativePenalty: res.facts?.cumulativePenalty ?? 0,
-        inflation: res.facts?.inflation ?? 0,
-        unemployment: res.facts?.unemployment ?? 0,
-        growth: res.facts?.growth ?? 0,
-      }))
+      .map((res) => {
+        const facts = getResultFacts(res.facts)
+        return {
+          id: res.player.id,
+          name: res.player.name,
+          cumulativePenalty: getNumber(facts.cumulativePenalty),
+          inflation: getNumber(facts.inflation),
+          unemployment: getNumber(facts.unemployment),
+          growth: getNumber(facts.growth),
+        }
+      })
       .sort((a, b) => a.cumulativePenalty - b.cumulativePenalty)
   }, [data])
 
@@ -376,25 +381,29 @@ function Leaderboard() {
 }
 
 export default function Cockpit() {
-  const { data: playerDataResult, refetch: refetchResult } = useQuery(
-    ResultDocument,
-    {
-      fetchPolicy: 'cache-and-network',
-    }
-  )
-  const [performAction] = useMutation(PerformActionDocument)
+  const { data: playerDataResult } = trpc.play.result.useQuery()
+  const utils = trpc.useUtils()
+  const performAction = trpc.play.performAction.useMutation({
+    async onSuccess() {
+      await Promise.all([
+        utils.play.result.invalidate(),
+        utils.results.listForCurrentGame.invalidate(),
+      ])
+    },
+  })
   const { toast } = useToast()
 
-  const currentGame = playerDataResult?.result?.currentGame
+  const currentGame = playerDataResult?.currentGame
   const status = currentGame?.status
 
-  const { data: resultsData } = useQuery(ResultsDocument, {
-    skip:
-      status === 'RUNNING' ||
-      status === 'PREPARATION' ||
-      status === 'SCHEDULED',
-    fetchPolicy: 'cache-and-network',
+  const resultsQuery = trpc.results.listForCurrentGame.useQuery(undefined, {
+    enabled:
+      status !== 'RUNNING' &&
+      status !== 'PREPARATION' &&
+      status !== 'SCHEDULED',
+    refetchInterval: 5000,
   })
+  const resultsData = resultsQuery.data
 
   const activeSegmentFacts = useMemo(() => {
     const f = currentGame?.activePeriod?.activeSegment?.facts
@@ -410,10 +419,10 @@ export default function Cockpit() {
   }, [currentGame])
 
   const comparativeData = useMemo(() => {
-    if (!resultsData?.results) return []
+    if (!resultsData) return []
 
-    const playerMap: Record<string, any[]> = {}
-    resultsData.results.forEach((res: any) => {
+    const playerMap: Record<string, CurrentGameResult[]> = {}
+    resultsData.forEach((res) => {
       if (res.period?.index === currentGame?.activePeriod?.index) {
         if (!playerMap[res.player.id]) playerMap[res.player.id] = []
         playerMap[res.player.id].push(res)
@@ -431,39 +440,26 @@ export default function Cockpit() {
       )
 
       const displayResult = periodEndResult || activeSegResult
-      let facts = displayResult?.facts || {}
-      if (typeof facts === 'string') {
-        try {
-          facts = JSON.parse(facts)
-        } catch {
-          facts = {}
-        }
-      }
+      const facts = getResultFacts(displayResult?.facts)
 
       return {
         id: playerId,
         name: playerResults[0]?.player.name || 'Governor',
-        inflation: facts.inflation ?? 0,
-        unemployment: facts.unemployment ?? 0,
-        growth: facts.growth ?? 0,
-        cumulativePenalty: facts.cumulativePenalty ?? 0,
-        exchangeRate: facts.exchangeRateIndex ?? 100,
-        tradeBalance: facts.tradeBalance ?? 0,
-        spilloverInflation: facts.spilloverInflation ?? 0,
-        spilloverUnemployment: facts.spilloverUnemployment ?? 0,
+        inflation: getNumber(facts.inflation),
+        unemployment: getNumber(facts.unemployment),
+        growth: getNumber(facts.growth),
+        cumulativePenalty: getNumber(facts.cumulativePenalty),
+        exchangeRate: getNumber(facts.exchangeRateIndex, 100),
+        tradeBalance: getNumber(facts.tradeBalance),
+        spilloverInflation: getNumber(facts.spilloverInflation),
+        spilloverUnemployment: getNumber(facts.spilloverUnemployment),
         history: [...playerResults]
           .filter((res) => res.type === 'SEGMENT_END')
           .sort((a, b) => (a.segment?.index ?? 0) - (b.segment?.index ?? 0))
           .map((res) => {
-            let f = res.facts
-            if (typeof f === 'string') {
-              try {
-                f = JSON.parse(f)
-              } catch {
-                f = {}
-              }
-            }
-            return f.decisions?.rate ?? DEFAULT_RATE
+            const resultFacts = getResultFacts(res.facts)
+            const decisions = getFacts(resultFacts.decisions)
+            return getNumber(decisions.rate, DEFAULT_RATE)
           }),
       }
     })
@@ -488,7 +484,7 @@ export default function Cockpit() {
     return chartPoints
   }, [comparativeData, currentGame])
 
-  if (!playerDataResult?.result) {
+  if (!playerDataResult) {
     return (
       <div className="flex h-screen items-center justify-center">
         Loading cockpit...
@@ -496,9 +492,12 @@ export default function Cockpit() {
     )
   }
 
-  const resultFacts = playerDataResult.result.playerResult?.facts || {}
-  const activePeriodFacts = currentGame.activePeriod?.facts || {}
-  const scenario = activePeriodFacts.scenario || {
+  const resultFacts = getFacts(
+    playerDataResult.playerResult?.facts
+  ) as ResultFacts
+  const activePeriodFacts = getFacts(currentGame.activePeriod?.facts)
+  const scenario = (activePeriodFacts.scenario as
+    PeriodFacts['scenario'] | undefined) || {
     targetInflation: 2.0,
     naturalUnemployment: 5.0,
   }
@@ -593,19 +592,16 @@ export default function Cockpit() {
                       validationSchema={schema}
                       onSubmit={async (values) => {
                         try {
-                          await performAction({
-                            variables: {
-                              type: '',
-                              payload: JSON.stringify({
-                                rate: parseFloat(values.rate.toString()),
-                              }),
-                            },
+                          await performAction.mutateAsync({
+                            type: '',
+                            payload: JSON.stringify({
+                              rate: parseFloat(values.rate.toString()),
+                            }),
                           })
                           toast({
                             title: 'Decision submitted',
                             description: `Policy rate set to ${values.rate}%`,
                           })
-                          refetchResult()
                         } catch (e: any) {
                           toast({
                             title: 'Error submitting decision',

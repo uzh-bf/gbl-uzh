@@ -1,8 +1,8 @@
-import { OutputFacts, PayloadSegment } from '@gbl-uzh/platform'
+import type { OutputFacts, PayloadSegment } from '@gbl-uzh/platform'
 import { debugLog, diceRoll } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
-import { GameFacts } from '../types/Game'
-import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
+import type { GameFacts } from '../types/Game'
+import type { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
 type InputSegmentFacts = {}
 type OutputSegmentFacts = OutputFacts<

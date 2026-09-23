@@ -13,8 +13,8 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - apps/demo-game/**
-      - examples/central-bank/**
       - examples/rate-wars/**
+      - examples/central-bank/**
       - packages/platform/**
       - packages/ui/**
       - playwright/**
@@ -41,7 +41,7 @@ env:
   NEXTAUTH_SECRET: ci-demo-game-not-a-secret
   NEXTAUTH_URL: http://localhost:3000
   NEXT_PUBLIC_APP_URL: http://localhost:3000
-  NEXT_PUBLIC_API_URL: http://localhost:3000/api/graphql
+  NEXT_PUBLIC_API_URL: http://localhost:3000/api/trpc
   GBL_AUTH_MODE: mock
   GBL_MOCK_OIDC_ISSUER: http://oidc:8090/default
   GBL_MOCK_OIDC_CLIENT_ID: demo-game-local
@@ -59,10 +59,7 @@ jobs:
       matrix:
         game: [demo-game, rate-wars, central-bank]
     env:
-      # Central Bank remains on GraphQL until its migration layer; the other
-      # matrix apps use tRPC. Keep the browser API origin identical to
-      # NEXTAUTH_URL so auth cookies accompany the GraphQL request.
-      NEXT_PUBLIC_API_URL: http://localhost:3000${{ matrix.game == 'central-bank' && '/api/graphql' || '/api/trpc' }}
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api/trpc
     services:
       postgres:
         image: postgres:15
