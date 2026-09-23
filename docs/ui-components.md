@@ -132,3 +132,7 @@ Known holes, confirmed by how the demo game works around them (candidates for li
 - **Local shadcn-style fallbacks** coexist with the design system in `apps/demo-game/src/components/ui/` (`select`, `dialog`, `popover`, `command`, `toast`/`toaster`, `button`) — e.g. the cockpit uses the local `Select`, and `_app.tsx` uses the local `Toaster`.
 - **No chart components** beyond `ProbabilityChart` — games assemble recharts (`LineChart`, `BarChart`, `AreaChart`, scatter) by hand; only `ChartContainer` is shared.
 - **`@gbl-uzh/ui` gaps**: use `Button` from the design system; the package still lacks a usable admin timeline, generic decision-form scaffold, and results-table component. Keep game-specific layouts, decisions, charts, and GraphQL adapters in the game.
+
+### Countdown notices
+
+The demo-game floating countdown messages use the opt-in `countdown` toast variant. `AllocationNotice.tsx:playerNoticeStyles` supplies the same green surface, border, corners, responsive spacing, and title/body hierarchy as the allocation-submitted notice, with a clock icon and an accessible dismiss button. Player typography is applied directly to the floating toast. `GameLayout` uses this variant for countdown updates and threshold reminders across tabs; timing, placement, text, and dismissal behavior remain unchanged. Default and destructive toast variants retain their existing presentation.

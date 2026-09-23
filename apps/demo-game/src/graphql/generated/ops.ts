@@ -269,7 +269,6 @@ export type Period = {
 };
 
 export type PeriodFactsInput = {
-  rollsPerSegment?: InputMaybe<Scalars['Int']['input']>;
   scenario?: InputMaybe<PeriodFactsScenarioInput>;
 };
 

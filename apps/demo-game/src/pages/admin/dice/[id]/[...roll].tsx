@@ -8,9 +8,10 @@ import {
   MarketDiceDocument,
   RevealMarketRollDocument,
 } from '~/graphql/generated/ops'
-import { FIRST_GAME_YEAR } from '~/lib/constants'
+import { FIRST_GAME_YEAR, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 import { parseFacts } from '~/lib/facts'
 import { shouldRefetchDemoGame } from '~/lib/gameEvents'
+import { queueRefetch } from '~/lib/queuedRefetch'
 import {
   readMarketRoll,
   readScenario,
@@ -18,7 +19,6 @@ import {
   type MarketRoll,
   type MarketScenario,
 } from '~/lib/market'
-import { queueRefetch } from '~/lib/queuedRefetch'
 
 import {
   Button,
@@ -236,7 +236,7 @@ const Forecast = () => {
       <h1>
         {FIRST_GAME_YEAR + segment.periodIx} · Quarter {segment.index + 1}
       </h1>
-      {facts.diceRolls.map((_, index) => {
+      {facts.diceRolls.slice(0, NUM_MONTHS_PER_SEGMENT).map((_, index) => {
         const roll = readMarketRoll(segment.facts, index)
         return roll ? (
           <DiceMonth

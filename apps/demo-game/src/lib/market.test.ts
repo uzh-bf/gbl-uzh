@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+import { FIRST_GAME_YEAR } from './constants'
 import { parseFacts } from './facts'
 import {
   latestRevealedRoll,
@@ -69,7 +70,7 @@ test('latest reveal uses chronological order, persists over years, and excludes 
   const result = latestRevealedRoll(game)
   assert.equal(result.segmentId, 'last')
   assert.equal(result.index, 1)
-  assert.equal(result.label, '2026 · Quarter 4 · Month 2')
+  assert.equal(result.label, `${FIRST_GAME_YEAR} · Quarter 4 · Month 2`)
   assert.equal(result.roll.returns.bank, 0.004)
   game.periods[0].segments[1].facts.revealedRollIndices = [0]
   assert.equal(latestRevealedRoll(game).segmentId, 'current')
@@ -102,6 +103,9 @@ test('final results retain the last period after the active pointer disconnects'
       },
     ],
   } as unknown as Parameters<typeof latestRevealedRoll>[0]
-  assert.equal(latestRevealedRoll(game).label, '2026 · Quarter 2 · Month 2')
+  assert.equal(
+    latestRevealedRoll(game).label,
+    `${FIRST_GAME_YEAR} · Quarter 2 · Month 2`
+  )
   assert.deepEqual(readScenario(marketPeriod(game).facts), scenario)
 })

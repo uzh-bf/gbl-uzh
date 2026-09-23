@@ -2,6 +2,10 @@
 
 ## 2026-09-23
 
+**Update**: [Developing a Game](developing-a-game.md), [Game Model](game-model.md) — remove the temporary reward ledger and repair commands after the local correction; consolidate report helpers, JWT handling, scenario constants, and result tests into their existing owners. Existing corrected XP is preserved.
+
+**Update**: [Game Model](game-model.md), [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — document direct 20 XP demo lesson rewards, atomic completion-based duplicate prevention without schema additions, matching countdown notices, fixed three-month segments, and the current-year timeline.
+
 **Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — centralize demo-game facts/result helpers and presentation metadata, reuse signed Market percentages, simplify cockpit and welcome composition, and share browser setup/visual checks while preserving behavior. Group History and Results in one module, keep constants together and avatar names local, remove unused helpers, and correct warning placement and final-period test guidance.
 
 ## 2026-09-22

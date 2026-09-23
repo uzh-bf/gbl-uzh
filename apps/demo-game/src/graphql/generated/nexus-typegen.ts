@@ -49,7 +49,6 @@ export interface NexusGenInputs {
     myInt?: number | null; // Int
   }
   PeriodFactsInput: { // input type
-    rollsPerSegment: number | null; // Int
     scenario: NexusGenInputs['PeriodFactsScenarioInput'] | null; // PeriodFactsScenarioInput
   }
   PeriodFactsScenarioInput: { // input type

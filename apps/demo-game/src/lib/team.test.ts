@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import type { ResultQuery } from '../graphql/generated/ops'
+import { FIRST_GAME_YEAR } from './constants'
 import { learningXP, storyLibrary, teamStatistics } from './team'
 
 const story = (id: string) => ({
@@ -41,7 +42,7 @@ test('story library hides future content and retains first-release metadata on r
     ['D', 'C', 'A', 'B']
   )
   const a = entries.find((entry) => entry.story.id === 'A')!
-  assert.equal(a.sequence.year, 2026)
+  assert.equal(a.sequence.year, FIRST_GAME_YEAR)
   assert.equal(a.sequence.quarter, 1)
   assert.equal(a.index, 0)
   assert.deepEqual(

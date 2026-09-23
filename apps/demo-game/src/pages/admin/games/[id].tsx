@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Controller, useForm } from 'react-hook-form'
 import { twMerge } from 'tailwind-merge'
+import { NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 
 import { useMutation, useQuery } from '@apollo/client'
 import {
@@ -64,7 +65,7 @@ import {
   INTEREST_BANK,
   TREND_BONDS,
   TREND_STOCKS,
-} from '~/types/Period'
+} from '~/lib/constants'
 
 interface PeriodFormValues {
   segmentCount: number
@@ -742,9 +743,7 @@ function ManageGame() {
                     label="Number of segments"
                     name="segmentCount"
                     type="number"
-                    tooltip={
-                      'One period corresponds to one year. The number of segments is used to compute the number of months in the period.'
-                    }
+                    tooltip={`One period corresponds to one year. Each segment contains ${NUM_MONTHS_PER_SEGMENT} months.`}
                     required
                     register={registerPeriod}
                     error={errorsPeriod.segmentCount}

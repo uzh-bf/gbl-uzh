@@ -1,3 +1,4 @@
+import { FIRST_GAME_YEAR } from '../../apps/demo-game/src/lib/constants'
 import {
   expect,
   test,
@@ -1407,7 +1408,7 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     )
     await expect(panel.getByTestId('history-value')).toHaveText("10'000.00")
     await expect(
-      panel.getByRole('button', { name: '2027', exact: true })
+      panel.getByRole('button', { name: `${FIRST_GAME_YEAR + 1}`, exact: true })
     ).toHaveCount(0)
     await player.getByRole('link', { name: 'Cockpit', exact: true }).click()
     await expect(
@@ -1424,13 +1425,13 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     })
     await expect(quarters).toHaveCount(1)
     const expand = panel.getByRole('button', {
-      name: '2026 Quarter 1 monthly details',
+      name: `${FIRST_GAME_YEAR} Quarter 1 monthly details`,
     })
     await expand.focus()
     await player.keyboard.press('Enter')
     await expect(expand).toHaveAttribute('aria-expanded', 'true')
     const monthly = panel.getByRole('table', {
-      name: '2026 Quarter 1 monthly results',
+      name: `${FIRST_GAME_YEAR} Quarter 1 monthly results`,
     })
     await expect(
       monthly.getByText('Not revealed', { exact: true })
@@ -1469,24 +1470,26 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     })
     await expect(quarters).toHaveCount(2)
     await expect(
-      panel.getByRole('button', { name: '2027', exact: true })
+      panel.getByRole('button', { name: `${FIRST_GAME_YEAR + 1}`, exact: true })
     ).toHaveCount(0)
     await advanceGame(page, {
       action: 'Next Period',
       expectedStatus: 'PREPARATION',
     })
     await expect(
-      panel.getByRole('button', { name: '2027', exact: true })
+      panel.getByRole('button', { name: `${FIRST_GAME_YEAR + 1}`, exact: true })
     ).toBeVisible()
     // Selection survives refetches and tabs, while a fresh page defaults to the latest started year.
     await expect(
-      panel.getByRole('button', { name: '2026', exact: true })
+      panel.getByRole('button', { name: `${FIRST_GAME_YEAR}`, exact: true })
     ).toHaveAttribute('aria-pressed', 'true')
     await player.reload()
     await expect(
-      panel.getByRole('button', { name: '2027', exact: true })
+      panel.getByRole('button', { name: `${FIRST_GAME_YEAR + 1}`, exact: true })
     ).toHaveAttribute('aria-pressed', 'true')
-    await expect(panel).toContainText('No completed quarters in 2027 yet.')
+    await expect(panel).toContainText(
+      `No completed quarters in ${FIRST_GAME_YEAR + 1} yet.`
+    )
     await advanceGame(page, {
       action: 'Next Segment',
       expectedStatus: 'RUNNING',
@@ -1505,8 +1508,8 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     const value = await panel.getByTestId('history-value').innerText()
     await panel.getByRole('button', { name: 'All', exact: true }).click()
     await expect(quarters).toHaveCount(3)
-    await expect(quarters.first()).toContainText('2026 · Q1')
-    await expect(quarters.last()).toContainText('2027 · Q1')
+    await expect(quarters.first()).toContainText(`${FIRST_GAME_YEAR} · Q1`)
+    await expect(quarters.last()).toContainText(`${FIRST_GAME_YEAR + 1} · Q1`)
     await expect(panel.getByTestId('history-value')).toHaveText(value)
     const header = player.locator('header')
     for (const tab of ['Cockpit', 'Market', 'Team', 'History']) {
@@ -1524,7 +1527,9 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     await expect(
       panel.getByRole('button', { name: 'All', exact: true })
     ).toHaveAttribute('aria-pressed', 'true')
-    await panel.getByRole('button', { name: '2026', exact: true }).click()
+    await panel
+      .getByRole('button', { name: `${FIRST_GAME_YEAR}`, exact: true })
+      .click()
     await expect(quarters).toHaveCount(2)
     await expect(panel.getByTestId('history-value')).toHaveText(value)
     await expect(
@@ -1535,7 +1540,7 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     await player.getByRole('link', { name: 'Market', exact: true }).click()
     await openHistory()
     await expect(
-      panel.getByRole('button', { name: '2026', exact: true })
+      panel.getByRole('button', { name: `${FIRST_GAME_YEAR}`, exact: true })
     ).toHaveAttribute('aria-pressed', 'true')
     for (const width of [784, 390, 320]) {
       await player.setViewportSize({
@@ -1560,10 +1565,14 @@ test('History follows settled quarters, filters years and preserves hidden dice'
         path: testInfo.outputPath(`history-${width}.png`),
       })
       await panel
-        .getByRole('button', { name: '2026 Quarter 1 monthly details' })
+        .getByRole('button', {
+          name: `${FIRST_GAME_YEAR} Quarter 1 monthly details`,
+        })
         .click()
       await panel
-        .getByRole('button', { name: '2026 Quarter 1 monthly details' })
+        .getByRole('button', {
+          name: `${FIRST_GAME_YEAR} Quarter 1 monthly details`,
+        })
         .evaluate((element) =>
           element.scrollIntoView({ block: 'center', inline: 'nearest' })
         )
@@ -1587,7 +1596,9 @@ test('History follows settled quarters, filters years and preserves hidden dice'
         })
       }
       await panel
-        .getByRole('button', { name: '2026 Quarter 1 monthly details' })
+        .getByRole('button', {
+          name: `${FIRST_GAME_YEAR} Quarter 1 monthly details`,
+        })
         .click()
     }
   } finally {
@@ -1694,7 +1705,7 @@ test('Team stories and learning sheets preserve progress, drafts and released co
     })
     await expect(bondStory).toContainText('New')
     await expect(bondStory).toHaveAccessibleDescription(
-      'Card 2 of 2 · 2026 · Q1 New'
+      `Card 2 of 2 · ${FIRST_GAME_YEAR} · Q1 New`
     )
     await expect(
       team.getByRole('button', { name: 'C. About Stocks', exact: true })
@@ -1738,7 +1749,7 @@ test('Team stories and learning sheets preserve progress, drafts and released co
     await savings.fill('42.1')
     await teamTab()
     const bonds = team.getByRole('button', { name: 'Bonds', exact: true })
-    await expect(bonds).toHaveAccessibleDescription('Quiz New')
+    await expect(bonds).toHaveAccessibleDescription('Quiz · 20 XP New')
     await bonds.click()
     await expect(quiz().getByRole('radio')).toHaveCount(3)
     await expect(
@@ -1748,7 +1759,7 @@ test('Team stories and learning sheets preserve progress, drafts and released co
     await capture('learning')
     await quiz().getByRole('button', { name: 'Later', exact: true }).click()
     await expect(bonds).toBeFocused()
-    await expect(bonds).toHaveAccessibleDescription('Quiz Open')
+    await expect(bonds).toHaveAccessibleDescription('Quiz · 20 XP Open')
     await bonds.click()
     await expect(quiz().getByRole('radio').nth(1)).toBeChecked()
     let rejectAnswer = true
@@ -1784,7 +1795,11 @@ test('Team stories and learning sheets preserve progress, drafts and released co
       .getByRole('button', { name: 'Close', exact: true })
       .first()
       .click()
-    await expect(bonds).toHaveAccessibleDescription('Quiz Solved')
+    await expect(bonds).toHaveAccessibleDescription('Quiz · 20 XP Solved')
+    await expect(team.getByRole('progressbar')).toHaveAttribute(
+      'aria-valuenow',
+      '20'
+    )
     await player
       .getByRole('link', { name: 'Cockpit', exact: true })
       .press('Enter')
@@ -1818,6 +1833,10 @@ test('Team stories and learning sheets preserve progress, drafts and released co
     await expect(story()).toBeHidden()
     await expect(risks).toContainText('Open')
     await expect(bonds).toContainText('Solved')
+    await expect(team.getByRole('progressbar')).toHaveAttribute(
+      'aria-valuenow',
+      '20'
+    )
     await expect(bondStory).toContainText('Read')
     await setCountdown(admin, '0')
     await risks.click()
@@ -1848,7 +1867,7 @@ test('Team stories and learning sheets preserve progress, drafts and released co
         name: 'A. About the Savings Account',
         exact: true,
       })
-    ).toContainText('2026 · Q1')
+    ).toContainText(`${FIRST_GAME_YEAR} · Q1`)
     await expect(
       team.getByRole('button', {
         name: 'A. About the Savings Account',
@@ -1857,7 +1876,7 @@ test('Team stories and learning sheets preserve progress, drafts and released co
     ).toHaveCount(1)
     await expect(
       team.getByRole('button', { name: 'C. About Stocks', exact: true })
-    ).toContainText('2026 · Q2')
+    ).toContainText(`${FIRST_GAME_YEAR} · Q2`)
     await expect(team.getByTestId('team-last-quarter')).not.toHaveText('—')
     await risks.click()
     await expect(quiz().getByRole('radio').nth(2)).toBeChecked()
@@ -1987,7 +2006,7 @@ test('Team stories and learning sheets preserve progress, drafts and released co
       .getByRole('button', { name: 'Close', exact: true })
       .first()
       .click()
-    await expect(risks).toHaveAccessibleDescription('Quiz Solved')
+    await expect(risks).toHaveAccessibleDescription('Quiz · 20 XP Solved')
     await risks.click()
     await expect(quiz().getByRole('radio').nth(2)).toBeChecked()
     await expect(quiz().getByRole('radio').nth(2)).toBeDisabled()
@@ -2119,7 +2138,7 @@ test('cockpit result designs follow settled quarters, consolidation and complete
         await expect(player.getByLabel('No countdown')).toHaveCount(0)
         if (!finalQuarter) {
           await expect(progress).toContainText(
-            `${2026 + periodIndex} · Quarter ${quarter} closed`
+            `${FIRST_GAME_YEAR + periodIndex} · Quarter ${quarter} closed`
           )
           await expect(
             player.getByText(
@@ -2152,27 +2171,144 @@ test('cockpit result designs follow settled quarters, consolidation and complete
         expectedStatus: 'RESULTS',
       })
       await expect(player.getByTestId('year-results')).toBeVisible()
-      await expect(progress).toContainText(`${2026 + periodIndex} closed`)
+      await expect(progress).toContainText(
+        `${FIRST_GAME_YEAR + periodIndex} closed`
+      )
       await expect(progress).toContainText('All quarters closed')
       await expect(
-        player.getByText(`${2027 + periodIndex} opens when everyone is ready`)
+        player.getByText(
+          `${FIRST_GAME_YEAR + 1 + periodIndex} opens when everyone is ready`
+        )
       ).toBeVisible()
       await expect(player.getByTestId('result-yearly-assets')).toContainText(
-        String(2026 + periodIndex)
+        String(FIRST_GAME_YEAR + periodIndex)
       )
       await checkReady('RESULTS')
       if (periodIndex === 1) {
         // There is no upcoming authored period: the active pointer disconnects.
         await player.reload({ waitUntil: 'domcontentloaded' })
         await expect(player.getByTestId('year-results')).toBeVisible()
-        await expect(progress).toContainText('2027 closed')
+        await expect(progress).toContainText(`${FIRST_GAME_YEAR + 1} closed`)
         await expect(player.getByTestId('result-yearly-assets')).toContainText(
-          '2026'
+          `${FIRST_GAME_YEAR}`
         )
         await capture('period-end')
       }
     }
     expect(errors).toEqual([])
+  } finally {
+    await session.context.close()
+  }
+})
+
+test('countdown notifications match player notices across tabs and viewport sizes', async ({
+  page: admin,
+  browser,
+  baseURL,
+}, testInfo) => {
+  const appBaseURL = requireBaseURL(baseURL)
+  await createGame(admin, {
+    name: `Countdown style ${Date.now()}`,
+    playerCount: 1,
+  })
+  await addPeriod(admin, { segmentCount: '1', index: 0 })
+  await addSegment(admin, { periodIndex: 0 })
+  const session = await joinPlayer(
+    browser,
+    appBaseURL,
+    await playerJoinUrl(admin, appBaseURL, 0),
+    players[0]
+  )
+  const player = session.page
+  try {
+    await advanceGame(admin, {
+      action: 'Start Period',
+      expectedStatus: 'PREPARATION',
+    })
+    await advanceGame(admin, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    await submitDecision(player, players[0].decisions[0])
+    await player.getByRole('switch', { name: 'Ready', exact: true }).click()
+    await expect(
+      player.getByRole('switch', { name: 'Ready', exact: true })
+    ).not.toBeChecked()
+    let seconds = 600
+    for (const width of [320, 390, 784]) {
+      await player.setViewportSize({ width, height: 1000 })
+      await player.getByRole('link', { name: 'Cockpit', exact: true }).click()
+      const allocation = player
+        .getByRole('status')
+        .filter({ hasText: 'Allocation submitted' })
+      const expected = await allocation.evaluate((element) => {
+        const style = getComputedStyle(element)
+        return {
+          backgroundColor: style.backgroundColor,
+          borderColor: style.borderColor,
+          borderRadius: style.borderRadius,
+        }
+      })
+      for (const tab of ['Cockpit', 'Market', 'History', 'Team']) {
+        await player.getByRole('link', { name: tab, exact: true }).click()
+        await setCountdown(admin, String(seconds++))
+        const notification = player
+          .getByRole('region', { name: 'Notifications (F8)' })
+          .getByRole('status')
+          .filter({ hasText: 'Countdown set/updated!' })
+        await expect(notification).toBeVisible()
+        await expect(notification).toHaveCSS(
+          'background-color',
+          expected.backgroundColor
+        )
+        await expect(notification).toHaveCSS(
+          'border-color',
+          expected.borderColor
+        )
+        await expect(notification).toHaveCSS(
+          'border-radius',
+          expected.borderRadius
+        )
+        await expect(notification.locator('svg.lucide-clock-3')).toBeVisible()
+        await expectNoPageOverflow(player)
+        await expect(
+          notification.getByRole('button', { name: 'Dismiss notification' })
+        ).toBeInViewport()
+        await expect
+          .poll(() =>
+            notification.evaluate((element) => {
+              const box = element.getBoundingClientRect()
+              return (
+                box.top >= 0 &&
+                box.bottom <= window.innerHeight &&
+                box.left >= 0 &&
+                box.right <= window.innerWidth
+              )
+            })
+          )
+          .toBe(true)
+        if (tab === 'Team')
+          await player.screenshot({
+            animations: 'disabled',
+            path: testInfo.outputPath(`countdown-${width}.png`),
+          })
+        await notification
+          .getByRole('button', { name: 'Dismiss notification' })
+          .click()
+        await expect(notification).toBeHidden()
+      }
+    }
+    // GraphQL must reject the removed configurable month count.
+    const response = await admin.request.post('/api/graphql', {
+      data: {
+        query:
+          'mutation($facts: PeriodFactsInput!) { addGamePeriod(gameId: -1, segmentCount: 1, facts: $facts) { id } }',
+        variables: { facts: { rollsPerSegment: 5 } },
+      },
+    })
+    expect(JSON.stringify((await response.json()).errors)).toContain(
+      'rollsPerSegment'
+    )
   } finally {
     await session.context.close()
   }

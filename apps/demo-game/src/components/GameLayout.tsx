@@ -118,6 +118,7 @@ function GameLayout({
 
     if (secondsRemaining > 0) {
       toast({
+        variant: 'countdown',
         title: 'Countdown set/updated!',
         description: `${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
       })
@@ -198,6 +199,7 @@ function GameLayout({
     )
     if (!notification) return
     toast({
+      variant: 'countdown',
       title: 'Countdown Update',
       description: `Less than ${notification.friendlyMinutes} min remaining! Please press ready.`,
     })

@@ -2,11 +2,21 @@ import { cn } from '@gbl-uzh/ui'
 import { Check, Clock3, Info } from 'lucide-react'
 import type { ReactNode } from 'react'
 
+export const playerNoticeStyles = {
+  surface:
+    'mobile:gap-app-3 mobile:p-app-3 mobile:app-caption mobile:rounded-app-card flex items-start rounded-[14px] border leading-[1.5] min-[601px]:gap-[18px] min-[601px]:rounded-[18px] min-[601px]:p-[24px] min-[601px]:text-[21px]',
+  success:
+    'border-player-success bg-player-success-surface text-player-success',
+  icon: 'mobile:mt-app-1 mt-[3px] size-[20px] shrink-0 min-[601px]:size-[24px]',
+  title:
+    'mobile:mb-app-1 mobile:app-body mb-[4px] block leading-[1.3] min-[601px]:text-[24px]',
+  body: 'text-player-body m-0',
+} as const
+
 const variants = {
   success: {
     icon: Check,
-    className:
-      'border-player-success bg-player-success-surface text-player-success',
+    className: playerNoticeStyles.success,
     iconClassName: '',
   },
   pending: {
@@ -39,26 +49,18 @@ export default function AllocationNotice({
       )}
     >
       <div
-        className={cn(
-          'mobile:gap-app-3 mobile:p-app-3 mobile:app-caption mobile:rounded-app-card flex items-start rounded-[14px] border leading-[1.5] min-[601px]:gap-[18px] min-[601px]:rounded-[18px] min-[601px]:p-[24px] min-[601px]:text-[21px]',
-          className
-        )}
+        className={cn(playerNoticeStyles.surface, className)}
         role={variant === 'success' ? 'status' : undefined}
       >
         <Icon
           aria-hidden="true"
-          className={cn(
-            'mobile:mt-app-1 mt-[3px] size-[20px] shrink-0 min-[601px]:size-[24px]',
-            iconClassName
-          )}
+          className={cn(playerNoticeStyles.icon, iconClassName)}
         />
         <div>
           {title && (
-            <strong className="mobile:mb-app-1 mobile:app-body mb-[4px] block leading-[1.3] min-[601px]:text-[24px]">
-              {title}
-            </strong>
+            <strong className={playerNoticeStyles.title}>{title}</strong>
           )}
-          <p className="text-player-body m-0">{children}</p>
+          <p className={playerNoticeStyles.body}>{children}</p>
         </div>
       </div>
     </div>

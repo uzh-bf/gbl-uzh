@@ -4,7 +4,12 @@ import {
   isAllocationValid,
   type Allocation,
 } from './allocation'
-import { FIRST_GAME_YEAR, MONTHS } from './constants'
+import {
+  FIRST_GAME_YEAR,
+  MONTHS,
+  NUM_MONTHS,
+  NUM_MONTHS_PER_SEGMENT,
+} from './constants'
 import { parseFacts } from './facts'
 import { readMarketRoll, revealedIndices } from './market'
 
@@ -72,9 +77,7 @@ export function buildResultView(data: ResultQuery) {
     (row) => row.segment.index === quarterIndex
   )
   const quarter = quarterIndex + 1
-  const rolls = finiteNumber(parseFacts(periodConfig?.facts).rollsPerSegment)
-  const monthsPerQuarter =
-    rolls !== null && rolls > 0 && Number.isInteger(rolls) ? rolls : 3
+  const monthsPerQuarter = NUM_MONTHS_PER_SEGMENT
   const initialCapital = readInitialCapital(
     rows,
     data.result?.playerResult?.facts
@@ -376,4 +379,28 @@ export function playerAmount(value: number | null, signed = false) {
 
 export function playerPercent(value: number | null) {
   return value === null ? '—' : `${playerAmount(value * 100, true)}%`
+}
+
+export const composeChartData = (dataPerPeriod: any, key: string) => {
+  const output = []
+  dataPerPeriod.forEach((periodData, periodIndex) => {
+    if (Object.keys(periodData).length === 0) return
+
+    const players = Object.values(periodData) as any[]
+    const num = players.length > 0 ? players[0][key].length : NUM_MONTHS
+
+    for (let i = 0; i < num; i++) {
+      const entry = {
+        period: periodIndex,
+        month: MONTHS[i % NUM_MONTHS] + ' P' + (periodIndex + 1).toString(),
+      }
+
+      players.forEach((player) => {
+        entry[player.name] = player[key][i]
+      })
+
+      output.push(entry)
+    }
+  })
+  return output
 }

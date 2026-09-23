@@ -1,16 +1,18 @@
 import { inputObjectType } from 'nexus'
 import * as yup from 'yup'
 
-export const ROLLS_PER_SEGMENT = 3
-export const DEFAULT_SEED = 1
-export const GAP_STOCKS = 0.025
-export const GAP_BONDS = 0.005
-export const INTEREST_BANK = 0.002
-export const TREND_STOCKS = 0.0065
-export const TREND_BONDS = 0.0031
+import {
+  DEFAULT_SEED,
+  GAP_BONDS,
+  GAP_STOCKS,
+  INTEREST_BANK,
+  TREND_BONDS,
+  TREND_STOCKS,
+} from '../lib/constants'
 
 export const PeriodFactsSchema = yup.object({
-  rollsPerSegment: yup.number().positive().integer().default(ROLLS_PER_SEGMENT),
+  // Ignore legacy JSON overrides; duration is a demo-game rule.
+  rollsPerSegment: yup.mixed().strip(),
   scenario: yup
     .object({
       seed: yup.number().integer().default(DEFAULT_SEED),
@@ -40,7 +42,6 @@ export const PeriodFactsScenarioInput = inputObjectType({
 export const PeriodFactsInput = inputObjectType({
   name: 'PeriodFactsInput',
   definition(t) {
-    t.int('rollsPerSegment', { default: ROLLS_PER_SEGMENT })
     t.field('scenario', {
       type: PeriodFactsScenarioInput,
       default: {

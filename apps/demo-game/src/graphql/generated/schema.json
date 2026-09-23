@@ -2060,18 +2060,6 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "rollsPerSegment",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "defaultValue": "3",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "scenario",
             "description": null,
             "type": {

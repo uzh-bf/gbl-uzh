@@ -51,8 +51,8 @@ import {
   YAxis,
 } from 'recharts'
 
-import { composeChartData } from '~/lib/analysis'
 import { NUM_MONTHS } from '~/lib/constants'
+import { composeChartData } from '~/lib/results'
 
 const colors = [
   'var(--chart-1)',

@@ -113,6 +113,7 @@ export async function performAction<ActionTypes>(
           currentLevelIx: previousResult.player.levelIx,
         },
         prisma: tx, // Use the transaction client
+        inTransaction: true,
       })
 
       if (!isDirty) {
@@ -577,7 +578,17 @@ export async function attemptLearningElement(
   if (!learningElement) return null
 
   try {
-    const selectedOptions = JSON.parse(args.selection)
+    const selectedOptions: unknown = JSON.parse(args.selection)
+    if (
+      !Array.isArray(selectedOptions) ||
+      !selectedOptions.every(
+        (index) =>
+          Number.isInteger(index) &&
+          index >= 0 &&
+          index < learningElement.options.length
+      )
+    )
+      return null
 
     const pointsAchieved = learningElement.options.reduce((acc, option, ix) => {
       if (option.correct && selectedOptions.includes(ix)) {
@@ -592,52 +603,97 @@ export async function attemptLearningElement(
     const pointsMax = learningElement.options.length
 
     let updatedPlayer
-    if (pointsAchieved === pointsMax) {
-      updatedPlayer = await ctx.prisma.player.update({
-        where: {
-          id: ctx.user.sub,
-        },
-        data: {
-          completedLearningElements: {
-            connect: {
-              id: args.elementId,
-            },
-          },
-          completedLearningElementIds: {
-            push: args.elementId,
-          },
-        },
-        include: {
-          game: {
-            include: {
-              activePeriod: true,
-            },
-          },
-        },
-      })
+    if (pointsMax > 0 && pointsAchieved === pointsMax) {
+      for (let attempt = 0; attempt < 5; attempt++) {
+        try {
+          const result = await ctx.prisma.$transaction(
+            async (tx) => {
+              const player = await tx.player.findUniqueOrThrow({
+                where: { id: ctx.user.sub },
+                include: {
+                  game: true,
+                  completedLearningElements: { select: { id: true } },
+                },
+              })
+              if (
+                player.completedLearningElementIds.includes(args.elementId) ||
+                player.completedLearningElements.some(
+                  (element) => element.id === args.elementId
+                )
+              )
+                return { player, notifications: [] }
 
-      await EventService.receiveEvents({
-        events: [
-          {
-            type: UserNotificationType.LEARNING_ELEMENT_SOLVED,
-            facts: {
-              elementId: args.elementId,
+              const levels = await tx.playerLevel.findMany()
+              const rewarded = await tx.player.update({
+                where: { id: player.id },
+                data: {
+                  ...EventService.experienceUpdate(
+                    player,
+                    EventService.rewardXP(learningElement.reward),
+                    levels
+                  ),
+                  completedLearningElements: {
+                    connect: { id: args.elementId },
+                  },
+                  completedLearningElementIds: { push: args.elementId },
+                },
+              })
+              const notifications: { type: UserNotificationType }[] = []
+              await EventService.receiveEvents({
+                events: [
+                  {
+                    type: UserNotificationType.LEARNING_ELEMENT_SOLVED,
+                    facts: { elementId: args.elementId },
+                  },
+                ],
+                ctx: {
+                  user: ctx.user,
+                  args: {
+                    gameId: player.gameId,
+                    periodIx: player.game.activePeriodIx,
+                    playerId: player.id,
+                  },
+                  achievements: rewarded.achievementKeys,
+                  experience: rewarded.experience,
+                  currentLevelIx: rewarded.levelIx,
+                },
+                prisma: tx,
+                inTransaction: true,
+                notify: (_ctx, events) => {
+                  notifications.push(...events)
+                },
+              })
+              const updated = await tx.player.findUniqueOrThrow({
+                where: { id: player.id },
+              })
+              // One level notification covers both the lesson and any additional achievements.
+              const committedNotifications = notifications.filter(
+                (event) => event.type !== UserNotificationType.LEVEL_UP
+              )
+              committedNotifications.push({
+                type: UserNotificationType.LEARNING_ELEMENT_SOLVED,
+              })
+              if (updated.levelIx > player.levelIx)
+                committedNotifications.push({
+                  type: UserNotificationType.LEVEL_UP,
+                })
+              return { player: updated, notifications: committedNotifications }
             },
-          },
-        ],
-        ctx: {
-          user: ctx.user,
-          args: {
-            gameId: ctx.user.gameId,
-            periodIx: updatedPlayer.game.activePeriodIx,
-            playerId: ctx.user.sub,
-          },
-          achievements: updatedPlayer.achievementKeys,
-          experience: updatedPlayer.experience,
-          currentLevelIx: updatedPlayer.levelIx,
-        },
-        prisma: ctx.prisma,
-      })
+            { isolationLevel: DB.Prisma.TransactionIsolationLevel.Serializable }
+          )
+          updatedPlayer = result.player
+          // A notification failure must not turn an already committed answer into a failed attempt.
+          try {
+            EventService.publishUserNotification(ctx, result.notifications)
+          } catch (error) {
+            console.warn('Could not publish learning completion', error)
+          }
+          break
+        } catch (error) {
+          if (attempt === 4 || (error as { code?: string }).code !== 'P2034')
+            throw error
+        }
+      }
     } else {
       EventService.publishUserNotification(ctx, [
         {

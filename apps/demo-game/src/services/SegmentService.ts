@@ -6,6 +6,7 @@ import {
 } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
 import * as R from 'ramda'
+import { NUM_MONTHS_PER_SEGMENT } from '../lib/constants'
 import { GameFacts } from '../types/Game'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
@@ -40,7 +41,7 @@ export function initialize(
       const segmentIx = payload.segmentIx
       const seedAndIndices = [seed, periodIx, segmentIx]
 
-      const diceRolls = R.range(0, periodFacts.rollsPerSegment).map(
+      const diceRolls = R.range(0, NUM_MONTHS_PER_SEGMENT).map(
         (rollIx: number) => {
           const bondsAndStocks = diceRoll([...seedAndIndices, rollIx, 0])
           return {

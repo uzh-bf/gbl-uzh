@@ -1,5 +1,15 @@
 // Each platform period represents a year in the player timeline.
-export const FIRST_GAME_YEAR = 2026
+export const FIRST_GAME_YEAR = new Date().getFullYear()
+export const NUM_MONTHS_PER_SEGMENT = 3
+
+export const LEARNING_ACTIVITY_XP = 20
+export const INITIAL_CAPITAL = 10000
+export const DEFAULT_SEED = 1
+export const GAP_STOCKS = 0.025
+export const GAP_BONDS = 0.005
+export const INTEREST_BANK = 0.002
+export const TREND_STOCKS = 0.0065
+export const TREND_BONDS = 0.0031
 
 export const LOCATIONS = {
   Trader: ['AG', 'AI', 'BE', 'FR', 'GR', 'JU', 'TI', 'ZH'],

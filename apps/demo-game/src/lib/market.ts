@@ -1,5 +1,5 @@
 import type { ResultQuery } from '../graphql/generated/ops'
-import { FIRST_GAME_YEAR } from './constants'
+import { FIRST_GAME_YEAR, NUM_MONTHS_PER_SEGMENT } from './constants'
 import { parseFacts } from './facts'
 
 export type MarketScenario = {
@@ -38,6 +38,7 @@ export function readMarketRoll(
   if (
     !Number.isInteger(index) ||
     index < 0 ||
+    index >= NUM_MONTHS_PER_SEGMENT ||
     !Array.isArray(facts.diceRolls) ||
     !Array.isArray(facts.returns)
   )
@@ -66,7 +67,9 @@ export function revealedIndices(raw: unknown): number[] {
         ...new Set(
           indices.filter(
             (index): index is number =>
-              Number.isInteger(index) && Number(index) >= 0
+              Number.isInteger(index) &&
+              Number(index) >= 0 &&
+              Number(index) < NUM_MONTHS_PER_SEGMENT
           )
         ),
       ].sort((a, b) => a - b)
