@@ -2,6 +2,8 @@
 
 ## 2026-09-23
 
+**Update**: [Developing a Game](developing-a-game.md) — migrate demo-game, platform, and UI tests to Vitest 5 with independent commands, preserve opt-in learning integration coverage, and update UI’s compatible Vite tooling while retaining its browser targets and package exports.
+
 **Update**: [Developing a Game](developing-a-game.md), [Game Model](game-model.md) — remove the temporary reward ledger and repair commands after the local correction; consolidate report helpers, JWT handling, scenario constants, and result tests into their existing owners. Existing corrected XP is preserved.
 
 **Update**: [Game Model](game-model.md), [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — document direct 20 XP demo lesson rewards, atomic completion-based duplicate prevention without schema additions, matching countdown notices, fixed three-month segments, and the current-year timeline.

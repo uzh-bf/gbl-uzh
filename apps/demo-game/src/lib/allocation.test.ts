@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict'
-import { test } from 'node:test'
+import { expect, test } from 'vitest'
 import {
   allocationBoundaries,
   allocationSchema,
@@ -12,15 +11,14 @@ import {
 
 test('decimal allocations validate and round-trip without truncation', () => {
   const value = parseAllocation({ bank: '33.3', bonds: '33.3', stocks: '33.4' })
-  assert.deepEqual(
-    allocationSchema.validateSync(value, { strict: true }),
+  expect(allocationSchema.validateSync(value, { strict: true })).toStrictEqual(
     value
   )
-  assert.deepEqual(fromBoundaries(allocationBoundaries(value)), value)
-  assert.equal(formatCHF(10070.37 * 0.55), "5'538.70 CHF")
+  expect(fromBoundaries(allocationBoundaries(value))).toStrictEqual(value)
+  expect(formatCHF(10070.37 * 0.55)).toBe("5'538.70 CHF")
   for (let left = 0; left <= 1000; left += 7) {
     for (let right = left; right <= 1000; right += 11) {
-      assert.ok(isAllocationValid(fromBoundaries([left, right])))
+      expect(isAllocationValid(fromBoundaries([left, right]))).toBeTruthy()
     }
   }
 })
@@ -40,26 +38,27 @@ test('server validation rejects invalid payloads rather than coercing them', () 
     { bank: 100, bonds: 0 },
     undefined,
   ])
-    assert.throws(() => allocationSchema.validateSync(value, { strict: true }))
-  assert.equal(
-    isAllocationValid(parseAllocation({ bank: '', bonds: '0', stocks: '100' })),
-    false
-  )
+    expect(() =>
+      allocationSchema.validateSync(value, { strict: true })
+    ).toThrow()
+  expect(
+    isAllocationValid(parseAllocation({ bank: '', bonds: '0', stocks: '100' }))
+  ).toBe(false)
 })
 
 test('handles push each other in either direction and can separate again', () => {
-  assert.deepEqual(moveBoundary([550, 900], 0, 950), [950, 950])
-  assert.deepEqual(moveBoundary([550, 900], 1, 200), [200, 200])
-  assert.deepEqual(moveBoundary([950, 950], 0, 333), [333, 950])
-  assert.deepEqual(moveBoundary([200, 200], 1, 666), [200, 666])
-  assert.deepEqual(moveBoundary([550, 900], 0, 1100), [1000, 1000])
-  assert.deepEqual(moveBoundary([550, 900], 1, -10), [0, 0])
+  expect(moveBoundary([550, 900], 0, 950)).toStrictEqual([950, 950])
+  expect(moveBoundary([550, 900], 1, 200)).toStrictEqual([200, 200])
+  expect(moveBoundary([950, 950], 0, 333)).toStrictEqual([333, 950])
+  expect(moveBoundary([200, 200], 1, 666)).toStrictEqual([200, 666])
+  expect(moveBoundary([550, 900], 0, 1100)).toStrictEqual([1000, 1000])
+  expect(moveBoundary([550, 900], 1, -10)).toStrictEqual([0, 0])
   for (const value of [
     { bank: 100, bonds: 0, stocks: 0 },
     { bank: 0, bonds: 100, stocks: 0 },
     { bank: 0, bonds: 0, stocks: 100 },
   ]) {
-    assert.ok(isAllocationValid(value))
-    assert.deepEqual(fromBoundaries(allocationBoundaries(value)), value)
+    expect(isAllocationValid(value)).toBeTruthy()
+    expect(fromBoundaries(allocationBoundaries(value))).toStrictEqual(value)
   }
 })

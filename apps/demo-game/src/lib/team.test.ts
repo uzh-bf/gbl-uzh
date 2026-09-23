@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict'
-import { test } from 'node:test'
+import { expect, test } from 'vitest'
 import type { ResultQuery } from '../graphql/generated/ops'
 import { FIRST_GAME_YEAR } from './constants'
 import { learningXP, storyLibrary, teamStatistics } from './team'
@@ -37,18 +36,17 @@ test('story library hides future content and retains first-release metadata on r
     },
   })
   const entries = storyLibrary(data)
-  assert.deepEqual(
-    entries.map((entry) => entry.story.id),
-    ['D', 'C', 'A', 'B']
-  )
+  expect(entries.map((entry) => entry.story.id)).toStrictEqual([
+    'D',
+    'C',
+    'A',
+    'B',
+  ])
   const a = entries.find((entry) => entry.story.id === 'A')!
-  assert.equal(a.sequence.year, FIRST_GAME_YEAR)
-  assert.equal(a.sequence.quarter, 1)
-  assert.equal(a.index, 0)
-  assert.deepEqual(
-    a.sequence.stories.map((item) => item.id),
-    ['A', 'B']
-  )
+  expect(a.sequence.year).toBe(FIRST_GAME_YEAR)
+  expect(a.sequence.quarter).toBe(1)
+  expect(a.index).toBe(0)
+  expect(a.sequence.stories.map((item) => item.id)).toStrictEqual(['A', 'B'])
 })
 
 test('story archive survives upcoming and disconnected period pointers in results', () => {
@@ -64,16 +62,16 @@ test('story archive survives upcoming and disconnected period pointers in result
       },
     },
   })
-  assert.deepEqual(
-    storyLibrary(data).map((entry) => entry.story.id),
-    ['B', 'A']
-  )
+  expect(storyLibrary(data).map((entry) => entry.story.id)).toStrictEqual([
+    'B',
+    'A',
+  ])
   data.result!.currentGame!.activePeriod = null
-  assert.deepEqual(
-    storyLibrary(data).map((entry) => entry.story.id),
-    ['B', 'A']
-  )
-  assert.deepEqual(storyLibrary(asData({})), [])
+  expect(storyLibrary(data).map((entry) => entry.story.id)).toStrictEqual([
+    'B',
+    'A',
+  ])
+  expect(storyLibrary(asData({}))).toStrictEqual([])
 })
 
 test('team value and last quarter use settled balances, not the cumulative return', () => {
@@ -99,13 +97,19 @@ test('team value and last quarter use settled balances, not the cumulative retur
       currentGame: { status: 'RUNNING', periods: [first], activePeriod: first },
     },
   })
-  assert.deepEqual(teamStatistics(data), { value: 10000, lastQuarter: null })
+  expect(teamStatistics(data)).toStrictEqual({
+    value: 10000,
+    lastQuarter: null,
+  })
   data.result!.currentGame!.status = 'PAUSED' as never
-  assert.deepEqual(teamStatistics(data), { value: 12600, lastQuarter: 0.05 })
+  expect(teamStatistics(data)).toStrictEqual({
+    value: 12600,
+    lastQuarter: 0.05,
+  })
   facts.assetsWithReturns[0].totalAssets = 0
-  assert.equal(teamStatistics(data).lastQuarter, null)
+  expect(teamStatistics(data).lastQuarter).toBe(null)
   facts.assetsWithReturns = []
-  assert.deepEqual(teamStatistics(data), { value: null, lastQuarter: null })
+  expect(teamStatistics(data)).toStrictEqual({ value: null, lastQuarter: null })
 })
 
 test('XP badges accept only configured finite nonnegative reward.xp', () => {
@@ -119,7 +123,7 @@ test('XP badges accept only configured finite nonnegative reward.xp', () => {
     { xp: NaN },
     { xp: -1 },
   ])
-    assert.equal(learningXP(value), null)
-  assert.equal(learningXP({ xp: 0 }), 0)
-  assert.equal(learningXP({ xp: 20 }), 20)
+    expect(learningXP(value)).toBe(null)
+  expect(learningXP({ xp: 0 })).toBe(0)
+  expect(learningXP({ xp: 20 })).toBe(20)
 })

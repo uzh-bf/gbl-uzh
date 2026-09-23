@@ -38,6 +38,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "devDependencies": {
+    "@apollo/client": "3.14.1",
     "@tailwindcss/postcss": "~4.1.11",
     "@types/node": "^24.0.0",
     "@types/ramda": "^0.30.2",
@@ -46,8 +47,7 @@
     "@typescript-eslint/eslint-plugin": "~7.15.0",
     "@typescript-eslint/parser": "~7.15.0",
     "@uzh-bf/design-system": "~4.1.6",
-    "@vitejs/plugin-react-swc": "~3.7.1",
-    "@apollo/client": "3.14.1",
+    "@vitejs/plugin-react-swc": "~4.3.3",
     "eslint": "~8.57.1",
     "eslint-plugin-react-hooks": "~4.6.2",
     "eslint-plugin-react-refresh": "~0.4.7",
@@ -57,9 +57,10 @@
     "react-hook-form": "^7.80.0",
     "tailwindcss": "~4.1.11",
     "typescript": "6.0.2",
-    "vite": "~5.4.11",
+    "vite": "~7.3.6",
     "vite-plugin-dts": "~4.3.0",
-    "vite-plugin-externalize-deps": "~0.8.0"
+    "vite-plugin-externalize-deps": "~0.10.0",
+    "vitest": "~5.0.1"
   },
   "peerDependencies": {
     "@apollo/client": "^3.11.10",
@@ -72,10 +73,13 @@
   "scripts": {
     "build": "node_modules/typescript/bin/tsc --project tsconfig.json && vite build",
     "check:ts": "../../node_modules/typescript-native/bin/tsc --project tsconfig.json",
+    "check:ts:test": "../../node_modules/typescript-native/bin/tsc --project tsconfig.test.json",
     "check:ts:typescript6": "node_modules/typescript/bin/tsc --project tsconfig.json",
     "dev": "vite build --watch",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "prepack": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest --watch",
     "verify:consumer": "node scripts/verify-consumer.mjs",
     "verify:package": "node scripts/verify-package.mjs"
   },

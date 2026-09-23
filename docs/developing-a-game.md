@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: "2026-09-23T00:00:00Z"
+timestamp: "2026-09-23T12:00:00Z"
 ---
 
 # Developing a Game
@@ -181,6 +181,10 @@ The sheets share an app-local, accessible dialog shell with a 784px width cap, a
 
 ## Verification loop
 
+Demo-game, platform, and UI use Vitest 5 with separate package-local configurations. Run `pnpm --filter @gbl-uzh/demo-game test`, `pnpm --filter @gbl-uzh/platform test`, or `pnpm --filter @gbl-uzh/ui test` for a single run; each package also provides `test:watch`. Demo-game provides `test:debug` for an inspector-enabled watch session, and platform retains `test:auth` for its authentication suite. Tests import Vitest explicitly and run in Node. UI test types are checked with `pnpm --filter @gbl-uzh/ui check:ts:test`.
+
+Demo-game service tests use the generated Prisma clients and platform distribution from the normal local setup; rebuild platform after changing its implementation. Default test runs skip database integration cases and do not initialize the demo-game Prisma connection. Browser tests remain in the separate Playwright package.
+
 - Run the app locally (devcontainer flow above) and click through the full lifecycle as admin + one player — the fastest end-to-end check.
 - `playwright/tests/demo-game-flow.spec.ts` shows how to automate exactly that loop (admin auth setup, multi-player contexts, status assertions via `data-game-status`); adapt it for your game.
 - Keep the copied package's `check` script green (`pnpm run check` = lint + `check:ts`; there is no `typecheck` script); the facts types are your main defense against silent data corruption.
@@ -194,4 +198,4 @@ The existing seed sets `{ xp: LEARNING_ACTIVITY_XP }` on the four demo activitie
 
 Before this fix, completion did not apply a lesson's direct XP reward. An old completion alone cannot establish whether XP has already been corrected; replaying all completions would risk duplicate credit. The affected local data was repaired once (1,160 XP across 51 players), and that credit is preserved. Any other legacy database needs a separately audited, one-time data correction with a retained receipt, rather than awarding again when a solved lesson is submitted.
 
-From `apps/demo-game`, `GBL_TEST_DATABASE=1 node --import tsx --test src/services/learning.test.ts` exercises transactional rewards using temporary fixtures in the configured database, then cleans them up. `node --import tsx --test src/services/calendar.test.ts` verifies the fixed month count and current-year behavior. These focused checks do not need additional package scripts.
+From `apps/demo-game`, `GBL_TEST_DATABASE=1 pnpm test src/services/learning.test.ts` enables six sequential integration cases covering transactional rewards, using temporary fixtures in a configured local test database and cleaning them up afterward. Vitest runs with `NODE_ENV=test`, so configure the connection through `DATABASE_URL` or `.env.test.local`; `.env.local` is intentionally not loaded. `pnpm test src/services/calendar.test.ts` verifies the fixed month count and current-year behavior, including an isolated Node subprocess for fresh runtime imports.

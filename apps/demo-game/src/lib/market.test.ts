@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict'
-import { test } from 'node:test'
+import { expect, test } from 'vitest'
 import { FIRST_GAME_YEAR } from './constants'
 import { parseFacts } from './facts'
 import {
@@ -22,7 +21,9 @@ const facts = {
 }
 
 test('read persisted rolls safely without computing or inventing results', () => {
-  assert.deepEqual(readMarketRoll(JSON.stringify(JSON.stringify(facts)), 0), {
+  expect(
+    readMarketRoll(JSON.stringify(JSON.stringify(facts)), 0)
+  ).toStrictEqual({
     dice: facts.diceRolls[0],
     returns: facts.returns[0],
   })
@@ -32,11 +33,11 @@ test('read persisted rolls safely without computing or inventing results', () =>
     { diceRolls: [null], returns: [null] },
     { ...facts, diceRolls: [{ shared: 3, bonds: 3, stocks: 13 }] },
   ])
-    assert.equal(readMarketRoll(raw, 0), null)
+    expect(readMarketRoll(raw, 0)).toBe(null)
   for (const index of [-1, 0.5, 2])
-    assert.equal(readMarketRoll(facts, index), null)
-  assert.deepEqual(parseFacts('bad'), {})
-  assert.equal(readScenario({}), null)
+    expect(readMarketRoll(facts, index)).toBe(null)
+  expect(parseFacts('bad')).toStrictEqual({})
+  expect(readScenario({})).toBe(null)
 })
 
 test('latest reveal uses chronological order, persists over years, and excludes future segments', () => {
@@ -68,18 +69,18 @@ test('latest reveal uses chronological order, persists over years, and excludes 
     ],
   } as unknown as Parameters<typeof latestRevealedRoll>[0]
   const result = latestRevealedRoll(game)
-  assert.equal(result.segmentId, 'last')
-  assert.equal(result.index, 1)
-  assert.equal(result.label, `${FIRST_GAME_YEAR} · Quarter 4 · Month 2`)
-  assert.equal(result.roll.returns.bank, 0.004)
+  expect(result.segmentId).toBe('last')
+  expect(result.index).toBe(1)
+  expect(result.label).toBe(`${FIRST_GAME_YEAR} · Quarter 4 · Month 2`)
+  expect(result.roll.returns.bank).toBe(0.004)
   game.periods[0].segments[1].facts.revealedRollIndices = [0]
-  assert.equal(latestRevealedRoll(game).segmentId, 'current')
+  expect(latestRevealedRoll(game).segmentId).toBe('current')
   game.periods.forEach((period) =>
     period.segments.forEach((segment) => {
       segment.facts = { ...segment.facts, revealedRollIndices: [] }
     })
   )
-  assert.equal(latestRevealedRoll(game), null)
+  expect(latestRevealedRoll(game)).toBe(null)
 })
 
 test('final results retain the last period after the active pointer disconnects', () => {
@@ -103,9 +104,8 @@ test('final results retain the last period after the active pointer disconnects'
       },
     ],
   } as unknown as Parameters<typeof latestRevealedRoll>[0]
-  assert.equal(
-    latestRevealedRoll(game).label,
+  expect(latestRevealedRoll(game).label).toBe(
     `${FIRST_GAME_YEAR} · Quarter 2 · Month 2`
   )
-  assert.deepEqual(readScenario(marketPeriod(game).facts), scenario)
+  expect(readScenario(marketPeriod(game).facts)).toStrictEqual(scenario)
 })

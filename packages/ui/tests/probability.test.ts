@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict'
-import { test } from 'node:test'
+import { expect, test } from 'vitest'
 import { probabilityDistribution, signedPercent } from '../src/lib/probability'
 
 test('market chart uses scenario returns and existing volatility convention', () => {
@@ -10,14 +9,13 @@ test('market chart uses scenario returns and existing volatility convention', ()
     [0.0065, 0.025],
   ]) {
     const { data, volatility } = probabilityDistribution(trend, gap)
-    assert.equal(data.length, 11)
-    assert.equal(data[0].value, trend - 5 * gap)
-    assert.equal(data[5].value, trend)
-    assert.equal(data[10].value, trend + 5 * gap)
-    assert.ok(data.every((item) => item.prob <= data[5].prob))
+    expect(data.length).toBe(11)
+    expect(data[0].value).toBe(trend - 5 * gap)
+    expect(data[5].value).toBe(trend)
+    expect(data[10].value).toBe(trend + 5 * gap)
+    expect(data.every((item) => item.prob <= data[5].prob)).toBeTruthy()
     const mean = data.reduce((sum, item) => sum + item.prob * item.value, 0)
-    assert.equal(
-      volatility,
+    expect(volatility).toBe(
       Math.sqrt(
         4 *
           data.reduce(
@@ -27,25 +25,22 @@ test('market chart uses scenario returns and existing volatility convention', ()
       )
     )
   }
-  assert.equal(
-    (probabilityDistribution(0.0031, 0.005).volatility * 100).toFixed(2),
-    '2.42'
-  )
-  assert.equal(
-    (probabilityDistribution(0.0065, 0.025).volatility * 100).toFixed(2),
-    '12.08'
-  )
-  assert.notEqual(
-    probabilityDistribution(-0.03, 0.017).volatility,
+  expect(
+    (probabilityDistribution(0.0031, 0.005).volatility * 100).toFixed(2)
+  ).toBe('2.42')
+  expect(
+    (probabilityDistribution(0.0065, 0.025).volatility * 100).toFixed(2)
+  ).toBe('12.08')
+  expect(probabilityDistribution(-0.03, 0.017).volatility).not.toBe(
     probabilityDistribution(0.0031, 0.005).volatility
   )
 })
 
 test('signed percentages preserve precision and suppress rounded negative zero', () => {
-  assert.equal(signedPercent(0.0123), '+1.2%')
-  assert.equal(signedPercent(-0.0123), '-1.2%')
-  assert.equal(signedPercent(0.0123, 2), '+1.23%')
-  assert.equal(signedPercent(-0.0001), '0.0%')
-  assert.equal(signedPercent(0), '0.0%')
-  assert.equal(signedPercent(-0, 2), '0.00%')
+  expect(signedPercent(0.0123)).toBe('+1.2%')
+  expect(signedPercent(-0.0123)).toBe('-1.2%')
+  expect(signedPercent(0.0123, 2)).toBe('+1.23%')
+  expect(signedPercent(-0.0001)).toBe('0.0%')
+  expect(signedPercent(0)).toBe('0.0%')
+  expect(signedPercent(-0, 2)).toBe('0.00%')
 })

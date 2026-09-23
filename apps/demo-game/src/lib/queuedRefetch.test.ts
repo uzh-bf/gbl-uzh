@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict'
-import { test } from 'node:test'
+import { expect, test } from 'vitest'
 import { queueRefetch } from './queuedRefetch'
 
 test('events during an in-flight read queue a fresh read after it completes', async () => {
@@ -12,14 +11,14 @@ test('events during an in-flight read queue a fresh read after it completes', as
   const first = refresh()
   const second = refresh()
   refresh()
-  assert.equal(calls, 1)
+  expect(calls).toBe(1)
   finish.shift()!()
   await Promise.resolve()
-  assert.equal(calls, 2)
+  expect(calls).toBe(2)
   finish.shift()!()
   await Promise.all([first, second])
   const next = refresh()
-  assert.equal(calls, 3)
+  expect(calls).toBe(3)
   finish.shift()!()
   await next
 })
@@ -29,7 +28,7 @@ test('a failed read does not prevent a later retry', async () => {
   const refresh = queueRefetch(async () => {
     if (fail) throw new Error('Offline')
   })
-  await assert.rejects(refresh(), /Offline/)
+  await expect(refresh()).rejects.toThrow(/Offline/)
   fail = false
   await refresh()
 })
@@ -40,7 +39,7 @@ test('a synchronous failure does not prevent a later retry', async () => {
     if (fail) throw new Error('Offline')
     return Promise.resolve()
   })
-  await assert.rejects(refresh(), /Offline/)
+  await expect(refresh()).rejects.toThrow(/Offline/)
   fail = false
   await refresh()
 })

@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict'
-import { test } from 'node:test'
+import { expect, test } from 'vitest'
 import type { ResultFacts } from '../types/facts'
 import { ActionTypes, apply } from './ActionsReducer'
 import { initialize, start } from './SegmentResultService'
@@ -14,11 +13,11 @@ const submit = (state: Parameters<typeof apply>[0]) =>
 test('submitting the default mix persists an explicit marker without changing percentages', () => {
   const state = { decisions }
   const result = submit(state)
-  assert.equal(result.isDirty, true)
-  assert.equal(result.result.allocationSubmitted, true)
-  assert.deepEqual(result.result.decisions, decisions)
-  assert.equal('allocationSubmitted' in state, false)
-  assert.equal(submit(result.result).result.allocationSubmitted, true)
+  expect(result.isDirty).toBe(true)
+  expect(result.result.allocationSubmitted).toBe(true)
+  expect(result.result.decisions).toStrictEqual(decisions)
+  expect('allocationSubmitted' in state).toBe(false)
+  expect(submit(result.result).result.allocationSubmitted).toBe(true)
 })
 
 test('first and subsequent segments reset submission without discarding the mix', () => {
@@ -26,8 +25,8 @@ test('first and subsequent segments reset submission without discarding the mix'
   const initialized = initialize(facts, {} as Parameters<typeof initialize>[1])
   const started = start(facts, {} as Parameters<typeof start>[1])
   for (const result of [initialized, started]) {
-    assert.equal(result.resultFacts.allocationSubmitted, false)
-    assert.deepEqual(result.resultFacts.decisions, decisions)
+    expect(result.resultFacts.allocationSubmitted).toBe(false)
+    expect(result.resultFacts.decisions).toStrictEqual(decisions)
   }
-  assert.equal(facts.allocationSubmitted, true)
+  expect(facts.allocationSubmitted).toBe(true)
 })

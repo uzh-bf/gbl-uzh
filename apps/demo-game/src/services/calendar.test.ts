@@ -1,6 +1,5 @@
-import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { test } from 'node:test'
+import { expect, test } from 'vitest'
 import { NUM_MONTHS_PER_SEGMENT } from '../lib/constants'
 import { readMarketRoll, revealedIndices } from '../lib/market'
 import { PeriodFactsSchema } from '../types/Period'
@@ -22,38 +21,35 @@ test('legacy month overrides are stripped and generation always uses three month
       scenario,
       rollsPerSegment,
     })
-    assert.equal('rollsPerSegment' in validated, false)
+    expect('rollsPerSegment' in validated).toBe(false)
     // Even callers bypassing the input schema cannot override the game rule.
     const result = initialize({}, {
       periodFacts: { scenario, rollsPerSegment },
       periodIx: 0,
       segmentIx: 0,
     } as never).resultFacts
-    assert.equal(result.diceRolls.length, NUM_MONTHS_PER_SEGMENT)
-    assert.equal(result.returns.length, NUM_MONTHS_PER_SEGMENT)
-    assert.equal(readMarketRoll(result, NUM_MONTHS_PER_SEGMENT), null)
-    assert.deepEqual(
-      revealedIndices({ revealedRollIndices: [0, 1, 2, 3, -1] }),
-      [0, 1, 2]
-    )
+    expect(result.diceRolls.length).toBe(NUM_MONTHS_PER_SEGMENT)
+    expect(result.returns.length).toBe(NUM_MONTHS_PER_SEGMENT)
+    expect(readMarketRoll(result, NUM_MONTHS_PER_SEGMENT)).toBe(null)
+    expect(
+      revealedIndices({ revealedRollIndices: [0, 1, 2, 3, -1] })
+    ).toStrictEqual([0, 1, 2])
   }
 })
 
 test('settlement rejects incompatible stored month counts before computing results', () => {
   for (const count of [0, 2, 4]) {
-    assert.throws(
-      () =>
-        end(
-          {} as never,
-          {
-            segmentFacts: {
-              returns: Array(count).fill({}),
-              diceRolls: Array(count).fill({}),
-            },
-          } as never
-        ),
-      /must contain 3 monthly returns and dice rolls/
-    )
+    expect(() =>
+      end(
+        {} as never,
+        {
+          segmentFacts: {
+            returns: Array(count).fill({}),
+            diceRolls: Array(count).fill({}),
+          },
+        } as never
+      )
+    ).toThrow(/must contain 3 monthly returns and dice rolls/)
   }
 })
 

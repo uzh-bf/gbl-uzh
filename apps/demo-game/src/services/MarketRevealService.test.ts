@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict'
-import { test } from 'node:test'
+import { expect, test } from 'vitest'
 import { getMarketDice, revealMarketRoll } from './MarketRevealService'
 
 function fixture() {
@@ -35,7 +34,7 @@ function fixture() {
     prisma: {
       periodSegment: { findUnique: async () => segment },
       $transaction: async (fn, options) => {
-        assert.equal(options.isolationLevel, 'Serializable')
+        expect(options.isolationLevel).toBe('Serializable')
         const startingVersion = version
         const snapshot = structuredClone(segment)
         let updated = false
@@ -75,9 +74,12 @@ test('reveals merge under concurrent requests and replay never changes outcomes'
     revealMarketRoll(1, 1, f.ctx),
   ])
   await revealMarketRoll(1, 0, f.ctx)
-  assert.deepEqual(f.segment.facts, { ...initial, revealedRollIndices: [0, 1] })
-  assert.equal(f.events.length, 3)
-  assert.deepEqual(f.events[0], {
+  expect(f.segment.facts).toStrictEqual({
+    ...initial,
+    revealedRollIndices: [0, 1],
+  })
+  expect(f.events.length).toBe(3)
+  expect(f.events[0]).toStrictEqual({
     type: 'MARKET_ROLL_REVEALED',
     facts: { gameId: 1 },
   })
@@ -87,18 +89,18 @@ test('rejects non-admins, missing/invalid rolls and future segments', async () =
   const f = fixture()
   for (const role of ['PLAYER', undefined]) {
     f.ctx.user = role ? { role } : undefined
-    await assert.rejects(revealMarketRoll(1, 0, f.ctx), /Only admins/)
-    await assert.rejects(getMarketDice(1, f.ctx), /Only admins/)
+    await expect(revealMarketRoll(1, 0, f.ctx)).rejects.toThrow(/Only admins/)
+    await expect(getMarketDice(1, f.ctx)).rejects.toThrow(/Only admins/)
   }
   f.ctx.user = { role: 'MASTER' }
   for (const index of [-1, 0.5, 2])
-    await assert.rejects(revealMarketRoll(1, index, f.ctx), /Invalid/)
+    await expect(revealMarketRoll(1, index, f.ctx)).rejects.toThrow(/Invalid/)
   f.segment.index = 1
-  await assert.rejects(revealMarketRoll(1, 0, f.ctx), /Future/)
+  await expect(revealMarketRoll(1, 0, f.ctx)).rejects.toThrow(/Future/)
   f.segment.index = 0
   f.segment.periodIx = 1
-  await assert.rejects(revealMarketRoll(1, 0, f.ctx), /Future/)
-  assert.equal(f.events.length, 0)
+  await expect(revealMarketRoll(1, 0, f.ctx)).rejects.toThrow(/Future/)
+  expect(f.events.length).toBe(0)
 })
 
 test('failed notification can be retried without changing a persisted reveal', async () => {
@@ -107,10 +109,10 @@ test('failed notification can be retried without changing a persisted reveal', a
   f.ctx.pubSub.publish = () => {
     throw new Error('Disconnected')
   }
-  await assert.rejects(revealMarketRoll(1, 0, f.ctx), /Disconnected/)
-  assert.deepEqual(f.segment.facts.revealedRollIndices, [0])
+  await expect(revealMarketRoll(1, 0, f.ctx)).rejects.toThrow(/Disconnected/)
+  expect(f.segment.facts.revealedRollIndices).toStrictEqual([0])
   f.ctx.pubSub.publish = publish
   await revealMarketRoll(1, 0, f.ctx)
-  assert.deepEqual(f.segment.facts.revealedRollIndices, [0])
-  assert.equal(f.events.length, 1)
+  expect(f.segment.facts.revealedRollIndices).toStrictEqual([0])
+  expect(f.events.length).toBe(1)
 })
