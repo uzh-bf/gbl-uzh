@@ -111,6 +111,93 @@ complete eight-layer stack.
 }
 ```
 
+## 2026-08-13 platform transport-contract correction (current)
+
+Problem: architect review identified two remaining tRPC boundary defects in the
+platform kernel: `story.list` and `learning.questAchievements` still returned
+persistence records directly, and `play.performAction` treated a missing
+injected `ActionFactsSchema` as an instruction to skip validation.
+
+Evidence: the old GraphQL operations define the public StoryElement fields as
+`id`, `type`, `title`, `content`, and `contentRole`, and the quest-achievement
+operation defines `id`, `name`, `namesByRole`, `description`,
+`descriptionsByRole`, `image`, `when`, `scope`, `activePeriods`, and `reward`.
+The three game routers inject `ActionFactsSchema`; the platform package remains
+on Zod 3.23.8 and uses SuperJSON for dates and other non-JSON values.
+
+Decision: keep explicit DTO mappers as the projection boundary and make Zod
+schemas the runtime/type source for a targeted set of stable or sensitive
+outputs. Do not perform a blanket `.output()` conversion, upgrade Zod, replace
+`z.unknown()` for arbitrary facts, or remove SuperJSON. Zod 3-compatible
+`.strict()` objects, `z.nativeEnum`, `z.date()`, nullable fields, and exact
+optional fields are the allowed schema vocabulary.
+
+Output contract allowlist:
+
+| Procedure family | Runtime contract | Boundary reason |
+| --- | --- | --- |
+| `story.list` | strict array of the five old GraphQL StoryElement fields | persistence projection and public compatibility |
+| `learning.questAchievements` | strict array of the ten old GraphQL achievement fields | persistence projection and public compatibility |
+| `auth.loginAsTeam`, `play.self`, `play.updatePlayerData` | `PlayerSelfDto` | player projection must stay token-free and shape-stable |
+| `play.performAction`, `play.result` | nullable `PlayerResultCoreDto` / `PlayerResultDto` | player-facing result boundary and fail-closed action validation |
+| `results.listForCurrentGame`, `results.specific`, `results.pastForPlayer` | strict arrays of their existing result DTOs | result privacy and stable client contract |
+| `game.list`, `game.byId`, game mutations returning an admin game | existing game DTO projections | admin token and internal game fields must remain explicit |
+
+`contentRole`, `namesByRole`, `descriptionsByRole`, `reward`, and result/game
+`facts` remain `unknown` values because their domain schemas are intentionally
+game-defined; the mappers still decide which of them cross each boundary.
+Date fields remain `Date` values and are serialized by the existing SuperJSON
+transformer. No output validator is added to a procedure whose output is not
+yet represented by a stable DTO schema.
+
+Primitive impact:
+
+| Product primitive | Disposition | Contract delta | Affected compositions and consumers | Evidence or open ruling |
+| --- | --- | --- | --- | --- |
+| Game content and achievement catalog | extend | Preserve the existing content meaning while making the tRPC transport projection explicit and GraphQL-compatible; no new content state or ownership is introduced | platform story/learning procedures compose persistence records with player and admin clients; old GraphQL operations remain independent compatibility evidence | `FStoryElementData.graphql`, `QQuestAchievements.graphql`, and the platform DTO mappers |
+| Player result and progress view | reuse | Keep the existing player-facing privacy boundary and add runtime output validation; no new result meaning or state transition | play and results procedures compose existing PlayService results with player clients; admin facts remain outside the player DTO | existing result DTO mappers and the D3 fact-withholding corrections in this layer |
+| Player action submission | extend | Make the existing game-specific `ActionFactsSchema` invariant fail closed when configuration is missing; action semantics and reducer ownership remain unchanged | play.performAction composes the injected game schema with the existing PlayService reducer and transaction | all three game routers inject the schema; missing-schema regression test proves no transaction/reducer call |
+| tRPC transport contract | extend | Add targeted strict runtime DTO validators for named stable/sensitive procedures; preserve `unknown` game JSON and SuperJSON `Date` transport | Pages Router example clients and separate games consume inferred RouterOutputs from the platform router | official tRPC validator/transformer guidance and the current client stack |
+
+Delegation Map: S0 plan boundary — main session; S1 platform contract and test
+changes — main session (`critical-path coupling`, because the mappers, schema
+source types, router allowlist, and caller-level tests must change as one
+contract); S2 downstream rebase, active-plan reconciliation, and stack
+verification — main session. The plan-stage planner returned
+`DONE_WITH_CONCERNS`; its report is
+`project/_local/reviews/2026-08-13-platform-contract-correction-planning.md`.
+
+Do:
+
+1. Commit this addendum as the first correction boundary on PR #196.
+2. Add explicit platform projections, canonical Zod DTO schemas, and the
+   required `ActionFactsSchema` check in PR #196.
+3. Extend existing caller-level tests for field exclusion, projection query
+   shape, and missing-schema failure; retain the existing valid/invalid action
+   tests.
+4. Run focused platform tests, the full platform test suite, both TypeScript
+   checks, and the platform build. Run the required post-slice simplifier and
+   slice reviewer on the immutable implementation commit.
+5. Rebase the existing upper layers in stack order, add the propagation record
+   to the active plan on PR #205, and require fresh per-layer CI. Do not merge,
+   mark ready, delete branches, or clean up worktrees in this correction.
+
+Risk: output validation turns a mapper or upstream shape regression into
+`INTERNAL_SERVER_ERROR`; that is intentional for the named contracts, but the
+allowlist must remain narrow. Before implementation, confirm the old GraphQL
+field/nullability evidence and keep any incompatible field out of the mapper
+only if the existing tRPC migration contract explicitly permits that change.
+
+Check: the focused tests must prove that persistence-only fields do not escape,
+the selected Prisma projections are explicit, and a router with no
+`ActionFactsSchema` rejects before the action service or transaction. The
+broader checks must pass at the lower layer and again after stack propagation;
+remote checks on pre-correction commits are stale evidence.
+
+Commit: `docs(project): plan platform contract correction` on PR #196, followed
+by `fix(platform): enforce explicit trpc output contracts` on PR #196 and
+`docs(project): record platform correction propagation` on PR #205.
+
 ## 2026-08-10 continuation note
 
 This plan's extraction was replaced by the still-open draft PR stack #194-#197
