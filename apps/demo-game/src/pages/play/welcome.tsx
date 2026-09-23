@@ -1,4 +1,3 @@
-import { useMutation, useQuery } from '@apollo/client'
 import { Logo, LogoSelector, cn } from '@gbl-uzh/ui'
 import {
   Button,
@@ -12,46 +11,36 @@ import {
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import {
-  SelfDocument,
-  UpdatePlayerDataDocument,
-} from 'src/graphql/generated/ops'
 import { AVATARS, COLORS, LOCATIONS } from 'src/lib/constants'
+import { useToast } from '~/components/ui/use-toast'
+import { trpc } from '~/lib/trpc'
+
+function getPlayerFacts(value: unknown): Record<string, string> {
+  return typeof value === 'object' && value !== null
+    ? (value as Record<string, string>)
+    : {}
+}
 
 function Welcome() {
   const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const { data, loading, error } = useQuery(SelfDocument, {
-    onError: (error) => {
-      console.error('Error fetching player data:', error)
-    },
-    onCompleted: (data) => {
-      if (!data.self) {
-        console.warn('No player data found - user may not be authenticated')
-      }
+  const { toast } = useToast()
+
+  const {
+    data: player,
+    isLoading: isPlayerLoading,
+    error: playerError,
+  } = trpc.play.self.useQuery()
+
+  const utils = trpc.useUtils()
+  const updatePlayerData = trpc.play.updatePlayerData.useMutation({
+    onSuccess: async () => {
+      await utils.play.self.invalidate()
     },
   })
 
-  const [updatePlayerData] = useMutation(UpdatePlayerDataDocument, {
-    optimisticResponse: data?.self
-      ? {
-          updatePlayerData: {
-            __typename: 'Player',
-            ...data.self,
-            name: data.self.name,
-            facts: JSON.stringify({
-              color: data.self.facts.color,
-              avatar: data.self.facts.avatar,
-              location: data.self.facts.location,
-            }),
-          } as any,
-        }
-      : undefined,
-    onError: (error) => {
-      console.error('Error updating player data:', error)
-      setIsSubmitting(false)
-    },
-  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const playerFacts = getPlayerFacts(player?.facts)
 
   const {
     register,
@@ -61,19 +50,18 @@ function Welcome() {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      name: data?.self?.name ?? '',
-      color: data?.self?.facts?.color ?? Object.keys(COLORS)[0],
-      location: data?.self?.facts?.location ?? LOCATIONS.Trader[0],
-      imgPathAvatar:
-        data?.self?.facts?.avatar ?? '/avatars/avatar_placeholder.png',
+      name: '',
+      color: Object.keys(COLORS)[0],
+      location: LOCATIONS.Trader[0],
+      imgPathAvatar: '/avatars/avatar_placeholder.png',
     },
-    values: data?.self
+    values: player
       ? {
-          name: data.self.name,
-          color: data.self.facts.color ?? Object.keys(COLORS)[0],
-          location: data.self.facts.location ?? LOCATIONS.Trader[0],
+          name: player.name,
+          color: playerFacts.color ?? Object.keys(COLORS)[0],
+          location: playerFacts.location ?? LOCATIONS.Trader[0],
           imgPathAvatar:
-            data.self.facts.avatar ?? '/avatars/avatar_placeholder.png',
+            playerFacts.avatar ?? '/avatars/avatar_placeholder.png',
         }
       : undefined,
   })
@@ -83,8 +71,11 @@ function Welcome() {
   const watchLocation = watch('location')
   const watchAvatar = watch('imgPathAvatar')
 
-  if (loading) return null
-  if (error) return `Error! ${error}`
+  if (isPlayerLoading) return null
+  if (playerError) return `Error! ${playerError.message}`
+  if (!player) {
+    return 'No player data found - user may not be authenticated'
+  }
 
   const gameName = 'Minigame'
 
@@ -97,20 +88,24 @@ function Welcome() {
     setIsSubmitting(true)
 
     try {
-      await updatePlayerData({
-        variables: {
-          name: values.name,
-          facts: JSON.stringify({
-            color: values.color,
-            avatar: values.imgPathAvatar,
-            location: values.location,
-          }),
-        },
+      await updatePlayerData.mutateAsync({
+        name: values.name,
+        facts: JSON.stringify({
+          color: values.color,
+          avatar: values.imgPathAvatar,
+          location: values.location,
+        }),
       })
-      router.replace('/play/cockpit')
-    } catch (e) {
-      console.error(e)
+      await router.replace('/play/cockpit')
+    } catch (error) {
+      console.error('Error updating player data:', error)
       setIsSubmitting(false)
+      toast({
+        title: 'Could not save your setup',
+        description:
+          error instanceof Error ? error.message : 'Please try again.',
+        variant: 'destructive',
+      })
     }
   }
 

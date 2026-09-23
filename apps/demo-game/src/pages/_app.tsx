@@ -1,9 +1,8 @@
-import { ApolloProvider } from '@apollo/client'
 import { config } from '@fortawesome/fontawesome-svg-core'
-import { useApollo } from '@gbl-uzh/platform/dist/lib/apollo'
 import { SessionProvider } from 'next-auth/react'
 import type { AppProps } from 'next/app'
 import { Toaster } from '../components/ui/toaster'
+import { TRPCProvider } from '../lib/trpc'
 // import { Toaster } from '@uzh-bf/design-system'
 
 import '@fortawesome/fontawesome-svg-core/styles.css'
@@ -16,16 +15,14 @@ export default function App({
   Component,
   pageProps: { session, ...pageProps },
 }: AppProps) {
-  const apolloClient = useApollo(pageProps.initialApolloState)
-
   return (
     <RootLayout>
       <SessionProvider session={session}>
-        <ApolloProvider client={apolloClient}>
+        <TRPCProvider>
           <Toaster />
 
           <Component {...pageProps} />
-        </ApolloProvider>
+        </TRPCProvider>
       </SessionProvider>
     </RootLayout>
   )

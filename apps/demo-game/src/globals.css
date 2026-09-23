@@ -47,6 +47,18 @@ html {
  * app regardless of design-system default drift.
  */
 :root {
+  /*
+   * The design system applies `font-family: var(--theme-font-primary),
+   * var(--source-sans-pro), ...` to `html, body, #__next`. next/font only
+   * defines the real `--source-sans-pro` on the RootLayout wrapper (deeper in
+   * the tree), so without a fallback here the undefined `var()` collapses the
+   * entire declaration to the serif initial value. Page content gets the real
+   * font from RootLayout's next/font `.className`; these keep the top-level
+   * chrome elements valid (and pinned to a Source Sans fallback).
+   */
+  --source-sans-pro: 'Source Sans 3', 'Source Sans Pro';
+  --theme-font-primary: var(--source-sans-pro);
+
   --theme-color-primary: #0028a5;
   --theme-color-primary-80: #3353b7;
   --theme-color-primary-60: #667ec9;

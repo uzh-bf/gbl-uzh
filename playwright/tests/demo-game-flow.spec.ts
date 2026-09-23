@@ -5,9 +5,8 @@ import {
   type BrowserContext,
   type Locator,
   type Page,
+  type Response,
 } from '@playwright/test'
-
-import { expectGameStatusEventually } from './support/waits'
 
 test.setTimeout(300_000)
 
@@ -149,7 +148,7 @@ async function joinPlayer(
   await page.waitForURL('**/play/welcome')
   await input(page, 'name').fill(plan.name)
   await Promise.all([
-    page.waitForURL('**/play/cockpit'),
+    page.waitForURL('**/play/cockpit', { waitUntil: 'domcontentloaded' }),
     page.getByRole('button', { name: 'Start Game' }).click(),
   ])
 
@@ -199,10 +198,47 @@ async function advanceGame(
     expectedStatus: string
   }
 ) {
+  const detail = page.getByTestId('game-detail')
   const button = page.getByRole('button', { name: action })
   await expect(button).toBeEnabled()
-  await button.click()
-  await expectGameStatusEventually(page, expectedStatus)
+  // A React re-render can replace the button between mousedown and mouseup,
+  // swallowing the click without an error. Retry only until the matching tRPC
+  // mutation is sent; after that, another click could advance the state
+  // machine twice while the invalidated game query is still refreshing.
+  let responsePromise: Promise<Response> | undefined
+  await expect(async () => {
+    const candidateResponse = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'POST' &&
+        /\/api\/trpc\/game\.activateNext(?:Period|Segment)$/.test(
+          new URL(response.url()).pathname
+        ),
+      { timeout: 30_000 }
+    )
+    const requestPromise = page
+      .waitForRequest(
+        (request) =>
+          request.method() === 'POST' &&
+          /\/api\/trpc\/game\.activateNext(?:Period|Segment)$/.test(
+            new URL(request.url()).pathname
+          ),
+        { timeout: 5_000 }
+      )
+      .catch(() => null)
+
+    await page.getByRole('button', { name: action }).click()
+    const request = await requestPromise
+    if (!request) {
+      void candidateResponse.catch(() => undefined)
+      throw new Error(`No tRPC game-transition request after clicking ${action}`)
+    }
+    responsePromise = candidateResponse
+  }).toPass({ timeout: 60_000, intervals: [500, 1_000, 2_000] })
+  if (!responsePromise) throw new Error(`No tRPC response wait for ${action}`)
+  expect((await responsePromise).ok()).toBe(true)
+  await expect(detail).toHaveAttribute('data-game-status', expectedStatus, {
+    timeout: 30_000,
+  })
 }
 
 async function assertPlayerDecisionForm(sessions: PlayerSession[]) {
@@ -285,10 +321,14 @@ async function assertDicePage(page: Page) {
     .locator('a[href*="/admin/dice/"]')
   await expect(diceLink).toBeVisible()
 
-  const [dicePage] = await Promise.all([
-    page.waitForEvent('popup'),
-    diceLink.click(),
-  ])
+  let dicePage!: Page
+  await expect(async () => {
+    const [popup] = await Promise.all([
+      page.waitForEvent('popup', { timeout: 5_000 }),
+      diceLink.click(),
+    ])
+    dicePage = popup
+  }).toPass({ timeout: 30_000, intervals: [500, 1_000] })
 
   try {
     await expect(dicePage.getByText('1. Month')).toBeVisible({ timeout: 30_000 })
@@ -301,10 +341,18 @@ async function assertDicePage(page: Page) {
 }
 
 async function assertFinalReport(page: Page, playerPlans: PlayerPlan[]) {
-  const [reportPage] = await Promise.all([
-    page.waitForEvent('popup'),
-    page.getByRole('button', { name: 'Report' }).click(),
-  ])
+  // The same mid-click re-render that advanceGame guards against can swallow
+  // the Report click (button inside a target=_blank Link), leaving no popup.
+  // Re-click until a popup actually appears; extra popups are harmless (same
+  // report URL) and the last one is asserted.
+  let reportPage!: Page
+  await expect(async () => {
+    const [popup] = await Promise.all([
+      page.waitForEvent('popup', { timeout: 5_000 }),
+      page.getByRole('button', { name: 'Report' }).click(),
+    ])
+    reportPage = popup
+  }).toPass({ timeout: 30_000, intervals: [500, 1_000] })
 
   try {
     await expect(reportPage.getByTestId('report-loaded')).toBeVisible({
@@ -363,10 +411,6 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
   await expect(page.getByRole('button', { name: 'Add period' })).toBeDisabled()
   await addSegment(page, { periodIndex: 1 })
   await expect(page.getByRole('button', { name: 'Add segment' })).toBeDisabled()
-  // TODO: remove sentinel when final-period consolidation no longer connects
-  // the next period.
-  await addPeriod(page, { segmentCount: '1', index: 2 })
-
   const playerSessions: PlayerSession[] = []
 
   try {
@@ -479,7 +523,7 @@ test('trading actions submit one validated modifier and reset after success', as
     }
   })
 
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
 
   const volume = page.getByRole('spinbutton', { name: 'Volume' })
   const buy = page.getByRole('button', { name: 'Buy' })

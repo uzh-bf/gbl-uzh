@@ -21,7 +21,7 @@ const eslintConfig = [
   },
   {
     // An object with only `ignores` sets global ignores. Mirrors the old
-    // `ignorePatterns` (build output + generated GraphQL); node_modules is
+    // `ignorePatterns` (build output + generated Prisma); node_modules is
     // ignored by flat config out of the box.
     ignores: [
       '.next/**',
@@ -29,7 +29,6 @@ const eslintConfig = [
       'build/**',
       'next-env.d.ts',
       'src/generated/prisma/**',
-      'src/graphql/generated/**',
     ],
   },
 ]

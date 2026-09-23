@@ -7,34 +7,20 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { MultiSelect } from '@gbl-uzh/ui'
+import { GameStatus } from 'src/generated/prisma/enums'
 import { Button, H3, H4, Modal } from '@uzh-bf/design-system'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useEffect, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { twMerge } from 'tailwind-merge'
 
-import { useMutation, useQuery } from '@apollo/client'
 import {
-  computePeriodStatus,
-  computeSegmentStatus,
   PlayerCompact,
   STATUS,
+  computePeriodStatus,
+  computeSegmentStatus,
 } from '@gbl-uzh/ui'
-import { useCallback, useEffect, useState } from 'react'
-import {
-  ActivateNextPeriodDocument,
-  ActivateNextSegmentDocument,
-  AddCountdownDocument,
-  AddGamePeriodDocument,
-  AddPeriodSegmentDocument,
-  Game,
-  GameDocument,
-  GameStatus,
-  LearningElementsDocument,
-  Player,
-  StoryElementsDocument,
-} from 'src/graphql/generated/ops'
-
 import {
   Card,
   CardContent,
@@ -49,17 +35,27 @@ import {
   ShadcnTableHeader as TableHeader,
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
+import { useToast } from '~/components/ui/use-toast'
+import { trpc } from '~/lib/trpc'
 
 import { AdminInputField } from '~/components/fields/AdminInputField'
-import { useToast } from '~/components/ui/use-toast'
 import {
   DEFAULT_SEED,
   GAP_BONDS,
   GAP_STOCKS,
   INTEREST_BANK,
+  type PeriodFacts,
+  type PeriodSegmentFacts,
   TREND_BONDS,
   TREND_STOCKS,
 } from '~/types/Period'
+
+function scrollToActivePeriod() {
+  const anchor = document.querySelector('#active-period')
+  if (anchor) {
+    anchor.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+}
 
 interface PeriodFormValues {
   segmentCount: number
@@ -73,9 +69,58 @@ interface PeriodFormValues {
 
 function ManageGame() {
   const router = useRouter()
+  const utils = trpc.useUtils()
 
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
+
+  const gameId = Number(router.query.id)
+  const hasGameId = Number.isFinite(gameId)
+
+  const {
+    data: game,
+    error: gameError,
+    isLoading: gameLoading,
+  } = trpc.game.byId.useQuery(
+    { id: hasGameId ? gameId : 0 },
+    {
+      enabled: hasGameId,
+      refetchInterval: hasGameId ? 15000 : false,
+    }
+  )
+
+  const {
+    data: learningElementsData = [],
+    error: learningElementsError,
+    isLoading: learningElementsLoading,
+  } = trpc.learning.list.useQuery(undefined, { enabled: hasGameId })
+
+  const {
+    data: storyElementsData = [],
+    error: storyElementsError,
+    isLoading: storyElementsLoading,
+  } = trpc.story.list.useQuery(undefined, { enabled: hasGameId })
+
+  const { toast } = useToast()
+
+  async function invalidateGameById() {
+    if (!hasGameId) return
+    await utils.game.byId.invalidate({ id: gameId })
+  }
+
+  const nextPeriod = trpc.game.activateNextPeriod.useMutation({
+    async onSuccess() {
+      scrollToActivePeriod()
+      await invalidateGameById()
+    },
+    onError: (err) => {
+      toast({
+        title: 'Could not advance the game',
+        description: err.message,
+        variant: 'destructive',
+      })
+    },
+  })
 
   const {
     control: segmentControl,
@@ -122,132 +167,112 @@ function ManageGame() {
     storyElements: string[]
     learningElements: string[]
   }) => {
-    await addPeriodSegment({
-      variables: {
-        gameId: Number(router.query.id),
-        periodIx: values.periodIx,
-        facts: {},
-        storyElements: values.storyElements,
-        learningElements: values.learningElements,
-      },
+    await addPeriodSegment.mutateAsync({
+      gameId,
+      periodIx: values.periodIx,
+      facts: {},
+      storyElements: values.storyElements,
+      learningElements: values.learningElements,
     })
     resetSegment()
   }
 
   const onPeriodSubmit = async (values: PeriodFormValues) => {
-    await addGamePeriod({
-      variables: {
-        gameId: Number(router.query.id),
-        facts: {
-          scenario: {
-            seed: Math.trunc(values.seed),
-            interestBank: values.interestBank,
-            trendBonds: values.trendBonds,
-            gapBonds: values.gapBonds,
-            trendStocks: values.trendStocks,
-            gapStocks: values.gapStocks,
-          },
+    await addGamePeriod.mutateAsync({
+      gameId,
+      facts: {
+        scenario: {
+          seed: Math.trunc(values.seed),
+          interestBank: values.interestBank,
+          trendBonds: values.trendBonds,
+          gapBonds: values.gapBonds,
+          trendStocks: values.trendStocks,
+          gapStocks: values.gapStocks,
         },
-        segmentCount: Math.trunc(values.segmentCount),
       },
+      segmentCount: Math.trunc(values.segmentCount),
     })
     resetPeriod()
   }
 
-  const onCountdownSubmit = (values: { countdownSeconds: number }) => {
-    addCountdown({
-      variables: {
-        gameId: Number(router.query.id),
-        seconds: Number(values.countdownSeconds),
-      },
+  const onCountdownSubmit = async (values: { countdownSeconds: number }) => {
+    await addCountdown.mutateAsync({
+      gameId,
+      seconds: Number(values.countdownSeconds),
     })
   }
 
-  const { data, error, loading } = useQuery(GameDocument, {
-    variables: { id: Number(router.query.id) },
-    pollInterval: 15000,
-    skip: !router.query.id,
+  const nextSegment = trpc.game.activateNextSegment.useMutation({
+    async onSuccess() {
+      scrollToActivePeriod()
+      await invalidateGameById()
+    },
+    onError: (err) => {
+      toast({
+        title: 'Could not advance the game',
+        description: err.message,
+        variant: 'destructive',
+      })
+    },
   })
 
-  const {
-    data: learningElementsData,
-    loading: learningElementsLoading,
-    error: learningElementsError,
-  } = useQuery(LearningElementsDocument)
+  const addGamePeriod = trpc.period.add.useMutation({
+    async onSuccess() {
+      // Close only after the create succeeds. On failure the modal stays open
+      // (via onError) so the admin can retry without losing their input.
+      setIsPeriodModalOpen(false)
+      await invalidateGameById()
+    },
+    onError: (err) => {
+      toast({
+        title: 'Could not add the period',
+        description: err.message,
+        variant: 'destructive',
+      })
+    },
+  })
 
-  const {
-    data: storyElementsData,
-    loading: storyElementsLoading,
-    error: storyElementsError,
-  } = useQuery(StoryElementsDocument)
+  const addPeriodSegment = trpc.segment.add.useMutation({
+    async onSuccess() {
+      setIsSegmentModalOpen(false)
+      await invalidateGameById()
+    },
+    onError: (err) => {
+      toast({
+        title: 'Could not add the segment',
+        description: err.message,
+        variant: 'destructive',
+      })
+    },
+  })
 
-  const [activateNextPeriod, { loading: nextPeriodLoading }] = useMutation(
-    ActivateNextPeriodDocument,
-    {
-      onCompleted() {
-        try {
-          const anchor = document.querySelector('#active-period')
-          if (anchor)
-            anchor.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        } catch (e) {}
-      },
-    }
-  )
-  const [activateNextSegment, { loading: nextSegmentLoading }] = useMutation(
-    ActivateNextSegmentDocument
-  )
-  const [addGamePeriod, { loading: addGamePeriodLoading }] = useMutation(
-    AddGamePeriodDocument,
-    {
-      refetchQueries: 'active',
-    }
-  )
-  const [addPeriodSegment, { loading: addPeriodSegmentLoading }] = useMutation(
-    AddPeriodSegmentDocument,
-    {
-      refetchQueries: 'active',
-    }
-  )
-
-  const [addCountdown] = useMutation(AddCountdownDocument, {
-    refetchQueries: [GameDocument],
-    onCompleted: () =>
+  const addCountdown = trpc.game.addCountdown.useMutation({
+    async onSuccess() {
+      await invalidateGameById()
       toast({
         title: 'Countdown added',
         description: 'Players were notified.',
-      }),
-    onError: (err) =>
+      })
+    },
+    onError: (err) => {
       toast({
         title: 'Countdown failed',
         description: err.message,
         variant: 'destructive',
-      }),
+      })
+    },
   })
 
-  const { toast } = useToast()
-
-  const nextPeriod = () =>
-    activateNextPeriod({
-      variables: {
-        gameId: Number(router.query.id),
-      },
-      refetchQueries: [GameDocument],
-    })
-
-  const nextSegment = () =>
-    activateNextSegment({
-      variables: {
-        gameId: Number(router.query.id),
-      },
-      refetchQueries: [GameDocument],
-    })
-
+  const wasAllReady = useRef(false)
   useEffect(() => {
-    const game = data?.game
-    if (game?.status !== GameStatus.Running) return
+    if (game?.status !== GameStatus.RUNNING) {
+      wasAllReady.current = false
+      return
+    }
 
     const allPlayersReady = game.players.every((player) => player.isReady)
-    if (allPlayersReady) {
+    if (allPlayersReady && !wasAllReady.current) {
+      wasAllReady.current = true
       toast({
         title: 'All players are ready!',
         description: 'All players are ready to continue.',
@@ -258,52 +283,70 @@ function ManageGame() {
         alert('Autoplay restrictions. Please enable autoplay in your browser.')
         console.error('Error playing notification sound:', err)
       })
+    } else if (!allPlayersReady) {
+      wasAllReady.current = false
     }
-  }, [data?.game])
+  }, [game?.players, game?.status, toast])
 
-  const getButton = useCallback(() => {
-    const game = data.game as Game
-    // const disabled = game.periods.length === 0
-    const activePeriod = game?.activePeriod
-    const segments = activePeriod?.segments
-    const activeSegmentIx = activePeriod?.activeSegmentIx
+  async function activateNextPeriod() {
+    if (!hasGameId) return
+    await nextPeriod.mutateAsync({ gameId })
+  }
+
+  async function activateNextSegment() {
+    if (!hasGameId) return
+    await nextSegment.mutateAsync({ gameId })
+  }
+
+  function renderActionButton() {
+    if (!game) return null
+    const activePeriod = game.activePeriod
+    const segments = activePeriod?.segments ?? []
+    const activeSegmentIx = activePeriod?.activeSegmentIx ?? -1
 
     switch (game.status) {
-      case GameStatus.Preparation: {
+      case GameStatus.PREPARATION: {
         const atLastSegment = activeSegmentIx >= segments.length - 1
         if (!atLastSegment) {
           return (
-            <Button disabled={nextSegmentLoading} onClick={nextSegment}>
+            <Button
+              disabled={nextSegment.isPending}
+              onClick={activateNextSegment}
+            >
               Next Segment
             </Button>
           )
         }
-        const disabled =
-          game.periods.length === 0 || activePeriod.segments.length === 0
+        const disabled = game.periods.length === 0 || segments.length === 0
         return (
-          <Button disabled={disabled} onClick={nextPeriod}>
+          <Button disabled={disabled} onClick={activateNextPeriod}>
             Start Period
           </Button>
         )
       }
-      case GameStatus.Scheduled:
+      case GameStatus.SCHEDULED:
         if (!activePeriod) {
           const disabled =
             game.periods.length === 0 || game.periods[0].segments.length === 0
           return (
-            <Button disabled={disabled} onClick={nextPeriod}>
+            <Button disabled={disabled} onClick={activateNextPeriod}>
               Start Period
             </Button>
           )
         }
-        return <Button onClick={nextPeriod}>Start Segment</Button>
-      case GameStatus.Running: {
+        return <Button onClick={activateNextPeriod}>Start Segment</Button>
+      case GameStatus.RUNNING: {
+        if (!activePeriod) return null
+
         const atLastSegment =
           activeSegmentIx >= segments.length - 1 &&
           activePeriod.segmentCount === segments.length
         if (atLastSegment) {
           return (
-            <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+            <Button
+              disabled={nextPeriod.isPending}
+              onClick={activateNextPeriod}
+            >
               Consolidate
             </Button>
           )
@@ -313,19 +356,19 @@ function ManageGame() {
         const disabled = activePeriod.activeSegmentIx === segments.length - 1
         return (
           <Button
-            disabled={nextSegmentLoading || disabled}
-            onClick={nextSegment}
+            disabled={nextSegment.isPending || disabled}
+            onClick={activateNextSegment}
           >
             Segment Results
           </Button>
         )
       }
-      case GameStatus.Paused: {
+      case GameStatus.PAUSED: {
         const atLastSegment = activeSegmentIx >= segments.length - 1
         return (
           <Button
-            disabled={nextSegmentLoading || atLastSegment}
-            onClick={nextSegment}
+            disabled={nextSegment.isPending || atLastSegment}
+            onClick={activateNextSegment}
           >
             Next Segment
           </Button>
@@ -337,65 +380,65 @@ function ManageGame() {
       // - const periods = game?.periods
       //   const activePeriodIx = game?.activePeriodIx
       //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
-      case GameStatus.Consolidation:
+      case GameStatus.CONSOLIDATION:
         return (
-          <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+          <Button disabled={nextPeriod.isPending} onClick={activateNextPeriod}>
             Period Results
           </Button>
         )
-      case GameStatus.Results: {
+      case GameStatus.RESULTS: {
         const anotherPeriod = game.activePeriodIx > game.periods.length - 1
         return (
-          <Button disabled={anotherPeriod} onClick={nextPeriod}>
+          <Button disabled={anotherPeriod} onClick={activateNextPeriod}>
             Next Period
           </Button>
         )
       }
 
-      case GameStatus.Completed:
+      case GameStatus.COMPLETED:
         return (
           <Button disabled onClick={() => null}>
             Completed
           </Button>
         )
+      default:
+        return null
     }
-  }, [data?.game])
+  }
 
-  if (loading || !data?.game) {
+  if (gameError) {
+    return <div>{gameError.message}</div>
+  }
+
+  if (gameLoading || !game) {
     return <div>loading...</div>
   }
 
-  if (error) {
-    return <div>{error.message}</div>
-  }
-
-  const game = data.game
-
-  const learningElementsAll = (
-    learningElementsData?.learningElements || []
-  ).map((e) => ({
+  const learningElementsAll = learningElementsData.map((e) => ({
     label: e.id,
     value: e.id,
   }))
 
-  const storyElementsAll = (storyElementsData?.storyElements || []).map(
-    (e) => ({
-      label: e.id,
-      value: e.id,
-    })
-  )
+  const storyElementsAll = storyElementsData.map((e) => ({
+    label: e.id,
+    value: e.id,
+  }))
+  const countdownExpiresAt =
+    game.activePeriod?.activeSegment?.countdownExpiresAt
 
   return (
     <div className="p-4" data-cy="game-detail" data-game-status={game.status}>
       <div>
         <div className="mb-4 flex flex-col gap-2 overflow-x-auto md:flex-row">
           {game.periods.map((period, ix) => {
-            const periodStatus = computePeriodStatus(game, ix)
+            const periodStatus = computePeriodStatus(game as any, ix)
 
+            const periodFacts = period.facts as PeriodFacts
+            const scenario = periodFacts.scenario ?? {}
             const labels = [
-              period.facts.spotTradingEnabled && 'S',
-              period.facts.futuresTradingEnabled && 'F',
-              period.facts.optionsTradingEnabled && 'O',
+              periodFacts.spotTradingEnabled && 'S',
+              periodFacts.futuresTradingEnabled && 'F',
+              periodFacts.optionsTradingEnabled && 'O',
             ].filter(Boolean)
 
             const isPeriodPlanned = periodStatus === STATUS.SCHEDULED
@@ -405,13 +448,12 @@ function ManageGame() {
               periodStatus === STATUS.COMPLETED ||
               periodStatus === STATUS.RESULTS
 
-            const scenario = period.facts.scenario
-            const trendBonds = scenario.trendBonds
-            const gapBonds = scenario.gapBonds
-            const trendStocks = scenario.trendStocks
-            const gapStocks = scenario.gapStocks
-            const savingsInterest = scenario.interestBank
-            const seed = scenario.seed
+            const trendBonds = scenario.trendBonds ?? 0
+            const gapBonds = scenario.gapBonds ?? 0
+            const trendStocks = scenario.trendStocks ?? 0
+            const gapStocks = scenario.gapStocks ?? 0
+            const savingsInterest = scenario.interestBank ?? 0
+            const seed = scenario.seed ?? 0
 
             return (
               <div
@@ -490,114 +532,113 @@ function ManageGame() {
                     </div>
                   </div>
                   <div className="mt-1 flex flex-row gap-1">
-                    {Array.apply(null, Array(period.segmentCount)).map(
-                      (_, ix) => {
-                        const segment = period.segments[ix]
-                        const segmentStatus = computeSegmentStatus(
-                          game,
-                          period,
-                          ix
-                        )
+                    {Array.from({ length: period.segmentCount }, (_, ix) => {
+                      const segment = period.segments[ix]
+                      const segmentStatus = computeSegmentStatus(
+                        game as any,
+                        period as any,
+                        ix
+                      )
 
-                        const isSegmentActive =
-                          periodStatus === STATUS.ACTIVE &&
-                          segmentStatus === STATUS.ACTIVE
-                        const isSegmentCompleted =
-                          periodStatus === STATUS.COMPLETED ||
-                          segmentStatus === STATUS.COMPLETED
+                      const isSegmentActive =
+                        periodStatus === STATUS.ACTIVE &&
+                        segmentStatus === STATUS.ACTIVE
+                      const isSegmentCompleted =
+                        periodStatus === STATUS.COMPLETED ||
+                        segmentStatus === STATUS.COMPLETED
 
-                        const diceBonds = segment?.facts.diceRolls.map(
-                          (dice) => dice.bonds
-                        )
-                        const diceStocks = segment?.facts.diceRolls.map(
-                          (dice) => dice.stocks
-                        )
-                        const diceShared = segment?.facts.diceRolls.map(
-                          (dice) => dice.shared
-                        )
+                      const segmentFacts = segment?.facts as
+                        | PeriodSegmentFacts
+                        | undefined
+                      const diceBonds = segmentFacts?.diceRolls?.map(
+                        (dice) => dice.bonds
+                      )
+                      const diceStocks = segmentFacts?.diceRolls?.map(
+                        (dice) => dice.stocks
+                      )
+                      const diceShared = segmentFacts?.diceRolls?.map(
+                        (dice) => dice.shared
+                      )
 
-                        const dataToEncode = {
-                          diceBonds,
-                          diceShared,
-                          diceStocks,
-                          trendBonds,
-                          gapBonds,
-                          trendStocks,
-                          gapStocks,
-                        }
-                        const encoded = btoa(JSON.stringify(dataToEncode))
-
-                        return (
-                          <div
-                            className={twMerge(
-                              'flex-initial rounded border p-2 text-center',
-                              (!segment || isSegmentCompleted) &&
-                                'bg-gray-100 text-gray-400',
-                              isSegmentActive && 'border-green-600 bg-green-100'
-                            )}
-                            key={ix}
-                            data-cy={`period-${period.index}-segment-${ix}`}
-                          >
-                            <div className="flex flex-row items-center gap-2">
-                              <div>
-                                {!isSegmentActive && !isSegmentCompleted && (
-                                  <FontAwesomeIcon icon={faCalendar} />
-                                )}
-                                {isSegmentActive && (
-                                  <FontAwesomeIcon icon={faSync} />
-                                )}
-                                {isSegmentCompleted && (
-                                  <FontAwesomeIcon icon={faCheck} />
-                                )}
-                              </div>
-                              {
-                                <div>
-                                  Segment{' '}
-                                  {segment?.index !== undefined
-                                    ? segment.index + 1
-                                    : ''}
-                                </div>
-                              }
-                            </div>
-                            <div className="my-2">
-                              <div className="flex flex-row gap-2">
-                                <div className="text-sm">
-                                  Story: {segment?.storyElements.length ?? 0}
-                                </div>
-                                <div className="text-sm">
-                                  Learn: {segment?.learningElements.length ?? 0}
-                                </div>
-                              </div>
-                            </div>
-
-                            {segment && (
-                              <Link
-                                href={`/admin/dice/${segment.id}/${encoded}`}
-                                target="_blank"
-                                className="flex flex-col rounded border border-gray-300 p-2"
-                              >
-                                <div className="flex justify-between text-nowrap">
-                                  Dice Bonds:
-                                  <div className="flex flex-row gap-2">
-                                    {diceBonds?.map((dice, ix) => (
-                                      <div key={ix}>{dice}</div>
-                                    ))}
-                                  </div>
-                                </div>
-                                <div className="flex justify-between gap-2 text-nowrap">
-                                  Dice Stocks:
-                                  <div className="flex flex-row gap-2">
-                                    {diceStocks?.map((dice, ix) => (
-                                      <div key={ix}>{dice}</div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </Link>
-                            )}
-                          </div>
-                        )
+                      const dataToEncode = {
+                        diceBonds,
+                        diceShared,
+                        diceStocks,
+                        trendBonds,
+                        gapBonds,
+                        trendStocks,
+                        gapStocks,
                       }
-                    )}
+                      const encoded = btoa(JSON.stringify(dataToEncode))
+
+                      return (
+                        <div
+                          className={twMerge(
+                            'flex-initial rounded border p-2 text-center',
+                            (!segment || isSegmentCompleted) &&
+                              'bg-gray-100 text-gray-400',
+                            isSegmentActive && 'border-green-600 bg-green-100'
+                          )}
+                          key={ix}
+                          data-cy={`period-${period.index}-segment-${ix}`}
+                        >
+                          <div className="flex flex-row items-center gap-2">
+                            <div>
+                              {!isSegmentActive && !isSegmentCompleted && (
+                                <FontAwesomeIcon icon={faCalendar} />
+                              )}
+                              {isSegmentActive && (
+                                <FontAwesomeIcon icon={faSync} />
+                              )}
+                              {isSegmentCompleted && (
+                                <FontAwesomeIcon icon={faCheck} />
+                              )}
+                            </div>
+                            <div>
+                              Segment{' '}
+                              {segment?.index !== undefined
+                                ? segment.index + 1
+                                : ''}
+                            </div>
+                          </div>
+                          <div className="my-2">
+                            <div className="flex flex-row gap-2">
+                              <div className="text-sm">
+                                Story: {segment?.storyElements?.length ?? 0}
+                              </div>
+                              <div className="text-sm">
+                                Learn: {segment?.learningElements?.length ?? 0}
+                              </div>
+                            </div>
+                          </div>
+
+                          {segment && (
+                            <Link
+                              href={`/admin/dice/${segment.id}/${encoded}`}
+                              target="_blank"
+                              className="flex flex-col rounded border border-gray-300 p-2"
+                            >
+                              <div className="flex justify-between text-nowrap">
+                                Dice Bonds:
+                                <div className="flex flex-row gap-2">
+                                  {diceBonds?.map((dice, ix) => (
+                                    <div key={ix}>{dice}</div>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="flex justify-between gap-2 text-nowrap">
+                                Dice Stocks:
+                                <div className="flex flex-row gap-2">
+                                  {diceStocks?.map((dice, ix) => (
+                                    <div key={ix}>{dice}</div>
+                                  ))}
+                                </div>
+                              </div>
+                            </Link>
+                          )}
+                        </div>
+                      )
+                    })}
                     {!isPeriodCompleted && game.periods.length - 1 === ix && (
                       <>
                         {storyElementsLoading || learningElementsLoading ? (
@@ -635,8 +676,9 @@ function ManageGame() {
                             secondaryLabel="Discard"
                             onPrimaryAction={() => {
                               setSegmentValue('periodIx', period.index)
+                              // Modal is closed by the mutation's onSuccess so
+                              // a failed submit keeps it open and recoverable.
                               handleSegmentSubmit(onSegmentSubmit)()
-                              setIsSegmentModalOpen(false)
                             }}
                             primaryLabel="Submit"
                           >
@@ -723,8 +765,9 @@ function ManageGame() {
                 }}
                 secondaryLabel="Discard"
                 onPrimaryAction={() => {
+                  // Modal is closed by the mutation's onSuccess so a failed
+                  // submit keeps it open and recoverable.
                   handlePeriodSubmit(onPeriodSubmit)()
-                  setIsPeriodModalOpen(false)
                 }}
                 primaryLabel="Submit"
               >
@@ -826,7 +869,7 @@ function ManageGame() {
         </div>
       </div>
       <div className="mt-2 flex flex-row gap-2">
-        {getButton()}
+        {renderActionButton()}
         <Link target="_blank" href={`/admin/reports/${game?.id}`}>
           <Button>Report</Button>
         </Link>
@@ -838,7 +881,7 @@ function ManageGame() {
           <div className="mt-2 flex flex-col gap-4">
             {game.players.map((player, ix) => (
               <div key={player.id} data-cy={`player-${ix}`}>
-                <PlayerCompact player={player as Player} />
+                <PlayerCompact player={player} />
               </div>
             ))}
           </div>
@@ -863,10 +906,7 @@ function ManageGame() {
                   required
                 />
               </div>
-              {/* TODO(JJ): @RS Do we want to show the following? If no we
-                we can remove the refetchQueries.
-              */}
-              {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
+              {countdownExpiresAt?.toLocaleString()}
             </CardContent>
             <CardFooter>
               <Button type="submit">Set Countdown</Button>
