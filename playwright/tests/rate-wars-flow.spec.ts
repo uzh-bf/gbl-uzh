@@ -160,7 +160,7 @@ async function joinPlayer(
   await page.waitForURL('**/play/welcome')
   await input(page, 'name').fill(plan.name)
   await Promise.all([
-    page.waitForURL('**/play/cockpit'),
+    page.waitForURL('**/play/cockpit', { waitUntil: 'domcontentloaded' }),
     page.getByRole('button', { name: 'Start Game' }).click(),
   ])
 
@@ -213,17 +213,30 @@ async function advanceGame(
 ) {
   const button = page.getByRole('button', { name: action })
   await expect(button).toBeEnabled()
-  await button.click()
+  // The status poll reloads the page. Wait for the tRPC mutation response
+  // first so that reload cannot abort a just-dispatched client request.
+  const procedure =
+    action === 'Next Segment'
+      ? 'game.activateNextSegment'
+      : 'game.activateNextPeriod'
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (candidate) =>
+        candidate.request().method() === 'POST' &&
+        candidate.url().includes(`/api/trpc/${procedure}`)
+    ),
+    button.click(),
+  ])
+  expect(response.ok()).toBe(true)
   await expectGameStatusEventually(page, expectedStatus)
 }
 
 async function assertRateForm(sessions: PlayerSession[]) {
-  await Promise.all(sessions.map(({ page }) => page.reload()))
   await Promise.all(
     sessions.map(({ page }) =>
       expect(
         page.getByRole('button', { name: 'Submit rates' })
-      ).toBeVisible()
+      ).toBeVisible({ timeout: 30_000 })
     )
   )
 }
@@ -238,7 +251,7 @@ async function assertLeaderboard(
   await expect
     .poll(
       async () => {
-        await page.reload()
+        await page.reload({ waitUntil: 'domcontentloaded' })
         return page
           .getByText(`Leaderboard — Year ${year}`)
           .waitFor({ state: 'visible', timeout: 10_000 })
@@ -263,22 +276,9 @@ async function setCountdown(page: Page, seconds: string) {
 }
 
 async function assertCountdownVisible(page: Page) {
-  await expect
-    .poll(
-      async () => {
-        await page.reload()
-        return page
-          .getByTestId('countdown')
-          .waitFor({ state: 'visible', timeout: 10_000 })
-          .then(() => true)
-          .catch(() => false)
-      },
-      {
-        intervals: [500, 1_000],
-        timeout: 60_000,
-      }
-    )
-    .toBe(true)
+  // Do not reload: this assertion proves that the already-connected player
+  // receives the SSE event and invalidates play.result after the admin update.
+  await expect(page.getByTestId('countdown')).toBeVisible({ timeout: 60_000 })
 }
 
 async function runYear(
@@ -300,7 +300,7 @@ async function runYear(
     expectedStatus: 'CONSOLIDATION',
   })
 
-  await sessions[0].page.reload()
+  await sessions[0].page.reload({ waitUntil: 'domcontentloaded' })
   await expect(sessions[0].page.getByText('Rates locked')).toBeVisible()
 
   await advanceGame(adminPage, {
@@ -329,10 +329,16 @@ async function assertUniqueJoinUrls(
 }
 
 async function assertAdminReport(page: Page, playerPlans: PlayerPlan[]) {
-  const [reportPage] = await Promise.all([
-    page.waitForEvent('popup'),
-    page.getByRole('button', { name: 'Report' }).click(),
-  ])
+  // Admin-page refreshes can replace the button inside the target=_blank link
+  // during the click. Retry until the browser actually creates the report page.
+  let reportPage!: Page
+  await expect(async () => {
+    const [popup] = await Promise.all([
+      page.waitForEvent('popup', { timeout: 5_000 }),
+      page.getByRole('button', { name: 'Report' }).click(),
+    ])
+    reportPage = popup
+  }).toPass({ timeout: 30_000, intervals: [500, 1_000] })
 
   try {
     await expect(reportPage.getByText('Standings')).toBeVisible({

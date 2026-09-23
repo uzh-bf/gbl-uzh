@@ -1,21 +1,26 @@
-import {
+import type {
   OutputFacts,
   PayloadPeriodResult,
   PayloadPeriodResultEnd,
 } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
-import { PlayerResult } from 'src/graphql/generated/ops'
 import { clearMarket, rankByEquity } from '../lib/model'
-import { PlayerRole } from '../settings/Constants'
-import { GameFacts } from '../types/Game'
-import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
-import {
+import type { PlayerRole } from '../settings/Constants'
+import type { GameFacts } from '../types/Game'
+import type { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
+import type {
   MarketEntry,
   OutputResultFacts,
   ResultFacts,
   ResultFactsInit,
 } from '../types/facts'
+
+type SegmentEndResultRow = {
+  playerId: string
+  periodIx: number
+  facts?: Partial<ResultFacts>
+}
 
 export const INITIAL_EQUITY = 500
 export const DEFAULT_DECISIONS = { depositRate: 1, loanRate: 4 }
@@ -72,7 +77,7 @@ export function start(
 export function end(
   facts: ResultFacts,
   payload: PayloadPeriodResultEnd<
-    PlayerResult[],
+    SegmentEndResultRow[],
     GameFacts,
     PeriodFacts,
     PeriodSegmentFacts,
@@ -90,10 +95,8 @@ export function end(
 
     // segmentEndResults / otherPlayersSegmentEndResults contain rows from ALL
     // periods (ordered by period asc) — restrict to the period being closed.
-    const own = (payload.segmentEndResults as any[]).filter(
-      (r) => r.periodIx === periodIx
-    )
-    const others = (payload.otherPlayersSegmentEndResults as any[]).filter(
+    const own = payload.segmentEndResults.filter((r) => r.periodIx === periodIx)
+    const others = payload.otherPlayersSegmentEndResults.filter(
       (r) => r.periodIx === periodIx
     )
     const ownPlayerId = own[own.length - 1]?.playerId
@@ -101,7 +104,7 @@ export function end(
     const ownBank =
       own.length > 0
         ? {
-            playerId: own[own.length - 1].playerId as string,
+            playerId: own[own.length - 1].playerId,
             decisions: facts.decisions ?? { ...DEFAULT_DECISIONS },
             equity: facts.equity ?? INITIAL_EQUITY,
           }
@@ -110,7 +113,7 @@ export function end(
     const otherBanks = [
       ...new Map(others.map((r) => [r.playerId, r])).values(),
     ].map((r) => ({
-      playerId: r.playerId as string,
+      playerId: r.playerId,
       decisions: r.facts?.decisions ?? { ...DEFAULT_DECISIONS },
       equity: r.facts?.equity ?? INITIAL_EQUITY,
     }))

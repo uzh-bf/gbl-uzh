@@ -1,9 +1,9 @@
-import { Action } from '@gbl-uzh/platform'
+import type { Action } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
-import { PrismaClient } from 'src/generated/prisma/client'
-import { RateDecision } from '../types/facts'
-import { GameFacts, PeriodFacts, PeriodSegmentFacts } from '../types/index'
+import type { PrismaClient } from 'src/generated/prisma/client'
+import type { RateDecision } from '../types/facts'
+import type { GameFacts, PeriodFacts, PeriodSegmentFacts } from '../types/index'
 
 export const MIN_DEPOSIT_RATE = 0
 export const MAX_DEPOSIT_RATE = 8

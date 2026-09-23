@@ -1,9 +1,12 @@
-# GAME
+# Rate Wars
 
 > [!NOTE]
-> Parts of this README are outdated (the reducer terminology below predates the current `Services` contract). The maintained documentation for building games on the platform is the wiki at [`docs/`](../../docs/index.md); local dev setup is covered by the devcontainer configs (see below). New to all of this? Start at [`docs/getting-started.md`](../../docs/getting-started.md).
+> The detailed service terminology below is historical. The maintained game-building documentation is the [platform wiki](../../docs/index.md), and the current API pattern is [tRPC v11 on the Pages Router](../../docs/api-layer.md).
 
-This is a step by step explanation on how to implement a game using the uzh-gbl-platform packag along with the demo-game as a starer template.
+Rate Wars is an example game built on `@gbl-uzh/platform`. It uses the same
+typed tRPC router, NextAuth context, SuperJSON transport, and Server-Sent Events
+pattern as `apps/demo-game` while supplying its own facts and service
+computations.
 
 ## Getting started
 
@@ -52,7 +55,10 @@ The frontend is generated using React and Next.js. The frontend is located in th
 
 ### Schema
 
-The database schema is defined in `src/graphql/types`. The most important file is `src/graphql/types/Period.ts`, here all we define PeriodFactsInput, PeriodSegmentFactsScema, PeriodSegmentFacts and PeriodSegmentFactsInput.
+The shared database schema comes from the platform and is copied by
+`prisma/copy.ts`. Game-specific facts and Yup schemas live in `src/types/`.
+`src/server/trpc/router.ts` supplies those schemas and the service modules to
+`createPlatformRouter`; no GraphQL schema or client code generation is used.
 
 ### Reducers
 

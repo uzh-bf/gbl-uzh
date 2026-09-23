@@ -1,10 +1,14 @@
-import { OutputFacts, PayloadSegmentResult } from '@gbl-uzh/platform'
+import type { OutputFacts, PayloadSegmentResult } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
-import { PlayerRole } from '../settings/Constants'
-import { GameFacts } from '../types/Game'
+import type { PlayerRole } from '../settings/Constants'
+import type { GameFacts } from '../types/Game'
 import type { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
-import { OutputResultFacts, ResultFacts, ResultFactsInit } from '../types/facts'
+import type {
+  OutputResultFacts,
+  ResultFacts,
+  ResultFactsInit,
+} from '../types/facts'
 
 // In Rate Wars the market clears at the PERIOD boundary (cross-player data is
 // only available in PeriodResult.end), so segment results are thin: carry the
