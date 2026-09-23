@@ -82,7 +82,7 @@ importers:
         version: link:../../packages/ui
       '@next-auth/prisma-adapter':
         specifier: 1.0.7
-        version: 1.0.7(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.2))(typescript@6.0.2))(next-auth@4.24.14(next@16.2.9(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
+        version: 1.0.7(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.2))(typescript@6.0.2))(next-auth@4.24.14(next@16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
       '@prisma/adapter-pg':
         specifier: 7.9.1
         version: 7.9.1
@@ -110,6 +110,9 @@ importers:
       '@trpc/client':
         specifier: 11.18.0
         version: 11.18.0(@trpc/server@11.18.0(typescript@6.0.2))(typescript@6.0.2)
+      '@trpc/next':
+        specifier: 11.18.0
+        version: 11.18.0(@tanstack/react-query@5.101.4(react@19.2.7))(@trpc/client@11.18.0(@trpc/server@11.18.0(typescript@6.0.2))(typescript@6.0.2))(@trpc/react-query@11.18.0(@tanstack/react-query@5.101.4(react@19.2.7))(@trpc/client@11.18.0(@trpc/server@11.18.0(typescript@6.0.2))(typescript@6.0.2))(@trpc/server@11.18.0(typescript@6.0.2))(react@19.2.7)(typescript@6.0.2))(@trpc/server@11.18.0(typescript@6.0.2))(next@16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.2)
       '@trpc/react-query':
         specifier: 11.18.0
         version: 11.18.0(@tanstack/react-query@5.101.4(react@19.2.7))(@trpc/client@11.18.0(@trpc/server@11.18.0(typescript@6.0.2))(typescript@6.0.2))(@trpc/server@11.18.0(typescript@6.0.2))(react@19.2.7)(typescript@6.0.2)
@@ -151,7 +154,7 @@ importers:
         version: 16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0)
       next-auth:
         specifier: 4.24.14
-        version: 4.24.14(next@16.2.9(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 4.24.14(next@16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       nookies:
         specifier: 2.5.2
         version: 2.5.2
@@ -278,7 +281,7 @@ importers:
         version: 1.8.1
       connect-session-sequelize:
         specifier: ^7.1.3
-        version: 7.1.7(sequelize@6.37.8(pg@8.22.0)(supports-color@8.1.1))(supports-color@8.1.1)
+        version: 7.1.7(sequelize@6.37.8(pg@8.22.0))
       cookie-parser:
         specifier: ^1.4.6
         version: 1.4.7
@@ -296,7 +299,7 @@ importers:
         version: 3.1.10
       eslint:
         specifier: ^8.14.0
-        version: 8.57.1(supports-color@8.1.1)
+        version: 8.57.1
       express:
         specifier: ^4.17.3
         version: 4.22.2
@@ -347,7 +350,7 @@ importers:
         version: 1.101.0
       sequelize:
         specifier: ^6.19.0
-        version: 6.37.8(pg@8.22.0)(supports-color@8.1.1)
+        version: 6.37.8(pg@8.22.0)
       sequelize-cli:
         specifier: ^6.4.1
         version: 6.6.5
@@ -356,16 +359,16 @@ importers:
         version: 4.5.0
       supertest:
         specifier: ^4.0.2
-        version: 4.0.2(supports-color@8.1.1)
+        version: 4.0.2
       supertest-session:
         specifier: ^4.0.0
-        version: 4.1.0(supertest@4.0.2(supports-color@8.1.1))
+        version: 4.1.0(supertest@4.0.2)
       uuid-token-generator:
         specifier: ^1.0.0
         version: 1.0.0
       zombie:
         specifier: ^6.1.4
-        version: 6.1.4(supports-color@8.1.1)
+        version: 6.1.4
     devDependencies:
       jest:
         specifier: ^28.0.3
@@ -381,7 +384,7 @@ importers:
         version: 1.7.4
       '@myriaddreamin/rehype-typst':
         specifier: ^0.5.0-rc9
-        version: 0.5.4(supports-color@8.1.1)
+        version: 0.5.4
       '@napi-rs/simple-git':
         specifier: 0.1.19
         version: 0.1.19
@@ -480,7 +483,7 @@ importers:
         version: 7.0.1
       rehype-mathjax:
         specifier: ^6.0.0
-        version: 6.0.0(supports-color@8.1.1)
+        version: 6.0.0
       rehype-pretty-code:
         specifier: ^0.14.0
         version: 0.14.5(shiki@1.29.2)
@@ -746,7 +749,7 @@ importers:
         version: link:../../packages/ui
       '@next-auth/prisma-adapter':
         specifier: 1.0.7
-        version: 1.0.7(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.2))(typescript@6.0.2))(next-auth@4.24.14(next@16.2.9(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
+        version: 1.0.7(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.2))(typescript@6.0.2))(next-auth@4.24.14(next@16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
       '@prisma/adapter-pg':
         specifier: 7.9.1
         version: 7.9.1
@@ -815,7 +818,7 @@ importers:
         version: 16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0)
       next-auth:
         specifier: 4.24.14
-        version: 4.24.14(next@16.2.9(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 4.24.14(next@16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       nexus:
         specifier: 1.3.0
         version: 1.3.0(graphql@16.9.0)
@@ -963,7 +966,7 @@ importers:
         version: link:../../packages/ui
       '@next-auth/prisma-adapter':
         specifier: 1.0.7
-        version: 1.0.7(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.2))(typescript@6.0.2))(next-auth@4.24.14(next@16.2.9(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
+        version: 1.0.7(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.2))(typescript@6.0.2))(next-auth@4.24.14(next@16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
       '@prisma/adapter-pg':
         specifier: 7.9.1
         version: 7.9.1
@@ -1032,7 +1035,7 @@ importers:
         version: 16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0)
       next-auth:
         specifier: 4.24.14
-        version: 4.24.14(next@16.2.9(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 4.24.14(next@16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       nexus:
         specifier: 1.3.0
         version: 1.3.0(graphql@16.9.0)
@@ -1241,7 +1244,7 @@ importers:
         version: 16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0)
       next-auth:
         specifier: 4.24.14
-        version: 4.24.14(next@16.2.9(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 4.24.14(next@16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       nexus:
         specifier: 1.3.0
         version: 1.3.0(graphql@16.9.0)
@@ -5213,6 +5216,24 @@ packages:
     peerDependencies:
       '@trpc/server': 11.18.0
       typescript: '>=5.7.2'
+
+  '@trpc/next@11.18.0':
+    resolution: {integrity: sha512-ocwbruAWMGX9hY3HFg86X4jAcoF2v+xx+A2jDn72SbttRRG2hXR+XKPjrLc1dDJC0oi+/2DJEbL14+k1pyY5og==}
+    hasBin: true
+    peerDependencies:
+      '@tanstack/react-query': ^5.59.15
+      '@trpc/client': 11.18.0
+      '@trpc/react-query': 11.18.0
+      '@trpc/server': 11.18.0
+      next: '*'
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+      typescript: '>=5.7.2'
+    peerDependenciesMeta:
+      '@tanstack/react-query':
+        optional: true
+      '@trpc/react-query':
+        optional: true
 
   '@trpc/react-query@11.18.0':
     resolution: {integrity: sha512-C1+Wwm2pCeUJucI+bnFpxGYjNuvV+ko1BC1T9tUxBVdrhHRCdn9ubxdevdLSAa49XRJRJiZnSuzl3Ys/yvs1vg==}
@@ -14145,11 +14166,6 @@ snapshots:
   '@esbuild/win32-x64@0.25.12':
     optional: true
 
-  '@eslint-community/eslint-utils@4.9.1(eslint@8.57.1(supports-color@8.1.1))':
-    dependencies:
-      eslint: 8.57.1(supports-color@8.1.1)
-      eslint-visitor-keys: 3.4.3
-
   '@eslint-community/eslint-utils@4.9.1(eslint@8.57.1)':
     dependencies:
       eslint: 8.57.1
@@ -14183,7 +14199,7 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
 
-  '@eslint/eslintrc@2.1.4(supports-color@8.1.1)':
+  '@eslint/eslintrc@2.1.4':
     dependencies:
       ajv: 6.15.0
       debug: 4.4.3(supports-color@8.1.1)
@@ -14730,8 +14746,8 @@ snapshots:
       dotenv: 16.6.1
       graphql: 16.9.0
       graphql-request: 6.1.0(graphql@16.9.0)
-      http-proxy-agent: 7.0.2(supports-color@8.1.1)
-      https-proxy-agent: 7.0.6(supports-color@8.1.1)
+      http-proxy-agent: 7.0.2
+      https-proxy-agent: 7.0.6
       jose: 5.10.0
       js-yaml: 4.1.1
       lodash: 4.17.21
@@ -14851,7 +14867,7 @@ snapshots:
 
   '@humanfs/types@0.15.0': {}
 
-  '@humanwhocodes/config-array@0.13.0(supports-color@8.1.1)':
+  '@humanwhocodes/config-array@0.13.0':
     dependencies:
       '@humanwhocodes/object-schema': 2.0.3
       debug: 4.4.3(supports-color@8.1.1)
@@ -15500,14 +15516,14 @@ snapshots:
 
   '@microsoft/tsdoc@0.16.0': {}
 
-  '@myriaddreamin/rehype-typst@0.5.4(supports-color@8.1.1)':
+  '@myriaddreamin/rehype-typst@0.5.4':
     dependencies:
       '@myriaddreamin/typst-ts-node-compiler': 0.5.4
       '@types/hast': 3.0.4
       '@types/katex': 0.16.8
       hast-util-from-html-isomorphic: 2.0.0
       hast-util-to-text: 4.0.2
-      https-proxy-agent: 7.0.6(supports-color@8.1.1)
+      https-proxy-agent: 7.0.6
       unist-util-visit-parents: 6.0.2
       vfile: 6.0.3
     transitivePeerDependencies:
@@ -15626,10 +15642,10 @@ snapshots:
       '@tybys/wasm-util': 0.10.1
     optional: true
 
-  '@next-auth/prisma-adapter@1.0.7(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.2))(typescript@6.0.2))(next-auth@4.24.14(next@16.2.9(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))':
+  '@next-auth/prisma-adapter@1.0.7(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.2))(typescript@6.0.2))(next-auth@4.24.14(next@16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))':
     dependencies:
       '@prisma/client': 7.9.1(prisma@7.9.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.2))(typescript@6.0.2)
-      next-auth: 4.24.14(next@16.2.9(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      next-auth: 4.24.14(next@16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
 
   '@next/env@16.2.12': {}
 
@@ -18212,6 +18228,18 @@ snapshots:
       '@trpc/server': 11.18.0(typescript@6.0.2)
       typescript: 6.0.2
 
+  '@trpc/next@11.18.0(@tanstack/react-query@5.101.4(react@19.2.7))(@trpc/client@11.18.0(@trpc/server@11.18.0(typescript@6.0.2))(typescript@6.0.2))(@trpc/react-query@11.18.0(@tanstack/react-query@5.101.4(react@19.2.7))(@trpc/client@11.18.0(@trpc/server@11.18.0(typescript@6.0.2))(typescript@6.0.2))(@trpc/server@11.18.0(typescript@6.0.2))(react@19.2.7)(typescript@6.0.2))(@trpc/server@11.18.0(typescript@6.0.2))(next@16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.2)':
+    dependencies:
+      '@trpc/client': 11.18.0(@trpc/server@11.18.0(typescript@6.0.2))(typescript@6.0.2)
+      '@trpc/server': 11.18.0(typescript@6.0.2)
+      next: 16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0)
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+      typescript: 6.0.2
+    optionalDependencies:
+      '@tanstack/react-query': 5.101.4(react@19.2.7)
+      '@trpc/react-query': 11.18.0(@tanstack/react-query@5.101.4(react@19.2.7))(@trpc/client@11.18.0(@trpc/server@11.18.0(typescript@6.0.2))(typescript@6.0.2))(@trpc/server@11.18.0(typescript@6.0.2))(react@19.2.7)(typescript@6.0.2)
+
   '@trpc/react-query@11.18.0(@tanstack/react-query@5.101.4(react@19.2.7))(@trpc/client@11.18.0(@trpc/server@11.18.0(typescript@6.0.2))(typescript@6.0.2))(@trpc/server@11.18.0(typescript@6.0.2))(react@19.2.7)(typescript@6.0.2)':
     dependencies:
       '@tanstack/react-query': 5.101.4(react@19.2.7)
@@ -20189,10 +20217,10 @@ snapshots:
 
   connect-flash@0.1.1: {}
 
-  connect-session-sequelize@7.1.7(sequelize@6.37.8(pg@8.22.0)(supports-color@8.1.1))(supports-color@8.1.1):
+  connect-session-sequelize@7.1.7(sequelize@6.37.8(pg@8.22.0)):
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
-      sequelize: 6.37.8(pg@8.22.0)(supports-color@8.1.1)
+      sequelize: 6.37.8(pg@8.22.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -21640,52 +21668,9 @@ snapshots:
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@8.57.1)
       '@eslint-community/regexpp': 4.12.2
-      '@eslint/eslintrc': 2.1.4(supports-color@8.1.1)
+      '@eslint/eslintrc': 2.1.4
       '@eslint/js': 8.57.1
-      '@humanwhocodes/config-array': 0.13.0(supports-color@8.1.1)
-      '@humanwhocodes/module-importer': 1.0.1
-      '@nodelib/fs.walk': 1.2.8
-      '@ungap/structured-clone': 1.3.0
-      ajv: 6.15.0
-      chalk: 4.1.2
-      cross-spawn: 7.0.6
-      debug: 4.4.3(supports-color@8.1.1)
-      doctrine: 3.0.0
-      escape-string-regexp: 4.0.0
-      eslint-scope: 7.2.2
-      eslint-visitor-keys: 3.4.3
-      espree: 9.6.1
-      esquery: 1.6.0
-      esutils: 2.0.3
-      fast-deep-equal: 3.1.3
-      file-entry-cache: 6.0.1
-      find-up: 5.0.0
-      glob-parent: 6.0.2
-      globals: 13.24.0
-      graphemer: 1.4.0
-      ignore: 5.3.2
-      imurmurhash: 0.1.4
-      is-glob: 4.0.3
-      is-path-inside: 3.0.3
-      js-yaml: 4.1.1
-      json-stable-stringify-without-jsonify: 1.0.1
-      levn: 0.4.1
-      lodash.merge: 4.6.2
-      minimatch: 3.1.5
-      natural-compare: 1.4.0
-      optionator: 0.9.4
-      strip-ansi: 6.0.1
-      text-table: 0.2.0
-    transitivePeerDependencies:
-      - supports-color
-
-  eslint@8.57.1(supports-color@8.1.1):
-    dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@8.57.1(supports-color@8.1.1))
-      '@eslint-community/regexpp': 4.12.2
-      '@eslint/eslintrc': 2.1.4(supports-color@8.1.1)
-      '@eslint/js': 8.57.1
-      '@humanwhocodes/config-array': 0.13.0(supports-color@8.1.1)
+      '@humanwhocodes/config-array': 0.13.0
       '@humanwhocodes/module-importer': 1.0.1
       '@nodelib/fs.walk': 1.2.8
       '@ungap/structured-clone': 1.3.0
@@ -22818,7 +22803,7 @@ snapshots:
       statuses: 2.0.2
       toidentifier: 1.0.1
 
-  http-proxy-agent@7.0.2(supports-color@8.1.1):
+  http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.4
       debug: 4.4.3(supports-color@8.1.1)
@@ -22837,7 +22822,7 @@ snapshots:
       jsprim: 2.0.2
       sshpk: 1.18.0
 
-  https-proxy-agent@7.0.6(supports-color@8.1.1):
+  https-proxy-agent@7.0.6:
     dependencies:
       agent-base: 7.1.4
       debug: 4.4.3(supports-color@8.1.1)
@@ -23975,7 +23960,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  jsdom@23.2.0(supports-color@8.1.1):
+  jsdom@23.2.0:
     dependencies:
       '@asamuzakjp/dom-selector': 2.0.2
       cssstyle: 4.6.0
@@ -23983,8 +23968,8 @@ snapshots:
       decimal.js: 10.6.0
       form-data: 4.0.6
       html-encoding-sniffer: 4.0.0
-      http-proxy-agent: 7.0.2(supports-color@8.1.1)
-      https-proxy-agent: 7.0.6(supports-color@8.1.1)
+      http-proxy-agent: 7.0.2
+      https-proxy-agent: 7.0.6
       is-potential-custom-element-name: 1.0.1
       parse5: 7.3.0
       rrweb-cssom: 0.6.0
@@ -25317,7 +25302,7 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  next-auth@4.24.14(next@16.2.9(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
+  next-auth@4.24.14(next@16.2.9(@babel/core@7.28.5)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.101.0))(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
     dependencies:
       '@babel/runtime': 7.28.4
       '@panva/hkdf': 1.2.1
@@ -26676,13 +26661,13 @@ snapshots:
       unist-util-visit-parents: 6.0.2
       vfile: 6.0.3
 
-  rehype-mathjax@6.0.0(supports-color@8.1.1):
+  rehype-mathjax@6.0.0:
     dependencies:
       '@types/hast': 3.0.4
       '@types/mathjax': 0.0.40
       hast-util-from-dom: 5.0.1
       hast-util-to-text: 4.0.2
-      jsdom: 23.2.0(supports-color@8.1.1)
+      jsdom: 23.2.0
       mathjax-full: 3.2.2
       unified: 11.0.5
       unist-util-visit-parents: 6.0.2
@@ -27255,7 +27240,7 @@ snapshots:
 
   sequelize-pool@7.1.0: {}
 
-  sequelize@6.37.8(pg@8.22.0)(supports-color@8.1.1):
+  sequelize@6.37.8(pg@8.22.0):
     dependencies:
       '@types/debug': 4.1.12
       '@types/validator': 13.15.10
@@ -27807,7 +27792,7 @@ snapshots:
 
   stylis@4.4.0: {}
 
-  superagent@3.8.3(supports-color@8.1.1):
+  superagent@3.8.3:
     dependencies:
       component-emitter: 1.3.1
       cookiejar: 2.1.4
@@ -27826,17 +27811,17 @@ snapshots:
     dependencies:
       copy-anything: 4.0.5
 
-  supertest-session@4.1.0(supertest@4.0.2(supports-color@8.1.1)):
+  supertest-session@4.1.0(supertest@4.0.2):
     dependencies:
       cookiejar: 2.1.4
       methods: 1.1.2
       object-assign: 4.1.1
-      supertest: 4.0.2(supports-color@8.1.1)
+      supertest: 4.0.2
 
-  supertest@4.0.2(supports-color@8.1.1):
+  supertest@4.0.2:
     dependencies:
       methods: 1.1.2
-      superagent: 3.8.3(supports-color@8.1.1)
+      superagent: 3.8.3
     transitivePeerDependencies:
       - supports-color
 
@@ -28950,7 +28935,7 @@ snapshots:
 
   zod@3.25.72: {}
 
-  zombie@6.1.4(supports-color@8.1.1):
+  zombie@6.1.4:
     dependencies:
       babel-runtime: 6.26.0
       bluebird: 3.7.2

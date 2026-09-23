@@ -2,7 +2,7 @@ import { config } from '@fortawesome/fontawesome-svg-core'
 import { SessionProvider } from 'next-auth/react'
 import type { AppProps } from 'next/app'
 import { Toaster } from '../components/ui/toaster'
-import { TRPCProvider } from '../lib/trpc'
+import { trpc } from '../lib/trpc'
 // import { Toaster } from '@uzh-bf/design-system'
 
 import '@fortawesome/fontawesome-svg-core/styles.css'
@@ -11,19 +11,16 @@ import '../globals.css'
 
 config.autoAddCss = false
 
-export default function App({
-  Component,
-  pageProps: { session, ...pageProps },
-}: AppProps) {
+function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
     <RootLayout>
       <SessionProvider session={session}>
-        <TRPCProvider>
-          <Toaster />
+        <Toaster />
 
-          <Component {...pageProps} />
-        </TRPCProvider>
+        <Component {...pageProps} />
       </SessionProvider>
     </RootLayout>
   )
 }
+
+export default trpc.withTRPC(App)

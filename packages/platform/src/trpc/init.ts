@@ -6,6 +6,15 @@ import { throwAsTRPCError } from './errors.js'
 
 const t = initTRPC.context<PlatformContext>().create({
   transformer: superjson,
+  sse: {
+    ping: {
+      enabled: true,
+      intervalMs: 15_000,
+    },
+    client: {
+      reconnectAfterInactivityMs: 30_000,
+    },
+  },
   // Never leak raw internal error messages (Prisma/service internals) to
   // clients. Mapped errors (UNAUTHORIZED/FORBIDDEN/BAD_REQUEST) keep their
   // message; anything that fell through to INTERNAL_SERVER_ERROR is genericized.

@@ -1,14 +1,8 @@
-import { QueryClientProvider } from '@tanstack/react-query'
 import { httpBatchLink, httpSubscriptionLink, splitLink } from '@trpc/client'
-import { createTRPCReact } from '@trpc/react-query'
-import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { createTRPCNext } from '@trpc/next'
 import superjson from 'superjson'
 
 import type { AppRouter } from '../server/trpc/router'
-import { getQueryClient } from './queryClient'
-
-export const trpc = createTRPCReact<AppRouter>()
 
 function getUrl() {
   if (typeof window !== 'undefined') {
@@ -27,15 +21,10 @@ function getUrl() {
   return 'http://localhost:3000/api/trpc'
 }
 
-export function TRPCProvider({
-  children,
-}: Readonly<{
-  children: ReactNode
-}>) {
-  const queryClient = getQueryClient()
-
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
+export const trpc = createTRPCNext<AppRouter>({
+  transformer: superjson,
+  config() {
+    return {
       links: [
         splitLink({
           condition(op) {
@@ -44,30 +33,16 @@ export function TRPCProvider({
           true: httpSubscriptionLink({
             url: getUrl(),
             transformer: superjson,
-            eventSourceOptions() {
-              return {
-                withCredentials: true,
-              }
-            },
           }),
           false: httpBatchLink({
             url: getUrl(),
             transformer: superjson,
-            fetch(url, options) {
-              return fetch(url, {
-                ...options,
-                credentials: 'include',
-              })
-            },
+            maxItems: 10,
+            maxURLLength: 2083,
           }),
         }),
       ],
-    })
-  )
-
-  return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </trpc.Provider>
-  )
-}
+    }
+  },
+  ssr: false,
+})

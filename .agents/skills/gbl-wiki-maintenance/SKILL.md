@@ -12,7 +12,10 @@ The wiki in `docs/` is the ground truth AI agents use to build games on this pla
 - `packages/platform` changes: state machine, `Services` contract/payloads, schema.prisma, auth, realtime, achievement engine → [game-lifecycle](../../../docs/game-lifecycle.md), [game-model](../../../docs/game-model.md), [developing-a-game](../../../docs/developing-a-game.md), [api-layer](../../../docs/api-layer.md)
 - `packages/ui` or design-system upgrades → [ui-components](../../../docs/ui-components.md)
 - `apps/demo-game` structural changes (routes, services layout, seed, auth flow) → [developing-a-game](../../../docs/developing-a-game.md), skills referencing demo-game paths
-- **tRPC migration merges to `dev`** (standing item): rewrite [api-layer](../../../docs/api-layer.md) — GraphQL section deleted, tRPC becomes current; also update `gbl-new-game-app` + `gbl-frontend-game-ui` skills and the `generateBaseMutations` reference in [developing-a-game](../../../docs/developing-a-game.md)
+- **Game API or transport changes**: keep [api-layer](../../../docs/api-layer.md),
+  [developing-a-game](../../../docs/developing-a-game.md), deployment guidance,
+  and the new-game/frontend/backend/Playwright skills aligned with the current
+  tRPC pattern.
 - **Deployment setup changes**: Vercel/Neon env vars or `deploy/` k8s path changes, Prisma `binaryTargets`, auth-provider wiring (`authOptions.ts`), or the `prisma/copy.ts` build-order → [deploying-a-game](../../../docs/deploying-a-game.md); if the easy staging path or the production path moves, update the corresponding section and the `gbl-deploy-staging` skill
 - Wiki also has documented caveats that expire: `COMPLETED` unreachable, `GameFacts.update` unwired, UI first-publish bootstrap pending, and demo game as primary reference. If a change invalidates one, remove it everywhere (grep the claim).
 
