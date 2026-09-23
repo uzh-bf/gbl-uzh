@@ -31,11 +31,11 @@ There are two local stacks. Use the one that matches how the app is running. **T
 The getting-started / building-with-an-agent path: the app is published on `http://localhost:3000`, there is no devrouter, DevPod, or `<game>.localhost`. Run Playwright **inside the container**, prefixing every command with the exec container:
 
 ```bash
-# Install browsers once per app container (reinstall after a container rebuild)
-docker compose -f .devcontainer/starter/docker-compose.yml -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && pnpm --filter @gbl-uzh/playwright exec playwright install --with-deps chromium'
+# Install browsers once per container (the binary persists in the container volume)
+docker compose -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && pnpm --filter @gbl-uzh/playwright exec playwright install --with-deps chromium'
 
 # Run the suite
-docker compose -f .devcontainer/starter/docker-compose.yml -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium'
+docker compose -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium'
 ```
 
 Point tests at `http://localhost:3000` - set `PLAYWRIGHT_BASE_URL=http://localhost:3000` if the config defaults elsewhere. Everything below is the devrouter/DevPod maintainer stack only.
@@ -47,7 +47,7 @@ Run from repo root:
 ```bash
 dev up
 dev tls install
-devpod up . --ide none
+devrouter ensure .
 for a in app oidc db; do dev app run "$a" --yes; done
 ```
 
@@ -56,10 +56,6 @@ Expected routes:
 - app: `https://demo-game.localhost`
 - OIDC mock: `https://oidc.demo-game.localhost/default`
 - Postgres SNI route: `db.demo-game.localhost:5432`
-
-The Playwright config maps the routed app and OIDC hostnames to
-`devrouter-traefik` when Chromium runs inside the app container. Keep that
-resolver rule scoped to HTTPS `*.localhost` URLs so staging URLs use normal DNS.
 
 Probe before blaming tests:
 
@@ -110,25 +106,26 @@ claim prettier verification unless the binary exists.
 Keep `.github/workflows/playwright-testing.yml` close to the Klicker pattern, but
 adapt it to GBL's smaller stack:
 
-- Use Node `24` and pnpm `11.6.0`, matching the root package manager metadata.
+- Use the Playwright Docker image matching `playwright/package.json`
+  (`mcr.microsoft.com/playwright:v1.62.0-noble` for Playwright `1.62.0`).
+- Use Node `24` and pnpm `11.18.0`, matching the root package manager metadata.
 - Pin third-party GitHub Actions to a full commit SHA. SonarCloud flags
   floating third-party action tags such as `pnpm/action-setup@v4`.
-- Run Postgres and `mock-oauth2-server` as job services; the job container reaches the issuer through the `oidc` service alias.
+- Run Postgres and `ghcr.io/navikt/mock-oauth2-server:2.1.11` as job services.
 - In CI, do not use devrouter/TLS. Use:
-  - `PLAYWRIGHT_BASE_URL=http://localhost:3000`
-  - `NEXTAUTH_URL=http://localhost:3000`
-  - `GBL_AUTH_MODE=mock`
-  - `GBL_MOCK_OIDC_ISSUER=http://oidc:8090/default`
-- Build `@gbl-uzh/platform` and `@gbl-uzh/ui` before starting the selected game.
+  - `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000`
+  - `NEXTAUTH_URL=http://127.0.0.1:3000`
+  - `AUTH0_ISSUER=http://oidc:8090/default`
+- Build `@gbl-uzh/platform` and `@gbl-uzh/ui` before starting `demo-game`.
 - Prepare Prisma with `prisma:copy`, `prisma:generate`, `prisma:push`, and
   `prisma:seed`.
-- Start the selected game in the background, wait for OIDC discovery and
-  `/admin/login`, then run its matching flow spec.
-- Use a game matrix with `fail-fast: false`, upload one blob report per game,
+- Start `pnpm --filter @gbl-uzh/demo-game dev` in the background, wait for both
+  OIDC discovery and `/admin/login`, then run the shard.
+- Use matrix shards with `fail-fast: false`, upload one blob report per shard,
   and merge them in a separate job.
-- A missing game spec must fail the unsharded matrix job. Reserve
-  `--pass-with-no-tests` for genuine Playwright sharding where empty shards are
-  expected.
+- Current suite has one real spec file, so two shards means one shard can be
+  empty. Use `--pass-with-no-tests` only for sharded CI; split future breadth
+  coverage into separate spec files before increasing shard count.
 
 ## Auth And Data Rules
 
@@ -152,7 +149,6 @@ adapt it to GBL's smaller stack:
 
 > [!TIP]
 > **After clicking submit, assert `toBeEnabled()`, not `toBeDisabled()`.** GraphQL mutations resolve fast; by the time Playwright checks, the button has already re-enabled. Asserting `toBeDisabled()` flakes. The stable idiom is: click submit, then `await expect(submitButton).toBeEnabled()` to confirm the mutation finished processing, then assert the next durable UI state (e.g. the "Set Ready" button appears).
-
 ## GBL Game Flow Rules
 
 Current stable broad flow (demo game):

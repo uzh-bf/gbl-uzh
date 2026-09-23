@@ -7,13 +7,10 @@ Playwright E2E tests for `apps/demo-game`.
 Run the devcontainer/devrouter stack from the repository root:
 
 ```bash
-dev up
-dev tls install
-devpod up . --ide none
-for a in app oidc db; do dev app run "$a" --yes; done
+devrouter ensure .
 ```
 
-Requires devrouter `>=0.0.23`.
+Requires devrouter `>=0.0.35`.
 
 The default Playwright base URL is `https://demo-game.localhost`.
 
