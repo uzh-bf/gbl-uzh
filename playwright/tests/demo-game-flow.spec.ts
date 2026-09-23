@@ -1,4 +1,3 @@
-import { FIRST_GAME_YEAR } from '../../apps/demo-game/src/lib/constants'
 import {
   expect,
   test,
@@ -7,6 +6,7 @@ import {
   type Locator,
   type Page,
 } from '@playwright/test'
+import { FIRST_GAME_YEAR } from '../../apps/demo-game/src/lib/constants'
 import {
   capturePlayerScreenshot,
   createGame,
@@ -249,7 +249,7 @@ async function assertAllocationControls(page: Page, admin: Page) {
   await savings.fill('33.33')
   await expect(savings).toHaveAttribute('aria-invalid', 'true')
   await savings.fill('33.3')
-  await page.getByRole('link', { name: 'Market outlook' }).click()
+  await page.getByRole('link', { name: 'Market', exact: true }).click()
   await expect(page).toHaveURL(/tab=market/)
   await expect(page.getByTestId('market-panel')).toBeVisible()
   await expect(submit).toBeHidden()
@@ -280,7 +280,7 @@ async function assertAllocationControls(page: Page, admin: Page) {
     .getByRole('button', { name: 'Close', exact: true })
     .first()
     .click()
-  await page.getByRole('link', { name: 'Cockpit', exact: true }).click()
+  await page.getByRole('link', { name: 'Decisions', exact: true }).click()
   await expect(savings).toHaveValue('33.3')
   await setCountdown(admin, '300')
   await assertCountdownVisible(page)
@@ -421,6 +421,11 @@ async function assertSubmittedStates(page: Page, admin: Page) {
     exact: true,
   })
   const change = page.getByRole('button', { name: 'Change allocation' })
+  const forecast = page.getByRole('region', {
+    name: 'Market outlook',
+    exact: true,
+  })
+  await expect(forecast).toBeVisible()
   await expect(ready).toBeDisabled()
   const editingSizes = new Map<
     number,
@@ -449,6 +454,7 @@ async function assertSubmittedStates(page: Page, admin: Page) {
     page.getByText('Allocation submitted', { exact: true })
   ).toBeVisible()
   for (const state of ['submitted', 'ready']) {
+    await expect(forecast).toHaveCount(0)
     if (state === 'ready') {
       const rejectReady = async (route: import('@playwright/test').Route) => {
         if (route.request().postData()?.includes('UpdateReadyState')) {
@@ -484,7 +490,7 @@ async function assertSubmittedStates(page: Page, admin: Page) {
       await page.getByRole('link', { name: tab, exact: true }).click()
       await expect(page.getByTestId(`${tab.toLowerCase()}-panel`)).toBeVisible()
     }
-    await page.getByRole('link', { name: 'Cockpit', exact: true }).click()
+    await page.getByRole('link', { name: 'Decisions', exact: true }).click()
     for (const { name, width, height } of cockpitViewports) {
       await page.setViewportSize({ width, height })
       await expect
@@ -499,6 +505,7 @@ async function assertSubmittedStates(page: Page, admin: Page) {
   await ready.click()
   await expect(change).toBeEnabled()
   await change.click()
+  await expect(forecast).toBeVisible()
   await expect(ready).toBeDisabled()
   await expect(
     page.getByRole('spinbutton', { name: 'Savings', exact: true })
@@ -511,7 +518,7 @@ async function assertSubmittedStates(page: Page, admin: Page) {
   await change.click()
   await page.getByRole('link', { name: 'Market', exact: true }).click()
   await setCountdown(admin, '300')
-  await page.getByRole('link', { name: 'Cockpit', exact: true }).click()
+  await page.getByRole('link', { name: 'Decisions', exact: true }).click()
   await expect(submit).toBeVisible()
   await expect(ready).toBeDisabled()
   for (const [name, values] of [
@@ -1232,7 +1239,7 @@ test('Market shows fixed admin reveals to two players during allocation', async 
       }
     }
     await checkRoll(0)
-    await player.getByRole('link', { name: 'Cockpit', exact: true }).click()
+    await player.getByRole('link', { name: 'Decisions', exact: true }).click()
     await expect(
       player.getByRole('spinbutton', { name: 'Savings', exact: true })
     ).toHaveValue('50')
@@ -1408,9 +1415,12 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     )
     await expect(panel.getByTestId('history-value')).toHaveText("10'000.00")
     await expect(
-      panel.getByRole('button', { name: `${FIRST_GAME_YEAR + 1}`, exact: true })
+      panel.getByRole('button', {
+        name: `${FIRST_GAME_YEAR + 1}`,
+        exact: true,
+      })
     ).toHaveCount(0)
-    await player.getByRole('link', { name: 'Cockpit', exact: true }).click()
+    await player.getByRole('link', { name: 'Decisions', exact: true }).click()
     await expect(
       player.getByRole('spinbutton', { name: 'Savings', exact: true })
     ).toHaveValue('50')
@@ -1470,14 +1480,20 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     })
     await expect(quarters).toHaveCount(2)
     await expect(
-      panel.getByRole('button', { name: `${FIRST_GAME_YEAR + 1}`, exact: true })
+      panel.getByRole('button', {
+        name: `${FIRST_GAME_YEAR + 1}`,
+        exact: true,
+      })
     ).toHaveCount(0)
     await advanceGame(page, {
       action: 'Next Period',
       expectedStatus: 'PREPARATION',
     })
     await expect(
-      panel.getByRole('button', { name: `${FIRST_GAME_YEAR + 1}`, exact: true })
+      panel.getByRole('button', {
+        name: `${FIRST_GAME_YEAR + 1}`,
+        exact: true,
+      })
     ).toBeVisible()
     // Selection survives refetches and tabs, while a fresh page defaults to the latest started year.
     await expect(
@@ -1485,7 +1501,10 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     ).toHaveAttribute('aria-pressed', 'true')
     await player.reload()
     await expect(
-      panel.getByRole('button', { name: `${FIRST_GAME_YEAR + 1}`, exact: true })
+      panel.getByRole('button', {
+        name: `${FIRST_GAME_YEAR + 1}`,
+        exact: true,
+      })
     ).toHaveAttribute('aria-pressed', 'true')
     await expect(panel).toContainText(
       `No completed quarters in ${FIRST_GAME_YEAR + 1} yet.`
@@ -1512,7 +1531,7 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     await expect(quarters.last()).toContainText(`${FIRST_GAME_YEAR + 1} · Q1`)
     await expect(panel.getByTestId('history-value')).toHaveText(value)
     const header = player.locator('header')
-    for (const tab of ['Cockpit', 'Market', 'Team', 'History']) {
+    for (const tab of ['Decisions', 'Market', 'Team', 'History']) {
       await player.getByRole('link', { name: tab, exact: true }).click()
       await expect(header.getByRole('heading', { level: 1 })).toHaveText(
         players[0].name
@@ -1739,7 +1758,7 @@ test('Team stories and learning sheets preserve progress, drafts and released co
     await expect(story()).toBeHidden()
     await expect(bondStory).toContainText('Read')
     await player
-      .getByRole('link', { name: 'Cockpit', exact: true })
+      .getByRole('link', { name: 'Decisions', exact: true })
       .press('Enter')
     const savings = player.getByRole('spinbutton', {
       name: 'Savings',
@@ -1801,7 +1820,7 @@ test('Team stories and learning sheets preserve progress, drafts and released co
       '20'
     )
     await player
-      .getByRole('link', { name: 'Cockpit', exact: true })
+      .getByRole('link', { name: 'Decisions', exact: true })
       .press('Enter')
     await expect(savings).toHaveValue('42.1')
     await teamTab()
@@ -2064,6 +2083,9 @@ test('cockpit result designs follow settled quarters, consolidation and complete
   player.on('pageerror', (error) => errors.push(error.message))
   const ready = player.getByRole('switch', { name: 'Ready', exact: true })
   const progress = player.getByRole('region', { name: 'Game progress' })
+  const waiting = player.getByText('Waiting for the instructor to continue.', {
+    exact: true,
+  })
   const capture = async (state: string) => {
     for (const { name, width, height } of [
       { name: 'reference', width: 784, height: 1694 },
@@ -2075,7 +2097,8 @@ test('cockpit result designs follow settled quarters, consolidation and complete
       await player.locator('main').evaluate((element) => {
         element.scrollTop = 0
       })
-      await expect(ready).toBeInViewport()
+      await expect(ready).toHaveCount(0)
+      await expect(waiting).toBeInViewport()
       await player.screenshot({
         path: testInfo.outputPath(`${state}-${name}.png`),
         animations: 'disabled',
@@ -2092,14 +2115,10 @@ test('cockpit result designs follow settled quarters, consolidation and complete
     }
     await player.setViewportSize({ width: 784, height: 1694 })
   }
-  const checkReady = async (status: string) => {
-    await expect(ready).not.toBeChecked()
-    await ready.click()
-    await expect(ready).toBeChecked()
-    // All teams are ready, but only the instructor can advance.
+  const checkReview = async (status: string) => {
     await expect(progress).toHaveAttribute('data-game-status', status)
-    await ready.click()
-    await expect(ready).not.toBeChecked()
+    await expect(ready).toHaveCount(0)
+    await expect(waiting).toBeVisible()
   }
   try {
     for (let periodIndex = 0; periodIndex < 2; periodIndex++) {
@@ -2107,6 +2126,9 @@ test('cockpit result designs follow settled quarters, consolidation and complete
         action: periodIndex === 0 ? 'Start Period' : 'Next Period',
         expectedStatus: 'PREPARATION',
       })
+      await expect(progress).toHaveAttribute('data-game-status', 'PREPARATION')
+      await expect(ready).toHaveCount(0)
+      await expect(waiting).toHaveCount(0)
       for (let quarter = 1; quarter <= 4; quarter++) {
         await advanceGame(page, {
           action: 'Next Segment',
@@ -2118,6 +2140,8 @@ test('cockpit result designs follow settled quarters, consolidation and complete
             exact: true,
           })
         ).toBeVisible()
+        await expect(ready).toBeDisabled()
+        await expect(ready).not.toBeChecked()
         await submitDecision(player, {
           savings: '55',
           bonds: '35',
@@ -2133,6 +2157,7 @@ test('cockpit result designs follow settled quarters, consolidation and complete
             finalQuarter ? 'consolidation-results' : 'quarter-results'
           )
         ).toBeVisible()
+        await checkReview(finalQuarter ? 'CONSOLIDATION' : 'PAUSED')
         await expect(player.getByTestId('result-total')).toContainText('CHF')
         await expect(player.getByTestId('result-total')).not.toContainText('—')
         await expect(player.getByLabel('No countdown')).toHaveCount(0)
@@ -2140,31 +2165,23 @@ test('cockpit result designs follow settled quarters, consolidation and complete
           await expect(progress).toContainText(
             `${FIRST_GAME_YEAR + periodIndex} · Quarter ${quarter} closed`
           )
-          await expect(
-            player.getByText(
-              `Quarter ${quarter + 1} opens when everyone is ready`
-            )
-          ).toBeVisible()
         } else {
           await expect(progress).toContainText('Consolidation · held')
           await expect(player.getByTestId('result-total')).toContainText('0.00')
         }
         if (periodIndex === 1 && quarter === 3) {
-          await checkReady('PAUSED')
           await capture('segment-end')
           await player
             .getByRole('link', { name: 'History', exact: true })
             .click()
           await expect(player.getByTestId('history-panel')).toBeVisible()
           await player
-            .getByRole('link', { name: 'Cockpit', exact: true })
+            .getByRole('link', { name: 'Decisions', exact: true })
             .click()
           await expect(player.getByTestId('quarter-results')).toBeVisible()
+          await checkReview('PAUSED')
         }
-        if (periodIndex === 1 && finalQuarter) {
-          await checkReady('CONSOLIDATION')
-          await capture('consolidation')
-        }
+        if (periodIndex === 1 && finalQuarter) await capture('consolidation')
       }
       await advanceGame(page, {
         action: 'Period Results',
@@ -2175,15 +2192,10 @@ test('cockpit result designs follow settled quarters, consolidation and complete
         `${FIRST_GAME_YEAR + periodIndex} closed`
       )
       await expect(progress).toContainText('All quarters closed')
-      await expect(
-        player.getByText(
-          `${FIRST_GAME_YEAR + 1 + periodIndex} opens when everyone is ready`
-        )
-      ).toBeVisible()
       await expect(player.getByTestId('result-yearly-assets')).toContainText(
         String(FIRST_GAME_YEAR + periodIndex)
       )
-      await checkReady('RESULTS')
+      await checkReview('RESULTS')
       if (periodIndex === 1) {
         // There is no upcoming authored period: the active pointer disconnects.
         await player.reload({ waitUntil: 'domcontentloaded' })
@@ -2192,6 +2204,7 @@ test('cockpit result designs follow settled quarters, consolidation and complete
         await expect(player.getByTestId('result-yearly-assets')).toContainText(
           `${FIRST_GAME_YEAR}`
         )
+        await checkReview('RESULTS')
         await capture('period-end')
       }
     }
@@ -2237,7 +2250,7 @@ test('countdown notifications match player notices across tabs and viewport size
     let seconds = 600
     for (const width of [320, 390, 784]) {
       await player.setViewportSize({ width, height: 1000 })
-      await player.getByRole('link', { name: 'Cockpit', exact: true }).click()
+      await player.getByRole('link', { name: 'Decisions', exact: true }).click()
       const allocation = player
         .getByRole('status')
         .filter({ hasText: 'Allocation submitted' })
@@ -2249,7 +2262,7 @@ test('countdown notifications match player notices across tabs and viewport size
           borderRadius: style.borderRadius,
         }
       })
-      for (const tab of ['Cockpit', 'Market', 'History', 'Team']) {
+      for (const tab of ['Decisions', 'Market', 'History', 'Team']) {
         await player.getByRole('link', { name: tab, exact: true }).click()
         await setCountdown(admin, String(seconds++))
         const notification = player
@@ -2309,6 +2322,224 @@ test('countdown notifications match player notices across tabs and viewport size
     expect(JSON.stringify((await response.json()).errors)).toContain(
       'rollsPerSegment'
     )
+  } finally {
+    await session.context.close()
+  }
+})
+
+test('Decisions forecast matches Market and handles unavailable scenarios', async ({
+  page: admin,
+  browser,
+  baseURL,
+}, testInfo) => {
+  const appBaseURL = requireBaseURL(baseURL)
+  await createGame(admin, {
+    name: `Decisions forecast ${Date.now()}`,
+    playerCount: 1,
+  })
+  await addPeriod(admin, {
+    segmentCount: '1',
+    index: 0,
+    scenario: {
+      trendBonds: '-0.01',
+      gapBonds: '0.001',
+      trendStocks: '0.02',
+      gapStocks: '0.01',
+    },
+  })
+  await addSegment(admin, { periodIndex: 0 })
+  const session = await joinPlayer(
+    browser,
+    appBaseURL,
+    await playerJoinUrl(admin, appBaseURL, 0),
+    players[0]
+  )
+  const player = session.page
+  try {
+    await expect(player.getByTestId('ready-switch')).toHaveCount(0)
+    await advanceGame(admin, {
+      action: 'Start Period',
+      expectedStatus: 'PREPARATION',
+    })
+    await advanceGame(admin, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    await player.goto(`${appBaseURL}/play/cockpit?tab=cockpit`)
+    await expect(
+      player.getByRole('link', { name: 'Decisions', exact: true })
+    ).toHaveAttribute('aria-current', 'page')
+    const forecast = player.getByRole('region', {
+      name: 'Market outlook',
+      exact: true,
+    })
+    await expect(forecast.getByRole('link')).toHaveCount(0)
+    const fixtures = [
+      { asset: 'Bonds', values: ['-1.00%', '0.10%', '0.48%'] },
+      { asset: 'Stocks', values: ['+2.00%', '1.00%', '4.83%'] },
+    ]
+    for (const { asset, values } of fixtures)
+      await expect(
+        forecast
+          .getByRole('region', { name: `${asset} forecast` })
+          .locator('dd')
+      ).toHaveText(values)
+    for (const width of [784, 390, 320]) {
+      await player.setViewportSize({ width, height: 1024 })
+      await forecast.scrollIntoViewIfNeeded()
+      await expectNoPageOverflow(player)
+      await expect(forecast).toBeInViewport()
+      await capturePlayerScreenshot(player, {
+        path: testInfo.outputPath(`decisions-forecast-${width}.png`),
+      })
+    }
+    await player.getByRole('link', { name: 'Market', exact: true }).click()
+    for (const { asset, values } of fixtures)
+      await expect(
+        player.getByTestId(`market-${asset.toLowerCase()}`).locator('strong')
+      ).toHaveText(values)
+    await player.getByRole('link', { name: 'Decisions', exact: true }).click()
+    await expect(player).toHaveURL(/tab=cockpit/)
+    await submitDecision(player, { savings: '55', bonds: '35', stocks: '10' })
+    await expect(forecast).toHaveCount(0)
+    await player.getByRole('switch', { name: 'Ready', exact: true }).click()
+    await expect(forecast).toHaveCount(0)
+    await player.getByRole('button', { name: 'Change allocation' }).click()
+    await expect(forecast).toBeVisible()
+    // Zero gap is readable legacy data but cannot be authored in the admin UI.
+    // Exercise it and invalid/missing scenarios without changing the game.
+    for (const scenario of [
+      {
+        trendBonds: -0.01,
+        gapBonds: 0,
+        trendStocks: 0.02,
+        gapStocks: 0.01,
+        interestBank: 0.001,
+      },
+      null,
+      { trendBonds: 0, gapBonds: -1 },
+    ]) {
+      const overrideScenario = async (
+        route: import('@playwright/test').Route
+      ) => {
+        if (route.request().postDataJSON()?.operationName !== 'Result')
+          return route.fallback()
+        const response = await route.fetch()
+        const json = await response.json()
+        json.data.result.currentGame.activePeriod.facts.scenario = scenario
+        await route.fulfill({ response, json })
+      }
+      await player.route('**/api/graphql', overrideScenario)
+      await player.reload({ waitUntil: 'domcontentloaded' })
+      await player.getByRole('button', { name: 'Change allocation' }).click()
+      if (scenario?.gapBonds === 0) {
+        await expect(
+          forecast.getByRole('region', { name: 'Bonds forecast' }).locator('dd')
+        ).toHaveText(['-1.00%', '0.00%', '0.00%'])
+      } else {
+        await expect(
+          forecast.getByText('Market outlook is not available yet.')
+        ).toBeVisible()
+        await expect(forecast.locator('dd')).toHaveCount(0)
+      }
+      await player.unroute('**/api/graphql', overrideScenario)
+    }
+  } finally {
+    await session.context.close()
+  }
+})
+
+test('Ready countdown reminders stop during review while timers remain visible', async ({
+  page: admin,
+  browser,
+  baseURL,
+}) => {
+  const appBaseURL = requireBaseURL(baseURL)
+  await createGame(admin, {
+    name: `Review countdown ${Date.now()}`,
+    playerCount: 1,
+  })
+  await addPeriod(admin, { segmentCount: '2', index: 0 })
+  await addSegment(admin, { periodIndex: 0 })
+  await addSegment(admin, { periodIndex: 0 })
+  const session = await joinPlayer(
+    browser,
+    appBaseURL,
+    await playerJoinUrl(admin, appBaseURL, 0),
+    players[0]
+  )
+  try {
+    await advanceGame(admin, {
+      action: 'Start Period',
+      expectedStatus: 'PREPARATION',
+    })
+    await advanceGame(admin, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    await setCountdown(admin, '300')
+    const player = await session.context.newPage()
+    await player.clock.install()
+    await player.goto(`${appBaseURL}/play/cockpit`)
+    const notices = player
+      .getByRole('region', { name: 'Notifications (F8)' })
+      .getByRole('status')
+      .filter({ hasText: /Countdown (set\/updated!|Update)/ })
+    await expect(notices).toContainText('Countdown set/updated!')
+    await notices.getByRole('button', { name: 'Dismiss notification' }).click()
+    await player.clock.fastForward(130_000)
+    await expect(notices).toContainText(
+      'Less than 3 min remaining! Please press ready.'
+    )
+    await notices.getByRole('button', { name: 'Dismiss notification' }).click()
+    await advanceGame(admin, {
+      action: 'Segment Results',
+      expectedStatus: 'PAUSED',
+    })
+    await expect(player.getByTestId('quarter-results')).toBeVisible()
+    await player.clock.fastForward(120_000)
+    await expect(player.getByTestId('countdown')).toBeVisible()
+    await expect(notices).toHaveCount(0)
+    await player.close()
+    for (const status of ['PAUSED', 'CONSOLIDATION', 'RESULTS']) {
+      if (status === 'CONSOLIDATION') {
+        await advanceGame(admin, {
+          action: 'Next Segment',
+          expectedStatus: 'RUNNING',
+        })
+        await advanceGame(admin, {
+          action: 'Consolidate',
+          expectedStatus: 'CONSOLIDATION',
+        })
+      }
+      if (status !== 'RESULTS') await setCountdown(admin, '300')
+      else
+        await advanceGame(admin, {
+          action: 'Period Results',
+          expectedStatus: 'RESULTS',
+        })
+      const review = await session.context.newPage()
+      await review.clock.install()
+      await review.goto(`${appBaseURL}/play/cockpit`)
+      await expect(
+        review.getByText('Waiting for the instructor to continue.', {
+          exact: true,
+        })
+      ).toBeVisible()
+      await expect(
+        review.getByRole('switch', { name: 'Ready', exact: true })
+      ).toHaveCount(0)
+      if (status !== 'RESULTS')
+        await expect(review.getByTestId('countdown')).toBeVisible()
+      await review.clock.fastForward(250_000)
+      await expect(
+        review
+          .getByRole('region', { name: 'Notifications (F8)' })
+          .getByRole('status')
+          .filter({ hasText: /Please press ready/ })
+      ).toHaveCount(0)
+      await review.close()
+    }
   } finally {
     await session.context.close()
   }

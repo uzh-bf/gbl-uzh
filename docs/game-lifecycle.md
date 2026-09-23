@@ -6,7 +6,7 @@ tags:
   - lifecycle
   - state-machine
   - admin
-timestamp: "2026-09-22T00:00:00Z"
+timestamp: "2026-09-23T00:00:00Z"
 ---
 
 # Game Lifecycle
@@ -68,9 +68,9 @@ Independent of status: story elements attached to a newly activated segment appe
 
 ## Coordination mechanics (all advisory)
 
-- **Demo-game cockpit** — Ready requires submission through the editor. It locks editing until switched off; Change allocation requires resubmission before Ready is available again. Submission is persisted per segment, survives reload, and resets at the next segment. This is a cockpit control rule, not API enforcement.
+- **Demo-game Decisions tab** — Ready appears only during RUNNING and requires submission through the editor. It locks editing until switched off; Change allocation requires resubmission before Ready is available again. Submission is persisted per segment, survives reload, and resets at the next segment. This is a cockpit control rule, not API enforcement.
 - **Ready flag** — players toggle "Ready" after acting (`updateReadyState`). The admin UI plays a sound and shows "All players are ready!" but the platform never blocks or auto-advances on it.
-- **Countdown** — the admin can set a countdown on the active segment (`addCountdown`); players see a ticking widget and warning toasts. When it expires **nothing happens automatically** — the admin still clicks the button. Treat it as social pressure, not enforcement.
+- **Countdown** — the admin can set a countdown on the active segment (`addCountdown`); players see a ticking widget; the demo game emits readiness reminder toasts only during RUNNING, while configured timers remain visible during review. When it expires **nothing happens automatically** — the admin still clicks the button. Treat it as social pressure, not enforcement.
 - **Market reveals** — the demo-game admin can publish each precomputed monthly roll during or after allocation. Its animation calls `revealMarketRoll`; persistence and `MARKET_ROLL_REVEALED` refresh all player Market tabs. Replaying dice keeps the same outcome; closing a segment does not reveal it. Allocation and lifecycle transitions remain independent.
 - **Realtime** — every transition publishes a global event (`PERIOD_ACTIVATED`, `SEGMENT_ACTIVATED`, `COUNTDOWN_UPDATED`, ...). Clients use these purely as a signal to refetch their queries — no payload is trusted. See [api-layer.md](api-layer.md).
 

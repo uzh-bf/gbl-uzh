@@ -419,7 +419,7 @@ export default function WelcomeSetup({
                   {player.game.status === 'SCHEDULED' ||
                   player.game.status === 'PREPARATION'
                     ? 'Starting now puts you in the waiting room until the instructor opens segment 1.'
-                    : 'Your game is already underway. Start now to join your bank’s cockpit.'}
+                    : 'Your game is already underway. Start now to open your bank’s Decisions tab.'}
                 </p>
               </div>
             </>

@@ -21,7 +21,12 @@ import MarketPanel from './market/MarketPanel'
 import TeamContent from './team/TeamContent'
 import { useToast } from './ui/use-toast'
 
-const tabs = ['Cockpit', 'Market', 'History', 'Team']
+const tabs = [
+  { id: 'cockpit', label: 'Decisions' },
+  { id: 'market', label: 'Market' },
+  { id: 'history', label: 'History' },
+  { id: 'team', label: 'Team' },
+]
 
 function GameLayout({
   children,
@@ -45,10 +50,11 @@ function GameLayout({
   const currentGame = result?.currentGame
   const activePeriod = currentGame?.activePeriod
   const activeSegment = activePeriod?.activeSegment
+  const running = currentGame?.status === 'RUNNING'
   const router = useRouter()
   const tab =
     typeof router.query.tab === 'string' &&
-    tabs.some((name) => name.toLowerCase() === router.query.tab)
+    tabs.some(({ id }) => id === router.query.tab)
       ? router.query.tab
       : 'cockpit'
   const detailTab = tab !== 'cockpit'
@@ -110,7 +116,9 @@ function GameLayout({
   }, [strExpiresAt])
 
   useEffect(() => {
-    if (!strExpiresAt) return
+    countdownNotifications.current = { '60': false, '180': false }
+    previousCountdownSeconds.current = null
+    if (!running || !strExpiresAt) return
 
     const dateExpiresAt = dayjs(strExpiresAt)
     const secondsRemaining = dateExpiresAt.diff(dayjs(), 's')
@@ -123,9 +131,7 @@ function GameLayout({
         description: `${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
       })
     }
-
-    countdownNotifications.current = { '60': false, '180': false }
-  }, [strExpiresAt, countdownDurationMs, toast])
+  }, [running, strExpiresAt, countdownDurationMs, toast])
 
   if (!self || !currentGame) {
     return null
@@ -142,7 +148,6 @@ function GameLayout({
     currentGame.periods.find((period) => period.id === activePeriod?.id)
       ?.segmentCount ??
     0
-  const running = currentGame.status === 'RUNNING'
   const done =
     segmentIndex == null
       ? 0
@@ -166,17 +171,14 @@ function GameLayout({
       PAUSED: {
         heading: `Game ${currentGame.id} · ${resultView.year} · Quarter ${resultView.quarter} closed`,
         detail: resultView.monthRange,
-        footer: `Quarter ${resultView.quarter + 1} opens when everyone is ready`,
       },
       CONSOLIDATION: {
         heading: `After quarter ${resultView.quarter}`,
         detail: 'Consolidation · held',
-        footer: `${resultView.year} closes when everyone is ready`,
       },
       RESULTS: {
         heading: `${resultView.year} closed`,
         detail: 'All quarters closed',
-        footer: `${resultView.year + 1} opens when everyone is ready`,
       },
     }[resultView.status]
   const initials =
@@ -189,6 +191,7 @@ function GameLayout({
       .toUpperCase() || 'T'
   const avatar = typeof facts.avatar === 'string' ? facts.avatar : ''
   const handleCountdownUpdate = (secondsLeft: number) => {
+    if (!running) return
     const previousSecondsLeft = previousCountdownSeconds.current
     previousCountdownSeconds.current = secondsLeft
     if (previousSecondsLeft === null) return
@@ -378,7 +381,7 @@ function GameLayout({
           />
         </main>
         <div className="relative z-[3] shrink-0 bg-white">
-          {tab === 'cockpit' && (
+          {tab === 'cockpit' && (running || resultView) && (
             <div
               className={cn(
                 'border-player-divider mobile:min-h-0 mobile:gap-app-3 mobile:px-app-4 mobile:py-app-3 flex items-center justify-between gap-[12px] border-t min-[601px]:min-h-[96px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
@@ -387,80 +390,71 @@ function GameLayout({
             >
               {resultView ? (
                 <p className="text-player-muted mobile:app-caption m-0 min-[601px]:text-[24px]">
-                  {resultCopy.footer}
+                  Waiting for the instructor to continue.
                 </p>
               ) : (
                 action
               )}
-              <div
-                className="mobile:gap-app-3 ml-auto flex items-center gap-[10px]"
-                data-cy="ready-switch"
-                data-ready={self.isReady}
-                data-disabled={readyControl.disabled}
-              >
-                <label
-                  htmlFor="isReady"
-                  className={cn(
-                    'mobile:app-body text-[17px] font-semibold',
-                    resultScreen && 'min-[601px]:text-[24px]',
-                    readyControl.disabled
-                      ? 'text-player-disabled'
-                      : self.isReady
-                        ? 'text-player-success'
-                        : resultScreen
-                          ? 'text-player-text'
-                          : 'text-player-primary'
-                  )}
+              {running && (
+                <div
+                  className="mobile:gap-app-3 ml-auto flex items-center gap-[10px]"
+                  data-cy="ready-switch"
+                  data-ready={self.isReady}
+                  data-disabled={readyControl.disabled}
                 >
-                  Ready
-                </label>
-                <Switch
-                  id="isReady"
-                  checked={self.isReady}
-                  disabled={readyControl.disabled}
-                  size="lg"
-                  className={{
-                    element: cn(
-                      'mobile:app-switch-target h-[30px] w-[52px]',
-                      resultScreen &&
-                        'shrink-0 min-[601px]:h-[44px] min-[601px]:w-[80px]',
-                      self.isReady
-                        ? 'bg-player-success disabled:bg-player-success'
-                        : 'bg-player-switch disabled:bg-player-switch'
-                    ),
-                    thumb: cn(
-                      'ml-[3px] size-[24px] shadow-[0_1px_3px_#0002] [&>svg]:invisible',
-                      resultScreen && 'min-[601px]:size-[36px]',
-                      self.isReady
-                        ? cn(
-                            'translate-x-[22px]',
-                            resultScreen && 'min-[601px]:translate-x-[36px]'
-                          )
-                        : 'translate-x-0'
-                    ),
-                  }}
-                  onCheckedChange={readyControl.onChange}
-                />
-              </div>
+                  <label
+                    htmlFor="isReady"
+                    className={cn(
+                      'mobile:app-body text-[17px] font-semibold',
+                      readyControl.disabled
+                        ? 'text-player-disabled'
+                        : self.isReady
+                          ? 'text-player-success'
+                          : 'text-player-primary'
+                    )}
+                  >
+                    Ready
+                  </label>
+                  <Switch
+                    id="isReady"
+                    checked={self.isReady}
+                    disabled={readyControl.disabled}
+                    size="lg"
+                    className={{
+                      element: cn(
+                        'mobile:app-switch-target h-[30px] w-[52px]',
+                        self.isReady
+                          ? 'bg-player-success disabled:bg-player-success'
+                          : 'bg-player-switch disabled:bg-player-switch'
+                      ),
+                      thumb: cn(
+                        'ml-[3px] size-[24px] shadow-[0_1px_3px_#0002] [&>svg]:invisible',
+                        self.isReady ? 'translate-x-[22px]' : 'translate-x-0'
+                      ),
+                    }}
+                    onCheckedChange={readyControl.onChange}
+                  />
+                </div>
+              )}
             </div>
           )}
           <nav
             className="border-player-border grid grid-cols-4 border-t pb-[env(safe-area-inset-bottom)]"
             aria-label="Player navigation"
           >
-            {tabs.map((name) => (
+            {tabs.map(({ id, label }) => (
               <Link
-                key={name}
-                href={`/play/cockpit?tab=${name.toLowerCase()}`}
+                key={id}
+                href={`/play/cockpit?tab=${id}`}
                 shallow
                 className={cn(
                   'text-player-muted aria-[current=page]:border-player-primary aria-[current=page]:text-player-primary focus-visible:outline-player-primary mobile:min-h-app-nav mobile:app-body flex items-center justify-center border-t-[3px] border-transparent text-[17px] no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] aria-[current=page]:font-bold min-[601px]:min-h-[60px]',
                   resultScreen &&
                     'min-[601px]:min-h-[108px] min-[601px]:text-[24px]'
                 )}
-                aria-current={tab === name.toLowerCase() ? 'page' : undefined}
+                aria-current={tab === id ? 'page' : undefined}
               >
-                {name}
+                {label}
               </Link>
             ))}
           </nav>

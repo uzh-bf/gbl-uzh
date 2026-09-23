@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { cn, probabilityDistribution, signedPercent } from '@gbl-uzh/ui'
 import {
   ALLOCATION_KEYS,
   allocationDraft,
@@ -6,6 +6,7 @@ import {
   toTenths,
 } from '~/lib/allocation'
 import { assetLabels } from '~/lib/constants'
+import type { MarketScenario } from '~/lib/market'
 import AllocationRow from './AllocationRow'
 import AllocationSlider from './AllocationSlider'
 import type { useAllocationForm } from './useAllocationForm'
@@ -19,7 +20,7 @@ export default function AllocationForm({
   controller: ReturnType<typeof useAllocationForm>
   disabled?: boolean
   assets: number
-  scenario: { trendBonds?: number; trendStocks?: number }
+  scenario: MarketScenario | null
 }) {
   const { form, allocation, valid, preview, setDraft } = controller
   const total = ALLOCATION_KEYS.reduce(
@@ -28,10 +29,6 @@ export default function AllocationForm({
     0
   )
   const difference = Math.round((100 - total) * 10) / 10
-  const expectation = (value?: number) =>
-    Number.isFinite(value)
-      ? `${value >= 0 ? '+' : ''}${(value * 100).toFixed(2)}%`
-      : '—'
 
   return (
     <form id="allocation-form" onSubmit={form.handleSubmit} noValidate>
@@ -126,25 +123,72 @@ export default function AllocationForm({
           </p>
         )}
       </div>
-      <Link
-        href="/play/cockpit?tab=market"
-        shallow
-        className="focus-visible:outline-player-primary mobile:gap-app-3 mobile:px-app-4 mobile:py-app-4 mobile:app-caption flex items-center gap-[10px] text-inherit no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] min-[601px]:px-[24px] min-[601px]:py-[20px] min-[601px]:text-[17px] [@media(max-width:360px)]:flex-wrap"
+      <section
+        aria-label="Market outlook"
+        className="mobile:px-app-4 mobile:py-app-3 min-[601px]:px-[24px] min-[601px]:py-[16px]"
       >
-        <strong className="mobile:app-body mr-auto min-[601px]:text-[21px]">
+        <h2 className="mobile:app-body m-0 font-bold min-[601px]:text-[18px]">
           Market outlook
-        </strong>
-        <span className="text-player-muted">
-          Bonds {expectation(scenario?.trendBonds)} · Stocks{' '}
-          {expectation(scenario?.trendStocks)}
-        </span>
-        <span
-          aria-hidden="true"
-          className="text-player-primary mobile:app-value text-[28px] leading-none"
-        >
-          ›
-        </span>
-      </Link>
+        </h2>
+        {scenario ? (
+          <div className="mobile:mt-app-2 mobile:gap-app-6 grid grid-cols-2 min-[601px]:mt-[8px] min-[601px]:gap-[48px]">
+            {(['bonds', 'stocks'] as const).map((asset) => {
+              const trend =
+                asset === 'bonds' ? scenario.trendBonds : scenario.trendStocks
+              const gap =
+                asset === 'bonds' ? scenario.gapBonds : scenario.gapStocks
+              const { volatility } = probabilityDistribution(trend, gap)
+              return (
+                <section
+                  key={asset}
+                  aria-label={`${assetLabels[asset].name} forecast`}
+                  className="min-w-0"
+                >
+                  <h3 className="mobile:app-body m-0 font-semibold min-[601px]:text-[16px]">
+                    {assetLabels[asset].name}
+                  </h3>
+                  <dl className="mobile:mt-app-1 mobile:gap-app-1 mobile:app-caption m-0 grid min-[601px]:mt-[4px] min-[601px]:gap-[4px] min-[601px]:text-[14px]">
+                    {[
+                      {
+                        label: 'Expected value',
+                        value: signedPercent(trend, 2),
+                        color:
+                          trend < 0
+                            ? 'text-player-error'
+                            : 'text-player-success',
+                      },
+                      { label: 'Gap', value: `${(gap * 100).toFixed(2)}%` },
+                      {
+                        label: 'Volatility',
+                        value: `${(volatility * 100).toFixed(2)}%`,
+                      },
+                    ].map(({ label, value, color }) => (
+                      <div
+                        key={label}
+                        className="mobile:gap-app-1 flex items-baseline justify-between min-[601px]:gap-[8px]"
+                      >
+                        <dt className="text-player-muted">{label}</dt>
+                        <dd
+                          className={cn(
+                            'm-0 shrink-0 font-bold tabular-nums',
+                            color
+                          )}
+                        >
+                          {value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              )
+            })}
+          </div>
+        ) : (
+          <p className="text-player-muted mobile:app-caption min-[601px]:text-[17px]">
+            Market outlook is not available yet.
+          </p>
+        )}
+      </section>
     </form>
   )
 }

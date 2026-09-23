@@ -12,6 +12,7 @@ import PlayerActionButton from '~/components/cockpit/PlayerActionButton'
 import ResultPanel from '~/components/cockpit/ResultPanels'
 import { useAllocationForm } from '~/components/cockpit/useAllocationForm'
 import { useToast } from '~/components/ui/use-toast'
+import { readScenario } from '~/lib/market'
 import { buildResultView } from '~/lib/results'
 
 function Cockpit() {
@@ -132,7 +133,7 @@ function Cockpit() {
             controller={allocationController}
             disabled={updatingReady}
             assets={resultFacts?.assets?.totalAssets ?? 0}
-            scenario={currentGame.activePeriod?.facts?.scenario}
+            scenario={readScenario(currentGame.activePeriod?.facts)}
           />
         ) : (
           <AllocationSummary
