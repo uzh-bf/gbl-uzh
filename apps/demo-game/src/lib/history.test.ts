@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import type { ResultQuery } from '../graphql/generated/ops'
-import { buildHistory, historyAmount, historyPercent } from './history'
+import { buildHistory, playerAmount, playerPercent } from './results'
 
 const facts = {
   initialCapital: 10000,
@@ -192,11 +192,11 @@ test('missing, malformed and double-encoded facts degrade without inventing valu
 })
 
 test('formats Swiss amounts and signed returns without negative zero', () => {
-  assert.equal(historyAmount(10140.86), "10'140.86")
-  assert.equal(historyAmount(140.86, true), '+140.86')
-  assert.equal(historyAmount(-0.001, true), '0.00')
-  assert.equal(historyAmount(-1.005, true), '-1.01')
-  assert.equal(historyPercent(-0.019), '-1.90%')
-  assert.equal(historyPercent(0.0141), '+1.41%')
-  assert.equal(historyPercent(null), '—')
+  assert.equal(playerAmount(10140.86), "10'140.86")
+  assert.equal(playerAmount(140.86, true), '+140.86')
+  assert.equal(playerAmount(-0.001, true), '0.00')
+  assert.equal(playerAmount(-1.005, true), '-1.01')
+  assert.equal(playerPercent(-0.019), '-1.90%')
+  assert.equal(playerPercent(0.0141), '+1.41%')
+  assert.equal(playerPercent(null), '—')
 })

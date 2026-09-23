@@ -15,7 +15,7 @@ Playwright docs/skills only for API details; keep repo-specific decisions here.
 
 - Specs: `playwright/tests/**/*.spec.ts`
 - Setup auth: `playwright/tests/setup/admin-auth.setup.ts`
-- Support helpers: `playwright/tests/support/*.ts`
+- Support helpers: `playwright/tests/support/*.ts`; `demoGame.ts` shares game creation, welcome-session setup, no-overflow checks, and overlay-free captures. Keep detailed welcome assertions in `demo-game-welcome.spec.ts`; ordinary player joins follow the happy path.
 - Config: `playwright/playwright.config.ts`
 - CI workflow: `.github/workflows/playwright-testing.yml`
 - App under test: `apps/demo-game`
@@ -230,7 +230,7 @@ The demo-game spec (`playwright/tests/demo-game-flow.spec.ts`) is the template f
 - **Decision form**: swap the demo's allocation inputs (`bank` / `bonds` / `stocks` summing to 100) for your game's single decision. Update the input locator (e.g. `getByPlaceholder`, `input[name=...]`), the yup validation values, and the submit button name. Mirror the constraints your `Actions.apply` reducer enforces.
 - **Player plan**: replace the `decisions` array with your game's per-segment decision values (e.g. `[{ rate: '6.0' }, { rate: '5.5' }]`).
 - **Dashboard assertions**: replace demo-game metric labels (`To allocate`, `Savings`, `Bonds`, `Stocks`) with your game's (`Current Inflation`, `Unemployment`, `GDP Growth`, `Cumulative Loss`). Assert durable headings, not chart pixels or transient numbers.
-- **Keep the sentinel period** (see the WARNING above). Add one unplayed period after your last played period.
+- **Cover final results without a sentinel period.** The demo breadth scenario deliberately includes an upcoming period; the result-design scenario covers the disconnected final pointer. New game flows need no artificial final period.
 - **Keep the admin flow**: `createGame` -> `addPeriod` -> `addSegment` (per period) -> join players -> advance transitions. The state-transition sequence is game-agnostic.
 - **Keep `expectGameStatusEventually`** (or equivalent reload-aware polling) for admin status assertions - UI data lags mutations.
 - **Segment count via stable child content**: count real segments by a child that only exists after `SegmentService.initialize` (e.g. `text=Roll:`), not by placeholder card count.

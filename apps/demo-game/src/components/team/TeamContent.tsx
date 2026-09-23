@@ -8,6 +8,7 @@ import {
   ResultDocument,
   type ResultQuery,
 } from '~/graphql/generated/ops'
+import { FIRST_GAME_YEAR } from '~/lib/constants'
 import {
   sortStories,
   storyLibrary,
@@ -81,7 +82,7 @@ export default function TeamContent({
       segment
         ? {
             id: segment.id,
-            year: 2026 + game.activePeriod.index,
+            year: FIRST_GAME_YEAR + game.activePeriod.index,
             quarter: segment.index + 1,
             stories: sortStories(segment.storyElements),
           }

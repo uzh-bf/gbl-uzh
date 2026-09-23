@@ -2,8 +2,7 @@ import { cn } from '@gbl-uzh/ui'
 import { BookOpen, ChevronRight, Lightbulb } from 'lucide-react'
 import { useId, type ReactNode } from 'react'
 import type { ResultQuery } from '~/graphql/generated/ops'
-import { historyAmount, historyPercent } from '~/lib/history'
-import { parseMarketFacts } from '~/lib/market'
+import { playerAmount, playerPercent } from '~/lib/results'
 import { learningXP, teamStatistics, type StoryEntry } from '~/lib/team'
 
 type Activity = { id: string; title: string; reward?: unknown }
@@ -26,10 +25,6 @@ export default function TeamPanel({
   onStory: (entry: StoryEntry) => void
 }) {
   const self = data.self
-  const facts = parseMarketFacts(self?.facts)
-  const location = typeof facts.location === 'string' ? facts.location : ''
-  const avatar = typeof facts.avatar === 'string' ? facts.avatar : ''
-  const avatarKey = avatar.split('/').pop()?.split('.')[0]
   const stats = teamStatistics(data)
   const completedIds = new Set(
     completedActivities.map((activity) => activity.id)
@@ -66,12 +61,12 @@ export default function TeamPanel({
       <dl className="border-player-border m-0 grid grid-cols-2 border-b">
         <Statistic
           title="Value"
-          value={historyAmount(stats.value)}
+          value={playerAmount(stats.value)}
           testId="team-value"
         />
         <Statistic
           title="Last quarter"
-          value={historyPercent(stats.lastQuarter)}
+          value={playerPercent(stats.lastQuarter)}
           testId="team-last-quarter"
           color={
             stats.lastQuarter > 0

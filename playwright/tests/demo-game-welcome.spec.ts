@@ -1,4 +1,12 @@
 import { expect, test, type Browser, type Page } from '@playwright/test'
+import {
+  capturePlayerScreenshot,
+  createGame,
+  expectNoPageOverflow,
+  openPlayerWelcome,
+  playerJoinUrl,
+  requireBaseURL,
+} from './support/demoGame'
 
 const viewports = [
   { name: 'narrow', width: 320, height: 844 },
@@ -12,48 +20,22 @@ const viewports = [
 ] as const
 
 async function openWelcome(admin: Page, browser: Browser, baseURL?: string) {
-  if (!baseURL) throw new Error('baseURL is required')
-  const gameName = `Welcome checks ${Date.now()}`
-  await admin.goto('/admin/games', { waitUntil: 'domcontentloaded' })
-  await admin.locator('input[name="name"]').fill(gameName)
-  await admin.locator('input[name="playerCount"]').fill('1')
-  await admin.getByRole('button', { name: 'Create Game' }).click()
-  await admin.getByRole('link', { name: new RegExp(gameName) }).click()
-  const joinLink = admin
-    .getByTestId('player-0')
-    .getByTestId('player-login-link')
-  await expect(joinLink).toBeVisible({ timeout: 45_000 })
-  const href = await joinLink.getAttribute('href')
-  if (!href) throw new Error('Missing player join link')
-  const context = await browser.newContext({
-    baseURL,
-    ignoreHTTPSErrors: true,
-    viewport: viewports[3],
+  const appBaseURL = requireBaseURL(baseURL)
+  await createGame(admin, {
+    name: `Welcome checks ${Date.now()}`,
+    playerCount: 1,
   })
-  try {
-    const page = await context.newPage()
-    await page.goto(new URL(href, baseURL).href, {
-      waitUntil: 'domcontentloaded',
-    })
-    await page.waitForURL('**/play/welcome', { waitUntil: 'domcontentloaded' })
-    await expect(
-      page.getByRole('heading', { name: 'You just won the lottery' })
-    ).toBeVisible({ timeout: 30_000 })
-    return { context, page }
-  } catch (error) {
-    await context.close()
-    throw error
-  }
+  return openPlayerWelcome(
+    browser,
+    appBaseURL,
+    await playerJoinUrl(admin, appBaseURL, 0)
+  )
 }
 
 async function captureViews(page: Page, state: string) {
   for (const viewport of viewports) {
     await page.setViewportSize(viewport)
-    await expect
-      .poll(() =>
-        page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)
-      )
-      .toBe(true)
+    await expectNoPageOverflow(page)
     const dialog = page.getByRole('dialog')
     if (await dialog.count()) {
       await expect(dialog).toBeVisible()
@@ -69,11 +51,8 @@ async function captureViews(page: Page, state: string) {
       await expect(
         page.locator('footer').getByRole('button').last()
       ).toBeInViewport()
-    await page.screenshot({
+    await capturePlayerScreenshot(page, {
       path: test.info().outputPath(`welcome-${state}-${viewport.name}.png`),
-      animations: 'disabled',
-      style:
-        'nextjs-portal, [aria-label="Notifications (F8)"] { visibility: hidden !important; }',
     })
   }
   await page.setViewportSize(viewports[3])
@@ -98,6 +77,8 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
     await setup.click()
     const name = page.getByLabel('Bank name', { exact: true })
     const review = page.getByRole('button', { name: 'Review your bank' })
+    await name.fill(' ')
+    await expect(review).toBeDisabled()
     await name.fill('A')
     await name.blur()
     await expect(page.getByText('Use at least 2 characters.')).toBeVisible()
@@ -170,6 +151,16 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
       page.getByRole('heading', { name: 'Your bank', exact: true })
     ).toBeFocused()
     await captureViews(page, 'review')
+    const editAvatar = page.getByRole('button', {
+      name: 'Edit avatar',
+      exact: true,
+    })
+    await editAvatar.click()
+    await expect(
+      page.getByRole('button', { name: 'Bear', exact: true })
+    ).toHaveAttribute('aria-pressed', 'true')
+    await page.keyboard.press('Escape')
+    await expect(editAvatar).toBeFocused()
     await page
       .getByRole('button', { name: 'Edit bank name', exact: true })
       .click()

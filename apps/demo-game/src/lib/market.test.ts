@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+import { parseFacts } from './facts'
 import {
   latestRevealedRoll,
   marketPeriod,
-  parseMarketFacts,
   readMarketRoll,
   readScenario,
 } from './market'
@@ -34,7 +34,7 @@ test('read persisted rolls safely without computing or inventing results', () =>
     assert.equal(readMarketRoll(raw, 0), null)
   for (const index of [-1, 0.5, 2])
     assert.equal(readMarketRoll(facts, index), null)
-  assert.deepEqual(parseMarketFacts('bad'), {})
+  assert.deepEqual(parseFacts('bad'), {})
   assert.equal(readScenario({}), null)
 })
 

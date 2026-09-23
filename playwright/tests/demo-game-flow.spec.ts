@@ -6,6 +6,14 @@ import {
   type Locator,
   type Page,
 } from '@playwright/test'
+import {
+  capturePlayerScreenshot,
+  createGame,
+  expectNoPageOverflow,
+  openPlayerWelcome,
+  playerJoinUrl,
+  requireBaseURL,
+} from './support/demoGame'
 
 import { expectGameStatusEventually } from './support/waits'
 
@@ -67,47 +75,8 @@ const players: PlayerPlan[] = [
   },
 ]
 
-function absoluteUrl(baseURL: string, href: string) {
-  return new URL(href, baseURL).toString()
-}
-
-function requireBaseURL(baseURL: string | undefined) {
-  if (!baseURL) {
-    throw new Error('baseURL is required for player join links')
-  }
-
-  return baseURL
-}
-
 function input(scope: Locator | Page, name: string) {
   return scope.locator(`input[name="${name}"]`)
-}
-
-async function playerJoinUrl(page: Page, baseURL: string, index: number) {
-  const href = await page
-    .getByTestId(`player-${index}`)
-    .getByTestId('player-login-link')
-    .getAttribute('href')
-
-  if (!href) {
-    throw new Error(`Missing player ${index} join link`)
-  }
-
-  return absoluteUrl(baseURL, href)
-}
-
-async function createGame(
-  page: Page,
-  { name, playerCount }: { name: string; playerCount: number }
-) {
-  await page.goto('/admin/games', { waitUntil: 'domcontentloaded' })
-  await input(page, 'name').fill(name)
-  await input(page, 'playerCount').fill(String(playerCount))
-  await page.getByRole('button', { name: 'Create Game' }).click()
-  await page.getByRole('link', { name: new RegExp(name) }).click()
-  await expect(page.getByTestId('game-detail')).toBeVisible({
-    timeout: 20_000,
-  })
 }
 
 async function addPeriod(
@@ -180,95 +149,35 @@ async function joinPlayer(
   joinUrl: string,
   plan: PlayerPlan
 ): Promise<PlayerSession> {
-  const context = await browser.newContext({
-    baseURL,
-    ignoreHTTPSErrors: true,
-  })
-  const page = await context.newPage()
-  // Next's development toolbar can cover mobile footer controls. It is not
-  // part of the player UI; keep it out of pointer and screenshot checks.
-  await page.addInitScript(() => {
-    document.addEventListener('DOMContentLoaded', () => {
-      const style = document.createElement('style')
-      style.textContent = 'nextjs-portal { display: none; }'
-      document.head.append(style)
+  const { context, page } = await openPlayerWelcome(browser, baseURL, joinUrl)
+  try {
+    await page
+      .getByRole('button', { name: 'Set up your bank', exact: true })
+      .click()
+    await page.getByLabel('Bank name', { exact: true }).fill(plan.name)
+    await page.getByRole('button', { name: /^Avatar / }).click()
+    await page.getByRole('button', { name: 'Bear', exact: true }).click()
+    await page.getByRole('button', { name: 'Use Bear', exact: true }).click()
+    await page.getByRole('button', { name: /^Location / }).click()
+    await page.getByRole('textbox', { name: 'Search canton' }).fill('AG')
+    await page.getByRole('button', { name: 'Aargau (AG)', exact: true }).click()
+    await page
+      .getByRole('button', { name: 'Use Aargau (AG)', exact: true })
+      .click()
+    await page.getByRole('button', { name: 'Review your bank' }).click()
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await Promise.all([
+      page.waitForURL('**/play/cockpit', { waitUntil: 'domcontentloaded' }),
+      page.getByRole('button', { name: 'Start the game', exact: true }).click(),
+    ])
+    await expect(page.getByText('Game is scheduled.')).toBeVisible({
+      timeout: 30_000,
     })
-  })
-
-  await page.goto(joinUrl, { waitUntil: 'domcontentloaded' })
-  await page.waitForURL('**/play/welcome', { waitUntil: 'domcontentloaded' })
-  await page.setViewportSize({ width: 390, height: 844 })
-  await expect(
-    page.getByRole('heading', { name: 'You just won the lottery' })
-  ).toBeVisible()
-  await page
-    .getByRole('button', { name: 'Set up your bank', exact: true })
-    .click()
-  await page.getByLabel('Bank name', { exact: true }).fill(' ')
-  await expect(
-    page.getByRole('button', { name: 'Review your bank' })
-  ).toBeDisabled()
-  await page.getByLabel('Bank name', { exact: true }).fill(plan.name)
-  await page.getByRole('button', { name: /^Avatar / }).click()
-  await page.getByRole('button', { name: 'Bear', exact: true }).click()
-  await expect(
-    page.getByRole('button', { name: 'Use Bear', exact: true })
-  ).toBeEnabled()
-  await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-  await expect(
-    page.getByRole('button', { name: 'Avatar Choose an animal' })
-  ).toBeFocused()
-  await page.getByRole('button', { name: /^Avatar / }).click()
-  await page.getByRole('button', { name: 'Bear', exact: true }).click()
-  await page.getByRole('button', { name: 'Use Bear', exact: true }).click()
-  await page.getByRole('button', { name: /^Location / }).click()
-  await page
-    .getByRole('textbox', { name: 'Search canton' })
-    .fill('not-a-canton')
-  await expect(page.getByRole('status')).toContainText('No cantons found')
-  await page.getByRole('textbox', { name: 'Search canton' }).fill('AG')
-  await page.getByRole('button', { name: 'Aargau (AG)', exact: true }).click()
-  await page
-    .getByRole('button', { name: 'Use Aargau (AG)', exact: true })
-    .click()
-  await expect(
-    page.getByRole('button', { name: 'Review your bank' })
-  ).toBeEnabled()
-  await page.getByRole('button', { name: 'Review your bank' }).click()
-  await expect(
-    page.getByRole('heading', { name: 'Your bank', exact: true })
-  ).toBeVisible()
-  await page
-    .getByRole('button', { name: 'Edit bank name', exact: true })
-    .click()
-  await expect(page.getByLabel('Bank name', { exact: true })).toHaveValue(
-    plan.name
-  )
-  await page.getByRole('button', { name: 'Review your bank' }).click()
-  await page.getByRole('button', { name: 'Edit avatar', exact: true }).click()
-  await expect(
-    page.getByRole('button', { name: 'Bear', exact: true })
-  ).toHaveAttribute('aria-pressed', 'true')
-  await page.keyboard.press('Escape')
-  await expect(
-    page.getByRole('button', { name: 'Edit avatar', exact: true })
-  ).toBeFocused()
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth
-    )
-  ).toBe(true)
-  await page.setViewportSize({ width: 1280, height: 900 })
-  await Promise.all([
-    page.waitForURL('**/play/cockpit', { waitUntil: 'domcontentloaded' }),
-    page.getByRole('button', { name: 'Start the game', exact: true }).click(),
-  ])
-
-  await expect(page.getByText('Game is scheduled.')).toBeVisible({
-    timeout: 30_000,
-  })
-
-  return { context, page, plan }
+    return { context, page, plan }
+  } catch (error) {
+    await context.close()
+    throw error
+  }
 }
 
 async function joinPlayers(
@@ -470,19 +379,10 @@ async function assertAllocationControls(page: Page, admin: Page) {
     { name: 'desktop', width: 1440, height: 1000 },
   ]) {
     await page.setViewportSize({ width, height })
-    await expect
-      .poll(() =>
-        page.evaluate(
-          () => document.documentElement.scrollWidth <= window.innerWidth
-        )
-      )
-      .toBe(true)
-    await page.screenshot({
+    await expectNoPageOverflow(page)
+    await capturePlayerScreenshot(page, {
       path: test.info().outputPath(`cockpit-${name}.png`),
       fullPage: true,
-      animations: 'disabled',
-      style:
-        'nextjs-portal, [aria-label="Notifications (F8)"] { visibility: hidden !important; }',
     })
   }
 }
@@ -530,17 +430,10 @@ async function assertSubmittedStates(page: Page, admin: Page) {
     await expect
       .poll(() => page.evaluate(() => innerWidth))
       .toBe(viewport.width)
-    await expect
-      .poll(() =>
-        page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)
-      )
-      .toBe(true)
+    await expectNoPageOverflow(page)
     editingSizes.set(viewport.width, await cockpitControlSizes(page, submit))
-    await page.screenshot({
+    await capturePlayerScreenshot(page, {
       path: test.info().outputPath(`cockpit-editing-${viewport.name}.png`),
-      animations: 'disabled',
-      style:
-        'nextjs-portal, [aria-label="Notifications (F8)"] { visibility: hidden !important; }',
     })
   }
   await submit.click()
@@ -588,9 +481,7 @@ async function assertSubmittedStates(page: Page, admin: Page) {
     await expect(page.getByRole('slider')).toHaveCount(0)
     for (const tab of ['Market', 'History']) {
       await page.getByRole('link', { name: tab, exact: true }).click()
-      await expect(
-        page.getByTestId(`${tab.toLowerCase()}-panel`)
-      ).toBeVisible()
+      await expect(page.getByTestId(`${tab.toLowerCase()}-panel`)).toBeVisible()
     }
     await page.getByRole('link', { name: 'Cockpit', exact: true }).click()
     for (const { name, width, height } of cockpitViewports) {
@@ -598,18 +489,9 @@ async function assertSubmittedStates(page: Page, admin: Page) {
       await expect
         .poll(() => cockpitControlSizes(page, change))
         .toEqual(editingSizes.get(width))
-      await expect
-        .poll(() =>
-          page.evaluate(
-            () => document.documentElement.scrollWidth <= innerWidth
-          )
-        )
-        .toBe(true)
-      await page.screenshot({
+      await expectNoPageOverflow(page)
+      await capturePlayerScreenshot(page, {
         path: test.info().outputPath(`cockpit-${state}-${name}.png`),
-        animations: 'disabled',
-        style:
-          'nextjs-portal, [aria-label="Notifications (F8)"] { visibility: hidden !important; }',
       })
     }
   }
@@ -645,28 +527,29 @@ async function assertSubmittedStates(page: Page, admin: Page) {
       page.getByText('Allocation submitted', { exact: true })
     ).toBeVisible()
     await page.setViewportSize({ width: 320, height: 844 })
-    await expect
-      .poll(() =>
-        page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)
-      )
-      .toBe(true)
-    await page.screenshot({
+    await expectNoPageOverflow(page)
+    await capturePlayerScreenshot(page, {
       path: test.info().outputPath(`cockpit-submitted-${name}.png`),
-      animations: 'disabled',
-      style:
-        'nextjs-portal, [aria-label="Notifications (F8)"] { visibility: hidden !important; }',
     })
     await ready.click()
     await expect(ready).toBeChecked()
-    await page.screenshot({
+    await capturePlayerScreenshot(page, {
       path: test.info().outputPath(`cockpit-ready-${name}.png`),
-      animations: 'disabled',
-      style:
-        'nextjs-portal, [aria-label="Notifications (F8)"] { visibility: hidden !important; }',
     })
     await ready.click()
     await change.click()
   }
+}
+
+async function fillAllocation(page: Page, values: DecisionValues) {
+  for (const [key, label] of [
+    ['savings', 'Savings'],
+    ['bonds', 'Bonds'],
+    ['stocks', 'Stocks'],
+  ] as const)
+    await page
+      .getByRole('spinbutton', { name: label, exact: true })
+      .fill(values[key])
 }
 
 async function submitDecision(page: Page, values: DecisionValues) {
@@ -674,9 +557,7 @@ async function submitDecision(page: Page, values: DecisionValues) {
     name: 'Submit allocation',
     exact: true,
   })
-  await page.getByRole('spinbutton', { name: 'Savings' }).fill(values.savings)
-  await page.getByRole('spinbutton', { name: 'Bonds' }).fill(values.bonds)
-  await page.getByRole('spinbutton', { name: 'Stocks' }).fill(values.stocks)
+  await fillAllocation(page, values)
   await submitButton.click()
   await expect(
     page.getByText('Allocation submitted', { exact: true })
@@ -915,15 +796,11 @@ test('cockpit allocation controls, navigation, and decimal persistence', async (
     await expect(
       session.page.getByRole('switch', { name: 'Ready', exact: true })
     ).toBeDisabled()
-    await session.page
-      .getByRole('spinbutton', { name: 'Savings', exact: true })
-      .fill('50')
-    await session.page
-      .getByRole('spinbutton', { name: 'Bonds', exact: true })
-      .fill('25')
-    await session.page
-      .getByRole('spinbutton', { name: 'Stocks', exact: true })
-      .fill('25')
+    await fillAllocation(session.page, {
+      savings: '50',
+      bonds: '25',
+      stocks: '25',
+    })
     // Keep an old-round response pending while a new quarter starts.
     const pendingActions: import('@playwright/test').Route[] = []
     await session.page.route('**/api/graphql', async (route) => {
@@ -1030,8 +907,8 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
   await expect(page.getByRole('button', { name: 'Add period' })).toBeDisabled()
   await addSegment(page, { periodIndex: 1 })
   await expect(page.getByRole('button', { name: 'Add segment' })).toBeDisabled()
-  // TODO: remove sentinel when final-period consolidation no longer connects
-  // the next period.
+  // Exercise RESULTS with an upcoming period; the result-design test covers
+  // the disconnected final pointer without an upcoming period.
   await addPeriod(page, { segmentCount: '1', index: 2 })
 
   const playerSessions: PlayerSession[] = []
@@ -1241,15 +1118,7 @@ test('Market shows fixed admin reveals to two players during allocation', async 
       expectedStatus: 'RUNNING',
     })
     const player = sessions[0].page
-    await player
-      .getByRole('spinbutton', { name: 'Savings', exact: true })
-      .fill('50')
-    await player
-      .getByRole('spinbutton', { name: 'Bonds', exact: true })
-      .fill('30')
-    await player
-      .getByRole('spinbutton', { name: 'Stocks', exact: true })
-      .fill('20')
+    await fillAllocation(player, { savings: '50', bonds: '30', stocks: '20' })
     for (const session of sessions) {
       await session.page
         .getByRole('link', { name: 'Market', exact: true })
@@ -1531,15 +1400,7 @@ test('History follows settled quarters, filters years and preserves hidden dice'
       action: 'Next Segment',
       expectedStatus: 'RUNNING',
     })
-    await player
-      .getByRole('spinbutton', { name: 'Savings', exact: true })
-      .fill('50')
-    await player
-      .getByRole('spinbutton', { name: 'Bonds', exact: true })
-      .fill('30')
-    await player
-      .getByRole('spinbutton', { name: 'Stocks', exact: true })
-      .fill('20')
+    await fillAllocation(player, { savings: '50', bonds: '30', stocks: '20' })
     await openHistory()
     await expect(panel).toContainText(
       'Your history will appear after the first quarter closes.'
@@ -1681,13 +1542,7 @@ test('History follows settled quarters, filters years and preserves hidden dice'
         width,
         height: width === 784 ? 1692 : 844,
       })
-      await expect
-        .poll(() =>
-          player.evaluate(
-            () => document.documentElement.scrollWidth <= window.innerWidth
-          )
-        )
-        .toBe(true)
+      await expectNoPageOverflow(player)
       const breakdown = panel.getByRole('region', {
         name: 'Quarterly results',
         exact: true,
@@ -1785,24 +1640,15 @@ test('Team stories and learning sheets preserve progress, drafts and released co
         width,
         height: width === 784 ? 1692 : 844,
       })
-      await expect
-        .poll(() =>
-          player.evaluate(
-            () => document.documentElement.scrollWidth <= innerWidth
-          )
-        )
-        .toBe(true)
+      await expectNoPageOverflow(player)
       const dialog = player.getByRole('dialog')
       if (await dialog.count()) {
         const bounds = await dialog.boundingBox()
         expect(bounds!.y).toBeGreaterThanOrEqual(0)
         await expect(dialog.getByRole('button').last()).toBeInViewport()
       }
-      await player.screenshot({
+      await capturePlayerScreenshot(player, {
         path: testInfo.outputPath(`team-${state}-${width}.png`),
-        animations: 'disabled',
-        style:
-          'nextjs-portal, [aria-label="Notifications (F8)"] { visibility: hidden !important; }',
       })
     }
     await player.setViewportSize({ width: 390, height: 844 })
@@ -2206,13 +2052,7 @@ test('cockpit result designs follow settled quarters, consolidation and complete
       { name: 'narrow', width: 320, height: 844 },
     ]) {
       await player.setViewportSize({ width, height })
-      await expect
-        .poll(() =>
-          player.evaluate(
-            () => document.documentElement.scrollWidth <= window.innerWidth
-          )
-        )
-        .toBe(true)
+      await expectNoPageOverflow(player)
       await player.locator('main').evaluate((element) => {
         element.scrollTop = 0
       })

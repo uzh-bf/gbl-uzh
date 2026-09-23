@@ -1,5 +1,9 @@
 # Log
 
+## 2026-09-23
+
+**Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — centralize demo-game facts/result helpers and presentation metadata, reuse signed Market percentages, simplify cockpit and welcome composition, and share browser setup/visual checks while preserving behavior. Group History and Results in one module, keep constants together and avatar names local, remove unused helpers, and correct warning placement and final-period test guidance.
+
 ## 2026-09-22
 
 **Update**: [UI Building Blocks](ui-components.md) — added rounded, scrolling History filters with All; unified player header identity and removed the duplicate Team avatar; tightened annual-chart spacing and reference labels, colored accumulated-return percentages, and distinguished completed progress from Stocks.

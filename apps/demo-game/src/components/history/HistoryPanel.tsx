@@ -10,13 +10,14 @@ import {
 } from '@uzh-bf/design-system'
 import { Fragment, useState } from 'react'
 import type { ResultQuery } from '~/graphql/generated/ops'
+import { assetLabels } from '~/lib/constants'
 import {
   buildHistory,
-  historyAmount,
-  historyPercent,
+  playerAmount,
+  playerPercent,
   type HistoryQuarter,
-} from '~/lib/history'
-import AllocationBar, { assetLabels } from '../cockpit/AllocationBar'
+} from '~/lib/results'
+import AllocationBar from '../cockpit/AllocationBar'
 import PortfolioHistoryChart from './PortfolioHistoryChart'
 
 const padding = 'mobile:px-app-4 min-[601px]:px-[32px]'
@@ -79,11 +80,11 @@ function MonthlyResults({ quarter }: { quarter: HistoryQuarter }) {
                 key={asset}
                 className={cn('text-right tabular-nums', tone(month[asset]))}
               >
-                {historyPercent(month[asset])}
+                {playerPercent(month[asset])}
               </td>
             ))}
             <td className="text-right font-semibold tabular-nums">
-              {historyAmount(month.gain, true)}
+              {playerAmount(month.gain, true)}
             </td>
           </tr>
         ))}
@@ -151,14 +152,14 @@ function QuarterRows({
               tone(quarter[asset])
             )}
           >
-            {historyPercent(quarter[asset])}
+            {playerPercent(quarter[asset])}
           </TableCell>
         ))}
         <TableCell
           className={cn(cell, 'text-right font-semibold tabular-nums')}
-          aria-label={`Result ${historyAmount(quarter.gain, true)} CHF`}
+          aria-label={`Result ${playerAmount(quarter.gain, true)} CHF`}
         >
-          {historyAmount(quarter.gain, true)}
+          {playerAmount(quarter.gain, true)}
         </TableCell>
       </TableRow>
       <TableRow
@@ -244,7 +245,7 @@ export default function HistoryPanel({
               className="mobile:app-value tabular-nums min-[601px]:text-[42px]"
               data-cy="history-value"
             >
-              {historyAmount(history.value)}
+              {playerAmount(history.value)}
             </strong>
             <span className="text-player-muted mobile:app-body min-[601px]:text-[26px]">
               CHF
@@ -258,8 +259,8 @@ export default function HistoryPanel({
             tone(history.gain)
           )}
         >
-          {historyAmount(history.gain, true)} since the start ·{' '}
-          {historyPercent(history.gainRate)}
+          {playerAmount(history.gain, true)} since the start ·{' '}
+          {playerPercent(history.gainRate)}
         </p>
         {history.quarters.length > 0 ? (
           active && <PortfolioHistoryChart quarters={history.quarters} />

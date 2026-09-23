@@ -1,15 +1,6 @@
 import { cn } from '@gbl-uzh/ui'
 import { ALLOCATION_KEYS, type Allocation } from '~/lib/allocation'
-
-export const assetLabels = {
-  bank: { name: 'Savings', risk: 'No risk', color: 'bg-player-savings' },
-  bonds: {
-    name: 'Bonds',
-    risk: 'Some risk',
-    color: 'bg-player-bonds text-white',
-  },
-  stocks: { name: 'Stocks', risk: 'High risk', color: 'bg-player-stocks' },
-} as const
+import { assetLabels } from '~/lib/constants'
 
 export default function AllocationBar({
   value,
@@ -31,7 +22,8 @@ export default function AllocationBar({
           className={cn(
             '@container relative min-w-0 overflow-hidden',
             !compact && 'not-first:shadow-[inset_2px_0_white]',
-            assetLabels[key].color
+            assetLabels[key].color,
+            key === 'bonds' && 'text-white'
           )}
           data-asset={key}
           style={{ width: `${value[key]}%` }}

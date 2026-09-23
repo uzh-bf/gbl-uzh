@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { probabilityDistribution } from '../src/lib/probability'
+import { probabilityDistribution, signedPercent } from '../src/lib/probability'
 
 test('market chart uses scenario returns and existing volatility convention', () => {
   for (const [trend, gap] of [
@@ -39,4 +39,13 @@ test('market chart uses scenario returns and existing volatility convention', ()
     probabilityDistribution(-0.03, 0.017).volatility,
     probabilityDistribution(0.0031, 0.005).volatility
   )
+})
+
+test('signed percentages preserve precision and suppress rounded negative zero', () => {
+  assert.equal(signedPercent(0.0123), '+1.2%')
+  assert.equal(signedPercent(-0.0123), '-1.2%')
+  assert.equal(signedPercent(0.0123, 2), '+1.23%')
+  assert.equal(signedPercent(-0.0001), '0.0%')
+  assert.equal(signedPercent(0), '0.0%')
+  assert.equal(signedPercent(-0, 2), '0.00%')
 })

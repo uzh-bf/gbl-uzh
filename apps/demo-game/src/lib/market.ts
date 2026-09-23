@@ -1,4 +1,6 @@
 import type { ResultQuery } from '../graphql/generated/ops'
+import { FIRST_GAME_YEAR } from './constants'
+import { parseFacts } from './facts'
 
 export type MarketScenario = {
   trendBonds: number
@@ -10,24 +12,11 @@ export type MarketScenario = {
 export type MarketRoll = { shared: number; bonds: number; stocks: number }
 export type MarketReturns = { bank: number; bonds: number; stocks: number }
 
-export function parseMarketFacts(raw: unknown): Record<string, unknown> {
-  try {
-    let value = raw
-    for (let i = 0; i < 2 && typeof value === 'string'; i++)
-      value = JSON.parse(value)
-    return value && typeof value === 'object' && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : {}
-  } catch {
-    return {}
-  }
-}
-
 const finite = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value)
 
 export function readScenario(raw: unknown): MarketScenario | null {
-  const scenario = parseMarketFacts(parseMarketFacts(raw).scenario)
+  const scenario = parseFacts(parseFacts(raw).scenario)
   return [
     'trendBonds',
     'gapBonds',
@@ -45,7 +34,7 @@ export function readMarketRoll(
   raw: unknown,
   index: number
 ): { dice: MarketRoll; returns: MarketReturns } | null {
-  const facts = parseMarketFacts(raw)
+  const facts = parseFacts(raw)
   if (
     !Number.isInteger(index) ||
     index < 0 ||
@@ -53,8 +42,8 @@ export function readMarketRoll(
     !Array.isArray(facts.returns)
   )
     return null
-  const dice = parseMarketFacts(facts.diceRolls[index])
-  const returns = parseMarketFacts(facts.returns[index])
+  const dice = parseFacts(facts.diceRolls[index])
+  const returns = parseFacts(facts.returns[index])
   const die = (value: unknown) =>
     finite(value) && Number.isInteger(value) && value >= 1 && value <= 6
   if (
@@ -71,7 +60,7 @@ export function readMarketRoll(
 }
 
 export function revealedIndices(raw: unknown): number[] {
-  const indices = parseMarketFacts(raw).revealedRollIndices
+  const indices = parseFacts(raw).revealedRollIndices
   return Array.isArray(indices)
     ? [
         ...new Set(
@@ -89,7 +78,7 @@ export function marketTimeLabel(
   segmentIndex: number,
   rollIndex: number
 ) {
-  return `${2026 + periodIndex} · Quarter ${segmentIndex + 1} · Month ${rollIndex + 1}`
+  return `${FIRST_GAME_YEAR + periodIndex} · Quarter ${segmentIndex + 1} · Month ${rollIndex + 1}`
 }
 
 export function marketPeriod(game: ResultQuery['result']['currentGame']) {
@@ -132,9 +121,4 @@ export function latestRevealedRoll(game: ResultQuery['result']['currentGame']) {
     }
   }
   return null
-}
-
-export function formatMarketReturn(value: number) {
-  const rounded = (value * 100).toFixed(1)
-  return `${Number(rounded) > 0 ? '+' : ''}${Number(rounded) === 0 ? '0.0' : rounded}%`
 }

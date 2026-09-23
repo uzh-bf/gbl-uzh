@@ -1,9 +1,6 @@
 import type { PrismaClient } from '../generated/prisma/client'
-import {
-  parseMarketFacts,
-  readMarketRoll,
-  revealedIndices,
-} from '../lib/market'
+import { parseFacts } from '../lib/facts'
+import { readMarketRoll, revealedIndices } from '../lib/market'
 
 type Context = {
   prisma: PrismaClient
@@ -72,7 +69,7 @@ export async function revealMarketRoll(
             where: { id: segmentId },
             data: {
               facts: {
-                ...parseMarketFacts(segment.facts),
+                ...parseFacts(segment.facts),
                 revealedRollIndices: [...indices, rollIndex].sort(
                   (a, b) => a - b
                 ),

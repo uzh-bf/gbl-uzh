@@ -1,5 +1,6 @@
 import '~/globals.css'
 export * from '~/lib/utils'
+export { signedPercent } from '~/lib/probability'
 export * from '~/lib/global-events'
 export * from '~/components/Layout'
 export * from '~/components/Logo'

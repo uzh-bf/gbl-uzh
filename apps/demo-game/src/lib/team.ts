@@ -1,5 +1,6 @@
 import type { ResultQuery } from '../graphql/generated/ops'
-import { buildHistory } from './history'
+import { FIRST_GAME_YEAR } from './constants'
+import { buildHistory } from './results'
 
 type Game = NonNullable<NonNullable<ResultQuery['result']>['currentGame']>
 export type TeamStory =
@@ -41,7 +42,7 @@ export function storyLibrary(data: ResultQuery): StoryEntry[] {
         continue
       const sequence: StorySequence = {
         id: segment.id,
-        year: 2026 + period.index,
+        year: FIRST_GAME_YEAR + period.index,
         quarter: segment.index + 1,
         stories: sortStories(segment.storyElements),
       }

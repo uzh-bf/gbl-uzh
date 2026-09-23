@@ -1,6 +1,7 @@
 import { ChartContainer } from '@uzh-bf/design-system'
 import { Bar, BarChart, Tooltip, XAxis, YAxis } from 'recharts'
-import { historyAmount, type HistoryQuarter } from '~/lib/history'
+import type { HistoryQuarter } from '~/lib/results'
+import { playerAmount } from '~/lib/results'
 
 export default function PortfolioHistoryChart({
   quarters,
@@ -51,7 +52,7 @@ export default function PortfolioHistoryChart({
               <Tooltip
                 cursor={false}
                 formatter={(value: number) => [
-                  `${historyAmount(value)} CHF`,
+                  `${playerAmount(value)} CHF`,
                   'Portfolio value',
                 ]}
               />
@@ -69,8 +70,7 @@ export default function PortfolioHistoryChart({
       <ul className="sr-only" aria-label="Quarterly portfolio values">
         {quarters.map((quarter) => (
           <li key={quarter.id}>
-            {quarter.year} Q{quarter.quarter}: {historyAmount(quarter.value)}{' '}
-            CHF
+            {quarter.year} Q{quarter.quarter}: {playerAmount(quarter.value)} CHF
           </li>
         ))}
       </ul>

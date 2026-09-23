@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useSubscription } from '@apollo/client'
-import { ProbabilityChart, shouldRefetchGameResult } from '@gbl-uzh/ui'
+import { ProbabilityChart } from '@gbl-uzh/ui'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -8,8 +8,10 @@ import {
   MarketDiceDocument,
   RevealMarketRollDocument,
 } from '~/graphql/generated/ops'
+import { FIRST_GAME_YEAR } from '~/lib/constants'
+import { parseFacts } from '~/lib/facts'
+import { shouldRefetchDemoGame } from '~/lib/gameEvents'
 import {
-  parseMarketFacts,
   readMarketRoll,
   readScenario,
   revealedIndices,
@@ -216,11 +218,7 @@ const Forecast = () => {
     skip: !segment,
     onData: ({ data: eventData }) => {
       const event = eventData.data?.eventsGlobal
-      if (
-        shouldRefetchGameResult(event, segment?.gameId) ||
-        (event?.type === 'MARKET_ROLL_REVEALED' &&
-          event.facts?.gameId === segment?.gameId)
-      )
+      if (shouldRefetchDemoGame(event, segment?.gameId))
         void queuedRefetch().catch(() => {})
     },
   })
@@ -229,14 +227,14 @@ const Forecast = () => {
     return <p role="alert">Could not load dice. Please reload the page.</p>
   if (!segment) return <p>Segment not found.</p>
   const scenario = readScenario(segment.periodFacts)
-  const facts = parseMarketFacts(segment.facts)
+  const facts = parseFacts(segment.facts)
   if (!scenario || !Array.isArray(facts.diceRolls))
     return <p>Market data is unavailable.</p>
   const indices = revealedIndices(segment.facts)
   return (
     <div className="mobile:app-panel mobile:app-body flex flex-col gap-4 px-8 py-8">
       <h1>
-        {2026 + segment.periodIx} · Quarter {segment.index + 1}
+        {FIRST_GAME_YEAR + segment.periodIx} · Quarter {segment.index + 1}
       </h1>
       {facts.diceRolls.map((_, index) => {
         const roll = readMarketRoll(segment.facts, index)

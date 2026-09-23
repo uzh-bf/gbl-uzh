@@ -17,27 +17,28 @@ import {
   YAxis,
 } from 'recharts'
 import { ALLOCATION_KEYS } from '~/lib/allocation'
-import { historyAmount, historyPercent } from '~/lib/history'
+import { assetLabels, MONTHS } from '~/lib/constants'
 import {
   balanceMix,
-  RESULT_MONTHS,
+  playerAmount,
+  playerPercent,
   type ResultBalance,
   type ResultView,
 } from '~/lib/results'
-import AllocationBar, { assetLabels } from './AllocationBar'
+import AllocationBar from './AllocationBar'
 
 const inset = 'mobile:px-app-4 min-[601px]:px-[32px]'
 const colors = {
-  bank: 'var(--color-player-savings)',
-  bonds: 'var(--color-player-bonds)',
-  stocks: 'var(--color-player-stocks)',
+  bank: assetLabels.bank.chartColor,
+  bonds: assetLabels.bonds.chartColor,
+  stocks: assetLabels.stocks.chartColor,
   totalAssets: 'var(--color-player-primary)',
 }
 const benchmarkConfig = {
   totalAssets: { label: 'You', color: colors.totalAssets },
-  bankBenchmark: { label: 'Savings', color: colors.bank },
-  bondsBenchmark: { label: 'Bonds', color: colors.bonds },
-  stocksBenchmark: { label: 'Stocks', color: colors.stocks },
+  bankBenchmark: { label: assetLabels.bank.name, color: colors.bank },
+  bondsBenchmark: { label: assetLabels.bonds.name, color: colors.bonds },
+  stocksBenchmark: { label: assetLabels.stocks.name, color: colors.stocks },
 }
 const assetConfig = Object.fromEntries(
   ALLOCATION_KEYS.map((key) => [
@@ -121,7 +122,7 @@ function TotalAssets({
           Total assets
         </h2>
         <p className="mobile:app-value m-0 leading-[1.2] font-bold tabular-nums min-[601px]:text-[48px]">
-          {historyAmount(view.current.totalAssets)}{' '}
+          {playerAmount(view.current.totalAssets)}{' '}
           <span className="whitespace-nowrap">CHF</span>
         </p>
       </div>
@@ -135,7 +136,7 @@ function TotalAssets({
             resultTone(change)
           )}
         >
-          {historyAmount(change, true)}
+          {playerAmount(change, true)}
         </p>
       </div>
     </section>
@@ -191,7 +192,7 @@ function BalanceRow({
           !muted && 'font-semibold'
         )}
       >
-        {historyAmount(value.totalAssets)}
+        {playerAmount(value.totalAssets)}
       </span>
     </div>
   )
@@ -227,13 +228,13 @@ function AssetRows({ view }: { view: ResultView }) {
             )}
           >
             {annual
-              ? historyPercent(view.annualReturns[key])
+              ? playerPercent(view.annualReturns[key])
               : mix
                 ? `${Number(mix[key].toFixed(1))}%`
                 : '—'}
           </dd>
           <dd className="mobile:app-body m-0 text-right font-semibold tabular-nums min-[601px]:text-[28px]">
-            {historyAmount(view.current[key])}
+            {playerAmount(view.current[key])}
           </dd>
         </div>
       ))}
@@ -274,7 +275,7 @@ function Benchmarks({ view }: { view: ResultView }) {
             <YAxis hide domain={['auto', 'auto']} />
             <Tooltip
               formatter={(value: number, name: string) => [
-                `${historyAmount(value)} CHF`,
+                `${playerAmount(value)} CHF`,
                 benchmarkConfig[name]?.label ?? name,
               ]}
             />
@@ -339,7 +340,7 @@ function Benchmarks({ view }: { view: ResultView }) {
                   <th>{sample.label}</th>
                   {Object.keys(benchmarkConfig).map((key) => (
                     <td key={key}>
-                      {historyAmount(
+                      {playerAmount(
                         sample[key as keyof typeof benchmarkConfig]
                       )}
                     </td>
@@ -355,7 +356,7 @@ function Benchmarks({ view }: { view: ResultView }) {
 }
 
 function MonthlyReturns({ view }: { view: ResultView }) {
-  const bars = RESULT_MONTHS.map((label, month) => ({
+  const bars = MONTHS.map((label, month) => ({
     label,
     month,
     accumulatedReturn: view.monthly[month]?.accumulatedReturn ?? null,
@@ -368,8 +369,8 @@ function MonthlyReturns({ view }: { view: ResultView }) {
       title="Accumulated return by month"
       detail={
         <strong className={resultTone(view.accumulatedReturn)}>
-          {historyPercent(view.accumulatedReturn)} since the{' '}
-          {historyAmount(view.initialCapital)} start
+          {playerPercent(view.accumulatedReturn)} since the{' '}
+          {playerAmount(view.initialCapital)} start
         </strong>
       }
       testId="result-monthly-returns"
@@ -412,7 +413,7 @@ function MonthlyReturns({ view }: { view: ResultView }) {
             <Tooltip
               cursor={false}
               formatter={(value: number) => [
-                historyPercent(value),
+                playerPercent(value),
                 'Since start',
               ]}
             />
@@ -438,7 +439,7 @@ function MonthlyReturns({ view }: { view: ResultView }) {
         <ul className="sr-only" aria-label="Accumulated monthly returns">
           {bars.map((bar) => (
             <li key={bar.month}>
-              {bar.label}: {historyPercent(bar.accumulatedReturn)}
+              {bar.label}: {playerPercent(bar.accumulatedReturn)}
             </li>
           ))}
         </ul>
@@ -545,7 +546,7 @@ function YearResults({ view }: { view: ResultView }) {
                 <Tooltip
                   cursor={false}
                   formatter={(value: number, name: string) => [
-                    `${historyAmount(value)} CHF`,
+                    `${playerAmount(value)} CHF`,
                     assetConfig[name]?.label ?? name,
                   ]}
                 />
@@ -557,7 +558,7 @@ function YearResults({ view }: { view: ResultView }) {
                     strokeDasharray="6 6"
                     ifOverflow="extendDomain"
                     label={{
-                      value: historyAmount(view.initialCapital),
+                      value: playerAmount(view.initialCapital),
                       position: 'right',
                       offset: 8,
                       fill: 'var(--color-player-muted)',
@@ -579,7 +580,7 @@ function YearResults({ view }: { view: ResultView }) {
                         dataKey="totalAssets"
                         position="top"
                         offset={8}
-                        formatter={(value: number) => historyAmount(value)}
+                        formatter={(value: number) => playerAmount(value)}
                         fill="var(--color-player-text)"
                         fontSize={'var(--result-chart-label-size, 20px)'}
                         fontWeight={700}
@@ -600,10 +601,10 @@ function YearResults({ view }: { view: ResultView }) {
                 <div key={year.year}>
                   {year.year}{' '}
                   <strong className={resultTone(year.gain)}>
-                    {historyAmount(year.gain, true)}
+                    {playerAmount(year.gain, true)}
                   </strong>
                   <span className="sr-only">
-                    ; total {historyAmount(year.totalAssets)} CHF
+                    ; total {playerAmount(year.totalAssets)} CHF
                   </span>
                 </div>
               ))}
@@ -620,7 +621,7 @@ function YearResults({ view }: { view: ResultView }) {
               resultTone(view.accumulatedReturn)
             )}
           >
-            {historyPercent(view.accumulatedReturn)}
+            {playerPercent(view.accumulatedReturn)}
           </strong>
         }
         testId="result-yearly-returns"
@@ -650,7 +651,7 @@ function YearResults({ view }: { view: ResultView }) {
                 />
                 <Tooltip
                   formatter={(value: number) => [
-                    historyPercent(value),
+                    playerPercent(value),
                     'Since start',
                   ]}
                 />
@@ -689,7 +690,7 @@ function YearResults({ view }: { view: ResultView }) {
                 <span key={point.label}>
                   {point.label}{' '}
                   <span className={resultTone(point.accumulatedReturn)}>
-                    {historyPercent(point.accumulatedReturn)}
+                    {playerPercent(point.accumulatedReturn)}
                   </span>
                 </span>
               ))}

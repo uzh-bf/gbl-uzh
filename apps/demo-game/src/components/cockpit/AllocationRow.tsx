@@ -1,7 +1,7 @@
 import { cn } from '@gbl-uzh/ui'
 import type { ReactNode } from 'react'
 import { type Allocation, formatCHF } from '~/lib/allocation'
-import { assetLabels } from './AllocationBar'
+import { assetLabels } from '~/lib/constants'
 
 /** Shared asset identity and CHF column in editable and saved allocations. */
 export default function AllocationRow({

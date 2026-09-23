@@ -1,9 +1,5 @@
 import { useSubscription } from '@apollo/client'
-import {
-  cn,
-  getCountdownNotification,
-  shouldRefetchGameResult,
-} from '@gbl-uzh/ui'
+import { cn, getCountdownNotification } from '@gbl-uzh/ui'
 import { Switch } from '@uzh-bf/design-system'
 import dayjs from 'dayjs'
 import Image from 'next/image'
@@ -14,9 +10,11 @@ import {
   GlobalEventsDocument,
   type ResultQuery,
 } from 'src/graphql/generated/ops'
+import { cantonNames, FIRST_GAME_YEAR } from '~/lib/constants'
+import { parseFacts } from '~/lib/facts'
+import { shouldRefetchDemoGame } from '~/lib/gameEvents'
 import { queueRefetch } from '~/lib/queuedRefetch'
 import type { ResultView } from '~/lib/results'
-import { cantonNames } from '~/lib/teamIdentity'
 import CompactCountdown from './cockpit/CompactCountdown'
 import HistoryPanel from './history/HistoryPanel'
 import MarketPanel from './market/MarketPanel'
@@ -24,21 +22,6 @@ import TeamContent from './team/TeamContent'
 import { useToast } from './ui/use-toast'
 
 const tabs = ['Cockpit', 'Market', 'History', 'Team']
-// The reference timeline starts in 2026; each platform period is one year.
-const FIRST_GAME_YEAR = 2026
-
-function parseFacts(raw: unknown): Record<string, any> {
-  try {
-    let value = raw
-    for (let i = 0; i < 2 && typeof value === 'string'; i++)
-      value = JSON.parse(value)
-    return value && typeof value === 'object' && !Array.isArray(value)
-      ? value
-      : {}
-  } catch {
-    return {}
-  }
-}
 
 function GameLayout({
   children,
@@ -90,11 +73,7 @@ function GameLayout({
     onData: ({ data: subData }) => {
       if (subData?.data?.eventsGlobal) {
         const event = subData.data.eventsGlobal
-        if (
-          shouldRefetchGameResult(event, currentGameId) ||
-          (event.type === 'MARKET_ROLL_REVEALED' &&
-            event.facts?.gameId === currentGameId)
-        ) {
+        if (shouldRefetchDemoGame(event, currentGameId)) {
           void queuedRefetch().catch(() => {})
         }
       }
@@ -152,6 +131,8 @@ function GameLayout({
   }
 
   const facts = parseFacts(self.facts)
+  const location =
+    typeof facts.location === 'string' ? facts.location : undefined
   const segmentIndex = resultView
     ? resultView.quarter - 1
     : activePeriod?.activeSegment?.index
@@ -268,7 +249,7 @@ function GameLayout({
                 expandedHeader && 'leading-[1.25] min-[601px]:text-[22px]'
               )}
             >
-              HQ {cantonNames[facts.location] ?? facts.location ?? '—'}
+              HQ {cantonNames[location] ?? location ?? '—'}
             </p>
           </div>
           <div

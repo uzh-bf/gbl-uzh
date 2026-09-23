@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import {
   PerformActionDocument,
   ResultDocument,
@@ -75,113 +75,92 @@ function Cockpit() {
   if (!playerDataResult) return null
   const currentGame = playerDataResult.currentGame
 
+  const resultView = buildResultView(data)
+  let body: ReactNode
+  let action: ReactNode
+
   switch (currentGame?.status) {
     case 'PREPARATION':
     case 'COMPLETED':
-      return (
-        <GameLayout
-          data={data}
-          refetchResult={refetch}
-          readyControl={readyControl}
-        >
-          <div className="w-full">
-            <div className="font-semibold">
-              {currentGame.status === 'PREPARATION'
-                ? 'Preparing the next year'
-                : 'Game completed'}
-            </div>
+      body = (
+        <div className="w-full">
+          <div className="font-semibold">
+            {currentGame.status === 'PREPARATION'
+              ? 'Preparing the next year'
+              : 'Game completed'}
           </div>
-        </GameLayout>
+        </div>
       )
-
+      break
     case 'SCHEDULED':
-      return (
-        <GameLayout
-          data={data}
-          refetchResult={refetch}
-          readyControl={readyControl}
-        >
-          <div>Game is scheduled.</div>
-        </GameLayout>
-      )
-
+      body = <div>Game is scheduled.</div>
+      break
     case 'PAUSED':
     case 'CONSOLIDATION':
-    case 'RESULTS': {
-      const resultView = buildResultView(data)
-      return (
-        <GameLayout
-          data={data}
-          refetchResult={refetch}
-          readyControl={readyControl}
-          resultView={resultView}
-        >
-          <ResultPanel view={resultView} />
-        </GameLayout>
-      )
-    }
-
+    case 'RESULTS':
+      body = <ResultPanel view={resultView} />
+      break
     case 'RUNNING': {
       const resultFacts = playerDataResult.playerResult?.facts
       const { view, form } = allocationController
-      return (
-        <GameLayout
-          data={data}
-          refetchResult={refetch}
-          readyControl={readyControl}
-          action={
-            view === 'editing' ? (
-              <PlayerActionButton
-                key="submit-allocation"
-                type="submit"
-                form="allocation-form"
-                disabled={
-                  !allocationController.valid ||
-                  form.isSubmitting ||
-                  updatingReady
-                }
-              >
-                {form.isSubmitting ? 'Submitting…' : 'Submit allocation'}
-              </PlayerActionButton>
-            ) : (
-              <PlayerActionButton
-                key="change-allocation"
-                type="button"
-                variant="secondary"
-                disabled={
-                  view === 'ready' || form.isSubmitting || updatingReady
-                }
-                onClick={allocationController.beginEditing}
-              >
-                Change allocation
-              </PlayerActionButton>
-            )
-          }
-        >
-          {view === 'editing' ? (
-            <AllocationForm
-              controller={allocationController}
-              disabled={updatingReady}
-              assets={resultFacts?.assets?.totalAssets ?? 0}
-              scenario={currentGame.activePeriod?.facts?.scenario}
-            />
-          ) : (
-            <AllocationSummary
-              allocation={allocationController.saved}
-              assets={resultFacts?.assets?.totalAssets ?? 0}
-              quarterNumber={
-                (currentGame.activePeriod?.activeSegment?.index ?? 0) + 1
-              }
-              ready={view === 'ready'}
-            />
-          )}
-        </GameLayout>
-      )
+      action =
+        view === 'editing' ? (
+          <PlayerActionButton
+            key="submit-allocation"
+            type="submit"
+            form="allocation-form"
+            disabled={
+              !allocationController.valid || form.isSubmitting || updatingReady
+            }
+          >
+            {form.isSubmitting ? 'Submitting…' : 'Submit allocation'}
+          </PlayerActionButton>
+        ) : (
+          <PlayerActionButton
+            key="change-allocation"
+            type="button"
+            variant="secondary"
+            disabled={view === 'ready' || form.isSubmitting || updatingReady}
+            onClick={allocationController.beginEditing}
+          >
+            Change allocation
+          </PlayerActionButton>
+        )
+      body =
+        view === 'editing' ? (
+          <AllocationForm
+            controller={allocationController}
+            disabled={updatingReady}
+            assets={resultFacts?.assets?.totalAssets ?? 0}
+            scenario={currentGame.activePeriod?.facts?.scenario}
+          />
+        ) : (
+          <AllocationSummary
+            allocation={allocationController.saved}
+            assets={resultFacts?.assets?.totalAssets ?? 0}
+            quarterNumber={
+              (currentGame.activePeriod?.activeSegment?.index ?? 0) + 1
+            }
+            ready={view === 'ready'}
+          />
+        )
+      break
     }
-
     default:
       return <div>Game has not been created yet.</div>
   }
+
+  return (
+    <GameLayout
+      data={data}
+      refetchResult={refetch}
+      readyControl={readyControl}
+      resultView={resultView}
+      action={action}
+    >
+      {body}
+    </GameLayout>
+  )
 }
 
 export default Cockpit

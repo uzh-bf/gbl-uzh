@@ -1,18 +1,38 @@
 import { cn } from '@gbl-uzh/ui'
 import { useFormik } from 'formik'
-import { ArrowLeft, ChevronRight, Info, MapPin, UserRound } from 'lucide-react'
+import { ArrowLeft, Info, MapPin, UserRound } from 'lucide-react'
 import Image from 'next/image'
 import { useRef, useState, type ReactElement } from 'react'
 import type { SelfQuery } from 'src/graphql/generated/ops'
-import { AVATARS, COLORS, LOCATIONS } from 'src/lib/constants'
+import { AVATARS, COLORS, LOCATIONS, cantonNames } from 'src/lib/constants'
 import * as yup from 'yup'
-import { avatarNames, cantonNames } from '~/lib/teamIdentity'
+import { ALLOCATION_KEYS } from '~/lib/allocation'
+import { assetLabels } from '~/lib/constants'
+import { parseFacts } from '~/lib/facts'
 import OptionPicker, { type Option } from './OptionPicker'
 import {
   WelcomeActionButton,
+  WelcomePickerTrigger,
   WelcomeTextButton,
   WelcomeTextInput,
 } from './WelcomeControls'
+
+const avatarNames: Record<string, string> = {
+  sparbaer: 'Bear',
+  sparbulle: 'Bull',
+  sparfalken: 'Falcon',
+  spargecko: 'Gecko',
+  spargeier: 'Vulture',
+  sparhai: 'Shark',
+  sparheuschrecke: 'Locust',
+  sparhund_1: 'Dog 1',
+  sparhund_2: 'Dog 2',
+  sparhund_3: 'Dog 3',
+  sparmaeuse: 'Mice',
+  sparpegasus: 'Pegasus',
+  sparschaf: 'Sheep',
+  sparschwein: 'Pig',
+}
 
 const steps = {
   intro: {
@@ -41,20 +61,6 @@ const locations: Option[] = LOCATIONS.Trader.map((value) => ({
   label: `${cantonNames[value]} (${value})`,
 }))
 
-// Player facts can arrive as JSON, including legacy double-encoded values.
-function parsePlayerFacts(raw: unknown): Record<string, unknown> {
-  try {
-    let value = raw
-    for (let i = 0; i < 2 && typeof value === 'string'; i++)
-      value = JSON.parse(value)
-    return value && typeof value === 'object' && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : {}
-  } catch {
-    return {}
-  }
-}
-
 const schema = yup.object({
   name: yup
     .string()
@@ -81,7 +87,7 @@ export default function WelcomeSetup({
   const content = useRef<HTMLElement>(null)
   const heading = useRef<HTMLHeadingElement>(null)
   const nameInput = useRef<HTMLInputElement>(null)
-  const facts = parsePlayerFacts(player.facts)
+  const facts = parseFacts(player.facts)
   const form = useFormik({
     initialValues: {
       name: player.name ?? '',
@@ -226,32 +232,19 @@ export default function WelcomeSetup({
                 </p>
               </section>
               <ul className="mobile:mb-app-3 mobile:gap-app-2 m-0 mb-[14px] grid list-none gap-[8px] p-0">
-                {[
-                  {
-                    name: 'Savings',
-                    risk: 'No risk',
-                    color: 'bg-player-savings',
-                  },
-                  {
-                    name: 'Bonds',
-                    risk: 'Some risk',
-                    color: 'bg-player-bonds',
-                  },
-                  {
-                    name: 'Stocks',
-                    risk: 'High risk',
-                    color: 'bg-player-stocks',
-                  },
-                ].map(({ name, risk, color }) => (
-                  <li
-                    key={name}
-                    className="border-player-input mobile:gap-app-3 mobile:px-app-3 mobile:py-app-3 grid grid-cols-[10px_78px_1fr] items-center gap-[10px] rounded-[12px] border px-[12px] py-[11px]"
-                  >
-                    <i className={cn('size-[10px] rounded-[2px]', color)} />
-                    <strong>{name}</strong>
-                    <span className="text-player-muted">{risk}</span>
-                  </li>
-                ))}
+                {ALLOCATION_KEYS.map((key) => {
+                  const { name, risk, color } = assetLabels[key]
+                  return (
+                    <li
+                      key={name}
+                      className="border-player-input mobile:gap-app-3 mobile:px-app-3 mobile:py-app-3 grid grid-cols-[10px_78px_1fr] items-center gap-[10px] rounded-[12px] border px-[12px] py-[11px]"
+                    >
+                      <i className={cn('size-[10px] rounded-[2px]', color)} />
+                      <strong>{name}</strong>
+                      <span className="text-player-muted">{risk}</span>
+                    </li>
+                  )
+                })}
               </ul>
               <p className="text-player-muted mobile:app-caption m-0 text-[14px] leading-[1.65]">
                 Savings pay 0.2% a month. Bonds and stocks follow the market
@@ -295,33 +288,28 @@ export default function WelcomeSetup({
                     Avatar
                   </span>
                   {avatarPicker(
-                    <button
-                      type="button"
-                      className="border-player-input text-player-muted focus-visible:outline-player-primary mobile:app-control mobile:gap-app-3 flex min-h-[62px] w-full items-center gap-[16px] rounded-[12px] border bg-white px-[20px] py-[12px] text-left [font:inherit] focus-visible:outline-2 focus-visible:outline-offset-[3px]"
-                      aria-labelledby="avatar-label avatar-value"
+                    <WelcomePickerTrigger
+                      labelId="avatar-label"
+                      valueId="avatar-value"
+                      icon={
+                        avatar?.value ? (
+                          <Image
+                            src={avatar.value}
+                            alt=""
+                            className="size-[32px] rounded-[6px] object-cover"
+                            width={32}
+                            height={32}
+                          />
+                        ) : (
+                          <UserRound
+                            aria-hidden="true"
+                            className="w-[20px] shrink-0"
+                          />
+                        )
+                      }
                     >
-                      {avatar?.value ? (
-                        <Image
-                          src={avatar.value}
-                          alt=""
-                          className="size-[32px] rounded-[6px] object-cover"
-                          width={32}
-                          height={32}
-                        />
-                      ) : (
-                        <UserRound
-                          aria-hidden="true"
-                          className="w-[20px] shrink-0"
-                        />
-                      )}
-                      <span className="flex-1" id="avatar-value">
-                        {avatar?.label ?? 'Choose an animal'}
-                      </span>
-                      <ChevronRight
-                        aria-hidden="true"
-                        className="w-[20px] shrink-0"
-                      />
-                    </button>
+                      {avatar?.label ?? 'Choose an animal'}
+                    </WelcomePickerTrigger>
                   )}
                 </div>
                 <div className="mobile:gap-app-2 flex flex-col gap-[8px]">
@@ -329,23 +317,18 @@ export default function WelcomeSetup({
                     Location
                   </span>
                   {locationPicker(
-                    <button
-                      type="button"
-                      className="border-player-input text-player-muted focus-visible:outline-player-primary mobile:app-control mobile:gap-app-3 flex min-h-[62px] w-full items-center gap-[16px] rounded-[12px] border bg-white px-[20px] py-[12px] text-left [font:inherit] focus-visible:outline-2 focus-visible:outline-offset-[3px]"
-                      aria-labelledby="location-label location-value"
+                    <WelcomePickerTrigger
+                      labelId="location-label"
+                      valueId="location-value"
+                      icon={
+                        <MapPin
+                          aria-hidden="true"
+                          className="w-[20px] shrink-0"
+                        />
+                      }
                     >
-                      <MapPin
-                        aria-hidden="true"
-                        className="w-[20px] shrink-0"
-                      />
-                      <span className="flex-1" id="location-value">
-                        {location?.label ?? 'Choose a canton'}
-                      </span>
-                      <ChevronRight
-                        aria-hidden="true"
-                        className="w-[20px] shrink-0"
-                      />
-                    </button>
+                      {location?.label ?? 'Choose a canton'}
+                    </WelcomePickerTrigger>
                   )}
                 </div>
               </div>

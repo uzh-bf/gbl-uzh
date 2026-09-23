@@ -5,7 +5,7 @@ import {
   formatCHF,
   toTenths,
 } from '~/lib/allocation'
-import { assetLabels } from './AllocationBar'
+import { assetLabels } from '~/lib/constants'
 import AllocationRow from './AllocationRow'
 import AllocationSlider from './AllocationSlider'
 import type { useAllocationForm } from './useAllocationForm'

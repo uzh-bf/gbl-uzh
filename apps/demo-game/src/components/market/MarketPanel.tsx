@@ -1,7 +1,7 @@
-import { ProbabilityChart } from '@gbl-uzh/ui'
+import { ProbabilityChart, signedPercent } from '@gbl-uzh/ui'
 import type { ResultQuery } from '~/graphql/generated/ops'
+import { assetLabels } from '~/lib/constants'
 import {
-  formatMarketReturn,
   latestRevealedRoll,
   marketPeriod,
   readScenario,
@@ -13,16 +13,16 @@ const sectionClass =
 const marketAssets = [
   {
     key: 'bonds',
-    label: 'Bonds',
-    color: 'bg-player-bonds',
+    label: assetLabels.bonds.name,
+    color: assetLabels.bonds.color,
     dieColor: 'bg-[#ffe000] text-black',
     trend: 'trendBonds',
     gap: 'gapBonds',
   },
   {
     key: 'stocks',
-    label: 'Stocks',
-    color: 'bg-player-stocks',
+    label: assetLabels.stocks.name,
+    color: assetLabels.stocks.color,
     dieColor: 'bg-[#268368] text-white',
     trend: 'trendStocks',
     gap: 'gapStocks',
@@ -30,7 +30,7 @@ const marketAssets = [
 ] as const
 const assets = [
   ...marketAssets,
-  { key: 'bank', label: 'Savings', color: 'bg-player-savings' },
+  { key: 'bank', label: assetLabels.bank.name, color: assetLabels.bank.color },
 ] as const
 
 function StaticDie({
@@ -145,7 +145,7 @@ export default function MarketPanel({ data }: { data: ResultQuery }) {
                   className="mobile:gap-app-3 grid grid-cols-[90px_1fr_65px] items-center gap-[12px] min-[601px]:grid-cols-[160px_1fr_80px]"
                   key={key}
                   data-cy={`market-return-${key}`}
-                  aria-label={`${label}: ${formatMarketReturn(value)}`}
+                  aria-label={`${label}: ${signedPercent(value)}`}
                 >
                   <div className="text-player-body mobile:gap-app-3 mobile:app-body flex items-center min-[601px]:gap-[20px] min-[601px]:text-[26px]">
                     <span
@@ -172,7 +172,7 @@ export default function MarketPanel({ data }: { data: ResultQuery }) {
                     )}
                   </div>
                   <strong className="mobile:app-caption text-right min-[601px]:text-[24px]">
-                    {formatMarketReturn(value)}
+                    {signedPercent(value)}
                   </strong>
                 </div>
               )

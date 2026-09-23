@@ -1,3 +1,6 @@
+// Each platform period represents a year in the player timeline.
+export const FIRST_GAME_YEAR = 2026
+
 export const LOCATIONS = {
   Trader: ['AG', 'AI', 'BE', 'FR', 'GR', 'JU', 'TI', 'ZH'],
 }
@@ -45,4 +48,34 @@ export const AVATARS = {
 
 export const NUM_MONTHS = MONTHS.length
 
-export const NUM_MONTHS_PER_SEGMENT = 4
+export const cantonNames: Record<string, string> = {
+  AG: 'Aargau',
+  AI: 'Appenzell Innerrhoden',
+  BE: 'Bern',
+  FR: 'Fribourg',
+  GR: 'Graubünden',
+  JU: 'Jura',
+  TI: 'Ticino',
+  ZH: 'Zürich',
+}
+
+export const assetLabels = {
+  bank: {
+    name: 'Savings',
+    risk: 'No risk',
+    color: 'bg-player-savings',
+    chartColor: 'var(--color-player-savings)',
+  },
+  bonds: {
+    name: 'Bonds',
+    risk: 'Some risk',
+    color: 'bg-player-bonds',
+    chartColor: 'var(--color-player-bonds)',
+  },
+  stocks: {
+    name: 'Stocks',
+    risk: 'High risk',
+    color: 'bg-player-stocks',
+    chartColor: 'var(--color-player-stocks)',
+  },
+} as const

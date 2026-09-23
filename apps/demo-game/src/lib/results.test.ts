@@ -1,7 +1,19 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import type { ResultQuery } from '../graphql/generated/ops'
-import { balanceMix, buildResultView } from './results'
+import { parseFacts } from './facts'
+import {
+  balanceMix,
+  buildResultView,
+  compoundReturns,
+  difference,
+  finiteNumber,
+  playerAmount,
+  playerPercent,
+  readAllocation,
+  readBalanceSamples,
+  readInitialCapital,
+} from './results'
 
 const assets = (total: number) => ({
   bank: total * 0.5,
@@ -238,4 +250,117 @@ test('year gain requires a real opening balance, not the earliest surviving quar
   assert.equal(build(data).yearGain, null)
   data.result.previousResults.push(row(0, 0))
   assert.equal(build(data).yearGain, 500)
+})
+
+test('facts accept objects and legacy encodings, without accepting arrays or primitives', () => {
+  const facts = { avatar: 'bear', initialCapital: 0 }
+  assert.equal(parseFacts(facts), facts)
+  for (const raw of [
+    JSON.stringify(facts),
+    JSON.stringify(JSON.stringify(facts)),
+  ])
+    assert.deepEqual(parseFacts(raw), facts)
+  for (const raw of [
+    null,
+    undefined,
+    0,
+    false,
+    [],
+    '{} broken',
+    'null',
+    '[1]',
+    JSON.stringify(JSON.stringify(JSON.stringify(facts))),
+  ])
+    assert.deepEqual(parseFacts(raw), {})
+})
+
+test('numeric helpers preserve missing data, zero, and finite losses', () => {
+  for (const raw of [null, undefined, '1', NaN, Infinity, -Infinity])
+    assert.equal(finiteNumber(raw), null)
+  assert.equal(finiteNumber(0), 0)
+  assert.equal(finiteNumber(-0.1), -0.1)
+  assert.equal(difference(0, 2), -2)
+  assert.equal(difference(null, 2), null)
+  assert.equal(difference(2, null), null)
+  assert.equal(difference(Number.MAX_VALUE, -Number.MAX_VALUE), null)
+  assert.equal(compoundReturns([]), null)
+  assert.equal(compoundReturns([0.1, null]), null)
+  assert.equal(compoundReturns([Infinity]), null)
+  assert.equal(compoundReturns([NaN]), null)
+  assert.equal(compoundReturns([0, 0]), 0)
+  assert.equal(compoundReturns([-1, 0.2]), -1)
+  assert.equal(compoundReturns([0.1, -0.05, 0.02]), 1.1 * 0.95 * 1.02 - 1)
+})
+
+test('saved allocations retain decimal validation without coercing stored strings', () => {
+  const allocation = { bank: 33.3, bonds: 33.3, stocks: 33.4 }
+  assert.deepEqual(readAllocation(JSON.stringify(allocation)), allocation)
+  for (const raw of [
+    null,
+    { bank: 100 },
+    { bank: '100', bonds: 0, stocks: 0 },
+    { bank: 33.33, bonds: 33.33, stocks: 33.34 },
+  ])
+    assert.equal(readAllocation(raw), null)
+})
+
+test('balance samples require an opening record and contiguous indices', () => {
+  const samples = [
+    { ix: 0, totalAssets: 100 },
+    { ix: 1, totalAssets: 90 },
+  ]
+  assert.deepEqual(readBalanceSamples({ assetsWithReturns: samples }), samples)
+  assert.deepEqual(
+    readBalanceSamples(
+      JSON.stringify({
+        assetsWithReturns: samples.map((sample) => JSON.stringify(sample)),
+      })
+    ),
+    samples
+  )
+  for (const samples of [
+    [],
+    [{ ix: 0 }],
+    [{ ix: 1 }, { ix: 2 }],
+    [{ ix: 0 }, { ix: 2 }],
+    [null, { ix: 1 }],
+  ])
+    assert.deepEqual(readBalanceSamples({ assetsWithReturns: samples }), [])
+})
+
+test('initial capital uses the first recorded finite value, including zero, then current facts', () => {
+  assert.equal(
+    readInitialCapital([{ facts: {} }, { facts: { initialCapital: 0 } }], {
+      initialCapital: 10,
+    }),
+    0
+  )
+  assert.equal(
+    readInitialCapital(
+      [{ facts: { initialCapital: NaN } }],
+      JSON.stringify({ initialCapital: 10 })
+    ),
+    10
+  )
+  assert.equal(
+    readInitialCapital(
+      [
+        { facts: JSON.stringify({ initialCapital: 100 }) },
+        { facts: { initialCapital: 200 } },
+      ],
+      { initialCapital: 300 }
+    ),
+    100
+  )
+  assert.equal(readInitialCapital([], {}), null)
+})
+
+test('player formatting keeps Swiss separators, signed rounding and neutral zero', () => {
+  assert.equal(playerAmount(1234.5), "1'234.50")
+  assert.equal(playerAmount(-1.005, true), '-1.01')
+  for (const zero of [0, -0, 0.001, -0.001])
+    assert.equal(playerAmount(zero, true), '0.00')
+  assert.equal(playerPercent(0.000001), '0.00%')
+  assert.equal(playerPercent(-0.000001), '0.00%')
+  assert.equal(playerAmount(null), '—')
 })

@@ -1,6 +1,11 @@
 import { cn } from '@gbl-uzh/ui'
 import { Button } from '@uzh-bf/design-system'
-import type { ComponentPropsWithRef, ComponentPropsWithoutRef } from 'react'
+import { ChevronRight } from 'lucide-react'
+import type {
+  ComponentPropsWithRef,
+  ComponentPropsWithoutRef,
+  ReactNode,
+} from 'react'
 
 export function WelcomeActionButton({
   className,
@@ -65,5 +70,36 @@ export function WelcomeMessage({
         className
       )}
     />
+  )
+}
+
+export function WelcomePickerTrigger({
+  icon,
+  labelId,
+  valueId,
+  children,
+  className,
+  ...props
+}: ComponentPropsWithRef<'button'> & {
+  icon: ReactNode
+  labelId: string
+  valueId: string
+}) {
+  return (
+    <button
+      type="button"
+      aria-labelledby={`${labelId} ${valueId}`}
+      {...props}
+      className={cn(
+        'border-player-input text-player-muted focus-visible:outline-player-primary mobile:app-control mobile:gap-app-3 flex min-h-[62px] w-full items-center gap-[16px] rounded-[12px] border bg-white px-[20px] py-[12px] text-left [font:inherit] focus-visible:outline-2 focus-visible:outline-offset-[3px]',
+        className
+      )}
+    >
+      {icon}
+      <span className="flex-1" id={valueId}>
+        {children}
+      </span>
+      <ChevronRight aria-hidden="true" className="w-[20px] shrink-0" />
+    </button>
   )
 }
