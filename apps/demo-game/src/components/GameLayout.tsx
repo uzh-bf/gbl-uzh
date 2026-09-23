@@ -128,20 +128,27 @@ function GameLayout({ children }: { children: React.ReactNode }) {
 
   const currentGameId = resultData?.currentGame?.id
 
+  // Period/segment transitions reset player readiness server-side, and the
+  // ready switch reads isReady from play.self — refresh both, the way the
+  // single GraphQL Result document used to.
+  const refreshGameResult = () => {
+    Promise.all([
+      utils.play.result.invalidate(),
+      utils.play.self.invalidate(),
+    ]).catch((error) => {
+      console.error('GameLayout: Failed to refresh result:', error)
+    })
+  }
+
   trpc.events.global.useSubscription(undefined, {
     enabled: Boolean(currentGameId),
+    // Runs on every SSE (re)connect. Events published while disconnected are
+    // not replayed, so refetch to catch up on anything missed.
+    onStarted: refreshGameResult,
     onData(event) {
       if (!currentGameId) return
       if (shouldRefetchGameResult(event, currentGameId)) {
-        // Period/segment transitions reset player readiness server-side, and
-        // the ready switch reads isReady from play.self — refresh both, the way
-        // the single GraphQL Result document used to.
-        Promise.all([
-          utils.play.result.invalidate(),
-          utils.play.self.invalidate(),
-        ]).catch((error) => {
-          console.error('GameLayout: Failed to refresh result:', error)
-        })
+        refreshGameResult()
       }
     },
     onError: (err) => {

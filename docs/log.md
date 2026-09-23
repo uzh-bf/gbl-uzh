@@ -1,5 +1,9 @@
 # Log
 
+## 2026-09-23
+
+- **Update**: `api-layer.md` - documented typed `createPlatformRouter` extensions, service-error `cause` preservation, and query refetch on every subscription (re)connect.
+
 ## 2026-08-13
 
 - **Update**: `developing-a-game.md`, the example READMEs, and native host guidance - aligned the new-game architecture and local-auth guidance with the three tRPC Pages Router apps: native host mode uses committed mock defaults, and GraphQL/Nexus generation is not part of game scaffolding.

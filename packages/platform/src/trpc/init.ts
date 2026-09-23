@@ -2,7 +2,7 @@ import superjson from 'superjson'
 import { TRPCError, initTRPC } from '@trpc/server'
 import { UserRole } from '../types.js'
 import type { PlatformContext, PlatformUser } from './context.js'
-import { throwAsTRPCError } from './errors.js'
+import { asTRPCCodeFromServiceError, throwAsTRPCError } from './errors.js'
 
 const t = initTRPC.context<PlatformContext>().create({
   transformer: superjson,
@@ -78,10 +78,13 @@ const enforceRole = (role: UserRole) =>
 const mapServiceErrors = t.middleware(async ({ next }) => {
   const result = await next()
 
+  // Unmapped failures stay as tRPC produced them, so onError still logs the
+  // original stack instead of one pointing at this middleware.
   if (
     !result.ok &&
     result.error.code === 'INTERNAL_SERVER_ERROR' &&
-    result.error.cause !== undefined
+    result.error.cause !== undefined &&
+    asTRPCCodeFromServiceError(result.error.cause) !== 'INTERNAL_SERVER_ERROR'
   ) {
     throwAsTRPCError(result.error.cause)
   }

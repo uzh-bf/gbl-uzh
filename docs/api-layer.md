@@ -7,7 +7,7 @@ tags:
   - graphql
   - trpc
   - realtime
-timestamp: "2026-08-10T00:00:00Z"
+timestamp: "2026-09-23T00:00:00Z"
 ---
 
 # API Layer and Realtime
@@ -30,13 +30,15 @@ been confirmed. They are not a supported starting point for new work; see
   router, procedure, and caller helpers rather than the entire `t` object.
 - `createPlatformRouter({ services, schemas, roleAssigner?, extensions? })`
   composes the `auth`, `game`, `period`, `segment`, `play`, `learning`, `events`,
-  `story`, and `results` routers.
+  `story`, and `results` routers. Routers passed as `extensions` are merged at
+  the top level and keep their procedure types in `AppRouter`.
 - A game exports `AppRouter = typeof appRouter`; browser modules import this as
   a type so server code cannot enter the client bundle.
 - Zod validates transport inputs. Yup continues to validate game-specific facts
   before service computations run.
-- Known domain failures are mapped to `TRPCError`. Unexpected internal errors
-  are logged server-side and returned with a generic client message.
+- Known domain failures are mapped to `TRPCError` with the service error as
+  `cause`. Unexpected internal errors keep their original stack for server-side
+  logging and are returned with a generic client message.
 
 ## Authorization
 
@@ -104,7 +106,9 @@ Server subscriptions return async iterables and pass the request
 event bus is process-local, so a game must run a single app replica. There is no
 cross-instance delivery, retained history, or reconnect replay. Do not use
 `tracked()` until events have stable IDs and durable history that can fill a
-reconnect gap.
+reconnect gap. Until then, clients invalidate the affected queries in the
+subscription's `onStarted` callback, which runs on every SSE (re)connect, so
+state changed while disconnected is refetched.
 
 ## Verification
 
