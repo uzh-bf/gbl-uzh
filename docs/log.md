@@ -2,7 +2,7 @@
 
 ## 2026-09-25
 
-**Update**: [Deploying a Game](deploying-a-game.md) — document the isolated ARM64 GBL production validation image, digest-pinning gate, and manual data migration prerequisites.
+**Update**: [Deploying a Game](deploying-a-game.md) — document the ARM64 GBL production image for startinvest.df-app.ch, digest-pinning gate, and manual data migration prerequisites.
 
 ## 2026-09-23
 

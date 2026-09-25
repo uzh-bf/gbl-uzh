@@ -145,10 +145,10 @@ Open `https://<your-vercel-domain>/admin/login`, sign in through your OIDC tenan
 | Too many database connections under light load                | App using the direct (non-pooled) Neon string                          | Point `DATABASE_URL` at the **pooled** string; keep direct only for migrate/seed         |
 | `prisma migrate deploy` hangs or errors on Neon               | Running migrations through the pooler                                  | Run migrations with the **direct** connection string                                     |
 
-## Parallel GBL production validation
+## GBL production image preparation
 
 The additional build_gbl_prd_arm64 job in .github/workflows/demo-game.yml uses
-apps/demo-game/.env.gbl-prd-arm64 to bake https://gbl-demo.prd.df-app.ch into
+apps/demo-game/.env.gbl-prd-arm64 to bake https://startinvest.df-app.ch into
 the frontend. PRs to dev build without publishing; pushes to dev publish
 gbl-prd-arm64 and gbl-prd-<commit SHA>-arm64, separately from existing tags.
 This publishes an image only; it does not deploy or migrate a database.
@@ -157,6 +157,8 @@ Before activation, verify the ARM64 publisher and pin its registry digest in the
 Helm charts gbl/demo-game/prd overlay. Its mutable draft tag is not a release pin.
 The cloud stack provides separate prd-gbl-demo resources and a new database.
 Configure runtime authentication secrets and Auth0 callback/web-origin/logout
-allowlists for the validation hostname. Restore and validate production data
+allowlists for startinvest.df-app.ch. Restore and validate production data
 manually before sync; no automatic PRD migration hook is enabled. Keep legacy
-production resources and credentials unchanged until a separate cutover.
+production resources and credentials unchanged until a separate cutover. The new
+Demo ingress reuses the legacy public host: do not sync it while the legacy
+ingress owns that host/path. Coordinate ingress ownership explicitly at cutover.
