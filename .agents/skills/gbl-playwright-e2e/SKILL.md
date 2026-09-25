@@ -15,7 +15,7 @@ Playwright docs/skills only for API details; keep repo-specific decisions here.
 
 - Specs: `playwright/tests/**/*.spec.ts`
 - Setup auth: `playwright/tests/setup/admin-auth.setup.ts`
-- Support helpers: `playwright/tests/support/*.ts`
+- Support helpers: `playwright/tests/support/*.ts`; `demoGame.ts` shares game creation, welcome-session setup, no-overflow checks, and overlay-free captures. Keep detailed welcome assertions in `demo-game-welcome.spec.ts`; ordinary player joins follow the happy path.
 - Config: `playwright/playwright.config.ts`
 - CI workflow: `.github/workflows/playwright-testing.yml`
 - App under test: `apps/demo-game`
@@ -102,8 +102,10 @@ claim prettier verification unless the binary exists.
   `https://demo-game.localhost`.
 - Set file-local timeout only with measured runtime evidence. Local broad flow
   runs about `1.1m-1.6m`, but the GitHub-hosted shard has reached the old
-  `120_000` timeout after CI setup and slower player actions; current file-local
-  timeout is `300_000`.
+  `120_000` timeout after CI setup and slower player actions. The file default
+  remains `300_000`; the multi-team lifecycle test uses `420_000` after a local
+  run reached the final report at ~250s and exceeded the old popup wait during
+  cold compilation. Dice/report popup waits allow `60_000`.
 
 ## GitHub Actions Rules
 
@@ -151,7 +153,7 @@ adapt it to GBL's smaller stack:
 > **Segment facts validation schemas must allow empty/partial input.** When the admin clicks "Add Segment", the platform submits `{}` as the initial facts before calling `SegmentService.initialize`. If your yup schema marks fields as `.required()`, the mutation silently fails. Make segment-facts schema fields `.optional()` (or `.nullable()`) and let `SegmentService.initialize` fill them.
 
 > [!TIP]
-> **After clicking submit, assert `toBeEnabled()`, not `toBeDisabled()`.** GraphQL mutations resolve fast; by the time Playwright checks, the button has already re-enabled. Asserting `toBeDisabled()` flakes. The stable idiom is: click submit, then `await expect(submitButton).toBeEnabled()` to confirm the mutation finished processing, then assert the next durable UI state (e.g. the "Set Ready" button appears).
+> **After clicking submit, assert the durable resulting state.** In the demo game, submission replaces the button and editor with the “Allocation submitted” summary. Assert that summary and its saved percentages, including after reload. Do not expect the removed submit button to re-enable. For forms that retain their submit button, asserting re-enablement is preferable to transient loading-state assertions.
 
 ## GBL Game Flow Rules
 
@@ -219,8 +221,7 @@ Return the post-reload status in the same poll cycle.
   dice animation coverage.
 - Countdown: set countdown, assert player widget appears, never wait for expiry
   in CI.
-- Player cockpit: assert form/result states (`Submit`, `Assets Overview`,
-  `Savings`, `Bonds`, `Stocks`, `Total`) rather than chart pixels.
+- Demo-game cockpit: assert `Submit allocation`, `To allocate`, and the named Savings/Bonds/Stocks spinbuttons. Allocation sliders are named `Savings boundary` and `Stocks boundary`. Check decimal persistence, invalid totals, pushing/keyboard behavior, tab draft retention, and failed-save recovery; preserve existing result-screen assertions. Cover submitted summaries, Ready/unready, resubmission, failed Ready mutations, and summary/Ready reload persistence. Ready disables editing and is unavailable in the editor until resubmission; all-ready does not advance the instructor-controlled lifecycle. Compare action-button and shared-chrome dimensions across editing, submitted, and Ready at mobile/tablet widths. Wait for viewport layout to settle before measuring. The tab is labeled Decisions with the existing `cockpit` URL key. Ready is only visible there during RUNNING; review states show the instructor waiting message. Verify editing-only forecast values against Market and keep mobile forecast/footer coverage, and learning activities live in Team.
 
 ## Adapting the demo-game spec to your game
 
@@ -228,8 +229,8 @@ The demo-game spec (`playwright/tests/demo-game-flow.spec.ts`) is the template f
 
 - **Decision form**: swap the demo's allocation inputs (`bank` / `bonds` / `stocks` summing to 100) for your game's single decision. Update the input locator (e.g. `getByPlaceholder`, `input[name=...]`), the yup validation values, and the submit button name. Mirror the constraints your `Actions.apply` reducer enforces.
 - **Player plan**: replace the `decisions` array with your game's per-segment decision values (e.g. `[{ rate: '6.0' }, { rate: '5.5' }]`).
-- **Dashboard assertions**: replace demo-game metric labels (`Assets Overview`, `Savings`, `Bonds`, `Stocks`, `Total`) with your game's (`Current Inflation`, `Unemployment`, `GDP Growth`, `Cumulative Loss`). Assert durable headings, not chart pixels or transient numbers.
-- **Keep the sentinel period** (see the WARNING above). Add one unplayed period after your last played period.
+- **Dashboard assertions**: replace demo-game metric labels (`To allocate`, `Savings`, `Bonds`, `Stocks`) with your game's (`Current Inflation`, `Unemployment`, `GDP Growth`, `Cumulative Loss`). Assert durable headings, not chart pixels or transient numbers.
+- **Cover final results without a sentinel period.** The demo breadth scenario deliberately includes an upcoming period; the result-design scenario covers the disconnected final pointer. New game flows need no artificial final period.
 - **Keep the admin flow**: `createGame` -> `addPeriod` -> `addSegment` (per period) -> join players -> advance transitions. The state-transition sequence is game-agnostic.
 - **Keep `expectGameStatusEventually`** (or equivalent reload-aware polling) for admin status assertions - UI data lags mutations.
 - **Segment count via stable child content**: count real segments by a child that only exists after `SegmentService.initialize` (e.g. `text=Roll:`), not by placeholder card count.

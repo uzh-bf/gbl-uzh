@@ -9,8 +9,10 @@ fragment PlayerData on Player {
   facts
 
   experience
-  experienceToNext
+  completedLearningElementIds
+  visitedStoryElementIds
 
+  experienceToNext
 
   game {
     id

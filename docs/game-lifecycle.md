@@ -6,7 +6,7 @@ tags:
   - lifecycle
   - state-machine
   - admin
-timestamp: "2026-07-03T00:00:00Z"
+timestamp: "2026-09-23T00:00:00Z"
 ---
 
 # Game Lifecycle
@@ -55,20 +55,23 @@ Notes:
 
 The player cockpit is a single page that switches on `game.status` (`apps/demo-game/src/pages/play/cockpit.tsx`):
 
-| Status                 | Player view                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------------- |
-| SCHEDULED              | "Game is scheduled" placeholder                                                         |
-| PREPARATION            | Header only — waiting while the admin sets up                                           |
-| RUNNING                | The decision form (game-specific), plus a Ready toggle                                  |
-| PAUSED / CONSOLIDATION | Read-only segment results OR active period consolidation forms (e.g. investing in factories, setting dividends for the period) |
-| RESULTS                | Period-end report: aggregate charts across the period(s)                                |
+| Status        | Player view                                                                                           |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| SCHEDULED     | "Game is scheduled" placeholder                                                                       |
+| PREPARATION   | Header only — waiting while the admin sets up                                                         |
+| RUNNING       | Demo game: allocation editor → submitted summary → reversible Ready lock                              |
+| PAUSED        | Demo game: closed-quarter balances, benchmark history, and accumulated monthly returns                |
+| CONSOLIDATION | Demo game: carried-over holdings, change since quarter close, and benchmark history                   |
+| RESULTS       | Demo game: completed-year asset totals, accumulated portfolio return, and annual asset market returns |
 
-Independent of status: story elements attached to a newly activated segment appear as blocking popups until acknowledged; learning elements sit in a sidebar list; achievements/level-ups arrive as notifications.
+Independent of status: story elements attached to a newly activated segment appear as blocking popups until acknowledged; demo-game learning elements sit in the Team tab (other games may use a sidebar); achievements/level-ups arrive as notifications.
 
 ## Coordination mechanics (all advisory)
 
+- **Demo-game Decisions tab** — Ready appears only during RUNNING and requires submission through the editor. It locks editing until switched off; Change allocation requires resubmission before Ready is available again. Submission is persisted per segment, survives reload, and resets at the next segment. This is a cockpit control rule, not API enforcement.
 - **Ready flag** — players toggle "Ready" after acting (`updateReadyState`). The admin UI plays a sound and shows "All players are ready!" but the platform never blocks or auto-advances on it.
-- **Countdown** — the admin can set a countdown on the active segment (`addCountdown`); players see a ticking widget and warning toasts. When it expires **nothing happens automatically** — the admin still clicks the button. Treat it as social pressure, not enforcement.
+- **Countdown** — the admin can set a countdown on the active segment (`addCountdown`); players see a ticking widget; the demo game emits readiness reminder toasts only during RUNNING, while configured timers remain visible during review. When it expires **nothing happens automatically** — the admin still clicks the button. Treat it as social pressure, not enforcement.
+- **Market reveals** — the demo-game admin can publish each precomputed monthly roll during or after allocation. Its animation calls `revealMarketRoll`; persistence and `MARKET_ROLL_REVEALED` refresh all player Market tabs. Replaying dice keeps the same outcome; closing a segment does not reveal it. Allocation and lifecycle transitions remain independent.
 - **Realtime** — every transition publishes a global event (`PERIOD_ACTIVATED`, `SEGMENT_ACTIVATED`, `COUNTDOWN_UPDATED`, ...). Clients use these purely as a signal to refetch their queries — no payload is trusted. See [api-layer.md](api-layer.md).
 
 ## End-to-end walkthrough

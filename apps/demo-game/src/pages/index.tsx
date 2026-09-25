@@ -26,7 +26,7 @@ export default function Home() {
   const router = useRouter()
   const tabs = [
     { name: 'Welcome', href: '/play/welcome' },
-    { name: 'Cockpit', href: '/play/cockpit' },
+    { name: 'Decisions', href: '/play/cockpit' },
   ]
   const playerInfo = {
     name: 'playerName',

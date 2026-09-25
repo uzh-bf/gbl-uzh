@@ -7,6 +7,8 @@ import * as React from 'react'
 
 import { twMerge } from 'tailwind-merge'
 
+import { playerNoticeStyles } from '../cockpit/AllocationNotice'
+
 const ToastProvider = ToastPrimitives.Provider
 
 const ToastViewport = React.forwardRef<
@@ -30,6 +32,7 @@ const toastVariants = cva(
     variants: {
       variant: {
         default: 'border bg-background text-foreground',
+        countdown: `${playerNoticeStyles.surface} ${playerNoticeStyles.success} font-player justify-start space-x-0 pr-[56px] mobile:pr-[56px] min-[601px]:pr-[64px]`,
         destructive:
           'destructive group border-destructive bg-destructive text-destructive-foreground',
       },

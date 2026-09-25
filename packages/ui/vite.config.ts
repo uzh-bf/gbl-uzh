@@ -12,13 +12,16 @@ export default defineConfig({
     externalizeDeps({
       deps: true,
       peerDeps: true,
-    }) as Plugin,
+    }),
   ],
   build: {
+    // Preserve the browser targets used before the Vite 7 upgrade.
+    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
       formats: ['es'],
       fileName: 'index',
+      cssFileName: 'style',
     },
     rollupOptions: {
       watch: {

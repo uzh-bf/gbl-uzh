@@ -7,7 +7,7 @@ tags:
   - design-system
   - tailwind
   - components
-timestamp: '2026-07-11T00:00:00Z'
+timestamp: "2026-09-23T00:00:00Z"
 ---
 
 # UI Building Blocks
@@ -56,7 +56,7 @@ Vite-built ESM library; source `packages/ui/src/components/`. Selected exports f
 | Forms and controls     | `TradingForm`, `ReusableFormField`, `Form`, `MultiSelect`, `HelpTooltip`                             | React Hook Form for shared reusable fields; app authoring forms may still use Formik  |
 | Data and game widgets  | `EventLog`, `ProbabilityChart`, `StorageOverview`, `Die`                                             | `ProbabilityChart` and `Die` remain reference-game flavored                           |
 
-Other public exports include `cn`, number formatters, status helpers, and global-event helpers. Internal components include `Achievement`, `SegmentEntry`, `LearningElementDisplay`, and the underlying UI primitives used by exported components. `ListItem` is fully commented out.
+Other public exports include `cn`, number formatters (including `signedPercent(value, digits = 1)` for signed fixed-precision percentages with rounded-zero normalization), status helpers, and global-event helpers. Internal components include `Achievement`, `SegmentEntry`, `LearningElementDisplay`, and the underlying UI primitives used by exported components. `ListItem` is fully commented out.
 
 CSS: the package ships a Tailwind v4 **utilities-only** stylesheet (no preflight; the consuming app supplies a base). Consumers import `@gbl-uzh/ui/style.css` explicitly; see `apps/demo-game/src/globals.css`.
 
@@ -78,6 +78,52 @@ Copy the demo game's setup (`apps/demo-game/src/globals.css`, `postcss.config.js
 3. `@layer utilities { .aspect-video { ... } }` is manually patched in because the design system's `ChartContainer` needs it but the shipped CSS doesn't emit it.
 4. Theming = CSS custom properties on `:root` (`--theme-color-primary`, `--theme-color-secondary`, with `-80/-60/-40/-20` shades).
 
+### Market probability charts
+
+`packages/ui/src/components/ProbabilityChart.tsx:ProbabilityChart` keeps its existing admin presentation by default. `variant="market"` adds the compact player presentation with optional `title`, `titleContent`, and `month`; `totalEyes` selects an actual revealed total, with no automatic highlight of 7. Expected return, trend gap, and volatility share a compact row with matching text sizes. `month` places the latest revealed month beneath the Expected value for both Bonds and Stocks; the charts have no highlighted-date footer. The month remains absent until a roll is revealed. The comparison heading is “Monthly returns · Month N”; the latest revealed results continue to persist across quarter and year changes. `titleContent` places the latest revealed dice beneath each asset title; these compact dice use stored outcomes and asset colors. The exported `probabilityDistribution` helper also supplies the Decisions editor’s forecast volatility; `signedPercent` formats its expected values. The shared calculation preserves the reference game's rounded probability weights and volatility convention. All values derive from supplied scenario inputs, not screenshot constants. The Market SVG has an accessible description and per-roll descriptions; all 11 bars scale to the available width without horizontal scrolling, including at a 400px viewport. Narrower bars and compact mobile labels preserve room for the endpoint labels.
+
+### Player styling convention
+
+The demo-game cockpit and welcome flow use colocated Tailwind utilities, with shared player colors and font tokens in `apps/demo-game/src/globals.css`. Primary actions use the UZH primary token; Savings, Bonds, and Stocks use named asset tokens shared with the welcome screen. The welcome screen's portaled pickers apply their font, size, line height, and colors directly to dialog content. Welcome-local controls in `apps/demo-game/src/components/welcome/WelcomeControls.tsx` reuse design-system buttons with 44px mobile / 48px desktop minimum heights and forward native props and refs; text inputs and Edit/Cancel buttons share utility classes. `WelcomePickerTrigger` shares the native avatar/canton trigger structure and forwards native props and refs. Welcome and cockpit retain separate action dimensions, while sharing palette tokens, including welcome's primary hover shade.
+
+Reuse structure and styles through app-local components: `PlayerActionButton` provides primary/secondary actions with shared responsive dimensions; `AllocationNotice` provides success/pending/informational notices; `AllocationRow` shares asset identity and amounts between editing and saved summaries. `AllocationBar` owns proportional sections and container-query label visibility; its optional `compact` presentation suppresses labels and internal separators for History table mixes, whose wrappers provide accessible percentages. These components live in `apps/demo-game/src/components/cockpit/`; promote them to the shared UI package only when another game needs them.
+
+Demo-game result panels (`apps/demo-game/src/components/cockpit/ResultPanels.tsx`) share total-asset summaries, monthly balance rows, asset breakdowns, and benchmark charts. Compact `AllocationBar` segments encode actual holdings; accessible descriptions expose the mix. Recharts provides monthly cumulative-return bars, stacked year-end assets with an initial-capital reference, and cumulative year-end returns. Shared player colors distinguish Savings/Bonds/Stocks, and gains/losses use success/error tokens. The 784px reference layout scales down to 320px; multi-year charts scroll within their own sections. Screen-reader tables/lists expose monthly chart values.
+
+Preserve the current pixel dimensions and explicit viewport thresholds when adapting these designs: the app root is **14px**, so default rem-based Tailwind spacing is not a pixel-equivalent replacement. Dynamic widths and slider positions remain inline styles. Custom CSS in the converted cockpit is limited to the WebKit number-input stepper reset in the components layer; ordinary layout, responsive rules, and interaction states belong in utilities. Supply control overrides through the design system's class slots rather than CSS Module selectors and blanket `!important` rules.
+
+### Demo-game sizing contract
+
+`apps/demo-game/src/globals.css` centrally defines the demo-game sizing roles. Apply the `mobile:` variant (below **601px**) to opt a component into this scale; existing base and desktop utilities preserve the previous desktop appearance. Keep the **14px document root**, welcome's 359px avatar-grid boundary and 721px shell boundary, and the player shell's existing desktop widths.
+
+| Role                     | Mobile value                     | Usage                                        |
+| ------------------------ | -------------------------------- | -------------------------------------------- |
+| `app-annotation`         | 12px / 1.25                      | Dense chart and allocation-bar labels        |
+| `app-caption`            | 14px / 1.4                       | Metadata, legends, section labels            |
+| `app-body`               | 16px / 1.5                       | Body text, fields, buttons, tables           |
+| `app-heading`            | 20px / 1.25                      | Page, card and dialog headings               |
+| `app-value`              | 24px / 1.2                       | Primary balances and countdown               |
+| `app-control`            | Minimum 44px, 8px corners        | Controls that can grow when their text wraps |
+| `app-touch`              | Minimum 44 × 44px                | Icon buttons and quarter expansion           |
+| `app-panel` / `app-card` | 16px / 12px padding              | Sections and cards; cards use 12px corners   |
+| `app-cell`               | 16px text, 10px vertical padding | Dense result tables                          |
+
+The `app-1/2/3/4/6` spacing tokens provide 4/8/12/16/24px for gap, padding and margin utilities. Named dimensions cover navigation (48px), header avatars (40px), dice (28px), allocation mixes (88px), and chart heights: monthly 130px, benchmark 150px, accumulated return 160px, History 180px, annual assets 200px, admin reports 240px. Choose by content; do not shrink probability SVG coordinates as though they were screen pixels.
+
+Use semantic roles such as `mobile:app-heading`, `mobile:app-control` and `mobile:h-app-chart-history` instead of introducing new mobile pixel literals. Pair them with explicit desktop overrides; omit base size literals when those two rules already cover every viewport. Controls include the body-text and touch-target roles, so do not repeat those classes. The mobile variant repeats only its explicitly opted-in class selector to take precedence over later bundled design-system utilities, without `!important` or global element selectors. Root variables reach portaled dialogs; `RootLayout` supplies the resolved mobile font family, and font/role classes still belong on the portal content itself.
+
+Existing player and welcome controls consume these roles. `apps/demo-game/src/components/admin/AdminControls.tsx` applies them through design-system class slots for admin buttons, cards, headings, tables and dialogs. Components without app sizing changes are imported directly from the design system. Shared `ProbabilityChart`, `MultiSelect`, and `PlayerCompact` consume optional `--market-*` / `--gbl-*` sizing variables with their previous styles as fallbacks; only demo-game defines those overrides on mobile. Other games and desktop retain their existing presentation.
+
+The resize preserves the result-view computations, lifecycle copy and Ready behavior. History uses fully rounded year filters in a keyboard-focusable horizontal scroll region, plus an All filter with year-qualified quarter rows. A fresh page selects the latest started year; the selected filter survives refetches and tab switches. Its 180px chart always shows cumulative data.
+
+`GameLayout` shows the team name and HQ location in every tab header, alongside the single shared avatar and countdown. `TeamPanel` keeps its profile text and statistics without repeating the avatar. Stocks retain their blue asset token; completed segments and other completed progress markers use `player-progress-done`, mapped to UZH secondary orange, to distinguish progress from portfolio composition. Annual assets use a compact heading gap and a numeric initial-capital reference label; accumulated-return axis percentages use success/error/neutral colors by sign.
+
+### Demo-game content presentation
+
+The demo game keeps Team-specific presentation in `apps/demo-game/src/components/team/`: `TeamPanel`, `ContentSheet`, `StorySheet`, and `LearningSheet`, coordinated by `TeamContent`. These reuse player tokens and action buttons without changing the shared `StoryElements` or learning-modal defaults used by other games. The local story reader adds archive navigation around the existing mark-visited mutation. GraphQL aggregate fragments select historical story bodies, lesson rewards, and self read/completion IDs; this requires operation regeneration but no database migration.
+
+`packages/ui/src/hooks/useLearningActivities.ts:useLearningActivities` adds optional `preserveDrafts` (default false), optional list-item reward metadata, and query/submission errors plus a query retry function. Query data is exposed only for the selected activity ID; transient submission feedback cannot alter a newer selection. Mutations refresh the submitted activity by ID even after it closes, preserving solved answers and explanations on reopening. Persisted progress is derived directly from the query, while one per-activity draft map stores local selections and attempt feedback, avoiding synchronization effects and duplicate state. Demo-game opts into per-activity answer drafts for the current page visit. Its direct Markdown rendering uses the same React 19 JSX compatibility bridge as the shared UI package.
+
 ## Gaps a new game will hit
 
 Known holes, confirmed by how the demo game works around them (candidates for library improvement):
@@ -86,3 +132,7 @@ Known holes, confirmed by how the demo game works around them (candidates for li
 - **Local shadcn-style fallbacks** coexist with the design system in `apps/demo-game/src/components/ui/` (`select`, `dialog`, `popover`, `command`, `toast`/`toaster`, `button`) — e.g. the cockpit uses the local `Select`, and `_app.tsx` uses the local `Toaster`.
 - **No chart components** beyond `ProbabilityChart` — games assemble recharts (`LineChart`, `BarChart`, `AreaChart`, scatter) by hand; only `ChartContainer` is shared.
 - **`@gbl-uzh/ui` gaps**: use `Button` from the design system; the package still lacks a usable admin timeline, generic decision-form scaffold, and results-table component. Keep game-specific layouts, decisions, charts, and GraphQL adapters in the game.
+
+### Countdown notices
+
+The demo-game floating countdown messages use the opt-in `countdown` toast variant. `AllocationNotice.tsx:playerNoticeStyles` supplies the same green surface, border, corners, responsive spacing, and title/body hierarchy as the allocation-submitted notice, with a clock icon and an accessible dismiss button. Player typography is applied directly to the floating toast. `GameLayout` uses this variant for countdown updates and threshold reminders across tabs; timing, placement, text, and dismissal behavior remain unchanged. Default and destructive toast variants retain their existing presentation.

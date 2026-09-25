@@ -8,23 +8,25 @@ import {
 } from 'src/graphql/generated/ops'
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-  ShadcnTable as Table,
   ShadcnTableBody as TableBody,
-  ShadcnTableCell as TableCell,
-  ShadcnTableHead as TableHead,
   ShadcnTableHeader as TableHeader,
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  ShadcnTable as Table,
+  ShadcnTableCell as TableCell,
+  ShadcnTableHead as TableHead,
+} from '~/components/admin/AdminControls'
 import {
   Select,
   SelectContent,
@@ -49,8 +51,8 @@ import {
   YAxis,
 } from 'recharts'
 
-import { composeChartData } from '~/lib/analysis'
 import { NUM_MONTHS } from '~/lib/constants'
+import { composeChartData } from '~/lib/results'
 
 const colors = [
   'var(--chart-1)',
@@ -367,7 +369,10 @@ function ReportGame() {
   ]
 
   return (
-    <div className="container mx-auto p-4" data-cy="report-loaded">
+    <div
+      className="mobile:app-panel mobile:app-body container mx-auto p-4"
+      data-cy="report-loaded"
+    >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
         <Card className="flex h-full w-full flex-col">
           <CardHeader>
@@ -375,7 +380,10 @@ function ReportGame() {
             <CardDescription>Assets over time.</CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
-            <ChartContainer config={playerConfig} className="h-[300px] w-full">
+            <ChartContainer
+              config={playerConfig}
+              className="mobile:h-app-chart-report h-[300px] w-full"
+            >
               <LineChart data={dataTotalAssets} accessibilityLayer>
                 <ChartTooltip
                   cursor={false}
@@ -390,7 +398,9 @@ function ReportGame() {
                           className="h-[8px] w-[8px] rounded-sm"
                           style={{ background: item.color }}
                         />
-                        <span className="text-xs text-gray-600">{name}</span>
+                        <span className="mobile:app-caption text-xs text-gray-600">
+                          {name}
+                        </span>
                       </div>
                       <span className="font-bold text-black">
                         {Number(value).toFixed(2)}
@@ -458,7 +468,10 @@ function ReportGame() {
             </Select>
           </CardHeader>
           <CardContent className="flex-grow">
-            <ChartContainer config={playerConfig} className="h-[300px] w-full">
+            <ChartContainer
+              config={playerConfig}
+              className="mobile:h-app-chart-report h-[300px] w-full"
+            >
               <AreaChart
                 data={
                   currPeriod === 0
@@ -483,7 +496,9 @@ function ReportGame() {
                           className="h-[8px] w-[8px] rounded-sm"
                           style={{ background: item.color }}
                         />
-                        <span className="text-xs text-gray-600">{name}</span>
+                        <span className="mobile:app-caption text-xs text-gray-600">
+                          {name}
+                        </span>
                       </div>
                       <span className="font-bold text-black">
                         {(Number(value) * 100).toFixed(2)}%
@@ -621,7 +636,10 @@ function ReportGame() {
             <CardDescription>Average decisions over players.</CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
-            <ChartContainer config={config} className="h-[300px] w-full">
+            <ChartContainer
+              config={config}
+              className="mobile:h-app-chart-report h-[300px] w-full"
+            >
               <BarChart data={dataAvg}>
                 {Object.keys(config).map((key, ix, arr) => {
                   return (
@@ -671,7 +689,10 @@ function ReportGame() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
-            <ChartContainer config={playerConfig} className="h-[300px] w-full">
+            <ChartContainer
+              config={playerConfig}
+              className="mobile:h-app-chart-report h-[300px] w-full"
+            >
               <ScatterChart>
                 <ChartTooltip
                   cursor={false}
@@ -686,7 +707,9 @@ function ReportGame() {
                           className="h-[8px] w-[8px] rounded-sm"
                           style={{ background: item.color }}
                         />
-                        <span className="text-xs text-gray-600">{name}</span>
+                        <span className="mobile:app-caption text-xs text-gray-600">
+                          {name}
+                        </span>
                       </div>
                       <span className="font-bold text-black">
                         {(Number(value) * 100).toFixed(2)}%
@@ -737,7 +760,7 @@ function ReportGame() {
           <CardContent className="flex-grow">
             <ChartContainer
               config={configSharpeRatio}
-              className="h-[300px] w-full"
+              className="mobile:h-app-chart-report h-[300px] w-full"
             >
               <BarChart data={sharpeRatioPerPeriod}>
                 {Object.keys(configSharpeRatio).map((key, ix) => {

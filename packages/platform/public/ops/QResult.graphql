@@ -40,6 +40,7 @@ query Result {
           countdownDurationMs
           learningElements {
             id
+            reward
             title
           }
           storyElements {

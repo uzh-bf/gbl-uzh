@@ -58,3 +58,173 @@ html {
   --theme-color-secondary-40: #f1bfa9;
   --theme-color-secondary-20: #f8dfd4;
 }
+
+/* Shared player UI tokens, including welcome's portaled dialogs.
+ * Pixel dimensions in player components deliberately preserve the design at
+ * the app's 14px root size; do not change the global spacing scale. */
+@theme inline {
+  --color-player-primary: var(--theme-color-primary);
+  --font-player: var(--source-sans-pro), sans-serif;
+}
+
+@theme static {
+  --color-player-primary-hover: #001f82;
+  --color-player-savings: #1ba6be;
+  --color-player-bonds: #20376e;
+  --color-player-stocks: #5889f3;
+  --color-player-text: #151515;
+  --color-player-body: #414141;
+  --color-player-muted: #707070;
+  --color-player-border: #e9e9e9;
+  --color-player-divider: #d8d8d8;
+  --color-player-input: #dedede;
+  --color-player-progress: #bfcaea;
+  --color-player-progress-done: var(--theme-color-secondary);
+  --color-player-feedback: #f5f7ff;
+  --color-player-invalid: #b42318;
+  --color-player-error: #a51c14;
+  --color-player-switch: #e7e7e7;
+  --color-player-success: #557018;
+  --color-player-success-surface: #edf6d6;
+  --color-player-warning: #b17b00;
+  --color-player-warning-surface: #fff5dc;
+  --color-player-disabled: #a2a2a2;
+  --color-player-disabled-surface: #f8f8f8;
+}
+
+@layer components {
+  /* Native steppers interfere with the compact percentage field on WebKit. */
+  .player-number-input::-webkit-inner-spin-button,
+  .player-number-input::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+}
+
+/* Demo-game sizing contract. Mobile roles are opt-in so external design-system
+ * components and desktop layouts keep their defaults. Root tokens also reach
+ * portaled pickers, quizzes, stories, and admin dialogs. */
+/* Bundled design-system CSS also emits utilities after the app stylesheet.
+ * Repeat only the explicitly opted-in selector so its mobile role wins that
+ * cascade without !important or global element overrides. */
+@custom-variant mobile {
+  @media (width < 601px) {
+    && {
+      @slot;
+    }
+  }
+}
+
+@theme static {
+  --spacing-app-1: 4px;
+  --spacing-app-2: 8px;
+  --spacing-app-3: 12px;
+  --spacing-app-4: 16px;
+  --spacing-app-6: 24px;
+  --spacing-app-control: 44px;
+  --spacing-app-nav: 48px;
+  --spacing-app-header-avatar: 40px;
+  --spacing-app-die: 28px;
+  --spacing-app-mix: 88px;
+  --spacing-app-marker: 14px;
+  --spacing-app-icon: 20px;
+  --spacing-app-chart-monthly: 130px;
+  --spacing-app-chart-benchmark: 150px;
+  --spacing-app-chart-return: 160px;
+  --spacing-app-chart-history: 180px;
+  --spacing-app-chart-annual: 200px;
+  --spacing-app-chart-report: 240px;
+  --radius-app-control: 8px;
+  --radius-app-card: 12px;
+  --radius-app-sheet: 16px;
+}
+
+:root {
+  --app-text-annotation: 12px;
+  --app-text-caption: 14px;
+  --app-text-body: 16px;
+  --app-text-heading: 20px;
+  --app-text-value: 24px;
+  --app-leading-annotation: 1.25;
+  --app-leading-caption: 1.4;
+  --app-leading-body: 1.5;
+  --app-leading-heading: 1.25;
+  --app-leading-value: 1.2;
+  --app-table-cell-y: 10px;
+}
+
+@utility app-annotation {
+  font-size: var(--app-text-annotation);
+  line-height: var(--app-leading-annotation);
+}
+@utility app-caption {
+  font-size: var(--app-text-caption);
+  line-height: var(--app-leading-caption);
+}
+@utility app-body {
+  font-size: var(--app-text-body);
+  line-height: var(--app-leading-body);
+}
+@utility app-heading {
+  font-size: var(--app-text-heading);
+  line-height: var(--app-leading-heading);
+}
+@utility app-value {
+  font-size: var(--app-text-value);
+  line-height: var(--app-leading-value);
+}
+@utility app-control {
+  @apply app-body app-touch;
+  height: auto;
+  padding: var(--spacing-app-2) var(--spacing-app-4);
+  border-radius: var(--radius-app-control);
+  white-space: normal;
+}
+@utility app-touch {
+  min-width: var(--spacing-app-control);
+  min-height: var(--spacing-app-control);
+}
+@utility app-panel {
+  padding: var(--spacing-app-4);
+}
+@utility app-card {
+  padding: var(--spacing-app-3);
+  border-radius: var(--radius-app-card);
+}
+@utility app-cell {
+  @apply app-body;
+  padding-block: var(--app-table-cell-y);
+  padding-inline: var(--spacing-app-2);
+}
+
+/* The shared Market SVG keeps its geometry (SVG units are not screen pixels).
+ * Only demo-game supplies these optional typography/spacing overrides. */
+@media (width < 601px) {
+  :root {
+    --market-heading-size: var(--app-text-heading);
+    --market-heading-leading: var(--app-leading-heading);
+    --market-metric-size: var(--app-text-caption);
+    --market-metric-leading: var(--app-leading-caption);
+    --market-chart-gap: var(--spacing-app-3);
+    --gbl-control-height: var(--spacing-app-control);
+    --gbl-body-size: var(--app-text-body);
+    --gbl-body-leading: var(--app-leading-body);
+    --gbl-caption-size: var(--app-text-caption);
+    --gbl-caption-leading: var(--app-leading-caption);
+    --gbl-link-display: inline-flex;
+    --history-axis-size: var(--app-text-annotation);
+    --result-chart-label-size: var(--app-text-caption);
+  }
+}
+
+@utility app-switch-target {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: var(--spacing-app-control);
+    transform: translateY(-50%);
+  }
+}

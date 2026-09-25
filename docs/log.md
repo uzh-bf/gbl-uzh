@@ -1,5 +1,65 @@
 # Log
 
+## 2026-09-23
+
+**Update**: [Game Model](game-model.md), [Developing a Game](developing-a-game.md) — revert the XP work from `a11456d6`: restore achievement-only computation, remove seeded lesson rewards and their tests, and restore prior reward-badge validation. Both platform services return to their pre-commit versions. Calendar, countdown, cleanup, and later changes are preserved, as are existing database XP and lesson rewards. Earlier XP implementation and correction entries below remain as historical records.
+
+**Update**: [Developing a Game](developing-a-game.md), [Game Lifecycle](game-lifecycle.md), [UI Building Blocks](ui-components.md) — rename Cockpit to Decisions without changing URLs; show editing-only, side-by-side Bonds/Stocks forecasts with expected-value colors matching Market and no extra navigation link. Limit Ready and readiness reminders to active segments; review screens wait for the instructor.
+
+**Update**: [Developing a Game](developing-a-game.md) — migrate demo-game, platform, and UI tests to Vitest 5 with independent commands, preserve opt-in learning integration coverage, and update UI’s compatible Vite tooling while retaining its browser targets and package exports.
+
+**Update**: [Developing a Game](developing-a-game.md), [Game Model](game-model.md) — remove the temporary reward ledger and repair commands after the local correction; consolidate report helpers, JWT handling, scenario constants, and result tests into their existing owners. Existing corrected XP is preserved.
+
+**Update**: [Game Model](game-model.md), [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — document direct 20 XP demo lesson rewards, atomic completion-based duplicate prevention without schema additions, matching countdown notices, fixed three-month segments, and the current-year timeline.
+
+**Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — centralize demo-game facts/result helpers and presentation metadata, reuse signed Market percentages, simplify cockpit and welcome composition, and share browser setup/visual checks while preserving behavior. Group History and Results in one module, keep constants together and avatar names local, remove unused helpers, and correct warning placement and final-period test guidance.
+
+## 2026-09-22
+
+**Update**: [UI Building Blocks](ui-components.md) — added rounded, scrolling History filters with All; unified player header identity and removed the duplicate Team avatar; tightened annual-chart spacing and reference labels, colored accumulated-return percentages, and distinguished completed progress from Stocks.
+
+**Update**: [UI Building Blocks](ui-components.md) — central demo-game mobile sizing roles now cover player tabs, welcome, admin, and portaled content while preserving desktop layouts and the updated cockpit results. Review removed redundant size declarations and unchanged component re-exports, corrected mobile portal fonts, and aligned History padding and allocation hit areas with the sizing contract.
+
+**Update**: [Developing a Game](developing-a-game.md) — reviewed and simplified result adapters and state rendering; shared settlement/sample parsing with History, and fixed year-end progress and opening-balance handling for missing records.
+
+**Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md), [Game Lifecycle](game-lifecycle.md) — replace the demo cockpit's quarter, consolidation, and year-end reports with the supplied designs; document settled result selection, cumulative chart semantics, annual asset returns, and advisory Ready behavior.
+
+**Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — shortened the comparison heading to “Monthly returns · Month N”; retained existing Market results across quarter and year changes.
+
+**Update**: [UI Building Blocks](ui-components.md) — Market charts show the revealed month below Expected and remove the highlighted year/quarter/month footer.
+
+**Update**: [UI Building Blocks](ui-components.md) — Market probability charts now fit all 11 outcomes without horizontal scrolling at 400px, with narrower bars and compact labels.
+
+**Update**: Demo-game Team and content sheets — documented settled team statistics, released-story rereading and skip semantics, browser-local activity views, accessible responsive sheets, and shared learning-hook draft/error support. Review consolidated quiz drafts and feedback, removed the redundant story-read cache, exposed row status/metadata to screen readers, and fixed stale quiz data after successful submissions finish in the background.
+
+## 2026-09-21
+
+- **Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — implement the History tab with cumulative portfolio values, year-filtered expandable quarters, lifecycle-aware settlement, instructor-controlled dice visibility, and responsive browser coverage.
+
+## 2026-09-17
+
+- **Update**: Market tab — restored scenario-based probability charts in the mobile design, added persisted admin monthly dice reveals and player refresh, and documented the distinction between current outlook and historical returns. Updated developing-a-game, UI components, API, and lifecycle guidance.
+
+- **Update**: [UI Building Blocks](ui-components.md), [Developing a Game](developing-a-game.md) - remove the welcome CSS Module, use shared player tokens and welcome-local Tailwind controls across setup, portaled pickers, and loading/error views, and document responsive and failure/retry browser coverage.
+
+## 2026-09-16
+
+- **Update**: [UI Building Blocks](ui-components.md), [Developing a Game](developing-a-game.md) - replace the cockpit CSS Module with Tailwind utilities and app-local action, notice, and allocation-row components; centralize player tokens and unify welcome/cockpit primary and asset colors while preserving responsive dimensions.
+
+- **Update**: [Developing a Game](developing-a-game.md), [Game Lifecycle](game-lifecycle.md) - document persisted allocation submission, reversible Ready locking, instructor-controlled results, year/quarter labels, and shared cockpit sizing and allocation-bar rendering aligned with the revised references.
+
+- **Update**: [Developing a Game](developing-a-game.md) - document compact cockpit sizing on tablet and desktop, preserving mobile control sizes and the centered, bounded layout.
+
+- **Update**: [Developing a Game](developing-a-game.md) - document the final centered slider labels and handles, directional selection when handles coincide, and endpoint stacking. Simplify cockpit state handling and consolidate browser screenshots under each test's output directory.
+
+## 2026-09-15
+
+**Update**: [Developing a Game](developing-a-game.md), [Game Lifecycle](game-lifecycle.md) — document the demo-game cockpit design, bottom navigation, Team profile/learning activities, and shared decimal allocation validation.
+
+- **Update**: `developing-a-game.md` - clarify the welcome footer layout and locked review controls during saving.
+
+- **Update**: `developing-a-game.md` - document the mobile welcome introduction, bank setup and review, confirmed avatar/canton pickers, validation, and save behavior.
+
 ## 2026-09-07
 
 - **Update**: `deploying-a-game.md` - document an isolated Startinvest ARM staging image while preserving existing build URLs and multi-architecture tags.
