@@ -8,7 +8,7 @@ tags:
   - vercel
   - neon
   - prisma
-timestamp: "2026-09-07T00:00:00Z"
+timestamp: "2026-09-25T00:00:00Z"
 ---
 
 # Deploying a Game to Staging (Vercel + Neon)
@@ -113,6 +113,30 @@ DATABASE_URL="<neon-direct-string>" pnpm prisma:seed
 ```
 
 `prisma migrate deploy` applies the committed migrations under `prisma/schema/migrations/`. If your game has no migration history yet, `pnpm prisma db push --schema=prisma/schema` is the pragmatic staging alternative. Seeding is mandatory - without the `PlayerLevel` ladder from `prisma/seed.ts`, players cannot be created.
+
+### Existing demo-game databases and container deployments
+
+Deploying the app image does not migrate its database: `apps/demo-game/Dockerfile`
+starts only the Next.js server. Run the committed migrations against the same
+database used by the app before rolling out schema-dependent code. The separate
+`apps/demo-game/Dockerfile.migration` defaults to `prisma migrate deploy`; rebuilding
+and publishing that image alone does not execute it against a database.
+
+If team login fails with `The column Achievement.namesByRole does not exist`,
+ensure the migration runner includes
+`20260925090000_achievement_role_labels` and run it with the staging database's
+`DATABASE_URL`. That migration adds nullable JSONB columns `namesByRole` and
+`descriptionsByRole`, preserving existing records. From a checkout containing it,
+with the staging connection already exported, run:
+
+```bash
+pnpm --dir apps/demo-game exec prisma migrate deploy
+```
+
+Do not use `prisma:deploy` for this staging command: the current package script
+selects Infisical's `prd` environment. Do not run `prisma:setup:stg` to repair an
+existing database: it begins with `migrate reset`. See
+`apps/demo-game/package.json:scripts` and `apps/demo-game/prisma.config.ts`.
 
 ## Step 5 - Auth for a real deployment
 
