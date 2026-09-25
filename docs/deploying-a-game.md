@@ -147,7 +147,7 @@ Open `https://<your-vercel-domain>/admin/login`, sign in through your OIDC tenan
 
 ## GBL production image preparation
 
-The additional build_gbl_prd_arm64 job in .github/workflows/demo-game.yml uses
+The additional build_startinvest_prd_arm64 job in .github/workflows/demo-game.yml uses
 apps/demo-game/.env.gbl-prd-arm64 to bake https://startinvest.df-app.ch into
 the frontend. PRs to dev build without publishing; pushes to dev publish
 gbl-prd-arm64 and gbl-prd-<commit SHA>-arm64, separately from existing tags.

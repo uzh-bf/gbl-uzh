@@ -135,7 +135,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=demo-game-startinvest-arm64
 
   # Production validation uses its own baked URLs and image tags.
-  build_gbl_prd_arm64:
+  build_startinvest_prd_arm64:
     if: github.ref == 'refs/heads/dev' || (github.event_name == 'pull_request' && github.base_ref == 'dev')
     runs-on: ubuntu-24.04-arm
     permissions:
