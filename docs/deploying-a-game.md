@@ -8,7 +8,7 @@ tags:
   - vercel
   - neon
   - prisma
-timestamp: "2026-09-07T00:00:00Z"
+timestamp: "2026-09-25T00:00:00Z"
 ---
 
 # Deploying a Game to Staging (Vercel + Neon)
@@ -144,3 +144,23 @@ Open `https://<your-vercel-domain>/admin/login`, sign in through your OIDC tenan
 | Admin login redirects then errors with a state/cookie failure | `NEXTAUTH_URL` does not match the deployed origin                      | Set `NEXTAUTH_URL` to the exact `https://` domain, redeploy                              |
 | Too many database connections under light load                | App using the direct (non-pooled) Neon string                          | Point `DATABASE_URL` at the **pooled** string; keep direct only for migrate/seed         |
 | `prisma migrate deploy` hangs or errors on Neon               | Running migrations through the pooler                                  | Run migrations with the **direct** connection string                                     |
+
+## Startinvest ARM production image
+
+The additional build_startinvest_prd_arm64 job in .github/workflows/demo-game.yml uses
+apps/demo-game/.env.production-arm64 to bake https://startinvest.df-app.ch into
+the frontend. PRs to dev build without publishing; pushes to dev publish
+prd-startinvest-arm64, separately from existing tags. The job mirrors the staging
+variant with APP_ENV=production-arm64 and its own demo-game-startinvest-prd-arm64
+cache scope.
+This publishes an image only; it does not deploy or migrate a database.
+
+Before activation, verify the ARM64 publisher and pin its registry digest in the
+Helm charts gbl/demo-game/prd overlay. Its mutable draft tag is not a release pin.
+The cloud stack provides separate prd-gbl-demo resources and a new database.
+Configure runtime authentication secrets and Auth0 callback/web-origin/logout
+allowlists for startinvest.df-app.ch. Restore and validate production data
+manually before sync; no automatic PRD migration hook is enabled. Keep legacy
+production resources and credentials unchanged until a separate cutover. The new
+Demo ingress reuses the legacy public host: do not sync it while the legacy
+ingress owns that host/path. Coordinate ingress ownership explicitly at cutover.

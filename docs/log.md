@@ -1,5 +1,9 @@
 # Log
 
+## 2026-09-25
+
+**Update**: [Deploying a Game](deploying-a-game.md) — document the ARM64 Startinvest production image for startinvest.df-app.ch, digest-pinning gate, and manual data migration prerequisites.
+
 ## 2026-09-23
 
 **Update**: [Game Model](game-model.md), [Developing a Game](developing-a-game.md) — revert the XP work from `a11456d6`: restore achievement-only computation, remove seeded lesson rewards and their tests, and restore prior reward-badge validation. Both platform services return to their pre-commit versions. Calendar, countdown, cleanup, and later changes are preserved, as are existing database XP and lesson rewards. Earlier XP implementation and correction entries below remain as historical records.
