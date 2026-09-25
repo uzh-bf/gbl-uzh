@@ -145,12 +145,14 @@ Open `https://<your-vercel-domain>/admin/login`, sign in through your OIDC tenan
 | Too many database connections under light load                | App using the direct (non-pooled) Neon string                          | Point `DATABASE_URL` at the **pooled** string; keep direct only for migrate/seed         |
 | `prisma migrate deploy` hangs or errors on Neon               | Running migrations through the pooler                                  | Run migrations with the **direct** connection string                                     |
 
-## GBL production image preparation
+## Startinvest ARM production image
 
 The additional build_startinvest_prd_arm64 job in .github/workflows/demo-game.yml uses
-apps/demo-game/.env.gbl-prd-arm64 to bake https://startinvest.df-app.ch into
+apps/demo-game/.env.production-arm64 to bake https://startinvest.df-app.ch into
 the frontend. PRs to dev build without publishing; pushes to dev publish
-gbl-prd-arm64 and gbl-prd-<commit SHA>-arm64, separately from existing tags.
+prd-startinvest-arm64, separately from existing tags. The job mirrors the staging
+variant with APP_ENV=production-arm64 and its own demo-game-startinvest-prd-arm64
+cache scope.
 This publishes an image only; it does not deploy or migrate a database.
 
 Before activation, verify the ARM64 publisher and pin its registry digest in the
