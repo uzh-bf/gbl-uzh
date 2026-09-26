@@ -1,5 +1,9 @@
 # Log
 
+## 2026-09-26
+
+**Update**: [UI Building Blocks](ui-components.md) — inset the allocation slider track by 24px per side on mobile to move handles away from phone navigation gesture areas, preserving touch-target size and desktop layout.
+
 ## 2026-09-25
 
 **Update**: [Deploying a Game](deploying-a-game.md) — add the missing demo-game achievement role-label migration and document applying it to existing staging databases separately from deploying the application image.
