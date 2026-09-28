@@ -2,6 +2,8 @@
 
 ## 2026-09-28
 
+**Update**: [UI Building Blocks](ui-components.md) — complete the canton coat-of-arms assets and add circular canton flag badges to the player header and welcome confirmation avatars, with local flag SVGs and source attribution.
+
 **Update**: [UI Building Blocks](ui-components.md) — anchor the player shell on phone viewports with 40px navigation, contain content scrolling, compact quarter-closed monthly balances, and slim mobile History bars.
 
 **Update**: [Developing a Game](developing-a-game.md) — expand the welcome canton selection to all 26 Swiss cantons, including shared names for search, review, and cockpit display.

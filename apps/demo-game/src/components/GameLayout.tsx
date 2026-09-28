@@ -15,6 +15,7 @@ import { parseFacts } from '~/lib/facts'
 import { shouldRefetchDemoGame } from '~/lib/gameEvents'
 import { queueRefetch } from '~/lib/queuedRefetch'
 import type { ResultView } from '~/lib/results'
+import CantonFlagBadge from './CantonFlagBadge'
 import CompactCountdown from './cockpit/CompactCountdown'
 import HistoryPanel from './history/HistoryPanel'
 import MarketPanel from './market/MarketPanel'
@@ -221,23 +222,26 @@ function GameLayout({
         >
           <div
             className={cn(
-              'bg-player-progress text-player-primary phone:size-app-header-avatar phone:app-body grid shrink-0 place-items-center overflow-hidden rounded-full font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]',
+              'text-player-primary phone:size-app-header-avatar phone:app-body relative shrink-0 font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]',
               expandedHeader &&
                 'min-[601px]:size-[60px] min-[601px]:text-[24px]'
             )}
             aria-hidden="true"
           >
-            {avatar ? (
-              <Image
-                src={avatar}
-                width={60}
-                height={60}
-                alt=""
-                className="size-full object-cover"
-              />
-            ) : (
-              initials
-            )}
+            <div className="bg-player-progress grid size-full place-items-center overflow-hidden rounded-full">
+              {avatar ? (
+                <Image
+                  src={avatar}
+                  width={60}
+                  height={60}
+                  alt=""
+                  className="size-full object-cover"
+                />
+              ) : (
+                initials
+              )}
+            </div>
+            <CantonFlagBadge location={location} />
           </div>
           <div className="min-w-0 flex-1">
             <div

@@ -7,7 +7,7 @@ tags:
   - design-system
   - tailwind
   - components
-timestamp: "2026-09-28T09:24:57Z"
+timestamp: "2026-09-28T11:02:51Z"
 ---
 
 # UI Building Blocks
@@ -131,6 +131,8 @@ Existing player and welcome controls consume these roles. `apps/demo-game/src/co
 The resize preserves the result-view computations, lifecycle copy and Ready behavior. History uses fully rounded year filters in a keyboard-focusable horizontal scroll region, plus an All filter with year-qualified quarter rows. A fresh page selects the latest started year; the selected filter survives refetches and tab switches. Its 180px chart always shows cumulative data.
 
 `GameLayout` shows the team name and HQ location in every tab header, alongside the single shared avatar and countdown. `TeamPanel` keeps its profile text and statistics without repeating the avatar. Stocks retain their blue asset token; completed segments and other completed progress markers use `player-progress-done`, mapped to UZH secondary orange, to distinguish progress from portfolio composition. Annual assets use a compact heading gap and a numeric initial-capital reference label; accumulated-return axis percentages use success/error/neutral colors by sign.
+
+The header and welcome confirmation avatars share `apps/demo-game/src/components/CantonFlagBadge.tsx:CantonFlagBadge`: a circular flag at bottom-right, sized to 45% of the avatar with a white border. The badge sits outside avatar clipping, is decorative alongside the HQ text, and is omitted for unsupported or missing locations. All 26 square flags live in `apps/demo-game/public/locations/flags/`, separate from the shield-shaped coats of arms; `public/locations/README.md` records asset sources and licenses.
 
 ### Demo-game content presentation
 

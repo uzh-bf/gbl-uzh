@@ -9,6 +9,7 @@ import * as yup from 'yup'
 import { ALLOCATION_KEYS } from '~/lib/allocation'
 import { assetLabels } from '~/lib/constants'
 import { parseFacts } from '~/lib/facts'
+import CantonFlagBadge from '../CantonFlagBadge'
 import OptionPicker, { type Option } from './OptionPicker'
 import {
   WelcomeActionButton,
@@ -350,13 +351,16 @@ export default function WelcomeSetup({
             <>
               <div className="border-player-input mobile:mt-app-4 mobile:mb-app-4 mobile:gap-app-3 mobile:px-app-4 mobile:py-app-4 mt-[18px] mb-[16px] flex items-center gap-[14px] rounded-[16px] border px-[20px] py-[15px] shadow-[0_1px_3px_#00000014]">
                 {avatar?.value && (
-                  <Image
-                    src={avatar.value}
-                    alt=""
-                    width={56}
-                    height={56}
-                    className="size-[56px] rounded-[12px] object-cover"
-                  />
+                  <div className="relative size-[56px] shrink-0">
+                    <Image
+                      src={avatar.value}
+                      alt=""
+                      width={56}
+                      height={56}
+                      className="size-full rounded-[12px] object-cover"
+                    />
+                    <CantonFlagBadge location={form.values.location} />
+                  </div>
                 )}
                 <div className="min-w-0">
                   <strong className="mobile:app-heading text-[20px] [overflow-wrap:anywhere]">
