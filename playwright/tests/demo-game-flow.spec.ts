@@ -727,20 +727,48 @@ async function assertFinalReport(page: Page, playerPlans: PlayerPlan[]) {
       timeout: 30_000,
     })
 
-    for (const { name } of playerPlans) {
-      await expect(reportPage.getByRole('columnheader', { name })).toBeVisible()
-    }
+    // Real API rows must carry their segment links, not just render team names.
+    await expect(
+      reportPage.getByRole('region', { name: 'Report summary' })
+    ).toContainText(`Across ${playerPlans.length} teams`)
+    await expect(
+      reportPage.getByText('No settled results in this scope yet.')
+    ).toHaveCount(0)
 
-    await expect(reportPage.getByText('Player Decisions')).toBeVisible()
-    for (const label of ['P1 S1', 'P1 S2', 'P2 S1', 'P2 S2']) {
-      await expect(reportPage.getByText(label)).toBeVisible()
+    for (const { name } of playerPlans) {
+      await expect(
+        reportPage.getByRole('rowheader', { name, exact: true })
+      ).toBeVisible()
+      await expect(
+        reportPage.getByRole('button', { name: `Focus ${name}`, exact: true })
+      ).toHaveAccessibleDescription(
+        /Assets \d[^ ]* CHF\. Return [+-]?\d+\.\d+%\./
+      )
+      await expect(
+        reportPage
+          .getByRole('button', { name: new RegExp(`^${name}, Q1`) })
+          .first()
+      ).toBeVisible()
     }
 
     await expect(
-      reportPage.getByText('Risk-Return', { exact: true }).first()
+      reportPage.getByRole('heading', { name: 'Decisions', exact: true })
+    ).toBeVisible()
+    for (const year of [FIRST_GAME_YEAR, FIRST_GAME_YEAR + 1]) {
+      for (const quarter of [1, 2]) {
+        await expect(
+          reportPage.getByRole('columnheader', {
+            name: `Q${quarter} ${String(year).slice(-2)}`,
+          })
+        ).toBeVisible()
+      }
+    }
+
+    await expect(
+      reportPage.getByRole('heading', { name: 'Risk and return', exact: true })
     ).toBeVisible()
     await expect(
-      reportPage.getByText('Sharpe Ratio', { exact: true })
+      reportPage.getByRole('heading', { name: 'Sharpe ratio', exact: true })
     ).toBeVisible()
   } finally {
     await reportPage.close()

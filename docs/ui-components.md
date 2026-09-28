@@ -7,7 +7,7 @@ tags:
   - design-system
   - tailwind
   - components
-timestamp: "2026-09-28T00:00:00Z"
+timestamp: "2026-09-28T07:53:26Z"
 ---
 
 # UI Building Blocks
@@ -142,6 +142,10 @@ Known holes, confirmed by how the demo game works around them (candidates for li
 - **Local shadcn-style fallbacks** coexist with the design system in `apps/demo-game/src/components/ui/` (`select`, `dialog`, `popover`, `command`, `toast`/`toaster`, `button`) — e.g. the cockpit uses the local `Select`, and `_app.tsx` uses the local `Toaster`.
 - **No chart components** beyond `ProbabilityChart` — games assemble recharts (`LineChart`, `BarChart`, `AreaChart`, scatter) by hand; only `ChartContainer` is shared.
 - **`@gbl-uzh/ui` gaps**: use `Button` from the design system; the package still lacks a usable admin timeline, generic decision-form scaffold, and results-table component. Keep game-specific layouts, decisions, charts, and GraphQL adapters in the game.
+
+### Admin report presentation
+
+The demo-game report uses app-local sections under `src/components/admin/report/`: `ReportOverview` supplies summaries, ranking and allocation tables; `ReportCharts` supplies performance, risk/return and Sharpe views. They reuse design-system buttons, tooltips and chart containers, the player font/color tokens, and `AllocationBar`'s opt-in `report` presentation (compact rectangular bars with numeric labels). The default player allocation presentation is unchanged. Allocation wrappers provide accessible percentage labels and keyboard-triggered tooltips. Team colors are stable by player order, independent of scope and ranking. Beyond the first 15 reference colors, deterministic HSL hues extend the palette instead of cycling it. All teams remain available: ranking and Sharpe lists have bounded vertical scrolling, and the decisions table scrolls with a sticky header and team column. Ranking controls announce rank, CHF balance and return through accessible descriptions. Focused endpoint labels use the report’s scalar values in both Assets and Return modes, avoiding the area chart’s internal range representation. Year and whole-game tabs share one renderer. Chart/ranking and lower panels stack below 1024px; summary cells stack below 600px, and tabs/tables scroll within their containers.
 
 ### Countdown notices
 

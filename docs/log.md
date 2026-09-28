@@ -2,6 +2,14 @@
 
 ## 2026-09-28
 
+**Update**: [Developing a Game](developing-a-game.md) — simplify report refresh error handling and shared ranking order; wait for all queries before processing queued refreshes so an early query failure cannot lose newer results. Add a delayed-query recovery regression.
+
+**Update**: [API Layer](api-layer.md), [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — restore missing segment relations in report results, refresh open reports after settlement, and support larger classes with extended team colors and bounded lists. Add 60-team browser coverage and assert populated metrics in the real lifecycle smoke.
+
+**Update**: [UI Building Blocks](ui-components.md) — review the admin report: fix focused Return endpoint labels, add accessible ranking descriptions, and simplify shared scope tabs, timeline construction, and currency formatting.
+
+**Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — redesign the admin report around year/whole-game scopes, coordinated team focus, quarterly allocation bars, and scoped return/risk/Sharpe calculations. Add guarded empty/error states and report-specific calculation and browser coverage.
+
 **Update**: [UI Building Blocks](ui-components.md) — redesign the admin dice page with month tabs, always-visible forecasts, persistent revealed outcomes, and responsive dice/chart columns. Remove the replay button after reveal while preserving publication retry and player updates. Review simplified the active tab panel and Roll/Retry controls, and retained loaded data and month selection when background refresh fails.
 
 ## 2026-09-26

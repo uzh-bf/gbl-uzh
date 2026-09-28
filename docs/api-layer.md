@@ -7,7 +7,7 @@ tags:
   - graphql
   - trpc
   - realtime
-timestamp: "2026-09-17T00:00:00Z"
+timestamp: "2026-09-28T07:53:26Z"
 ---
 
 # API Layer and Realtime
@@ -28,6 +28,7 @@ These hold in both worlds and are what game code should rely on:
 ## Current on `dev`: GraphQL (kept brief — being replaced)
 
 - Schema: code-first via nexus in `packages/platform/src/types/` (`Query`, `Mutation`, `Subscription`, object types); served by graphql-yoga from the game app at `/api/graphql` (`apps/demo-game/src/pages/api/graphql.ts`), with `prisma`, session user, and `pubSub` in context.
+- Admin reports: `packages/platform/src/services/PlayService.ts:getSpecificResults` includes player, period, and segment relations. Quarter metadata must accompany `SEGMENT_END` facts so clients can place monthly samples on the settled timeline; period-level results may have a null segment.
 - Game wiring: `generateBaseMutations({ services, schemas, inputTypes })` from the platform, called in `apps/demo-game/src/graphql/index.ts`.
 - Client: Apollo Client with a split link — subscriptions over `graphql-sse` (`packages/platform/src/lib/SSELink.ts`), everything else over HTTP. Shared operation documents ship with the platform (`packages/platform/public/ops/*.graphql`); each game runs codegen against them for typed hooks.
 - If you are building a new game while this is still current: copy the demo game's `src/graphql/` + `codegen.ts` wholesale and do not invest in custom GraphQL; it will be removed when the tRPC branch merges.
