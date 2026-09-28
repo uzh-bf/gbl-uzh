@@ -28,7 +28,7 @@ export default function PortfolioHistoryChart({
       >
         <div
           style={{
-            minWidth: Math.max(280, quarters.length * 88),
+            width: quarters.length * (compact ? 56 : 120),
           }}
         >
           <ChartContainer

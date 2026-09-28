@@ -213,6 +213,134 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
     await expect(page.getByText('Game is scheduled.')).toBeVisible({
       timeout: 30_000,
     })
+    const readProgress = async () => {
+      const response = await page.request.post('/api/graphql', {
+        data: {
+          query:
+            '{ self { id isReady experience completedLearningElementIds visitedStoryElementIds achievementKeys facts } }',
+        },
+      })
+      const body = await response.json()
+      expect(body.errors).toBeUndefined()
+      return body.data.self
+    }
+    const before = await readProgress()
+    for (const [label, tab] of [
+      ['Decisions', 'cockpit'],
+      ['Market', 'market'],
+      ['History', 'history'],
+      ['Team', 'team'],
+    ]) {
+      const tabLink = page.getByRole('link', { name: label, exact: true })
+      await tabLink.click()
+      await expect(tabLink).toHaveAttribute('aria-current', 'page')
+      const profile = page.getByRole('link', { name: 'Edit player profile' })
+      await profile.focus()
+      await page.keyboard.press('Enter')
+      await expect(page).toHaveURL(
+        new RegExp(`/play/welcome\\?edit=1&tab=${tab}$`)
+      )
+      await expect(
+        page.getByRole('heading', { name: 'Edit your bank' })
+      ).toBeVisible()
+      await expect(name).toHaveValue('Style Bank')
+      await expect(avatar).toContainText('Bear')
+      await expect(location).toContainText('Aargau')
+      await expect(
+        page.getByText('Starting capital', { exact: true })
+      ).toHaveCount(0)
+      await expect(
+        page.getByRole('button', { name: 'Review your bank' })
+      ).toHaveCount(0)
+      await name.fill('Discard this name')
+      await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+      await expect(page).toHaveURL(new RegExp(`/play/cockpit\\?tab=${tab}$`))
+      await expect(page.locator('header').getByRole('heading')).toHaveText(
+        'Style Bank'
+      )
+    }
+    await page.getByRole('link', { name: 'Edit player profile' }).click()
+    const save = page.getByRole('button', {
+      name: 'Save changes',
+      exact: true,
+    })
+    await name.fill('A')
+    await name.blur()
+    await expect(save).toBeDisabled()
+    await expect(page.getByText('Use at least 2 characters.')).toBeVisible()
+    await name.fill('Updated Bank')
+    await avatar.click()
+    await page.getByRole('button', { name: 'Bull', exact: true }).click()
+    await page.getByRole('button', { name: 'Use Bull', exact: true }).click()
+    await location.click()
+    await page.getByRole('textbox', { name: 'Search canton' }).fill('ZH')
+    await page.getByRole('button', { name: 'Zürich (ZH)', exact: true }).click()
+    await page
+      .getByRole('button', { name: 'Use Zürich (ZH)', exact: true })
+      .click()
+    for (const width of [320, 400, 784]) {
+      await page.setViewportSize({ width, height: 844 })
+      await expectNoPageOverflow(page)
+      await expect(save).toBeInViewport()
+      await capturePlayerScreenshot(page, {
+        path: test.info().outputPath(`profile-edit-${width}.png`),
+      })
+    }
+    const editSaveGate = new Promise<void>((resolve) => {
+      rejectSave = resolve
+    })
+    let saveCount = 0
+    await page.route('**/api/graphql', async (route) => {
+      if (route.request().postDataJSON()?.operationName !== 'UpdatePlayerData')
+        return route.continue()
+      saveCount++
+      await editSaveGate
+      await route.fulfill({
+        json: { errors: [{ message: 'Test profile save failure' }] },
+      })
+    })
+    await save.click()
+    await expect(
+      page.getByRole('button', { name: 'Saving…', exact: true })
+    ).toBeDisabled()
+    await expect(name).toBeDisabled()
+    await expect(avatar).toBeDisabled()
+    await expect(location).toBeDisabled()
+    await expect(
+      page.getByRole('button', { name: 'Cancel', exact: true })
+    ).toBeDisabled()
+    rejectSave?.()
+    await expect(page.locator('footer').getByRole('alert')).toContainText(
+      'We couldn’t save your bank'
+    )
+    expect(saveCount).toBe(1)
+    await expect(name).toHaveValue('Updated Bank')
+    await page.unroute('**/api/graphql')
+    await save.click()
+    await expect(page).toHaveURL(/\/play\/cockpit\?tab=team$/)
+    await expect(page.locator('header').getByRole('heading')).toHaveText(
+      'Updated Bank'
+    )
+    await expect(page.locator('header')).toContainText('HQ Zürich')
+    await expect(page.locator('header img[src*="avatars"]')).toHaveAttribute(
+      'src',
+      /sparbulle/
+    )
+    const after = await readProgress()
+    const { facts: beforeFacts, ...beforeProgress } = before
+    const { facts: afterFacts, ...afterProgress } = after
+    expect(afterProgress).toEqual(beforeProgress)
+    const parseFacts = (value: unknown) =>
+      typeof value === 'string' ? JSON.parse(value) : value
+    expect(parseFacts(afterFacts)).toEqual({
+      ...parseFacts(beforeFacts),
+      avatar: '/avatars/sparbulle.jpeg',
+      location: 'ZH',
+    })
+    await page.goto('/play/welcome?edit=1&tab=invalid')
+    await expect(name).toHaveValue('Updated Bank')
+    await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+    await expect(page).toHaveURL(/\/play\/cockpit\?tab=cockpit$/)
   } catch (error) {
     await test.info().attach('welcome-failure', {
       body: await page.screenshot(),
@@ -274,6 +402,15 @@ test('welcome loading, query retry, and missing-player views', async ({
     await expect(
       page.getByRole('link', { name: 'Back to Minigame' })
     ).toHaveAttribute('href', '/')
+    mode = 'error'
+    await page.goto('/play/welcome?edit=1&tab=history')
+    await expect(page.getByRole('main').getByRole('alert')).toContainText(
+      'Please try again'
+    )
+    const back = page.getByRole('link', { name: 'Back to game' })
+    await expect(back).toHaveAttribute('href', '/play/cockpit?tab=history')
+    await back.click()
+    await expect(page.getByTestId('history-panel')).toBeVisible()
   } finally {
     release?.()
     await context.close()

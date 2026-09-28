@@ -6,7 +6,7 @@ import {
   type Locator,
   type Page,
 } from '@playwright/test'
-import { FIRST_GAME_YEAR } from '../../apps/demo-game/src/lib/constants'
+import { FIRST_GAME_YEAR, MONTHS } from '../../apps/demo-game/src/lib/constants'
 import {
   capturePlayerScreenshot,
   createGame,
@@ -1328,12 +1328,12 @@ test('Market shows fixed admin reveals to two players during allocation', async 
       for (const session of sessions) {
         await expect(
           session.page.getByTestId('market-comparison')
-        ).toContainText(`Monthly returns · Month ${index + 1}`)
+        ).toContainText(`Monthly returns · Q1 · ${MONTHS[index]}`)
         for (const asset of ['bonds', 'stocks']) {
           const chart = session.page.getByTestId(`market-${asset}`)
           const dice = original.diceRolls[index]
           await expect(
-            chart.getByText(`Month ${index + 1}`, { exact: true })
+            chart.getByText(`Q1 · ${MONTHS[index]}`, { exact: true })
           ).toBeVisible()
           await expect(chart).not.toContainText('Highlighted:')
           await expect(
@@ -1689,6 +1689,26 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     await expect(quarters).toHaveCount(3)
     await expect(quarters.first()).toContainText(`${FIRST_GAME_YEAR} · Q1`)
     await expect(quarters.last()).toContainText(`${FIRST_GAME_YEAR + 1} · Q1`)
+    for (const [year, quarter, months] of [
+      [FIRST_GAME_YEAR, 1, ['Jan', 'Feb', 'Mar']],
+      [FIRST_GAME_YEAR, 2, ['Apr', 'May', 'Jun']],
+      [FIRST_GAME_YEAR + 1, 1, ['Jan', 'Feb', 'Mar']],
+    ] as const) {
+      const details = panel.getByRole('button', {
+        name: `${year} Quarter ${quarter} monthly details`,
+      })
+      const wasExpanded =
+        (await details.getAttribute('aria-expanded')) === 'true'
+      if (!wasExpanded) await details.click()
+      await expect(
+        panel
+          .getByRole('table', {
+            name: `${year} Quarter ${quarter} monthly results`,
+          })
+          .getByRole('rowheader')
+      ).toHaveText([...months])
+      if (!wasExpanded) await details.click()
+    }
     await expect(panel.getByTestId('history-value')).toHaveText(value)
     const header = player.locator('header')
     await player.setViewportSize({ width: 390, height: 667 })
@@ -1699,7 +1719,7 @@ test('History follows settled quarters, filters years and preserves hidden dice'
         players[0].name
       )
       await expect(header.locator('p')).toHaveText('HQ Aargau')
-      await expect(header.locator('img')).toHaveCount(1)
+      await expect(header.locator('img[src*="avatars"]')).toHaveCount(1)
       if (tab === 'Team')
         await expect(
           player.getByTestId('team-panel').locator('img')
@@ -2226,7 +2246,7 @@ test('cockpit result designs follow settled quarters, consolidation and complete
     playerCount: 1,
   })
   const joinUrl = await playerJoinUrl(page, appBaseURL, 0)
-  for (let periodIndex = 0; periodIndex < 2; periodIndex++) {
+  for (let periodIndex = 0; periodIndex < 3; periodIndex++) {
     await addPeriod(page, { segmentCount: '4', index: periodIndex })
     for (let quarter = 0; quarter < 4; quarter++)
       await addSegment(page, { periodIndex })
@@ -2313,7 +2333,7 @@ test('cockpit result designs follow settled quarters, consolidation and complete
     await expect(waiting).toBeVisible()
   }
   try {
-    for (let periodIndex = 0; periodIndex < 2; periodIndex++) {
+    for (let periodIndex = 0; periodIndex < 3; periodIndex++) {
       await advanceGame(page, {
         action: periodIndex === 0 ? 'Start Period' : 'Next Period',
         expectedStatus: 'PREPARATION',
@@ -2350,6 +2370,69 @@ test('cockpit result designs follow settled quarters, consolidation and complete
           )
         ).toBeVisible()
         await checkReview(finalQuarter ? 'CONSOLIDATION' : 'PAUSED')
+        const benchmark = player.getByTestId('result-benchmarks')
+        await expect(benchmark.getByText('CHF', { exact: true })).toBeVisible()
+        const chart = benchmark.getByRole('application')
+        await expect(chart.getByText('Jan', { exact: true })).toBeVisible()
+        await expect(
+          chart.getByText(MONTHS[quarter * 3 - 1], { exact: true })
+        ).toBeVisible()
+        await player.getByRole('link', { name: 'History', exact: true }).click()
+        const history = player.getByTestId('history-panel')
+        await history
+          .getByRole('button', {
+            name: String(FIRST_GAME_YEAR + periodIndex),
+            exact: true,
+          })
+          .click()
+        const details = history.getByRole('button', {
+          name: `${FIRST_GAME_YEAR + periodIndex} Quarter ${quarter} monthly details`,
+        })
+        await details.click()
+        await expect(
+          history
+            .getByRole('table', {
+              name: `${FIRST_GAME_YEAR + periodIndex} Quarter ${quarter} monthly results`,
+            })
+            .getByRole('rowheader')
+        ).toHaveText(MONTHS.slice((quarter - 1) * 3, quarter * 3))
+        if (
+          (periodIndex === 0 && (quarter === 1 || quarter === 4)) ||
+          (periodIndex === 2 && quarter === 4)
+        ) {
+          for (const width of [320, 400, 784]) {
+            await player.setViewportSize({ width, height: 1000 })
+            await expectNoPageOverflow(player)
+            await history
+              .getByRole('region', { name: 'Portfolio value by quarter' })
+              .scrollIntoViewIfNeeded()
+            await capturePlayerScreenshot(player, {
+              path: testInfo.outputPath(
+                `history-${periodIndex * 4 + quarter}-quarters-${width}.png`
+              ),
+            })
+          }
+        }
+        await details.click()
+        await player
+          .getByRole('link', { name: 'Decisions', exact: true })
+          .click()
+        if (periodIndex === 0 && (quarter === 1 || quarter === 4)) {
+          for (const width of [320, 400, 784]) {
+            await player.setViewportSize({ width, height: 1000 })
+            await expectNoPageOverflow(player)
+            await benchmark.scrollIntoViewIfNeeded()
+            await expect(chart.getByText('Jan', { exact: true })).toBeVisible()
+            await expect(
+              chart.getByText(MONTHS[quarter * 3 - 1], { exact: true })
+            ).toBeVisible()
+            await capturePlayerScreenshot(player, {
+              path: testInfo.outputPath(
+                `benchmark-${quarter * 3}-months-${width}.png`
+              ),
+            })
+          }
+        }
         await expect(player.getByTestId('result-total')).toContainText('CHF')
         await expect(player.getByTestId('result-total')).not.toContainText('—')
         await expect(player.getByLabel('No countdown')).toHaveCount(0)
@@ -2361,7 +2444,7 @@ test('cockpit result designs follow settled quarters, consolidation and complete
           await expect(progress).toContainText('Consolidation · held')
           await expect(player.getByTestId('result-total')).toContainText('0.00')
         }
-        if (periodIndex === 1 && quarter === 3) {
+        if (periodIndex === 2 && quarter === 3) {
           await capture('segment-end')
           await player
             .getByRole('link', { name: 'History', exact: true })
@@ -2373,7 +2456,7 @@ test('cockpit result designs follow settled quarters, consolidation and complete
           await expect(player.getByTestId('quarter-results')).toBeVisible()
           await checkReview('PAUSED')
         }
-        if (periodIndex === 1 && finalQuarter) await capture('consolidation')
+        if (periodIndex === 2 && finalQuarter) await capture('consolidation')
       }
       await advanceGame(page, {
         action: 'Period Results',
@@ -2388,11 +2471,11 @@ test('cockpit result designs follow settled quarters, consolidation and complete
         String(FIRST_GAME_YEAR + periodIndex)
       )
       await checkReview('RESULTS')
-      if (periodIndex === 1) {
+      if (periodIndex === 2) {
         // There is no upcoming authored period: the active pointer disconnects.
         await player.reload({ waitUntil: 'domcontentloaded' })
         await expect(player.getByTestId('year-results')).toBeVisible()
-        await expect(progress).toContainText(`${FIRST_GAME_YEAR + 1} closed`)
+        await expect(progress).toContainText(`${FIRST_GAME_YEAR + 2} closed`)
         await expect(player.getByTestId('result-yearly-assets')).toContainText(
           `${FIRST_GAME_YEAR}`
         )
@@ -2732,6 +2815,111 @@ test('Ready countdown reminders stop during review while timers remain visible',
       ).toHaveCount(0)
       await review.close()
     }
+  } finally {
+    await session.context.close()
+  }
+})
+
+test('profile editing returns to the latest allocation, Ready state and round', async ({
+  page: admin,
+  browser,
+  baseURL,
+}) => {
+  const appBaseURL = requireBaseURL(baseURL)
+  await createGame(admin, {
+    name: `Profile return ${Date.now()}`,
+    playerCount: 1,
+  })
+  await addPeriod(admin, { segmentCount: '2', index: 0 })
+  await addSegment(admin, { periodIndex: 0 })
+  await addSegment(admin, { periodIndex: 0 })
+  const session = await joinPlayer(
+    browser,
+    appBaseURL,
+    await playerJoinUrl(admin, appBaseURL, 0),
+    players[0]
+  )
+  const player = session.page
+  const profile = player.getByRole('link', { name: 'Edit player profile' })
+  const cancel = player.getByRole('button', { name: 'Cancel', exact: true })
+  const summary = player.getByTestId('allocation-summary')
+  const ready = player.getByRole('switch', { name: 'Ready', exact: true })
+  try {
+    await advanceGame(admin, {
+      action: 'Start Period',
+      expectedStatus: 'PREPARATION',
+    })
+    await advanceGame(admin, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    const savings = player.getByRole('spinbutton', {
+      name: 'Savings',
+      exact: true,
+    })
+    await expect(savings).toBeVisible()
+    const original = await savings.inputValue()
+    await fillAllocation(player, { savings: '50', bonds: '30', stocks: '20' })
+    await profile.click()
+    await cancel.click()
+    await expect(savings).toHaveValue(original)
+    await submitDecision(player, { savings: '50', bonds: '30', stocks: '20' })
+    await ready.click()
+    await expect(ready).not.toBeChecked()
+    await player
+      .getByRole('button', { name: 'Change allocation', exact: true })
+      .click()
+    await fillAllocation(player, { savings: '70', bonds: '20', stocks: '10' })
+    await profile.click()
+    await cancel.click()
+    await expect(summary.getByTestId('submitted-bank')).toContainText('50%')
+    await profile.click()
+    // Another window submits while the original window is editing its profile.
+    const peer = await session.context.newPage()
+    await peer.goto('/play/cockpit')
+    await peer
+      .getByRole('button', { name: 'Change allocation', exact: true })
+      .click()
+    await submitDecision(peer, { savings: '20', bonds: '40', stocks: '40' })
+    const peerReady = peer.getByRole('switch', { name: 'Ready', exact: true })
+    await peerReady.click()
+    await expect(peerReady).not.toBeChecked()
+    await peer.close()
+    await cancel.click()
+    await expect(summary).toBeVisible()
+    await expect(summary.getByTestId('submitted-bank')).toContainText('20%')
+    await ready.click()
+    await expect(ready).toBeChecked()
+    const readySummary = await summary.innerText()
+    await profile.click()
+    await player.getByLabel('Bank name', { exact: true }).fill('Ready Bank')
+    await player
+      .getByRole('button', { name: 'Save changes', exact: true })
+      .click()
+    await expect(player.locator('header').getByRole('heading')).toHaveText(
+      'Ready Bank'
+    )
+    await expect(summary).toHaveText(readySummary, { useInnerText: true })
+    await expect(ready).toBeChecked()
+    await expect(
+      player.getByRole('button', { name: 'Change allocation', exact: true })
+    ).toBeDisabled()
+    await profile.click()
+    await advanceGame(admin, {
+      action: 'Segment Results',
+      expectedStatus: 'PAUSED',
+    })
+    await advanceGame(admin, {
+      action: 'Next Segment',
+      expectedStatus: 'RUNNING',
+    })
+    await cancel.click()
+    await expect(savings).toHaveValue('20')
+    await expect(ready).not.toBeChecked()
+    await expect(ready).toBeDisabled()
+    await expect(
+      player.getByRole('region', { name: 'Game progress' })
+    ).toContainText('Quarter 2')
   } finally {
     await session.context.close()
   }

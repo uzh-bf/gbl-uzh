@@ -17,7 +17,9 @@ import { buildResultView } from '~/lib/results'
 
 function Cockpit() {
   const { loading, error, data, refetch } = useQuery(ResultDocument, {
-    fetchPolicy: 'cache-and-network',
+    // Returning from profile editing must initialize from the latest round
+    // and saved allocation, rather than briefly exposing stale cached controls.
+    fetchPolicy: 'network-only',
   })
 
   const [performAction] = useMutation(PerformActionDocument, {

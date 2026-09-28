@@ -220,13 +220,14 @@ function GameLayout({
               'min-[601px]:gap-[20px] min-[601px]:px-[32px] min-[601px]:py-[24px]'
           )}
         >
-          <div
+          <Link
+            href={{ pathname: '/play/welcome', query: { edit: '1', tab } }}
+            aria-label="Edit player profile"
             className={cn(
-              'text-player-primary phone:size-app-header-avatar phone:app-body relative shrink-0 font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]',
+              'text-player-primary focus-visible:outline-player-primary phone:size-app-header-avatar phone:app-body relative shrink-0 rounded-full font-bold focus-visible:outline-2 focus-visible:outline-offset-4 min-[601px]:size-[44px] min-[601px]:text-[18px]',
               expandedHeader &&
                 'min-[601px]:size-[60px] min-[601px]:text-[24px]'
             )}
-            aria-hidden="true"
           >
             <div className="bg-player-progress grid size-full place-items-center overflow-hidden rounded-full">
               {avatar ? (
@@ -242,7 +243,7 @@ function GameLayout({
               )}
             </div>
             <CantonFlagBadge location={location} />
-          </div>
+          </Link>
           <div className="min-w-0 flex-1">
             <div
               className={cn(

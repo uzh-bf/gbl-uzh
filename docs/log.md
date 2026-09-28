@@ -2,6 +2,12 @@
 
 ## 2026-09-28
 
+**Update**: [Developing a Game](developing-a-game.md) — simplify the shared welcome/profile form to one submit action and one edit-mode signal; retain a return-to-game link when loading profile data fails.
+
+**Update**: [UI Building Blocks](ui-components.md) — prefix calendar month abbreviations with Q1–Q4 in the Market forecasts and monthly returns heading, retaining the date of the latest revealed result across quarter/year transitions.
+
+**Update**: [UI Building Blocks](ui-components.md), [Developing a Game](developing-a-game.md) — tighten History bar spacing, label expanded months Jan–Dec within Q1–Q4, expose benchmark month/CHF axes, and add avatar-linked profile editing with Save/Cancel return navigation and fresh server allocation state.
+
 **Update**: [UI Building Blocks](ui-components.md) — complete the canton coat-of-arms assets and add circular canton flag badges to the player header and welcome confirmation avatars, with local flag SVGs and source attribution.
 
 **Update**: [UI Building Blocks](ui-components.md) — anchor the player shell on phone viewports with 40px navigation, contain content scrolling, compact quarter-closed monthly balances, and slim mobile History bars.

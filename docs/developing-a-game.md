@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: "2026-09-28T09:01:30Z"
+timestamp: "2026-09-28T11:37:28Z"
 ---
 
 # Developing a Game
@@ -106,7 +106,7 @@ There is no generic frontend — each game builds its own Next.js pages (Pages R
 | Route                 | Purpose                                                                                                                                             |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/join/[token]`       | Player entry: calls the team-login mutation, redirects to the welcome page. Pure boilerplate — copy as-is.                                          |
-| `/play/welcome`       | One-time team setup (name, avatar); writes `Player.facts`.                                                                                          |
+| `/play/welcome`       | Initial team setup and avatar-linked profile editing (name, avatar, canton); writes `Player.facts`.                                                 |
 | `/play/cockpit`       | **The** player screen: one layout + a body that switches on `game.status`. Game-specific.                                                           |
 | `/`, `/admin/login`   | Shared StartInvest administrator OIDC sign-in; authenticated administrators continue to games.                                                      |
 | `/admin/games`        | Game list + create form. Near-boilerplate.                                                                                                          |
@@ -130,6 +130,8 @@ There is no generic frontend — each game builds its own Next.js pages (Pages R
 `apps/demo-game/src/components/welcome/WelcomeSetup.tsx:WelcomeSetup` implements a responsive welcome flow: lottery introduction → bank setup → review. The mobile layout follows the references in `apps/demo-game/design/`, with bottom-sheet avatar and searchable canton pickers and a footer that stays below the scrolling content without covering it. Avatar options use the existing supported assets from `src/lib/constants.ts`; the canton picker offers all 26 Swiss cantons in abbreviation order with local names and `Name (CODE)` labels, searchable by name or abbreviation. `LOCATIONS.Trader` controls the choices and validation, while `cantonNames` supplies welcome and cockpit labels. The complete welcome flow uses colocated Tailwind utilities and shared player color/font tokens from `src/globals.css`, including its portaled dialogs and loading/error views. App-local controls in `src/components/welcome/WelcomeControls.tsx` preserve native props and refs, reuse design-system buttons, and keep welcome actions at least 44px high on mobile and 48px above 600px. The 720px shell, 359px avatar-grid boundary, 721px desktop boundary, and safe-area footer/sheet padding use explicit pixel utilities. `playwright/tests/demo-game-welcome.spec.ts` covers these layouts, picker drafts and dismissal, validation, save failure/retry, and loading/query-error/missing-player states.
 
 Setup uses Formik + yup and requires a trimmed bank name of 2–20 characters, an avatar, and a canton. Picker changes remain drafts until confirmed; Cancel or Escape discards them. Players can edit all three choices from the review. The final **Start the game** action persists the name and facts through the existing mutation, preserves the saved color (defaults to Blue when absent or invalid), and navigates to `/play/cockpit`. Review controls are disabled while saving. Failed saves retain the choices and show a retry message. The route handles loading, query failures, and missing player sessions (`apps/demo-game/src/pages/play/welcome.tsx:Welcome`).
+
+The header avatar links to `/play/welcome?edit=1&tab=<tab>` for profile edits. The route validates the return tab against `cockpit`, `market`, `history`, and `team`, defaulting to Decisions. Edit mode opens directly at the prefilled name/avatar/canton form with **Save changes** and **Cancel**, omitting introductory, review, and starting-capital content. Saving uses the existing player update mutation and preserves saved color and game progress; Cancel does not write. Both return to the originating tab. Inputs and actions are disabled during saving, and errors retain edits for retry. A profile load failure also offers Back to game for the originating tab. The shared form derives edit mode from its Cancel callback and uses one submit action for setup and editing. Welcome and cockpit query fresh server data on entry: returning discards unsent allocation drafts and uses the latest submission or carried-forward allocation, current round, and Ready state. The first-time introduction/setup/review flow remains unchanged.
 
 The cockpit pattern (from `apps/demo-game/src/pages/play/cockpit.tsx`):
 

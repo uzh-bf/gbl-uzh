@@ -40,6 +40,10 @@ const benchmarkConfig = {
   bondsBenchmark: { label: assetLabels.bonds.name, color: colors.bonds },
   stocksBenchmark: { label: assetLabels.stocks.name, color: colors.stocks },
 }
+const benchmarkAmount = new Intl.NumberFormat('en', {
+  notation: 'compact',
+  maximumFractionDigits: 2,
+})
 const assetConfig = Object.fromEntries(
   ALLOCATION_KEYS.map((key) => [
     key,
@@ -260,24 +264,45 @@ function Benchmarks({ view }: { view: ResultView }) {
       testId="result-benchmarks"
     >
       <div className={inset}>
+        <div className="text-player-muted mobile:app-annotation text-[12px]">
+          CHF
+        </div>
         <ChartContainer
           config={benchmarkConfig}
           className={cn(
-            'mobile:h-app-chart-benchmark aspect-auto w-full min-[601px]:h-[180px]',
+            'mobile:h-app-chart-benchmark aspect-auto w-full min-[601px]:h-[230px]',
             held && 'min-[601px]:h-[260px]'
           )}
         >
           <LineChart
             accessibilityLayer
             data={view.monthly}
-            margin={{ top: 12, right: 16, left: 16, bottom: 8 }}
+            margin={{ top: 12, right: 16, left: 0, bottom: 8 }}
           >
             <CartesianGrid
               vertical={false}
               stroke="var(--color-player-border)"
             />
-            <XAxis dataKey="label" hide />
-            <YAxis hide domain={['auto', 'auto']} />
+            <XAxis
+              dataKey="label"
+              interval="preserveStartEnd"
+              minTickGap={12}
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tick={{ fill: 'var(--color-player-muted)', fontSize: 12 }}
+            />
+            <YAxis
+              domain={['auto', 'auto']}
+              width={52}
+              tickCount={4}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value: number) =>
+                benchmarkAmount.format(value).replace('K', 'k')
+              }
+              tick={{ fill: 'var(--color-player-muted)', fontSize: 12 }}
+            />
             <Tooltip
               formatter={(value: number, name: string) => [
                 `${playerAmount(value)} CHF`,

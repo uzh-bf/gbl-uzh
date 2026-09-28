@@ -10,10 +10,20 @@ import {
 
 function Welcome() {
   const router = useRouter()
-  const { data, loading, error, refetch } = useQuery(SelfDocument)
+  const editing = router.query.edit === '1'
+  const tab =
+    typeof router.query.tab === 'string' &&
+    ['cockpit', 'market', 'history', 'team'].includes(router.query.tab)
+      ? router.query.tab
+      : 'cockpit'
+  const returnUrl = editing ? `/play/cockpit?tab=${tab}` : '/play/cockpit'
+  const { data, loading, error, refetch } = useQuery(SelfDocument, {
+    skip: !router.isReady,
+    fetchPolicy: 'network-only',
+  })
   const [updatePlayerData] = useMutation(UpdatePlayerDataDocument)
 
-  if (loading)
+  if (!router.isReady || loading)
     return <WelcomeMessage role="status">Loading your bank…</WelcomeMessage>
 
   if (error || !data?.self) {
@@ -33,8 +43,11 @@ function Welcome() {
             Try again
           </button>
         )}
-        <Link href="/" className="text-player-primary mobile:app-control">
-          Back to Minigame
+        <Link
+          href={editing ? returnUrl : '/'}
+          className="text-player-primary mobile:app-control"
+        >
+          {editing ? 'Back to game' : 'Back to Minigame'}
         </Link>
       </WelcomeMessage>
     )
@@ -42,13 +55,14 @@ function Welcome() {
 
   return (
     <WelcomeSetup
-      key={data.self.id}
+      key={`${data.self.id}:${editing}`}
       player={data.self}
-      onStart={async (name, facts) => {
+      onCancel={editing ? () => void router.replace(returnUrl) : undefined}
+      onSave={async (name, facts) => {
         await updatePlayerData({
           variables: { name, facts: JSON.stringify(facts) },
         })
-        await router.replace('/play/cockpit')
+        await router.replace(returnUrl)
       }}
     />
   )
