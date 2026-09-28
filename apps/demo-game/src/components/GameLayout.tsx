@@ -211,17 +211,17 @@ function GameLayout({
 
   return (
     <>
-      <div className="font-player text-player-text min-[785px]:border-player-border mobile:app-body mx-auto flex h-dvh w-full max-w-[784px] flex-col bg-white text-[16px] min-[785px]:border-x [&_*]:box-border">
+      <div className="font-player text-player-text min-[785px]:border-player-border phone:app-body phone:fixed phone:inset-0 phone:overflow-hidden mx-auto flex h-dvh w-full max-w-[784px] flex-col bg-white text-[16px] min-[785px]:border-x [&_*]:box-border">
         <header
           className={cn(
-            'border-player-divider mobile:gap-app-3 mobile:px-app-4 mobile:py-app-3 flex shrink-0 items-center border-b min-[601px]:gap-[16px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
+            'border-player-divider phone:gap-app-3 phone:px-app-4 phone:py-app-3 flex shrink-0 items-center border-b min-[601px]:gap-[16px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
             expandedHeader &&
               'min-[601px]:gap-[20px] min-[601px]:px-[32px] min-[601px]:py-[24px]'
           )}
         >
           <div
             className={cn(
-              'bg-player-progress text-player-primary mobile:size-app-header-avatar mobile:app-body grid shrink-0 place-items-center overflow-hidden rounded-full font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]',
+              'bg-player-progress text-player-primary phone:size-app-header-avatar phone:app-body grid shrink-0 place-items-center overflow-hidden rounded-full font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]',
               expandedHeader &&
                 'min-[601px]:size-[60px] min-[601px]:text-[24px]'
             )}
@@ -242,7 +242,7 @@ function GameLayout({
           <div className="min-w-0 flex-1">
             <div
               className={cn(
-                'mobile:app-body block leading-[1.15] font-bold [overflow-wrap:anywhere] min-[601px]:text-[22px]',
+                'phone:app-body block leading-[1.15] font-bold [overflow-wrap:anywhere] min-[601px]:text-[22px]',
                 expandedHeader && 'min-[601px]:text-[28px]'
               )}
             >
@@ -250,7 +250,7 @@ function GameLayout({
             </div>
             <p
               className={cn(
-                'text-player-muted mobile:app-caption m-0 min-[601px]:text-[16px]',
+                'text-player-muted phone:app-caption m-0 min-[601px]:text-[16px]',
                 expandedHeader && 'leading-[1.25] min-[601px]:text-[22px]'
               )}
             >
@@ -259,7 +259,7 @@ function GameLayout({
           </div>
           <div
             className={cn(
-              'mobile:app-value shrink-0 [font-family:monospace] font-bold tabular-nums min-[601px]:text-[28px]',
+              'phone:app-value shrink-0 [font-family:monospace] font-bold tabular-nums min-[601px]:text-[28px]',
               detailTab && 'min-[601px]:text-[36px]'
             )}
           >
@@ -276,16 +276,16 @@ function GameLayout({
         <section
           hidden={detailTab}
           className={cn(
-            'border-player-divider mobile:px-app-4 mobile:py-app-3 shrink-0 border-b min-[601px]:px-[24px] min-[601px]:py-[20px]',
+            'border-player-divider phone:px-app-4 phone:py-app-3 shrink-0 border-b min-[601px]:px-[24px] min-[601px]:py-[20px]',
             resultScreen && 'min-[601px]:px-[32px] min-[601px]:py-[28px]'
           )}
           aria-label="Game progress"
           data-game-status={currentGame.status}
         >
-          <div className="mobile:gap-x-app-3 mobile:gap-y-app-1 mobile:app-body flex flex-wrap items-baseline justify-between gap-x-[12px] gap-y-[4px] text-[17px] [@media(max-width:360px)]:items-start">
+          <div className="phone:gap-x-app-3 phone:gap-y-app-1 phone:app-body flex flex-wrap items-baseline justify-between gap-x-[12px] gap-y-[4px] text-[17px] [@media(max-width:360px)]:items-start">
             <h2
               className={cn(
-                'text-player-muted mobile:app-caption m-0 font-semibold tracking-[0.8px] uppercase min-[601px]:text-[14px]',
+                'text-player-muted phone:app-caption m-0 font-semibold tracking-[0.8px] uppercase min-[601px]:text-[14px]',
                 resultScreen && 'min-[601px]:text-[22px]'
               )}
             >
@@ -300,7 +300,7 @@ function GameLayout({
                 className={cn(
                   'font-semibold [@media(max-width:360px)]:whitespace-nowrap',
                   resultScreen &&
-                    'text-player-body mobile:app-caption min-[601px]:text-[24px]'
+                    'text-player-body phone:app-caption min-[601px]:text-[24px]'
                 )}
               >
                 {resultView ? resultCopy.detail : status}
@@ -311,10 +311,10 @@ function GameLayout({
             <>
               <div
                 className={cn(
-                  'mobile:mt-app-3 mobile:gap-app-2 flex gap-[8px] min-[601px]:mt-[16px]',
+                  'phone:mt-app-3 phone:gap-app-2 flex gap-[8px] min-[601px]:mt-[16px]',
                   !running &&
                     !resultView &&
-                    'mobile:mb-app-3 min-[601px]:mb-[16px]'
+                    'phone:mb-app-3 min-[601px]:mb-[16px]'
                 )}
                 aria-hidden="true"
               >
@@ -337,7 +337,7 @@ function GameLayout({
                 ))}
               </div>
               {!running && !resultView && (
-                <p className="text-player-muted mobile:app-body m-0 text-[16px]">
+                <p className="text-player-muted phone:app-body m-0 text-[16px]">
                   {done} {done === 1 ? 'quarter' : 'quarters'} done ·{' '}
                   {Math.max(0, segmentCount - done)} to come
                 </p>
@@ -345,7 +345,7 @@ function GameLayout({
             </>
           )}
         </section>
-        <main className="min-h-0 flex-1 overflow-auto">
+        <main className="phone:overscroll-y-contain min-h-0 flex-1 overflow-auto">
           <div
             hidden={tab !== 'cockpit'}
             className={cn(
@@ -384,12 +384,12 @@ function GameLayout({
           {tab === 'cockpit' && (running || resultView) && (
             <div
               className={cn(
-                'border-player-divider mobile:min-h-0 mobile:gap-app-3 mobile:px-app-4 mobile:py-app-3 flex items-center justify-between gap-[12px] border-t min-[601px]:min-h-[96px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
+                'border-player-divider phone:min-h-0 phone:gap-app-3 phone:px-app-4 phone:py-app-3 flex items-center justify-between gap-[12px] border-t min-[601px]:min-h-[96px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
                 resultScreen && 'min-[601px]:px-[32px]'
               )}
             >
               {resultView ? (
-                <p className="text-player-muted mobile:app-caption m-0 min-[601px]:text-[24px]">
+                <p className="text-player-muted phone:app-caption m-0 min-[601px]:text-[24px]">
                   Waiting for the instructor to continue.
                 </p>
               ) : (
@@ -397,7 +397,7 @@ function GameLayout({
               )}
               {running && (
                 <div
-                  className="mobile:gap-app-3 ml-auto flex items-center gap-[10px]"
+                  className="phone:gap-app-3 ml-auto flex items-center gap-[10px]"
                   data-cy="ready-switch"
                   data-ready={self.isReady}
                   data-disabled={readyControl.disabled}
@@ -405,7 +405,7 @@ function GameLayout({
                   <label
                     htmlFor="isReady"
                     className={cn(
-                      'mobile:app-body text-[17px] font-semibold',
+                      'phone:app-body text-[17px] font-semibold',
                       readyControl.disabled
                         ? 'text-player-disabled'
                         : self.isReady
@@ -422,7 +422,7 @@ function GameLayout({
                     size="lg"
                     className={{
                       element: cn(
-                        'mobile:app-switch-target h-[30px] w-[52px]',
+                        'phone:app-switch-target h-[30px] w-[52px]',
                         self.isReady
                           ? 'bg-player-success disabled:bg-player-success'
                           : 'bg-player-switch disabled:bg-player-switch'
@@ -448,7 +448,7 @@ function GameLayout({
                 href={`/play/cockpit?tab=${id}`}
                 shallow
                 className={cn(
-                  'text-player-muted aria-[current=page]:border-player-primary aria-[current=page]:text-player-primary focus-visible:outline-player-primary mobile:min-h-app-nav mobile:app-body flex items-center justify-center border-t-[3px] border-transparent text-[17px] no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] aria-[current=page]:font-bold min-[601px]:min-h-[60px]',
+                  'text-player-muted aria-[current=page]:border-player-primary aria-[current=page]:text-player-primary focus-visible:outline-player-primary phone:min-h-app-nav phone:app-body flex items-center justify-center border-t-[3px] border-transparent text-[17px] no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] aria-[current=page]:font-bold min-[601px]:min-h-[60px]',
                   resultScreen &&
                     'min-[601px]:min-h-[108px] min-[601px]:text-[24px]'
                 )}
