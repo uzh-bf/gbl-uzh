@@ -63,7 +63,7 @@ export default function AllocationSlider({
       </div>
       <div
         ref={track}
-        className="relative h-[44px] min-[601px]:h-[64px]"
+        className="mobile:mx-app-6 relative h-[44px] min-[601px]:h-[64px]"
         data-cy="allocation-slider"
         aria-disabled={disabled}
       >

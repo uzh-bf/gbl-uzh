@@ -1,5 +1,23 @@
 # Log
 
+## 2026-09-28
+
+**Update**: [Developing a Game](developing-a-game.md) — replace the home showcase and basic admin login with the shared, responsive StartInvest sign-in design. Preserve OIDC login, redirect existing administrators to games, and cover loading, retry, player sessions, and both entry routes. Keep the shared authentication helper and environment smoke check compatible with both the new screen and other games' existing login screens.
+
+**Update**: [Developing a Game](developing-a-game.md) — simplify report refresh error handling and shared ranking order; wait for all queries before processing queued refreshes so an early query failure cannot lose newer results. Add a delayed-query recovery regression.
+
+**Update**: [API Layer](api-layer.md), [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — restore missing segment relations in report results, refresh open reports after settlement, and support larger classes with extended team colors and bounded lists. Add 60-team browser coverage and assert populated metrics in the real lifecycle smoke.
+
+**Update**: [UI Building Blocks](ui-components.md) — review the admin report: fix focused Return endpoint labels, add accessible ranking descriptions, and simplify shared scope tabs, timeline construction, and currency formatting.
+
+**Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — redesign the admin report around year/whole-game scopes, coordinated team focus, quarterly allocation bars, and scoped return/risk/Sharpe calculations. Add guarded empty/error states and report-specific calculation and browser coverage.
+
+**Update**: [UI Building Blocks](ui-components.md) — redesign the admin dice page with month tabs, always-visible forecasts, persistent revealed outcomes, and responsive dice/chart columns. Remove the replay button after reveal while preserving publication retry and player updates. Review simplified the active tab panel and Roll/Retry controls, and retained loaded data and month selection when background refresh fails.
+
+## 2026-09-26
+
+**Update**: [UI Building Blocks](ui-components.md) — inset the allocation slider track by 24px per side on mobile to move handles away from phone navigation gesture areas, preserving touch-target size and desktop layout.
+
 ## 2026-09-25
 **Update**: [Deploying a Game](deploying-a-game.md) — add the missing demo-game achievement role-label migration and document applying it to existing staging databases separately from deploying the application image.
 **Update**: [Deploying a Game](deploying-a-game.md) — document the ARM64 Startinvest production image for startinvest.df-app.ch, digest-pinning gate, and manual data migration prerequisites.

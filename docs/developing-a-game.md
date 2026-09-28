@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: "2026-09-23T14:38:48Z"
+timestamp: "2026-09-28T08:16:52Z"
 ---
 
 # Developing a Game
@@ -108,10 +108,22 @@ There is no generic frontend — each game builds its own Next.js pages (Pages R
 | `/join/[token]`       | Player entry: calls the team-login mutation, redirects to the welcome page. Pure boilerplate — copy as-is.                                          |
 | `/play/welcome`       | One-time team setup (name, avatar); writes `Player.facts`.                                                                                          |
 | `/play/cockpit`       | **The** player screen: one layout + a body that switches on `game.status`. Game-specific.                                                           |
-| `/admin/login`        | Admin OIDC sign-in. Boilerplate.                                                                                                                    |
+| `/`, `/admin/login`   | Shared StartInvest administrator OIDC sign-in; authenticated administrators continue to games.                                                      |
 | `/admin/games`        | Game list + create form. Near-boilerplate.                                                                                                          |
 | `/admin/games/[id]`   | Facilitator control panel: period/segment authoring forms (game-specific fields!), the advance button, player list with join links, countdown form. |
 | `/admin/reports/[id]` | Cross-period analytics dashboard. Game-specific charts.                                                                                             |
+
+### Demo-game sign-in
+
+`apps/demo-game/src/components/admin/AdminSignIn.tsx:AdminSignIn` supplies both `/` and `/admin/login`: a responsive UZH-branded sign-in card replacing the home-page component showcase. It retains the `auth0` provider ID for mock/production OIDC and the `/admin/games` callback. Session loading and sign-in initiation disable the action; failed initiation offers a retry. Existing `ADMIN`/`MASTER` sessions redirect to games, while player sessions can start administrator sign-in. `playwright/tests/demo-game-sign-in.spec.ts` covers both entry routes, desktop/mobile/short layouts, loading/player states, failed initiation, and real mock-OIDC login plus administrator redirects.
+
+### Demo-game admin report
+
+`apps/demo-game/src/pages/admin/reports/[id].tsx:ReportGame` presents a year/whole-game dashboard with summary statistics, Assets/Return views, a return-ranked team list, quarterly allocation bars, risk/return scatter, and a diverging Sharpe ranking. Whole game and Assets are the defaults. Selecting a team in the ranking highlights it across the dashboard; selection and chart mode survive scope changes, while summary statistics remain class-wide. Configured but unplayed years have an explicit empty state. Report queries load from the network and refresh on matching lifecycle/reveal events, window focus, and reconnection, preserving scope, chart mode, and team selection. Each refresh waits for all three queries to settle before processing a queued event, including when one query fails early.
+
+`apps/demo-game/src/lib/adminReport.ts:buildAdminReport` aggregates existing `Game` and `SpecificResults` query data by player ID. It uses the same settlement rules as player history: live `SEGMENT_END` rows are excluded until the quarter closes, and `PERIOD_END` identifies finished years even after the active pointer disconnects. CHF balances remain absolute; returns compound from the selected scope's opening balance. Annualised risk uses sample standard deviation of monthly portfolio returns multiplied by √12. Sharpe subtracts the annualised compounded savings return from the annualised compounded portfolio return, then divides by risk; risk at or below 0.0001 is displayed as “No risk”. Missing samples are not zero-filled or joined across chart gaps, and incomplete return/benchmark inputs produce unavailable metrics. Average mix first averages valid quarterly allocations within each team, then across teams.
+
+`playwright/tests/demo-game-report.spec.ts` checks the four reference states, keyboard selection and allocation tooltips, responsive overflow, query retry, missing games, and empty/unplayed scopes using deterministic 15- and 60-team query fixtures. Large-class coverage checks bounded scrolling lists, access to the last team, and mobile overflow. The multi-team lifecycle test in `playwright/tests/demo-game-flow.spec.ts` also verifies populated summary metrics, numeric ranking values, and allocation bars against actual settled game data; headings alone cannot detect missing result relations.
 
 ### Demo-game welcome flow
 

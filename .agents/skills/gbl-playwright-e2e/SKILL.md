@@ -214,9 +214,16 @@ Return the post-reload status in the same poll cycle.
 
 ## Assertion Scope
 
-- Report: assert `report-loaded`, team names, `Player Decisions`, period/segment
-  row labels, and stable section titles (`Risk-Return`, `Sharpe Ratio`). Do not
-  overfit chart internals or transient exact numeric rendering.
+- Report: assert `report-loaded`, team row headers, `Decisions`, year/quarter
+  column labels, and headings `Risk and return` / `Sharpe ratio`. The focused
+  `demo-game-report.spec.ts` uses deterministic 15- and 60-team query fixtures for the
+  four reference views, scope/mode switches, keyboard focus and allocation
+  tooltips, bounded scrolling lists, last-team access, responsive overflow,
+  focus refresh after settlement, retry, and empty/missing-game states. Keep the
+  multi-team flow smoke against real settled results: assert the eligible team
+  count, numeric ranking values, and allocation bars, not only headings. Missing
+  segment relations in the API can otherwise pass an empty dashboard. Do not overfit chart
+  internals or transient exact numeric rendering.
 - Dice: one configured segment dice page smoke is enough unless user asks for
   dice animation coverage.
 - Countdown: set countdown, assert player widget appears, never wait for expiry

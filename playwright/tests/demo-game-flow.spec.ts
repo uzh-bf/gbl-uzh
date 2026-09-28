@@ -701,16 +701,16 @@ async function assertDicePage(page: Page) {
   ])
 
   try {
-    await expect(dicePage.getByText('1. Month')).toBeVisible({
-      timeout: 30_000,
-    })
-    await expect(dicePage.getByText('2. Month')).toBeVisible({
-      timeout: 30_000,
-    })
-    await expect(dicePage.getByText('3. Month')).toBeVisible({
-      timeout: 30_000,
-    })
-    await expect(dicePage.getByRole('button', { name: 'Roll' })).toHaveCount(3)
+    for (let month = 1; month <= 3; month++) {
+      await expect(
+        dicePage.getByRole('tab', { name: new RegExp(`Month ${month}`) })
+      ).toBeVisible({ timeout: 30_000 })
+    }
+    await expect(
+      dicePage.getByRole('button', { name: 'Roll', exact: true })
+    ).toHaveCount(1)
+    await expect(dicePage.getByTestId('admin-dice-bonds')).toBeVisible()
+    await expect(dicePage.getByTestId('admin-dice-stocks')).toBeVisible()
   } finally {
     await dicePage.close()
   }
@@ -727,20 +727,48 @@ async function assertFinalReport(page: Page, playerPlans: PlayerPlan[]) {
       timeout: 30_000,
     })
 
-    for (const { name } of playerPlans) {
-      await expect(reportPage.getByRole('columnheader', { name })).toBeVisible()
-    }
+    // Real API rows must carry their segment links, not just render team names.
+    await expect(
+      reportPage.getByRole('region', { name: 'Report summary' })
+    ).toContainText(`Across ${playerPlans.length} teams`)
+    await expect(
+      reportPage.getByText('No settled results in this scope yet.')
+    ).toHaveCount(0)
 
-    await expect(reportPage.getByText('Player Decisions')).toBeVisible()
-    for (const label of ['P1 S1', 'P1 S2', 'P2 S1', 'P2 S2']) {
-      await expect(reportPage.getByText(label)).toBeVisible()
+    for (const { name } of playerPlans) {
+      await expect(
+        reportPage.getByRole('rowheader', { name, exact: true })
+      ).toBeVisible()
+      await expect(
+        reportPage.getByRole('button', { name: `Focus ${name}`, exact: true })
+      ).toHaveAccessibleDescription(
+        /Assets \d[^ ]* CHF\. Return [+-]?\d+\.\d+%\./
+      )
+      await expect(
+        reportPage
+          .getByRole('button', { name: new RegExp(`^${name}, Q1`) })
+          .first()
+      ).toBeVisible()
     }
 
     await expect(
-      reportPage.getByText('Risk-Return', { exact: true }).first()
+      reportPage.getByRole('heading', { name: 'Decisions', exact: true })
+    ).toBeVisible()
+    for (const year of [FIRST_GAME_YEAR, FIRST_GAME_YEAR + 1]) {
+      for (const quarter of [1, 2]) {
+        await expect(
+          reportPage.getByRole('columnheader', {
+            name: `Q${quarter} ${String(year).slice(-2)}`,
+          })
+        ).toBeVisible()
+      }
+    }
+
+    await expect(
+      reportPage.getByRole('heading', { name: 'Risk and return', exact: true })
     ).toBeVisible()
     await expect(
-      reportPage.getByText('Sharpe Ratio', { exact: true })
+      reportPage.getByRole('heading', { name: 'Sharpe ratio', exact: true })
     ).toBeVisible()
   } finally {
     await reportPage.close()
@@ -1177,10 +1205,50 @@ test('Market shows fixed admin reveals to two players during allocation', async 
       page.waitForEvent('popup', { timeout: 60_000 }),
       link.click(),
     ])
-    await expect(dicePage.getByText('1. Month')).toBeVisible({
+    const firstTab = dicePage.getByRole('tab', { name: /Month 1/ })
+    await expect(firstTab).toHaveAttribute('aria-selected', 'true', {
       timeout: 30_000,
     })
+    await firstTab.press('ArrowRight')
+    await expect(dicePage.getByRole('tab', { name: /Month 2/ })).toBeFocused()
+    await dicePage.getByRole('tab', { name: /Month 2/ }).press('End')
+    await expect(
+      dicePage.getByRole('tab', { name: /Month 3/ })
+    ).toHaveAttribute('aria-selected', 'true')
+    await dicePage.getByRole('tab', { name: /Month 3/ }).press('Home')
+    await expect(firstTab).toBeFocused()
+    await expect(
+      dicePage.getByRole('img', { name: /die: not revealed/ })
+    ).toHaveCount(3)
+    await expect(dicePage.locator('[data-highlighted="true"]')).toHaveCount(0)
+    const captureDice = async (state: string) => {
+      for (const width of [1440, 1000, 784, 390, 320]) {
+        await dicePage!.setViewportSize({ width, height: 900 })
+        await expectNoPageOverflow(dicePage!)
+        await capturePlayerScreenshot(dicePage!, {
+          path: testInfo.outputPath(`admin-dice-${state}-${width}.png`),
+          fullPage: true,
+        })
+      }
+      await dicePage!.setViewportSize({ width: 1440, height: 900 })
+    }
+    await captureDice('unrevealed')
+    const originalDiceUrl = dicePage.url()
+    await dicePage.goto(
+      (await page
+        .getByTestId('period-0-segment-1')
+        .locator('a[href*="/admin/dice/"]')
+        .getAttribute('href'))!
+    )
+    await expect(
+      dicePage.getByRole('button', { name: 'Roll', exact: true })
+    ).toBeDisabled()
+    await expect(
+      dicePage.getByText('Start this segment before revealing its dice.')
+    ).toBeVisible()
+    await dicePage.goto(originalDiceUrl)
     let failOnce = true
+    let failRefresh = false
     await dicePage.route('**/api/graphql', async (route) => {
       if (
         failOnce &&
@@ -1190,14 +1258,61 @@ test('Market shows fixed admin reveals to two players during allocation', async 
         await route.fulfill({
           json: { errors: [{ message: 'Temporary publication failure' }] },
         })
+      } else if (
+        failRefresh &&
+        route.request().postData()?.includes('query MarketDice')
+      ) {
+        await route.fulfill({
+          json: { errors: [{ message: 'Temporary refresh failure' }] },
+        })
       } else await route.continue()
     })
     const first = dicePage.getByTestId('admin-roll-0')
     await first.getByRole('button', { name: 'Roll', exact: true }).click()
+    await expect(
+      first.getByRole('button', { name: 'Roll', exact: true })
+    ).toBeDisabled()
+    for (const tab of await dicePage.getByRole('tab').all())
+      await expect(tab).toBeDisabled()
     await expect(first.getByRole('alert')).toContainText('Could not publish')
     await expect(player.getByTestId('market-comparison')).toHaveCount(0)
     await first.getByRole('button', { name: 'Retry publishing' }).click()
-    await expect(first.getByRole('status')).toHaveText('Revealed to players')
+    await expect(first.getByRole('status')).toHaveText(
+      'Month 1 · January · revealed to players'
+    )
+    await expect(
+      first.getByRole('button', { name: 'Roll', exact: true })
+    ).toHaveCount(0)
+    await expect(firstTab).toHaveAttribute('aria-selected', 'true')
+    await expect(firstTab).toContainText('January · Rolled')
+    for (const asset of ['bonds', 'stocks']) {
+      const chart = dicePage.getByTestId(`admin-dice-${asset}`)
+      await expect(chart.locator('[data-highlighted="true"]')).toHaveAttribute(
+        'data-roll',
+        String(original.diceRolls[0][asset])
+      )
+      await expect(
+        chart.getByTestId(`admin-dice-return-${asset}`)
+      ).toContainText(`${(original.returns[0][asset] * 100).toFixed(1)}%`)
+    }
+    for (const [name, value] of [
+      ['Bonds', original.diceRolls[0].bonds - original.diceRolls[0].shared],
+      ['Shared', original.diceRolls[0].shared],
+      ['Stocks', original.diceRolls[0].stocks - original.diceRolls[0].shared],
+    ]) {
+      await expect(
+        first.getByRole('img', { name: `${name} die: ${value}`, exact: true })
+      ).toBeVisible()
+    }
+    await captureDice('revealed')
+    await dicePage.reload()
+    await expect(
+      dicePage.getByRole('tab', { name: /Month 2/ })
+    ).toHaveAttribute('aria-selected', 'true')
+    await firstTab.click()
+    await expect(first.getByRole('status')).toHaveText(
+      'Month 1 · January · revealed to players'
+    )
     const checkRoll = async (index: number) => {
       for (const session of sessions) {
         await expect(
@@ -1250,6 +1365,10 @@ test('Market shows fixed admin reveals to two players during allocation', async 
       player.getByRole('spinbutton', { name: 'Stocks', exact: true })
     ).toHaveValue('20')
     await player.getByRole('link', { name: 'Market', exact: true }).click()
+    // A failed event refetch must preserve the selected month and allow recovery.
+    const thirdTab = dicePage.getByRole('tab', { name: /Month 3/ })
+    await thirdTab.click()
+    failRefresh = true
     // Concurrent persistence must merge both markers; replaying month 1 cannot
     // replace month 3 as the latest result.
     const responses = await Promise.all(
@@ -1261,9 +1380,28 @@ test('Market shows fixed admin reveals to two players during allocation', async 
     )
     for (const response of responses)
       expect((await response.json()).errors).toBeUndefined()
+    const refreshAlert = dicePage
+      .getByRole('alert')
+      .filter({ hasText: 'Could not refresh dice.' })
+    await expect(refreshAlert).toBeVisible()
+    await expect(thirdTab).toHaveAttribute('aria-selected', 'true')
+    failRefresh = false
+    await dicePage
+      .getByRole('button', { name: 'Retry loading', exact: true })
+      .click()
+    await expect(refreshAlert).toHaveCount(0)
+    await expect(thirdTab).toHaveAttribute('aria-selected', 'true')
+    await expect(thirdTab).toContainText('March · Rolled')
+    await firstTab.click()
     await checkRoll(2)
-    await first.getByRole('button', { name: 'Roll', exact: true }).click()
-    await expect(first.getByRole('status')).toHaveText('Revealed to players')
+    const replay = await page.request.post('/api/graphql', {
+      data: { query: revealQuery, variables: { segmentId, rollIndex: 0 } },
+    })
+    expect((await replay.json()).errors).toBeUndefined()
+    await expect(
+      first.getByRole('button', { name: 'Roll', exact: true })
+    ).toHaveCount(0)
+    await expect(firstTab).toHaveAttribute('aria-selected', 'true')
     await checkRoll(2)
     const after = await (
       await page.request.post('/api/graphql', {
@@ -1275,9 +1413,20 @@ test('Market shows fixed admin reveals to two players during allocation', async 
       revealedRollIndices: [0, 1, 2],
     })
     await dicePage.reload()
-    await expect(
-      dicePage.getByText('Revealed to players', { exact: true })
-    ).toHaveCount(3)
+    await expect(firstTab).toHaveAttribute('aria-selected', 'true')
+    for (const [index, month] of ['January', 'February', 'March'].entries()) {
+      const tab = dicePage.getByRole('tab', {
+        name: new RegExp(`Month ${index + 1}`),
+      })
+      await expect(tab).toContainText(`${month} · Rolled`)
+      await tab.click()
+      await expect(dicePage.getByRole('status')).toHaveText(
+        `Month ${index + 1} · ${month} · revealed to players`
+      )
+      await expect(
+        dicePage.getByRole('button', { name: 'Roll', exact: true })
+      ).toHaveCount(0)
+    }
     await player.reload()
     await checkRoll(2)
     for (const width of [360, 390, 400, 784]) {

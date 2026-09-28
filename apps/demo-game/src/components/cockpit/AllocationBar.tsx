@@ -6,14 +6,20 @@ export default function AllocationBar({
   value,
   className,
   compact = false,
+  report = false,
 }: {
   value: Allocation
   className?: string
   compact?: boolean
+  report?: boolean
 }) {
   return (
     <div
-      className={cn('flex h-full overflow-hidden rounded-[50px]', className)}
+      className={cn(
+        'flex h-full overflow-hidden',
+        report ? 'rounded-[3px]' : 'rounded-[50px]',
+        className
+      )}
       aria-hidden="true"
     >
       {ALLOCATION_KEYS.map((key) => (
@@ -21,14 +27,18 @@ export default function AllocationBar({
           key={key}
           className={cn(
             '@container relative min-w-0 overflow-hidden',
-            !compact && 'not-first:shadow-[inset_2px_0_white]',
+            !compact && !report && 'not-first:shadow-[inset_2px_0_white]',
             assetLabels[key].color,
-            key === 'bonds' && 'text-white'
+            (key === 'bonds' || (report && key === 'stocks')) && 'text-white'
           )}
           data-asset={key}
           style={{ width: `${value[key]}%` }}
         >
-          {compact ? null : value[key] < 20 ? (
+          {report ? (
+            <span className="grid h-full place-items-center text-[11px] font-semibold [@container(max-width:25px)]:invisible">
+              {Number(value[key].toFixed(1))}
+            </span>
+          ) : compact ? null : value[key] < 20 ? (
             <div className="mobile:px-app-2 mobile:app-annotation grid h-full place-items-center px-[8px] text-[13px] [@container(max-width:30px)]:invisible [@container(max-width:56px)]:px-0 [@container(max-width:56px)]:text-[11px]">
               <strong>{value[key]}%</strong>
             </div>
