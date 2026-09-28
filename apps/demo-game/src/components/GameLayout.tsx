@@ -15,6 +15,7 @@ import { parseFacts } from '~/lib/facts'
 import { shouldRefetchDemoGame } from '~/lib/gameEvents'
 import { queueRefetch } from '~/lib/queuedRefetch'
 import type { ResultView } from '~/lib/results'
+import CantonFlagBadge from './CantonFlagBadge'
 import CompactCountdown from './cockpit/CompactCountdown'
 import HistoryPanel from './history/HistoryPanel'
 import MarketPanel from './market/MarketPanel'
@@ -219,26 +220,30 @@ function GameLayout({
               'min-[601px]:gap-[20px] min-[601px]:px-[32px] min-[601px]:py-[24px]'
           )}
         >
-          <div
+          <Link
+            href={{ pathname: '/play/welcome', query: { edit: '1', tab } }}
+            aria-label="Edit player profile"
             className={cn(
-              'bg-player-progress text-player-primary phone:size-app-header-avatar phone:app-body grid shrink-0 place-items-center overflow-hidden rounded-full font-bold min-[601px]:size-[44px] min-[601px]:text-[18px]',
+              'text-player-primary focus-visible:outline-player-primary phone:size-app-header-avatar phone:app-body relative shrink-0 rounded-full font-bold focus-visible:outline-2 focus-visible:outline-offset-4 min-[601px]:size-[44px] min-[601px]:text-[18px]',
               expandedHeader &&
                 'min-[601px]:size-[60px] min-[601px]:text-[24px]'
             )}
-            aria-hidden="true"
           >
-            {avatar ? (
-              <Image
-                src={avatar}
-                width={60}
-                height={60}
-                alt=""
-                className="size-full object-cover"
-              />
-            ) : (
-              initials
-            )}
-          </div>
+            <div className="bg-player-progress grid size-full place-items-center overflow-hidden rounded-full">
+              {avatar ? (
+                <Image
+                  src={avatar}
+                  width={60}
+                  height={60}
+                  alt=""
+                  className="size-full object-cover"
+                />
+              ) : (
+                initials
+              )}
+            </div>
+            <CantonFlagBadge location={location} />
+          </Link>
           <div className="min-w-0 flex-1">
             <div
               className={cn(

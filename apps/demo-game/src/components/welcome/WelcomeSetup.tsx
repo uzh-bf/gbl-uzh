@@ -9,6 +9,7 @@ import * as yup from 'yup'
 import { ALLOCATION_KEYS } from '~/lib/allocation'
 import { assetLabels } from '~/lib/constants'
 import { parseFacts } from '~/lib/facts'
+import CantonFlagBadge from '../CantonFlagBadge'
 import OptionPicker, { type Option } from './OptionPicker'
 import {
   WelcomeActionButton,
@@ -77,12 +78,18 @@ const schema = yup.object({
 
 export default function WelcomeSetup({
   player,
-  onStart,
+  onSave,
+  onCancel,
 }: {
   player: NonNullable<SelfQuery['self']>
-  onStart: (name: string, facts: Record<string, unknown>) => Promise<void>
+  onSave: (name: string, facts: Record<string, unknown>) => Promise<void>
+  /** Supplying Cancel opens profile editing instead of first-time setup. */
+  onCancel?: () => void
 }) {
-  const [step, setStep] = useState<keyof typeof steps>('intro')
+  const editing = Boolean(onCancel)
+  const [step, setStep] = useState<keyof typeof steps>(
+    editing ? 'setup' : 'intro'
+  )
   const [submitError, setSubmitError] = useState('')
   const content = useRef<HTMLElement>(null)
   const heading = useRef<HTMLHeadingElement>(null)
@@ -98,13 +105,13 @@ export default function WelcomeSetup({
     validationSchema: schema,
     validateOnMount: true,
     onSubmit: async (values) => {
-      if (step === 'setup') {
+      if (step === 'setup' && !editing) {
         goTo('review')
         return
       }
       setSubmitError('')
       try {
-        await onStart(values.name.trim(), {
+        await onSave(values.name.trim(), {
           ...facts,
           avatar: values.avatar,
           location: values.location,
@@ -124,6 +131,11 @@ export default function WelcomeSetup({
   const avatar = avatars.find(({ value }) => value === form.values.avatar)
   const location = locations.find(({ value }) => value === form.values.location)
   const canContinue = form.isValid && !form.isValidating
+  const submitLabel = editing
+    ? 'Save changes'
+    : step === 'setup'
+      ? 'Review your bank'
+      : 'Start the game'
 
   function goTo(next: typeof step, editName = false) {
     setStep(next)
@@ -170,19 +182,21 @@ export default function WelcomeSetup({
             {player.game.name}
           </span>
         </div>
-        <span
-          className={cn(
-            'mobile:px-app-3 mobile:py-app-1 mobile:app-caption shrink-0 rounded-[5px] px-[11px] py-[3px] text-[13px] font-bold',
-            step === 'review'
-              ? 'bg-player-success-surface text-player-success'
-              : 'bg-player-border'
-          )}
-          aria-live="polite"
-        >
-          {step === 'review'
-            ? 'Complete'
-            : `Step ${step === 'intro' ? 1 : 2} of 2`}
-        </span>
+        {!editing && (
+          <span
+            className={cn(
+              'mobile:px-app-3 mobile:py-app-1 mobile:app-caption shrink-0 rounded-[5px] px-[11px] py-[3px] text-[13px] font-bold',
+              step === 'review'
+                ? 'bg-player-success-surface text-player-success'
+                : 'bg-player-border'
+            )}
+            aria-live="polite"
+          >
+            {step === 'review'
+              ? 'Complete'
+              : `Step ${step === 'intro' ? 1 : 2} of 2`}
+          </span>
+        )}
       </header>
       <form
         className="flex min-h-0 flex-1 flex-col"
@@ -209,10 +223,12 @@ export default function WelcomeSetup({
             tabIndex={-1}
             className="mobile:mb-app-2 mobile:app-heading m-0 mb-[8px] text-[24px] leading-[1.25] font-bold tracking-[-0.3px] focus:outline-none"
           >
-            {steps[step].title}
+            {editing ? 'Edit your bank' : steps[step].title}
           </h1>
           <p className="text-player-body m-0 leading-[1.65]">
-            {steps[step].description}
+            {editing
+              ? 'Update your bank name, avatar, or location.'
+              : steps[step].description}
           </p>
           {step === 'intro' ? (
             <>
@@ -264,6 +280,7 @@ export default function WelcomeSetup({
                     {...form.getFieldProps('name')}
                     placeholder="e.g. Team 1"
                     autoComplete="organization"
+                    disabled={form.isSubmitting}
                     aria-invalid={Boolean(
                       form.touched.name && form.errors.name
                     )}
@@ -291,6 +308,7 @@ export default function WelcomeSetup({
                     <WelcomePickerTrigger
                       labelId="avatar-label"
                       valueId="avatar-value"
+                      disabled={form.isSubmitting}
                       icon={
                         avatar?.value ? (
                           <Image
@@ -320,6 +338,7 @@ export default function WelcomeSetup({
                     <WelcomePickerTrigger
                       labelId="location-label"
                       valueId="location-value"
+                      disabled={form.isSubmitting}
                       icon={
                         <MapPin
                           aria-hidden="true"
@@ -332,31 +351,36 @@ export default function WelcomeSetup({
                   )}
                 </div>
               </div>
-              <div className="border-player-input mobile:mt-app-4 mobile:gap-app-3 mobile:pt-app-4 mt-[24px] flex items-center justify-between gap-[14px] border-t pt-[16px]">
-                <div>
-                  <span className="text-player-body mobile:app-caption text-[14px]">
-                    Starting capital
+              {!editing && (
+                <div className="border-player-input mobile:mt-app-4 mobile:gap-app-3 mobile:pt-app-4 mt-[24px] flex items-center justify-between gap-[14px] border-t pt-[16px]">
+                  <div>
+                    <span className="text-player-body mobile:app-caption text-[14px]">
+                      Starting capital
+                    </span>
+                    <strong className="mobile:app-value block text-[22px] leading-[1.3] whitespace-nowrap">
+                      10&apos;000.00 CHF
+                    </strong>
+                  </div>
+                  <span className="text-player-body mobile:app-caption text-right text-[14px]">
+                    Same for every team
                   </span>
-                  <strong className="mobile:app-value block text-[22px] leading-[1.3] whitespace-nowrap">
-                    10&apos;000.00 CHF
-                  </strong>
                 </div>
-                <span className="text-player-body mobile:app-caption text-right text-[14px]">
-                  Same for every team
-                </span>
-              </div>
+              )}
             </>
           ) : (
             <>
               <div className="border-player-input mobile:mt-app-4 mobile:mb-app-4 mobile:gap-app-3 mobile:px-app-4 mobile:py-app-4 mt-[18px] mb-[16px] flex items-center gap-[14px] rounded-[16px] border px-[20px] py-[15px] shadow-[0_1px_3px_#00000014]">
                 {avatar?.value && (
-                  <Image
-                    src={avatar.value}
-                    alt=""
-                    width={56}
-                    height={56}
-                    className="size-[56px] rounded-[12px] object-cover"
-                  />
+                  <div className="relative size-[56px] shrink-0">
+                    <Image
+                      src={avatar.value}
+                      alt=""
+                      width={56}
+                      height={56}
+                      className="size-full rounded-[12px] object-cover"
+                    />
+                    <CantonFlagBadge location={form.values.location} />
+                  </div>
                 )}
                 <div className="min-w-0">
                   <strong className="mobile:app-heading text-[20px] [overflow-wrap:anywhere]">
@@ -454,29 +478,38 @@ export default function WelcomeSetup({
               </>
             ) : (
               <>
-                <button
-                  type="button"
-                  className="border-player-input text-player-primary focus-visible:outline-player-primary grid min-h-[48px] min-w-[44px] cursor-pointer place-items-center rounded-[6px] border bg-white focus-visible:outline-2 focus-visible:outline-offset-[3px]"
-                  aria-label={
-                    step === 'setup'
-                      ? 'Back to introduction'
-                      : 'Back to bank setup'
-                  }
-                  disabled={form.isSubmitting}
-                  onClick={() => goTo(step === 'setup' ? 'intro' : 'setup')}
-                >
-                  <ArrowLeft aria-hidden="true" />
-                </button>
+                {editing ? (
+                  <WelcomeTextButton
+                    disabled={form.isSubmitting}
+                    onClick={onCancel}
+                  >
+                    Cancel
+                  </WelcomeTextButton>
+                ) : (
+                  <button
+                    type="button"
+                    className="border-player-input text-player-primary focus-visible:outline-player-primary grid min-h-[48px] min-w-[44px] cursor-pointer place-items-center rounded-[6px] border bg-white focus-visible:outline-2 focus-visible:outline-offset-[3px]"
+                    aria-label={
+                      step === 'setup'
+                        ? 'Back to introduction'
+                        : 'Back to bank setup'
+                    }
+                    disabled={form.isSubmitting}
+                    onClick={() => goTo(step === 'setup' ? 'intro' : 'setup')}
+                  >
+                    <ArrowLeft aria-hidden="true" />
+                  </button>
+                )}
                 <WelcomeActionButton
                   type="submit"
                   disabled={!canContinue || form.isSubmitting}
                   className="flex-1"
                 >
                   {form.isSubmitting
-                    ? 'Starting…'
-                    : step === 'setup'
-                      ? 'Review your bank'
-                      : 'Start the game'}
+                    ? editing
+                      ? 'Saving…'
+                      : 'Starting…'
+                    : submitLabel}
                 </WelcomeActionButton>
               </>
             )}

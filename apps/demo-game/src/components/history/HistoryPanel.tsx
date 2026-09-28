@@ -10,7 +10,7 @@ import {
 } from '@uzh-bf/design-system'
 import { Fragment, useState } from 'react'
 import type { ResultQuery } from '~/graphql/generated/ops'
-import { assetLabels } from '~/lib/constants'
+import { assetLabels, MONTHS, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 import {
   buildHistory,
   playerAmount,
@@ -66,7 +66,9 @@ function MonthlyResults({ quarter }: { quarter: HistoryQuarter }) {
               scope="row"
               className="mobile:py-[var(--app-table-cell-y)] py-[10px] text-left font-semibold"
             >
-              {month.index + 1}
+              {MONTHS[
+                (quarter.quarter - 1) * NUM_MONTHS_PER_SEGMENT + month.index
+              ] ?? '—'}
             </th>
             <td className="text-player-muted">
               {month.dice

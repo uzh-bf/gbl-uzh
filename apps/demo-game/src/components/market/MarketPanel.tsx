@@ -1,6 +1,6 @@
 import { ProbabilityChart, signedPercent } from '@gbl-uzh/ui'
 import type { ResultQuery } from '~/graphql/generated/ops'
-import { assetLabels } from '~/lib/constants'
+import { assetLabels, MONTHS, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 import {
   latestRevealedRoll,
   marketPeriod,
@@ -97,6 +97,9 @@ export default function MarketPanel({ data }: { data: ResultQuery }) {
   const scenario = readScenario(marketPeriod(game)?.facts)
   const latest = latestRevealedRoll(game)
   const roll = latest?.roll
+  const monthLabel = roll
+    ? `Q${latest.segmentIndex + 1} · ${MONTHS[latest.segmentIndex * NUM_MONTHS_PER_SEGMENT + latest.index]}`
+    : undefined
   const values = roll ? Object.values(roll.returns) : []
   const min = Math.min(0, ...values)
   const max = Math.max(0, ...values)
@@ -120,7 +123,7 @@ export default function MarketPanel({ data }: { data: ResultQuery }) {
               trendE={scenario[asset.trend]}
               trendGap={scenario[asset.gap]}
               totalEyes={roll ? String(roll.dice[asset.key]) : undefined}
-              month={roll ? latest.index + 1 : undefined}
+              monthLabel={monthLabel}
             />
           </div>
         ))
@@ -134,7 +137,7 @@ export default function MarketPanel({ data }: { data: ResultQuery }) {
           aria-live="polite"
         >
           <p className="text-player-muted mobile:mb-app-4 mobile:app-caption m-0 mb-[24px] min-[601px]:text-[24px]">
-            Monthly returns · Month {latest.index + 1}
+            Monthly returns · {monthLabel}
           </p>
           <div className="mobile:gap-app-3 grid gap-[18px]">
             {assets.map(({ key, label, color }) => {

@@ -28,6 +28,7 @@ function ProbabilityChart({
   title,
   titleContent,
   month,
+  monthLabel,
 }: {
   trendE: number
   trendGap: number
@@ -36,6 +37,7 @@ function ProbabilityChart({
   title?: string
   titleContent?: ReactNode
   month?: number
+  monthLabel?: string
 }) {
   const { data, vola } = useMemo(() => {
     const { data, volatility } = probabilityDistribution(trendE, trendGap)
@@ -70,9 +72,9 @@ function ProbabilityChart({
               >
                 {signedPercent(trendE, 2)}
               </strong>
-              {month !== undefined && (
+              {(monthLabel !== undefined || month !== undefined) && (
                 <span className="mt-[4px] block text-[14px] min-[601px]:text-[16px]">
-                  Month {month}
+                  {monthLabel ?? `Month ${month}`}
                 </span>
               )}
             </span>
