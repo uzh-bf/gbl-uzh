@@ -7,7 +7,7 @@ tags:
   - design-system
   - tailwind
   - components
-timestamp: "2026-09-26T00:00:00Z"
+timestamp: "2026-09-28T00:00:00Z"
 ---
 
 # UI Building Blocks
@@ -81,6 +81,14 @@ Copy the demo game's setup (`apps/demo-game/src/globals.css`, `postcss.config.js
 ### Market probability charts
 
 `packages/ui/src/components/ProbabilityChart.tsx:ProbabilityChart` keeps its existing admin presentation by default. `variant="market"` adds the compact player presentation with optional `title`, `titleContent`, and `month`; `totalEyes` selects an actual revealed total, with no automatic highlight of 7. Expected return, trend gap, and volatility share a compact row with matching text sizes. `month` places the latest revealed month beneath the Expected value for both Bonds and Stocks; the charts have no highlighted-date footer. The month remains absent until a roll is revealed. The comparison heading is “Monthly returns · Month N”; the latest revealed results continue to persist across quarter and year changes. `titleContent` places the latest revealed dice beneath each asset title; these compact dice use stored outcomes and asset colors. The exported `probabilityDistribution` helper also supplies the Decisions editor’s forecast volatility; `signedPercent` formats its expected values. The shared calculation preserves the reference game's rounded probability weights and volatility convention. All values derive from supplied scenario inputs, not screenshot constants. The Market SVG has an accessible description and per-roll descriptions; all 11 bars scale to the available width without horizontal scrolling, including at a 400px viewport. Narrower bars and compact mobile labels preserve room for the endpoint labels.
+
+### Admin dice workspace
+
+`apps/demo-game/src/components/admin/DiceWorkspace.tsx:DiceWorkspace` presents the admin dice route as three month tabs and one dice/sidebar-and-charts workspace, without a top header. The initial selection is the first unrevealed month (Month 1 when all are revealed); selection persists during refetches and after publication. Calendar names derive from the quarter, and the year uses `FIRST_GAME_YEAR`. Background refresh errors keep the loaded workspace and selected month visible with a retry action.
+
+Both forecasts remain visible before reveal, using the shared `probabilityDistribution` and `signedPercent` helpers in an app-local SVG presentation. Unrevealed dice are blank and neither chart highlights an outcome. After publication, Bonds/Shared/Stocks dice are green/orange/yellow; the charts highlight stored totals and show persisted returns with the shared-plus-asset calculation. The Roll button is replaced by the month's revealed status. Animation and publication temporarily disable month navigation; failed publication offers a retry without rerolling. Existing reveal eligibility, authoritative outcomes, realtime refetches, and backend idempotency are unchanged.
+
+At 1200px the workspace uses three columns; below that the dice section sits above the charts, and below 900px the charts stack. Tabs support arrow keys, Home and End, while labeled dice/charts and live status text expose outcomes to assistive technology. Shared `ProbabilityChart` defaults and player Market presentation remain unchanged.
 
 ### Player styling convention
 

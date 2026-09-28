@@ -1,5 +1,9 @@
 # Log
 
+## 2026-09-28
+
+**Update**: [UI Building Blocks](ui-components.md) — redesign the admin dice page with month tabs, always-visible forecasts, persistent revealed outcomes, and responsive dice/chart columns. Remove the replay button after reveal while preserving publication retry and player updates. Review simplified the active tab panel and Roll/Retry controls, and retained loaded data and month selection when background refresh fails.
+
 ## 2026-09-26
 
 **Update**: [UI Building Blocks](ui-components.md) — inset the allocation slider track by 24px per side on mobile to move handles away from phone navigation gesture areas, preserving touch-target size and desktop layout.
