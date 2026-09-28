@@ -1,4 +1,5 @@
 import { ChartContainer } from '@uzh-bf/design-system'
+import { useEffect, useState } from 'react'
 import { Bar, BarChart, Tooltip, XAxis, YAxis } from 'recharts'
 import type { HistoryQuarter } from '~/lib/results'
 import { playerAmount } from '~/lib/results'
@@ -8,6 +9,15 @@ export default function PortfolioHistoryChart({
 }: {
   quarters: HistoryQuarter[]
 }) {
+  const [compact, setCompact] = useState(false)
+  useEffect(() => {
+    const query = window.matchMedia('(width < 601px)')
+    const update = () => setCompact(query.matches)
+    update()
+    query.addEventListener('change', update)
+    return () => query.removeEventListener('change', update)
+  }, [])
+
   return (
     <>
       <div
@@ -61,7 +71,7 @@ export default function PortfolioHistoryChart({
                 fill="var(--color-player-primary)"
                 radius={[8, 8, 0, 0]}
                 isAnimationActive={false}
-                maxBarSize={100}
+                maxBarSize={compact ? 28 : 100}
               />
             </BarChart>
           </ChartContainer>

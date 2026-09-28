@@ -1,4 +1,9 @@
-import { expect, type Browser, type Page } from '@playwright/test'
+import {
+  expect,
+  type Browser,
+  type BrowserContextOptions,
+  type Page,
+} from '@playwright/test'
 
 export function requireBaseURL(baseURL: string | undefined) {
   if (!baseURL) {
@@ -46,12 +51,14 @@ export async function createGame(
 export async function openPlayerWelcome(
   browser: Browser,
   baseURL: string,
-  joinUrl: string
+  joinUrl: string,
+  device: Pick<BrowserContextOptions, 'hasTouch' | 'isMobile'> = {}
 ) {
   const context = await browser.newContext({
     baseURL,
     ignoreHTTPSErrors: true,
     viewport: { width: 390, height: 844 },
+    ...device,
   })
   try {
     const page = await context.newPage()
@@ -83,6 +90,49 @@ export async function expectNoPageOverflow(page: Page) {
       )
     )
     .toBe(true)
+}
+
+export async function expectPhoneScrollContained(page: Page) {
+  const nav = page.getByRole('navigation', { name: 'Player navigation' })
+  const main = page.getByRole('main')
+  const header = page.locator('header')
+  const viewport = page.viewportSize()!
+  await expect(nav.getByRole('link').first()).toHaveCSS('height', '40px')
+  await expect
+    .poll(async () => {
+      const bounds = await nav.boundingBox()
+      return Math.round(bounds!.y + bounds!.height)
+    })
+    .toBe(viewport.height)
+  const navBefore = await nav.boundingBox()
+  const headerBefore = await header.boundingBox()
+  expect((await main.boundingBox())!.height).toBeGreaterThan(100)
+  await main.evaluate((element) => {
+    element.scrollTop = element.scrollHeight
+  })
+  // Exercise scroll chaining at the end of the content and over the tabs.
+  await main.hover()
+  await page.mouse.wheel(0, 1000)
+  await nav.hover()
+  await page.mouse.wheel(0, 1000)
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+  expect(await nav.boundingBox()).toEqual(navBefore)
+  expect(await header.boundingBox()).toEqual(headerBefore)
+  expect(
+    await page.evaluate(() => document.documentElement.scrollHeight)
+  ).toBeLessThanOrEqual(viewport.height)
+  await expect
+    .poll(() =>
+      main.evaluate((element) =>
+        Math.abs(
+          element.scrollHeight - element.clientHeight - element.scrollTop
+        )
+      )
+    )
+    .toBeLessThanOrEqual(1)
+  await main.evaluate((element) => {
+    element.scrollTop = 0
+  })
 }
 
 export function capturePlayerScreenshot(

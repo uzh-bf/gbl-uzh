@@ -157,9 +157,13 @@ function BalanceRow({
   const mix = balanceMix(value)
   return (
     <div
+      data-cy="result-balance-row"
       className={cn(
         inset,
-        'border-player-border mobile:gap-app-3 mobile:py-app-4 grid min-h-[64px] grid-cols-[minmax(44px,0.6fr)_minmax(0,1.5fr)_minmax(92px,0.9fr)] items-center border-b py-[16px] last:border-b-0 min-[601px]:min-h-[88px] min-[601px]:gap-[24px]',
+        'border-player-border mobile:gap-app-3 grid min-h-[64px] grid-cols-[minmax(44px,0.6fr)_minmax(0,1.5fr)_minmax(92px,0.9fr)] items-center border-b py-[16px] last:border-b-0 min-[601px]:min-h-[88px] min-[601px]:gap-[24px]',
+        held
+          ? 'mobile:py-app-4'
+          : 'mobile:min-h-app-balance-row mobile:py-app-2',
         muted && 'opacity-45 min-[601px]:min-h-[64px]',
         held &&
           'min-[601px]:min-h-[96px] min-[601px]:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)_minmax(92px,0.9fr)]'
@@ -189,6 +193,7 @@ function BalanceRow({
       <span
         className={cn(
           'mobile:app-body text-right whitespace-nowrap tabular-nums min-[601px]:text-[28px]',
+          !held && 'mobile:whitespace-normal mobile:[overflow-wrap:anywhere]',
           !muted && 'font-semibold'
         )}
       >
@@ -452,7 +457,11 @@ function QuarterResults({ view }: { view: ResultView }) {
   return (
     <div data-cy="quarter-results">
       <TotalAssets view={view} label="This quarter" change={view.quarterGain} />
-      <Section title="Assets per month" detail="Mix · total CHF">
+      <Section
+        title="Assets per month"
+        detail="Mix · total CHF"
+        testId="monthly-assets"
+      >
         <BalanceRow label={view.opening.label} value={view.opening} muted />
         {view.quarterMonths.map((sample) => (
           <BalanceRow key={sample.month} label={sample.label} value={sample} />

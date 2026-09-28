@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: "2026-09-28T08:16:52Z"
+timestamp: "2026-09-28T09:01:30Z"
 ---
 
 # Developing a Game
@@ -127,7 +127,7 @@ There is no generic frontend — each game builds its own Next.js pages (Pages R
 
 ### Demo-game welcome flow
 
-`apps/demo-game/src/components/welcome/WelcomeSetup.tsx:WelcomeSetup` implements a responsive welcome flow: lottery introduction → bank setup → review. The mobile layout follows the references in `apps/demo-game/design/`, with bottom-sheet avatar and searchable canton pickers and a footer that stays below the scrolling content without covering it. Options use the existing supported assets from `src/lib/constants.ts`. The complete welcome flow uses colocated Tailwind utilities and shared player color/font tokens from `src/globals.css`, including its portaled dialogs and loading/error views. App-local controls in `src/components/welcome/WelcomeControls.tsx` preserve native props and refs, reuse design-system buttons, and keep welcome actions at least 44px high on mobile and 48px above 600px. The 720px shell, 359px avatar-grid boundary, 721px desktop boundary, and safe-area footer/sheet padding use explicit pixel utilities. `playwright/tests/demo-game-welcome.spec.ts` covers these layouts, picker drafts and dismissal, validation, save failure/retry, and loading/query-error/missing-player states.
+`apps/demo-game/src/components/welcome/WelcomeSetup.tsx:WelcomeSetup` implements a responsive welcome flow: lottery introduction → bank setup → review. The mobile layout follows the references in `apps/demo-game/design/`, with bottom-sheet avatar and searchable canton pickers and a footer that stays below the scrolling content without covering it. Avatar options use the existing supported assets from `src/lib/constants.ts`; the canton picker offers all 26 Swiss cantons in abbreviation order with local names and `Name (CODE)` labels, searchable by name or abbreviation. `LOCATIONS.Trader` controls the choices and validation, while `cantonNames` supplies welcome and cockpit labels. The complete welcome flow uses colocated Tailwind utilities and shared player color/font tokens from `src/globals.css`, including its portaled dialogs and loading/error views. App-local controls in `src/components/welcome/WelcomeControls.tsx` preserve native props and refs, reuse design-system buttons, and keep welcome actions at least 44px high on mobile and 48px above 600px. The 720px shell, 359px avatar-grid boundary, 721px desktop boundary, and safe-area footer/sheet padding use explicit pixel utilities. `playwright/tests/demo-game-welcome.spec.ts` covers these layouts, picker drafts and dismissal, validation, save failure/retry, and loading/query-error/missing-player states.
 
 Setup uses Formik + yup and requires a trimmed bank name of 2–20 characters, an avatar, and a canton. Picker changes remain drafts until confirmed; Cancel or Escape discards them. Players can edit all three choices from the review. The final **Start the game** action persists the name and facts through the existing mutation, preserves the saved color (defaults to Blue when absent or invalid), and navigates to `/play/cockpit`. Review controls are disabled while saving. Failed saves retain the choices and show a retry message. The route handles loading, query failures, and missing player sessions (`apps/demo-game/src/pages/play/welcome.tsx:Welcome`).
 

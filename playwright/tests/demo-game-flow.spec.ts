@@ -11,6 +11,7 @@ import {
   capturePlayerScreenshot,
   createGame,
   expectNoPageOverflow,
+  expectPhoneScrollContained,
   openPlayerWelcome,
   playerJoinUrl,
   requireBaseURL,
@@ -148,9 +149,15 @@ async function joinPlayer(
   browser: Browser,
   baseURL: string,
   joinUrl: string,
-  plan: PlayerPlan
+  plan: PlayerPlan,
+  touch = false
 ): Promise<PlayerSession> {
-  const { context, page } = await openPlayerWelcome(browser, baseURL, joinUrl)
+  const { context, page } = await openPlayerWelcome(
+    browser,
+    baseURL,
+    joinUrl,
+    touch ? { hasTouch: true, isMobile: true } : {}
+  )
   try {
     await page
       .getByRole('button', { name: 'Set up your bank', exact: true })
@@ -395,6 +402,8 @@ const cockpitViewports = [
   { name: 'mobile', width: 390, height: 844 },
   { name: 'mobile-boundary', width: 600, height: 1024 },
   { name: 'above-mobile', width: 601, height: 1024 },
+  { name: 'phone-boundary', width: 767, height: 1024 },
+  { name: 'tablet-boundary', width: 768, height: 1024 },
   { name: 'tablet', width: 784, height: 1024 },
   { name: 'shell-boundary', width: 785, height: 1024 },
   { name: 'desktop', width: 1440, height: 1000 },
@@ -438,6 +447,7 @@ async function assertSubmittedStates(page: Page, admin: Page) {
       .toBe(viewport.width)
     await expectNoPageOverflow(page)
     editingSizes.set(viewport.width, await cockpitControlSizes(page, submit))
+    if (viewport.width < 768) await expectPhoneScrollContained(page)
     await capturePlayerScreenshot(page, {
       path: test.info().outputPath(`cockpit-editing-${viewport.name}.png`),
     })
@@ -497,6 +507,7 @@ async function assertSubmittedStates(page: Page, admin: Page) {
         .poll(() => cockpitControlSizes(page, change))
         .toEqual(editingSizes.get(width))
       await expectNoPageOverflow(page)
+      if (width < 768) await expectPhoneScrollContained(page)
       await capturePlayerScreenshot(page, {
         path: test.info().outputPath(`cockpit-${state}-${name}.png`),
       })
@@ -1680,8 +1691,10 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     await expect(quarters.last()).toContainText(`${FIRST_GAME_YEAR + 1} · Q1`)
     await expect(panel.getByTestId('history-value')).toHaveText(value)
     const header = player.locator('header')
+    await player.setViewportSize({ width: 390, height: 667 })
     for (const tab of ['Decisions', 'Market', 'Team', 'History']) {
       await player.getByRole('link', { name: tab, exact: true }).click()
+      await expectPhoneScrollContained(player)
       await expect(header.getByRole('heading', { level: 1 })).toHaveText(
         players[0].name
       )
@@ -2218,7 +2231,13 @@ test('cockpit result designs follow settled quarters, consolidation and complete
     for (let quarter = 0; quarter < 4; quarter++)
       await addSegment(page, { periodIndex })
   }
-  const session = await joinPlayer(browser, appBaseURL, joinUrl, players[0])
+  const session = await joinPlayer(
+    browser,
+    appBaseURL,
+    joinUrl,
+    players[0],
+    true
+  )
   const player = session.page
   const errors: string[] = []
   player.on('pageerror', (error) => errors.push(error.message))
@@ -2232,6 +2251,9 @@ test('cockpit result designs follow settled quarters, consolidation and complete
       { name: 'reference', width: 784, height: 1694 },
       { name: 'mobile', width: 390, height: 844 },
       { name: 'narrow', width: 320, height: 844 },
+      { name: 'large-phone', width: 767, height: 1024 },
+      { name: 'landscape', width: 844, height: 390 },
+      { name: 'landscape-boundary', width: 1024, height: 500 },
     ]) {
       await player.setViewportSize({ width, height })
       await expectNoPageOverflow(player)
@@ -2240,6 +2262,35 @@ test('cockpit result designs follow settled quarters, consolidation and complete
       })
       await expect(ready).toHaveCount(0)
       await expect(waiting).toBeInViewport()
+      if (width < 768 || height <= 500) await expectPhoneScrollContained(player)
+      if (width < 601 && state === 'segment-end') {
+        const rows = player
+          .getByTestId('monthly-assets')
+          .getByTestId('result-balance-row')
+        await expect(rows).toHaveCount(4)
+        for (const row of await rows.all()) {
+          await expect(row).toHaveCSS('padding-top', '8px')
+          await expect(row).toHaveCSS('padding-bottom', '8px')
+          await expect(row).toHaveCSS('min-height', '40px')
+        }
+      }
+      if (width === 390) {
+        // Desktop Chromium has zero safe-area insets; emulate the resolved
+        // padding to verify that it occupies space without pushing tabs down.
+        const nav = player.getByRole('navigation', {
+          name: 'Player navigation',
+        })
+        await nav.evaluate((element) => {
+          element.style.paddingBottom = '34px'
+        })
+        try {
+          await expectPhoneScrollContained(player)
+        } finally {
+          await nav.evaluate((element) => {
+            element.style.removeProperty('padding-bottom')
+          })
+        }
+      }
       await player.screenshot({
         path: testInfo.outputPath(`${state}-${name}.png`),
         animations: 'disabled',

@@ -7,7 +7,7 @@ tags:
   - design-system
   - tailwind
   - components
-timestamp: "2026-09-28T07:53:26Z"
+timestamp: "2026-09-28T09:24:57Z"
 ---
 
 # UI Building Blocks
@@ -100,6 +100,8 @@ Reuse structure and styles through app-local components: `PlayerActionButton` pr
 
 Demo-game result panels (`apps/demo-game/src/components/cockpit/ResultPanels.tsx`) share total-asset summaries, monthly balance rows, asset breakdowns, and benchmark charts. Compact `AllocationBar` segments encode actual holdings; accessible descriptions expose the mix. Recharts provides monthly cumulative-return bars, stacked year-end assets with an initial-capital reference, and cumulative year-end returns. Shared player colors distinguish Savings/Bonds/Stocks, and gains/losses use success/error tokens. The 784px reference layout scales down to 320px; multi-year charts scroll within their own sections. Screen-reader tables/lists expose monthly chart values.
 
+Below 601px, the quarter-closed “Assets per month” opening and monthly rows use 8px vertical padding and a 40px minimum height, with wrapping amounts. Other balance rows retain their existing spacing. `apps/demo-game/src/components/history/PortfolioHistoryChart.tsx:PortfolioHistoryChart` caps portfolio bars at 28px below 601px and 100px otherwise; resizing updates the cap while quarter spacing, tooltips, and horizontal chart scrolling remain intact.
+
 Preserve the current pixel dimensions and explicit viewport thresholds when adapting these designs: the app root is **14px**, so default rem-based Tailwind spacing is not a pixel-equivalent replacement. Dynamic widths and slider positions remain inline styles. Custom CSS in the converted cockpit is limited to the WebKit number-input stepper reset in the components layer; ordinary layout, responsive rules, and interaction states belong in utilities. Supply control overrides through the design system's class slots rather than CSS Module selectors and blanket `!important` rules.
 
 ### Demo-game sizing contract
@@ -118,7 +120,9 @@ Preserve the current pixel dimensions and explicit viewport thresholds when adap
 | `app-panel` / `app-card` | 16px / 12px padding              | Sections and cards; cards use 12px corners   |
 | `app-cell`               | 16px text, 10px vertical padding | Dense result tables                          |
 
-The `app-1/2/3/4/6` spacing tokens provide 4/8/12/16/24px for gap, padding and margin utilities. Named dimensions cover navigation (48px), header avatars (40px), dice (28px), allocation mixes (88px), and chart heights: monthly 130px, benchmark 150px, accumulated return 160px, History 180px, annual assets 200px, admin reports 240px. Choose by content; do not shrink probability SVG coordinates as though they were screen pixels.
+The `app-1/2/3/4/6` spacing tokens provide 4/8/12/16/24px for gap, padding and margin utilities. Named dimensions cover phone navigation (40px), header avatars (40px), dice (28px), allocation mixes (88px), and chart heights: monthly 130px, benchmark 150px, accumulated return 160px, History 180px, annual assets 200px, admin reports 240px. Choose by content; do not shrink probability SVG coordinates as though they were screen pixels.
+
+`apps/demo-game/src/components/GameLayout.tsx:GameLayout` uses a separate `phone:` variant for widths below 768px, plus landscape viewports with a coarse pointer up to 1024px wide and 500px tall. On these viewports the shell is fixed to the dynamic viewport, with the header, quarter progress, action footer, and navigation outside the main scroll area. The shell chrome uses compact spacing and typography across this phone range so landscape retains room for content. Vertical overscroll stays within main content rather than chaining to the document. Navigation links are 40px tall, with bottom safe-area padding added separately. This viewport approximation leaves tablet and desktop shell behavior unchanged outside the phone rule and does not change the global below-601px compact-content breakpoint.
 
 Use semantic roles such as `mobile:app-heading`, `mobile:app-control` and `mobile:h-app-chart-history` instead of introducing new mobile pixel literals. Pair them with explicit desktop overrides; omit base size literals when those two rules already cover every viewport. Controls include the body-text and touch-target roles, so do not repeat those classes. The mobile variant repeats only its explicitly opted-in class selector to take precedence over later bundled design-system utilities, without `!important` or global element selectors. Root variables reach portaled dialogs; `RootLayout` supplies the resolved mobile font family, and font/role classes still belong on the portal content itself.
 
