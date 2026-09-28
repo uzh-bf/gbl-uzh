@@ -4,8 +4,9 @@ export const adminStorageState = '.auth/admin.json'
 
 export async function loginAsAdmin(page: Page) {
   await page.goto('/admin/login', { waitUntil: 'domcontentloaded' })
-  await expect(page.getByText('Not signed in')).toBeVisible()
-  await page.getByRole('button', { name: 'Sign in' }).click()
+  const signIn = page.getByRole('button', { name: 'Sign in', exact: true })
+  await expect(signIn).toBeEnabled()
+  await signIn.click()
   await page.waitForURL('**/admin/games', {
     timeout: 30_000,
     waitUntil: 'domcontentloaded',

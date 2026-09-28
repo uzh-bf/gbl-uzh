@@ -7,7 +7,7 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: "2026-09-28T08:06:52Z"
+timestamp: "2026-09-28T08:16:52Z"
 ---
 
 # Developing a Game
@@ -108,10 +108,14 @@ There is no generic frontend — each game builds its own Next.js pages (Pages R
 | `/join/[token]`       | Player entry: calls the team-login mutation, redirects to the welcome page. Pure boilerplate — copy as-is.                                          |
 | `/play/welcome`       | One-time team setup (name, avatar); writes `Player.facts`.                                                                                          |
 | `/play/cockpit`       | **The** player screen: one layout + a body that switches on `game.status`. Game-specific.                                                           |
-| `/admin/login`        | Admin OIDC sign-in. Boilerplate.                                                                                                                    |
+| `/`, `/admin/login`   | Shared StartInvest administrator OIDC sign-in; authenticated administrators continue to games.                                                      |
 | `/admin/games`        | Game list + create form. Near-boilerplate.                                                                                                          |
 | `/admin/games/[id]`   | Facilitator control panel: period/segment authoring forms (game-specific fields!), the advance button, player list with join links, countdown form. |
 | `/admin/reports/[id]` | Cross-period analytics dashboard. Game-specific charts.                                                                                             |
+
+### Demo-game sign-in
+
+`apps/demo-game/src/components/admin/AdminSignIn.tsx:AdminSignIn` supplies both `/` and `/admin/login`: a responsive UZH-branded sign-in card replacing the home-page component showcase. It retains the `auth0` provider ID for mock/production OIDC and the `/admin/games` callback. Session loading and sign-in initiation disable the action; failed initiation offers a retry. Existing `ADMIN`/`MASTER` sessions redirect to games, while player sessions can start administrator sign-in. `playwright/tests/demo-game-sign-in.spec.ts` covers both entry routes, desktop/mobile/short layouts, loading/player states, failed initiation, and real mock-OIDC login plus administrator redirects.
 
 ### Demo-game admin report
 

@@ -2,6 +2,8 @@
 
 ## 2026-09-28
 
+**Update**: [Developing a Game](developing-a-game.md) — replace the home showcase and basic admin login with the shared, responsive StartInvest sign-in design. Preserve OIDC login, redirect existing administrators to games, and cover loading, retry, player sessions, and both entry routes. Keep the shared authentication helper and environment smoke check compatible with both the new screen and other games' existing login screens.
+
 **Update**: [Developing a Game](developing-a-game.md) — simplify report refresh error handling and shared ranking order; wait for all queries before processing queued refreshes so an early query failure cannot lose newer results. Add a delayed-query recovery regression.
 
 **Update**: [API Layer](api-layer.md), [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — restore missing segment relations in report results, refresh open reports after settlement, and support larger classes with extended team colors and bounded lists. Add 60-team browser coverage and assert populated metrics in the real lifecycle smoke.
