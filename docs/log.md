@@ -2,6 +2,8 @@
 
 ## 2026-09-28
 
+**Update**: [Developing a Game](developing-a-game.md) — expand the welcome canton selection to all 26 Swiss cantons, including shared names for search, review, and cockpit display.
+
 **Update**: [Developing a Game](developing-a-game.md) — replace the home showcase and basic admin login with the shared, responsive StartInvest sign-in design. Preserve OIDC login, redirect existing administrators to games, and cover loading, retry, player sessions, and both entry routes. Keep the shared authentication helper and environment smoke check compatible with both the new screen and other games' existing login screens.
 
 **Update**: [Developing a Game](developing-a-game.md) — simplify report refresh error handling and shared ranking order; wait for all queries before processing queued refreshes so an early query failure cannot lose newer results. Add a delayed-query recovery regression.
