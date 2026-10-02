@@ -1,45 +1,97 @@
-import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import {
-  CycleCountdown,
+  GameSidebar,
+  getCountdownNotification,
   Layout,
   LearningActivitiesList,
   LearningActivityModal,
-  PlayerDisplay,
   shouldRefetchGameResult,
   StoryElements,
-  useLearningActivities,
 } from '@gbl-uzh/ui'
-import { Button, Card, CardContent } from '@uzh-bf/design-system'
+import { Button } from '@uzh-bf/design-system'
 import dayjs from 'dayjs'
-import { useMemo } from 'react'
-import {
-  AttemptLearningElementDocument,
-  GlobalEventsDocument,
-  LearningElementDocument,
-  MarkStoryElementDocument,
-  ResultDocument,
-  UpdateReadyStateDocument,
-} from 'src/graphql/generated/ops'
+import { useEffect, useRef, useState } from 'react'
+import { useLearningActivities } from '~/hooks/useLearningActivities'
+import { getFacts } from '~/lib/facts'
+import { trpc } from '~/lib/trpc'
 import { useToast } from './ui/use-toast'
 
-export default function GameLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const { data, refetch: refetchResult } = useQuery(ResultDocument, {
-    fetchPolicy: 'cache-and-network',
-  })
+const tabs = [
+  { name: 'Welcome', href: '/play/welcome' },
+  { name: 'Cockpit', href: '/play/cockpit' },
+]
 
-  const [updateReadyState, { loading }] = useMutation(UpdateReadyStateDocument)
+function getAchievementReward(value: unknown): { xp?: number } | null {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const xp = (value as Record<string, unknown>).xp
+    return { xp: typeof xp === 'number' ? xp : undefined }
+  }
+  return null
+}
+
+function toStoryElementData(
+  elements: readonly {
+    id: string
+    title: string
+    type?: string
+    content?: string | null
+    contentRole?: unknown
+  }[]
+) {
+  return elements.map((element) => ({
+    id: element.id,
+    title: element.title,
+    type: (element.type ?? 'GENERIC') as 'GENERIC' | 'ROLE_BASED',
+    content: element.content,
+    contentRole:
+      element.contentRole && typeof element.contentRole === 'object'
+        ? (element.contentRole as Record<string, unknown>)
+        : null,
+  }))
+}
+
+function GameLayout({ children }: { children: React.ReactNode }) {
+  const utils = trpc.useUtils()
+  const { data: resultData } = trpc.play.result.useQuery()
+  const { data: selfData } = trpc.play.self.useQuery()
   const { toast } = useToast()
 
-  const completedLearningElementIds =
-    data?.result?.playerResult?.player?.completedLearningElementIds || []
-  const periods = data?.result?.currentGame?.periods || []
-  const learningElements =
-    data?.result?.currentGame?.activePeriod?.activeSegment?.learningElements ||
-    []
+  const updateReadyState = trpc.play.updateReadyState.useMutation({
+    onSuccess: async () => {
+      await Promise.all([
+        utils.play.result.invalidate(),
+        utils.play.self.invalidate(),
+      ])
+    },
+    onError: (err) => {
+      toast({
+        title: 'Could not update your ready state',
+        description: err.message,
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const markStoryElement = trpc.story.markVisited.useMutation({
+    onSuccess: async () => {
+      await Promise.all([
+        utils.play.result.invalidate(),
+        utils.play.self.invalidate(),
+      ])
+    },
+    onError: (err) => {
+      toast({
+        title: 'Could not mark the story element as read',
+        description: err.message,
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const [countdownNotifications, setCountdownNotifications] = useState({
+    '60': false,
+    '180': false,
+  })
+  const previousCountdownSeconds = useRef<number | null>(null)
 
   const {
     activeLearningId,
@@ -48,172 +100,181 @@ export default function GameLayout({
     activeLearningOptions,
     setActiveLearningOptions,
     learningElementData,
+    learningElementLoading,
     attemptingLearning,
     handleAttemptLearning,
     completedLearningElements,
     openLearningElements,
   } = useLearningActivities({
-    learningElementDocument: LearningElementDocument,
-    attemptLearningElementDocument: AttemptLearningElementDocument,
-    resultDocument: ResultDocument,
-    completedLearningElementIds,
-    activeSegmentLearningElements: learningElements,
-    allPeriods: periods,
+    completedLearningElementIds: selfData?.completedLearningElementIds ?? [],
+    activeSegmentLearningElements:
+      resultData?.currentGame?.activePeriod?.activeSegment?.learningElements ??
+      [],
+    allPeriods: resultData?.currentGame?.periods ?? [],
     toast,
   })
 
-  const [markStoryElement] = useMutation(MarkStoryElementDocument, {
-    refetchQueries: [ResultDocument],
-  })
-
-  const currentGameId = parseInt(data?.result?.currentGame?.id)
-
-  useSubscription(GlobalEventsDocument, {
-    skip: !currentGameId,
-    onData: ({ data: subData }) => {
-      if (subData?.data?.eventsGlobal) {
-        const event = subData.data.eventsGlobal
-        if (shouldRefetchGameResult(event, currentGameId)) {
-          refetchResult()
-        }
+  const currentGameId = resultData?.currentGame?.id
+  trpc.events.global.useSubscription(undefined, {
+    enabled: Boolean(currentGameId),
+    onData(event) {
+      if (!currentGameId) return
+      if (shouldRefetchGameResult(event, currentGameId)) {
+        Promise.all([
+          utils.play.result.invalidate(),
+          utils.play.self.invalidate(),
+        ]).catch((error) => {
+          console.error('GameLayout: Failed to refresh result:', error)
+        })
       }
     },
     onError: (err) => {
-      console.error('Player Cockpit: Subscription error:', err)
+      console.error('GameLayout: Subscription error:', err)
     },
   })
 
-  const strExpiresAt = data?.result?.currentGame?.activePeriod?.activeSegment
-    ?.countdownExpiresAt as string | null
-  const countdownDurationMs = data?.result?.currentGame?.activePeriod
-    ?.activeSegment?.countdownDurationMs as number | null
+  const expiresAtDate =
+    resultData?.currentGame?.activePeriod?.activeSegment?.countdownExpiresAt ??
+    null
+  const countdownDurationMs =
+    resultData?.currentGame?.activePeriod?.activeSegment?.countdownDurationMs ??
+    null
+  const expiresAtKey = expiresAtDate?.getTime() ?? null
 
-  const expiresAtDate = useMemo(() => {
-    return strExpiresAt ? dayjs(strExpiresAt).toDate() : null
-  }, [strExpiresAt])
+  useEffect(() => {
+    if (!expiresAtDate) return
 
-  const self = data?.self
+    const secondsRemaining = dayjs(expiresAtDate).diff(dayjs(), 's')
+    previousCountdownSeconds.current = secondsRemaining
+    if (secondsRemaining > 0) {
+      toast({
+        title: 'Countdown set/updated!',
+        description: `${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
+      })
+    }
+    setCountdownNotifications({ '60': false, '180': false })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expiresAtKey, countdownDurationMs])
 
-  if (!data?.result) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        Loading...
-      </div>
-    )
-  }
+  if (!selfData || !resultData?.currentGame) return null
 
-  const isReady = self?.isReady ?? false
+  const selfFacts = getFacts(selfData.facts)
+  const playerColor =
+    typeof selfFacts.color === 'string' ? selfFacts.color : 'Red'
+  const playerLocation =
+    typeof selfFacts.location === 'string' ? selfFacts.location : 'ZH'
+  const playerAvatar =
+    typeof selfFacts.avatar === 'string'
+      ? selfFacts.avatar
+      : '/avatars/avatar_placeholder.png'
+
+  const achievements = selfData.achievements.map((entry) => ({
+    id: entry.id,
+    count: entry.count,
+    achievement: {
+      id: entry.achievement.id,
+      name: entry.achievement.name,
+      description: entry.achievement.description,
+      image: entry.achievement.image,
+      reward: getAchievementReward(entry.achievement.reward),
+    },
+  }))
 
   const playerInfo = {
-    name: self?.name || '',
-    color: self?.facts?.color || 'White',
-    location: self?.facts?.location || 'ZH',
-    level: self?.level?.index ?? 0,
-    xp: self?.experience ?? 0,
-    xpMax: self?.experienceToNext ?? 100,
-    achievements: (self?.achievements || []) as any,
-    imgPathAvatar: self?.facts?.avatar || '',
-    imgPathLocation: self?.facts?.location
-      ? `/locations/${self.facts.location}.svg`
-      : '',
-    onClick: () => {},
+    name: selfData.name,
+    color: playerColor,
+    location: playerLocation,
+    level: selfData.level.index,
+    xp: selfData.experience,
+    xpMax: selfData.experienceToNext,
+    achievements,
+    imgPathAvatar: playerAvatar,
+    imgPathLocation: `/locations/${playerLocation}.svg`,
   }
 
   const sidebar = (
-    <div id="sidebar" className="flex w-80 flex-col justify-between">
-      <Card className="mb-4">
-        <CardContent className="space-y-4 pt-6">
-          <PlayerDisplay
-            name={playerInfo.name}
-            color={playerInfo.color}
-            location={playerInfo.location}
-            level={playerInfo.level}
-            achievements={playerInfo.achievements}
-            imgPathAvatar={playerInfo.imgPathAvatar}
-            imgPathLocation={playerInfo.imgPathLocation}
-            onClick={playerInfo.onClick}
-          />
-          <div className="flex items-center justify-between border-t pt-4">
-            {self && (
-              <div data-cy="ready-switch" className="flex items-center gap-2">
-                <span className="text-sm font-medium">Ready?</span>
-                <Button
-                  variant={isReady ? 'success' : 'default'}
-                  disabled={loading}
-                  onClick={async () => {
-                    try {
-                      await updateReadyState({
-                        variables: {
-                          isReady: !isReady,
-                        },
-                      })
-                      refetchResult()
-                    } catch (e: any) {
-                      toast({
-                        title: 'Error updating ready state',
-                        description: e.message,
-                        variant: 'destructive',
-                      })
-                    }
-                  }}
-                >
-                  {isReady ? 'Ready' : 'Set Ready'}
-                </Button>
-              </div>
-            )}
+    <GameSidebar
+      playerInfo={playerInfo}
+      readySwitch={{
+        checked: selfData.isReady,
+        disabled: updateReadyState.isPending,
+        onCheckedChange: () => {
+          updateReadyState.mutate({ isReady: !selfData.isReady })
+        },
+      }}
+      countdown={
+        countdownDurationMs !== null && expiresAtDate !== null
+          ? {
+              expiresAt: expiresAtDate,
+              totalDuration: countdownDurationMs / 1000,
+              onUpdate: (secondsLeft) => {
+                const previousSecondsLeft = previousCountdownSeconds.current
+                previousCountdownSeconds.current = secondsLeft
+                if (previousSecondsLeft === null) return
 
-            {countdownDurationMs !== null && expiresAtDate !== null && (
-              <CycleCountdown
-                expiresAt={expiresAtDate}
-                totalDuration={countdownDurationMs / 1000}
-              />
-            )}
-            <LearningActivitiesList
-              openElements={openLearningElements}
-              completedElements={completedLearningElements}
-              onElementClick={(id) => setActiveLearningId(id)}
-            />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                const notification = getCountdownNotification(
+                  secondsLeft,
+                  previousSecondsLeft,
+                  countdownNotifications
+                )
+                if (!notification) return
+
+                toast({
+                  title: 'Countdown Update',
+                  description: `Less than ${notification.friendlyMinutes} min remaining! Please press ready.`,
+                })
+                setCountdownNotifications((previous) => ({
+                  ...previous,
+                  [notification.secondsKey]: true,
+                }))
+              },
+              onExpire: () => {},
+            }
+          : undefined
+      }
+    >
+      <LearningActivitiesList
+        openElements={openLearningElements}
+        completedElements={completedLearningElements}
+        onElementClick={(id) => setActiveLearningId(id)}
+      />
+    </GameSidebar>
   )
 
-  const tabs = [
-    { name: 'Welcome', href: '/play/welcome' },
-    { name: 'Cockpit', href: '/play/cockpit' },
-  ]
-
-  const activeSegment = data?.result?.currentGame?.activePeriod?.activeSegment
-
+  const activeSegment = resultData.currentGame.activePeriod?.activeSegment
   return (
     <>
       <StoryElements
         key={activeSegment?.id}
-        activeStoryElements={activeSegment?.storyElements || []}
-        visitedStoryElementIds={
-          data?.result?.playerResult?.player?.visitedStoryElementIds || []
-        }
-        playerRole={self?.role}
-        onMarkElementVisited={async (elementId) => {
-          await markStoryElement({
-            variables: { elementId },
-          })
+        activeStoryElements={toStoryElementData(
+          activeSegment?.storyElements ?? []
+        )}
+        visitedStoryElementIds={selfData.visitedStoryElementIds ?? []}
+        playerRole={selfData.role ?? undefined}
+        onMarkElementVisited={async (id) => {
+          await markStoryElement
+            .mutateAsync({ elementId: id })
+            .catch(() => undefined)
         }}
       />
       <Layout tabs={tabs} playerInfo={playerInfo} sidebar={sidebar}>
-        <div className="flex-1 space-y-6">{children}</div>
+        {children}
       </Layout>
       <LearningActivityModal
         open={!!activeLearningId}
         onClose={() => setActiveLearningId(null)}
-        element={learningElementData?.learningElement?.element}
+        element={learningElementData?.element}
         state={learningElementState}
         activeElements={activeLearningOptions}
         setActiveElements={setActiveLearningOptions}
         onSubmit={handleAttemptLearning}
-        loading={attemptingLearning}
+        loading={attemptingLearning || learningElementLoading}
+        returnButton={
+          <Button onClick={() => setActiveLearningId(null)}>Close</Button>
+        }
       />
     </>
   )
 }
+
+export default GameLayout

@@ -1,6 +1,6 @@
-import * as DB from '../../generated/prisma/client.js'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
+import * as DB from '../../generated/prisma/client.js'
 import * as EventService from '../../services/EventService.js'
 import * as GameService from '../../services/GameService.js'
 import * as PlayService from '../../services/PlayService.js'
@@ -101,7 +101,7 @@ export function createPlayRouter({
           ctx as any
         )
 
-        return toPlayerSelfDto(player as any)
+        return player ? { id: player.id, isReady: player.isReady } : null
       }),
 
     updatePlayerData: playerProcedure
