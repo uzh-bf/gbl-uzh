@@ -15,13 +15,14 @@ timestamp: "2026-10-02T00:00:00Z"
 The supported game API is tRPC v11 on the Next.js Pages Router. The platform
 owns procedures, authorization, data transfer objects, and realtime semantics;
 each game supplies its services and fact schemas, creates one router, and hosts
-one `/api/trpc` route. The reference implementation is `apps/demo-game`.
+one `/api/trpc` route. The reference implementation is `apps/demo-game`;
+`examples/rate-wars` and `examples/central-bank` are complete game-specific
+examples of the same pattern.
 
-Demo-game and Rate Wars use this pattern. Central Bank still contains the
-deprecated GraphQL compatibility client until its migration layer and is not a
-template for new games. Public GraphQL exports remain available temporarily for
-unknown external consumers, but repository code and documentation must use
-tRPC.
+All repository games use tRPC. Published GraphQL exports remain available only
+as deprecated compatibility for external consumers whose usage has not yet
+been confirmed. They are not a supported starting point for new work; see
+[ADR 0001](adr/0001-deprecate-graphql-compatibility.md).
 
 ## Server contract
 
@@ -29,13 +30,15 @@ tRPC.
   router, procedure, and caller helpers rather than the entire `t` object.
 - `createPlatformRouter({ services, schemas, roleAssigner?, extensions? })`
   composes the `auth`, `game`, `period`, `segment`, `play`, `learning`, `events`,
-  `story`, and `results` routers.
+  `story`, and `results` routers. Routers passed as `extensions` are merged at
+  the top level and keep their procedure types in `AppRouter`.
 - A game exports `AppRouter = typeof appRouter`; browser modules import this as
   a type so server code cannot enter the client bundle.
 - Zod validates transport inputs. Yup continues to validate game-specific facts
   before service computations run.
-- Known domain failures are mapped to `TRPCError`. Unexpected internal errors
-  are logged server-side and returned with a generic client message.
+- Known domain failures are mapped to `TRPCError` with the service error as
+  `cause`. Unexpected internal errors keep their original stack for server-side
+  logging and are returned with a generic client message.
 
 ## Authorization
 
@@ -95,6 +98,16 @@ The browser client does not need `NEXT_PUBLIC_API_URL` because it uses the
 same-origin relative route. Server-side construction uses the deployed Vercel
 origin, a configured API origin, or the local development origin as a fallback.
 
+## Published package boundary
+
+`@gbl-uzh/platform` exposes the supported tRPC router, context, DTO, and
+realtime modules. Its packed-artifact verifier checks declarations, relative
+runtime imports, dependency closure, and a clean tRPC-only consumer. GraphQL
+peers are optional there because only deprecated compatibility subpaths need
+them. `@gbl-uzh/ui` still has one deprecated Apollo-backed learning hook at its
+package root, so external consumers of that package must currently satisfy its
+Apollo peer even when they do not call the hook.
+
 ## Cache and realtime semantics
 
 Realtime is notify-then-refetch. The server publishes small global and per-user
@@ -107,7 +120,9 @@ Server subscriptions return async iterables and pass the request
 event bus is process-local, so a game must run a single app replica. There is no
 cross-instance delivery, retained history, or reconnect replay. Do not use
 `tracked()` until events have stable IDs and durable history that can fill a
-reconnect gap.
+reconnect gap. Until then, clients invalidate the affected queries in the
+subscription's `onStarted` callback, which runs on every SSE (re)connect, so
+state changed while disconnected is refetched.
 
 ## Verification
 

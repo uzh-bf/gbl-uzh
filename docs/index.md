@@ -22,11 +22,12 @@ An [Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-cata
 ## Related resources
 
 - [Agent skills](../.agents/skills/) - `gbl-game-design`, `gbl-new-game-app`, `gbl-backend-computations`, `gbl-frontend-game-ui`, `gbl-playwright-e2e`, `gbl-deploy-staging`, `gbl-environment-doctor`, `gbl-wiki-maintenance`
-- [Reference game](../apps/demo-game/) - the single worked implementation all pages cite
+- [Reference games](../apps/demo-game/) - demo-game is the canonical scaffold; Rate Wars and Central Bank under `examples/` show complete game-specific tRPC integrations
+- [GraphQL compatibility decision](adr/0001-deprecate-graphql-compatibility.md) - why published GraphQL exports remain deprecated while all repository games use tRPC
 - [E2E flow spec](../playwright/tests/demo-game-flow.spec.ts) - executable ground truth for the lifecycle
 
 ## Caveats (check before trusting details)
 
-- `apps/demo-game` is the only game built on the platform - generic-contract claims are inferred from one worked example plus platform source
-- Demo-game is the canonical tRPC reference and Rate Wars is a second complete example. Central Bank retains deprecated GraphQL compatibility until its migration layer is complete; do not copy its API wiring into a new game.
+- Demo-game is the canonical scaffold. Rate Wars and Central Bank are complete examples, but their game-specific facts, services, and UI are not generic platform contracts.
+- All three games use the same tRPC Pages Router pattern. Published GraphQL exports remain deprecated compatibility only; do not use them in new repository or external game code.
 - Pages cite `path:Symbol` instead of line numbers; if a symbol moved, search for it

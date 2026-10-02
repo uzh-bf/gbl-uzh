@@ -2,6 +2,12 @@
 
 Status: final serial cleanup after `WP10` and explicit confirmation that no external consumer needs platform GraphQL.
 
+Outcome (2026-08-10): deprecation path selected. Repository consumers are
+migrated, published compatibility exports remain deprecated, platform GraphQL
+peers are optional for tRPC-only consumers, and package verification covers the
+supported packed tRPC surface. Removal remains blocked on external-consumer
+confirmation; see `docs/adr/0001-deprecate-graphql-compatibility.md`.
+
 Depends on: `WP10`, consumer confirmation.
 
 Unblocks: final merge/release.

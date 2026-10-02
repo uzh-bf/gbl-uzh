@@ -74,6 +74,11 @@ function GameLayout({
 
   trpc.events.global.useSubscription(undefined, {
     enabled: Boolean(currentGameId),
+    // Runs on every SSE (re)connect. Events published while disconnected are
+    // not replayed, so refetch to catch up on anything missed.
+    onStarted: () => {
+      void queuedRefetch().catch(() => {})
+    },
     onData: (event) => {
       if (currentGameId && shouldRefetchDemoGame(event, currentGameId)) {
         void queuedRefetch().catch(() => {})

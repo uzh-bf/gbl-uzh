@@ -1,5 +1,9 @@
 # Log
 
+## 2026-10-02
+
+**Update**: [API Layer](api-layer.md), [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — carry dev's mobile redesign, market dice reveal, admin report, and achievement guidance into the tRPC stack: the `market` router extension, `results.specific` report reads, the app-local learning hook, and tRPC Playwright interception.
+
 ## 2026-09-28
 
 **Update**: [Developing a Game](developing-a-game.md) — simplify the shared welcome/profile form to one submit action and one edit-mode signal; retain a return-to-game link when loading profile data fails.
@@ -36,6 +40,8 @@
 **Update**: [Deploying a Game](deploying-a-game.md) — document the ARM64 Startinvest production image for startinvest.df-app.ch, digest-pinning gate, and manual data migration prerequisites.
 
 ## 2026-09-23
+
+- **Update**: `api-layer.md` - documented typed `createPlatformRouter` extensions, service-error `cause` preservation, and query refetch on every subscription (re)connect.
 
 **Update**: [Game Model](game-model.md), [Developing a Game](developing-a-game.md) — revert the XP work from `a11456d6`: restore achievement-only computation, remove seeded lesson rewards and their tests, and restore prior reward-badge validation. Both platform services return to their pre-commit versions. Calendar, countdown, cleanup, and later changes are preserved, as are existing database XP and lesson rewards. Earlier XP implementation and correction entries below remain as historical records.
 
@@ -99,6 +105,10 @@
 
 - **Update**: `deploying-a-game.md` - document an isolated Startinvest ARM staging image while preserving existing build URLs and multi-architecture tags.
 
+## 2026-08-13
+
+- **Update**: `developing-a-game.md`, the example READMEs, and native host guidance - aligned the new-game architecture and local-auth guidance with the three tRPC Pages Router apps: native host mode uses committed mock defaults, and GraphQL/Nexus generation is not part of game scaffolding.
+
 ## 2026-08-12
 
 - **Update**: example auth consumers, container environments, CI, and current auth documentation - all in-repo games now use `resolveAdminOidcConfig()`, starter/devrouter/CI use only `GBL_AUTH_MODE=mock` and `GBL_MOCK_OIDC_*`, native example mock startup remains unsupported, and production forbids mock mode.
@@ -112,6 +122,7 @@
 
 - **Update**: `api-layer.md`, `developing-a-game.md`, and deployment/building guidance - made tRPC v11 the supported game API, documented the official Pages Router wrapper, bounded batching, SSE/SuperJSON links, typed authorization, targeted invalidation, and same-origin browser routing.
 - **Update**: `api-layer.md` and `index.md` - recorded Rate Wars as a complete tRPC example after its admin, player, report, learning, story, and realtime paths passed the real two-year lifecycle.
+- **Decision**: `adr/0001-deprecate-graphql-compatibility.md` - retained published platform GraphQL exports and the UI Apollo hook as deprecated compatibility until external-consumer removal evidence exists; all repository games now use tRPC.
 
 ## 2026-07-11
 

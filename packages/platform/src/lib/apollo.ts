@@ -63,6 +63,10 @@ function createApolloClient() {
   })
 }
 
+/**
+ * @deprecated New games use their app-local tRPC client. Retained only for
+ * published GraphQL compatibility; see packages/platform/README.md.
+ */
 export function initializeApollo(initialState = null) {
   const _apolloClient = apolloClient ?? createApolloClient()
 
@@ -79,6 +83,10 @@ export function initializeApollo(initialState = null) {
   return _apolloClient
 }
 
+/**
+ * @deprecated New games use their app-local tRPC hooks. Retained only for
+ * published GraphQL compatibility; see packages/platform/README.md.
+ */
 export function useApollo(initialState) {
   const store = useMemo(() => initializeApollo(initialState), [initialState])
   return store

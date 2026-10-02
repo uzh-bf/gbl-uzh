@@ -74,7 +74,7 @@ The additional `build_startinvest_arm64` workflow job selects
 `apps/demo-game/.env.staging-arm64` with Docker build argument
 `APP_ENV=staging-arm64`. It sets `NEXT_PUBLIC_APP_URL` and `NEXTAUTH_URL` to
 `https://startinvest.stg.df-app.ch`, and `NEXT_PUBLIC_API_URL` to that origin
-plus `/api/graphql`. The job validates dev pull requests without publishing;
+plus `/api/trpc`. The job validates dev pull requests without publishing;
 pushes to dev publish only `ghcr.io/uzh-bf/gbl-uzh/demo-game:dev-startinvest-arm64`.
 It runs on `ubuntu-24.04-arm` and does not contribute to the existing
 multi-architecture manifest. Existing builds retain `APP_ENV=production`,

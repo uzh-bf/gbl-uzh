@@ -14,6 +14,10 @@ import {
   ExecutionResult,
 } from 'graphql-sse'
 
+/**
+ * @deprecated New games use tRPC's httpSubscriptionLink. Retained only for
+ * published GraphQL compatibility; see packages/platform/README.md.
+ */
 class SSELink extends ApolloLink {
   private client: Client
 

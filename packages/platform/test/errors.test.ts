@@ -5,6 +5,12 @@ import {
   asTRPCCodeFromServiceError,
   throwAsTRPCError,
 } from '../src/trpc/errors.js'
+import {
+  createCallerFactory,
+  createTRPCRouter,
+  publicProcedure,
+} from '../src/trpc/init.js'
+import { createTestContext } from './helpers.js'
 
 describe('asTRPCCodeFromServiceError', () => {
   it('maps INVALID_TOKEN to UNAUTHORIZED', () => {
@@ -99,5 +105,33 @@ describe('throwAsTRPCError', () => {
       expect((error as TRPCError).code).toBe('INTERNAL_SERVER_ERROR')
       expect((error as TRPCError).message).toBe('Internal server error')
     }
+  })
+})
+
+describe('service error middleware', () => {
+  function failingServiceCall(message: string): never {
+    throw new Error(message)
+  }
+
+  const router = createTRPCRouter({
+    mapped: publicProcedure.query(() => failingServiceCall('INVALID_TOKEN')),
+    unmapped: publicProcedure.query(() => failingServiceCall('P2002')),
+  })
+  const caller = createCallerFactory(router)(createTestContext())
+
+  it('keeps the service error as cause when remapping its code', async () => {
+    const error = await caller.mapped().catch((e: unknown) => e)
+
+    expect(error).toBeInstanceOf(TRPCError)
+    expect((error as TRPCError).code).toBe('UNAUTHORIZED')
+    expect(((error as TRPCError).cause as Error).message).toBe('INVALID_TOKEN')
+  })
+
+  it('leaves unmapped failures with their original stack for logging', async () => {
+    const error = await caller.unmapped().catch((e: unknown) => e)
+
+    expect((error as TRPCError).code).toBe('INTERNAL_SERVER_ERROR')
+    expect(((error as TRPCError).cause as Error).message).toBe('P2002')
+    expect((error as TRPCError).stack).toContain('failingServiceCall')
   })
 })

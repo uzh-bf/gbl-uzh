@@ -1,34 +1,96 @@
 name: Release Platform Package
+
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
-permissions:
-  id-token: write
-  contents: read
 jobs:
-  build:
-    name: Build and Publish
+  verify:
+    name: Build and verify
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Use Node 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: 24.x
+          package-manager-cache: false
           registry-url: https://registry.npmjs.org
 
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: true
+      - name: Use pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
+
+      - name: Use npm 11
+        run: npm install --global npm@11.13.0 --ignore-scripts
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Verify release version
+        working-directory: packages/platform
+        run: |
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          if [ "v${PACKAGE_VERSION}" != "${GITHUB_REF_NAME}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match @gbl-uzh/platform@${PACKAGE_VERSION}."
+            exit 1
+          fi
 
       - name: Build
-        working-directory: ./packages/platform
+        working-directory: packages/platform
         run: pnpm run build
 
+      - name: Test
+        working-directory: packages/platform
+        run: pnpm run test
+
+      - name: Verify package artifact
+        working-directory: packages/platform
+        run: pnpm run verify:package -- --output "${RUNNER_TEMP}/gbl-platform-package"
+
+      - name: Preserve verified package artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: gbl-platform-package
+          path: ${{ runner.temp }}/gbl-platform-package/*.tgz
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Verify external tRPC consumer
+        working-directory: packages/platform
+        run: |
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          pnpm run verify:consumer -- --package "${RUNNER_TEMP}/gbl-platform-package/gbl-uzh-platform-${PACKAGE_VERSION}.tgz"
+
+  publish:
+    name: Publish verified artifact
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Use Node 24
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24.x
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+
+      - name: Use npm 11
+        run: npm install --global npm@11.13.0 --ignore-scripts
+
+      - name: Download verified package artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: gbl-platform-package
+          path: ${{ runner.temp }}/gbl-platform-package
+
       - name: Publish
-        working-directory: ./packages/platform
-        run: npm publish --access public
+        run: |
+          PACKAGE_VERSION="${GITHUB_REF_NAME#v}"
+          npm publish "${RUNNER_TEMP}/gbl-platform-package/gbl-uzh-platform-${PACKAGE_VERSION}.tgz" --access public --ignore-scripts

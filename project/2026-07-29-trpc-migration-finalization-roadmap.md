@@ -14,6 +14,16 @@ Evidence base: three Opus reviews run 2026-07-29 — dependency currency (npm re
 dev-restructure impact analysis (`66ed4e0..origin/dev`), production-readiness review of the
 branch tree. Findings below are from those reports unless marked otherwise.
 
+## Outcome note (2026-08-10)
+
+W7's repository-example migration is no longer future work: Rate Wars and
+Central Bank have complete tRPC draft layers in PRs #202 and #204, each with
+real lifecycle proof. The public platform GraphQL exports and UI Apollo-backed
+hook are intentionally retained as deprecated compatibility under
+`docs/adr/0001-deprecate-graphql-compatibility.md`; consumer confirmation, not
+repository game migration, is now the removal gate. This roadmap remains the
+historical record for PR #144.
+
 ## Current state
 
 - PR #144: all 9 checks green on `37f4878` (lint+tsc gate, Docker build, Playwright shards,
