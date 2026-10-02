@@ -1,70 +1,70 @@
 // Shared test scaffolding for the platform tRPC behavioral tests. No real
-// database: prisma is a plain object of jest.fn()s that each test configures
+// database: prisma is a plain object of vi.fn()s that each test configures
 // via mockResolvedValue/mockResolvedValueOnce for the calls it actually
 // exercises. req/res are minimal stubs cast as any (the routers under test
 // never read from them directly; only AccountService touches `res` via
 // nookies, which no-ops when `getHeader`/`setHeader` are absent).
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import type { PlatformContext, PlatformUser } from '../src/trpc/context.js'
 
 export function createMockPrisma() {
   return {
     game: {
-      findFirst: jest.fn(),
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      update: jest.fn(),
-      create: jest.fn(),
+      findFirst: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+      create: vi.fn(),
     },
     player: {
-      findUnique: jest.fn(),
-      update: jest.fn(),
-      updateMany: jest.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
     },
     playerResult: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      update: jest.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
     },
     playerDecision: {
-      upsert: jest.fn(),
-      findUnique: jest.fn(),
+      upsert: vi.fn(),
+      findUnique: vi.fn(),
     },
     playerAction: {
-      create: jest.fn(),
-      findMany: jest.fn(),
+      create: vi.fn(),
+      findMany: vi.fn(),
     },
     achievement: {
-      findMany: jest.fn(),
+      findMany: vi.fn(),
     },
     achievementInstance: {
-      findUnique: jest.fn(),
-      findFirst: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
+      findUnique: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
     },
     learningElement: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
     },
     storyElement: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
     },
     period: {
-      findUnique: jest.fn(),
-      update: jest.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
     },
     periodSegment: {
-      update: jest.fn(),
+      update: vi.fn(),
     },
     event: {
-      findMany: jest.fn(),
+      findMany: vi.fn(),
     },
     playerLevel: {
-      findMany: jest.fn(),
+      findMany: vi.fn(),
     },
-    $transaction: jest.fn(),
+    $transaction: vi.fn(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any
 }

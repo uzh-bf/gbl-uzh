@@ -7,12 +7,16 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { MultiSelect } from '@gbl-uzh/ui'
-import { GameStatus } from 'src/generated/prisma/enums'
-import { Button, H3, H4, Modal } from '@uzh-bf/design-system'
+import {
+  ShadcnTableBody as TableBody,
+  ShadcnTableHeader as TableHeader,
+  ShadcnTableRow as TableRow,
+} from '@uzh-bf/design-system'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { GameStatus } from 'src/generated/prisma/enums'
 import { twMerge } from 'tailwind-merge'
 
 import {
@@ -22,19 +26,20 @@ import {
   computeSegmentStatus,
 } from '@gbl-uzh/ui'
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
+  H3,
+  H4,
+  Modal,
   ShadcnTable as Table,
-  ShadcnTableBody as TableBody,
   ShadcnTableCell as TableCell,
   ShadcnTableHead as TableHead,
-  ShadcnTableHeader as TableHeader,
-  ShadcnTableRow as TableRow,
-} from '@uzh-bf/design-system'
+} from '~/components/admin/AdminControls'
 import { useToast } from '~/components/ui/use-toast'
 import { trpc } from '~/lib/trpc'
 
@@ -44,11 +49,11 @@ import {
   GAP_BONDS,
   GAP_STOCKS,
   INTEREST_BANK,
-  type PeriodFacts,
-  type PeriodSegmentFacts,
+  NUM_MONTHS_PER_SEGMENT,
   TREND_BONDS,
   TREND_STOCKS,
-} from '~/types/Period'
+} from '~/lib/constants'
+import type { PeriodFacts, PeriodSegmentFacts } from '~/types/Period'
 
 function scrollToActivePeriod() {
   const anchor = document.querySelector('#active-period')
@@ -427,7 +432,11 @@ function ManageGame() {
     game.activePeriod?.activeSegment?.countdownExpiresAt
 
   return (
-    <div className="p-4" data-cy="game-detail" data-game-status={game.status}>
+    <div
+      className="mobile:app-panel mobile:app-body p-4"
+      data-cy="game-detail"
+      data-game-status={game.status}
+    >
       <div>
         <div className="mb-4 flex flex-col gap-2 overflow-x-auto md:flex-row">
           {game.periods.map((period, ix) => {
@@ -464,7 +473,7 @@ function ManageGame() {
               >
                 <div
                   className={twMerge(
-                    'flex flex-1 flex-col gap-1 rounded border p-2',
+                    'mobile:app-card mobile:min-w-0 flex flex-1 flex-col gap-1 rounded border p-2',
                     isPeriodPaused && 'border-orange-300 bg-orange-100',
                     isPeriodActive && 'border-green-300 bg-green-50',
                     isPeriodCompleted && 'bg-gray-100 text-gray-400'
@@ -506,7 +515,7 @@ function ManageGame() {
                           <div>{savingsInterest}</div>
                         </div>
                       </div>
-                      <Table className="border-l text-base">
+                      <Table className="mobile:app-body border-l text-base">
                         <TableHeader>
                           <TableRow className="border-none py-0">
                             <TableHead></TableHead>
@@ -548,8 +557,7 @@ function ManageGame() {
                         segmentStatus === STATUS.COMPLETED
 
                       const segmentFacts = segment?.facts as
-                        | PeriodSegmentFacts
-                        | undefined
+                        PeriodSegmentFacts | undefined
                       const diceBonds = segmentFacts?.diceRolls?.map(
                         (dice) => dice.bonds
                       )
@@ -603,10 +611,10 @@ function ManageGame() {
                           </div>
                           <div className="my-2">
                             <div className="flex flex-row gap-2">
-                              <div className="text-sm">
+                              <div className="mobile:app-caption text-sm">
                                 Story: {segment?.storyElements?.length ?? 0}
                               </div>
-                              <div className="text-sm">
+                              <div className="mobile:app-caption text-sm">
                                 Learn: {segment?.learningElements?.length ?? 0}
                               </div>
                             </div>
@@ -682,9 +690,9 @@ function ManageGame() {
                             }}
                             primaryLabel="Submit"
                           >
-                            <div className="flex w-1/2 flex-col gap-2">
+                            <div className="mobile:w-full flex w-1/2 flex-col gap-2">
                               <div className="flex flex-col gap-2">
-                                <span className="text-sm font-normal text-gray-700">
+                                <span className="mobile:app-caption text-sm font-normal text-gray-700">
                                   Story Elements
                                 </span>
                                 <Controller
@@ -701,7 +709,7 @@ function ManageGame() {
                                 />
                               </div>
                               <div className="flex flex-col gap-2">
-                                <span className="text-sm font-normal text-gray-700">
+                                <span className="mobile:app-caption text-sm font-normal text-gray-700">
                                   Learning Elements
                                 </span>
                                 <Controller
@@ -726,7 +734,7 @@ function ManageGame() {
                 </div>
                 <div
                   className={twMerge(
-                    'flex flex-row items-center rounded border bg-gray-50 p-2 text-xl text-gray-300',
+                    'mobile:app-heading flex flex-row items-center rounded border bg-gray-50 p-2 text-xl text-gray-300',
                     periodStatus === STATUS.RESULTS &&
                       'border-red-200 text-red-400'
                   )}
@@ -771,14 +779,12 @@ function ManageGame() {
                 }}
                 primaryLabel="Submit"
               >
-                <div className="flex w-1/2 flex-col gap-2">
+                <div className="mobile:w-full flex w-1/2 flex-col gap-2">
                   <AdminInputField
                     label="Number of segments"
                     name="segmentCount"
                     type="number"
-                    tooltip={
-                      'One period corresponds to one year. The number of segments is used to compute the number of months in the period.'
-                    }
+                    tooltip={`One period corresponds to one year. Each segment contains ${NUM_MONTHS_PER_SEGMENT} months.`}
                     required
                     register={registerPeriod}
                     error={errorsPeriod.segmentCount}
@@ -786,7 +792,7 @@ function ManageGame() {
                 </div>
                 <div className="mt-4">
                   <H3>Scenario Parameters</H3>
-                  <div className="flex w-1/2 flex-col gap-2">
+                  <div className="mobile:w-full flex w-1/2 flex-col gap-2">
                     <AdminInputField
                       label="Seed"
                       name="seed"
@@ -800,7 +806,7 @@ function ManageGame() {
                 </div>
                 <div className="mt-4">
                   <H4>Bank</H4>
-                  <div className="flex w-1/2 flex-col gap-2">
+                  <div className="mobile:w-full flex w-1/2 flex-col gap-2">
                     <AdminInputField
                       label="Saving Interest"
                       name="interestBank"
@@ -815,7 +821,7 @@ function ManageGame() {
                 </div>
                 <div className="mt-4">
                   <H4>Bonds</H4>
-                  <div className="flex w-1/2 gap-2">
+                  <div className="mobile:w-full flex w-1/2 gap-2">
                     <AdminInputField
                       label="Trend"
                       name="trendBonds"
@@ -840,7 +846,7 @@ function ManageGame() {
                 </div>
                 <div className="mt-4">
                   <H4>Stocks</H4>
-                  <div className="flex w-1/2 gap-2">
+                  <div className="mobile:w-full flex w-1/2 gap-2">
                     <AdminInputField
                       label="Trend"
                       name="trendStocks"
@@ -875,8 +881,8 @@ function ManageGame() {
         </Link>
       </div>
 
-      <div className="mt-4 flex w-full flex-row justify-between">
-        <div className="w-1/2">
+      <div className="mobile:flex-col mobile:gap-app-4 mt-4 flex w-full flex-row justify-between">
+        <div className="mobile:w-full w-1/2">
           <div className="font-bold">Players</div>
           <div className="mt-2 flex flex-col gap-4">
             {game.players.map((player, ix) => (

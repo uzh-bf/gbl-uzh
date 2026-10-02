@@ -1,11 +1,31 @@
-import { useEffect, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  type SetStateAction,
+} from 'react'
 import { trpc } from '~/lib/trpc'
 
 export type LearningState = 'ATTEMPTED' | 'SOLVED' | null
 
+type LearningDraft = {
+  options?: number[]
+  state?: LearningState
+  error?: string
+}
+
 interface LearningActivityListItem {
   id: string
   title: string
+  reward?: unknown
+}
+
+function compareLearningTitles(
+  left: LearningActivityListItem,
+  right: LearningActivityListItem
+) {
+  return left.title < right.title ? -1 : left.title > right.title ? 1 : 0
 }
 
 export interface UseLearningActivitiesProps {
@@ -16,18 +36,8 @@ export interface UseLearningActivitiesProps {
       learningElements?: readonly LearningActivityListItem[]
     }[]
   }[]
-  toast: (options: {
-    title: string
-    description: string
-    variant?: 'default' | 'destructive'
-  }) => void
-}
-
-function compareLearningTitles(
-  left: LearningActivityListItem,
-  right: LearningActivityListItem
-) {
-  return left.title < right.title ? -1 : left.title > right.title ? 1 : 0
+  preserveDrafts?: boolean
+  toast: (options: { title: string; description: string }) => void
 }
 
 function normalizeLearningState(
@@ -47,119 +57,142 @@ function parseLearningOptions(solution: string | null | undefined): number[] {
   }
 }
 
-// The DTO exposes `reward` as an untyped JSON blob and makes `options`
-// optional; the modal expects a numeric-or-null reward and a concrete
-// (possibly empty) options array, so narrow both here rather than in
-// GameLayout's markup.
-function getReward(value: unknown): number | null {
-  return typeof value === 'number' ? value : null
-}
-
-// tRPC's `learning.byId` returns the queried element's own id as the DTO's
-// top-level `id` (see PlayService.getLearningElement), so comparing it
-// against `activeLearningId` mirrors the old Apollo hook's
-// `learningElement?.id === activeLearningId` check.
 export function useLearningActivities({
   completedLearningElementIds,
   activeSegmentLearningElements,
   allPeriods,
+  preserveDrafts = false,
   toast,
 }: UseLearningActivitiesProps) {
   const utils = trpc.useUtils()
+  // Query data owns persisted progress; this map contains only local edits
+  // and attempt feedback. No effect is needed to copy query data into state.
+  const [drafts, setDrafts] = useState<Record<string, LearningDraft>>({})
+  const [selection, setSelection] = useState<{ id: string | null }>({
+    id: null,
+  })
+  const currentSelection = useRef(selection)
+  const inFlight = useRef(false)
+  const activeLearningId = selection.id
 
-  const [activeLearningId, setActiveLearningId] = useState<string | null>(null)
-  const [learningElementState, setLearningElementState] =
-    useState<LearningState>(null)
-  const [activeLearningOptions, setActiveLearningOptions] = useState<number[]>(
-    []
+  const updateDraft = (id: string, change: Partial<LearningDraft>) => {
+    setDrafts((previous) => ({
+      ...previous,
+      [id]: { ...previous[id], ...change },
+    }))
+  }
+
+  const setActiveLearningId = useCallback(
+    (value: SetStateAction<string | null>) => {
+      const previousId = currentSelection.current.id
+      const id = typeof value === 'function' ? value(previousId) : value
+      if (id === previousId) return
+      const next = { id }
+      currentSelection.current = next
+      setSelection(next)
+      setDrafts((previous) => {
+        const nextDrafts = { ...previous }
+        if (!preserveDrafts && previousId) delete nextDrafts[previousId]
+        if (id && nextDrafts[id]?.error) {
+          nextDrafts[id] = { ...nextDrafts[id], error: undefined }
+        }
+        return nextDrafts
+      })
+    },
+    [preserveDrafts]
   )
 
-  const { data: rawLearningElementData, isLoading: learningElementLoading } =
-    trpc.learning.byId.useQuery(
-      { id: activeLearningId ?? '' },
-      { enabled: Boolean(activeLearningId) }
-    )
+  const {
+    data,
+    isLoading: learningElementLoading,
+    error: learningElementError,
+    refetch: retryLearningElement,
+  } = trpc.learning.byId.useQuery(
+    { id: activeLearningId ?? '' },
+    { enabled: Boolean(activeLearningId) }
+  )
+  // `learning.byId` returns the queried element's id as the top-level `id`;
+  // ignore data that belongs to a previously selected element.
+  const learningElementData = data?.id === activeLearningId ? data : undefined
+  const element = learningElementData
+  const serverState = normalizeLearningState(element?.state)
+  const draft = activeLearningId ? drafts[activeLearningId] : undefined
+  const learningElementState =
+    serverState === 'SOLVED' ? serverState : (draft?.state ?? serverState)
+  const activeLearningOptions =
+    serverState === 'SOLVED'
+      ? parseLearningOptions(element?.solution)
+      : (draft?.options ?? parseLearningOptions(element?.solution))
+  const learningAttemptError = draft?.error ?? null
 
-  useEffect(() => {
-    const isActiveLearningElement =
-      rawLearningElementData?.id === activeLearningId
-
-    setLearningElementState((currentState) => {
-      const nextState = normalizeLearningState(
-        isActiveLearningElement ? rawLearningElementData?.state : null
-      )
-      // Sticky ATTEMPTED: once a player has attempted and gotten a wrong
-      // answer, a stale/refetched NEW state should not flip the UI back to
-      // unattempted.
-      if (currentState === 'ATTEMPTED' && nextState === null) {
-        return currentState
-      }
-      return nextState
-    })
-
-    setActiveLearningOptions(
-      parseLearningOptions(
-        isActiveLearningElement ? rawLearningElementData?.solution : null
-      )
-    )
-  }, [rawLearningElementData, activeLearningId])
-
-  const learningElementData = useMemo(() => {
-    if (!rawLearningElementData) return undefined
-
-    const element = rawLearningElementData.element
-
-    return {
-      ...rawLearningElementData,
-      element: {
-        ...element,
-        reward: getReward(element.reward),
-        options: element.options ?? [],
+  const setActiveLearningOptions = (value: SetStateAction<number[]>) => {
+    const id = activeLearningId
+    if (!id || learningElementState === 'SOLVED') return
+    setDrafts((previous) => ({
+      ...previous,
+      [id]: {
+        ...previous[id],
+        options:
+          typeof value === 'function'
+            ? value(previous[id]?.options ?? activeLearningOptions)
+            : value,
+        error: undefined,
       },
-    }
-  }, [rawLearningElementData])
+    }))
+  }
 
-  const attemptLearningElement = trpc.learning.attempt.useMutation({
-    async onSuccess() {
-      await Promise.all([
-        activeLearningId
-          ? utils.learning.byId.invalidate({ id: activeLearningId })
-          : Promise.resolve(),
-        utils.play.result.invalidate(),
-        utils.play.self.invalidate(),
-      ])
-    },
-    onError: (err) => {
-      toast({
-        title: 'Could not submit your answer',
-        description: err.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const attemptLearningElement = trpc.learning.attempt.useMutation()
+  const attemptingLearning = attemptLearningElement.isPending
 
   const handleAttemptLearning = async () => {
-    if (!activeLearningId) return
-
+    const requestSelection = currentSelection.current
+    const id = requestSelection.id
+    if (
+      !id ||
+      inFlight.current ||
+      !activeLearningOptions.length ||
+      learningElementState === 'SOLVED'
+    )
+      return
+    inFlight.current = true
+    updateDraft(id, { error: undefined })
     try {
-      const result = await attemptLearningElement.mutateAsync({
-        elementId: activeLearningId,
+      const attempt = await attemptLearningElement.mutateAsync({
+        elementId: id,
         selection: activeLearningOptions,
       })
-
-      if (result) {
-        if (result.pointsAchieved === result.pointsMax) {
-          setLearningElementState('SOLVED')
-        } else {
-          setLearningElementState('ATTEMPTED')
-          toast({
-            title: 'Wrong answer',
-            description: 'Try again!',
-          })
-        }
+      // Refresh the submitted activity even if another one is now open. A
+      // failed refresh must not be reported as a failed attempt.
+      void Promise.all([
+        utils.learning.byId.invalidate({ id }),
+        utils.play.result.invalidate(),
+        utils.play.self.invalidate(),
+      ]).catch(() => {})
+      if (
+        !attempt ||
+        typeof attempt.pointsAchieved !== 'number' ||
+        typeof attempt.pointsMax !== 'number'
+      ) {
+        throw new Error('No attempt result returned')
       }
-    } catch (error) {
-      console.error(error)
+      const state =
+        attempt.pointsAchieved === attempt.pointsMax ? 'SOLVED' : 'ATTEMPTED'
+      // Completion belongs to this activity even after switching away. Only
+      // transient feedback depends on the original selection still being open.
+      if (state === 'SOLVED') {
+        updateDraft(id, { state, options: activeLearningOptions })
+      } else if (currentSelection.current === requestSelection) {
+        updateDraft(id, { state })
+        toast({ title: 'Wrong answer', description: 'Try again!' })
+      }
+    } catch {
+      if (currentSelection.current === requestSelection) {
+        updateDraft(id, {
+          error: 'Could not submit your answer. Please try again.',
+        })
+      }
+    } finally {
+      inFlight.current = false
     }
   }
 
@@ -196,7 +229,10 @@ export function useLearningActivities({
     setActiveLearningOptions,
     learningElementData,
     learningElementLoading,
-    attemptingLearning: attemptLearningElement.isPending,
+    learningElementError,
+    learningAttemptError,
+    retryLearningElement,
+    attemptingLearning,
     handleAttemptLearning,
     completedLearningElements,
     openLearningElements,
