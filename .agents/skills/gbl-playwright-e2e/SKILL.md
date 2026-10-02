@@ -15,7 +15,7 @@ Playwright docs/skills only for API details; keep repo-specific decisions here.
 
 - Specs: `playwright/tests/**/*.spec.ts`
 - Setup auth: `playwright/tests/setup/admin-auth.setup.ts`
-- Support helpers: `playwright/tests/support/*.ts`
+- Support helpers: `playwright/tests/support/*.ts`; `demoGame.ts` shares game creation, welcome-session setup, no-overflow checks, and overlay-free captures. Keep detailed welcome assertions in `demo-game-welcome.spec.ts`; ordinary player joins follow the happy path.
 - Config: `playwright/playwright.config.ts`
 - CI workflow: `.github/workflows/playwright-testing.yml`
 - Apps under test: `apps/demo-game`, `examples/rate-wars`, and
@@ -100,8 +100,10 @@ claim prettier verification unless the binary exists.
   `https://demo-game.localhost`.
 - Set file-local timeout only with measured runtime evidence. Local broad flow
   runs about `1.1m-1.6m`, but the GitHub-hosted shard has reached the old
-  `120_000` timeout after CI setup and slower player actions; current file-local
-  timeout is `300_000`.
+  `120_000` timeout after CI setup and slower player actions. The file default
+  remains `300_000`; the multi-team lifecycle test uses `420_000` after a local
+  run reached the final report at ~250s and exceeded the old popup wait during
+  cold compilation. Dice/report popup waits allow `60_000`.
 
 ## GitHub Actions Rules
 
@@ -157,6 +159,8 @@ adapt it to GBL's smaller stack:
 > click, then require `response.ok()`. Follow that transport assertion with the
 > next durable UI state. Button enabled/disabled timing alone is not proof that
 > the intended mutation succeeded.
+
+> **After clicking submit, assert the durable resulting state.** In the demo game, submission replaces the button and editor with the “Allocation submitted” summary. Assert that summary and its saved percentages, including after reload. Do not expect the removed submit button to re-enable. For forms that retain their submit button, asserting re-enablement is preferable to transient loading-state assertions.
 
 ## GBL Game Flow Rules
 
@@ -215,15 +219,21 @@ Return the post-reload status in the same poll cycle.
 
 ## Assertion Scope
 
-- Report: assert `report-loaded`, team names, `Player Decisions`, period/segment
-  row labels, and stable section titles (`Risk-Return`, `Sharpe Ratio`). Do not
-  overfit chart internals or transient exact numeric rendering.
+- Report: assert `report-loaded`, team row headers, `Decisions`, year/quarter
+  column labels, and headings `Risk and return` / `Sharpe ratio`. The focused
+  `demo-game-report.spec.ts` uses deterministic 15- and 60-team query fixtures for the
+  four reference views, scope/mode switches, keyboard focus and allocation
+  tooltips, bounded scrolling lists, last-team access, responsive overflow,
+  focus refresh after settlement, retry, and empty/missing-game states. Keep the
+  multi-team flow smoke against real settled results: assert the eligible team
+  count, numeric ranking values, and allocation bars, not only headings. Missing
+  segment relations in the API can otherwise pass an empty dashboard. Do not overfit chart
+  internals or transient exact numeric rendering.
 - Dice: one configured segment dice page smoke is enough unless user asks for
   dice animation coverage.
 - Countdown: set countdown, assert player widget appears, never wait for expiry
   in CI.
-- Player cockpit: assert form/result states (`Submit`, `Assets Overview`,
-  `Savings`, `Bonds`, `Stocks`, `Total`) rather than chart pixels.
+- Demo-game cockpit: assert `Submit allocation`, `To allocate`, and the named Savings/Bonds/Stocks spinbuttons. Allocation sliders are named `Savings boundary` and `Stocks boundary`. Check decimal persistence, invalid totals, pushing/keyboard behavior, tab draft retention, and failed-save recovery; preserve existing result-screen assertions. Cover submitted summaries, Ready/unready, resubmission, failed Ready mutations, and summary/Ready reload persistence. Ready disables editing and is unavailable in the editor until resubmission; all-ready does not advance the instructor-controlled lifecycle. Compare action-button and shared-chrome dimensions across editing, submitted, and Ready at mobile/tablet widths. Wait for viewport layout to settle before measuring. The tab is labeled Decisions with the existing `cockpit` URL key. Ready is only visible there during RUNNING; review states show the instructor waiting message. Verify editing-only forecast values against Market and keep mobile forecast/footer coverage, and learning activities live in Team.
 
 ## Adapting the demo-game spec to your game
 
@@ -231,7 +241,7 @@ The demo-game spec (`playwright/tests/demo-game-flow.spec.ts`) is the template f
 
 - **Decision form**: swap the demo's allocation inputs (`bank` / `bonds` / `stocks` summing to 100) for your game's single decision. Update the input locator (e.g. `getByPlaceholder`, `input[name=...]`), the yup validation values, and the submit button name. Mirror the constraints your `Actions.apply` reducer enforces.
 - **Player plan**: replace the `decisions` array with your game's per-segment decision values (e.g. `[{ rate: '6.0' }, { rate: '5.5' }]`).
-- **Dashboard assertions**: replace demo-game metric labels (`Assets Overview`, `Savings`, `Bonds`, `Stocks`, `Total`) with your game's (`Current Inflation`, `Unemployment`, `GDP Growth`, `Cumulative Loss`). Assert durable headings, not chart pixels or transient numbers.
+- **Dashboard assertions**: replace demo-game metric labels (`To allocate`, `Savings`, `Bonds`, `Stocks`) with your game's (`Current Inflation`, `Unemployment`, `GDP Growth`, `Cumulative Loss`). Assert durable headings, not chart pixels or transient numbers.
 - **Do not add a sentinel period.** Final-period consolidation disconnects the
   next-period pointer safely; the lifecycle spec should prove that the real last
   period reaches `RESULTS` without a fabricated extra period.

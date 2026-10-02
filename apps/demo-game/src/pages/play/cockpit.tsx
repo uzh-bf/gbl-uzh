@@ -1,143 +1,186 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
-
+import { useCallback, useEffect, useRef, type ReactNode } from 'react'
 import GameLayout from '~/components/GameLayout'
-import ConsolidationView from '~/components/play/ConsolidationView'
-import GameHeader from '~/components/play/GameHeader'
-import ResultsView from '~/components/play/ResultsView'
-import RunningView, {
-  type PortfolioFormValues,
-} from '~/components/play/RunningView'
-import { getFacts, getNumber } from '~/lib/facts'
+import AllocationForm from '~/components/cockpit/AllocationForm'
+import AllocationSummary from '~/components/cockpit/AllocationSummary'
+import PlayerActionButton from '~/components/cockpit/PlayerActionButton'
+import ResultPanel from '~/components/cockpit/ResultPanels'
+import { useAllocationForm } from '~/components/cockpit/useAllocationForm'
+import { useToast } from '~/components/ui/use-toast'
+import { parseFacts } from '~/lib/facts'
+import { readScenario } from '~/lib/market'
+import { buildResultView, readAllocation } from '~/lib/results'
 import { trpc } from '~/lib/trpc'
-import type { RouterOutputs } from '~/server/trpc/router'
-import { useToast } from '../../components/ui/use-toast'
-
-type CockpitResult = NonNullable<RouterOutputs['play']['result']>
+import { ActionTypes } from '~/types/facts'
 
 function Cockpit() {
-  const [period, setPeriod] = useState<number | null>(null)
-
   const utils = trpc.useUtils()
-  const { toast } = useToast()
-
-  const { data, isLoading, error } = trpc.play.result.useQuery()
+  // Returning from profile editing must initialize from the latest round
+  // and saved allocation, rather than briefly exposing stale cached controls.
+  const resultQuery = trpc.play.result.useQuery(undefined, {
+    refetchOnMount: 'always',
+  })
+  const selfQuery = trpc.play.self.useQuery(undefined, {
+    refetchOnMount: 'always',
+  })
+  const data =
+    resultQuery.data &&
+    selfQuery.data &&
+    resultQuery.isFetchedAfterMount &&
+    selfQuery.isFetchedAfterMount
+      ? { result: resultQuery.data, self: selfQuery.data }
+      : undefined
+  const error = resultQuery.error ?? selfQuery.error
+  const refetch = useCallback(
+    () =>
+      Promise.all([
+        utils.play.result.invalidate(),
+        utils.play.self.invalidate(),
+      ]),
+    [utils]
+  )
 
   const performAction = trpc.play.performAction.useMutation({
-    async onSuccess() {
-      await utils.play.result.invalidate()
-    },
-    onError: (err) => {
-      console.error('Player Cockpit: performAction failed', err)
-      toast({
-        title: 'Could not submit your decision',
-        description: err.message,
-        variant: 'destructive',
-      })
-    },
+    onSuccess: () => refetch(),
   })
 
-  const form = useForm<PortfolioFormValues>({
-    defaultValues: {
-      savings: 0,
-      bonds: 0,
-      stocks: 0,
-    },
+  const currentRound = `${data?.result?.currentGame?.id ?? ''}:${data?.result?.currentGame?.activePeriod?.id ?? ''}:${data?.result?.currentGame?.activePeriod?.activeSegment?.id ?? ''}`
+  const roundRef = useRef(currentRound)
+  useEffect(() => {
+    roundRef.current = currentRound
+  }, [currentRound])
+  const { toast } = useToast()
+  const updateReadyState = trpc.play.updateReadyState.useMutation({
+    onSuccess: () => refetch(),
   })
-  const { watch, reset } = form
+  const updatingReady = updateReadyState.isPending
+  const playerFacts = parseFacts(data?.result?.playerResult?.facts)
+  const allocationController = useAllocationForm(
+    readAllocation(playerFacts.decisions) ?? undefined,
+    currentRound,
+    (values) =>
+      performAction.mutateAsync({
+        type: ActionTypes.NONE,
+        payload: JSON.stringify(values),
+      }),
+    playerFacts.allocationSubmitted === true,
+    data?.self?.isReady === true
+  )
 
-  const watchSavings = watch('savings')
-  const watchBonds = watch('bonds')
-  const watchStocks = watch('stocks')
+  const readyControl = {
+    disabled:
+      updatingReady ||
+      allocationController.form.isSubmitting ||
+      (data?.result?.currentGame?.status === 'RUNNING' &&
+        allocationController.view === 'editing'),
+    onChange: async (isReady: boolean) => {
+      const changingRound = currentRound
+      try {
+        await updateReadyState.mutateAsync({ isReady })
+      } catch {
+        if (roundRef.current === changingRound)
+          toast({
+            title: 'Could not update Ready',
+            description: 'Please try again.',
+          })
+      }
+    },
+  }
 
-  const sum = useMemo(() => {
-    return (
-      Number(watchSavings || 0) +
-      Number(watchBonds || 0) +
-      Number(watchStocks || 0)
-    )
-  }, [watchSavings, watchBonds, watchStocks])
+  if (error && !data) return `Error! ${error.message}`
+  if (!data) return null
 
-  const isSumValid = sum === 100
-
-  const resultFactsForForm = getFacts(data?.playerResult?.facts)
-  const resultFactsDecisionsForForm = getFacts(resultFactsForForm.decisions)
-  useEffect(() => {
-    if (Object.keys(resultFactsDecisionsForForm).length > 0) {
-      reset({
-        savings: getNumber(resultFactsDecisionsForForm.bank),
-        bonds: getNumber(resultFactsDecisionsForForm.bonds),
-        stocks: getNumber(resultFactsDecisionsForForm.stocks),
-      })
-    }
-  }, [resultFactsDecisionsForForm, reset])
-
-  useEffect(() => {
-    if (data?.currentGame?.periods?.length > 0) {
-      setPeriod(data.currentGame.periods.length - 1)
-    }
-  }, [data?.currentGame?.periods?.length])
-
-  if (isLoading) return null
-  if (error) return `Error! ${error}`
-
-  const playerDataResult = data
+  const playerDataResult = data.result
   if (!playerDataResult) return null
   const currentGame = playerDataResult.currentGame
+
+  const resultView = buildResultView(data)
+  let body: ReactNode
+  let action: ReactNode
 
   switch (currentGame?.status) {
     case 'PREPARATION':
     case 'COMPLETED':
-      return (
-        <GameLayout>
-          <div className="w-full">
-            <GameHeader currentGame={currentGame} />
+      body = (
+        <div className="w-full">
+          <div className="font-semibold">
+            {currentGame.status === 'PREPARATION'
+              ? 'Preparing the next year'
+              : 'Game completed'}
           </div>
-        </GameLayout>
+        </div>
       )
-
-    case 'RESULTS':
-      return (
-        <ResultsView
-          currentGame={currentGame}
-          playerDataResult={playerDataResult}
-        />
-      )
-
+      break
     case 'SCHEDULED':
-      return (
-        <GameLayout>
-          <div> Game is scheduled. </div>
-        </GameLayout>
-      )
-
-    case 'CONSOLIDATION':
+      body = <div>Game is scheduled.</div>
+      break
     case 'PAUSED':
-      return (
-        <ConsolidationView
-          currentGame={currentGame}
-          playerDataResult={playerDataResult}
-          period={period}
-          setPeriod={setPeriod}
-        />
-      )
-
-    case 'RUNNING':
-      return (
-        <RunningView
-          currentGame={currentGame}
-          playerDataResult={playerDataResult}
-          period={period}
-          form={form}
-          performAction={performAction}
-          isSumValid={isSumValid}
-          sum={sum}
-        />
-      )
-
+    case 'CONSOLIDATION':
+    case 'RESULTS':
+      body = <ResultPanel view={resultView} />
+      break
+    case 'RUNNING': {
+      const assets = parseFacts(playerFacts.assets)
+      const totalAssets =
+        typeof assets.totalAssets === 'number' ? assets.totalAssets : 0
+      const { view, form } = allocationController
+      action =
+        view === 'editing' ? (
+          <PlayerActionButton
+            key="submit-allocation"
+            type="submit"
+            form="allocation-form"
+            disabled={
+              !allocationController.valid || form.isSubmitting || updatingReady
+            }
+          >
+            {form.isSubmitting ? 'Submitting…' : 'Submit allocation'}
+          </PlayerActionButton>
+        ) : (
+          <PlayerActionButton
+            key="change-allocation"
+            type="button"
+            variant="secondary"
+            disabled={view === 'ready' || form.isSubmitting || updatingReady}
+            onClick={allocationController.beginEditing}
+          >
+            Change allocation
+          </PlayerActionButton>
+        )
+      body =
+        view === 'editing' ? (
+          <AllocationForm
+            controller={allocationController}
+            disabled={updatingReady}
+            assets={totalAssets}
+            scenario={readScenario(currentGame.activePeriod?.facts)}
+          />
+        ) : (
+          <AllocationSummary
+            allocation={allocationController.saved}
+            assets={totalAssets}
+            quarterNumber={
+              (currentGame.activePeriod?.activeSegment?.index ?? 0) + 1
+            }
+            ready={view === 'ready'}
+          />
+        )
+      break
+    }
     default:
       return <div>Game has not been created yet.</div>
   }
+
+  return (
+    <GameLayout
+      data={data}
+      refetchResult={refetch}
+      readyControl={readyControl}
+      resultView={resultView}
+      action={action}
+    >
+      {body}
+    </GameLayout>
+  )
 }
 
 export default Cockpit

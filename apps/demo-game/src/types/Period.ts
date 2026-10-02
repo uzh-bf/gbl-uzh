@@ -1,15 +1,10 @@
 import * as yup from 'yup'
 
-export const ROLLS_PER_SEGMENT = 3
-export const DEFAULT_SEED = 1
-export const GAP_STOCKS = 0.025
-export const GAP_BONDS = 0.005
-export const INTEREST_BANK = 0.002
-export const TREND_STOCKS = 0.0065
-export const TREND_BONDS = 0.0031
+import { DEFAULT_SEED } from '../lib/constants'
 
 export const PeriodFactsSchema = yup.object({
-  rollsPerSegment: yup.number().positive().integer().default(ROLLS_PER_SEGMENT),
+  // Ignore legacy JSON overrides; duration is a demo-game rule.
+  rollsPerSegment: yup.mixed().strip(),
   scenario: yup
     .object({
       seed: yup.number().integer().default(DEFAULT_SEED),
@@ -58,13 +53,16 @@ export interface PeriodFacts extends yup.InferType<typeof PeriodFactsSchema> {
 //   })
 // }
 
-export const PeriodSegmentFactsSchema = yup.object({})
+export const PeriodSegmentFactsSchema = yup.object({
+  revealedRollIndices: yup
+    .array()
+    .of(yup.number().integer().min(0).required())
+    .optional(),
+})
 
 export interface PeriodSegmentFacts extends yup.InferType<
   typeof PeriodSegmentFactsSchema
 > {
   returns: { bank: number; bonds: number; stocks: number }[]
-  // `shared` is the third (shared bonds/stocks) die; written by the reducer,
-  // read in the admin dice view. Optional to stay compatible with older facts.
-  diceRolls: { bonds: number; stocks: number; shared?: number }[]
+  diceRolls: { shared: number; bonds: number; stocks: number }[]
 }
