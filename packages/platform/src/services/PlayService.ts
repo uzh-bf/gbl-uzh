@@ -200,7 +200,10 @@ export async function performAction<ActionTypes>(
   )
 
   if (globalNotificationToPublish) {
-    EventService.publishGlobalNotification(globalNotificationToPublish)
+    EventService.publishGlobalNotification(
+      args.gameId,
+      globalNotificationToPublish
+    )
     log.info(
       `Published ${globalNotificationToPublish.type} for game ${args.gameId}`,
       globalNotificationToPublish.facts
@@ -810,7 +813,7 @@ export async function updateReadyState(args, ctx: Context) {
         isReady: updatedPlayer.isReady,
       }),
     }
-    EventService.publishGlobalNotification(eventToPublish)
+    EventService.publishGlobalNotification(ctx.user.gameId, eventToPublish)
     log.info(
       `Published ${eventToPublish.type} for game ${ctx.user.gameId}`,
       eventToPublish.facts
@@ -871,7 +874,7 @@ export async function addCountdown(args, ctx: Context) {
       countdownDurationMs,
     }),
   }
-  EventService.publishGlobalNotification(eventToPublish)
+  EventService.publishGlobalNotification(args.gameId, eventToPublish)
   log.info(
     `Published ${eventToPublish.type} for game ${args.gameId}`,
     eventToPublish.facts
@@ -918,7 +921,7 @@ export async function toggleSwitch(args, ctx: Context) {
       toggle: args.toggle,
     }),
   }
-  EventService.publishGlobalNotification(eventToPublish)
+  EventService.publishGlobalNotification(args.gameId, eventToPublish)
   log.info(
     `Published ${eventToPublish.type} for game ${args.gameId}`,
     eventToPublish.facts
