@@ -165,7 +165,7 @@ export function useLearningActivities({
       // Refresh the submitted activity even if another one is now open. A
       // failed refresh must not be reported as a failed attempt.
       void Promise.all([
-        utils.learning.byId.invalidate({ id }),
+        utils.learning.byId.invalidate({ id }, { refetchType: 'all' }),
         utils.play.result.invalidate(),
         utils.play.self.invalidate(),
       ]).catch(() => {})
