@@ -1,10 +1,6 @@
 import { useRouter } from 'next/router'
-
-import { useQuery } from '@apollo/client'
-import {
-  GameDocument,
-  SpecificResultsDocument,
-} from 'src/graphql/generated/ops'
+import { PlayerResultType } from 'src/generated/prisma/enums'
+import { trpc } from '~/lib/trpc'
 
 import {
   Card,
@@ -37,26 +33,32 @@ const colors = [
 
 function ReportGame() {
   const router = useRouter()
+  const gameId = Number(router.query.id)
+  const hasGameId = Number.isFinite(gameId)
 
-  const { data, error, loading } = useQuery(GameDocument, {
-    variables: { id: Number(router.query.id) },
-    skip: !router.query.id,
-  })
+  const {
+    data: game,
+    error,
+    isLoading,
+  } = trpc.game.byId.useQuery(
+    { id: hasGameId ? gameId : 0 },
+    { enabled: hasGameId }
+  )
 
-  const { data: resultsData } = useQuery(SpecificResultsDocument, {
-    variables: { gameId: Number(router.query.id), type: 'PERIOD_END' },
-    skip: !router.query.id,
-  })
+  const { data: periodEndResults = [] } = trpc.results.specific.useQuery(
+    {
+      gameId: hasGameId ? gameId : 0,
+      type: PlayerResultType.PERIOD_END,
+    },
+    { enabled: hasGameId }
+  )
 
-  if (loading || !data?.game) return <div>loading...</div>
+  if (isLoading || !game) return <div>loading...</div>
   if (error) return <div>{error.message}</div>
 
-  const game = data.game
   const playersById = Object.fromEntries(
     game.players.map((p) => [p.id, p.name])
   )
-
-  const periodEndResults = resultsData?.specificResults ?? []
 
   // one series point per (player, period): equity after that year
   const byPeriod: Record<number, any> = {}

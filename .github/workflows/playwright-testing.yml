@@ -59,11 +59,10 @@ jobs:
       matrix:
         game: [demo-game, rate-wars, central-bank]
     env:
-      # demo-game is tRPC; the example games still run GraphQL. The demo-game
-      # client rewrites the path either way, but keep the env truthful.
-      # Keep the browser API origin identical to NEXTAUTH_URL so auth cookies
-      # are included during the still-GraphQL example layers.
-      NEXT_PUBLIC_API_URL: http://localhost:3000${{ matrix.game == 'demo-game' && '/api/trpc' || '/api/graphql' }}
+      # Central Bank remains on GraphQL until its migration layer; the other
+      # matrix apps use tRPC. Keep the browser API origin identical to
+      # NEXTAUTH_URL so auth cookies accompany the GraphQL request.
+      NEXT_PUBLIC_API_URL: http://localhost:3000${{ matrix.game == 'central-bank' && '/api/graphql' || '/api/trpc' }}
     services:
       postgres:
         image: postgres:15
