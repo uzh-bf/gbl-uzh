@@ -17,12 +17,10 @@
   },
   "devDependencies": {
     "@apollo/client": "3.14.1",
-    "@jest/globals": "~29.7.0",
     "@prisma/client": "~7.9.1",
     "@rollup/plugin-node-resolve": "~15.3.0",
     "@rollup/plugin-typescript": "~12.1.1",
     "@trpc/server": "11.18.0",
-    "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^24.0.0",
     "@types/ramda": "^0.30.2",
@@ -35,7 +33,6 @@
     "graphql-scalars": "1.23.0",
     "graphql-sse": "2.5.4",
     "graphql-yoga": "4.0.4",
-    "jest": "~29.7.0",
     "jsonwebtoken": "9.0.2",
     "next": "16.2.9",
     "next-auth": "4.24.14",
@@ -48,9 +45,10 @@
     "react-dom": "19.2.7",
     "rollup": "~4.25.0",
     "rollup-plugin-copy": "~3.5.0",
-    "ts-jest": "~29.4.12",
     "tsx": "~4.19.3",
     "typescript": "6.0.2",
+    "vite": "~7.3.6",
+    "vitest": "~5.0.1",
     "yup": "1.6.1"
   },
   "peerDependencies": {
@@ -79,10 +77,11 @@
     "build:ts": "cross-env NODE_ENV=production rollup -c",
     "check:ts": "../../node_modules/typescript-native/bin/tsc --project tsconfig.json --noEmit",
     "check:ts:typescript6": "node_modules/typescript/bin/tsc --project tsconfig.json --noEmit",
-    "test:auth": "tsx --test src/lib/auth.test.ts",
     "dev": "cross-env NODE_ENV=development rollup -c --watch",
     "generate": "prisma generate",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "vitest run",
+    "test:auth": "vitest run src/lib/auth.test.ts",
+    "test:watch": "vitest --watch"
   },
   "engines": {
     "node": ">=24"

@@ -4,7 +4,7 @@
 // game exists. Covers the function directly, then exercises it through a
 // real admin route (game.toggleSwitch) to confirm it actually gates the
 // router as wired.
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it } from 'vitest'
 import {
   assertGameOwnership,
   createCallerFactory,

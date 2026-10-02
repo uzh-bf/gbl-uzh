@@ -8,7 +8,7 @@ tags:
   - vercel
   - neon
   - prisma
-timestamp: "2026-08-12T00:00:00Z"
+timestamp: "2026-09-25T00:00:00Z"
 ---
 
 # Deploying a Game to Staging (Vercel + Neon)
@@ -68,6 +68,22 @@ Then set the project so Vercel builds only your app out of the workspace. In the
 
 ## Step 3 - Set environment variables
 
+### Isolated Startinvest ARM staging image
+
+The additional `build_startinvest_arm64` workflow job selects
+`apps/demo-game/.env.staging-arm64` with Docker build argument
+`APP_ENV=staging-arm64`. It sets `NEXT_PUBLIC_APP_URL` and `NEXTAUTH_URL` to
+`https://startinvest.stg.df-app.ch`, and `NEXT_PUBLIC_API_URL` to that origin
+plus `/api/graphql`. The job validates dev pull requests without publishing;
+pushes to dev publish only `ghcr.io/uzh-bf/gbl-uzh/demo-game:dev-startinvest-arm64`.
+It runs on `ubuntu-24.04-arm` and does not contribute to the existing
+multi-architecture manifest. Existing builds retain `APP_ENV=production`,
+the original `.env.production`, and their current tags and deployment URLs.
+The new helm-charts staging deployment should pin a verified digest from the
+Startinvest variant after merge; no existing deployment is switched here.
+
+### Vercel configuration
+
 Set these in Vercel (Production or Preview scope), **not** in the committed `.env.production` files:
 
 | Variable                                                   | Value                                      | Notes                                  |
@@ -97,6 +113,30 @@ DATABASE_URL="<neon-direct-string>" pnpm prisma:seed
 ```
 
 `prisma migrate deploy` applies the committed migrations under `prisma/schema/migrations/`. If your game has no migration history yet, `pnpm prisma db push --schema=prisma/schema` is the pragmatic staging alternative. Seeding is mandatory - without the `PlayerLevel` ladder from `prisma/seed.ts`, players cannot be created.
+
+### Existing demo-game databases and container deployments
+
+Deploying the app image does not migrate its database: `apps/demo-game/Dockerfile`
+starts only the Next.js server. Run the committed migrations against the same
+database used by the app before rolling out schema-dependent code. The separate
+`apps/demo-game/Dockerfile.migration` defaults to `prisma migrate deploy`; rebuilding
+and publishing that image alone does not execute it against a database.
+
+If team login fails with `The column Achievement.namesByRole does not exist`,
+ensure the migration runner includes
+`20260925090000_achievement_role_labels` and run it with the staging database's
+`DATABASE_URL`. That migration adds nullable JSONB columns `namesByRole` and
+`descriptionsByRole`, preserving existing records. From a checkout containing it,
+with the staging connection already exported, run:
+
+```bash
+pnpm --dir apps/demo-game exec prisma migrate deploy
+```
+
+Do not use `prisma:deploy` for this staging command: the current package script
+selects Infisical's `prd` environment. Do not run `prisma:setup:stg` to repair an
+existing database: it begins with `migrate reset`. See
+`apps/demo-game/package.json:scripts` and `apps/demo-game/prisma.config.ts`.
 
 ## Step 5 - Auth for a real deployment
 
@@ -128,3 +168,23 @@ Open `https://<your-vercel-domain>/admin/login`, sign in through your OIDC tenan
 | Admin login redirects then errors with a state/cookie failure | `NEXTAUTH_URL` does not match the deployed origin                      | Set `NEXTAUTH_URL` to the exact `https://` domain, redeploy                              |
 | Too many database connections under light load                | App using the direct (non-pooled) Neon string                          | Point `DATABASE_URL` at the **pooled** string; keep direct only for migrate/seed         |
 | `prisma migrate deploy` hangs or errors on Neon               | Running migrations through the pooler                                  | Run migrations with the **direct** connection string                                     |
+
+## Startinvest ARM production image
+
+The additional build_startinvest_prd_arm64 job in .github/workflows/demo-game.yml uses
+apps/demo-game/.env.production-arm64 to bake https://startinvest.df-app.ch into
+the frontend. PRs to dev build without publishing; pushes to dev publish
+prd-startinvest-arm64, separately from existing tags. The job mirrors the staging
+variant with APP_ENV=production-arm64 and its own demo-game-startinvest-prd-arm64
+cache scope.
+This publishes an image only; it does not deploy or migrate a database.
+
+Before activation, verify the ARM64 publisher and pin its registry digest in the
+Helm charts gbl/demo-game/prd overlay. Its mutable draft tag is not a release pin.
+The cloud stack provides separate prd-gbl-demo resources and a new database.
+Configure runtime authentication secrets and Auth0 callback/web-origin/logout
+allowlists for startinvest.df-app.ch. Restore and validate production data
+manually before sync; no automatic PRD migration hook is enabled. Keep legacy
+production resources and credentials unchanged until a separate cutover. The new
+Demo ingress reuses the legacy public host: do not sync it while the legacy
+ingress owns that host/path. Coordinate ingress ownership explicitly at cutover.

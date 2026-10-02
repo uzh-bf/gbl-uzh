@@ -5,7 +5,7 @@
 // schema seam: invalid payload never reaches the service layer; valid
 // payload proceeds into it (services.Actions.apply, injected via
 // createPlatformRouter({ services })).
-import { describe, expect, it, jest } from '@jest/globals'
+import { describe, expect, it, vi } from 'vitest'
 import * as yup from 'yup'
 import { createCallerFactory } from '../src/trpc/init.js'
 import { createPlatformRouter } from '../src/trpc/createPlatformRouter.js'
@@ -18,7 +18,7 @@ const ActionFactsSchema = yup.object({
 
 function buildCaller(
   prisma: ReturnType<typeof createMockPrisma>,
-  actionsApply: ReturnType<typeof jest.fn>
+  actionsApply: ReturnType<typeof vi.fn>
 ) {
   const router = createPlatformRouter({
     schemas: { ActionFactsSchema },
@@ -40,7 +40,7 @@ function buildCaller(
 
 function buildCallerWithoutActionFactsSchema(
   prisma: ReturnType<typeof createMockPrisma>,
-  actionsApply: ReturnType<typeof jest.fn>
+  actionsApply: ReturnType<typeof vi.fn>
 ) {
   const router = createPlatformRouter({
     services: {
@@ -67,7 +67,7 @@ describe('play.performAction schema seam', () => {
       activePeriod: { id: 10, index: 0 },
       activePeriodIx: 0,
     })
-    const actionsApply = jest.fn()
+    const actionsApply = vi.fn()
     const caller = buildCallerWithoutActionFactsSchema(prisma, actionsApply)
 
     await expect(
@@ -88,7 +88,7 @@ describe('play.performAction schema seam', () => {
       activePeriod: { id: 10, index: 0 },
       activePeriodIx: 0,
     })
-    const actionsApply = jest.fn()
+    const actionsApply = vi.fn()
     const caller = buildCaller(prisma, actionsApply)
 
     await expect(
@@ -111,7 +111,7 @@ describe('play.performAction schema seam', () => {
       activePeriod: null,
       activePeriodIx: 0,
     })
-    const actionsApply = jest.fn()
+    const actionsApply = vi.fn()
     const caller = buildCaller(prisma, actionsApply)
 
     await expect(
@@ -152,7 +152,7 @@ describe('play.performAction schema seam', () => {
     // callback against our transaction-scoped mock prisma.
     prisma.$transaction.mockImplementation((fn: any) => fn(tx))
 
-    const actionsApply = jest.fn().mockReturnValue({
+    const actionsApply = vi.fn().mockReturnValue({
       result: { total: 5 },
       isDirty: false,
     })
@@ -201,7 +201,7 @@ describe('play.performAction schema seam', () => {
     tx.playerResult.findUnique.mockResolvedValue(previousResult)
     prisma.$transaction.mockImplementation((fn: any) => fn(tx))
 
-    const actionsApply = jest.fn().mockReturnValue({
+    const actionsApply = vi.fn().mockReturnValue({
       result: { total: 5 },
       isDirty: false,
     })

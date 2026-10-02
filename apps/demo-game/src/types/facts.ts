@@ -65,6 +65,7 @@ export type AssetsWithReturns = Assets & {
 }
 
 export type ResultFactsInit = {
+  allocationSubmitted?: boolean
   decisions: Decisions
   assets: Assets
   benchmarks: AssetsBenchmark

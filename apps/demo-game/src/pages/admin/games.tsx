@@ -1,8 +1,8 @@
-import { Button } from '@uzh-bf/design-system'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form'
+import { Button } from '~/components/admin/AdminControls'
 import { AdminInputField } from '~/components/fields/AdminInputField'
 import { trpc } from '~/lib/trpc'
 
@@ -63,7 +63,7 @@ function Games() {
   }
 
   return (
-    <div className="p-4">
+    <div className="mobile:app-panel mobile:app-body p-4">
       {session && (
         <Button
           onClick={async () => {
@@ -80,7 +80,7 @@ function Games() {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="my-4 flex max-w-md flex-col gap-4 rounded border p-4"
+        className="mobile:app-card mobile:gap-app-3 my-4 flex max-w-md flex-col gap-4 rounded border p-4"
       >
         <AdminInputField
           label="Name"
@@ -117,20 +117,22 @@ function Games() {
       <div className="mt-4 flex flex-col gap-1">
         {gamesQuery.data.map((game) => (
           <Link
-            className="w-96 font-medium text-slate-700"
+            className="mobile:w-full mobile:min-w-0 w-96 font-medium text-slate-700"
             href={`/admin/games/${game.id}`}
             key={game.id}
           >
             <Button
               className={{
-                root: 'flex w-full flex-col items-start justify-around text-left',
+                root: 'mobile:app-card mobile:gap-app-2 flex w-full flex-col items-start justify-around text-left',
               }}
             >
-              <div className="flex w-full justify-between p-2">
-                <div>{game.name}</div>
-                <div className="flex w-10">Id: {game.id}</div>
+              <div className="mobile:gap-app-2 mobile:p-0 flex w-full justify-between p-2">
+                <div className="mobile:min-w-0 mobile:[overflow-wrap:anywhere]">
+                  {game.name}
+                </div>
+                <div className="mobile:shrink-0 flex w-10">Id: {game.id}</div>
               </div>
-              <div className="flex w-full items-end justify-between p-2 text-sm">
+              <div className="mobile:app-caption mobile:flex-wrap mobile:gap-app-2 mobile:p-0 flex w-full items-end justify-between p-2 text-sm">
                 <div className="flex flex-col justify-between gap-y-1 text-left">
                   <div>Player count: {game.playersCount}</div>
                   <div>

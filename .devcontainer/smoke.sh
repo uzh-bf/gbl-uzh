@@ -39,7 +39,7 @@ login_ok=0
 for attempt in $(seq 1 30); do
   if login_page="$(curl --fail --silent --show-error --max-time 10 \
     "${APP_URL}/admin/login")"; then
-    if printf '%s' "$login_page" | grep -Fq 'Not signed in' && \
+    if printf '%s' "$login_page" | grep -Eq 'Not signed in|Sign in to StartInvest' && \
       printf '%s' "$login_page" | grep -Fq 'Sign in'; then
       login_ok=1
       break
