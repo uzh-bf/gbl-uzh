@@ -9,6 +9,7 @@ import {
 } from '../../types'
 
 import * as services from '../../services'
+import { marketRouter } from './market'
 
 export const appRouter = createPlatformRouter({
   services,
@@ -18,6 +19,9 @@ export const appRouter = createPlatformRouter({
     PeriodFactsSchema,
     PeriodSegmentFactsSchema,
     PlayerFactsSchema,
+  },
+  extensions: {
+    market: marketRouter,
   },
 })
 

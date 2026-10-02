@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it } from 'vitest'
 import { TRPCError } from '@trpc/server'
 import * as yup from 'yup'
 import {
