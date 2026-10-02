@@ -39,9 +39,12 @@ export function AdminInputField<TFieldValues extends FieldValues>({
   const errorId = `${name}-error`
 
   return (
-    <div className="flex w-full flex-col gap-1">
+    <div className="mobile:gap-app-1 flex w-full flex-col gap-1">
       <div className="flex items-center gap-1.5 pb-1">
-        <label htmlFor={name} className="text-sm font-medium text-slate-700">
+        <label
+          htmlFor={name}
+          className="mobile:app-caption text-sm font-medium text-slate-700"
+        >
           {label}
         </label>
         {tooltip && <HelpTooltip content={tooltip} />}
@@ -65,13 +68,17 @@ export function AdminInputField<TFieldValues extends FieldValues>({
               }
             : { required: required ? 'Required' : false }
         )}
-        className="w-full rounded border border-slate-300 bg-white p-2 text-sm focus:ring-2 focus:ring-slate-500 focus:outline-none"
+        className="mobile:app-control w-full rounded border border-slate-300 bg-white p-2 text-sm focus:ring-2 focus:ring-slate-500 focus:outline-none"
         data-cy={testId ?? name}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}
       />
       {error && (
-        <span id={errorId} role="alert" className="text-xs text-red-500">
+        <span
+          id={errorId}
+          role="alert"
+          className="mobile:app-caption text-xs text-red-500"
+        >
           {error.message}
         </span>
       )}

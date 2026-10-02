@@ -2,6 +2,7 @@ import { Action } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
 import { PrismaClient } from 'src/generated/prisma/client'
+import { allocationSchema } from '../lib/allocation'
 import { Decisions } from '../types/facts'
 import { GameFacts, PeriodFacts, PeriodSegmentFacts } from '../types/index'
 
@@ -18,6 +19,7 @@ type PayloadType = {
 
 type State = {
   decisions: Decisions
+  allocationSubmitted?: boolean
 }
 
 type Actions = Action<ActionTypes.NONE, PayloadType, PrismaClient>
@@ -33,17 +35,10 @@ export function apply(state: State, action: Actions) {
   // TODO: the user reducer could just get the "draft" inside this function as first parameter
   // TODO: and platform would do all code around it
   const newState = produce(baseState, (draft) => {
-    const { bank, bonds, stocks } = action.payload.playerArgs
-    if (bank < 0 || bank > 100)
-      throw new Error('Bank must be between 0 and 100')
-    if (bonds < 0 || bonds > 100)
-      throw new Error('Bonds must be between 0 and 100')
-    if (stocks < 0 || stocks > 100)
-      throw new Error('Stocks must be between 0 and 100')
-    if (bank + bonds + stocks !== 100)
-      throw new Error('Bank + Bonds + Stocks must equal 100')
+    allocationSchema.validateSync(action.payload.playerArgs, { strict: true })
 
     draft.result.decisions = action.payload.playerArgs
+    draft.result.allocationSubmitted = true
 
     // This is only to test the game facts
     // TODO(JJ): Change to gameFactsToUpdate
