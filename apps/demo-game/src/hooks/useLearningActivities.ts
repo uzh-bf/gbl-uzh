@@ -109,7 +109,8 @@ export function useLearningActivities({
     refetch: retryLearningElement,
   } = trpc.learning.byId.useQuery(
     { id: activeLearningId ?? '' },
-    { enabled: Boolean(activeLearningId) }
+    // The sheet offers its own Try again action after a failed load.
+    { enabled: Boolean(activeLearningId), retry: false }
   )
   // `learning.byId` returns the queried element's id as the top-level `id`;
   // ignore data that belongs to a previously selected element.

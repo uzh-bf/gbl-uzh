@@ -1414,7 +1414,8 @@ test('Market shows fixed admin reveals to two players during allocation', async 
     const refreshAlert = dicePage
       .getByRole('alert')
       .filter({ hasText: 'Could not refresh dice.' })
-    await expect(refreshAlert).toBeVisible()
+    // The admin view learns about reveals from its 15s poll.
+    await expect(refreshAlert).toBeVisible({ timeout: 25_000 })
     await expect(thirdTab).toHaveAttribute('aria-selected', 'true')
     failRefresh = false
     await dicePage
