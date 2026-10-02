@@ -7,7 +7,7 @@ tags:
   - graphql
   - trpc
   - realtime
-timestamp: "2026-08-10T00:00:00Z"
+timestamp: "2026-10-02T00:00:00Z"
 ---
 
 # API Layer and Realtime
@@ -48,6 +48,20 @@ game.
 The API route builds context from the NextAuth session and the app's Prisma
 client. Keep that work per request; never place a user or request context in a
 module singleton.
+
+Admin reports read `results.specific`, backed by
+`PlayService.getSpecificResults`, which includes the player, period, and segment
+relations. Quarter metadata must accompany `SEGMENT_END` facts so clients can
+place monthly samples on the settled timeline; period-level results may have a
+null segment.
+
+The demo game merges a game-specific `market` router through
+`createPlatformRouter({ extensions })`
+(`apps/demo-game/src/server/trpc/market.ts`). The admin-only `market.dice`
+query reads authoritative precomputed outcomes, and `market.revealRoll`
+persists reveal indices without rerolling. Its `MARKET_ROLL_REVEALED` global
+event carries only `gameId`; the player refetches its existing `play.result`
+data.
 
 ## Pages Router client pattern
 

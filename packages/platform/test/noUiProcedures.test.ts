@@ -4,7 +4,7 @@
 // test/authTiers.test.ts) plus one happy path against a minimal mocked
 // prisma fixture, read off the exact prisma calls in the underlying router
 // and service.
-import { beforeEach, describe, expect, it } from '@jest/globals'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { createPlatformRouter } from '../src/trpc/createPlatformRouter.js'
 import { createCallerFactory } from '../src/trpc/init.js'
 import { UserRole } from '../src/types.js'
