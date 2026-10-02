@@ -17,6 +17,8 @@ export default function Forecast() {
       // The global event stream is player-only, so the admin view polls to
       // pick up segment starts and reveals from other operator tabs.
       refetchInterval: 15000,
+      // Failed refreshes surface the Retry loading action instead.
+      retry: false,
     }
   )
   const reveal = trpc.market.revealRoll.useMutation()

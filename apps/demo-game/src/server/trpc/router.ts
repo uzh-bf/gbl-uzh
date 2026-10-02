@@ -1,7 +1,7 @@
 import { createPlatformRouter } from '@gbl-uzh/platform'
 import { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
+import { allocationSchema } from '../../lib/allocation'
 import {
-  DecisionsSchema,
   GameFactsSchema,
   PeriodFactsSchema,
   PeriodSegmentFactsSchema,
@@ -14,7 +14,9 @@ import { marketRouter } from './market'
 export const appRouter = createPlatformRouter({
   services,
   schemas: {
-    ActionFactsSchema: DecisionsSchema,
+    // Validates the performAction payload at the tRPC boundary so bad player
+    // input fails as BAD_REQUEST before it reaches the ActionsReducer.
+    ActionFactsSchema: allocationSchema,
     GameFactsSchema,
     PeriodFactsSchema,
     PeriodSegmentFactsSchema,
