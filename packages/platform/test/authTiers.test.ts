@@ -11,7 +11,7 @@
 // from the tier itself; those two cases are asserted as "does not reject
 // regardless of caller identity" instead of contorting a procedure into
 // throwing errors its tier structurally cannot produce.
-import { beforeEach, describe, expect, it } from '@jest/globals'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { createCallerFactory } from '../src/trpc/init.js'
 import { createPlatformRouter } from '../src/trpc/createPlatformRouter.js'
 import { UserRole } from '../src/types.js'
