@@ -11,10 +11,14 @@ fragment SegmentData on PeriodSegment {
   learningElements {
     id
     title
+    reward
   }
 
   storyElements {
     id
     title
+    type
+    content
+    contentRole
   }
 }

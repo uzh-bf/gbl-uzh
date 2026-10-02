@@ -6,6 +6,7 @@ import {
 } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
 import * as R from 'ramda'
+import { NUM_MONTHS_PER_SEGMENT } from '../lib/constants'
 import { PlayerRole } from '../settings/Constants'
 import { GameFacts } from '../types/Game'
 import type { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
@@ -43,7 +44,9 @@ export function initialize(
 
   const resultFacts: OutputSegmentResultFactsInit = produce(
     basefacts,
-    (draft: OutputSegmentResultFactsInit) => {}
+    (draft: OutputSegmentResultFactsInit) => {
+      draft.resultFacts.allocationSubmitted = false
+    }
   )
 
   debugLog('SegmentResultInitialize', facts, payload, resultFacts)
@@ -65,7 +68,9 @@ export function start(
 
   const resultFacts: OutputResultFacts = produce(
     basefacts,
-    (draft: OutputResultFacts) => {}
+    (draft: OutputResultFacts) => {
+      draft.resultFacts.allocationSubmitted = false
+    }
   )
 
   debugLog('SegmentResultStart', facts, payload, resultFacts)
@@ -89,6 +94,13 @@ export function end(
     basefacts,
     (draft: OutputResultFacts) => {
       const segmentFacts = payload.segmentFacts
+      if (
+        segmentFacts.returns?.length !== NUM_MONTHS_PER_SEGMENT ||
+        segmentFacts.diceRolls?.length !== NUM_MONTHS_PER_SEGMENT
+      )
+        throw new Error(
+          `Each demo-game segment must contain ${NUM_MONTHS_PER_SEGMENT} monthly returns and dice rolls.`
+        )
 
       const totalAssets =
         facts.assets.bank + facts.assets.bonds + facts.assets.stocks
