@@ -1,12 +1,8 @@
-import { useMutation, useQuery } from '@apollo/client'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { WelcomeMessage } from 'src/components/welcome/WelcomeControls'
 import WelcomeSetup from 'src/components/welcome/WelcomeSetup'
-import {
-  SelfDocument,
-  UpdatePlayerDataDocument,
-} from 'src/graphql/generated/ops'
+import { trpc } from '~/lib/trpc'
 
 function Welcome() {
   const router = useRouter()
@@ -17,16 +13,24 @@ function Welcome() {
       ? router.query.tab
       : 'cockpit'
   const returnUrl = editing ? `/play/cockpit?tab=${tab}` : '/play/cockpit'
-  const { data, loading, error, refetch } = useQuery(SelfDocument, {
-    skip: !router.isReady,
-    fetchPolicy: 'network-only',
+  const utils = trpc.useUtils()
+  const {
+    data: self,
+    isFetchedAfterMount,
+    error,
+    refetch,
+  } = trpc.play.self.useQuery(undefined, {
+    enabled: router.isReady,
+    refetchOnMount: 'always',
   })
-  const [updatePlayerData] = useMutation(UpdatePlayerDataDocument)
+  const updatePlayerData = trpc.play.updatePlayerData.useMutation({
+    onSuccess: () => utils.play.self.invalidate(),
+  })
 
-  if (!router.isReady || loading)
+  if (!router.isReady || (!isFetchedAfterMount && !error))
     return <WelcomeMessage role="status">Loading your bank…</WelcomeMessage>
 
-  if (error || !data?.self) {
+  if (error || !self) {
     return (
       <WelcomeMessage>
         <h1 className="mobile:app-heading">We couldn’t load your bank</h1>
@@ -55,12 +59,13 @@ function Welcome() {
 
   return (
     <WelcomeSetup
-      key={`${data.self.id}:${editing}`}
-      player={data.self}
+      key={`${self.id}:${editing}`}
+      player={self}
       onCancel={editing ? () => void router.replace(returnUrl) : undefined}
       onSave={async (name, facts) => {
-        await updatePlayerData({
-          variables: { name, facts: JSON.stringify(facts) },
+        await updatePlayerData.mutateAsync({
+          name,
+          facts: JSON.stringify(facts),
         })
         await router.replace(returnUrl)
       }}

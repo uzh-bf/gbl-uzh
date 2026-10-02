@@ -3,12 +3,12 @@ import { useFormik } from 'formik'
 import { ArrowLeft, Info, MapPin, UserRound } from 'lucide-react'
 import Image from 'next/image'
 import { useRef, useState, type ReactElement } from 'react'
-import type { SelfQuery } from 'src/graphql/generated/ops'
 import { AVATARS, COLORS, LOCATIONS, cantonNames } from 'src/lib/constants'
 import * as yup from 'yup'
 import { ALLOCATION_KEYS } from '~/lib/allocation'
 import { assetLabels } from '~/lib/constants'
 import { parseFacts } from '~/lib/facts'
+import type { SelfPlayer } from '~/types/api'
 import CantonFlagBadge from '../CantonFlagBadge'
 import OptionPicker, { type Option } from './OptionPicker'
 import {
@@ -81,7 +81,7 @@ export default function WelcomeSetup({
   onSave,
   onCancel,
 }: {
-  player: NonNullable<SelfQuery['self']>
+  player: SelfPlayer
   onSave: (name: string, facts: Record<string, unknown>) => Promise<void>
   /** Supplying Cancel opens profile editing instead of first-time setup. */
   onCancel?: () => void

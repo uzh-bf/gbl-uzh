@@ -1,7 +1,7 @@
 import { cn } from '@gbl-uzh/ui'
 import Markdown from 'react-markdown'
-import type { LearningElementQuery } from '~/graphql/generated/ops'
 import { learningXP } from '~/lib/team'
+import type { LearningElementDetail } from '~/types/api'
 import CompactCountdown from '../cockpit/CompactCountdown'
 import PlayerActionButton from '../cockpit/PlayerActionButton'
 import ContentSheet, {
@@ -10,7 +10,7 @@ import ContentSheet, {
   SheetTextButton,
 } from './ContentSheet'
 
-type Element = NonNullable<LearningElementQuery['learningElement']>['element']
+type Element = LearningElementDetail['element']
 const ignoreTick = () => {}
 
 export default function LearningSheet({

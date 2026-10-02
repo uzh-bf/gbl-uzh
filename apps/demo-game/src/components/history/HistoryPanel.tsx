@@ -9,7 +9,6 @@ import {
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
 import { Fragment, useState } from 'react'
-import type { ResultQuery } from '~/graphql/generated/ops'
 import { assetLabels, MONTHS, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 import {
   buildHistory,
@@ -17,6 +16,7 @@ import {
   playerPercent,
   type HistoryQuarter,
 } from '~/lib/results'
+import type { GameData } from '~/types/api'
 import AllocationBar from '../cockpit/AllocationBar'
 import PortfolioHistoryChart from './PortfolioHistoryChart'
 
@@ -189,7 +189,7 @@ export default function HistoryPanel({
   data,
   active,
 }: {
-  data: ResultQuery
+  data: GameData
   active: boolean
 }) {
   const history = buildHistory(data)

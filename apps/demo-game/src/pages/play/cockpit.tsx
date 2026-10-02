@@ -1,10 +1,4 @@
-import { useMutation, useQuery } from '@apollo/client'
-import { useEffect, useRef, type ReactNode } from 'react'
-import {
-  PerformActionDocument,
-  ResultDocument,
-  UpdateReadyStateDocument,
-} from 'src/graphql/generated/ops'
+import { useCallback, useEffect, useRef, type ReactNode } from 'react'
 import GameLayout from '~/components/GameLayout'
 import AllocationForm from '~/components/cockpit/AllocationForm'
 import AllocationSummary from '~/components/cockpit/AllocationSummary'
@@ -12,19 +6,41 @@ import PlayerActionButton from '~/components/cockpit/PlayerActionButton'
 import ResultPanel from '~/components/cockpit/ResultPanels'
 import { useAllocationForm } from '~/components/cockpit/useAllocationForm'
 import { useToast } from '~/components/ui/use-toast'
+import { parseFacts } from '~/lib/facts'
 import { readScenario } from '~/lib/market'
-import { buildResultView } from '~/lib/results'
+import { buildResultView, readAllocation } from '~/lib/results'
+import { trpc } from '~/lib/trpc'
+import { ActionTypes } from '~/types/facts'
 
 function Cockpit() {
-  const { loading, error, data, refetch } = useQuery(ResultDocument, {
-    // Returning from profile editing must initialize from the latest round
-    // and saved allocation, rather than briefly exposing stale cached controls.
-    fetchPolicy: 'network-only',
+  const utils = trpc.useUtils()
+  // Returning from profile editing must initialize from the latest round
+  // and saved allocation, rather than briefly exposing stale cached controls.
+  const resultQuery = trpc.play.result.useQuery(undefined, {
+    refetchOnMount: 'always',
   })
+  const selfQuery = trpc.play.self.useQuery(undefined, {
+    refetchOnMount: 'always',
+  })
+  const data =
+    resultQuery.data &&
+    selfQuery.data &&
+    resultQuery.isFetchedAfterMount &&
+    selfQuery.isFetchedAfterMount
+      ? { result: resultQuery.data, self: selfQuery.data }
+      : undefined
+  const error = resultQuery.error ?? selfQuery.error
+  const refetch = useCallback(
+    () =>
+      Promise.all([
+        utils.play.result.invalidate(),
+        utils.play.self.invalidate(),
+      ]),
+    [utils]
+  )
 
-  const [performAction] = useMutation(PerformActionDocument, {
-    refetchQueries: [ResultDocument],
-    awaitRefetchQueries: true,
+  const performAction = trpc.play.performAction.useMutation({
+    onSuccess: () => refetch(),
   })
 
   const currentRound = `${data?.result?.currentGame?.id ?? ''}:${data?.result?.currentGame?.activePeriod?.id ?? ''}:${data?.result?.currentGame?.activePeriod?.activeSegment?.id ?? ''}`
@@ -33,21 +49,20 @@ function Cockpit() {
     roundRef.current = currentRound
   }, [currentRound])
   const { toast } = useToast()
-  const [updateReadyState, { loading: updatingReady }] = useMutation(
-    UpdateReadyStateDocument,
-    {
-      refetchQueries: [ResultDocument],
-      awaitRefetchQueries: true,
-    }
-  )
+  const updateReadyState = trpc.play.updateReadyState.useMutation({
+    onSuccess: () => refetch(),
+  })
+  const updatingReady = updateReadyState.isPending
+  const playerFacts = parseFacts(data?.result?.playerResult?.facts)
   const allocationController = useAllocationForm(
-    data?.result?.playerResult?.facts?.decisions,
+    readAllocation(playerFacts.decisions) ?? undefined,
     currentRound,
     (values) =>
-      performAction({
-        variables: { type: '', payload: JSON.stringify(values) },
+      performAction.mutateAsync({
+        type: ActionTypes.NONE,
+        payload: JSON.stringify(values),
       }),
-    data?.result?.playerResult?.facts?.allocationSubmitted === true,
+    playerFacts.allocationSubmitted === true,
     data?.self?.isReady === true
   )
 
@@ -60,7 +75,7 @@ function Cockpit() {
     onChange: async (isReady: boolean) => {
       const changingRound = currentRound
       try {
-        await updateReadyState({ variables: { isReady } })
+        await updateReadyState.mutateAsync({ isReady })
       } catch {
         if (roundRef.current === changingRound)
           toast({
@@ -71,8 +86,8 @@ function Cockpit() {
     },
   }
 
-  if (loading && !data) return null
-  if (error && !data) return `Error! ${error}`
+  if (error && !data) return `Error! ${error.message}`
+  if (!data) return null
 
   const playerDataResult = data.result
   if (!playerDataResult) return null
@@ -104,7 +119,9 @@ function Cockpit() {
       body = <ResultPanel view={resultView} />
       break
     case 'RUNNING': {
-      const resultFacts = playerDataResult.playerResult?.facts
+      const assets = parseFacts(playerFacts.assets)
+      const totalAssets =
+        typeof assets.totalAssets === 'number' ? assets.totalAssets : 0
       const { view, form } = allocationController
       action =
         view === 'editing' ? (
@@ -134,13 +151,13 @@ function Cockpit() {
           <AllocationForm
             controller={allocationController}
             disabled={updatingReady}
-            assets={resultFacts?.assets?.totalAssets ?? 0}
+            assets={totalAssets}
             scenario={readScenario(currentGame.activePeriod?.facts)}
           />
         ) : (
           <AllocationSummary
             allocation={allocationController.saved}
-            assets={resultFacts?.assets?.totalAssets ?? 0}
+            assets={totalAssets}
             quarterNumber={
               (currentGame.activePeriod?.activeSegment?.index ?? 0) + 1
             }

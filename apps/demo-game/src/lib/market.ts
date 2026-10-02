@@ -1,4 +1,4 @@
-import type { ResultQuery } from '../graphql/generated/ops'
+import type { GameData } from '~/types/api'
 import { FIRST_GAME_YEAR, NUM_MONTHS_PER_SEGMENT } from './constants'
 import { parseFacts } from './facts'
 
@@ -84,9 +84,9 @@ export function marketTimeLabel(
   return `${FIRST_GAME_YEAR + periodIndex} · Quarter ${segmentIndex + 1} · Month ${rollIndex + 1}`
 }
 
-export function marketPeriod(game: ResultQuery['result']['currentGame']) {
-  // At final RESULTS, self.game has a null activePeriod and Apollo normalizes
-  // it over result.currentGame's server-side fallback. Period history remains.
+export function marketPeriod(game: GameData['result']['currentGame']) {
+  // At final RESULTS the game can carry no activePeriod; fall back to the
+  // latest period so period history remains.
   return (
     game?.activePeriod ??
     (game?.status === 'RESULTS'
@@ -95,7 +95,7 @@ export function marketPeriod(game: ResultQuery['result']['currentGame']) {
   )
 }
 
-export function latestRevealedRoll(game: ResultQuery['result']['currentGame']) {
+export function latestRevealedRoll(game: GameData['result']['currentGame']) {
   if (!game) return null
   const activePeriod = marketPeriod(game)
   const periods = [...game.periods].sort((a, b) => b.index - a.index)

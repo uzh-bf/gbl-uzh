@@ -1,5 +1,4 @@
 import { ProbabilityChart, signedPercent } from '@gbl-uzh/ui'
-import type { ResultQuery } from '~/graphql/generated/ops'
 import { assetLabels, MONTHS, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 import {
   latestRevealedRoll,
@@ -7,6 +6,7 @@ import {
   readScenario,
   type MarketRoll,
 } from '~/lib/market'
+import type { GameData } from '~/types/api'
 
 const sectionClass =
   'border-player-border border-b mobile:px-app-4 mobile:py-app-4 min-[601px]:px-[32px] min-[601px]:py-[28px]'
@@ -92,7 +92,7 @@ function AssetDice({
   )
 }
 
-export default function MarketPanel({ data }: { data: ResultQuery }) {
+export default function MarketPanel({ data }: { data: GameData }) {
   const game = data.result?.currentGame
   const scenario = readScenario(marketPeriod(game)?.facts)
   const latest = latestRevealedRoll(game)

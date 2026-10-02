@@ -1,4 +1,3 @@
-import { useSubscription } from '@apollo/client'
 import { cn, getCountdownNotification } from '@gbl-uzh/ui'
 import { Switch } from '@uzh-bf/design-system'
 import dayjs from 'dayjs'
@@ -6,15 +5,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useRef } from 'react'
-import {
-  GlobalEventsDocument,
-  type ResultQuery,
-} from 'src/graphql/generated/ops'
 import { cantonNames, FIRST_GAME_YEAR } from '~/lib/constants'
 import { parseFacts } from '~/lib/facts'
 import { shouldRefetchDemoGame } from '~/lib/gameEvents'
 import { queueRefetch } from '~/lib/queuedRefetch'
 import type { ResultView } from '~/lib/results'
+import { trpc } from '~/lib/trpc'
+import type { GameData } from '~/types/api'
 import CantonFlagBadge from './CantonFlagBadge'
 import CompactCountdown from './cockpit/CompactCountdown'
 import HistoryPanel from './history/HistoryPanel'
@@ -39,7 +36,7 @@ function GameLayout({
 }: {
   children: React.ReactNode
   action?: React.ReactNode
-  data: ResultQuery
+  data: GameData
   refetchResult: () => Promise<unknown>
   resultView?: ResultView | null
   readyControl: {
@@ -69,20 +66,17 @@ function GameLayout({
   })
   const previousCountdownSeconds = useRef<number | null>(null)
 
-  const currentGameId = parseInt(currentGame?.id)
+  const currentGameId = currentGame?.id
   const queuedRefetch = useMemo(
     () => queueRefetch(refetchResult),
     [refetchResult]
   )
 
-  useSubscription(GlobalEventsDocument, {
-    skip: !currentGameId,
-    onData: ({ data: subData }) => {
-      if (subData?.data?.eventsGlobal) {
-        const event = subData.data.eventsGlobal
-        if (shouldRefetchDemoGame(event, currentGameId)) {
-          void queuedRefetch().catch(() => {})
-        }
+  trpc.events.global.useSubscription(undefined, {
+    enabled: Boolean(currentGameId),
+    onData: (event) => {
+      if (currentGameId && shouldRefetchDemoGame(event, currentGameId)) {
+        void queuedRefetch().catch(() => {})
       }
     },
   })
@@ -108,9 +102,10 @@ function GameLayout({
     }
   }, [queuedRefetch, tab])
 
-  const strExpiresAt = activeSegment?.countdownExpiresAt as string | null
-  const countdownDurationMs = activeSegment?.countdownDurationMs as
-    number | null
+  // A string key keeps the countdown effects from re-running on every refetch,
+  // which returns a new Date instance for the same deadline.
+  const strExpiresAt = activeSegment?.countdownExpiresAt?.toISOString() ?? null
+  const countdownDurationMs = activeSegment?.countdownDurationMs ?? null
 
   const expiresAtDate = useMemo(() => {
     return strExpiresAt ? dayjs(strExpiresAt).toDate() : null

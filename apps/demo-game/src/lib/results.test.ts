@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import type { ResultQuery } from '../graphql/generated/ops'
+import type { GameData } from '~/types/api'
 import { FIRST_GAME_YEAR } from './constants'
 import { parseFacts } from './facts'
 import {
@@ -80,7 +80,7 @@ function fixture() {
   }
 }
 const build = (data: ReturnType<typeof fixture>) =>
-  buildResultView(data as unknown as ResultQuery)
+  buildResultView(data as unknown as GameData)
 
 test('quarter view uses settled balances, month order, benchmarks and cumulative return', () => {
   const data = fixture()
@@ -186,7 +186,7 @@ test('missing and encoded facts never become invented balances or returns', () =
       view.monthly.every((sample) => sample.totalAssets === null)
     ).toBeTruthy()
   }
-  expect(buildResultView({} as ResultQuery)).toBe(null)
+  expect(buildResultView({} as GameData)).toBe(null)
 })
 
 test('mix derives from holdings and supports zero asset allocations', () => {
@@ -365,7 +365,7 @@ test('player formatting keeps Swiss separators, signed rounding and neutral zero
 test('legacy month overrides cannot change quarter month ranges', () => {
   const data = fixture()
   data.result.currentGame.periods[0].facts.rollsPerSegment = 5
-  const view = buildResultView(data as unknown as ResultQuery)
+  const view = buildResultView(data as unknown as GameData)
   expect(view.monthRange).toBe('Jan – Mar')
   expect(view.quarterMonths.length).toBe(3)
 })
@@ -451,7 +451,7 @@ describe('history', () => {
     }
   }
   const history = (data: ReturnType<typeof fixture>) =>
-    buildHistory(data as unknown as ResultQuery)
+    buildHistory(data as unknown as GameData)
 
   test('live SEGMENT_END records never count, even with carried-forward samples', () => {
     const data = fixture()
@@ -561,7 +561,7 @@ describe('history', () => {
     expect(quarter.allocation).toBe(null)
     expect(quarter.bonds).toBe(null)
     expect(quarter.gain).toBe(-100)
-    expect(buildHistory({} as ResultQuery).value).toBe(null)
+    expect(buildHistory({} as GameData).value).toBe(null)
   })
 
   test('formats Swiss amounts and signed returns without negative zero', () => {

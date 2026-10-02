@@ -1,13 +1,13 @@
 import { probabilityDistribution, signedPercent } from '@gbl-uzh/ui'
 import dynamic from 'next/dynamic'
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import type { MarketDiceQuery } from '~/graphql/generated/ops'
 import { FIRST_GAME_YEAR, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 import {
   readMarketRoll,
   revealedIndices,
   type MarketScenario,
 } from '~/lib/market'
+import type { MarketDice } from '~/types/api'
 import { Button } from './AdminControls'
 
 const Die = dynamic(() => import('@gbl-uzh/ui').then((mod) => mod.Die), {
@@ -199,7 +199,7 @@ export function DiceWorkspace({
   scenario,
   publish,
 }: {
-  segment: NonNullable<MarketDiceQuery['marketDice']>
+  segment: MarketDice
   scenario: MarketScenario
   publish: (rollIndex: number) => Promise<void>
 }) {

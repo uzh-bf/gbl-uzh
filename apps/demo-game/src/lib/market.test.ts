@@ -73,11 +73,13 @@ test('latest reveal uses chronological order, persists over years, and excludes 
   expect(result.index).toBe(1)
   expect(result.label).toBe(`${FIRST_GAME_YEAR} · Quarter 4 · Month 2`)
   expect(result.roll.returns.bank).toBe(0.004)
-  game.periods[0].segments[1].facts.revealedRollIndices = [0]
+  ;(
+    game.periods[0].segments[1].facts as { revealedRollIndices?: number[] }
+  ).revealedRollIndices = [0]
   expect(latestRevealedRoll(game).segmentId).toBe('current')
   game.periods.forEach((period) =>
     period.segments.forEach((segment) => {
-      segment.facts = { ...segment.facts, revealedRollIndices: [] }
+      segment.facts = { ...(segment.facts as object), revealedRollIndices: [] }
     })
   )
   expect(latestRevealedRoll(game)).toBe(null)

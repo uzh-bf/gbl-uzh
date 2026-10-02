@@ -60,7 +60,8 @@
     "vite": "~7.3.6",
     "vite-plugin-dts": "~4.3.0",
     "vite-plugin-externalize-deps": "~0.10.0",
-    "vitest": "~5.0.1"
+    "vitest": "~5.0.1",
+    "next": "16.2.9"
   },
   "peerDependencies": {
     "@apollo/client": "^3.11.10",

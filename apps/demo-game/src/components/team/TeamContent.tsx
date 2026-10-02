@@ -1,13 +1,5 @@
-import { useMutation } from '@apollo/client'
-import { useLearningActivities } from '@gbl-uzh/ui'
 import { useEffect, useMemo, useState } from 'react'
-import {
-  AttemptLearningElementDocument,
-  LearningElementDocument,
-  MarkStoryElementDocument,
-  ResultDocument,
-  type ResultQuery,
-} from '~/graphql/generated/ops'
+import { useLearningActivities } from '~/hooks/useLearningActivities'
 import { FIRST_GAME_YEAR } from '~/lib/constants'
 import {
   sortStories,
@@ -15,6 +7,8 @@ import {
   type StoryEntry,
   type StorySequence,
 } from '~/lib/team'
+import { trpc } from '~/lib/trpc'
+import type { GameData } from '~/types/api'
 import { useToast } from '../ui/use-toast'
 import LearningSheet from './LearningSheet'
 import StorySheet from './StorySheet'
@@ -31,7 +25,7 @@ export default function TeamContent({
   active,
   expiresAt,
 }: {
-  data: ResultQuery
+  data: GameData
   active: boolean
   expiresAt: Date | null
 }) {
@@ -39,11 +33,16 @@ export default function TeamContent({
   const self = data.self
   const segment = game?.activePeriod?.activeSegment
   const { toast } = useToast()
-  const [markStory] = useMutation(MarkStoryElementDocument, {
-    refetchQueries: [ResultDocument],
+  const utils = trpc.useUtils()
+  const markStory = trpc.story.markVisited.useMutation({
+    onSuccess: () =>
+      Promise.all([
+        utils.play.result.invalidate(),
+        utils.play.self.invalidate(),
+      ]),
   })
   const visitedIds = self.visitedStoryElementIds
-  const [dismissed, setDismissed] = useState<ReadonlySet<string>>(
+  const [dismissed, setDismissed] = useState<ReadonlySet<number>>(
     () => new Set()
   )
   const [reading, setReading] = useState<Reading | null>(null)
@@ -67,9 +66,6 @@ export default function TeamContent({
   }, [storageKey])
 
   const learning = useLearningActivities({
-    learningElementDocument: LearningElementDocument,
-    attemptLearningElementDocument: AttemptLearningElementDocument,
-    resultDocument: ResultDocument,
     completedLearningElementIds: self?.completedLearningElementIds ?? [],
     activeSegmentLearningElements: segment?.learningElements ?? [],
     allPeriods: game?.periods ?? [],
@@ -165,9 +161,8 @@ export default function TeamContent({
           role={self.role}
           onClose={closeStories}
           onMark={async (id) => {
-            const result = await markStory({ variables: { elementId: id } })
-            if (!result.data?.markStoryElement)
-              throw new Error('Story progress was not saved')
+            const result = await markStory.mutateAsync({ elementId: id })
+            if (!result) throw new Error('Story progress was not saved')
           }}
         />
       )}
@@ -175,7 +170,7 @@ export default function TeamContent({
         <LearningSheet
           key={learning.activeLearningId}
           title={activeActivity?.title ?? 'Learning activity'}
-          element={learning.learningElementData?.learningElement?.element}
+          element={learning.learningElementData?.element}
           isNew={openedAsNew}
           state={learning.learningElementState}
           selection={learning.activeLearningOptions}

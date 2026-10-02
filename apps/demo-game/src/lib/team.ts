@@ -1,12 +1,12 @@
-import type { ResultQuery } from '../graphql/generated/ops'
+import type { GameData } from '~/types/api'
 import { FIRST_GAME_YEAR } from './constants'
 import { buildHistory } from './results'
 
-type Game = NonNullable<NonNullable<ResultQuery['result']>['currentGame']>
+type Game = NonNullable<NonNullable<GameData['result']>['currentGame']>
 export type TeamStory =
   Game['periods'][number]['segments'][number]['storyElements'][number]
 export type StorySequence = {
-  id: string
+  id: number
   year: number
   quarter: number
   stories: TeamStory[]
@@ -20,7 +20,7 @@ export type StoryEntry = {
 export const sortStories = (stories: readonly TeamStory[]) =>
   [...stories].sort((a, b) => a.title.localeCompare(b.title))
 
-export function storyLibrary(data: ResultQuery): StoryEntry[] {
+export function storyLibrary(data: GameData): StoryEntry[] {
   const game = data.result?.currentGame
   if (!game) return []
   const ended = new Set(
@@ -61,7 +61,7 @@ export function storyLibrary(data: ResultQuery): StoryEntry[] {
   )
 }
 
-export function teamStatistics(data: ResultQuery) {
+export function teamStatistics(data: GameData) {
   const history = buildHistory(data)
   const last = history.quarters.at(-1)
   const start =

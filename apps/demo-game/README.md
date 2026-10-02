@@ -64,7 +64,7 @@ The frontend is generated using React and Next.js. The frontend is located in th
 
 ### Schema
 
-The database schema is defined in `src/graphql/types`. The most important file is `src/graphql/types/Period.ts`, here all we define PeriodFactsInput, PeriodSegmentFactsScema, PeriodSegmentFacts and PeriodSegmentFactsInput.
+The shared database schema is provided by the platform Prisma schema. Demo-game-specific runtime fact schemas live in `src/types` (most importantly `src/types/Period.ts` with `PeriodFactsSchema` and `PeriodSegmentFactsSchema`) and are passed into the platform tRPC router.
 
 ### Reducers
 

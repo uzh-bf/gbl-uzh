@@ -1,14 +1,12 @@
 import { Action } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
-import { PrismaClient } from 'src/generated/prisma/client'
+import type { PrismaClient } from 'src/generated/prisma/client'
 import { allocationSchema } from '../lib/allocation'
-import { Decisions } from '../types/facts'
+import { ActionTypes, Decisions } from '../types/facts'
 import { GameFacts, PeriodFacts, PeriodSegmentFacts } from '../types/index'
 
-export enum ActionTypes {
-  NONE = '',
-}
+export { ActionTypes }
 
 type PayloadType = {
   playerArgs: Decisions

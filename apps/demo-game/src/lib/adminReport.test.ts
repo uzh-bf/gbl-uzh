@@ -1,13 +1,32 @@
 import { describe, expect, test } from 'vitest'
-import type { GameQuery, SpecificResultsQuery } from '../graphql/generated/ops'
+import type { GameDetail, SpecificResult } from '~/types/api'
 import {
   averageAllocation,
   buildAdminReport,
   reportPercent,
 } from './adminReport'
 
-type Game = NonNullable<GameQuery['game']>
-type Row = NonNullable<SpecificResultsQuery['specificResults']>[number]
+type Game = GameDetail
+// Fixture rows use readable string ids and loose facts; the report only
+// compares ids for equality and parses facts defensively.
+type Row = Omit<SpecificResult, 'id' | 'facts' | 'type'> & {
+  id: string
+  type?: SpecificResult['type']
+  facts: any
+}
+
+const buildReport = (
+  game: Game,
+  rows: Row[],
+  ends: Row[],
+  scope: Parameters<typeof buildAdminReport>[3]
+) =>
+  buildAdminReport(
+    game,
+    rows as unknown as SpecificResult[],
+    ends as unknown as SpecificResult[],
+    scope
+  )
 
 function fixture() {
   const game = {
@@ -57,15 +76,15 @@ function fixture() {
     period,
     player: game.players[0],
     facts: {},
-  })) as Row[]
+  })) as unknown as Row[]
   return { game, rows, ends }
 }
 
 describe('admin report scoped metrics', () => {
   test('compounds the selected year and whole game, keeping actual balances', () => {
     const { game, rows, ends } = fixture()
-    const year = buildAdminReport(game, rows, ends, 1)
-    const whole = buildAdminReport(game, rows, ends, 'all')
+    const year = buildReport(game, rows, ends, 1)
+    const whole = buildReport(game, rows, ends, 'all')
     const r0 = (1.01 * 0.98 * 1.03) ** 4 - 1
     const r1 = (0.98 * 1.01 * 1.02) ** 4 - 1
     expect(year.teams[0].return).toBeCloseTo(r1)
@@ -81,7 +100,7 @@ describe('admin report scoped metrics', () => {
 
   test('annualises sample volatility and geometric excess return over savings', () => {
     const { game, rows, ends } = fixture()
-    const report = buildAdminReport(game, rows, ends, 'all')
+    const report = buildReport(game, rows, ends, 'all')
     const rates = Array.from({ length: 4 }, () => [
       0.01, -0.02, 0.03, -0.02, 0.01, 0.02,
     ]).flat()
@@ -101,7 +120,7 @@ describe('admin report scoped metrics', () => {
 
   test('ranking, average return and allocations use the scope and preserve decimals', () => {
     const { game, rows, ends } = fixture()
-    const report = buildAdminReport(game, rows, ends, 0)
+    const report = buildReport(game, rows, ends, 0)
     expect(report.ranking[0].id).toBe('a')
     expect(report.averageReturn).toBeCloseTo(
       (report.teams[0].return! + report.teams[1].return!) / 2
@@ -115,29 +134,32 @@ describe('admin report scoped metrics', () => {
 
   test('sorts result rows and accepts double-encoded legacy facts', () => {
     const { game, rows, ends } = fixture()
-    const expected = buildAdminReport(game, rows, ends, 'all')
+    const expected = buildReport(game, rows, ends, 'all')
     rows[0].facts = JSON.stringify(JSON.stringify(rows[0].facts))
-    expect(
-      buildAdminReport(game, rows.reverse(), ends.reverse(), 'all')
-    ).toEqual(expected)
+    expect(buildReport(game, rows.reverse(), ends.reverse(), 'all')).toEqual(
+      expected
+    )
   })
 
   test('excludes live segment records and includes the quarter after settlement', () => {
     const { game, rows, ends } = fixture()
     game.status = 'RUNNING' as Game['status']
-    game.activePeriod = { id: 'p1', activeSegmentIx: 1 } as Game['activePeriod']
-    let report = buildAdminReport(game, rows, ends.slice(0, 1), 1)
+    game.activePeriod = {
+      id: 'p1',
+      activeSegmentIx: 1,
+    } as unknown as Game['activePeriod']
+    let report = buildReport(game, rows, ends.slice(0, 1), 1)
     expect(report.points).toHaveLength(4)
     expect(report.teams[0].decisions['p1:s1']).toBeNull()
     game.status = 'PAUSED' as Game['status']
-    report = buildAdminReport(game, rows, ends.slice(0, 1), 1)
+    report = buildReport(game, rows, ends.slice(0, 1), 1)
     expect(report.points).toHaveLength(7)
     expect(report.teams[0].decisions['p1:s1']).not.toBeNull()
   })
 
   test('does not bridge a missing quarter or turn missing data into zero', () => {
     const { game, rows, ends } = fixture()
-    const report = buildAdminReport(
+    const report = buildReport(
       game,
       rows.filter((row) => row.id !== 'a-p0-s1'),
       ends,
@@ -162,26 +184,25 @@ describe('admin report scoped metrics', () => {
     const { game, rows, ends } = fixture()
     rows[0].facts.assetsWithReturns[2].ix = 9
     rows[4].facts.assetsWithReturns[1].bankReturn = undefined
-    const first = buildAdminReport(game, rows, ends, 0)
+    const first = buildReport(game, rows, ends, 0)
     expect(first.teams[0].return).toBeNull()
     expect(first.teams[0].sharpe).toBeNull()
-    const second = buildAdminReport(game, rows, ends, 1)
+    const second = buildReport(game, rows, ends, 1)
     expect(second.teams[0].return).not.toBeNull()
     expect(second.teams[0].sharpe).toBeNull()
     rows[0].facts = '{bad JSON'
-    expect(() => buildAdminReport(game, rows, ends, 'all')).not.toThrow()
+    expect(() => buildReport(game, rows, ends, 'all')).not.toThrow()
   })
 
   test('empty games and unplayed years render unavailable data', () => {
     const { game } = fixture()
-    const report = buildAdminReport(game, [], [], 1)
+    const report = buildReport(game, [], [], 1)
     expect(report.hasResults).toBe(false)
     expect(report.top).toBeNull()
     expect(report.averageReturn).toBeNull()
     expect(report.points).toEqual([])
     expect(
-      buildAdminReport({ ...game, players: [], periods: [] }, [], [], 'all')
-        .teams
+      buildReport({ ...game, players: [], periods: [] }, [], [], 'all').teams
     ).toEqual([])
   })
 
@@ -189,7 +210,7 @@ describe('admin report scoped metrics', () => {
     const { game, rows, ends } = fixture()
     rows[7].facts.assetsWithReturns.pop()
     rows[15].facts.assetsWithReturns.pop()
-    const report = buildAdminReport(game, rows, ends, 1)
+    const report = buildReport(game, rows, ends, 1)
     expect(report.teams[0].assets).toBeNull()
     expect(report.teams[0].return).toBeNull()
     expect(report.teams[0].sharpe).toBeNull()
@@ -209,10 +230,10 @@ describe('admin report scoped metrics', () => {
       id: `player-${index}`,
       number: index + 1,
     }))
-    const whole = buildAdminReport(game, rows, ends, 'all')
+    const whole = buildReport(game, rows, ends, 'all')
     expect(new Set(whole.teams.map((team) => team.color)).size).toBe(100)
     game.players.reverse()
-    const year = buildAdminReport(game, rows, ends, 1)
+    const year = buildReport(game, rows, ends, 1)
     expect(year.teams.map(({ id, color }) => ({ id, color }))).toEqual(
       whole.teams.map(({ id, color }) => ({ id, color }))
     )

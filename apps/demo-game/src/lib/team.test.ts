@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import type { ResultQuery } from '../graphql/generated/ops'
+import type { GameData } from '~/types/api'
 import { FIRST_GAME_YEAR } from './constants'
 import { learningXP, storyLibrary, teamStatistics } from './team'
 
@@ -19,7 +19,7 @@ const period = (index: number, activeSegmentIx: number, cards: string[][]) => ({
     storyElements: ids.map(story),
   })),
 })
-const asData = (data: unknown) => data as ResultQuery
+const asData = (data: unknown) => data as GameData
 
 test('story library hides future content and retains first-release metadata on repeats', () => {
   const first = period(0, 1, [
