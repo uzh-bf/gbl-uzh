@@ -1,4 +1,4 @@
-import { OutputFacts, PayloadSegmentResult } from '@gbl-uzh/platform'
+import type { OutputFacts, PayloadSegmentResult } from '@gbl-uzh/platform'
 import {
   computePercentChange,
   debugLog,

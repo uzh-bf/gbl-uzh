@@ -1,4 +1,4 @@
-import { OutputFacts } from '@gbl-uzh/platform'
+import type { OutputFacts } from '@gbl-uzh/platform'
 
 // Lives here (not in services/ActionsReducer) so client pages can reference
 // action types without pulling the Prisma-importing reducer into the bundle.

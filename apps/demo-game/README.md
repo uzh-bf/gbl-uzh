@@ -1,6 +1,13 @@
-> [!WARNING]
-> This README's setup and reducer documentation is **legacy and outdated**.
-> For the current ground truth, follow the [LLM Wiki](../../docs/index.md) (particularly [Developing a Game](../../docs/developing-a-game.md)).
+> [!NOTE]
+> Demo-game is the canonical scaffold for the supported
+> [tRPC v11 Pages Router pattern](../../docs/api-layer.md). The detailed reducer
+> terminology below is historical; use the [platform wiki](../../docs/index.md),
+> especially [Developing a Game](../../docs/developing-a-game.md), for current
+> game-building instructions.
+
+The app hosts the platform router at `/api/trpc`, uses a typed
+`createTRPCNext<AppRouter>` client with SuperJSON and Server-Sent Events, and
+injects its game-specific services and fact schemas on the server.
 
 This is a step by step explanation on how to implement a game using the uzh-gbl-platform packag along with the demo-game as a starer template.
 
