@@ -101,7 +101,7 @@ export function createPlayRouter({
           ctx as any
         )
 
-        return toPlayerSelfDto(player as any)
+        return player ? { id: player.id, isReady: player.isReady } : null
       }),
 
     updatePlayerData: playerProcedure
