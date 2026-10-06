@@ -27,7 +27,7 @@ import {
 } from '~/lib/results'
 import AllocationBar from './AllocationBar'
 
-const inset = 'mobile:px-app-4 min-[601px]:px-[32px]'
+const inset = 'mobile:px-app-4 min-[601px]:px-[32px] tablet:px-[16px]'
 const colors = {
   bank: assetLabels.bank.chartColor,
   bonds: assetLabels.bonds.chartColor,
@@ -78,21 +78,23 @@ function Section({
 }) {
   return (
     <section
-      className="border-player-border mobile:py-app-4 border-b py-[24px] min-[601px]:pt-[28px]"
+      className="border-player-border mobile:py-app-4 tablet:py-[12px] border-b py-[24px] min-[601px]:pt-[28px]"
       data-cy={testId}
     >
       <div
         className={cn(
           inset,
           'mobile:gap-x-app-3 mobile:gap-y-app-2 flex flex-wrap items-baseline justify-between gap-x-[16px] gap-y-[6px]',
-          compactHeader ? 'mb-app-2' : 'mobile:mb-app-4 mb-[24px]'
+          compactHeader
+            ? 'mb-app-2'
+            : 'mobile:mb-app-4 tablet:mb-[12px] mb-[24px]'
         )}
       >
-        <h2 className="text-player-muted mobile:app-caption m-0 font-semibold tracking-[1px] uppercase min-[601px]:text-[22px]">
+        <h2 className="text-player-muted mobile:app-caption tablet:text-[14px] m-0 font-semibold tracking-[1px] uppercase min-[601px]:text-[22px]">
           {title}
         </h2>
         {detail && (
-          <div className="text-player-muted mobile:app-caption min-[601px]:text-[22px]">
+          <div className="text-player-muted mobile:app-caption tablet:text-[14px] min-[601px]:text-[22px]">
             {detail}
           </div>
         )}
@@ -116,27 +118,27 @@ function TotalAssets({
       data-cy="result-total"
       className={cn(
         inset,
-        'border-player-border mobile:gap-app-3 mobile:py-app-4 flex items-end justify-between gap-[12px] border-b min-[601px]:py-[32px]',
+        'border-player-border mobile:gap-app-3 mobile:py-app-4 tablet:py-[12px] flex items-end justify-between gap-[12px] border-b min-[601px]:py-[32px]',
         view.status === 'CONSOLIDATION' &&
-          'min-[601px]:min-h-[210px] min-[601px]:items-center'
+          'tablet:min-h-[100px] min-[601px]:min-h-[210px] min-[601px]:items-center'
       )}
     >
       <div className="min-w-0">
-        <h2 className="text-player-muted mobile:mb-app-3 mobile:app-caption m-0 mb-[10px] font-semibold tracking-[1px] uppercase min-[601px]:text-[22px]">
+        <h2 className="text-player-muted mobile:mb-app-3 mobile:app-caption tablet:text-[14px] m-0 mb-[10px] font-semibold tracking-[1px] uppercase min-[601px]:text-[22px]">
           Total assets
         </h2>
-        <p className="mobile:app-value m-0 leading-[1.2] font-bold tabular-nums min-[601px]:text-[48px]">
+        <p className="mobile:app-value tablet:app-value m-0 leading-[1.2] font-bold tabular-nums min-[601px]:text-[48px]">
           {playerAmount(view.current.totalAssets)}{' '}
           <span className="whitespace-nowrap">CHF</span>
         </p>
       </div>
       <div className="shrink-0 text-right">
-        <div className="text-player-muted mobile:app-caption min-[601px]:text-[22px]">
+        <div className="text-player-muted mobile:app-caption tablet:text-[14px] min-[601px]:text-[22px]">
           {label}
         </div>
         <p
           className={cn(
-            'mobile:mt-app-2 mobile:app-value m-0 mt-[8px] leading-[1.2] font-bold tabular-nums min-[601px]:text-[36px]',
+            'mobile:mt-app-2 mobile:app-value tablet:text-[24px] m-0 mt-[8px] leading-[1.2] font-bold tabular-nums min-[601px]:text-[36px]',
             resultTone(change)
           )}
         >
@@ -164,7 +166,7 @@ function BalanceRow({
       data-cy="result-balance-row"
       className={cn(
         inset,
-        'border-player-border mobile:gap-app-3 grid min-h-[64px] grid-cols-[minmax(44px,0.6fr)_minmax(0,1.5fr)_minmax(92px,0.9fr)] items-center border-b py-[16px] last:border-b-0 min-[601px]:min-h-[88px] min-[601px]:gap-[24px]',
+        'border-player-border mobile:gap-app-3 tablet:min-h-[56px] tablet:py-[10px] tablet:gap-[12px] grid min-h-[64px] grid-cols-[minmax(44px,0.6fr)_minmax(0,1.5fr)_minmax(92px,0.9fr)] items-center border-b py-[16px] last:border-b-0 min-[601px]:min-h-[88px] min-[601px]:gap-[24px]',
         held
           ? 'mobile:py-app-4'
           : 'mobile:min-h-app-balance-row mobile:py-app-2',
@@ -175,7 +177,7 @@ function BalanceRow({
     >
       <span
         className={cn(
-          'mobile:app-body min-[601px]:text-[26px]',
+          'mobile:app-body tablet:text-[16px] min-[601px]:text-[26px]',
           !muted && 'font-semibold'
         )}
       >
@@ -183,7 +185,7 @@ function BalanceRow({
       </span>
       {mix ? (
         <div
-          className="h-[14px] min-[601px]:h-[20px]"
+          className="tablet:h-[14px] h-[14px] min-[601px]:h-[20px]"
           role="img"
           aria-label={ALLOCATION_KEYS.map(
             (key) => `${assetLabels[key].name} ${mix[key].toFixed(1)}%`
@@ -196,7 +198,7 @@ function BalanceRow({
       )}
       <span
         className={cn(
-          'mobile:app-body text-right whitespace-nowrap tabular-nums min-[601px]:text-[28px]',
+          'mobile:app-body tablet:app-body text-right whitespace-nowrap tabular-nums min-[601px]:text-[28px]',
           !held && 'mobile:whitespace-normal mobile:[overflow-wrap:anywhere]',
           !muted && 'font-semibold'
         )}
@@ -217,14 +219,14 @@ function AssetRows({ view }: { view: ResultView }) {
           key={key}
           className={cn(
             inset,
-            'border-player-border mobile:gap-app-3 mobile:py-app-4 grid min-h-[70px] grid-cols-[minmax(0,1fr)_auto_auto] items-center border-b py-[20px] min-[601px]:min-h-[100px] min-[601px]:gap-[40px]',
+            'border-player-border mobile:gap-app-3 mobile:py-app-4 tablet:min-h-[56px] tablet:py-[10px] tablet:gap-[12px] grid min-h-[70px] grid-cols-[minmax(0,1fr)_auto_auto] items-center border-b py-[20px] min-[601px]:min-h-[100px] min-[601px]:gap-[40px]',
             !annual && 'min-[601px]:min-h-[106px]'
           )}
         >
-          <dt className="mobile:gap-app-3 mobile:app-body flex items-center font-bold min-[601px]:gap-[20px] min-[601px]:text-[30px]">
+          <dt className="mobile:gap-app-3 mobile:app-body tablet:app-body flex items-center font-bold min-[601px]:gap-[20px] min-[601px]:text-[30px]">
             <span
               className={cn(
-                'size-[12px] shrink-0 rounded-[3px] min-[601px]:size-[20px]',
+                'tablet:size-[14px] size-[12px] shrink-0 rounded-[3px] min-[601px]:size-[20px]',
                 assetLabels[key].color
               )}
             />
@@ -232,7 +234,7 @@ function AssetRows({ view }: { view: ResultView }) {
           </dt>
           <dd
             className={cn(
-              'mobile:app-body m-0 tabular-nums min-[601px]:text-[24px]',
+              'mobile:app-body tablet:text-[16px] m-0 tabular-nums min-[601px]:text-[24px]',
               annual ? resultTone(view.annualReturns[key]) : 'text-player-muted'
             )}
           >
@@ -242,7 +244,7 @@ function AssetRows({ view }: { view: ResultView }) {
                 ? `${Number(mix[key].toFixed(1))}%`
                 : '—'}
           </dd>
-          <dd className="mobile:app-body m-0 text-right font-semibold tabular-nums min-[601px]:text-[28px]">
+          <dd className="mobile:app-body tablet:app-body m-0 text-right font-semibold tabular-nums min-[601px]:text-[28px]">
             {playerAmount(view.current[key])}
           </dd>
         </div>
@@ -337,7 +339,7 @@ function Benchmarks({ view }: { view: ResultView }) {
           </LineChart>
         </ChartContainer>
         <div
-          className="text-player-muted mobile:mt-app-4 mobile:gap-x-app-3 mobile:gap-y-app-2 mobile:app-body mt-[18px] flex flex-wrap gap-x-[24px] gap-y-[8px] min-[601px]:text-[22px]"
+          className="text-player-muted mobile:mt-app-4 mobile:gap-x-app-3 mobile:gap-y-app-2 mobile:app-body tablet:text-[14px] mt-[18px] flex flex-wrap gap-x-[24px] gap-y-[8px] min-[601px]:text-[22px]"
           aria-label="Benchmark legend"
         >
           {Object.entries(benchmarkConfig).map(([key, config]) => (
@@ -423,7 +425,7 @@ function MonthlyReturns({ view }: { view: ResultView }) {
               interval={0}
               tick={({ x, y, payload }) => (
                 <text
-                  className="mobile:app-caption min-[601px]:text-[18px]"
+                  className="mobile:app-caption tablet:text-[14px] min-[601px]:text-[18px]"
                   x={x}
                   y={Number(y) + 16}
                   textAnchor="middle"
@@ -494,7 +496,7 @@ function QuarterResults({ view }: { view: ResultView }) {
         <div
           className={cn(
             inset,
-            'text-player-muted mobile:mt-app-4 mobile:gap-x-app-3 mobile:gap-y-app-2 mobile:app-caption mt-[20px] flex flex-wrap gap-x-[28px] gap-y-[8px] min-[601px]:text-[22px]'
+            'text-player-muted mobile:mt-app-4 mobile:gap-x-app-3 mobile:gap-y-app-2 mobile:app-caption tablet:text-[14px] mt-[20px] flex flex-wrap gap-x-[28px] gap-y-[8px] min-[601px]:text-[22px]'
           )}
         >
           {ALLOCATION_KEYS.map((key) => (
@@ -567,7 +569,7 @@ function YearResults({ view }: { view: ResultView }) {
           <div style={{ minWidth: Math.max(260, view.years.length * 180) }}>
             <ChartContainer
               config={assetConfig}
-              className="mobile:h-app-chart-annual aspect-auto w-full min-[601px]:h-[290px]"
+              className="mobile:h-app-chart-annual tablet:h-[220px] aspect-auto w-full min-[601px]:h-[290px]"
             >
               <BarChart
                 accessibilityLayer
@@ -625,7 +627,7 @@ function YearResults({ view }: { view: ResultView }) {
               </BarChart>
             </ChartContainer>
             <div
-              className="mobile:mt-app-4 mobile:gap-app-3 mobile:app-body mt-[16px] grid gap-[16px] text-center min-[601px]:text-[22px]"
+              className="mobile:mt-app-4 mobile:gap-app-3 mobile:app-body tablet:text-[14px] mt-[16px] grid gap-[16px] text-center min-[601px]:text-[22px]"
               style={{
                 paddingRight: referenceGutter,
                 gridTemplateColumns: `repeat(${Math.max(1, view.years.length)}, minmax(0, 1fr))`,
@@ -651,7 +653,7 @@ function YearResults({ view }: { view: ResultView }) {
         detail={
           <strong
             className={cn(
-              'mobile:app-value min-[601px]:text-[30px]',
+              'mobile:app-value tablet:app-body min-[601px]:text-[30px]',
               resultTone(view.accumulatedReturn)
             )}
           >
@@ -719,7 +721,7 @@ function YearResults({ view }: { view: ResultView }) {
                 />
               </AreaChart>
             </ChartContainer>
-            <div className="text-player-muted mobile:mt-app-4 mobile:gap-app-3 mobile:app-caption mt-[16px] flex justify-between gap-[20px] min-[601px]:text-[20px]">
+            <div className="text-player-muted mobile:mt-app-4 mobile:gap-app-3 mobile:app-caption tablet:text-[14px] mt-[16px] flex justify-between gap-[20px] min-[601px]:text-[20px]">
               {accumulated.map((point) => (
                 <span key={point.label}>
                   {point.label}{' '}

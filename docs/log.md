@@ -1,5 +1,13 @@
 # Log
 
+## 2026-10-06
+
+**Update**: [UI Building Blocks](ui-components.md) — align quarter/year strips across phone and tablet layouts and give both the same compact year tabs and bring learning/story sheets onto the cockpit typography, control and spacing scale while retaining phone sheet styling.
+
+## 2026-09-30
+
+**Update**: [UI Building Blocks](ui-components.md), [Developing a Game](developing-a-game.md), [Game Lifecycle](game-lifecycle.md) — add the tablet/desktop cockpit with Decisions/History navigation, compact allocation and Team panels, full-width Market beneath them, and responsive History charts and filters. Retain phone layouts, game identity, controller state, colors, content and instructor-controlled Ready behavior; document browser coverage and opt-in compact Market charts.
+
 ## 2026-09-28
 
 **Update**: [Developing a Game](developing-a-game.md) — simplify the shared welcome/profile form to one submit action and one edit-mode signal; retain a return-to-game link when loading profile data fails.

@@ -20,9 +20,9 @@ import {
 import AllocationBar from '../cockpit/AllocationBar'
 import PortfolioHistoryChart from './PortfolioHistoryChart'
 
-const padding = 'mobile:px-app-4 min-[601px]:px-[32px]'
+const padding = 'mobile:px-app-4 min-[601px]:px-[32px] tablet:px-[16px]'
 const cell =
-  'px-[12px] py-[20px] mobile:app-cell first:pl-[16px] last:pr-[16px] min-[601px]:first:pl-[32px] min-[601px]:last:pr-[32px]'
+  'px-[12px] py-[20px] mobile:app-cell first:pl-[16px] last:pr-[16px] min-[601px]:first:pl-[32px] min-[601px]:last:pr-[32px] tablet:px-[8px] tablet:py-[10px] tablet:first:pl-[16px] tablet:last:pr-[16px]'
 const tone = (value: number | null) =>
   value === null || value === 0
     ? 'text-player-muted'
@@ -33,7 +33,7 @@ const tone = (value: number | null) =>
 function MonthlyResults({ quarter }: { quarter: HistoryQuarter }) {
   return (
     <table
-      className="mobile:app-caption w-full min-[601px]:text-[17px]"
+      className="mobile:app-caption tablet:text-[14px] w-full min-[601px]:text-[17px]"
       aria-label={`${quarter.year} Quarter ${quarter.quarter} monthly results`}
     >
       <thead className="text-player-muted">
@@ -171,7 +171,7 @@ function QuarterRows({
         <TableCell colSpan={5} className="p-0">
           <div
             id={detailId}
-            className="bg-player-feedback mobile:px-app-4 mobile:py-app-4 py-[20px] min-[601px]:px-[32px]"
+            className="bg-player-feedback mobile:px-app-4 mobile:py-app-4 tablet:px-[16px] py-[20px] min-[601px]:px-[32px]"
           >
             {quarter.months.length ? (
               <MonthlyResults quarter={quarter} />
@@ -205,10 +205,14 @@ export default function HistoryPanel({
     (quarter) => year === 'all' || quarter.year === year
   )
   return (
-    <section aria-label="History" data-cy="history-panel">
+    <section
+      aria-label="History"
+      data-cy="history-panel"
+      className="tablet:contents"
+    >
       {history.years.length > 0 && (
         <div
-          className="border-player-divider focus-visible:outline-player-primary mobile:gap-app-2 mobile:p-app-3 flex max-w-full min-w-0 gap-[12px] overflow-x-auto overscroll-x-contain border-b py-[20px] focus-visible:outline-2 focus-visible:outline-offset-[-2px] min-[601px]:px-[32px]"
+          className="border-player-divider focus-visible:outline-player-primary phone:gap-app-2 phone:p-app-3 phone:min-h-[72px] phone:items-center tablet:min-h-[72px] tablet:items-center tablet:box-border tablet:gap-[8px] tablet:px-[16px] tablet:col-span-2 tablet:row-start-1 tablet:py-[12px] flex max-w-full min-w-0 gap-[12px] overflow-x-auto overscroll-x-contain border-b py-[20px] focus-visible:outline-2 focus-visible:outline-offset-[-2px] min-[601px]:px-[32px]"
           role="group"
           aria-label="History year"
           tabIndex={0}
@@ -220,7 +224,7 @@ export default function HistoryPanel({
               aria-pressed={year === option}
               className={{
                 root: cn(
-                  'mobile:app-control mobile:w-auto mobile:rounded-full shrink-0 rounded-full border-2 bg-white shadow-none min-[601px]:h-[84px] min-[601px]:w-[212px] min-[601px]:text-[26px]',
+                  'phone:app-caption phone:h-[36px] phone:min-h-[36px] phone:w-[88px] phone:flex-none phone:rounded-full phone:px-[16px] phone:py-[4px] tablet:app-caption tablet:h-[36px] tablet:min-h-[36px] tablet:w-[88px] tablet:flex-none tablet:rounded-full tablet:px-[16px] tablet:py-[4px] shrink-0 rounded-full border-2 bg-white shadow-none min-[601px]:h-[84px] min-[601px]:w-[212px] min-[601px]:text-[26px]',
                   year === option
                     ? 'border-player-primary text-player-primary font-semibold'
                     : 'border-player-input text-player-body font-normal'
@@ -232,130 +236,135 @@ export default function HistoryPanel({
           ))}
         </div>
       )}
-      <div
-        className={cn(
-          padding,
-          'border-player-border mobile:py-app-4 border-b py-[28px] min-[601px]:pt-[36px]'
-        )}
-      >
-        <div className="mobile:gap-x-app-3 mobile:gap-y-app-2 flex flex-wrap items-baseline justify-between gap-x-[16px] gap-y-[6px]">
-          <span className="text-player-muted mobile:app-body min-[601px]:text-[26px]">
-            Portfolio value
-          </span>
-          <span className="mobile:gap-app-3 flex items-baseline gap-[14px]">
-            <strong
-              className="mobile:app-value tabular-nums min-[601px]:text-[42px]"
-              data-cy="history-value"
-            >
-              {playerAmount(history.value)}
-            </strong>
-            <span className="text-player-muted mobile:app-body min-[601px]:text-[26px]">
-              CHF
-            </span>
-          </span>
-        </div>
-        <p
-          data-cy="history-gain"
+      <div className="tablet:col-start-1 tablet:row-start-2 tablet:min-w-0">
+        <div
           className={cn(
-            'mobile:mt-app-3 mobile:mb-app-4 mobile:app-body mt-[12px] mb-[24px] font-semibold min-[601px]:text-[24px]',
-            tone(history.gain)
+            padding,
+            'border-player-border mobile:py-app-4 tablet:py-[12px] border-b py-[28px] min-[601px]:pt-[36px]'
           )}
         >
-          {playerAmount(history.gain, true)} since the start ·{' '}
-          {playerPercent(history.gainRate)}
-        </p>
-        {history.quarters.length > 0 ? (
-          active && <PortfolioHistoryChart quarters={history.quarters} />
+          <div className="mobile:gap-x-app-3 mobile:gap-y-app-2 flex flex-wrap items-baseline justify-between gap-x-[16px] gap-y-[6px]">
+            <span className="text-player-muted mobile:app-body tablet:text-[16px] min-[601px]:text-[26px]">
+              Portfolio value
+            </span>
+            <span className="mobile:gap-app-3 flex items-baseline gap-[14px]">
+              <strong
+                className="mobile:app-value tablet:app-value tabular-nums min-[601px]:text-[42px]"
+                data-cy="history-value"
+              >
+                {playerAmount(history.value)}
+              </strong>
+              <span className="text-player-muted mobile:app-body tablet:text-[16px] min-[601px]:text-[26px]">
+                CHF
+              </span>
+            </span>
+          </div>
+          <p
+            data-cy="history-gain"
+            className={cn(
+              'mobile:mt-app-3 mobile:mb-app-4 mobile:app-body tablet:text-[14px] mt-[12px] mb-[24px] font-semibold min-[601px]:text-[24px]',
+              tone(history.gain)
+            )}
+          >
+            {playerAmount(history.gain, true)} since the start ·{' '}
+            {playerPercent(history.gainRate)}
+          </p>
+          {history.quarters.length > 0 ? (
+            active && <PortfolioHistoryChart quarters={history.quarters} />
+          ) : (
+            <p className="text-player-muted mobile:py-app-4 py-[32px]">
+              Your history will appear after the first quarter closes.
+            </p>
+          )}
+        </div>
+        <h2
+          className={cn(
+            padding,
+            'text-player-muted mobile:mt-app-6 tablet:mt-[20px] tablet:mb-[12px] mobile:mb-app-4 mobile:app-caption tablet:text-[14px] mt-[36px] mb-[24px] font-semibold tracking-[1px] uppercase min-[601px]:text-[22px]'
+          )}
+        >
+          What each quarter paid
+        </h2>
+        {quarters.length ? (
+          <div
+            className="overflow-x-auto"
+            role="region"
+            aria-label="Quarterly results"
+            tabIndex={0}
+          >
+            <Table
+              containerClassName="overflow-visible"
+              className="mobile:app-body tablet:min-w-[400px] tablet:text-[14px] min-w-[600px] min-[601px]:text-[24px] min-[601px]:leading-[1.5]"
+            >
+              <TableHeader>
+                <TableRow className="border-player-border hover:bg-transparent">
+                  {['Quarter', 'Your mix', 'Bonds', 'Stocks', 'Result'].map(
+                    (label, index) => (
+                      <TableHead
+                        key={label}
+                        className={cn(
+                          cell,
+                          'text-player-muted h-auto font-normal whitespace-nowrap',
+                          index > 1 && 'text-right'
+                        )}
+                      >
+                        {label === 'Result' ? (
+                          <span title="Quarterly gain or loss in CHF">
+                            Result <span className="sr-only">(CHF)</span>
+                          </span>
+                        ) : (
+                          label
+                        )}
+                      </TableHead>
+                    )
+                  )}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {quarters.map((quarter) => (
+                  <QuarterRows
+                    key={quarter.id}
+                    quarter={quarter}
+                    showYear={year === 'all'}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         ) : (
-          <p className="text-player-muted mobile:py-app-4 py-[32px]">
-            Your history will appear after the first quarter closes.
+          <p
+            className={cn(
+              padding,
+              'text-player-muted mobile:py-app-4 py-[16px]'
+            )}
+          >
+            {typeof year === 'number'
+              ? `No completed quarters in ${year} yet.`
+              : 'No completed quarters yet.'}
           </p>
         )}
-      </div>
-      <h2
-        className={cn(
-          padding,
-          'text-player-muted mobile:mt-app-6 mobile:mb-app-4 mobile:app-caption mt-[36px] mb-[24px] font-semibold tracking-[1px] uppercase min-[601px]:text-[22px]'
-        )}
-      >
-        What each quarter paid
-      </h2>
-      {quarters.length ? (
         <div
-          className="overflow-x-auto"
-          role="region"
-          aria-label="Quarterly results"
-          tabIndex={0}
+          className={cn(
+            padding,
+            'text-player-muted mobile:gap-x-app-3 mobile:gap-y-app-3 mobile:py-app-4 mobile:app-caption tablet:text-[14px] tablet:py-[12px] flex flex-wrap gap-x-[28px] gap-y-[12px] py-[28px] min-[601px]:text-[24px]'
+          )}
         >
-          <Table
-            containerClassName="overflow-visible"
-            className="mobile:app-body min-w-[600px] min-[601px]:text-[24px] min-[601px]:leading-[1.5]"
-          >
-            <TableHeader>
-              <TableRow className="border-player-border hover:bg-transparent">
-                {['Quarter', 'Your mix', 'Bonds', 'Stocks', 'Result'].map(
-                  (label, index) => (
-                    <TableHead
-                      key={label}
-                      className={cn(
-                        cell,
-                        'text-player-muted h-auto font-normal whitespace-nowrap',
-                        index > 1 && 'text-right'
-                      )}
-                    >
-                      {label === 'Result' ? (
-                        <span title="Quarterly gain or loss in CHF">
-                          Result <span className="sr-only">(CHF)</span>
-                        </span>
-                      ) : (
-                        label
-                      )}
-                    </TableHead>
-                  )
-                )}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {quarters.map((quarter) => (
-                <QuarterRows
-                  key={quarter.id}
-                  quarter={quarter}
-                  showYear={year === 'all'}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      ) : (
-        <p
-          className={cn(padding, 'text-player-muted mobile:py-app-4 py-[16px]')}
-        >
-          {typeof year === 'number'
-            ? `No completed quarters in ${year} yet.`
-            : 'No completed quarters yet.'}
-        </p>
-      )}
-      <div
-        className={cn(
-          padding,
-          'text-player-muted mobile:gap-x-app-3 mobile:gap-y-app-3 mobile:py-app-4 mobile:app-caption flex flex-wrap gap-x-[28px] gap-y-[12px] py-[28px] min-[601px]:text-[24px]'
-        )}
-      >
-        {Object.entries(assetLabels).map(([key, asset]) => (
-          <span
-            key={key}
-            className="mobile:gap-app-3 flex items-center gap-[10px]"
-          >
+          {Object.entries(assetLabels).map(([key, asset]) => (
             <span
-              aria-hidden="true"
-              className={cn(
-                'mobile:size-app-marker size-[18px] rounded-[4px]',
-                asset.color
-              )}
-            />
-            {asset.name}
-          </span>
-        ))}
+              key={key}
+              className="mobile:gap-app-3 flex items-center gap-[10px]"
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'mobile:size-app-marker size-[18px] rounded-[4px]',
+                  asset.color
+                )}
+              />
+              {asset.name}
+            </span>
+          ))}
+        </div>
       </div>
     </section>
   )

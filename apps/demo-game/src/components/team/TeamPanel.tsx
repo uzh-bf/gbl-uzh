@@ -36,8 +36,8 @@ export default function TeamPanel({
     threshold > 0 ? Math.min(100, (experience / threshold) * 100) : 0
   return (
     <section data-cy="team-panel">
-      <div className="border-player-border mobile:px-app-4 mobile:py-app-4 border-b min-[601px]:px-[32px] min-[601px]:py-[28px]">
-        <div className="mobile:mb-app-4 mobile:gap-app-2 mobile:app-body mb-[16px] flex flex-wrap justify-between gap-[8px] min-[601px]:text-[26px]">
+      <div className="border-player-border mobile:px-app-4 mobile:py-app-4 tablet:px-[12px] tablet:py-[8px] border-b min-[601px]:px-[32px] min-[601px]:py-[28px]">
+        <div className="mobile:mb-app-4 mobile:gap-app-2 mobile:app-body tablet:text-[14px] tablet:leading-[1.4] tablet:mb-[8px] mb-[16px] flex flex-wrap justify-between gap-[8px] min-[601px]:text-[26px]">
           <span className="font-semibold">Level {self?.level?.index ?? 0}</span>
           <span className="text-player-muted">
             {experience} / {threshold > 0 ? threshold : '—'} XP
@@ -50,7 +50,7 @@ export default function TeamPanel({
           aria-valuemax={threshold > 0 ? threshold : 100}
           aria-valuenow={threshold > 0 ? Math.min(experience, threshold) : 0}
           aria-valuetext={`${experience} XP${threshold > 0 ? ` of ${threshold}` : ''}`}
-          className="bg-player-progress h-[12px] overflow-hidden rounded-[6px] min-[601px]:h-[16px]"
+          className="bg-player-progress tablet:h-[6px] h-[12px] overflow-hidden rounded-[6px] min-[601px]:h-[16px]"
         >
           <div
             className="bg-player-primary h-full"
@@ -94,7 +94,12 @@ export default function TeamPanel({
               description={`Quiz${xp !== null ? ` · ${xp} XP` : ''}`}
               state={state}
               onClick={() => onLearning(activity.id)}
-              icon={<Lightbulb size={26} className="mobile:size-app-icon" />}
+              icon={
+                <Lightbulb
+                  size={26}
+                  className="mobile:size-app-icon tablet:size-[16px]"
+                />
+              }
             />
           )
         })}
@@ -111,7 +116,12 @@ export default function TeamPanel({
             description={`Card ${entry.index + 1} of ${entry.sequence.stories.length} · ${entry.sequence.year} · Q${entry.sequence.quarter}`}
             state={visited.has(entry.story.id) ? 'Read' : 'New'}
             onClick={() => onStory(entry)}
-            icon={<BookOpen size={26} className="mobile:size-app-icon" />}
+            icon={
+              <BookOpen
+                size={26}
+                className="mobile:size-app-icon tablet:size-[16px]"
+              />
+            }
           />
         ))}
         {!stories.length && (
@@ -134,14 +144,14 @@ function Statistic({
   testId: string
 }) {
   return (
-    <div className="border-player-border mobile:px-app-4 mobile:py-app-4 min-w-0 px-[16px] py-[20px] first:border-r min-[601px]:p-[32px]">
-      <dt className="text-player-muted mobile:app-caption font-semibold tracking-[1px] uppercase min-[601px]:text-[22px]">
+    <div className="border-player-border mobile:px-app-4 mobile:py-app-4 tablet:px-[12px] tablet:py-[8px] min-w-0 px-[16px] py-[20px] first:border-r min-[601px]:p-[32px]">
+      <dt className="text-player-muted mobile:app-caption tablet:text-[12px] tablet:leading-[1.3] font-semibold tracking-[1px] uppercase min-[601px]:text-[22px]">
         {title}
       </dt>
       <dd
         data-cy={testId}
         className={cn(
-          'mobile:mt-app-2 mobile:app-value m-0 mt-[8px] font-bold [overflow-wrap:anywhere] tabular-nums min-[601px]:text-[40px]',
+          'mobile:mt-app-2 mobile:app-value tablet:text-[20px] tablet:mt-[4px] tablet:leading-[1.2] m-0 mt-[8px] font-bold [overflow-wrap:anywhere] tabular-nums min-[601px]:text-[40px]',
           color
         )}
       >
@@ -152,12 +162,12 @@ function Statistic({
 }
 function SectionHeading({ title, note }: { title: string; note?: string }) {
   return (
-    <div className="border-player-border mobile:gap-app-2 mobile:px-app-4 mobile:pt-app-4 mobile:pb-app-4 flex flex-wrap items-center justify-between gap-[8px] border-b min-[601px]:px-[32px] min-[601px]:pt-[36px] min-[601px]:pb-[22px]">
-      <h2 className="text-player-muted mobile:app-caption m-0 font-semibold tracking-[1px] uppercase min-[601px]:text-[24px]">
+    <div className="border-player-border mobile:gap-app-2 mobile:px-app-4 mobile:pt-app-4 mobile:pb-app-4 tablet:px-[12px] tablet:py-[8px] flex flex-wrap items-center justify-between gap-[8px] border-b min-[601px]:px-[32px] min-[601px]:pt-[36px] min-[601px]:pb-[22px]">
+      <h2 className="text-player-muted mobile:app-caption tablet:text-[12px] tablet:leading-[1.3] m-0 font-semibold tracking-[1px] uppercase min-[601px]:text-[24px]">
         {title}
       </h2>
       {note && (
-        <span className="text-player-muted mobile:app-caption min-[601px]:text-[24px]">
+        <span className="text-player-muted mobile:app-caption tablet:text-[12px] tablet:leading-[1.3] min-[601px]:text-[24px]">
           {note}
         </span>
       )}
@@ -186,12 +196,12 @@ function ContentRow({
         aria-label={title}
         aria-describedby={`${descriptionId} ${stateId}`}
         onClick={onClick}
-        className="focus-visible:outline-player-primary hover:bg-player-feedback mobile:gap-app-3 mobile:px-app-4 mobile:py-app-4 flex w-full items-center text-left focus-visible:outline-2 focus-visible:outline-offset-[-3px] min-[601px]:gap-[20px] min-[601px]:px-[32px] min-[601px]:py-[26px]"
+        className="focus-visible:outline-player-primary hover:bg-player-feedback mobile:gap-app-3 mobile:px-app-4 mobile:py-app-4 tablet:gap-[8px] tablet:px-[12px] tablet:py-[8px] flex w-full items-center text-left focus-visible:outline-2 focus-visible:outline-offset-[-3px] min-[601px]:gap-[20px] min-[601px]:px-[32px] min-[601px]:py-[26px]"
       >
         <span
           aria-hidden="true"
           className={cn(
-            'grid size-[40px] shrink-0 place-items-center rounded-[12px] min-[601px]:size-[52px]',
+            'tablet:size-[28px] tablet:rounded-[8px] grid size-[40px] shrink-0 place-items-center rounded-[12px] min-[601px]:size-[52px]',
             state === 'New'
               ? 'bg-player-warning-surface text-player-warning'
               : 'bg-player-progress text-player-primary'
@@ -200,25 +210,25 @@ function ContentRow({
           {icon}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="mobile:app-body block leading-[1.2] font-semibold [overflow-wrap:anywhere] min-[601px]:text-[28px]">
+          <span className="mobile:app-body tablet:app-caption block leading-[1.2] font-semibold [overflow-wrap:anywhere] min-[601px]:text-[28px]">
             {title}
           </span>
           <span
             id={descriptionId}
-            className="text-player-muted mobile:mt-app-1 mobile:app-caption mt-[4px] block min-[601px]:text-[24px]"
+            className="text-player-muted mobile:mt-app-1 mobile:app-caption tablet:text-[12px] tablet:leading-[1.3] tablet:mt-[2px] mt-[4px] block min-[601px]:text-[24px]"
           >
             {description}
           </span>
         </span>
         <span
           id={stateId}
-          className="text-player-body mobile:app-caption font-semibold min-[601px]:text-[24px]"
+          className="text-player-body mobile:app-caption tablet:text-[12px] tablet:leading-[1.3] font-semibold min-[601px]:text-[24px]"
         >
           {state}
         </span>
         <ChevronRight
           aria-hidden="true"
-          className="text-player-muted size-[20px] shrink-0 min-[601px]:size-[26px]"
+          className="text-player-muted tablet:size-[16px] size-[20px] shrink-0 min-[601px]:size-[26px]"
         />
       </button>
     </li>
@@ -226,7 +236,7 @@ function ContentRow({
 }
 function Empty({ children }: { children: ReactNode }) {
   return (
-    <li className="text-player-muted mobile:px-app-4 mobile:py-app-4 mobile:app-body py-[24px] min-[601px]:px-[32px] min-[601px]:text-[24px]">
+    <li className="text-player-muted mobile:px-app-4 mobile:py-app-4 mobile:app-body tablet:px-[12px] tablet:py-[8px] tablet:app-caption py-[24px] min-[601px]:px-[32px] min-[601px]:text-[24px]">
       {children}
     </li>
   )

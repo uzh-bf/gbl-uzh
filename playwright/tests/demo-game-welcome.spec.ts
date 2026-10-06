@@ -255,9 +255,7 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
       await name.fill('Discard this name')
       await page.getByRole('button', { name: 'Cancel', exact: true }).click()
       await expect(page).toHaveURL(new RegExp(`/play/cockpit\\?tab=${tab}$`))
-      await expect(page.locator('header').getByRole('heading')).toHaveText(
-        'Style Bank'
-      )
+      await expect(page.locator('header')).toContainText('Style Bank')
     }
     await page.getByRole('link', { name: 'Edit player profile' }).click()
     const save = page.getByRole('button', {
@@ -318,9 +316,7 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
     await page.unroute('**/api/graphql')
     await save.click()
     await expect(page).toHaveURL(/\/play\/cockpit\?tab=team$/)
-    await expect(page.locator('header').getByRole('heading')).toHaveText(
-      'Updated Bank'
-    )
+    await expect(page.locator('header')).toContainText('Updated Bank')
     await expect(page.locator('header')).toContainText('HQ Zürich')
     await expect(page.locator('header img[src*="avatars"]')).toHaveAttribute(
       'src',

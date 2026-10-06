@@ -18,7 +18,7 @@ const ToastViewport = React.forwardRef<
   <ToastPrimitives.Viewport
     ref={ref}
     className={twMerge(
-      'fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:top-auto sm:right-0 sm:bottom-0 sm:flex-col md:max-w-[420px]',
+      'tablet:max-w-[360px] fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:top-auto sm:right-0 sm:bottom-0 sm:flex-col md:max-w-[420px]',
       className
     )}
     {...props}
@@ -32,7 +32,7 @@ const toastVariants = cva(
     variants: {
       variant: {
         default: 'border bg-background text-foreground',
-        countdown: `${playerNoticeStyles.surface} ${playerNoticeStyles.success} font-player justify-start space-x-0 pr-[56px] mobile:pr-[56px] min-[601px]:pr-[64px]`,
+        countdown: `${playerNoticeStyles.surface} ${playerNoticeStyles.success} font-player justify-start space-x-0 pr-[56px] mobile:pr-[56px] min-[601px]:pr-[64px] tablet:pr-[56px]`,
         destructive:
           'destructive group border-destructive bg-destructive text-destructive-foreground',
       },

@@ -181,6 +181,12 @@ async function joinPlayer(
     await expect(page.getByText('Game is scheduled.')).toBeVisible({
       timeout: 30_000,
     })
+    // Tab-specific assertions exercise the unchanged phone navigation; the
+    // tablet suite covers the embedded Market/Team and top navigation.
+    await page.setViewportSize({ width: 390, height: 844 })
+    await expect(
+      page.getByRole('navigation', { name: 'Player navigation' })
+    ).toBeVisible()
     return { context, page, plan }
   } catch (error) {
     await context.close()
@@ -415,7 +421,7 @@ async function cockpitControlSizes(page: Page, action: Locator) {
       action,
       page.getByTestId('ready-switch'),
       page.locator('header'),
-      page.getByRole('navigation', { name: 'Player navigation' }),
+      page.getByRole('navigation', { name: /^(Player|Cockpit) navigation$/ }),
     ].map(async (locator) => {
       const box = await locator.boundingBox()
       return { width: Math.round(box!.width), height: Math.round(box!.height) }
@@ -424,6 +430,7 @@ async function cockpitControlSizes(page: Page, action: Locator) {
 }
 
 async function assertSubmittedStates(page: Page, admin: Page) {
+  await page.setViewportSize({ width: 390, height: 844 })
   const ready = page.getByRole('switch', { name: 'Ready', exact: true })
   const submit = page.getByRole('button', {
     name: 'Submit allocation',
@@ -464,6 +471,8 @@ async function assertSubmittedStates(page: Page, admin: Page) {
     page.getByText('Allocation submitted', { exact: true })
   ).toBeVisible()
   for (const state of ['submitted', 'ready']) {
+    // Phone-only tabs remain available here; the sizing loop covers both layouts.
+    await page.setViewportSize({ width: 390, height: 844 })
     await expect(forecast).toHaveCount(0)
     if (state === 'ready') {
       const rejectReady = async (route: import('@playwright/test').Route) => {
@@ -513,6 +522,7 @@ async function assertSubmittedStates(page: Page, admin: Page) {
       })
     }
   }
+  await page.setViewportSize({ width: 390, height: 844 })
   await ready.click()
   await expect(change).toBeEnabled()
   await change.click()
@@ -527,6 +537,7 @@ async function assertSubmittedStates(page: Page, admin: Page) {
     page.getByText('Allocation submitted', { exact: true })
   ).toBeVisible()
   await change.click()
+  await page.setViewportSize({ width: 390, height: 844 })
   await page.getByRole('link', { name: 'Market', exact: true }).click()
   await setCountdown(admin, '300')
   await page.getByRole('link', { name: 'Decisions', exact: true }).click()
@@ -1715,10 +1726,10 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     for (const tab of ['Decisions', 'Market', 'Team', 'History']) {
       await player.getByRole('link', { name: tab, exact: true }).click()
       await expectPhoneScrollContained(player)
-      await expect(header.getByRole('heading', { level: 1 })).toHaveText(
-        players[0].name
+      await expect(header.getByRole('heading', { level: 1 })).toBeVisible()
+      await expect(header.locator('p')).toHaveText(
+        `${players[0].name} · HQ Aargau`
       )
-      await expect(header.locator('p')).toHaveText('HQ Aargau')
       await expect(header.locator('img[src*="avatars"]')).toHaveCount(1)
       if (tab === 'Team')
         await expect(
@@ -1759,9 +1770,12 @@ test('History follows settled quarters, filters years and preserves hidden dice'
       await player.getByRole('main').evaluate((element) => {
         element.scrollTop = 0
       })
-      await expect(
-        player.getByRole('link', { name: 'Team', exact: true })
-      ).toBeInViewport()
+      if (width >= 768)
+        await expect(player.getByTestId('team-panel')).toBeVisible()
+      else
+        await expect(
+          player.getByRole('link', { name: 'Team', exact: true })
+        ).toBeInViewport()
       await player.screenshot({
         path: testInfo.outputPath(`history-${width}.png`),
       })
@@ -1858,6 +1872,23 @@ test('Team stories and learning sheets preserve progress, drafts and released co
         const bounds = await dialog.boundingBox()
         expect(bounds!.y).toBeGreaterThanOrEqual(0)
         await expect(dialog.getByRole('button').last()).toBeInViewport()
+        if (width === 784) {
+          await expect(dialog).toHaveCSS('font-size', '16px')
+          await expect(dialog.getByTestId('content-sheet-heading')).toHaveCSS(
+            'font-size',
+            '20px'
+          )
+          await expect(dialog.locator('p').first()).toHaveCSS(
+            'font-size',
+            '16px'
+          )
+          const action = dialog.getByRole('button').last()
+          await expect(action).toHaveCSS('font-size', '16px')
+          expect((await action.boundingBox())!.height).toBe(44)
+          for (const radio of await dialog.getByRole('radio').all()) {
+            expect((await radio.boundingBox())!.width).toBe(24)
+          }
+        }
       }
       await capturePlayerScreenshot(player, {
         path: testInfo.outputPath(`team-${state}-${width}.png`),
@@ -1950,7 +1981,8 @@ test('Team stories and learning sheets preserve progress, drafts and released co
     await savings.fill('42.1')
     await teamTab()
     const bonds = team.getByRole('button', { name: 'Bonds', exact: true })
-    await expect(bonds).toHaveAccessibleDescription('Quiz New')
+    // Existing databases may have configured XP rewards for these lessons.
+    await expect(bonds).toHaveAccessibleDescription(/^Quiz(?: · \d+ XP)? New$/)
     await bonds.click()
     await expect(quiz().getByRole('radio')).toHaveCount(3)
     await expect(
@@ -1960,7 +1992,7 @@ test('Team stories and learning sheets preserve progress, drafts and released co
     await capture('learning')
     await quiz().getByRole('button', { name: 'Later', exact: true }).click()
     await expect(bonds).toBeFocused()
-    await expect(bonds).toHaveAccessibleDescription('Quiz Open')
+    await expect(bonds).toHaveAccessibleDescription(/^Quiz(?: · \d+ XP)? Open$/)
     await bonds.click()
     await expect(quiz().getByRole('radio').nth(1)).toBeChecked()
     let rejectAnswer = true
@@ -1996,7 +2028,9 @@ test('Team stories and learning sheets preserve progress, drafts and released co
       .getByRole('button', { name: 'Close', exact: true })
       .first()
       .click()
-    await expect(bonds).toHaveAccessibleDescription('Quiz Solved')
+    await expect(bonds).toHaveAccessibleDescription(
+      /^Quiz(?: · \d+ XP)? Solved$/
+    )
     await player
       .getByRole('link', { name: 'Decisions', exact: true })
       .press('Enter')
@@ -2199,7 +2233,9 @@ test('Team stories and learning sheets preserve progress, drafts and released co
       .getByRole('button', { name: 'Close', exact: true })
       .first()
       .click()
-    await expect(risks).toHaveAccessibleDescription('Quiz Solved')
+    await expect(risks).toHaveAccessibleDescription(
+      /^Quiz(?: · \d+ XP)? Solved$/
+    )
     await risks.click()
     await expect(quiz().getByRole('radio').nth(2)).toBeChecked()
     await expect(quiz().getByRole('radio').nth(2)).toBeDisabled()
@@ -2537,7 +2573,9 @@ test('countdown notifications match player notices across tabs and viewport size
           borderRadius: style.borderRadius,
         }
       })
-      for (const tab of ['Decisions', 'Market', 'History', 'Team']) {
+      for (const tab of width >= 768
+        ? ['Decisions', 'History']
+        : ['Decisions', 'Market', 'History', 'Team']) {
         await player.getByRole('link', { name: tab, exact: true }).click()
         await setCountdown(admin, String(seconds++))
         const notification = player
@@ -2557,6 +2595,13 @@ test('countdown notifications match player notices across tabs and viewport size
           'border-radius',
           expected.borderRadius
         )
+        if (width >= 768) {
+          await expect(notification).toHaveCSS('font-size', '14px')
+          await expect(notification).toHaveCSS('padding-top', '12px')
+          await expect(
+            notification.getByText('Countdown set/updated!')
+          ).toHaveCSS('font-size', '16px')
+        }
         await expect(notification.locator('svg.lucide-clock-3')).toBeVisible()
         await expectNoPageOverflow(player)
         await expect(
@@ -2896,9 +2941,7 @@ test('profile editing returns to the latest allocation, Ready state and round', 
     await player
       .getByRole('button', { name: 'Save changes', exact: true })
       .click()
-    await expect(player.locator('header').getByRole('heading')).toHaveText(
-      'Ready Bank'
-    )
+    await expect(player.locator('header')).toContainText('Ready Bank')
     await expect(summary).toHaveText(readySummary, { useInnerText: true })
     await expect(ready).toBeChecked()
     await expect(

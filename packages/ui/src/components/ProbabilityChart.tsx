@@ -13,6 +13,7 @@ import {
   type YAxisProps,
 } from 'recharts'
 import { probabilityDistribution, signedPercent } from '../lib/probability'
+import { cn } from '../lib/utils'
 
 // Recharts 2 declares legacy class components that are not JSX-compatible
 // with React 19's types, despite the runtime's React 19 peer support.
@@ -29,6 +30,7 @@ function ProbabilityChart({
   titleContent,
   month,
   monthLabel,
+  compact = false,
 }: {
   trendE: number
   trendGap: number
@@ -38,6 +40,7 @@ function ProbabilityChart({
   titleContent?: ReactNode
   month?: number
   monthLabel?: string
+  compact?: boolean
 }) {
   const { data, vola } = useMemo(() => {
     const { data, volatility } = probabilityDistribution(trendE, trendGap)
@@ -51,42 +54,75 @@ function ProbabilityChart({
   }, [trendE, trendGap])
 
   if (variant === 'market') {
+    const barStep = compact ? 40 : 66
+    const barWidth = compact ? 30 : 52
+    const chartWidth = data.length * barStep
+    const metricClass = cn('block', !compact && 'min-[601px]:inline')
     return (
       <div>
         <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
           <div>
-            <h2 className="m-0 text-[length:var(--market-heading-size,24px)] leading-[var(--market-heading-leading,inherit)] font-bold min-[601px]:text-[30px]">
+            <h2
+              className={
+                compact
+                  ? 'm-0 text-[20px] leading-[1.25] font-bold'
+                  : 'm-0 text-[length:var(--market-heading-size,24px)] leading-[var(--market-heading-leading,inherit)] font-bold min-[601px]:text-[30px]'
+              }
+            >
               {title}
             </h2>
             {titleContent && <div className="mt-[8px]">{titleContent}</div>}
           </div>
-          <div className="grid grid-cols-3 items-baseline gap-x-[12px] text-[length:var(--market-metric-size,15px)] leading-[var(--market-metric-leading,inherit)] text-[var(--color-player-muted,#707070)] min-[601px]:gap-x-[20px] min-[601px]:text-[20px]">
+          <div
+            className={
+              compact
+                ? 'grid grid-cols-3 items-baseline gap-x-[8px] text-[14px] leading-[1.4] text-[var(--color-player-muted,#707070)]'
+                : 'grid grid-cols-3 items-baseline gap-x-[12px] text-[length:var(--market-metric-size,15px)] leading-[var(--market-metric-leading,inherit)] text-[var(--color-player-muted,#707070)] min-[601px]:gap-x-[20px] min-[601px]:text-[20px]'
+            }
+          >
             <span>
               Expected{' '}
               <strong
-                className={
+                className={cn(
+                  metricClass,
                   trendE < 0
-                    ? 'block text-[var(--color-player-error,#a51c14)] min-[601px]:inline'
-                    : 'block text-[var(--color-player-success,#557018)] min-[601px]:inline'
-                }
+                    ? 'text-[var(--color-player-error,#a51c14)]'
+                    : 'text-[var(--color-player-success,#557018)]'
+                )}
               >
                 {signedPercent(trendE, 2)}
               </strong>
               {(monthLabel !== undefined || month !== undefined) && (
-                <span className="mt-[4px] block text-[14px] min-[601px]:text-[16px]">
+                <span
+                  className={
+                    compact
+                      ? 'mt-[4px] block text-[12px]'
+                      : 'mt-[4px] block text-[14px] min-[601px]:text-[16px]'
+                  }
+                >
                   {monthLabel ?? `Month ${month}`}
                 </span>
               )}
             </span>
             <span>
               Trend gap{' '}
-              <strong className="block text-[var(--color-player-text,#151515)] min-[601px]:inline">
+              <strong
+                className={cn(
+                  metricClass,
+                  'text-[var(--color-player-text,#151515)]'
+                )}
+              >
                 {(trendGap * 100).toFixed(2)}%
               </strong>
             </span>
             <span>
               Volatility{' '}
-              <strong className="block text-[var(--color-player-text,#151515)] min-[601px]:inline">
+              <strong
+                className={cn(
+                  metricClass,
+                  'text-[var(--color-player-text,#151515)]'
+                )}
+              >
                 {(vola * 100).toFixed(2)}%
               </strong>
             </span>
@@ -98,14 +134,14 @@ function ProbabilityChart({
           aria-label={`${title} return probabilities`}
         >
           <svg
-            viewBox="0 0 726 258"
+            viewBox={`0 0 ${chartWidth} 258`}
             className="block w-full"
             role="img"
             aria-label={`${title}: bar height is probability; labels show return. ${totalEyes ? `Latest revealed total: ${totalEyes}.` : 'No roll revealed.'}`}
           >
             <line
               x1="0"
-              x2="726"
+              x2={chartWidth}
               y1="211"
               y2="211"
               stroke="var(--color-player-border, #e9e9e9)"
@@ -113,7 +149,7 @@ function ProbabilityChart({
             {data.map((item, index) => {
               const selected = item.eyes === totalEyes
               const height = (item.prob / 0.1667) * 168
-              const x = index * 66 + 7
+              const x = index * barStep + (barStep - barWidth) / 2
               return (
                 <g
                   key={item.eyes}
@@ -124,7 +160,7 @@ function ProbabilityChart({
                   <rect
                     x={x}
                     y={200 - height}
-                    width="52"
+                    width={barWidth}
                     height={height}
                     rx="8"
                     fill={
@@ -134,11 +170,13 @@ function ProbabilityChart({
                     }
                   />
                   <text
-                    x={x + 26}
+                    x={x + barWidth / 2}
                     y={188 - height}
                     textAnchor="middle"
                     fontSize="16"
-                    className="max-[600px]:text-[22px]"
+                    className={
+                      compact ? 'text-[18px]' : 'max-[600px]:text-[22px]'
+                    }
                     fontWeight={selected ? 700 : 400}
                     fill={
                       selected
@@ -149,11 +187,13 @@ function ProbabilityChart({
                     {signedPercent(item.value).replace('%', '')}
                   </text>
                   <text
-                    x={x + 26}
+                    x={x + barWidth / 2}
                     y="244"
                     textAnchor="middle"
                     fontSize="18"
-                    className="max-[600px]:text-[22px]"
+                    className={
+                      compact ? 'text-[20px]' : 'max-[600px]:text-[22px]'
+                    }
                     fontWeight={selected ? 700 : 400}
                     fill={
                       selected

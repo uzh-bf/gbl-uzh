@@ -67,6 +67,19 @@ html {
   --font-player: var(--source-sans-pro), sans-serif;
 }
 
+/* Exact complement of the phone shell, including compact touch landscape. */
+@custom-variant tablet {
+  @media (width >= 768px) and (height > 500px),
+    (width > 1024px),
+    (width >= 768px) and (pointer: fine),
+    (width >= 768px) and (pointer: none),
+    (width >= 768px) and (orientation: portrait) {
+    && {
+      @slot;
+    }
+  }
+}
+
 @theme static {
   --color-player-primary-hover: #001f82;
   --color-player-savings: #1ba6be;
