@@ -239,7 +239,7 @@ export default function WelcomeSetup({
               alt="A winning lottery ticket surrounded by coins and a piggy bank"
               width={720}
               height={360}
-              sizes="(min-width: 768px) min(calc(100vw - 80px), 1358px), (max-width: 720px) calc(100vw - 32px), 654px"
+              sizes="(min-width: 641px) min(calc(100vw - 80px), 1358px), (max-width: 720px) calc(100vw - 32px), 654px"
               loading="eager"
             />
           )}

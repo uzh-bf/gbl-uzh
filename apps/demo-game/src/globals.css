@@ -67,13 +67,9 @@ html {
   --font-player: var(--source-sans-pro), sans-serif;
 }
 
-/* Exact complement of the phone shell, including compact touch landscape. */
+/* Layout is width-only: tablet always begins at 641px on every device. */
 @custom-variant tablet {
-  @media (width >= 768px) and (height > 500px),
-    (width > 1024px),
-    (width >= 768px) and (pointer: fine),
-    (width >= 768px) and (pointer: none),
-    (width >= 768px) and (orientation: portrait) {
+  @media (width >= 641px) {
     && {
       @slot;
     }
@@ -121,17 +117,16 @@ html {
  * Repeat only the explicitly opted-in selector so its mobile role wins that
  * cascade without !important or global element overrides. */
 @custom-variant mobile {
-  @media (width < 601px) {
+  @media (width < 641px) {
     && {
       @slot;
     }
   }
 }
 
-/* Phone shell behavior is independent of the compact-content sizing scale. */
+/* Phone shell and compact-content sizing share the tablet boundary. */
 @custom-variant phone {
-  @media (width < 768px),
-    (orientation: landscape) and (pointer: coarse) and (width <= 1024px) and (height <= 500px) {
+  @media (width < 641px) {
     && {
       @slot;
     }
@@ -223,13 +218,17 @@ html {
 
 /* The shared Market SVG keeps its geometry (SVG units are not screen pixels).
  * Only demo-game supplies these optional typography/spacing overrides. */
-@media (width < 601px) {
+@media (width < 641px) {
   :root {
     --market-heading-size: var(--app-text-heading);
     --market-heading-leading: var(--app-leading-heading);
     --market-metric-size: var(--app-text-caption);
     --market-metric-leading: var(--app-leading-caption);
     --market-chart-gap: var(--spacing-app-3);
+    --market-metric-gap: var(--spacing-app-3);
+    --market-value-display: block;
+    --market-month-size: var(--app-text-caption);
+    --market-chart-label-size: 22px;
     --gbl-control-height: var(--spacing-app-control);
     --gbl-body-size: var(--app-text-body);
     --gbl-body-leading: var(--app-leading-body);

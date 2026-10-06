@@ -392,7 +392,7 @@ test('tablet welcome popup pickers, preview, review and profile editing survive 
   const review = page.getByRole('button', { name: 'Review your bank' })
   let releaseSave: (() => void) | undefined
   try {
-    for (const width of [768, 784, 1024, 1600]) {
+    for (const width of [641, 700, 767, 768, 784, 1024, 1600]) {
       await page.setViewportSize({ width, height: 1114 })
       await expectNoPageOverflow(page)
       const title = page.getByRole('heading', {
@@ -432,7 +432,7 @@ test('tablet welcome popup pickers, preview, review and profile editing survive 
       page.getByRole('button', { name: 'Bear', exact: true })
     ).toHaveCount(0)
     await expect(review).toBeDisabled()
-    for (const width of [768, 784, 1024, 1600]) {
+    for (const width of [641, 700, 767, 768, 784, 1024, 1600]) {
       await page.setViewportSize({ width, height: 1114 })
       await expect(preview).toBeVisible()
       await expectNoPageOverflow(page)
@@ -527,7 +527,7 @@ test('tablet welcome popup pickers, preview, review and profile editing survive 
     await expect(
       page.getByRole('button', { name: 'Start the game', exact: true })
     ).toBeEnabled()
-    for (const width of [768, 784, 1024, 1600]) {
+    for (const width of [641, 700, 767, 768, 784, 1024, 1600]) {
       await page.setViewportSize({ width, height: 1114 })
       await expect(preview).toContainText('Tablet Bank')
       await expectNoPageOverflow(page)
@@ -570,7 +570,10 @@ test('tablet welcome popup pickers, preview, review and profile editing survive 
       .getByRole('button', { name: 'Start the game', exact: true })
       .click()
     await expect(page).toHaveURL(/\/play\/cockpit$/)
-    await page.getByRole('link', { name: 'Edit player profile' }).click()
+    await page
+      .getByRole('main')
+      .getByRole('link', { name: 'Edit player profile' })
+      .click()
     await expect(
       page.getByRole('heading', { name: 'Edit your bank' })
     ).toBeVisible()
@@ -580,7 +583,10 @@ test('tablet welcome popup pickers, preview, review and profile editing survive 
     ).toHaveCount(0)
     await name.fill('Discarded Bank')
     await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-    await page.getByRole('link', { name: 'Edit player profile' }).click()
+    await page
+      .getByRole('main')
+      .getByRole('link', { name: 'Edit player profile' })
+      .click()
     await expect(name).toHaveValue('Tablet Bank')
     await name.fill('Tablet Edited')
     await avatarSelect.click()
@@ -601,7 +607,10 @@ test('tablet welcome popup pickers, preview, review and profile editing survive 
     await expect(page).toHaveURL(/\/play\/cockpit\?tab=cockpit$/)
     await expect(page.getByText('Tablet Edited', { exact: true })).toBeVisible()
     await expect(page.getByText('HQ Zürich', { exact: true })).toBeVisible()
-    await page.getByRole('link', { name: 'Edit player profile' }).click()
+    await page
+      .getByRole('main')
+      .getByRole('link', { name: 'Edit player profile' })
+      .click()
     await expect(name).toHaveValue('Tablet Edited')
     await expect(preview).toContainText('Bull · HQ Zürich (ZH)')
     expect(errors).toEqual([])
@@ -611,7 +620,7 @@ test('tablet welcome popup pickers, preview, review and profile editing survive 
   }
 })
 
-test('welcome retains the phone layout in compact touch landscape', async ({
+test('welcome uses tablet layout in touch landscape', async ({
   page: admin,
   browser,
   baseURL,
@@ -631,14 +640,14 @@ test('welcome retains the phone layout in compact touch landscape', async ({
     await page.setViewportSize({ width: 844, height: 390 })
     await expect(
       page.getByRole('heading', { name: 'The three assets' })
-    ).toBeHidden()
+    ).toBeVisible()
     await page
       .getByRole('button', { name: 'Set up your bank', exact: true })
       .click()
     await expect(page.getByRole('button', { name: /^Avatar / })).toBeVisible()
     await expect(
       page.getByRole('complementary', { name: 'Your bank preview' })
-    ).toBeHidden()
+    ).toBeVisible()
     await expectNoPageOverflow(page)
     await expect(
       page.getByRole('button', { name: 'Review your bank' })

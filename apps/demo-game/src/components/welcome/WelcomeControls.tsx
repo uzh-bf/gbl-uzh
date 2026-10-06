@@ -66,7 +66,7 @@ export function WelcomeMessage({
     <main
       {...props}
       className={cn(
-        'font-player text-player-text mobile:my-app-6 mobile:gap-app-3 mobile:p-app-4 mobile:app-body mx-auto my-[64px] grid max-w-[600px] gap-[16px] bg-white p-[24px] text-[16px] leading-[1.5]',
+        'font-player text-player-text mobile:my-app-6 mobile:gap-app-3 mobile:p-app-4 mobile:app-body mx-auto my-[64px] grid max-w-[640px] gap-[16px] bg-white p-[24px] text-[16px] leading-[1.5]',
         className
       )}
     />

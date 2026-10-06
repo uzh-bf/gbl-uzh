@@ -1,18 +1,26 @@
 import { useEffect, useState } from 'react'
 
 // Keep in sync with the phone/tablet variants in globals.css.
-const PHONE_QUERY =
-  '(width < 768px), (orientation: landscape) and (pointer: coarse) and (width <= 1024px) and (height <= 500px)'
+const TABLET_QUERY = '(width >= 641px)'
 
 /** Client-only layout selection; SSR retains the existing phone structure. */
 export function useTabletLayout() {
-  const [tablet, setTablet] = useState(false)
+  return useLayoutQuery(TABLET_QUERY)
+}
+
+/** Market fills the shell below the desktop two-row sidebar layout. */
+export function useFullWidthMarketLayout() {
+  return useLayoutQuery('(641px <= width < 1024px)')
+}
+
+function useLayoutQuery(mediaQuery: string) {
+  const [matches, setMatches] = useState(false)
   useEffect(() => {
-    const phone = window.matchMedia(PHONE_QUERY)
-    const update = () => setTablet(!phone.matches)
+    const query = window.matchMedia(mediaQuery)
+    const update = () => setMatches(query.matches)
     update()
-    phone.addEventListener('change', update)
-    return () => phone.removeEventListener('change', update)
-  }, [])
-  return tablet
+    query.addEventListener('change', update)
+    return () => query.removeEventListener('change', update)
+  }, [mediaQuery])
+  return matches
 }

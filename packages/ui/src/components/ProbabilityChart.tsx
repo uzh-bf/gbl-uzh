@@ -31,6 +31,7 @@ function ProbabilityChart({
   month,
   monthLabel,
   compact = false,
+  fixedHeight,
 }: {
   trendE: number
   trendGap: number
@@ -41,6 +42,8 @@ function ProbabilityChart({
   month?: number
   monthLabel?: string
   compact?: boolean
+  /** Market-only: distribute bars horizontally without scaling height or text. */
+  fixedHeight?: number
 }) {
   const { data, vola } = useMemo(() => {
     const { data, volatility } = probabilityDistribution(trendE, trendGap)
@@ -57,27 +60,55 @@ function ProbabilityChart({
     const barStep = compact ? 40 : 66
     const barWidth = compact ? 30 : 52
     const chartWidth = data.length * barStep
-    const metricClass = cn('block', !compact && 'min-[601px]:inline')
+    const fixedSize = fixedHeight !== undefined
+    const verticalScale = fixedSize ? fixedHeight / 258 : 1
+    const horizontal = (value: number) =>
+      fixedSize ? `${(value / chartWidth) * 100}%` : value
+    const returnLabelSize = fixedSize
+      ? 14
+      : compact
+        ? 18
+        : 'var(--market-chart-label-size,16px)'
+    const rollLabelSize = fixedSize
+      ? 16
+      : compact
+        ? 20
+        : 'var(--market-chart-label-size,18px)'
+    const labelClass =
+      !fixedSize && !compact ? 'max-[600px]:text-[22px]' : undefined
+    const metricClass = cn(
+      'block',
+      !compact && 'min-[601px]:[display:var(--market-value-display,inline)]'
+    )
     return (
       <div>
-        <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
+        <div
+          className={cn(
+            'flex flex-wrap items-baseline gap-[8px]',
+            compact ? 'justify-center text-center' : 'justify-between'
+          )}
+        >
           <div>
             <h2
               className={
                 compact
                   ? 'm-0 text-[20px] leading-[1.25] font-bold'
-                  : 'm-0 text-[length:var(--market-heading-size,24px)] leading-[var(--market-heading-leading,inherit)] font-bold min-[601px]:text-[30px]'
+                  : 'm-0 text-[length:var(--market-heading-size,24px)] leading-[var(--market-heading-leading,inherit)] font-bold min-[601px]:text-[length:var(--market-heading-size,30px)]'
               }
             >
               {title}
             </h2>
-            {titleContent && <div className="mt-[8px]">{titleContent}</div>}
+            {titleContent && (
+              <div className={cn('mt-[8px]', compact && 'flex justify-center')}>
+                {titleContent}
+              </div>
+            )}
           </div>
           <div
             className={
               compact
                 ? 'grid grid-cols-3 items-baseline gap-x-[8px] text-[14px] leading-[1.4] text-[var(--color-player-muted,#707070)]'
-                : 'grid grid-cols-3 items-baseline gap-x-[12px] text-[length:var(--market-metric-size,15px)] leading-[var(--market-metric-leading,inherit)] text-[var(--color-player-muted,#707070)] min-[601px]:gap-x-[20px] min-[601px]:text-[20px]'
+                : 'grid grid-cols-3 items-baseline gap-x-[12px] text-[length:var(--market-metric-size,15px)] leading-[var(--market-metric-leading,inherit)] text-[var(--color-player-muted,#707070)] min-[601px]:gap-x-[var(--market-metric-gap,20px)] min-[601px]:text-[length:var(--market-metric-size,20px)]'
             }
           >
             <span>
@@ -97,7 +128,7 @@ function ProbabilityChart({
                   className={
                     compact
                       ? 'mt-[4px] block text-[12px]'
-                      : 'mt-[4px] block text-[14px] min-[601px]:text-[16px]'
+                      : 'mt-[4px] block text-[14px] min-[601px]:text-[length:var(--market-month-size,16px)]'
                   }
                 >
                   {monthLabel ?? `Month ${month}`}
@@ -134,22 +165,26 @@ function ProbabilityChart({
           aria-label={`${title} return probabilities`}
         >
           <svg
-            viewBox={`0 0 ${chartWidth} 258`}
+            viewBox={fixedSize ? undefined : `0 0 ${chartWidth} 258`}
+            height={fixedHeight}
             className="block w-full"
             role="img"
             aria-label={`${title}: bar height is probability; labels show return. ${totalEyes ? `Latest revealed total: ${totalEyes}.` : 'No roll revealed.'}`}
           >
             <line
               x1="0"
-              x2={chartWidth}
-              y1="211"
-              y2="211"
+              x2={horizontal(chartWidth)}
+              y1={211 * verticalScale}
+              y2={211 * verticalScale}
               stroke="var(--color-player-border, #e9e9e9)"
             />
             {data.map((item, index) => {
               const selected = item.eyes === totalEyes
               const height = (item.prob / 0.1667) * 168
               const x = index * barStep + (barStep - barWidth) / 2
+              // Fixed-size edge labels need room for signed multi-digit returns.
+              const firstLabel = fixedSize && index === 0
+              const lastLabel = fixedSize && index === data.length - 1
               return (
                 <g
                   key={item.eyes}
@@ -158,11 +193,11 @@ function ProbabilityChart({
                 >
                   <title>{`Roll ${item.eyes}: ${(item.prob * 100).toFixed(2)}% probability, ${signedPercent(item.value)} return${selected ? ', latest revealed roll' : ''}`}</title>
                   <rect
-                    x={x}
-                    y={200 - height}
-                    width={barWidth}
-                    height={height}
-                    rx="8"
+                    x={horizontal(x)}
+                    y={(200 - height) * verticalScale}
+                    width={horizontal(barWidth)}
+                    height={height * verticalScale}
+                    rx={8 * verticalScale}
                     fill={
                       selected
                         ? 'var(--theme-color-primary, #0028a5)'
@@ -170,13 +205,19 @@ function ProbabilityChart({
                     }
                   />
                   <text
-                    x={x + barWidth / 2}
-                    y={188 - height}
-                    textAnchor="middle"
-                    fontSize="16"
-                    className={
-                      compact ? 'text-[18px]' : 'max-[600px]:text-[22px]'
+                    x={horizontal(
+                      firstLabel
+                        ? x
+                        : lastLabel
+                          ? x + barWidth
+                          : x + barWidth / 2
+                    )}
+                    y={(188 - height) * verticalScale}
+                    textAnchor={
+                      firstLabel ? 'start' : lastLabel ? 'end' : 'middle'
                     }
+                    fontSize={returnLabelSize}
+                    className={labelClass}
                     fontWeight={selected ? 700 : 400}
                     fill={
                       selected
@@ -187,13 +228,11 @@ function ProbabilityChart({
                     {signedPercent(item.value).replace('%', '')}
                   </text>
                   <text
-                    x={x + barWidth / 2}
-                    y="244"
+                    x={horizontal(x + barWidth / 2)}
+                    y={244 * verticalScale}
                     textAnchor="middle"
-                    fontSize="18"
-                    className={
-                      compact ? 'text-[20px]' : 'max-[600px]:text-[22px]'
-                    }
+                    fontSize={rollLabelSize}
+                    className={labelClass}
                     fontWeight={selected ? 700 : 400}
                     fill={
                       selected

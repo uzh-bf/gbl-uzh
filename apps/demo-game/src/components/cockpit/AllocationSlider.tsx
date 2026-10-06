@@ -54,8 +54,8 @@ export default function AllocationSlider({
   }
 
   return (
-    <div className="border-player-border mobile:p-app-4 tablet:px-[12px] tablet:py-[8px] border-b p-[16px] min-[601px]:px-[24px] min-[601px]:pt-[20px] min-[601px]:pb-[24px]">
-      <div className="text-player-muted mobile:mb-app-4 mobile:gap-app-3 mobile:app-body tablet:app-caption tablet:mb-[8px] flex items-baseline justify-between gap-[12px] text-[17px] min-[601px]:mb-[20px]">
+    <div className="border-player-border mobile:p-app-4 tablet:px-[12px] tablet:py-[8px] border-b p-[16px] min-[641px]:px-[24px] min-[641px]:pt-[20px] min-[641px]:pb-[24px]">
+      <div className="text-player-muted mobile:mb-app-4 mobile:gap-app-3 mobile:app-body tablet:app-caption tablet:mb-[8px] flex items-baseline justify-between gap-[12px] text-[17px] min-[641px]:mb-[20px]">
         <h2 className="mobile:app-caption tablet:text-[12px] tablet:leading-[1.3] m-0 text-[15px] font-semibold tracking-[1.5px] uppercase">
           Your mix
         </h2>
@@ -63,7 +63,7 @@ export default function AllocationSlider({
       </div>
       <div
         ref={track}
-        className="mobile:mx-app-6 tablet:h-[40px] relative h-[44px] min-[601px]:h-[64px]"
+        className="mobile:mx-app-6 tablet:h-[40px] relative h-[44px] min-[641px]:h-[64px]"
         data-cy="allocation-slider"
         aria-disabled={disabled}
       >

@@ -1,5 +1,4 @@
 import { ChartContainer } from '@uzh-bf/design-system'
-import { useEffect, useState } from 'react'
 import { Bar, BarChart, Tooltip, XAxis, YAxis } from 'recharts'
 import type { HistoryQuarter } from '~/lib/results'
 import { playerAmount } from '~/lib/results'
@@ -11,14 +10,6 @@ export default function PortfolioHistoryChart({
   quarters: HistoryQuarter[]
 }) {
   const tablet = useTabletLayout()
-  const [compact, setCompact] = useState(false)
-  useEffect(() => {
-    const query = window.matchMedia('(width < 601px)')
-    const update = () => setCompact(query.matches)
-    update()
-    query.addEventListener('change', update)
-    return () => query.removeEventListener('change', update)
-  }, [])
 
   return (
     <>
@@ -30,7 +21,7 @@ export default function PortfolioHistoryChart({
       >
         <div
           style={{
-            width: tablet ? '100%' : quarters.length * (compact ? 56 : 120),
+            width: tablet ? '100%' : quarters.length * 56,
             minWidth: tablet ? quarters.length * 44 : undefined,
           }}
         >
@@ -41,7 +32,7 @@ export default function PortfolioHistoryChart({
                 color: 'var(--color-player-primary)',
               },
             }}
-            className="mobile:h-app-chart-history tablet:h-[260px] aspect-auto w-full min-[601px]:h-[300px]"
+            className="mobile:h-app-chart-history tablet:h-[260px] aspect-auto w-full"
           >
             <BarChart
               accessibilityLayer
@@ -74,7 +65,7 @@ export default function PortfolioHistoryChart({
                 fill="var(--color-player-primary)"
                 radius={[8, 8, 0, 0]}
                 isAnimationActive={false}
-                maxBarSize={compact ? 28 : tablet ? 56 : 100}
+                maxBarSize={tablet ? 56 : 28}
               />
             </BarChart>
           </ChartContainer>

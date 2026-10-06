@@ -408,8 +408,8 @@ const cockpitViewports = [
   { name: 'mobile', width: 390, height: 844 },
   { name: 'mobile-boundary', width: 600, height: 1024 },
   { name: 'above-mobile', width: 601, height: 1024 },
-  { name: 'phone-boundary', width: 767, height: 1024 },
-  { name: 'tablet-boundary', width: 768, height: 1024 },
+  { name: 'phone-boundary', width: 640, height: 1024 },
+  { name: 'tablet-boundary', width: 641, height: 1024 },
   { name: 'tablet', width: 784, height: 1024 },
   { name: 'shell-boundary', width: 785, height: 1024 },
   { name: 'desktop', width: 1440, height: 1000 },
@@ -454,7 +454,7 @@ async function assertSubmittedStates(page: Page, admin: Page) {
       .toBe(viewport.width)
     await expectNoPageOverflow(page)
     editingSizes.set(viewport.width, await cockpitControlSizes(page, submit))
-    if (viewport.width < 768) await expectPhoneScrollContained(page)
+    if (viewport.width < 641) await expectPhoneScrollContained(page)
     await capturePlayerScreenshot(page, {
       path: test.info().outputPath(`cockpit-editing-${viewport.name}.png`),
     })
@@ -516,7 +516,7 @@ async function assertSubmittedStates(page: Page, admin: Page) {
         .poll(() => cockpitControlSizes(page, change))
         .toEqual(editingSizes.get(width))
       await expectNoPageOverflow(page)
-      if (width < 768) await expectPhoneScrollContained(page)
+      if (width < 641) await expectPhoneScrollContained(page)
       await capturePlayerScreenshot(page, {
         path: test.info().outputPath(`cockpit-${state}-${name}.png`),
       })
@@ -1770,7 +1770,7 @@ test('History follows settled quarters, filters years and preserves hidden dice'
       await player.getByRole('main').evaluate((element) => {
         element.scrollTop = 0
       })
-      if (width >= 768)
+      if (width >= 641)
         await expect(player.getByTestId('team-panel')).toBeVisible()
       else
         await expect(
@@ -2307,7 +2307,7 @@ test('cockpit result designs follow settled quarters, consolidation and complete
       { name: 'reference', width: 784, height: 1694 },
       { name: 'mobile', width: 390, height: 844 },
       { name: 'narrow', width: 320, height: 844 },
-      { name: 'large-phone', width: 767, height: 1024 },
+      { name: 'large-phone', width: 640, height: 1024 },
       { name: 'landscape', width: 844, height: 390 },
       { name: 'landscape-boundary', width: 1024, height: 500 },
     ]) {
@@ -2318,8 +2318,8 @@ test('cockpit result designs follow settled quarters, consolidation and complete
       })
       await expect(ready).toHaveCount(0)
       await expect(waiting).toBeInViewport()
-      if (width < 768 || height <= 500) await expectPhoneScrollContained(player)
-      if (width < 601 && state === 'segment-end') {
+      if (width < 641) await expectPhoneScrollContained(player)
+      if (width < 641 && state === 'segment-end') {
         const rows = player
           .getByTestId('monthly-assets')
           .getByTestId('result-balance-row')
@@ -2573,7 +2573,7 @@ test('countdown notifications match player notices across tabs and viewport size
           borderRadius: style.borderRadius,
         }
       })
-      for (const tab of width >= 768
+      for (const tab of width >= 641
         ? ['Decisions', 'History']
         : ['Decisions', 'Market', 'History', 'Team']) {
         await player.getByRole('link', { name: tab, exact: true }).click()
@@ -2595,7 +2595,7 @@ test('countdown notifications match player notices across tabs and viewport size
           'border-radius',
           expected.borderRadius
         )
-        if (width >= 768) {
+        if (width >= 641) {
           await expect(notification).toHaveCSS('font-size', '14px')
           await expect(notification).toHaveCSS('padding-top', '12px')
           await expect(

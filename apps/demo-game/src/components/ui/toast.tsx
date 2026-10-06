@@ -32,7 +32,7 @@ const toastVariants = cva(
     variants: {
       variant: {
         default: 'border bg-background text-foreground',
-        countdown: `${playerNoticeStyles.surface} ${playerNoticeStyles.success} font-player justify-start space-x-0 pr-[56px] mobile:pr-[56px] min-[601px]:pr-[64px] tablet:pr-[56px]`,
+        countdown: `${playerNoticeStyles.surface} ${playerNoticeStyles.success} font-player justify-start space-x-0 pr-[56px] mobile:pr-[56px] min-[641px]:pr-[64px] tablet:pr-[56px]`,
         destructive:
           'destructive group border-destructive bg-destructive text-destructive-foreground',
       },

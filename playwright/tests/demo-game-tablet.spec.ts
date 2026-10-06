@@ -44,6 +44,122 @@ async function openCockpit(page: Page) {
   return data
 }
 
+test('phone typography and control sizing stay compact across 601px', async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 566, height: 1024 })
+  await openCockpit(page)
+  const sizing = () =>
+    page.locator('main').evaluate((main) =>
+      Array.from(main.querySelectorAll('*'))
+        .filter((element) => element.getClientRects().length > 0)
+        .map((element) => {
+          const style = getComputedStyle(element)
+          return {
+            tag: element.tagName,
+            fontSize: style.fontSize,
+            lineHeight: style.lineHeight,
+            padding: style.padding,
+            gap: style.gap,
+            minHeight: style.minHeight,
+            borderRadius: style.borderRadius,
+          }
+        })
+    )
+  for (const tab of ['Decisions', 'Market', 'History', 'Team']) {
+    await page.setViewportSize({ width: 566, height: 1024 })
+    const link = page
+      .getByRole('navigation', { name: 'Player navigation' })
+      .getByRole('link', { name: tab, exact: true })
+    await link.click()
+    await expect(link).toHaveAttribute('aria-current', 'page')
+    const reference = await sizing()
+    for (const width of [600, 601, 620, 640]) {
+      await page.setViewportSize({ width, height: 1024 })
+      await expect
+        .poll(sizing, `${tab} sizing at ${width}px`)
+        .toEqual(reference)
+      await expectNoPageOverflow(page)
+      if (width === 601 && tab === 'Decisions') {
+        await capturePlayerScreenshot(page, {
+          path: testInfo.outputPath('phone-601.png'),
+        })
+      }
+    }
+  }
+})
+
+for (const hasTouch of [false, true]) {
+  test(`tablet breakpoint preserves panels and drafts with ${hasTouch ? 'touch' : 'mouse'} input`, async ({
+    browser,
+    baseURL,
+  }, testInfo) => {
+    const context = await browser.newContext({
+      baseURL,
+      hasTouch,
+      isMobile: hasTouch,
+      viewport: { width: 640, height: 900 },
+    })
+    const page = await context.newPage()
+    try {
+      await openCockpit(page)
+      const savings = page.getByRole('spinbutton', {
+        name: 'Savings',
+        exact: true,
+      })
+      await savings.fill('54.9')
+      for (const viewport of [
+        { width: 640, height: 900 },
+        { width: 641, height: 900 },
+        { width: 700, height: 390 },
+        { width: 767, height: 390 },
+        { width: 768, height: 900 },
+        { width: 772, height: 390 },
+        { width: 900, height: 390 },
+        { width: 1021, height: 390 },
+        { width: 1023, height: 390 },
+        { width: 1024, height: 900 },
+        { width: 641, height: 390 },
+        { width: 640, height: 900 },
+      ]) {
+        await page.setViewportSize(viewport)
+        const tablet = viewport.width >= 641
+        await expect
+          .poll(() =>
+            page.evaluate(() => {
+              const visible = (selector: string) =>
+                !!document.querySelector(selector)?.getClientRects().length
+              return {
+                tabletNavigation: visible(
+                  'nav[aria-label="Cockpit navigation"]'
+                ),
+                phoneNavigation: visible('nav[aria-label="Player navigation"]'),
+                team: visible('[data-cy="team-panel"]'),
+                market: visible('[data-cy="market-panel"]'),
+              }
+            })
+          )
+          .toEqual({
+            tabletNavigation: tablet,
+            phoneNavigation: !tablet,
+            team: tablet,
+            market: tablet,
+          })
+        await expect(savings).toHaveValue('54.9')
+        await expectNoPageOverflow(page)
+        if (viewport.width === 641 || viewport.width === 767)
+          await capturePlayerScreenshot(page, {
+            path: testInfo.outputPath(
+              `layout-${viewport.width}-${viewport.height}.png`
+            ),
+          })
+      }
+    } finally {
+      await context.close()
+    }
+  })
+}
+
 test('tablet and desktop compose Decisions, Market, Team and all result designs', async ({
   page,
 }, testInfo) => {
@@ -80,7 +196,8 @@ test('tablet and desktop compose Decisions, Market, Team and all result designs'
     await expect(
       page.getByRole('region', { name: 'Game progress' })
     ).toHaveAttribute('data-game-status', status)
-    for (const width of [768, 784, 1024, 1440]) {
+    let previousMarketSize: { width: number; height: number } | undefined
+    for (const width of [641, 767, 768, 772, 900, 1021, 1023, 1024, 1440]) {
       await page.setViewportSize({ width, height: 1114 })
       await expectNoPageOverflow(page)
       await expect(navigation).toBeVisible()
@@ -123,7 +240,49 @@ test('tablet and desktop compose Decisions, Market, Team and all result designs'
       expect(teamBounds.x).toBeGreaterThan(width * 0.55)
       expect(teamBounds.x + teamBounds.width).toBeLessThanOrEqual(width)
       const marketBounds = (await market.boundingBox())!
-      expect(marketBounds.width).toBeGreaterThan(width * 0.95)
+      const marketBlock = page.getByTestId('market-block')
+      const marketBlockBounds = (await marketBlock.boundingBox())!
+      const mainBounds = (await page.locator('main').boundingBox())!
+      await expect(marketBlock).toHaveCSS('border-top-width', '1px')
+      expect(marketBounds.x).toBe(marketBlockBounds.x)
+      const expectedMarketWidth =
+        width >= 1024 ? Math.min(768, mainBounds.width * 0.6) : mainBounds.width
+      expect(
+        Math.abs(marketBounds.width - expectedMarketWidth)
+      ).toBeLessThanOrEqual(1)
+      if (width >= 1024) {
+        const allocation = (await page
+          .locator('main > div')
+          .first()
+          .boundingBox())!
+        expect(marketBlockBounds.x).toBe(allocation.x)
+        expect(marketBlockBounds.width).toBe(allocation.width)
+        expect(marketBlockBounds.y).toBe(allocation.y + allocation.height)
+        expect(marketBounds.x).toBe(allocation.x)
+        const sidebar = (await team.locator('..').boundingBox())!
+        expect(sidebar.x).toBeGreaterThanOrEqual(
+          marketBlockBounds.x + marketBlockBounds.width
+        )
+        expect(sidebar.y + sidebar.height).toBeGreaterThanOrEqual(
+          marketBlockBounds.y + marketBlockBounds.height - 1
+        )
+      } else {
+        expect(marketBlockBounds.x).toBe(mainBounds.x)
+        expect(
+          Math.abs(marketBlockBounds.width - mainBounds.width)
+        ).toBeLessThanOrEqual(1)
+      }
+      const bondsBlock = (await market
+        .getByTestId('market-bonds')
+        .boundingBox())!
+      const stocksBlock = (await market
+        .getByTestId('market-stocks')
+        .boundingBox())!
+      expect(bondsBlock.x).toBe(marketBounds.x)
+      expect(stocksBlock.x).toBe(bondsBlock.x + bondsBlock.width)
+      expect(
+        Math.abs(bondsBlock.width - stocksBlock.width)
+      ).toBeLessThanOrEqual(1)
       const bondsPlot = (await market
         .getByRole('img', { name: /^Bonds: bar height/ })
         .boundingBox())!
@@ -133,7 +292,51 @@ test('tablet and desktop compose Decisions, Market, Team and all result designs'
       const comparison = (await market
         .getByTestId('market-comparison')
         .boundingBox())!
-      expect(bondsPlot.width).toBeGreaterThan(width * 0.44)
+      for (const asset of ['Bonds', 'Stocks']) {
+        const chart = market.getByRole('img', {
+          name: new RegExp(`^${asset}: bar height`),
+        })
+        const plot = (await chart.boundingBox())!
+        expect(plot.width).toBeGreaterThan(0)
+        if (width < 1024) {
+          await expect(chart).toHaveAttribute('height', '206')
+          expect(plot.height).toBe(206)
+          // Measure rendered labels inside the accessible chart: a viewBox
+          // transform could enlarge text even if its computed font stays fixed.
+          const labels = await chart.evaluate((element) => {
+            const bounds = element.getBoundingClientRect()
+            return Array.from(element.querySelectorAll('text')).map((label) => {
+              const rect = label.getBoundingClientRect()
+              return {
+                fontSize: getComputedStyle(label).fontSize,
+                scale: label.getScreenCTM()?.a,
+                inside:
+                  rect.left >= bounds.left - 1 &&
+                  rect.right <= bounds.right + 1 &&
+                  rect.top >= bounds.top - 1 &&
+                  rect.bottom <= bounds.bottom + 1,
+              }
+            })
+          })
+          expect(labels).toHaveLength(22)
+          labels.forEach((label, index) => {
+            expect(label.fontSize).toBe(index % 2 === 0 ? '14px' : '16px')
+            expect(label.scale).toBe(1)
+            expect(label.inside).toBe(true)
+          })
+        } else {
+          expect(plot.width).toBeLessThanOrEqual(352)
+          expect(plot.height / plot.width).toBeCloseTo(258 / 440, 2)
+          await expect(chart).toHaveAttribute('viewBox', '0 0 440 258')
+        }
+      }
+      if (width >= 772 && width <= 1023) {
+        if (previousMarketSize) {
+          expect(bondsBlock.width).toBeGreaterThan(previousMarketSize.width)
+          expect(bondsBlock.height).toBe(previousMarketSize.height)
+        }
+        previousMarketSize = bondsBlock
+      }
       expect(comparison.y).toBeGreaterThanOrEqual(
         Math.max(
           bondsPlot.y + bondsPlot.height,
@@ -161,9 +364,6 @@ test('tablet and desktop compose Decisions, Market, Team and all result designs'
         })
         await expect(savings).toHaveCSS('font-size', '14px')
         expect((await savings.locator('..').boundingBox())!.height).toBe(36)
-        await expect(
-          market.getByRole('img', { name: /^Bonds: bar height/ })
-        ).toHaveAttribute('viewBox', '0 0 440 258')
       } else {
         await expect(ready).toHaveCount(0)
         await expect(
@@ -321,7 +521,7 @@ test('legacy Market and Team links map to Decisions only on wider screens', asyn
   for (const label of ['Market', 'Team']) {
     await page.getByRole('link', { name: label, exact: true }).click()
     await expect(page).toHaveURL(new RegExp(`tab=${label.toLowerCase()}`))
-    await page.setViewportSize({ width: 768, height: 1024 })
+    await page.setViewportSize({ width: 641, height: 1024 })
     await expect(
       page.getByRole('spinbutton', { name: 'Savings', exact: true })
     ).toBeVisible()
@@ -350,7 +550,7 @@ test('embedded Market polls revealed outcomes without discarding drafts and hand
   page,
 }) => {
   await page.clock.install()
-  await page.setViewportSize({ width: 768, height: 1024 })
+  await page.setViewportSize({ width: 641, height: 1024 })
   const data = await openCockpit(page)
   const market = page.getByTestId('market-panel')
   const savings = page.getByRole('spinbutton', { name: 'Savings', exact: true })
@@ -374,6 +574,7 @@ test('embedded Market polls revealed outcomes without discarding drafts and hand
   await expect(
     market.getByText('Market outlook is not available yet.')
   ).toBeVisible()
+  await expectNoPageOverflow(page)
   await expect(savings).toHaveValue('54.9')
 })
 
@@ -413,10 +614,9 @@ test('phone reference captures preserve the existing shell and content', async (
         { width: 320, height: 844 },
         { width: 390, height: 844 },
         { width: 600, height: 1024 },
-        { width: 601, height: 1024 },
-        { width: 767, height: 1024 },
-        { width: 844, height: 390 },
-        { width: 1024, height: 500 },
+        { width: 640, height: 1024 },
+        { width: 600, height: 390 },
+        { width: 640, height: 500 },
       ]) {
         await page.setViewportSize(viewport)
         await expectNoPageOverflow(page)
