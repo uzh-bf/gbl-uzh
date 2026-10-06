@@ -14,6 +14,17 @@ Evidence base: three Opus reviews run 2026-07-29 — dependency currency (npm re
 dev-restructure impact analysis (`66ed4e0..origin/dev`), production-readiness review of the
 branch tree. Findings below are from those reports unless marked otherwise.
 
+## Outcome note (2026-10-06)
+
+The example migration shipped as the eight-PR stack #197 → #205, now carrying
+`dev` through #216 and the 2026-09 review fixes. Current heads, CI state and
+the remaining improvement list live in
+`project/2026-08-10-pr-205-trpc-examples-stack-plan.md` under
+`## 2026-10-06 stack state and pre-merge improvements`. The W7 follow-ups
+below that are still open (ui hook decoupling, Redis bus, SSE replay,
+`@trpc/tanstack-react-query`) are restated there; this file is not updated
+further.
+
 ## Outcome note (2026-08-10)
 
 W7's repository-example migration is no longer future work: Rate Wars and

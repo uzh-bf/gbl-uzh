@@ -2,29 +2,146 @@
 
 Date: 2026-08-10
 Plan: `project/2026-08-10-pr-205-trpc-examples-stack-plan.md`
-Status: the first-slice plan includes the comment-audit and platform-contract
-reconciliation. The stack has been corrected after integrated review findings,
-published at the rebased layer heads below, and reconciled through the final
-correction-review boundary. All eight PRs remain open, ready for review, and
-unmerged.
-The known SonarCloud Code Analysis exceptions on #202 and #204 remain
-intentionally outside the approved check gate. The final correction review
-found only pre-closure plan metadata contradictions; those are now resolved in
-this plan and the local gate register.
-
-The final layer's reviewed content is through `47a430f3`, on top of the last
-published #205 head `7515ea2a`. The substantive documentation commit is
-`6cfeb61b` (`docs(trpc): align final architecture guidance`); the following
-plan-only commits reconcile its boundary and review evidence. It updates the
-canonical `docs/` OKF bundle, example README guidance, and the native-host
-watcher comment. A focused Agy review using Gemini 3.7 Flash High passed with
-no actionable findings. The complete eight-branch stack has now been pushed
-to `origin`; this plan-only continuation does not merge or change PR review
-state.
+Status (2026-10-06): the stack carries the review fixes from the 2026-09-25
+tRPC review, every `dev` commit through #216 ported to tRPC by merge commits,
+and the CI fixes that port needed. All eight PRs are open and unmerged; #197
+is approved, the others have no review decision. CI on every layer fails only
+the trading test that also fails on `dev`, plus occasional flaky runs. The
+SonarCloud duplication gate stays red on #195, #202, #204 and #205 until the
+`.sonarcloud.properties` change on #205 reaches `dev`. The section
+`## 2026-10-06 stack state and pre-merge improvements` is the current record;
+the 2026-08-13 sections below are historical.
 Provider: GitHub stacked changes
-Base: `dev` at `6bab3ed`
-Worktree: `trees/trpc-examples-stack`
+Base: `dev`, no drift against #197 as of 2026-10-06
+Worktree: `trees/review-trpc-stack-205` (tracks all eight layer branches)
 Mode: guided, with a review pause after every layer
+
+## 2026-10-06 stack state and pre-merge improvements
+
+### Pushed heads
+
+| Layer | PR | Head |
+| --- | --- | --- |
+| trpc-stack/00-absorb-dev-toolchain | #197 | `95b59508b` |
+| trpc-stack/01-platform-trpc-kernel | #196 | `76b110a9f` |
+| trpc-stack/02-demo-game-trpc-migration | #195 | `fd23af692` |
+| trpc-stack/03-ci-devcontainer-docs-collateral | #194 | `cfb6529ab` |
+| rs/trpc-examples/00-pages-router-pattern | #201 | `32442b785` |
+| rs/trpc-examples/01-rate-wars-trpc | #202 | `467e96dea` |
+| rs/trpc-examples/02-central-bank-trpc | #204 | `6f82f02cd` |
+| rs/trpc-examples/03-graphql-deprecation-docs | #205 | `87d2c1870` |
+
+No branch was force-pushed. Each layer merges the layer below with a merge
+commit; `dev` was merged into every layer the same way.
+
+### What changed since 2026-08-13
+
+- Review fixes 1–3 from the 2026-09-25 review (`b50463d42` on #205).
+- `dev` #207–#216 merged into each layer. GraphQL-only features from those
+  PRs were ported to tRPC on the layer that owns them. Two `dev`-tracked env
+  files (`apps/demo-game/.env.production-arm64`, `.env.staging-arm64`, public
+  URLs only) required `AGENTS_SKIP_DATA_HYGIENE=1` on the merge commits of
+  layer 02 and above.
+- `packages/ui` pins `next` as a dev dependency (`764f19f6e`, layer 02) so
+  `turbo prune --docker` keeps the `next@16.2.9` snapshot the frozen Docker
+  install needs. Layer 02 Docker build run 37000662720 is green.
+- `useLearningActivities` in demo-game invalidates `learning.byId` with
+  `refetchType: 'all'` (`4279e7ab9`, layer 02) so a submitted activity
+  refreshes after the player switches away. The examples' hooks only
+  invalidate the active activity and were unaffected.
+- `play.updateReadyState` returns `{ id, isReady }` instead of mapping the
+  partial player through `toPlayerSelfDto` (`76b110a9f`, layer 01). The
+  service returns the bare update without the `game` relation, so the mapper
+  threw and the Ready switch never flipped. rs/02 already had the same fix as
+  `b4fd0536a`; it is now on the layer that owns the router.
+- `.sonarcloud.properties` excludes both example `GameLayout.tsx` files from
+  duplication detection (`5e30e7df8`, #205); they copy the demo game's SSE
+  reconnect refresh for the same scaffold reason as the other exclusions.
+- The #205 body was rewritten to describe the current stack (approved
+  2026-10-02 to update directly).
+
+### CI state per layer
+
+- Playwright: every layer fails only
+  `demo-game-flow.spec.ts` "trading actions submit one validated modifier and
+  reset after success" (`:1077`; `:1048` on layer 01). The same test fails on
+  `dev` (runs 36423109291, 36410553664, 36398377402). Layer 02 run
+  37372849315: 10 passed, 1 flaky (`:953`), 1 failed (`:1077`). rs/00 also hit
+  the flaky `central-bank-flow.spec.ts:250`, which flakes on `dev` too.
+- Docker: green except two flakes. `build_startinvest_arm64` fails
+  intermittently in `next/font`'s Google Fonts loader (`TypeError: Cannot read
+  properties of null (reading '1')`), introduced by `dev` #211's
+  `next/font/google` use; seen on #196 (`a28c70ff2`, passed on rerun) and
+  #201 (run 37372851588). #195 run 37372849381 "Build ARM64 migration image"
+  died on a runner shutdown signal.
+- TypeScript checks: green on every layer.
+- SonarCloud: duplication 4.0% against a 3% gate on #195, #202, #204 and
+  #205. SonarCloud reads `.sonarcloud.properties` only from the default
+  branch, so the exclusion on #205 clears the gate after the stack merges.
+
+### Before merge
+
+Nothing in the code blocks merging. Two merge-order facts matter:
+
+1. Merge the whole stack in one window, bottom to top. Merging only the lower
+   layers leaves `dev` with a red Sonar duplication gate (the exclusion lives
+   on #205) and with `docs/api-layer.md` and `docs/deploying-a-game.md` still
+   naming `/api/graphql` for the arm64 images (fixed only on #205).
+2. The trading test failure is pre-existing on `dev` and is not a stack
+   regression. It needs its own fix on `dev`.
+
+### Cheap improvements, new scope, not started
+
+Each is a micro change with no contract change. None is required for merge.
+
+- `events.user` has no client consumer in demo-game, the examples or
+  `packages/ui`. Remove it or document the intended consumer.
+- `PlatformContext.schemas` is write-only: the three app routers set it,
+  nothing in `packages/platform` reads it. `services` is read by
+  `period.add` and `play.saveConsolidationDecision` and stays.
+- `errorFormatter` in `packages/platform/src/trpc/init.ts` only masks
+  `INTERNAL_SERVER_ERROR`. Zod `BAD_REQUEST` errors reach the `onError`
+  toasts as the raw issue JSON. Flattening Zod issues into one message
+  changes what players see and should be a deliberate follow-up.
+
+### Later
+
+- `play` inputs still take JSON strings (`payload: z.string()`,
+  `facts: z.string()` in `routers/play.ts`) and `JSON.parse` them. Accepting
+  objects validated by the game's yup schema is a contract change for every
+  game client.
+- `.output()` is missing on `auth.logoutAsTeam`, `game.addCountdown`,
+  `game.toggleSwitch`, `learning.list`, `learning.byId`, `learning.attempt`,
+  `period.add`, `play.updateReadyState`, `play.saveConsolidationDecision`,
+  `segment.add` and `story.markVisited`. Subscriptions do not take
+  `.output()`. The returns are scalars or already DTO-mapped; add schemas or
+  stop claiming every procedure has an output contract.
+- 51 `ctx as any` / `input as any` casts at router-to-service calls. A
+  `toServiceContext` adapter would remove most of them.
+- 31 `onError` toast handlers across demo-game and the examples repeat the
+  same shape; a shared helper is optional.
+- `src/server/trpc/context.ts`, `src/pages/api/trpc/[trpc].ts` and
+  `src/lib/trpc.tsx` are copied into demo-game, rate-wars and central-bank
+  with small drift (4–11 lines each). Platform helpers would stop the drift.
+  The `GameLayout.tsx` files are not copies; each game owns its layout and
+  only the SSE reconnect block is shared.
+- Self-host the demo-game font instead of `next/font/google` to remove the
+  build-time Google Fonts fetch that flakes `build_startinvest_arm64`.
+- `packages/ui` still declares `@apollo/client` for the deprecated
+  Apollo-backed hook; removal follows ADR 0001's consumer-confirmation gate.
+- Unchanged from the 2026-07-29 roadmap: single-replica in-memory event bus
+  (Redis for scale-out), no SSE missed-event replay beyond the `onStarted`
+  refetch, no `loginAsTeam` rate limit, unbounded `game.list`, unfiltered
+  `story.list`, one global SSE channel for all games, optional
+  `@trpc/tanstack-react-query`.
+- The GraphQL-only `addGamePeriod` rejection assertion was dropped from the
+  Playwright port; `PeriodFactsSchema` strips `rollsPerSegment`.
+
+### Authority
+
+This record authorizes nothing. Merging, marking ready, force-pushing and
+requesting reviewers need explicit instruction. The user requests human
+reviewers.
 
 ## 2026-08-13 final pushed state
 
