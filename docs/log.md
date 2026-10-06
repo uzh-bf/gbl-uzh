@@ -2,6 +2,8 @@
 
 ## 2026-10-06
 
+**Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — adapt welcome to the tablet designs with a wider introduction, shared popup bank choices and live preview with circular avatars, retaining the separate review step, mobile layout/picker behavior and profile Save/Cancel flow. Review consolidates the step heading and uses CSS alone for preview visibility, avoiding duplicate viewport state.
+
 **Update**: [UI Building Blocks](ui-components.md) — align quarter/year strips across phone and tablet layouts and give both the same compact year tabs and bring learning/story sheets onto the cockpit typography, control and spacing scale while retaining phone sheet styling.
 
 ## 2026-09-30

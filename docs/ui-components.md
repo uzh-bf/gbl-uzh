@@ -7,7 +7,7 @@ tags:
   - design-system
   - tailwind
   - components
-timestamp: "2026-10-06T10:00:00Z"
+timestamp: "2026-10-06T15:00:00Z"
 ---
 
 # UI Building Blocks
@@ -92,7 +92,9 @@ At 1200px the workspace uses three columns; below that the dice section sits abo
 
 ### Player styling convention
 
-The demo-game cockpit and welcome flow use colocated Tailwind utilities, with shared player colors and font tokens in `apps/demo-game/src/globals.css`. Primary actions use the UZH primary token; Savings, Bonds, and Stocks use named asset tokens shared with the welcome screen. The welcome screen's portaled pickers apply their font, size, line height, and colors directly to dialog content. Welcome-local controls in `apps/demo-game/src/components/welcome/WelcomeControls.tsx` reuse design-system buttons with 44px mobile / 48px desktop minimum heights and forward native props and refs; text inputs and Edit/Cancel buttons share utility classes. `WelcomePickerTrigger` shares the native avatar/canton trigger structure and forwards native props and refs. Welcome and cockpit retain separate action dimensions, while sharing palette tokens, including welcome's primary hover shade.
+The demo-game cockpit and welcome flow use colocated Tailwind utilities, with shared player colors and font tokens in `apps/demo-game/src/globals.css`. Primary actions use the UZH primary token; Savings, Bonds, and Stocks use named asset tokens shared with the welcome screen. The welcome screen's portaled pickers apply their font, size, line height, and colors directly to dialog content. Welcome-local controls in `apps/demo-game/src/components/welcome/WelcomeControls.tsx` reuse design-system buttons with 44px minimum heights under the mobile/tablet variants and 48px otherwise and forward native props and refs; text inputs and Edit/Cancel buttons share utility classes. `WelcomePickerTrigger` shares the native avatar/canton trigger structure and forwards native props and refs. Welcome and cockpit retain separate action dimensions, while sharing palette tokens, including welcome's primary hover shade.
+
+Welcome opts into the cockpit’s complementary `tablet:` CSS variant, retaining its previous layout below 768px and in compact touch landscape. Tablet/desktop welcome caps at 1440px and uses 20px headings, 16px body text, 14px secondary text and 44px actions. The intro has two columns below its image; setup/review place a live bank preview beside the main two-thirds column. Setup uses the same avatar and searchable canton popup pickers on phones, tablets and desktops, retaining draft confirmation and cancellation. All welcome avatar images and the preview placeholder are circular. Both presentations share one form and step controller, including when resized; CSS alone controls preview visibility. The existing review step and profile Save/Cancel actions remain; edit mode omits starting capital. Welcome-local presentation stays in `src/components/welcome/`, with no shared-package or global sizing changes.
 
 Reuse structure and styles through app-local components: `PlayerActionButton` provides primary/secondary actions with shared responsive dimensions; `AllocationNotice` provides success/pending/informational notices; `AllocationRow` shares asset identity and amounts between editing and saved summaries. `AllocationBar` owns proportional sections and container-query label visibility; its optional `compact` presentation suppresses labels and internal separators for History table mixes, whose wrappers provide accessible percentages. These components live in `apps/demo-game/src/components/cockpit/`; promote them to the shared UI package only when another game needs them.
 
@@ -106,7 +108,7 @@ Preserve the current pixel dimensions and explicit viewport thresholds when adap
 
 ### Demo-game sizing contract
 
-`apps/demo-game/src/globals.css` centrally defines the demo-game sizing roles. Apply the `mobile:` variant (below **601px**) to opt a component into this scale; existing base and desktop utilities preserve the previous desktop appearance. Keep the **14px document root**, welcome's 359px avatar-grid boundary and 721px shell boundary, and the phone shell's existing widths.
+`apps/demo-game/src/globals.css` centrally defines the demo-game sizing roles. Apply the `mobile:` variant (below **601px**) to opt a component into this scale; existing base and desktop utilities preserve the previous desktop appearance. Keep the **14px document root**, welcome's phone-picker 359px avatar-grid boundary and below-tablet 721px padding boundary, and the phone shell's existing widths.
 
 | Role                     | Mobile value                     | Usage                                        |
 | ------------------------ | -------------------------------- | -------------------------------------------- |

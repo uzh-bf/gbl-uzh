@@ -19,7 +19,7 @@ export function WelcomeActionButton({
       onClick={(event) => event && onClick?.(event)}
       className={{
         root: cn(
-          'bg-player-primary font-player hover:bg-player-primary-hover focus-visible:outline-player-primary disabled:bg-player-disabled-surface disabled:text-player-disabled disabled:hover:bg-player-disabled-surface mobile:app-control min-h-[48px] cursor-pointer rounded-[6px] border-0 px-[21px] py-[10px] text-[18px] leading-[1.5] font-normal text-white focus-visible:outline-2 focus-visible:outline-offset-[3px] disabled:cursor-not-allowed disabled:opacity-100',
+          'bg-player-primary font-player hover:bg-player-primary-hover focus-visible:outline-player-primary disabled:bg-player-disabled-surface disabled:text-player-disabled disabled:hover:bg-player-disabled-surface mobile:app-control tablet:app-control min-h-[48px] cursor-pointer rounded-[6px] border-0 px-[21px] py-[10px] text-[18px] leading-[1.5] font-normal text-white focus-visible:outline-2 focus-visible:outline-offset-[3px] disabled:cursor-not-allowed disabled:opacity-100',
           className
         ),
       }}
