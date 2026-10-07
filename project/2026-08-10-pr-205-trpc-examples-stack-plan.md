@@ -11,8 +11,11 @@ SonarCloud duplication gate stays red on #195, #202, #204 and #205 until the
 `.sonarcloud.properties` change on #205 reaches `dev`. The section
 `## 2026-10-06 stack state and pre-merge improvements` is the current record;
 the 2026-08-13 sections below are historical.
+Next (2026-10-07): the section "2026-10-07 review-comment fixes and `dev`
+#217 integration (plan)" fixes the open review threads and merges `dev` #217
+across the stack. It is waiting for approval.
 Provider: GitHub stacked changes
-Base: `dev`, no drift against #197 as of 2026-10-06
+Base: `dev`; #197 is one commit behind (`07f296f38`, #217) as of 2026-10-07
 Worktree: `trees/review-trpc-stack-205` (tracks all eight layer branches)
 Mode: guided, with a review pause after every layer
 
@@ -142,6 +145,257 @@ Each is a micro change with no contract change. None is required for merge.
 This record authorizes nothing. Merging, marking ready, force-pushing and
 requesting reviewers need explicit instruction. The user requests human
 reviewers.
+
+## 2026-10-07 review-comment fixes and `dev` #217 integration (plan)
+
+### Approval summary
+
+**Why and what changes?** On 2026-10-06 the stack had 73 open review
+threads and none had a reply. 47 of them are from Jakob, and his #201 review
+notes that earlier comments were not considered. Most are still valid on the
+top of the stack. `dev` has also moved by one commit, #217 (tablet layout),
+which adds GraphQL-mocked Playwright specs and rewrites the demo-game
+`GameLayout`. This plan does three things in one bottom-to-top pass:
+
+1. Merge `dev` #217 into #197 and port its GraphQL code and specs to tRPC on
+   #195.
+2. Fix the valid review findings on the layer that owns each file (F1–F9
+   below).
+3. Draft a reply for every open thread, including the ones that are fixed,
+   by design or deferred, for the user to approve before anything is posted.
+
+**What stays unchanged?** No public procedure is removed or renamed. The
+GraphQL compatibility surface stays (ADR 0001). The larger design items (D1–D6
+below) stay deferred and get a reply that says so.
+
+**What could change the decision?** One open choice, item F1-a: whether
+`play.result` keeps sending all period and segment `facts` to players.
+Recommendation: keep `dev` parity in the platform, add an optional per-game
+redaction hook, and use it in demo-game to hide unrevealed dice rolls. #217 makes the
+Playwright baseline worse: `dev` at `07f296f38` fails three demo-game tests
+(run 37574884683), not one. The stack is judged against that set.
+
+**How will we know it is done?** Every layer contains `dev` at `07f296f38` and
+has no merge conflicts. F1–F9 are on their owning layers. Local checks pass on
+each layer. CI shows no Playwright failures beyond `dev`'s three. A reply file
+covers every open thread.
+
+**What does approval authorize?** Local commits, merge commits from `dev`
+and from each lower layer, and ordinary non-force pushes to the eight layer
+branches. It also covers updating the #205 body and this plan. It does not
+authorize posting or resolving review threads; that needs a separate yes on
+the drafted replies. Merging, marking ready, force-pushing and requesting
+reviewers stay withheld.
+
+### Execution details
+
+Execution mode: solo (Claude Opus 5.5 main session). Final simplification and
+final review are self-review, labeled as such.
+
+#### Sequence
+
+The work runs as one cascade. Each layer is finished before the next one
+starts. For each layer: merge the layer below with a merge commit, apply that
+layer's fixes, run the layer checks, commit, then move up. The pushes run
+after all eight layers pass locally, bottom to top, without force.
+
+| Step | Layer (PR) | Work |
+| --- | --- | --- |
+| 0 | `trpc-stack/00-absorb-dev-toolchain` (#197) | Merge `origin/dev` (`07f296f38`). Then F8 for files on this layer. |
+| 1 | `trpc-stack/01-platform-trpc-kernel` (#196) | Merge 00. F1–F5. |
+| 2 | `trpc-stack/02-demo-game-trpc-migration` (#195) | Merge 01 and resolve #217 against the tRPC port (I1). F1-b, F6. |
+| 3 | `trpc-stack/03-ci-devcontainer-docs-collateral` (#194) | Merge 02. F8 for files on this layer. |
+| 4 | `rs/trpc-examples/00-pages-router-pattern` (#201) | Merge 03. F7. |
+| 5 | `rs/trpc-examples/01-rate-wars-trpc` (#202) | Merge rs/00. F9 (Rate Wars). |
+| 6 | `rs/trpc-examples/02-central-bank-trpc` (#204) | Merge rs/01. F9 (Central Bank). |
+| 7 | `rs/trpc-examples/03-graphql-deprecation-docs` (#205) | Merge rs/02. F8 for files on this layer. Update this plan and the #205 body. Draft the replies (R1). |
+
+Earlier `dev` merges on layer 02 and above needed `AGENTS_SKIP_DATA_HYGIENE=1`
+because of the two `dev`-tracked arm64 env files. That approval covers merge
+commits of this stack only. Fix commits never use it.
+
+#### I1 — `dev` #217 integration
+
+#217 touches 35 files. Most are demo-game components with no API calls; they
+merge as is. The work that needs porting, all on #195:
+
+- `apps/demo-game/src/components/GameLayout.tsx`: #217 rewrites the layout
+  (`usePlayerLayout`, tablet structure). Keep #217's layout and keep the
+  stack's tRPC wiring: `play.result`, `play.self`, `events.global` with the
+  `onStarted` refetch, `updateReadyState`, `story.markVisited`, and the local
+  `useLearningActivities`.
+- `apps/demo-game/src/components/RootLayout.tsx`: one-line change on `dev`;
+  apply F6's comment removal on top.
+- `playwright/tests/support/cockpitFixture.ts` imports `ResultQuery` from
+  `apps/demo-game/src/graphql/generated/ops`. That path does not exist in the
+  stack. Retype the fixture from `RouterOutputs['play']['result']`.
+- `playwright/tests/demo-game-tablet.spec.ts` (new, 705 lines) and the
+  additions to `demo-game-flow.spec.ts` and `demo-game-welcome.spec.ts` mock
+  `**/api/graphql` by `operationName` (`Result`, `PerformAction`,
+  `UpdateReadyState`, `UpdatePlayerData`). Port them to `routeTrpc` /
+  `readTrpcCalls` in `playwright/tests/support/trpc.ts`, as the earlier port
+  did.
+- The `.agents/skills` and `docs/` edits from #217 merge on #197. Check
+  whether they name GraphQL operations; if so, reword them on #205 (the docs
+  layer).
+
+Acceptance for I1: `git grep -n "api/graphql\|graphql/generated" -- playwright
+apps/demo-game` finds nothing on #195. Demo-game `check:ts` and the Playwright
+type check pass.
+
+#### Fix list
+
+Each fix stays in its owning layer and changes the smallest region that
+resolves the thread. Thread IDs are `<PR>.<index>` from the 2026-10-06 thread
+dump.
+
+- **F1 — player result facts (#196, #195).**
+  - F1-a (decision): `play.result` copies period and segment `facts` into
+    `currentGame.periods`, `activePeriod` and `activeSegment`
+    (`packages/platform/src/trpc/dto/results.ts`). `dev`'s GraphQL `QResult`
+    returns the same fields. Player cockpits read them: demo-game
+    `readScenario(activePeriod.facts)`, Central Bank
+    `activeSegment.facts`. Demo-game's `SegmentService.initialize` writes all
+    of the segment's `diceRolls` and `returns` into segment facts when the
+    segment starts. The client hides unrevealed rolls, but the response
+    carries them. Recommended: an optional `playerFacts` hook on
+    `createPlatformRouter` (`{ period?, segment? }`, identity by default),
+    applied by the result mapper before output validation. Also correct the
+    comment in `dto/contracts.ts` that claims these facts are absent.
+    Threads: 196.11, 196.13; Greptile summary on #196.
+  - F1-b (#195): demo-game passes a segment redactor that keeps only
+    `revealedRollIndices` entries of `diceRolls` and `returns`. Unit test the
+    redactor; it protects game integrity.
+- **F2 — required game schemas (#196).** `createPlatformRouter` types every
+  schema as optional, but `requireFactsSchema` throws for `game.create`,
+  `period.add`, `segment.add` and fact-bearing `play.updatePlayerData`. Make
+  the schemas required in the options type, matching the runtime. Threads:
+  196.1, 196.12. Remove the write-only `PlatformContext.schemas` field if it
+  has no reader.
+- **F3 — learning attempt validation (#196).**
+  - Parse and validate string selections in `normalizeSelection` as an array
+    of integers, and return `BAD_REQUEST` when they are malformed (196.14).
+  - Remove the dead `instanceof SyntaxError` branch, because
+    `PlayService.attemptLearningElement` swallows all errors (CodeRabbit
+    nitpick, 196.38).
+  - Order learning-element `options` by `id` in both the DTO query and the
+    grading query. Keep a placeholder for malformed options so indices stay
+    aligned (196.5).
+  - Flatten Zod issues in `errorFormatter` into a readable message, so the
+    new `BAD_REQUEST`s do not reach toasts as raw JSON.
+- **F4 — DTO correctness nits (#196).**
+  - Reject non-finite numeric game IDs (196.3) and non-finite numbers in
+    `JsonValue` (CodeRabbit outside-diff).
+  - Align `activeSegmentIx` null handling between the list and admin mappers
+    (196.4).
+  - Route `nextAutoContinueAt` through `toDate` (196.7).
+  - Keep `activePeriod` when `activeSegmentIx` is null (nitpick).
+  - Make `tutorialCompleted` required (196.28) and fix the `private-role`
+    test fixture (196.42).
+  - Remove the redundant `period`/`segment` redeclarations in `results.ts`.
+- **F5 — Jakob's platform cleanups (#196).**
+  - `declare global` for the pubsub and realtime keys instead of
+    `globalThis as any` (196.16, 196.17).
+  - Merge the two near-identical subscribe functions, inline the single-use
+    channel helpers, and drop the `yield` cast (196.15, 196.18, 196.19).
+  - Remove the legacy one-argument `publishGlobalNotification` overload and
+    its test uses (196.20, 196.23).
+  - Inline single-use inputs and the generator, and stop re-exporting
+    contract types from `dto/results.ts` and `dto/game.ts` where callers can
+    import from `contracts` (196.24, 196.25, 196.32, 196.34, 196.35).
+  - Use `PlatformUser` instead of `RawPlatformUser` where they match
+    (196.39). No behavior change.
+- **F6 — demo-game cleanups (#195).**
+  - Delete the unused `getFacts`, `getFactsArray` and `getNumber` from
+    `lib/facts.ts` (195.8).
+  - Remove the `RootLayout` font comment (195.4).
+  - Import `ActionTypes` from `types/facts` and drop the re-export in
+    `services/ActionsReducer.ts` (195.14).
+  - Add the zod-migration TODO to `types/facts.ts` (195.13).
+- **F7 — tRPC client and SSE settings (#201).**
+  - Drop `ssr: false`, which is the default (201.1).
+  - Reduce `getUrl()` to `/api/trpc` in all three apps, since SSR is off
+    (201.2).
+  - Set the SSE ping and reconnect values and `maxDurationMs` from the
+    current tRPC docs (checked with ctx7 at execution time); Jakob proposes a
+    5 s ping and a 5 min maximum (201.3, 201.4).
+  - Behavior change: more pings, and a forced reconnect every 5 min, which
+    the `onStarted` refetch already handles.
+- **F8 — docs and plan hygiene (#197, #194, #205).**
+  - Replace every tracked `/Users/...` path with a repository-relative or
+    `<repo>/...` value. Each file is fixed on the layer where it is tracked
+    (197.6).
+  - Fix the MD018 line starting with `#194` (197.4).
+  - State that the cited review reports are local-only (197.7).
+  - Correct the demo-game lint-job comment in `.github/workflows/demo-game.yml`:
+    lint does not need the package builds (197.3).
+  - Align the Playwright skill's CI section with the per-game matrix and fix
+    its MD028 callout (205.3, 205.7).
+  - Use absolute GitHub links in `packages/platform/README.md` (205.4).
+  - Add `nexus` to the GraphQL audit patterns (205.5).
+  - Run npm through `process.execPath` and `npm-cli.js` on Windows in
+    `scripts/package-verification.mjs` (205.6).
+- **F9 — example learning and admin fixes (#202, #204).**
+  - Port demo-game's guarded attempt flow to both examples'
+    `useLearningActivities`. Capture the submitted element, invalidate that
+    element, and apply the result or toast only while it is still active
+    (202.0).
+  - Check `error` before the loading guard on Rate Wars `admin/games.tsx`,
+    `admin/games/[id].tsx`, `admin/reports/[id].tsx`, and Central Bank
+    `admin/games.tsx` (202.1, 204.0).
+
+#### Deferred, replied to
+
+These get a reply explaining the decision and stay in `## 2026-10-06 … ###
+Later`:
+
+- D1: no real subscription cap (196.2).
+- D2: no `tracked()`/`lastEventId` resume (196.22).
+- D3: "company" naming and the `Team \d+` rule in the platform (196.30, nitpick).
+- D4: the unused `loginAsTeam` return value (196.31).
+- D5: `useSubscription` return object and server-side learning lists (195.2, 195.6).
+- D6: inferring DTOs from Prisma (196.26, 196.27).
+
+Answer-only threads: 196.21, 196.33, 196.36, 196.37, 196.40, 196.41, 195.3,
+195.5, 195.11, plus Jakob's process feedback on #197. Threads that are already
+fixed or moot get a reply naming the commit: 195.1, 195.7, 195.9, 195.10,
+195.15, 195.16, 195.17, 196.29, 196.43.
+
+#### R1 — reply drafts
+
+Write `project/_local/reviews/2026-10-07-stack-thread-replies.md` (gitignored).
+It holds one entry per open thread: the PR, the thread, the verdict, the
+commit, and the reply text. The user approves it before anything is posted or
+resolved. Posting uses `gh api` replies on the existing threads; resolving uses
+`resolveReviewThread`. Both are withheld until that approval.
+
+#### Verification
+
+Repeat per layer, after the merge and fixes:
+
+- The frozen install, the platform and ui builds, prisma generate, and
+  `check:ts` across all packages.
+- On layers that change the platform: the platform tests, including new tests
+  for F1-a's hook, F3's selection validation and F3's option order.
+- On #195: the demo-game tests (including the F1-b redactor test), lint, and
+  the Playwright type check.
+- On #205: `verify:package`.
+
+After the pushes, CI on all eight PRs. The Playwright baseline is `dev`
+run 37574884683 at `07f296f38`, which fails three tests:
+`demo-game-flow.spec.ts` "trading actions submit one validated modifier and
+reset after success", "admin and players complete multi-team multi-period
+demo-game flow", and "Decisions forecast matches Market and handles
+unavailable scenarios". Any other failure is a stack defect. If the
+multi-period flow fails differently from `dev`, compare the traces before
+accepting it.
+
+Final pass: simplify the complete diff, then review the integrated result.
+Both are self-reviews.
+
+#### Progress
+
+- 2026-10-07: plan written. Waiting for approval and the F1-a decision.
 
 ## 2026-08-13 final pushed state
 

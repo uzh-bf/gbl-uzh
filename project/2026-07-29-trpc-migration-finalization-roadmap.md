@@ -24,6 +24,8 @@ the remaining improvement list live in
 below that are still open (ui hook decoupling, Redis bus, SSE replay,
 `@trpc/tanstack-react-query`) are restated there; this file is not updated
 further.
+The 2026-10-07 section of the same plan schedules the review-thread fixes
+and the `dev` #217 integration.
 
 ## Outcome note (2026-08-10)
 
