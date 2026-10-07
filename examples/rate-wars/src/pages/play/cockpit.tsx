@@ -1,4 +1,3 @@
-import { useMutation, useQuery } from '@apollo/client'
 import {
   Button,
   Card,
@@ -24,11 +23,11 @@ import {
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
 
 import { Form, Formik } from 'formik'
-import {
-  PerformActionDocument,
-  ResultDocument,
-} from 'src/graphql/generated/ops'
 import * as yup from 'yup'
+import { getFacts } from '~/lib/facts'
+import { trpc } from '~/lib/trpc'
+import type { PeriodFacts } from '~/types/Period'
+import type { ResultFacts } from '~/types/facts'
 import GameLayout from '../../components/GameLayout'
 
 function GameHeader({ currentGame }) {
@@ -188,22 +187,24 @@ function ScenarioCard({ scenario }: { scenario: any }) {
 }
 
 function Cockpit() {
-  const { loading, error, data } = useQuery(ResultDocument, {
-    fetchPolicy: 'cache-first',
+  const { data, isLoading, error } = trpc.play.result.useQuery()
+  const { data: self } = trpc.play.self.useQuery()
+  const utils = trpc.useUtils()
+
+  const performAction = trpc.play.performAction.useMutation({
+    async onSuccess() {
+      await utils.play.result.invalidate()
+    },
   })
 
-  const [performAction] = useMutation(PerformActionDocument, {
-    refetchQueries: [ResultDocument],
-  })
-
-  if (loading) return null
+  if (isLoading) return null
   if (error) return `Error! ${error}`
 
-  const playerDataResult = data.result
+  const playerDataResult = data
   if (!playerDataResult) return null
   const currentGame = playerDataResult.currentGame
   const players = currentGame?.players ?? []
-  const selfId = data.self?.id
+  const selfId = self?.id ?? ''
 
   switch (currentGame?.status) {
     case 'PREPARATION':
@@ -227,9 +228,12 @@ function Cockpit() {
       )
 
     case 'RUNNING': {
-      const resultFacts = playerDataResult.playerResult.facts
+      const resultFacts = getFacts(
+        playerDataResult.playerResult?.facts
+      ) as ResultFacts
       const decisions = resultFacts.decisions ?? { depositRate: 1, loanRate: 4 }
-      const scenario = currentGame.activePeriod?.facts?.scenario
+      const scenario = getFacts(currentGame.activePeriod?.facts).scenario as
+        PeriodFacts['scenario'] | undefined
       const lastMarket = resultFacts.lastMarket
 
       const schema = yup.object({
@@ -274,14 +278,12 @@ function Cockpit() {
                   }}
                   validationSchema={schema}
                   onSubmit={async (values) => {
-                    await performAction({
-                      variables: {
-                        type: '',
-                        payload: JSON.stringify({
-                          depositRate: Number(values.depositRate),
-                          loanRate: Number(values.loanRate),
-                        }),
-                      },
+                    await performAction.mutateAsync({
+                      type: '',
+                      payload: JSON.stringify({
+                        depositRate: Number(values.depositRate),
+                        loanRate: Number(values.loanRate),
+                      }),
                     })
                   }}
                 >
@@ -360,7 +362,9 @@ function Cockpit() {
 
     case 'CONSOLIDATION':
     case 'PAUSED': {
-      const resultFacts = playerDataResult.playerResult.facts
+      const resultFacts = getFacts(
+        playerDataResult.playerResult?.facts
+      ) as ResultFacts
       const decisions = resultFacts.decisions
       return (
         <GameLayout>
@@ -423,7 +427,7 @@ function Cockpit() {
         )
       }
 
-      const facts = latest.facts
+      const facts = getFacts(latest.facts) as ResultFacts
       const history = facts.history ?? []
       const lastSnapshot = history[history.length - 1]
       const market = facts.lastMarket ?? []
