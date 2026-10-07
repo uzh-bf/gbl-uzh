@@ -427,6 +427,9 @@ Both are self-reviews.
     browser client stops reading it.
   - The #205 package verifier accepted only `export { createPlatformRouter }`
     and broke on the F1-a type re-export; it now matches either form.
+  - The F8 `nexus` search found stale `src/graphql/generated` entries in the
+    Rate Wars and Central Bank `.prettierignore` files. They are removed on
+    #205, not on their owning layers #202 and #204.
 
   Local checks passed on each layer: the platform tests (75 on #205), the
   demo-game tests (55), standard and native `tsc` for the three games and

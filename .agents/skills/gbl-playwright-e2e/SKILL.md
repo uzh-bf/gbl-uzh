@@ -79,7 +79,7 @@ Use `CI=true` for pnpm commands when non-interactive module cleanup can trigger.
 CI=true pnpm --filter @gbl-uzh/playwright check:ts
 CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium
 CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium tests/demo-game-flow.spec.ts
-CI=true npm_config_verify_deps_before_run=false pnpm --dir playwright exec playwright test --list --project=chromium --shard=1/2
+CI=true npm_config_verify_deps_before_run=false pnpm --dir playwright exec playwright test --list --project=chromium
 git diff --check -- .github .agents playwright apps/demo-game project
 ```
 
@@ -99,7 +99,7 @@ claim prettier verification unless the binary exists.
 - Use `PLAYWRIGHT_BASE_URL` only to override default
   `https://demo-game.localhost`.
 - Set file-local timeout only with measured runtime evidence. Local broad flow
-  runs about `1.1m-1.6m`, but the GitHub-hosted shard has reached the old
+  runs about `1.1m-1.6m`, but the GitHub-hosted CI job has reached the old
   `120_000` timeout after CI setup and slower player actions. The file default
   remains `300_000`; the multi-team lifecycle test uses `420_000` after a local
   run reached the final report at ~250s and exceeded the old popup wait during
