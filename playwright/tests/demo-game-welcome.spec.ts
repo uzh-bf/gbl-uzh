@@ -7,6 +7,7 @@ import {
   playerJoinUrl,
   requireBaseURL,
 } from './support/demoGame'
+import { callTrpc, routeTrpc } from './support/trpc'
 
 const viewports = [
   { name: 'narrow', width: 320, height: 844 },
@@ -28,7 +29,7 @@ async function openWelcome(admin: Page, browser: Browser, baseURL?: string) {
   return openPlayerWelcome(
     browser,
     appBaseURL,
-    await playerJoinUrl(admin, appBaseURL, 0)
+    await playerJoinUrl(admin, appBaseURL, 0),
   )
 }
 
@@ -42,14 +43,14 @@ async function captureViews(page: Page, state: string) {
       const bounds = await dialog.boundingBox()
       expect(bounds!.y).toBeGreaterThanOrEqual(0)
       expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(
-        viewport.height + 1
+        viewport.height + 1,
       )
       await expect(
-        dialog.getByRole('button', { name: /^Use / })
+        dialog.getByRole('button', { name: /^Use / }),
       ).toBeInViewport()
     } else
       await expect(
-        page.locator('footer').getByRole('button').last()
+        page.locator('footer').getByRole('button').last(),
       ).toBeInViewport()
     await capturePlayerScreenshot(page, {
       path: test.info().outputPath(`welcome-${state}-${viewport.name}.png`),
@@ -107,7 +108,7 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
     await name.fill('A name longer than twenty characters')
     await name.blur()
     await expect(
-      page.getByText('Use no more than 20 characters.')
+      page.getByText('Use no more than 20 characters.'),
     ).toBeVisible()
     await name.fill('Style Bank')
     await captureViews(page, 'setup')
@@ -119,7 +120,7 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
     await page.getByRole('button', { name: 'Use Bear', exact: true }).focus()
     await page.keyboard.press('Tab')
     await expect(
-      page.getByRole('button', { name: 'Cancel', exact: true })
+      page.getByRole('button', { name: 'Cancel', exact: true }),
     ).toBeFocused()
     await page.getByRole('button', { name: 'Cancel', exact: true }).click()
     await expect(avatar).toBeFocused()
@@ -142,17 +143,17 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
       .locator('[aria-label="Where is your bank?"]')
     expect(
       await cantonList.evaluate(
-        (element) => element.scrollHeight > element.clientHeight
-      )
+        (element) => element.scrollHeight > element.clientHeight,
+      ),
     ).toBe(true)
     await page
       .getByRole('button', { name: 'Zürich (ZH)', exact: true })
       .scrollIntoViewIfNeeded()
     await expect(
-      page.getByRole('button', { name: 'Zürich (ZH)', exact: true })
+      page.getByRole('button', { name: 'Zürich (ZH)', exact: true }),
     ).toBeInViewport()
     await expect(
-      page.getByRole('button', { name: 'Use Aargau (AG)', exact: true })
+      page.getByRole('button', { name: 'Use Aargau (AG)', exact: true }),
     ).toBeInViewport()
     await page.setViewportSize(viewports[3])
     await page.keyboard.press('Escape')
@@ -177,7 +178,7 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
     })
     await editAvatar.click()
     await expect(
-      page.getByRole('button', { name: 'Bear', exact: true })
+      page.getByRole('button', { name: 'Bear', exact: true }),
     ).toHaveAttribute('aria-pressed', 'true')
     await page.keyboard.press('Escape')
     await expect(editAvatar).toBeFocused()
@@ -191,13 +192,10 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
     const saveGate = new Promise<void>((resolve) => {
       rejectSave = resolve
     })
-    await page.route('**/api/graphql', async (route) => {
-      if (route.request().postDataJSON()?.operationName !== 'UpdatePlayerData')
-        return route.continue()
+    const unrouteSave = await routeTrpc(page, async ({ path }) => {
+      if (path !== 'play.updatePlayerData') return undefined
       await saveGate
-      await route.fulfill({
-        json: { errors: [{ message: 'Test save failure' }] },
-      })
+      return { error: 'Test save failure' }
     })
     const start = page.getByRole('button', {
       name: 'Start the game',
@@ -205,7 +203,7 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
     })
     await start.click()
     await expect(
-      page.getByRole('button', { name: 'Starting…', exact: true })
+      page.getByRole('button', { name: 'Starting…', exact: true }),
     ).toBeDisabled()
     for (const label of [
       'Edit bank name',
@@ -214,17 +212,17 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
       'Back to bank setup',
     ])
       await expect(
-        page.getByRole('button', { name: label, exact: true })
+        page.getByRole('button', { name: label, exact: true }),
       ).toBeDisabled()
     rejectSave?.()
     await expect(page.locator('footer').getByRole('alert')).toContainText(
-      'We couldn’t save your bank'
+      'We couldn’t save your bank',
     )
     await expect(start).toBeEnabled()
     await expect(
-      page.getByText('Style Bank', { exact: true }).first()
+      page.getByText('Style Bank', { exact: true }).first(),
     ).toBeVisible()
-    await page.unroute('**/api/graphql')
+    await unrouteSave()
     await start.click()
     await page.waitForURL('**/play/cockpit', {
       waitUntil: 'domcontentloaded',
@@ -234,15 +232,26 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
       timeout: 30_000,
     })
     const readProgress = async () => {
-      const response = await page.request.post('/api/graphql', {
-        data: {
-          query:
-            '{ self { id isReady experience completedLearningElementIds visitedStoryElementIds achievementKeys facts } }',
-        },
-      })
-      const body = await response.json()
-      expect(body.errors).toBeUndefined()
-      return body.data.self
+      const { data, error } = await callTrpc(page.request, 'query', 'play.self')
+      expect(error).toBeUndefined()
+      const {
+        id,
+        isReady,
+        experience,
+        completedLearningElementIds,
+        visitedStoryElementIds,
+        achievementKeys,
+        facts,
+      } = data as Record<string, unknown>
+      return {
+        id,
+        isReady,
+        experience,
+        completedLearningElementIds,
+        visitedStoryElementIds,
+        achievementKeys,
+        facts,
+      }
     }
     const before = await readProgress()
     for (const [label, tab] of [
@@ -258,19 +267,19 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
       await profile.focus()
       await page.keyboard.press('Enter')
       await expect(page).toHaveURL(
-        new RegExp(`/play/welcome\\?edit=1&tab=${tab}$`)
+        new RegExp(`/play/welcome\\?edit=1&tab=${tab}$`),
       )
       await expect(
-        page.getByRole('heading', { name: 'Edit your bank' })
+        page.getByRole('heading', { name: 'Edit your bank' }),
       ).toBeVisible()
       await expect(name).toHaveValue('Style Bank')
       await expect(avatar).toContainText('Bear')
       await expect(location).toContainText('Aargau')
       await expect(
-        page.getByText('Starting capital', { exact: true })
+        page.getByText('Starting capital', { exact: true }),
       ).toHaveCount(0)
       await expect(
-        page.getByRole('button', { name: 'Review your bank' })
+        page.getByRole('button', { name: 'Review your bank' }),
       ).toHaveCount(0)
       await name.fill('Discard this name')
       await page.getByRole('button', { name: 'Cancel', exact: true }).click()
@@ -310,39 +319,36 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
       rejectSave = resolve
     })
     let saveCount = 0
-    await page.route('**/api/graphql', async (route) => {
-      if (route.request().postDataJSON()?.operationName !== 'UpdatePlayerData')
-        return route.continue()
+    const unrouteEditSave = await routeTrpc(page, async ({ path }) => {
+      if (path !== 'play.updatePlayerData') return undefined
       saveCount++
       await editSaveGate
-      await route.fulfill({
-        json: { errors: [{ message: 'Test profile save failure' }] },
-      })
+      return { error: 'Test profile save failure' }
     })
     await save.click()
     await expect(
-      page.getByRole('button', { name: 'Saving…', exact: true })
+      page.getByRole('button', { name: 'Saving…', exact: true }),
     ).toBeDisabled()
     await expect(name).toBeDisabled()
     await expect(avatar).toBeDisabled()
     await expect(location).toBeDisabled()
     await expect(
-      page.getByRole('button', { name: 'Cancel', exact: true })
+      page.getByRole('button', { name: 'Cancel', exact: true }),
     ).toBeDisabled()
     rejectSave?.()
     await expect(page.locator('footer').getByRole('alert')).toContainText(
-      'We couldn’t save your bank'
+      'We couldn’t save your bank',
     )
     expect(saveCount).toBe(1)
     await expect(name).toHaveValue('Updated Bank')
-    await page.unroute('**/api/graphql')
+    await unrouteEditSave()
     await save.click()
     await expect(page).toHaveURL(/\/play\/cockpit\?tab=team$/)
     await expect(page.locator('header')).toContainText('Updated Bank')
     await expect(page.locator('header')).toContainText('HQ Zürich')
     await expect(page.locator('header img[src*="avatars"]')).toHaveAttribute(
       'src',
-      /sparbulle/
+      /sparbulle/,
     )
     const after = await readProgress()
     const { facts: beforeFacts, ...beforeProgress } = before
@@ -543,13 +549,10 @@ test('tablet welcome popup pickers, preview, review and profile editing survive 
     const saveGate = new Promise<void>((resolve) => {
       releaseSave = resolve
     })
-    await page.route('**/api/graphql', async (route) => {
-      if (route.request().postDataJSON()?.operationName !== 'UpdatePlayerData')
-        return route.continue()
+    const unrouteSave = await routeTrpc(page, async ({ path }) => {
+      if (path !== 'play.updatePlayerData') return undefined
       await saveGate
-      await route.fulfill({
-        json: { errors: [{ message: 'Test tablet save failure' }] },
-      })
+      return { error: 'Test tablet save failure' }
     })
     await page
       .getByRole('button', { name: 'Start the game', exact: true })
@@ -565,7 +568,7 @@ test('tablet welcome popup pickers, preview, review and profile editing survive 
       'We couldn’t save your bank'
     )
     await expect(preview).toContainText('Tablet Bank')
-    await page.unroute('**/api/graphql')
+    await unrouteSave()
     await page
       .getByRole('button', { name: 'Start the game', exact: true })
       .click()
@@ -672,47 +675,41 @@ test('welcome loading, query retry, and missing-player views', async ({
       release = resolve
     })
     let mode: 'error' | 'real' | 'missing' = 'error'
-    await page.route('**/api/graphql', async (route) => {
-      if (route.request().postDataJSON()?.operationName !== 'Self')
-        return route.continue()
+    await routeTrpc(page, async ({ path }) => {
+      if (path !== 'play.self') return undefined
       await gate
-      if (mode === 'real') return route.continue()
-      await route.fulfill({
-        json:
-          mode === 'error'
-            ? { errors: [{ message: 'Test query failure' }] }
-            : { data: { self: null } },
-      })
+      if (mode === 'real') return undefined
+      return mode === 'error' ? { error: 'Test query failure' } : { data: null }
     })
     await page.reload({ waitUntil: 'domcontentloaded' })
     await expect(page.getByRole('status')).toContainText('Loading your bank')
     release()
     await expect(
-      page.getByRole('heading', { name: 'We couldn’t load your bank' })
+      page.getByRole('heading', { name: 'We couldn’t load your bank' }),
     ).toBeVisible()
     await expect(page.getByRole('main').getByRole('alert')).toContainText(
-      'Please try again'
+      'Please try again',
     )
     mode = 'real'
     await page.getByRole('button', { name: 'Try again', exact: true }).click()
     await expect(
-      page.getByRole('heading', { name: 'You just won the lottery' })
+      page.getByRole('heading', { name: 'You just won the lottery' }),
     ).toBeVisible()
     mode = 'missing'
     await page.reload({ waitUntil: 'domcontentloaded' })
     await expect(page.getByRole('main').getByRole('alert')).toContainText(
-      'Open the join link from your instructor'
+      'Open the join link from your instructor',
     )
     await expect(
-      page.getByRole('button', { name: 'Try again', exact: true })
+      page.getByRole('button', { name: 'Try again', exact: true }),
     ).toHaveCount(0)
     await expect(
-      page.getByRole('link', { name: 'Back to Minigame' })
+      page.getByRole('link', { name: 'Back to Minigame' }),
     ).toHaveAttribute('href', '/')
     mode = 'error'
     await page.goto('/play/welcome?edit=1&tab=history')
     await expect(page.getByRole('main').getByRole('alert')).toContainText(
-      'Please try again'
+      'Please try again',
     )
     const back = page.getByRole('link', { name: 'Back to game' })
     await expect(back).toHaveAttribute('href', '/play/cockpit?tab=history')

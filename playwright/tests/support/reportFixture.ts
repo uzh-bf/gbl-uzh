@@ -1,25 +1,68 @@
-import type {
-  GameQuery,
-  SpecificResultsQuery,
-} from '../../../apps/demo-game/src/graphql/generated/ops'
+type Segment = {
+  id: number
+  index: number
+  countdownExpiresAt: null
+  countdownDurationMs: null
+  facts: Record<string, never>
+  learningElements: never[]
+  storyElements: never[]
+}
 
-type Game = NonNullable<GameQuery['game']>
-type Row = NonNullable<SpecificResultsQuery['specificResults']>[number]
+type Period = {
+  id: number
+  index: number
+  activeSegmentIx: null
+  segmentCount: number
+  facts: Record<string, never>
+  segments: Segment[]
+}
+
+type Player = {
+  id: string
+  number: number
+  name: string
+  role: string
+  isReady: boolean
+  facts: Record<string, never>
+  experience: number
+  experienceToNext: number
+  token: string
+}
+
+type Game = {
+  id: number
+  name: string
+  status: string
+  version: number
+  activePeriodIx: number
+  activeSegmentIx: null
+  activePeriod: null
+  facts: Record<string, never>
+  players: Player[]
+  periods: Period[]
+}
+
+type Row = {
+  id: number
+  type: 'SEGMENT_END' | 'PERIOD_END'
+  player: { id: string; name: string }
+  period: { id: number; index: number }
+  segment: { id: number; index: number } | null
+  facts: unknown
+}
 
 /** A deterministic classroom-sized report; no database records are created. */
 export function reportFixture(teamCount = 15) {
-  const game = {
-    __typename: 'Game',
-    id: '74000',
+  const game: Game = {
+    id: 74000,
     name: 'Report design fixture',
     status: 'RESULTS',
-    activePeriodIx: null,
+    version: 1,
+    activePeriodIx: 0,
     activeSegmentIx: null,
     activePeriod: null,
-    playerCount: teamCount,
     facts: {},
     players: Array.from({ length: teamCount }, (_, index) => ({
-      __typename: 'Player',
       id: `report-team-${index + 1}`,
       number: index + 1,
       name: index === 6 ? 'Investment Guru' : `Team ${index + 1}`,
@@ -31,15 +74,13 @@ export function reportFixture(teamCount = 15) {
       token: '',
     })),
     periods: [0, 1, 2].map((index) => ({
-      __typename: 'Period',
-      id: `report-period-${index}`,
+      id: 74100 + index,
       index,
       activeSegmentIx: null,
       segmentCount: 4,
       facts: {},
       segments: Array.from({ length: 4 }, (_, quarter) => ({
-        __typename: 'PeriodSegment',
-        id: `report-segment-${index}-${quarter}`,
+        id: 74200 + index * 4 + quarter,
         index: quarter,
         countdownExpiresAt: null,
         countdownDurationMs: null,
@@ -48,9 +89,10 @@ export function reportFixture(teamCount = 15) {
         storyElements: [],
       })),
     })),
-  } as Game
+  }
   const rows: Row[] = []
   const ends: Row[] = []
+  let resultId = 74300
   const market = [
     -0.045, 0.022, 0.028, 0.02, 0.027, -0.034, -0.021, -0.007, -0.014, 0.015,
     -0.077, -0.07, 0.029, 0.024, -0.019, 0.012, -0.011, 0.05, -0.016, -0.019,
@@ -81,13 +123,11 @@ export function reportFixture(teamCount = 15) {
           })
         }
         rows.push({
-          __typename: 'PlayerResult',
-          id: `${player.id}-${segment.id}`,
-          type: 'SEGMENT_END' as Row['type'],
-          player: { __typename: 'Player', id: player.id, name: player.name },
-          period: { __typename: 'Period', id: period.id, index: period.index },
+          id: resultId++,
+          type: 'SEGMENT_END',
+          player: { id: player.id, name: player.name },
+          period: { id: period.id, index: period.index },
           segment: {
-            __typename: 'PeriodSegment',
             id: segment.id,
             index: segment.index,
           },
@@ -98,11 +138,10 @@ export function reportFixture(teamCount = 15) {
         })
       }
       ends.push({
-        __typename: 'PlayerResult',
-        id: `${player.id}-${period.id}-end`,
-        type: 'PERIOD_END' as Row['type'],
-        player: { __typename: 'Player', id: player.id, name: player.name },
-        period: { __typename: 'Period', id: period.id, index: period.index },
+        id: resultId++,
+        type: 'PERIOD_END',
+        player: { id: player.id, name: player.name },
+        period: { id: period.id, index: period.index },
         segment: null,
         facts: {},
       })

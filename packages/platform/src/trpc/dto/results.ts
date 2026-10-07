@@ -53,7 +53,11 @@ function toLearningElementRefDto(
     return null
   }
 
-  return { id: String(id), title }
+  return {
+    id: String(id),
+    title,
+    reward: (element as { reward?: unknown }).reward,
+  }
 }
 
 function toStoryElementDto(

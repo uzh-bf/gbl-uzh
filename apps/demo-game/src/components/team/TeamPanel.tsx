@@ -1,9 +1,9 @@
 import { cn } from '@gbl-uzh/ui'
 import { BookOpen, ChevronRight, Lightbulb } from 'lucide-react'
 import { useId, type ReactNode } from 'react'
-import type { ResultQuery } from '~/graphql/generated/ops'
 import { playerAmount, playerPercent } from '~/lib/results'
 import { learningXP, teamStatistics, type StoryEntry } from '~/lib/team'
+import type { GameData } from '~/types/api'
 
 type Activity = { id: string; title: string; reward?: unknown }
 
@@ -16,7 +16,7 @@ export default function TeamPanel({
   onLearning,
   onStory,
 }: {
-  data: ResultQuery
+  data: GameData
   stories: StoryEntry[]
   openActivities: readonly Activity[]
   completedActivities: readonly Activity[]

@@ -180,6 +180,7 @@ const learningElementRefDtoSchema = z
   .object({
     id: z.string(),
     title: z.string(),
+    reward: z.unknown().optional(),
   })
   .strict()
 

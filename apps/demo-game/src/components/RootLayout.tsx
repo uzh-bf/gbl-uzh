@@ -5,15 +5,12 @@ import type { PropsWithChildren } from 'react'
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <div
-      className={`${sourceSansPro.variable} mobile:font-player mobile:app-body`}
+      className={`${sourceSansPro.variable} ${sourceSansPro.className} mobile:font-player mobile:app-body`}
     >
       {children}
-      <style jsx global>{`
-        :root {
-          --source-sans-pro: ${sourceSansPro.variable};
-          --theme-font-primary: ${sourceSansPro.variable};
-        }
-        /* Portals do not inherit the font variable from the app wrapper. */
+      {/* Portals do not inherit the font variable from the app wrapper. A plain
+          static <style> keeps server and client markup identical. */}
+      <style>{`
         @media (width < 641px) {
           :root {
             --source-sans-pro: ${sourceSansPro.style.fontFamily};

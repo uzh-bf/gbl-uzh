@@ -1,4 +1,3 @@
-import { useQuery, useSubscription } from '@apollo/client'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
@@ -15,17 +14,12 @@ import {
   ReportSummary,
 } from '~/components/admin/report/ReportOverview'
 import {
-  GameDocument,
-  GlobalEventsDocument,
-  SpecificResultsDocument,
-} from '~/graphql/generated/ops'
-import {
   buildAdminReport,
   type ReportMode,
   type ReportScope,
 } from '~/lib/adminReport'
-import { shouldRefetchDemoGame } from '~/lib/gameEvents'
 import { queueRefetch } from '~/lib/queuedRefetch'
+import { trpc } from '~/lib/trpc'
 
 export default function ReportGame() {
   const router = useRouter()
@@ -35,21 +29,22 @@ export default function ReportGame() {
   const [focusedId, setFocusedId] = useState<string | null>(null)
   const id = Number(router.query.id)
   const skip = !router.isReady || !Number.isInteger(id) || id <= 0
-  const gameQuery = useQuery(GameDocument, {
-    variables: { id },
-    skip,
-    fetchPolicy: 'network-only',
-  })
-  const segmentQuery = useQuery(SpecificResultsDocument, {
-    variables: { gameId: id, type: 'SEGMENT_END' },
-    skip,
-    fetchPolicy: 'network-only',
-  })
-  const periodQuery = useQuery(SpecificResultsDocument, {
-    variables: { gameId: id, type: 'PERIOD_END' },
-    skip,
-    fetchPolicy: 'network-only',
-  })
+  // The global event stream is player-only, so the report polls to follow
+  // segment and period results as the game advances.
+  const queryOptions = {
+    enabled: !skip,
+    refetchOnMount: 'always',
+    refetchInterval: 15000,
+  } as const
+  const gameQuery = trpc.game.byId.useQuery({ id }, queryOptions)
+  const segmentQuery = trpc.results.specific.useQuery(
+    { gameId: id, type: 'SEGMENT_END' },
+    queryOptions
+  )
+  const periodQuery = trpc.results.specific.useQuery(
+    { gameId: id, type: 'PERIOD_END' },
+    queryOptions
+  )
   const { refetch: refetchGame } = gameQuery
   const { refetch: refetchSegments } = segmentQuery
   const { refetch: refetchPeriods } = periodQuery
@@ -62,12 +57,6 @@ export default function ReportGame() {
       ),
     [refetchGame, refetchSegments, refetchPeriods]
   )
-  useSubscription(GlobalEventsDocument, {
-    skip,
-    onData: ({ data }) => {
-      if (shouldRefetchDemoGame(data.data?.eventsGlobal, id)) void refresh()
-    },
-  })
   useEffect(() => {
     if (skip) return
     const onRefresh = () => void refresh()
@@ -78,14 +67,14 @@ export default function ReportGame() {
       window.removeEventListener('online', onRefresh)
     }
   }, [refresh, skip])
-  const game = gameQuery.data?.game
+  const game = gameQuery.data
   const report = useMemo(
     () =>
       game
         ? buildAdminReport(
             game,
-            segmentQuery.data?.specificResults ?? [],
-            periodQuery.data?.specificResults ?? [],
+            segmentQuery.data ?? [],
+            periodQuery.data ?? [],
             scope
           )
         : null,
@@ -93,9 +82,9 @@ export default function ReportGame() {
   )
   const loading =
     !router.isReady ||
-    gameQuery.loading ||
-    segmentQuery.loading ||
-    periodQuery.loading
+    gameQuery.isLoading ||
+    segmentQuery.isLoading ||
+    periodQuery.isLoading
   const error = gameQuery.error || segmentQuery.error || periodQuery.error
   const initials =
     session?.user?.name

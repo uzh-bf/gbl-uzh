@@ -1,4 +1,4 @@
-import type { ResultQuery } from '../graphql/generated/ops'
+import type { GameData } from '~/types/api'
 import {
   ALLOCATION_KEYS,
   isAllocationValid,
@@ -53,7 +53,7 @@ export function balanceMix(value: ResultBalance): Allocation | null {
 }
 
 /** Only settled rows enter these views; PERIOD_END identifies the displayed year. */
-export function buildResultView(data: ResultQuery) {
+export function buildResultView(data: GameData) {
   const game = data.result?.currentGame
   if (!game || !['PAUSED', 'CONSOLIDATION', 'RESULTS'].includes(game.status))
     return null
@@ -194,7 +194,7 @@ export type HistoryMonth = {
 }
 
 export type HistoryQuarter = {
-  id: string
+  id: number
   year: number
   quarter: number
   label: string
@@ -206,7 +206,7 @@ export type HistoryQuarter = {
   months: HistoryMonth[]
 }
 
-export function buildHistory(data: ResultQuery) {
+export function buildHistory(data: GameData) {
   const game = data.result?.currentGame
   const active = game?.activePeriod
   const { results, settled, inPeriod } = readResultHistory(data)
@@ -325,7 +325,7 @@ export function readBalanceSamples(raw: unknown) {
 }
 
 /** SEGMENT_END is also the live decision record; lifecycle state proves settlement. */
-export function readResultHistory(data: ResultQuery) {
+export function readResultHistory(data: GameData) {
   const game = data.result?.currentGame
   const results = (data.result?.previousResults ?? [])
     .map((row) => ({ ...row, facts: parseFacts(row.facts) }))

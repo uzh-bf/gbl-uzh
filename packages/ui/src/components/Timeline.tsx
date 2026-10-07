@@ -16,8 +16,6 @@ interface Period {
   segmentCount: number
 }
 
-// NOTE(JJ): Entries are mainly results -> check FResultData.graphql
-// - Maybe renaming? @RS
 interface Entry {
   id?: number
   type: string

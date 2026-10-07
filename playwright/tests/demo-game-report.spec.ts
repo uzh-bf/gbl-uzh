@@ -5,6 +5,7 @@ import {
   expectNoPageOverflow,
 } from './support/demoGame'
 import { reportFixture } from './support/reportFixture'
+import { routeTrpc } from './support/trpc'
 
 async function openReport(
   page: Page,
@@ -14,37 +15,28 @@ async function openReport(
     fail?: boolean
     future?: boolean
     teamCount?: number
-  } = {}
+  } = {},
 ) {
   const fixture = reportFixture(options.teamCount)
   if (!options.future) fixture.game.periods.pop()
   let fail = options.fail
   let empty = options.empty
-  await page.route('**/api/graphql', async (route) => {
-    const request = route.request().postDataJSON()
-    if (!['Game', 'SpecificResults'].includes(request?.operationName))
-      return route.continue()
-    if (fail)
-      return route.fulfill({
-        json: { errors: [{ message: 'Report unavailable' }] },
-      })
-    await route.fulfill({
-      json: {
-        data:
-          request.operationName === 'Game'
-            ? { game: options.missing ? null : fixture.game }
-            : {
-                specificResults: empty
-                  ? []
-                  : request.variables.type === 'SEGMENT_END'
-                    ? fixture.rows
-                    : fixture.ends,
-              },
-      },
-    })
+  const unroute = await routeTrpc(page, ({ path, input }) => {
+    if (path !== 'game.byId' && path !== 'results.specific') return undefined
+    if (fail) return { error: 'Report unavailable' }
+    if (path === 'game.byId')
+      return { data: options.missing ? null : fixture.game }
+    if (empty) return { data: [] }
+    return {
+      data:
+        (input as { type: string }).type === 'SEGMENT_END'
+          ? fixture.rows
+          : fixture.ends,
+    }
   })
   await page.goto(`/admin/reports/${fixture.game.id}`)
   return {
+    unroute,
     recover: () => {
       fail = false
     },
@@ -83,7 +75,7 @@ test('report reference states, scoped metrics, team focus and responsive layout'
     exact: true,
   })
   await expect(
-    page.getByRole('button', { name: 'Whole game' })
+    page.getByRole('button', { name: 'Whole game' }),
   ).toHaveAttribute('aria-pressed', 'true')
   await expect(ranking.getByRole('button')).toHaveCount(15)
   await expect(decisions.getByRole('columnheader')).toHaveCount(9)
@@ -107,14 +99,14 @@ test('report reference states, scoped metrics, team focus and responsive layout'
   await page.keyboard.press('Enter')
   await expect(team).toHaveAttribute('aria-pressed', 'true')
   await expect(team).toHaveAccessibleDescription(
-    /Rank \d+\. Assets .+ CHF\. Return .+%\./
+    /Rank \d+\. Assets .+ CHF\. Return .+%\./,
   )
   for (const name of ['Performance', 'Risk and return', 'Sharpe ratio'])
     await expect(
-      page.getByRole('region', { name, exact: true })
+      page.getByRole('region', { name, exact: true }),
     ).toHaveAttribute('data-focused-team', 'report-team-13')
   await expect(
-    decisions.locator('[data-team-id="report-team-13"]')
+    decisions.locator('[data-team-id="report-team-13"]'),
   ).toHaveAttribute('data-focused', 'true')
   expect(await summary.innerText()).toBe(scopedSummary)
   await capture(page, 'year-focused')
@@ -123,12 +115,12 @@ test('report reference states, scoped metrics, team focus and responsive layout'
   await page.getByRole('button', { name: 'Return', exact: true }).click()
   await expect(performance).toHaveAttribute(
     'data-focused-team',
-    'report-team-13'
+    'report-team-13',
   )
   await expect(performance).not.toContainText('NaN')
   const rankedReturn = (await team.innerText()).match(/[+-]?\d+\.\d+%/)![0]
   await expect(performance.getByTestId('report-focused-value')).toHaveText(
-    rankedReturn
+    rankedReturn,
   )
   await team.click()
   await expect(team).toHaveAttribute('aria-pressed', 'false')
@@ -149,7 +141,7 @@ test('report reference states, scoped metrics, team focus and responsive layout'
 test('report handles query failure and retry', async ({ page }) => {
   const { recover } = await openReport(page, { fail: true })
   await expect(page.getByRole('main').getByRole('alert')).toContainText(
-    'could not be loaded'
+    'could not be loaded',
   )
   recover()
   await page.getByRole('button', { name: 'Retry' }).click()
@@ -161,7 +153,7 @@ test('report refreshes newly settled results on window focus without resetting c
 }) => {
   const { settle } = await openReport(page, { empty: true })
   await expect(
-    page.getByText('No settled results in this scope yet.')
+    page.getByText('No settled results in this scope yet.'),
   ).toBeVisible()
   await scopeButton(page, FIRST_GAME_YEAR).click()
   await page.getByRole('button', { name: 'Return', exact: true }).click()
@@ -169,11 +161,11 @@ test('report refreshes newly settled results on window focus without resetting c
   settle()
   await page.evaluate(() => window.dispatchEvent(new Event('focus')))
   await expect(
-    page.getByRole('region', { name: 'Report summary' })
+    page.getByRole('region', { name: 'Report summary' }),
   ).toContainText('Across 15 teams')
   await expect(scopeButton(page, FIRST_GAME_YEAR)).toHaveAttribute(
     'aria-pressed',
-    'true'
+    'true',
   )
   const performance = page.getByRole('region', {
     name: 'Performance',
@@ -182,7 +174,7 @@ test('report refreshes newly settled results on window focus without resetting c
   await expect(performance).toHaveAttribute('data-mode', 'return')
   await expect(performance).toHaveAttribute(
     'data-focused-team',
-    'report-team-13'
+    'report-team-13',
   )
 })
 
@@ -199,11 +191,11 @@ test('report accommodates 60 teams with bounded lists and keyboard access', asyn
   await expect(decisions.getByRole('rowheader')).toHaveCount(61)
   await expect(sharpe.getByRole('listitem')).toHaveCount(60)
   await expect(
-    page.getByRole('region', { name: 'Report summary' })
+    page.getByRole('region', { name: 'Report summary' }),
   ).toContainText('Across 60 teams')
   for (const list of [ranking.getByRole('list'), sharpe.getByRole('list')]) {
     expect(
-      await list.evaluate((node) => node.scrollHeight > node.clientHeight)
+      await list.evaluate((node) => node.scrollHeight > node.clientHeight),
     ).toBe(true)
   }
   expect((await ranking.boundingBox())!.height).toBeLessThanOrEqual(468)
@@ -219,7 +211,7 @@ test('report accommodates 60 teams with bounded lists and keyboard access', asyn
   const focusedId = await performance.getAttribute('data-focused-team')
   for (const panel of [decisions, sharpe])
     await expect(
-      panel.locator(`[data-team-id="${focusedId}"]`)
+      panel.locator(`[data-team-id="${focusedId}"]`),
     ).toHaveAttribute('data-focused', 'true')
   await capture(page, '60-teams-focused')
   await page.keyboard.press('Enter')
@@ -241,9 +233,9 @@ test('report accommodates 60 teams with bounded lists and keyboard access', asyn
 test('report keeps a queued refresh when one query fails before the others finish', async ({
   page,
 }) => {
-  await openReport(page, { empty: true })
+  const { unroute } = await openReport(page, { empty: true })
   await expect(page.getByTestId('report-loaded')).toBeVisible()
-  await page.unroute('**/api/graphql')
+  await unroute()
   const fixture = reportFixture()
   let gameReads = 0
   let segmentReads = 0
@@ -251,63 +243,61 @@ test('report keeps a queued refresh when one query fails before the others finis
   const pendingSegments = new Promise<void>((resolve) => {
     releaseSegments = resolve
   })
-  await page.route('**/api/graphql', async (route) => {
-    const request = route.request().postDataJSON()
-    if (request?.operationName === 'Game')
-      return route.fulfill({
-        json:
-          ++gameReads === 1
-            ? { errors: [{ message: 'Temporary game query failure' }] }
-            : { data: { game: fixture.game } },
-      })
-    if (request?.operationName !== 'SpecificResults') return route.continue()
-    const segments = request.variables.type === 'SEGMENT_END'
+  let releaseRecovery!: () => void
+  const pendingRecovery = new Promise<void>((resolve) => {
+    releaseRecovery = resolve
+  })
+  // tRPC batches the three report reads into one HTTP response, so the game
+  // failure only surfaces once the held segment read is released. The queued
+  // refresh is held in turn to observe the failure before it recovers.
+  await routeTrpc(page, async ({ path, input }) => {
+    if (path === 'game.byId') {
+      if (++gameReads === 1) return { error: 'Temporary game query failure' }
+      await pendingRecovery
+      return { data: fixture.game }
+    }
+    if (path !== 'results.specific') return undefined
+    const segments = (input as { type: string }).type === 'SEGMENT_END'
     const firstSegmentRead = segments && ++segmentReads === 1
     if (firstSegmentRead) await pendingSegments
-    await route.fulfill({
-      json: {
-        data: {
-          specificResults: firstSegmentRead
-            ? []
-            : segments
-              ? fixture.rows
-              : fixture.ends,
-        },
-      },
-    })
+    return {
+      data: firstSegmentRead ? [] : segments ? fixture.rows : fixture.ends,
+    }
   })
   try {
     await page.evaluate(() => window.dispatchEvent(new Event('focus')))
-    await expect(page.getByRole('main').getByRole('alert')).toContainText(
-      'could not be loaded'
-    )
     await expect.poll(() => segmentReads).toBe(1)
     // The recovery event arrives while the failed refresh still has a pending read.
     await page.evaluate(() => window.dispatchEvent(new Event('online')))
     releaseSegments()
+    await expect(page.getByRole('main').getByRole('alert')).toContainText(
+      'could not be loaded',
+    )
+    releaseRecovery()
     await expect(
-      page.getByRole('region', { name: 'Report summary' })
+      page.getByRole('region', { name: 'Report summary' }),
     ).toContainText('Across 15 teams')
     expect(segmentReads).toBe(2)
   } finally {
     releaseSegments()
+    releaseRecovery()
   }
 })
 
 test('report handles unplayed years, empty results and missing games', async ({
   page,
 }) => {
-  await openReport(page, { future: true })
+  const first = await openReport(page, { future: true })
   await scopeButton(page, FIRST_GAME_YEAR + 2).click()
   await expect(
-    page.getByText('No settled results in this scope yet.')
+    page.getByText('No settled results in this scope yet.'),
   ).toBeVisible()
-  await page.unroute('**/api/graphql')
-  await openReport(page, { empty: true })
+  await first.unroute()
+  const second = await openReport(page, { empty: true })
   await expect(
-    page.getByText('No settled results in this scope yet.')
+    page.getByText('No settled results in this scope yet.'),
   ).toBeVisible()
-  await page.unroute('**/api/graphql')
+  await second.unroute()
   await openReport(page, { missing: true })
   await expect(page.getByText('Game not found.')).toBeVisible()
 })

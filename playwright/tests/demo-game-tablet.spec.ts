@@ -5,37 +5,25 @@ import {
   expectNoPageOverflow,
   expectPhoneScrollContained,
 } from './support/demoGame'
+import { routeTrpc } from './support/trpc'
 
 async function openCockpit(page: Page) {
   const data = cockpitFixture()
-  await page.route('**/api/graphql', async (route) => {
-    const request = route.request().postDataJSON()
-    if (request.operationName === 'Result')
-      return route.fulfill({ json: { data } })
-    if (request.operationName === 'PerformAction') {
+  await routeTrpc(page, ({ path, input }) => {
+    if (path === 'play.result') return { data: data.result }
+    if (path === 'play.self') return { data: data.self }
+    if (path === 'play.performAction') {
       data.result.playerResult.facts.decisions = JSON.parse(
-        request.variables.payload
+        (input as { payload: string }).payload
       )
       data.result.playerResult.facts.allocationSubmitted = true
-      return route.fulfill({
-        json: { data: { performAction: data.result.playerResult } },
-      })
+      return { data: data.result.playerResult }
     }
-    if (request.operationName === 'UpdateReadyState') {
-      data.self.isReady = request.variables.isReady
-      return route.fulfill({
-        json: {
-          data: {
-            updateReadyState: {
-              __typename: 'Player',
-              id: data.self.id,
-              isReady: data.self.isReady,
-            },
-          },
-        },
-      })
+    if (path === 'play.updateReadyState') {
+      data.self.isReady = (input as { isReady: boolean }).isReady
+      return { data: { id: data.self.id, isReady: data.self.isReady } }
     }
-    return route.continue()
+    return undefined
   })
   await page.goto('/play/cockpit')
   await expect(

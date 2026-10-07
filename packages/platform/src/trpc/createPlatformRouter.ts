@@ -1,3 +1,4 @@
+import type { TRPCCreateRouterOptions } from '@trpc/server'
 import type { PlayerFactsRedaction } from './dto/results.js'
 import { createTRPCRouter } from './init.js'
 import { createAuthRouter } from './routers/auth.js'
@@ -15,7 +16,7 @@ export type PlatformRouterSchemas = Record<string, unknown>
 
 type PlatformRoleAssigner = (ix: number, facts: unknown) => unknown
 
-type RouterDeps = {
+type RouterDeps<TExtensions extends TRPCCreateRouterOptions> = {
   services?: PlatformRouterServices
   // The game's yup facts schemas. Required because game.create, period.add,
   // segment.add and play.performAction reject every call without them.
@@ -28,18 +29,22 @@ type RouterDeps = {
   }
   roleAssigner?: PlatformRoleAssigner
   playerFacts?: PlayerFactsRedaction
-  extensions?: Record<string, unknown>
+  // Game-specific routers merged at the top level. Kept generic so their
+  // procedures stay part of the game's AppRouter type.
+  extensions?: TExtensions
 }
 
 export type { PlayerFactsRedaction }
 
-export function createPlatformRouter({
+export function createPlatformRouter<
+  TExtensions extends TRPCCreateRouterOptions = Record<never, never>,
+>({
   services = {},
   schemas,
   roleAssigner,
   playerFacts,
-  extensions = {},
-}: RouterDeps) {
+  extensions = {} as TExtensions,
+}: RouterDeps<TExtensions>) {
   return createTRPCRouter({
     auth: createAuthRouter(),
     game: createGameRouter({ services, schemas, roleAssigner }),

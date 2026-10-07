@@ -1,4 +1,4 @@
-import type { GameQuery, SpecificResultsQuery } from '~/graphql/generated/ops'
+import type { GameDetail, SpecificResult } from '~/types/api'
 import { ALLOCATION_KEYS, type Allocation } from './allocation'
 import { FIRST_GAME_YEAR, MONTHS, NUM_MONTHS_PER_SEGMENT } from './constants'
 import { parseFacts } from './facts'
@@ -9,8 +9,8 @@ import {
   readBalanceSamples,
 } from './results'
 
-type Game = NonNullable<GameQuery['game']>
-type Result = NonNullable<SpecificResultsQuery['specificResults']>[number]
+type Game = GameDetail
+type Result = SpecificResult
 export type ReportScope = 'all' | number
 export type ReportMode = 'assets' | 'return'
 

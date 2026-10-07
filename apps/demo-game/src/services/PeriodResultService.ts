@@ -5,12 +5,21 @@ import {
 } from '@gbl-uzh/platform'
 import { debugLog, standardDeviation } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
-import { PlayerResult } from 'src/graphql/generated/ops'
 import { INITIAL_CAPITAL, NUM_MONTHS } from '../lib/constants'
 import { PlayerRole } from '../settings/Constants'
 import { GameFacts } from '../types/Game'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 import { OutputResultFacts, ResultFacts, ResultFactsInit } from '../types/facts'
+
+type SegmentEndResult = {
+  facts?: {
+    assetsWithReturns?: Array<{
+      totalAssetsReturn?: number
+      accBankBenchmarkReturn?: number
+      accTotalAssetsReturn?: number
+    }>
+  } | null
+}
 
 type InputPeriodResultFactsInit = {}
 type OutputPeriodResultFactsInit = OutputFacts<
@@ -85,7 +94,7 @@ export function start(
 export function end(
   facts: ResultFacts,
   payload: PayloadPeriodResultEnd<
-    PlayerResult[],
+    SegmentEndResult[],
     GameFacts,
     PeriodFacts,
     PeriodSegmentFacts,
@@ -117,7 +126,7 @@ export function end(
 }
 
 const computeRiskAndReturnOfPlayer = (
-  segmentEndResultsOfPlayer: PlayerResult[]
+  segmentEndResultsOfPlayer: SegmentEndResult[]
 ) => {
   const totalAssetsReturns = segmentEndResultsOfPlayer.flatMap(({ facts }) => {
     const assetsWithReturns = facts?.assetsWithReturns.slice(1) || []

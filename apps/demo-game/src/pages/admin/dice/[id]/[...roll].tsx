@@ -1,37 +1,31 @@
-import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { Button } from '~/components/admin/AdminControls'
 import { DiceWorkspace } from '~/components/admin/DiceWorkspace'
-import {
-  GlobalEventsDocument,
-  MarketDiceDocument,
-  RevealMarketRollDocument,
-} from '~/graphql/generated/ops'
-import { shouldRefetchDemoGame } from '~/lib/gameEvents'
 import { readScenario } from '~/lib/market'
 import { queueRefetch } from '~/lib/queuedRefetch'
+import { trpc } from '~/lib/trpc'
 
 export default function Forecast() {
   const router = useRouter()
   const segmentId = Number(router.query.id)
-  const { data, loading, error, refetch } = useQuery(MarketDiceDocument, {
-    variables: { segmentId },
-    skip: !Number.isInteger(segmentId) || segmentId <= 0,
-    fetchPolicy: 'cache-and-network',
-  })
-  const [reveal] = useMutation(RevealMarketRollDocument)
+  const validSegment = Number.isInteger(segmentId) && segmentId > 0
+  const { data, isLoading, error, refetch } = trpc.market.dice.useQuery(
+    { segmentId },
+    {
+      enabled: validSegment,
+      // The global event stream is player-only, so the admin view polls to
+      // pick up segment starts and reveals from other operator tabs.
+      refetchInterval: 15000,
+      // Failed refreshes surface the Retry loading action instead.
+      retry: false,
+    }
+  )
+  const reveal = trpc.market.revealRoll.useMutation()
   const queuedRefetch = useMemo(() => queueRefetch(refetch), [refetch])
-  const segment = data?.marketDice
-  useSubscription(GlobalEventsDocument, {
-    skip: !segment,
-    onData: ({ data: eventData }) => {
-      const event = eventData.data?.eventsGlobal
-      if (shouldRefetchDemoGame(event, segment?.gameId))
-        void queuedRefetch().catch(() => {})
-    },
-  })
-  if (loading && !segment) return <p>Loading…</p>
+  const segment = data
+  if (!router.isReady || (validSegment && isLoading && !segment))
+    return <p>Loading…</p>
   if (error && !segment)
     return <p role="alert">Could not load dice. Please reload the page.</p>
   if (!segment) return <p>Segment not found.</p>
@@ -57,7 +51,7 @@ export default function Forecast() {
         segment={segment}
         scenario={scenario}
         publish={async (rollIndex) => {
-          await reveal({ variables: { segmentId, rollIndex } })
+          await reveal.mutateAsync({ segmentId, rollIndex })
           await queuedRefetch()
         }}
       />

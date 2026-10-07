@@ -1,5 +1,4 @@
 import { cn, ProbabilityChart, signedPercent } from '@gbl-uzh/ui'
-import type { ResultQuery } from '~/graphql/generated/ops'
 import { assetLabels, MONTHS, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 import {
   latestRevealedRoll,
@@ -8,6 +7,7 @@ import {
   type MarketRoll,
 } from '~/lib/market'
 import { useFullWidthMarketLayout } from '~/lib/usePlayerLayout'
+import type { GameData } from '~/types/api'
 
 const sectionClass =
   'border-player-border border-b mobile:px-app-4 mobile:py-app-4 tablet:min-w-0 tablet:px-[16px] tablet:py-[12px]'
@@ -97,7 +97,7 @@ export default function MarketPanel({
   data,
   embedded = false,
 }: {
-  data: ResultQuery
+  data: GameData
   embedded?: boolean
 }) {
   const fullWidthMarket = useFullWidthMarketLayout()

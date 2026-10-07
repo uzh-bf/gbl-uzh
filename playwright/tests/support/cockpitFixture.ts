@@ -1,14 +1,5 @@
-import type { ResultQuery } from '../../../apps/demo-game/src/graphql/generated/ops'
-
-type PlayerResultData = NonNullable<ResultQuery['result']>
-type CockpitFixture = ResultQuery & {
-  self: NonNullable<ResultQuery['self']>
-  result: PlayerResultData & {
-    currentGame: NonNullable<PlayerResultData['currentGame']>
-    previousResults: NonNullable<PlayerResultData['previousResults']>
-    playerResult: NonNullable<PlayerResultData['playerResult']>
-  }
-}
+// Facts are free-form JSON on the wire, so specs reshape them in place.
+type Facts = Record<string, any>
 
 /** Deterministic player data for responsive UI checks, without database writes. */
 export function cockpitFixture() {
@@ -20,7 +11,6 @@ export function cockpitFixture() {
   })
   const allocation = { bank: 55, bonds: 35, stocks: 10 }
   const periods = [0, 1].map((index) => ({
-    __typename: 'Period',
     id: `tablet-period-${index}`,
     index,
     segmentCount: 4,
@@ -33,9 +23,8 @@ export function cockpitFixture() {
         gapStocks: 0.025,
         interestBank: 0.002,
       },
-    },
+    } as Facts | null,
     segments: Array.from({ length: 4 }, (_, quarter) => ({
-      __typename: 'PeriodSegment',
       id: `tablet-segment-${index}-${quarter}`,
       index: quarter,
       facts: {
@@ -50,7 +39,7 @@ export function cockpitFixture() {
           { bank: 0.002, bonds: 0.0131, stocks: 0.0065 },
         ],
         revealedRollIndices: [0],
-      },
+      } as Facts,
       countdownExpiresAt: null,
       countdownDurationMs: null,
       learningElements: [],
@@ -82,15 +71,13 @@ export function cockpitFixture() {
     start: number,
     end: number
   ) => ({
-    __typename: 'PlayerResult',
     id: `tablet-result-${period}-${quarter}-${type}`,
     type,
-    period: { __typename: 'Period', id: periods[period].id, index: period },
+    period: { id: periods[period].id, index: period },
     segment:
       quarter < 0
         ? null
         : {
-            __typename: 'PeriodSegment',
             id: periods[period].segments[quarter].id,
             index: quarter,
           },
@@ -98,7 +85,6 @@ export function cockpitFixture() {
   })
   const activePeriod = { ...periods[1], activeSegment: periods[1].segments[1] }
   const currentGame = {
-    __typename: 'Game',
     id: '74001',
     name: 'Minigame',
     status: 'RUNNING',
@@ -110,7 +96,6 @@ export function cockpitFixture() {
   }
   return {
     self: {
-      __typename: 'Player',
       id: 'tablet-player',
       name: 'Team 1',
       role: 'Trader',
@@ -122,7 +107,7 @@ export function cockpitFixture() {
       visitedStoryElementIds: [],
       achievementKeys: [],
       achievements: [],
-      level: { __typename: 'PlayerLevel', id: 'tablet-level', index: 2 },
+      level: { id: 'tablet-level', index: 2 },
       game: currentGame,
     },
     result: {
@@ -146,7 +131,6 @@ export function cockpitFixture() {
       playerResult: {
         ...row(1, 1, 'SEGMENT_START', 10250, 10300),
         player: {
-          __typename: 'Player',
           id: 'tablet-player',
           completedLearningElementIds: [],
           visitedStoryElementIds: [],
@@ -154,6 +138,5 @@ export function cockpitFixture() {
       },
       transactions: [],
     },
-    decision: null,
-  } as unknown as CockpitFixture
+  }
 }
