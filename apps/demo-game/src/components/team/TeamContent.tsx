@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client'
 import { useLearningActivities } from '@gbl-uzh/ui'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   AttemptLearningElementDocument,
   LearningElementDocument,
@@ -30,10 +30,14 @@ export default function TeamContent({
   data,
   active,
   expiresAt,
+  className,
+  identity,
 }: {
   data: ResultQuery
   active: boolean
   expiresAt: Date | null
+  className?: string
+  identity?: ReactNode
 }) {
   const game = data.result?.currentGame
   const self = data.self
@@ -146,7 +150,8 @@ export default function TeamContent({
   ].find((activity) => activity.id === learning.activeLearningId)
   return (
     <>
-      <div hidden={!active} className={!active ? 'hidden' : undefined}>
+      <div hidden={!active} className={!active ? 'hidden' : className}>
+        {identity}
         <TeamPanel
           data={data}
           stories={stories}

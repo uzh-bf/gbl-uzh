@@ -11,6 +11,7 @@ import { assetLabels } from '~/lib/constants'
 import { parseFacts } from '~/lib/facts'
 import CantonFlagBadge from '../CantonFlagBadge'
 import OptionPicker, { type Option } from './OptionPicker'
+import WelcomeBankPreview from './WelcomeBankPreview'
 import {
   WelcomeActionButton,
   WelcomePickerTrigger,
@@ -173,11 +174,30 @@ export default function WelcomeSetup({
     )
   }
 
+  const stepHeading = (
+    <>
+      <h1
+        ref={heading}
+        tabIndex={-1}
+        className="mobile:mb-app-2 mobile:app-heading tablet:app-heading m-0 mb-[8px] text-[24px] leading-[1.25] font-bold tracking-[-0.3px] focus:outline-none"
+      >
+        {editing ? 'Edit your bank' : steps[step].title}
+      </h1>
+      <p className="text-player-body m-0 leading-[1.65]">
+        {editing
+          ? 'Update your bank name, avatar, or location.'
+          : steps[step].description}
+      </p>
+    </>
+  )
+
   return (
-    <div className="font-player text-player-text min-[721px]:border-player-input mobile:app-body mx-auto flex h-dvh max-w-[720px] flex-col bg-white text-[16px] leading-[1.5] min-[721px]:border-x">
-      <header className="border-player-input mobile:gap-app-3 mobile:px-app-4 mobile:py-app-3 flex min-h-[54px] shrink-0 items-center justify-between gap-[12px] border-b px-[16px] py-[12px] min-[721px]:px-[32px]">
+    <div className="font-player text-player-text min-[721px]:border-player-input mobile:app-body tablet:max-w-[1440px] tablet:app-body mx-auto flex h-dvh max-w-[720px] flex-col bg-white text-[16px] leading-[1.5] min-[721px]:border-x">
+      <header className="border-player-input mobile:gap-app-3 mobile:px-app-4 mobile:py-app-3 tablet:px-[20px] flex min-h-[54px] shrink-0 items-center justify-between gap-[12px] border-b px-[16px] py-[12px] min-[721px]:px-[32px]">
         <div className="mobile:gap-app-3 flex min-w-0 items-baseline gap-[10px]">
-          <strong className="mobile:app-body text-[18px]">Minigame</strong>
+          <strong className="mobile:app-body tablet:app-body text-[18px]">
+            Minigame
+          </strong>
           <span className="text-player-muted truncate" title={player.game.name}>
             {player.game.name}
           </span>
@@ -205,251 +225,267 @@ export default function WelcomeSetup({
       >
         <main
           ref={content}
-          className="mobile:p-app-4 flex-1 overflow-y-auto p-[16px] min-[721px]:px-[32px] min-[721px]:py-[28px]"
+          className={cn(
+            'mobile:p-app-4 flex-1 overflow-y-auto p-[16px] min-[721px]:px-[32px] min-[721px]:py-[28px]',
+            step === 'intro'
+              ? 'tablet:px-[40px] tablet:py-[32px]'
+              : 'tablet:grid tablet:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] tablet:p-0'
+          )}
         >
           {step === 'intro' && (
             <Image
-              className="border-player-input mobile:mb-app-3 mb-[14px] aspect-[2/1] h-auto w-full rounded-[12px] border object-cover"
+              className="border-player-input mobile:mb-app-3 tablet:mb-[32px] mb-[14px] aspect-[2/1] h-auto w-full rounded-[12px] border object-cover"
               src="/images/welcome.jpg"
               alt="A winning lottery ticket surrounded by coins and a piggy bank"
               width={720}
               height={360}
-              sizes="(max-width: 720px) calc(100vw - 32px), 654px"
+              sizes="(min-width: 641px) min(calc(100vw - 80px), 1358px), (max-width: 720px) calc(100vw - 32px), 654px"
               loading="eager"
             />
           )}
-          <h1
-            ref={heading}
-            tabIndex={-1}
-            className="mobile:mb-app-2 mobile:app-heading m-0 mb-[8px] text-[24px] leading-[1.25] font-bold tracking-[-0.3px] focus:outline-none"
-          >
-            {editing ? 'Edit your bank' : steps[step].title}
-          </h1>
-          <p className="text-player-body m-0 leading-[1.65]">
-            {editing
-              ? 'Update your bank name, avatar, or location.'
-              : steps[step].description}
-          </p>
           {step === 'intro' ? (
-            <>
-              <section
-                className="border-player-primary mobile:mt-app-4 mobile:mb-app-3 mobile:pl-app-3 mt-[16px] mb-[14px] border-l-[3px] pl-[14px]"
-                aria-labelledby="your-task"
-              >
-                <h2
-                  id="your-task"
-                  className="text-player-muted mobile:mb-app-2 mobile:app-caption m-0 mb-[5px] text-[13px] font-bold tracking-[1px] uppercase"
+            <div className="tablet:grid tablet:grid-cols-2 tablet:gap-[40px]">
+              <div className="min-w-0">
+                {stepHeading}
+                <section
+                  className="border-player-primary mobile:mt-app-4 mobile:mb-app-3 mobile:pl-app-3 mt-[16px] mb-[14px] border-l-[3px] pl-[14px]"
+                  aria-labelledby="your-task"
                 >
-                  Your task
+                  <h2
+                    id="your-task"
+                    className="text-player-muted mobile:mb-app-2 mobile:app-caption m-0 mb-[5px] text-[13px] font-bold tracking-[1px] uppercase"
+                  >
+                    Your task
+                  </h2>
+                  <p className="m-0 leading-[1.6]">
+                    Decide how much goes into savings, bonds and stocks. You
+                    repeat that decision every segment.
+                  </p>
+                </section>
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-player-muted tablet:block m-0 mb-[8px] hidden text-[14px] font-bold tracking-[1px] uppercase">
+                  The three assets
                 </h2>
-                <p className="m-0 leading-[1.6]">
-                  Decide how much goes into savings, bonds and stocks. You
-                  repeat that decision every segment.
+                <ul className="mobile:mb-app-3 mobile:gap-app-2 tablet:gap-0 m-0 mb-[14px] grid list-none gap-[8px] p-0">
+                  {ALLOCATION_KEYS.map((key) => {
+                    const { name, risk, color } = assetLabels[key]
+                    return (
+                      <li
+                        key={name}
+                        className="border-player-input mobile:gap-app-3 mobile:px-app-3 mobile:py-app-3 tablet:grid-cols-[10px_minmax(0,1fr)_auto] tablet:rounded-none tablet:border-x-0 tablet:border-t-0 tablet:px-0 tablet:py-[16px] grid grid-cols-[10px_78px_1fr] items-center gap-[10px] rounded-[12px] border px-[12px] py-[11px]"
+                      >
+                        <i className={cn('size-[10px] rounded-[2px]', color)} />
+                        <strong>{name}</strong>
+                        <span className="text-player-muted">{risk}</span>
+                      </li>
+                    )
+                  })}
+                </ul>
+                <p className="text-player-muted mobile:app-caption m-0 text-[14px] leading-[1.65]">
+                  Savings pay 0.2% a month. Bonds and stocks follow the market
+                  expectation, simulated by two dice.
                 </p>
-              </section>
-              <ul className="mobile:mb-app-3 mobile:gap-app-2 m-0 mb-[14px] grid list-none gap-[8px] p-0">
-                {ALLOCATION_KEYS.map((key) => {
-                  const { name, risk, color } = assetLabels[key]
-                  return (
-                    <li
-                      key={name}
-                      className="border-player-input mobile:gap-app-3 mobile:px-app-3 mobile:py-app-3 grid grid-cols-[10px_78px_1fr] items-center gap-[10px] rounded-[12px] border px-[12px] py-[11px]"
-                    >
-                      <i className={cn('size-[10px] rounded-[2px]', color)} />
-                      <strong>{name}</strong>
-                      <span className="text-player-muted">{risk}</span>
-                    </li>
-                  )
-                })}
-              </ul>
-              <p className="text-player-muted mobile:app-caption m-0 text-[14px] leading-[1.65]">
-                Savings pay 0.2% a month. Bonds and stocks follow the market
-                expectation, simulated by two dice.
-              </p>
-            </>
-          ) : step === 'setup' ? (
+              </div>
+            </div>
+          ) : (
             <>
-              <div className="mobile:mt-app-4 mobile:gap-app-3 mt-[20px] grid gap-[20px]">
-                <div className="mobile:gap-app-2 flex flex-col gap-[8px]">
-                  <label className="font-bold" htmlFor="bank-name">
-                    Bank name
-                  </label>
-                  <WelcomeTextInput
-                    ref={nameInput}
-                    id="bank-name"
-                    {...form.getFieldProps('name')}
-                    placeholder="e.g. Team 1"
-                    autoComplete="organization"
-                    disabled={form.isSubmitting}
-                    aria-invalid={Boolean(
-                      form.touched.name && form.errors.name
+              <div className="tablet:px-[40px] tablet:py-[32px] min-w-0">
+                {stepHeading}
+                {step === 'setup' ? (
+                  <>
+                    <div className="mobile:mt-app-4 mobile:gap-app-3 tablet:gap-[24px] mt-[20px] grid gap-[20px]">
+                      <div className="mobile:gap-app-2 flex flex-col gap-[8px]">
+                        <label className="font-bold" htmlFor="bank-name">
+                          Bank name
+                        </label>
+                        <WelcomeTextInput
+                          ref={nameInput}
+                          id="bank-name"
+                          {...form.getFieldProps('name')}
+                          placeholder="e.g. Team 1"
+                          autoComplete="organization"
+                          disabled={form.isSubmitting}
+                          aria-invalid={Boolean(
+                            form.touched.name && form.errors.name
+                          )}
+                          aria-describedby="bank-name-help bank-name-error"
+                        />
+                        <p
+                          id="bank-name-help"
+                          className="text-player-muted mobile:mt-app-2 mobile:app-caption m-0 mt-[6px] text-[14px] leading-[1.65]"
+                        >
+                          Shown on the ranking and the projector.
+                        </p>
+                        <p
+                          id="bank-name-error"
+                          className="text-player-invalid mobile:app-caption m-0 text-[14px] empty:hidden"
+                          aria-live="polite"
+                        >
+                          {form.touched.name && form.errors.name}
+                        </p>
+                      </div>
+                      <div className="mobile:gap-app-2 flex flex-col gap-[8px]">
+                        <span className="font-bold" id="avatar-label">
+                          Avatar
+                        </span>
+                        {avatarPicker(
+                          <WelcomePickerTrigger
+                            labelId="avatar-label"
+                            valueId="avatar-value"
+                            disabled={form.isSubmitting}
+                            icon={
+                              avatar?.value ? (
+                                <Image
+                                  src={avatar.value}
+                                  alt=""
+                                  className="size-[32px] rounded-full object-cover"
+                                  width={32}
+                                  height={32}
+                                />
+                              ) : (
+                                <UserRound
+                                  aria-hidden="true"
+                                  className="w-[20px] shrink-0"
+                                />
+                              )
+                            }
+                          >
+                            {avatar?.label ?? 'Choose an animal'}
+                          </WelcomePickerTrigger>
+                        )}
+                      </div>
+                      <div className="mobile:gap-app-2 flex flex-col gap-[8px]">
+                        <span className="font-bold" id="location-label">
+                          Location
+                        </span>
+                        {locationPicker(
+                          <WelcomePickerTrigger
+                            labelId="location-label"
+                            valueId="location-value"
+                            disabled={form.isSubmitting}
+                            icon={
+                              <MapPin
+                                aria-hidden="true"
+                                className="w-[20px] shrink-0"
+                              />
+                            }
+                          >
+                            {location?.label ?? 'Choose a canton'}
+                          </WelcomePickerTrigger>
+                        )}
+                      </div>
+                    </div>
+                    {!editing && (
+                      <div className="border-player-input mobile:mt-app-4 mobile:gap-app-3 mobile:pt-app-4 tablet:hidden mt-[24px] flex items-center justify-between gap-[14px] border-t pt-[16px]">
+                        <div>
+                          <span className="text-player-body mobile:app-caption text-[14px]">
+                            Starting capital
+                          </span>
+                          <strong className="mobile:app-value block text-[22px] leading-[1.3] whitespace-nowrap">
+                            10&apos;000.00 CHF
+                          </strong>
+                        </div>
+                        <span className="text-player-body mobile:app-caption text-right text-[14px]">
+                          Same for every team
+                        </span>
+                      </div>
                     )}
-                    aria-describedby="bank-name-help bank-name-error"
-                  />
-                  <p
-                    id="bank-name-help"
-                    className="text-player-muted mobile:mt-app-2 mobile:app-caption m-0 mt-[6px] text-[14px] leading-[1.65]"
-                  >
-                    Shown on the ranking and the projector.
-                  </p>
-                  <p
-                    id="bank-name-error"
-                    className="text-player-invalid mobile:app-caption m-0 text-[14px] empty:hidden"
-                    aria-live="polite"
-                  >
-                    {form.touched.name && form.errors.name}
-                  </p>
-                </div>
-                <div className="mobile:gap-app-2 flex flex-col gap-[8px]">
-                  <span className="font-bold" id="avatar-label">
-                    Avatar
-                  </span>
-                  {avatarPicker(
-                    <WelcomePickerTrigger
-                      labelId="avatar-label"
-                      valueId="avatar-value"
-                      disabled={form.isSubmitting}
-                      icon={
-                        avatar?.value ? (
+                  </>
+                ) : (
+                  <>
+                    <div className="border-player-input tablet:hidden mobile:mt-app-4 mobile:mb-app-4 mobile:gap-app-3 mobile:px-app-4 mobile:py-app-4 mt-[18px] mb-[16px] flex items-center gap-[14px] rounded-[16px] border px-[20px] py-[15px] shadow-[0_1px_3px_#00000014]">
+                      {avatar?.value && (
+                        <div className="relative size-[56px] shrink-0">
                           <Image
                             src={avatar.value}
                             alt=""
-                            className="size-[32px] rounded-[6px] object-cover"
-                            width={32}
-                            height={32}
+                            width={56}
+                            height={56}
+                            className="size-full rounded-full object-cover"
                           />
-                        ) : (
-                          <UserRound
-                            aria-hidden="true"
-                            className="w-[20px] shrink-0"
-                          />
-                        )
-                      }
-                    >
-                      {avatar?.label ?? 'Choose an animal'}
-                    </WelcomePickerTrigger>
-                  )}
-                </div>
-                <div className="mobile:gap-app-2 flex flex-col gap-[8px]">
-                  <span className="font-bold" id="location-label">
-                    Location
-                  </span>
-                  {locationPicker(
-                    <WelcomePickerTrigger
-                      labelId="location-label"
-                      valueId="location-value"
-                      disabled={form.isSubmitting}
-                      icon={
-                        <MapPin
-                          aria-hidden="true"
-                          className="w-[20px] shrink-0"
-                        />
-                      }
-                    >
-                      {location?.label ?? 'Choose a canton'}
-                    </WelcomePickerTrigger>
-                  )}
-                </div>
-              </div>
-              {!editing && (
-                <div className="border-player-input mobile:mt-app-4 mobile:gap-app-3 mobile:pt-app-4 mt-[24px] flex items-center justify-between gap-[14px] border-t pt-[16px]">
-                  <div>
-                    <span className="text-player-body mobile:app-caption text-[14px]">
-                      Starting capital
-                    </span>
-                    <strong className="mobile:app-value block text-[22px] leading-[1.3] whitespace-nowrap">
-                      10&apos;000.00 CHF
-                    </strong>
-                  </div>
-                  <span className="text-player-body mobile:app-caption text-right text-[14px]">
-                    Same for every team
-                  </span>
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              <div className="border-player-input mobile:mt-app-4 mobile:mb-app-4 mobile:gap-app-3 mobile:px-app-4 mobile:py-app-4 mt-[18px] mb-[16px] flex items-center gap-[14px] rounded-[16px] border px-[20px] py-[15px] shadow-[0_1px_3px_#00000014]">
-                {avatar?.value && (
-                  <div className="relative size-[56px] shrink-0">
-                    <Image
-                      src={avatar.value}
-                      alt=""
-                      width={56}
-                      height={56}
-                      className="size-full rounded-[12px] object-cover"
-                    />
-                    <CantonFlagBadge location={form.values.location} />
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <strong className="mobile:app-heading text-[20px] [overflow-wrap:anywhere]">
-                    {form.values.name.trim()}
-                  </strong>
-                  <p className="text-player-muted mobile:app-caption m-0 text-[14px]">
-                    {avatar?.label} · HQ {location?.label}
-                  </p>
-                  <p className="text-player-muted mobile:app-caption m-0 text-[14px]">
-                    10&apos;000.00 CHF to invest
-                  </p>
-                </div>
-              </div>
-              <div className="mobile:gap-app-2 grid gap-[8px]">
-                {[
-                  {
-                    label: 'Bank name',
-                    value: form.values.name.trim(),
-                  },
-                  {
-                    label: 'Avatar',
-                    value: avatar?.label,
-                    picker: avatarPicker,
-                  },
-                  {
-                    label: 'Location',
-                    value: location?.label,
-                    picker: locationPicker,
-                  },
-                ].map(({ label, value, picker }) => {
-                  const editButton = (
-                    <WelcomeTextButton
-                      aria-label={`Edit ${label.toLowerCase()}`}
-                      disabled={form.isSubmitting}
-                      onClick={picker ? undefined : () => goTo('setup', true)}
-                    >
-                      Edit
-                    </WelcomeTextButton>
-                  )
-                  return (
-                    <div
-                      key={label}
-                      className="border-player-input mobile:gap-app-3 mobile:px-app-3 mobile:py-app-2 flex min-h-[54px] items-center gap-[10px] rounded-[12px] border px-[14px] py-[5px]"
-                    >
-                      <span className="flex-1">{label}</span>
-                      <strong className="max-w-[48%] text-right [overflow-wrap:anywhere]">
-                        {value}
-                      </strong>
-                      {picker ? picker(editButton) : editButton}
+                          <CantonFlagBadge location={form.values.location} />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <strong className="mobile:app-heading text-[20px] [overflow-wrap:anywhere]">
+                          {form.values.name.trim()}
+                        </strong>
+                        <p className="text-player-muted mobile:app-caption m-0 text-[14px]">
+                          {avatar?.label} · HQ {location?.label}
+                        </p>
+                        <p className="text-player-muted mobile:app-caption m-0 text-[14px]">
+                          10&apos;000.00 CHF to invest
+                        </p>
+                      </div>
                     </div>
-                  )
-                })}
+                    <div className="mobile:gap-app-2 tablet:mt-[20px] grid gap-[8px]">
+                      {[
+                        {
+                          label: 'Bank name',
+                          value: form.values.name.trim(),
+                        },
+                        {
+                          label: 'Avatar',
+                          value: avatar?.label,
+                          picker: avatarPicker,
+                        },
+                        {
+                          label: 'Location',
+                          value: location?.label,
+                          picker: locationPicker,
+                        },
+                      ].map(({ label, value, picker }) => {
+                        const editButton = (
+                          <WelcomeTextButton
+                            aria-label={`Edit ${label.toLowerCase()}`}
+                            disabled={form.isSubmitting}
+                            onClick={
+                              picker ? undefined : () => goTo('setup', true)
+                            }
+                          >
+                            Edit
+                          </WelcomeTextButton>
+                        )
+                        return (
+                          <div
+                            key={label}
+                            className="border-player-input mobile:gap-app-3 mobile:px-app-3 mobile:py-app-2 flex min-h-[54px] items-center gap-[10px] rounded-[12px] border px-[14px] py-[5px]"
+                          >
+                            <span className="flex-1">{label}</span>
+                            <strong className="max-w-[48%] text-right [overflow-wrap:anywhere]">
+                              {value}
+                            </strong>
+                            {picker ? picker(editButton) : editButton}
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <div className="border-player-input text-player-body mobile:mt-app-4 mobile:gap-app-3 mobile:p-app-3 mt-[16px] flex gap-[12px] rounded-[12px] border p-[14px]">
+                      <Info
+                        aria-hidden="true"
+                        className="text-player-primary mobile:mt-app-1 mt-[3px] w-[18px] shrink-0"
+                      />
+                      <p className="m-0">
+                        {player.game.status === 'SCHEDULED' ||
+                        player.game.status === 'PREPARATION'
+                          ? 'Starting now puts you in the waiting room until the instructor opens segment 1.'
+                          : 'Your game is already underway. Start now to open your bank’s Decisions tab.'}
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
-              <div className="border-player-input text-player-body mobile:mt-app-4 mobile:gap-app-3 mobile:p-app-3 mt-[16px] flex gap-[12px] rounded-[12px] border p-[14px]">
-                <Info
-                  aria-hidden="true"
-                  className="text-player-primary mobile:mt-app-1 mt-[3px] w-[18px] shrink-0"
-                />
-                <p className="m-0">
-                  {player.game.status === 'SCHEDULED' ||
-                  player.game.status === 'PREPARATION'
-                    ? 'Starting now puts you in the waiting room until the instructor opens segment 1.'
-                    : 'Your game is already underway. Start now to open your bank’s Decisions tab.'}
-                </p>
-              </div>
+              <WelcomeBankPreview
+                name={form.values.name}
+                avatar={avatar}
+                location={location}
+                editing={editing}
+              />
             </>
           )}
         </main>
-        <footer className="border-player-input mobile:px-app-4 mobile:pt-app-3 shrink-0 border-t bg-white px-[16px] pt-[12px] pb-[max(12px,env(safe-area-inset-bottom))] min-[721px]:px-[32px]">
+        <footer className="border-player-input mobile:px-app-4 mobile:pt-app-3 tablet:px-[20px] shrink-0 border-t bg-white px-[16px] pt-[12px] pb-[max(12px,env(safe-area-inset-bottom))] min-[721px]:px-[32px]">
           {submitError && (
             <p
               role="alert"
@@ -458,7 +494,7 @@ export default function WelcomeSetup({
               {submitError}
             </p>
           )}
-          <div className="mobile:gap-app-3 flex items-center gap-[12px]">
+          <div className="mobile:gap-app-3 tablet:justify-between flex items-center gap-[12px]">
             {step === 'intro' ? (
               <>
                 <div
@@ -472,6 +508,7 @@ export default function WelcomeSetup({
                 <WelcomeActionButton
                   type="button"
                   onClick={() => goTo('setup')}
+                  className="tablet:ml-auto"
                 >
                   Set up your bank
                 </WelcomeActionButton>
@@ -488,7 +525,7 @@ export default function WelcomeSetup({
                 ) : (
                   <button
                     type="button"
-                    className="border-player-input text-player-primary focus-visible:outline-player-primary grid min-h-[48px] min-w-[44px] cursor-pointer place-items-center rounded-[6px] border bg-white focus-visible:outline-2 focus-visible:outline-offset-[3px]"
+                    className="border-player-input text-player-primary focus-visible:outline-player-primary tablet:min-h-[44px] grid min-h-[48px] min-w-[44px] cursor-pointer place-items-center rounded-[6px] border bg-white focus-visible:outline-2 focus-visible:outline-offset-[3px]"
                     aria-label={
                       step === 'setup'
                         ? 'Back to introduction'
@@ -503,7 +540,7 @@ export default function WelcomeSetup({
                 <WelcomeActionButton
                   type="submit"
                   disabled={!canContinue || form.isSubmitting}
-                  className="flex-1"
+                  className="tablet:flex-none tablet:ml-auto flex-1"
                 >
                   {form.isSubmitting
                     ? editing
