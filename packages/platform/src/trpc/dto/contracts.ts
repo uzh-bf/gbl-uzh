@@ -146,8 +146,9 @@ export const playerResultCoreDtoSchema = z
     id: z.number(),
     type: z.nativeEnum(DB.PlayerResultType),
     facts: z.unknown(),
-    // The period and segment facts contain operator-only simulation
-    // parameters and are intentionally absent from this player-facing DTO.
+    // A player's own result carries only period and segment references.
+    // The currentGame summaries in playerResultDtoSchema do carry period
+    // and segment facts, filtered by the game's playerFacts redaction.
     period: z
       .object({
         id: z.number(),

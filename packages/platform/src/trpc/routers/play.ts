@@ -5,7 +5,11 @@ import * as EventService from '../../services/EventService.js'
 import * as GameService from '../../services/GameService.js'
 import * as PlayService from '../../services/PlayService.js'
 import { toPlayerSelfDto } from '../dto/player.js'
-import { toPlayerResultCoreDto, toPlayerResultDto } from '../dto/results.js'
+import {
+  toPlayerResultCoreDto,
+  toPlayerResultDto,
+  type PlayerFactsRedaction,
+} from '../dto/results.js'
 import {
   playerResultCoreDtoSchema,
   playerResultDtoSchema,
@@ -23,16 +27,8 @@ type RouterDeps = {
     // the game's action reducer.
     ActionFactsSchema?: any
   }
+  playerFacts?: PlayerFactsRedaction
 }
-
-const saveConsolidationDecisionInput = z.object({
-  payload: z.string(),
-})
-
-const updatePlayerDataInput = z.object({
-  name: z.string().optional().nullable(),
-  facts: z.string().optional().nullable(),
-})
 
 function parsePayload(payload: string) {
   try {
@@ -64,6 +60,7 @@ function hasCompletedCompanySetup(
 export function createPlayRouter({
   services = {},
   schemas = {},
+  playerFacts,
 }: RouterDeps = {}) {
   return createTRPCRouter({
     self: playerProcedure
@@ -90,7 +87,7 @@ export function createPlayRouter({
           ctx as any
         )
 
-        return toPlayerResultDto(result as any)
+        return toPlayerResultDto(result as any, playerFacts)
       }),
 
     updateReadyState: playerProcedure
@@ -105,7 +102,12 @@ export function createPlayRouter({
       }),
 
     updatePlayerData: playerProcedure
-      .input(updatePlayerDataInput)
+      .input(
+        z.object({
+          name: z.string().optional().nullable(),
+          facts: z.string().optional().nullable(),
+        })
+      )
       .output(playerSelfDtoSchema.nullable())
       .mutation(async ({ input, ctx }) => {
         const previousPlayer = await ctx.prisma.player.findUnique({
@@ -201,7 +203,11 @@ export function createPlayRouter({
       }),
 
     saveConsolidationDecision: playerProcedure
-      .input(saveConsolidationDecisionInput)
+      .input(
+        z.object({
+          payload: z.string(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const facts = parsePayload(input.payload)
 

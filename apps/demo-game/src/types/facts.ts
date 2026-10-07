@@ -1,5 +1,8 @@
 import { OutputFacts } from '@gbl-uzh/platform'
 
+// TODO: replace these hand-written fact types with zod schemas once the
+// design-system upgrade removes the Formik forms that consume them.
+
 // Lives here (not in services/ActionsReducer) so client pages can reference
 // action types without pulling the Prisma-importing reducer into the bundle.
 export enum ActionTypes {

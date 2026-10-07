@@ -1,8 +1,6 @@
 import * as DB from '../../generated/prisma/client.js'
 import type { PlayerSelfDto } from './contracts.js'
 
-export type { PlayerSelfDto } from './contracts.js'
-
 export function toPlayerSelfDto(
   player:
     | {
@@ -14,7 +12,7 @@ export function toPlayerSelfDto(
         facts: unknown
         experience: number
         experienceToNext: number
-        tutorialCompleted?: boolean
+        tutorialCompleted: boolean
         level?: { id?: number; index?: number }
         game: {
           id: number
@@ -23,7 +21,7 @@ export function toPlayerSelfDto(
           facts: unknown
           activePeriod?: {
             index?: number
-            activeSegmentIx?: number
+            activeSegmentIx?: number | null
           }
         }
         achievementKeys?: string[]
@@ -34,7 +32,11 @@ export function toPlayerSelfDto(
     | null
     | undefined
 ): PlayerSelfDto | null {
-  if (!player) return null
+  // Callers pass service results untyped, so a query that forgot to include
+  // the game relation must not crash the mapper.
+  if (!player?.game) return null
+
+  const { activePeriod } = player.game
 
   return {
     id: player.id,
@@ -45,7 +47,7 @@ export function toPlayerSelfDto(
     facts: player.facts,
     experience: player.experience,
     experienceToNext: player.experienceToNext,
-    tutorialCompleted: Boolean(player.tutorialCompleted),
+    tutorialCompleted: player.tutorialCompleted,
     achievementKeys: player.achievementKeys ?? [],
     achievements: (player.achievements ?? []).map((entry) => {
       const item = entry as any
@@ -74,12 +76,12 @@ export function toPlayerSelfDto(
       name: player.game.name,
       status: player.game.status,
       facts: player.game.facts,
+      // -1 is the database default for a period without an active segment.
       activePeriod:
-        typeof player.game.activePeriod?.index === 'number' &&
-        typeof player.game.activePeriod?.activeSegmentIx === 'number'
+        typeof activePeriod?.index === 'number'
           ? {
-              index: player.game.activePeriod.index,
-              activeSegmentIx: player.game.activePeriod.activeSegmentIx,
+              index: activePeriod.index,
+              activeSegmentIx: activePeriod.activeSegmentIx ?? -1,
             }
           : undefined,
     },

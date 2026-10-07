@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
-import type { ResultFacts } from '../types/facts'
-import { ActionTypes, apply } from './ActionsReducer'
+import { ActionTypes, type ResultFacts } from '../types/facts'
+import { apply } from './ActionsReducer'
 import { initialize, start } from './SegmentResultService'
 
 const decisions = { bank: 100, bonds: 0, stocks: 0 }

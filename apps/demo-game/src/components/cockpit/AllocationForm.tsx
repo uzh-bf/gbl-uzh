@@ -32,11 +32,11 @@ export default function AllocationForm({
 
   return (
     <form id="allocation-form" onSubmit={form.handleSubmit} noValidate>
-      <div className="border-player-border mobile:gap-app-3 mobile:p-app-4 flex items-baseline justify-between gap-[12px] border-b p-[16px] min-[601px]:px-[24px] min-[601px]:py-[20px]">
-        <span className="text-player-muted mobile:app-body text-[18px]">
+      <div className="border-player-border mobile:gap-app-3 mobile:p-app-4 tablet:px-[12px] tablet:py-[8px] flex items-baseline justify-between gap-[12px] border-b p-[16px] min-[641px]:px-[24px] min-[641px]:py-[20px]">
+        <span className="text-player-muted mobile:app-body tablet:app-caption text-[18px]">
           To allocate
         </span>
-        <strong className="mobile:app-value leading-[1.5] font-bold tabular-nums min-[601px]:text-[30px]">
+        <strong className="mobile:app-value tablet:text-[20px] tablet:leading-[1.2] leading-[1.5] font-bold tabular-nums min-[641px]:text-[30px]">
           {formatCHF(assets)}
         </strong>
       </div>
@@ -57,7 +57,7 @@ export default function AllocationForm({
             >
               <label
                 htmlFor={`allocation-${key}`}
-                className="border-player-input focus-within:outline-player-primary has-[[aria-invalid=true]]:border-player-invalid mobile:px-app-2 mobile:app-body mobile:min-h-app-control mobile:rounded-app-control flex items-center justify-center rounded-[13px] border-2 px-[8px] font-bold focus-within:outline-2 focus-within:outline-offset-2 min-[601px]:h-[56px] min-[601px]:text-[22px]"
+                className="border-player-input focus-within:outline-player-primary has-[[aria-invalid=true]]:border-player-invalid mobile:px-app-2 mobile:app-body mobile:min-h-app-control mobile:rounded-app-control tablet:app-caption tablet:h-[36px] tablet:rounded-app-control flex items-center justify-center rounded-[13px] border-2 px-[8px] font-bold focus-within:outline-2 focus-within:outline-offset-2 min-[641px]:h-[56px] min-[641px]:text-[22px]"
               >
                 <input
                   className="player-number-input w-full min-w-0 [appearance:textfield] border-0 bg-transparent p-0 text-right text-inherit outline-0 [font:inherit] focus:shadow-none"
@@ -87,7 +87,7 @@ export default function AllocationForm({
               {!fieldValid && (
                 <p
                   id={`error-${key}`}
-                  className="text-player-error mobile:app-body col-[2/-1] m-0 text-[16px]"
+                  className="text-player-error mobile:app-body tablet:text-[12px] tablet:leading-[1.3] col-[2/-1] m-0 text-[16px]"
                 >
                   Enter 0–100%, in steps of 0.1%.
                 </p>
@@ -101,7 +101,7 @@ export default function AllocationForm({
         aria-live="polite"
         className={
           !valid || form.status
-            ? 'border-player-border bg-player-feedback mobile:p-app-4 mobile:app-caption border-b p-[16px] text-[15px] min-[601px]:px-[24px] min-[601px]:py-[20px]'
+            ? 'border-player-border bg-player-feedback mobile:p-app-4 mobile:app-caption tablet:px-[12px] tablet:py-[8px] tablet:text-[12px] tablet:leading-[1.3] border-b p-[16px] text-[15px] min-[641px]:px-[24px] min-[641px]:py-[20px]'
             : 'sr-only'
         }
       >
@@ -125,13 +125,13 @@ export default function AllocationForm({
       </div>
       <section
         aria-label="Market outlook"
-        className="mobile:px-app-4 mobile:py-app-3 min-[601px]:px-[24px] min-[601px]:py-[16px]"
+        className="tablet:hidden mobile:px-app-4 mobile:py-app-3 min-[641px]:px-[24px] min-[641px]:py-[16px]"
       >
-        <h2 className="mobile:app-body m-0 font-bold min-[601px]:text-[18px]">
+        <h2 className="mobile:app-body m-0 font-bold min-[641px]:text-[18px]">
           Market outlook
         </h2>
         {scenario ? (
-          <div className="mobile:mt-app-2 mobile:gap-app-6 grid grid-cols-2 min-[601px]:mt-[8px] min-[601px]:gap-[48px]">
+          <div className="mobile:mt-app-2 mobile:gap-app-6 grid grid-cols-2 min-[641px]:mt-[8px] min-[641px]:gap-[48px]">
             {(['bonds', 'stocks'] as const).map((asset) => {
               const trend =
                 asset === 'bonds' ? scenario.trendBonds : scenario.trendStocks
@@ -144,10 +144,10 @@ export default function AllocationForm({
                   aria-label={`${assetLabels[asset].name} forecast`}
                   className="min-w-0"
                 >
-                  <h3 className="mobile:app-body m-0 font-semibold min-[601px]:text-[16px]">
+                  <h3 className="mobile:app-body m-0 font-semibold min-[641px]:text-[16px]">
                     {assetLabels[asset].name}
                   </h3>
-                  <dl className="mobile:mt-app-1 mobile:gap-app-1 mobile:app-caption m-0 grid min-[601px]:mt-[4px] min-[601px]:gap-[4px] min-[601px]:text-[14px]">
+                  <dl className="mobile:mt-app-1 mobile:gap-app-1 mobile:app-caption m-0 grid min-[641px]:mt-[4px] min-[641px]:gap-[4px] min-[641px]:text-[14px]">
                     {[
                       {
                         label: 'Expected value',
@@ -165,7 +165,7 @@ export default function AllocationForm({
                     ].map(({ label, value, color }) => (
                       <div
                         key={label}
-                        className="mobile:gap-app-1 flex items-baseline justify-between min-[601px]:gap-[8px]"
+                        className="mobile:gap-app-1 flex items-baseline justify-between min-[641px]:gap-[8px]"
                       >
                         <dt className="text-player-muted">{label}</dt>
                         <dd
@@ -184,7 +184,7 @@ export default function AllocationForm({
             })}
           </div>
         ) : (
-          <p className="text-player-muted mobile:app-caption min-[601px]:text-[17px]">
+          <p className="text-player-muted mobile:app-caption min-[641px]:text-[17px]">
             Market outlook is not available yet.
           </p>
         )}
