@@ -44,10 +44,10 @@ export default function AllocationBar({
             </div>
           ) : (
             <div className="mobile:px-app-3 flex h-full flex-col items-center justify-center px-[12px] text-center leading-[1.1] whitespace-nowrap [@container(max-width:56px)]:invisible [@container(max-width:80px)]:px-0">
-              <strong className="mobile:app-body mobile:leading-[var(--app-leading-value)] min-[601px]:text-[21px]">
+              <strong className="mobile:app-body tablet:app-caption tablet:leading-[var(--app-leading-value)] mobile:leading-[var(--app-leading-value)] min-[641px]:text-[21px]">
                 {value[key]}%
               </strong>
-              <span className="mobile:mt-app-1 mobile:app-annotation mt-[4px] font-semibold min-[601px]:text-[15px] [@container(max-width:80px)]:hidden">
+              <span className="mobile:mt-app-1 mobile:app-annotation tablet:app-annotation tablet:mt-0 mt-[4px] font-semibold min-[641px]:text-[15px] [@container(max-width:80px)]:hidden">
                 {assetLabels[key].name}
               </span>
             </div>

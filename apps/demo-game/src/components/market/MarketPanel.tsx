@@ -1,4 +1,4 @@
-import { ProbabilityChart, signedPercent } from '@gbl-uzh/ui'
+import { cn, ProbabilityChart, signedPercent } from '@gbl-uzh/ui'
 import { assetLabels, MONTHS, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 import {
   latestRevealedRoll,
@@ -6,10 +6,11 @@ import {
   readScenario,
   type MarketRoll,
 } from '~/lib/market'
+import { useFullWidthMarketLayout } from '~/lib/usePlayerLayout'
 import type { GameData } from '~/types/api'
 
 const sectionClass =
-  'border-player-border border-b mobile:px-app-4 mobile:py-app-4 min-[601px]:px-[32px] min-[601px]:py-[28px]'
+  'border-player-border border-b mobile:px-app-4 mobile:py-app-4 tablet:min-w-0 tablet:px-[16px] tablet:py-[12px]'
 const marketAssets = [
   {
     key: 'bonds',
@@ -54,7 +55,7 @@ function StaticDie({
     <span
       role="img"
       aria-label={`${label}: ${value}`}
-      className={`mobile:size-app-die mobile:gap-[2px] mobile:p-app-1 grid size-[36px] shrink-0 grid-cols-3 grid-rows-3 gap-[3px] rounded-[8px] p-[6px] ${color}`}
+      className={`mobile:size-app-die mobile:gap-[2px] mobile:p-app-1 tablet:size-[28px] tablet:gap-[2px] tablet:p-[4px] grid size-[36px] shrink-0 grid-cols-3 grid-rows-3 gap-[3px] rounded-[8px] p-[6px] ${color}`}
     >
       {Array.from({ length: 9 }, (_, index) => (
         <span
@@ -85,14 +86,21 @@ function AssetDice({
         color={asset.dieColor}
         label={`${asset.label} die`}
       />
-      <strong className="text-player-body mobile:app-body min-w-[32px] text-[18px]">
+      <strong className="text-player-body mobile:app-body tablet:text-[14px] min-w-[32px] text-[18px]">
         = {dice[asset.key]}
       </strong>
     </div>
   )
 }
 
-export default function MarketPanel({ data }: { data: GameData }) {
+export default function MarketPanel({
+  data,
+  embedded = false,
+}: {
+  data: GameData
+  embedded?: boolean
+}) {
+  const fullWidthMarket = useFullWidthMarketLayout()
   const game = data.result?.currentGame
   const scenario = readScenario(marketPeriod(game)?.facts)
   const latest = latestRevealedRoll(game)
@@ -106,16 +114,36 @@ export default function MarketPanel({ data }: { data: GameData }) {
   const span = max - min || 1
   const zero = (-min / span) * 100
   return (
-    <section aria-label="Market" data-cy="market-panel">
+    <section
+      aria-label="Market"
+      data-cy="market-panel"
+      className={cn(
+        embedded &&
+          'tablet:grid tablet:grid-cols-2 tablet:min-[1024px]:max-w-[768px]'
+      )}
+    >
+      {embedded && (
+        <div className="text-player-muted col-span-2 flex flex-wrap items-baseline justify-between gap-[8px] px-[16px] pt-[12px] text-[14px]">
+          <h2 className="m-0 text-[14px] font-semibold tracking-[1px] uppercase">
+            Market
+          </h2>
+          <span>Return % per dice roll · bar height is how likely it is</span>
+        </div>
+      )}
       {scenario ? (
         marketAssets.map((asset) => (
           <div
-            className={sectionClass}
+            className={cn(
+              sectionClass,
+              asset.key === 'bonds' && 'tablet:border-r'
+            )}
             key={asset.key}
             data-cy={`market-${asset.key}`}
           >
             <ProbabilityChart
               variant="market"
+              compact={embedded}
+              fixedHeight={embedded && fullWidthMarket ? 206 : undefined}
               title={asset.label}
               titleContent={
                 roll && <AssetDice dice={roll.dice} asset={asset} />
@@ -128,15 +156,17 @@ export default function MarketPanel({ data }: { data: GameData }) {
           </div>
         ))
       ) : (
-        <p className={sectionClass}>Market outlook is not available yet.</p>
+        <p className={cn(sectionClass, 'tablet:col-span-2')}>
+          Market outlook is not available yet.
+        </p>
       )}
       {roll && (
         <div
-          className={sectionClass}
+          className={cn(sectionClass, 'tablet:col-span-2')}
           data-cy="market-comparison"
           aria-live="polite"
         >
-          <p className="text-player-muted mobile:mb-app-4 mobile:app-caption m-0 mb-[24px] min-[601px]:text-[24px]">
+          <p className="text-player-muted mobile:mb-app-4 mobile:app-caption tablet:mb-[16px] tablet:text-[16px] m-0 mb-[24px]">
             Monthly returns · {monthLabel}
           </p>
           <div className="mobile:gap-app-3 grid gap-[18px]">
@@ -145,19 +175,19 @@ export default function MarketPanel({ data }: { data: GameData }) {
               const end = ((value - min) / span) * 100
               return (
                 <div
-                  className="mobile:gap-app-3 grid grid-cols-[90px_1fr_65px] items-center gap-[12px] min-[601px]:grid-cols-[160px_1fr_80px]"
+                  className="mobile:gap-app-3 tablet:grid-cols-[70px_minmax(0,1fr)_55px] tablet:gap-[8px] grid grid-cols-[90px_1fr_65px] items-center gap-[12px]"
                   key={key}
                   data-cy={`market-return-${key}`}
                   aria-label={`${label}: ${signedPercent(value)}`}
                 >
-                  <div className="text-player-body mobile:gap-app-3 mobile:app-body flex items-center min-[601px]:gap-[20px] min-[601px]:text-[26px]">
+                  <div className="text-player-body mobile:gap-app-3 mobile:app-body tablet:gap-[8px] tablet:text-[14px] flex items-center">
                     <span
-                      className={`size-[14px] shrink-0 rounded-[4px] min-[601px]:size-[20px] ${color}`}
+                      className={`tablet:size-[12px] size-[14px] shrink-0 rounded-[4px] ${color}`}
                     />
                     {label}
                   </div>
                   <div
-                    className="bg-player-progress relative h-[16px] rounded-[5px] min-[601px]:h-[20px]"
+                    className="bg-player-progress tablet:h-[14px] relative h-[16px] rounded-[5px]"
                     aria-hidden="true"
                   >
                     <span
@@ -174,7 +204,7 @@ export default function MarketPanel({ data }: { data: GameData }) {
                       />
                     )}
                   </div>
-                  <strong className="mobile:app-caption text-right min-[601px]:text-[24px]">
+                  <strong className="mobile:app-caption tablet:text-[14px] text-right">
                     {signedPercent(value)}
                   </strong>
                 </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useLearningActivities } from '~/hooks/useLearningActivities'
 import { FIRST_GAME_YEAR } from '~/lib/constants'
 import {
@@ -24,10 +24,14 @@ export default function TeamContent({
   data,
   active,
   expiresAt,
+  className,
+  identity,
 }: {
   data: GameData
   active: boolean
   expiresAt: Date | null
+  className?: string
+  identity?: ReactNode
 }) {
   const game = data.result?.currentGame
   const self = data.self
@@ -142,7 +146,8 @@ export default function TeamContent({
   ].find((activity) => activity.id === learning.activeLearningId)
   return (
     <>
-      <div hidden={!active} className={!active ? 'hidden' : undefined}>
+      <div hidden={!active} className={!active ? 'hidden' : className}>
+        {identity}
         <TeamPanel
           data={data}
           stories={stories}

@@ -20,36 +20,38 @@ export function createSegmentRouter({
   services = {},
   schemas = {},
 }: RouterDeps = {}) {
-  const addInput = z.object({
-    gameId: gameIdSchema,
-    periodIx: z.number().int().nonnegative(),
-    facts: jsonObjectSchema,
-    learningElements: z.array(idSchema).optional(),
-    storyElements: z.array(idSchema).optional(),
-  })
-
   return createTRPCRouter({
-    add: adminProcedure.input(addInput).mutation(async ({ input, ctx }) => {
-      await assertGameOwnership(ctx, input.gameId)
-      const segment = await GameService.addPeriodSegment(
-        {
-          gameId: input.gameId,
-          periodIx: input.periodIx,
-          facts: input.facts,
-          learningElements: input.learningElements,
-          storyElements: input.storyElements,
-        } as Parameters<typeof GameService.addPeriodSegment>[0],
-        ctx as any,
-        {
-          schema: requireFactsSchema(
-            schemas.PeriodSegmentFactsSchema,
-            'PeriodSegmentFactsSchema'
-          ),
-          services: services as any,
-        } as any
+    add: adminProcedure
+      .input(
+        z.object({
+          gameId: gameIdSchema,
+          periodIx: z.number().int().nonnegative(),
+          facts: jsonObjectSchema,
+          learningElements: z.array(idSchema).optional(),
+          storyElements: z.array(idSchema).optional(),
+        })
       )
+      .mutation(async ({ input, ctx }) => {
+        await assertGameOwnership(ctx, input.gameId)
+        const segment = await GameService.addPeriodSegment(
+          {
+            gameId: input.gameId,
+            periodIx: input.periodIx,
+            facts: input.facts,
+            learningElements: input.learningElements,
+            storyElements: input.storyElements,
+          } as Parameters<typeof GameService.addPeriodSegment>[0],
+          ctx as any,
+          {
+            schema: requireFactsSchema(
+              schemas.PeriodSegmentFactsSchema,
+              'PeriodSegmentFactsSchema'
+            ),
+            services: services as any,
+          } as any
+        )
 
-      return toActiveSegmentDto(segment as any)
-    }),
+        return toActiveSegmentDto(segment as any)
+      }),
   })
 }

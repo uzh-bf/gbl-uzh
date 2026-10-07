@@ -540,7 +540,9 @@ export async function getLearningElement(
       id: args.id,
     },
     include: {
-      options: true,
+      // Selections and solutions are option positions; attemptLearningElement
+      // must read the options in the same order.
+      options: { orderBy: { id: 'asc' } },
     },
   })
 
@@ -574,7 +576,7 @@ export async function attemptLearningElement(
 ) {
   const learningElement = await ctx.prisma.learningElement.findUnique({
     where: { id: args.elementId },
-    include: { options: true },
+    include: { options: { orderBy: { id: 'asc' } } },
   })
 
   if (!learningElement) return null
