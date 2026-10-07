@@ -1,5 +1,6 @@
 import superjson from 'superjson'
 import { TRPCError, initTRPC } from '@trpc/server'
+import { ZodError } from 'zod'
 import { UserRole } from '../types.js'
 import type { PlatformContext, PlatformUser } from './context.js'
 import { asTRPCCodeFromServiceError, throwAsTRPCError } from './errors.js'
@@ -9,20 +10,36 @@ const t = initTRPC.context<PlatformContext>().create({
   sse: {
     ping: {
       enabled: true,
-      intervalMs: 15_000,
+      intervalMs: 3_000,
     },
+    // Ends each stream after 5 minutes; the client reconnects and its
+    // onStarted handler refetches anything missed in between.
+    maxDurationMs: 5 * 60 * 1_000,
     client: {
-      reconnectAfterInactivityMs: 30_000,
+      reconnectAfterInactivityMs: 5_000,
     },
   },
   // Never leak raw internal error messages (Prisma/service internals) to
   // clients. Mapped errors (UNAUTHORIZED/FORBIDDEN/BAD_REQUEST) keep their
   // message; anything that fell through to INTERNAL_SERVER_ERROR is genericized.
-  errorFormatter({ shape }) {
+  errorFormatter({ shape, error }) {
     if (shape.data.code === 'INTERNAL_SERVER_ERROR') {
       return {
         ...shape,
         message: 'Internal server error',
+      }
+    }
+
+    // Input validation failures otherwise reach clients as serialized issue
+    // JSON; one line per issue keeps toasts readable.
+    if (error.cause instanceof ZodError) {
+      return {
+        ...shape,
+        message: error.cause.issues
+          .map(
+            (issue) => `${issue.path.join('.') || 'input'}: ${issue.message}`
+          )
+          .join('; '),
       }
     }
 

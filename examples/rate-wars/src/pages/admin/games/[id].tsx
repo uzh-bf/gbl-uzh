@@ -307,12 +307,12 @@ function ManageGame() {
     }
   }
 
-  if (gameLoading || !game) {
-    return <div>loading...</div>
-  }
-
   if (gameError) {
     return <div>{gameError.message}</div>
+  }
+
+  if (gameLoading || !game) {
+    return <div>loading...</div>
   }
 
   const learningElementsAll = learningElementsData.map((e) => ({

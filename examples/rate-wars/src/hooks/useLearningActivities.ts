@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { trpc } from '~/lib/trpc'
 
 export type LearningState = 'ATTEMPTED' | 'SOLVED' | null
@@ -60,6 +60,11 @@ export function useLearningActivities({
   const utils = trpc.useUtils()
 
   const [activeLearningId, setActiveLearningId] = useState<string | null>(null)
+  // Lets a pending attempt see whether its activity is still the open one.
+  const activeLearningIdRef = useRef(activeLearningId)
+  useEffect(() => {
+    activeLearningIdRef.current = activeLearningId
+  }, [activeLearningId])
   const [learningElementState, setLearningElementState] =
     useState<LearningState>(null)
   const [activeLearningOptions, setActiveLearningOptions] = useState<number[]>(
@@ -107,33 +112,26 @@ export function useLearningActivities({
     }
   }, [rawLearningElementData])
 
-  const attemptLearningElement = trpc.learning.attempt.useMutation({
-    async onSuccess() {
-      await Promise.all([
-        activeLearningId
-          ? utils.learning.byId.invalidate({ id: activeLearningId })
-          : Promise.resolve(),
-        utils.play.result.invalidate(),
-        utils.play.self.invalidate(),
-      ])
-    },
-    onError: (err) => {
-      toast({
-        title: 'Could not submit your answer',
-        description: err.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const attemptLearningElement = trpc.learning.attempt.useMutation()
 
   const handleAttemptLearning = async () => {
-    if (!activeLearningId) return
+    const elementId = activeLearningId
+    if (!elementId) return
 
     try {
       const result = await attemptLearningElement.mutateAsync({
-        elementId: activeLearningId,
+        elementId,
         selection: activeLearningOptions,
       })
+      // Refresh the submitted activity even if another one is open now. A
+      // failed refresh is not a failed attempt.
+      void Promise.all([
+        utils.learning.byId.invalidate({ id: elementId }),
+        utils.play.result.invalidate(),
+        utils.play.self.invalidate(),
+      ]).catch(() => {})
+      // The player may have opened another activity while this one was pending.
+      if (activeLearningIdRef.current !== elementId) return
 
       if (result?.pointsAchieved === result?.pointsMax) {
         setLearningElementState('SOLVED')
@@ -142,7 +140,12 @@ export function useLearningActivities({
         toast({ title: 'Wrong answer', description: 'Try again!' })
       }
     } catch (error) {
-      console.error(error)
+      if (activeLearningIdRef.current !== elementId) return
+      toast({
+        title: 'Could not submit your answer',
+        description: error instanceof Error ? error.message : String(error),
+        variant: 'destructive',
+      })
     }
   }
 

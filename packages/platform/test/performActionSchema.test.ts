@@ -10,7 +10,7 @@ import * as yup from 'yup'
 import { createCallerFactory } from '../src/trpc/init.js'
 import { createPlatformRouter } from '../src/trpc/createPlatformRouter.js'
 import { UserRole } from '../src/types.js'
-import { createMockPrisma, createTestContext } from './helpers.js'
+import { createMockPrisma, createTestContext, testSchemas } from './helpers.js'
 
 const ActionFactsSchema = yup.object({
   amount: yup.number().required(),
@@ -21,7 +21,7 @@ function buildCaller(
   actionsApply: ReturnType<typeof vi.fn>
 ) {
   const router = createPlatformRouter({
-    schemas: { ActionFactsSchema },
+    schemas: { ...testSchemas, ActionFactsSchema },
     services: {
       Actions: {
         apply: actionsApply,
@@ -43,6 +43,7 @@ function buildCallerWithoutActionFactsSchema(
   actionsApply: ReturnType<typeof vi.fn>
 ) {
   const router = createPlatformRouter({
+    schemas: { ...testSchemas, ActionFactsSchema: undefined },
     services: {
       Actions: {
         apply: actionsApply,

@@ -53,8 +53,8 @@ function ReportGame() {
     { enabled: hasGameId }
   )
 
-  if (isLoading || !game) return <div>loading...</div>
   if (error) return <div>{error.message}</div>
+  if (isLoading || !game) return <div>loading...</div>
 
   const playersById = Object.fromEntries(
     game.players.map((p) => [p.id, p.name])

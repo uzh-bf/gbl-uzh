@@ -22,15 +22,15 @@ export default function AllocationRow({
     <div
       data-cy={`${saved ? 'submitted' : 'allocation'}-${asset}`}
       className={cn(
-        'border-player-border mobile:gap-app-3 mobile:px-app-4 mobile:py-app-3 grid min-h-[64px] items-center border-b min-[601px]:gap-[16px] min-[601px]:px-[24px] min-[601px]:py-[16px] [@media(max-width:360px)]:gap-[8px]',
+        'border-player-border mobile:gap-app-3 mobile:px-app-4 mobile:py-app-3 tablet:gap-[8px] tablet:px-[12px] tablet:py-[8px] grid min-h-[64px] items-center border-b min-[641px]:gap-[16px] min-[641px]:px-[24px] min-[641px]:py-[16px] [@media(max-width:360px)]:gap-[8px]',
         saved
-          ? 'grid-cols-[12px_minmax(0,1fr)_auto_52px] min-[601px]:min-h-[76px] min-[601px]:grid-cols-[14px_minmax(0,1fr)_auto_64px] [@media(max-width:360px)]:grid-cols-[10px_minmax(0,1fr)_auto_44px]'
-          : 'grid-cols-[12px_minmax(0,1fr)_auto_84px] min-[601px]:min-h-[88px] min-[601px]:grid-cols-[14px_minmax(0,1fr)_auto_96px] [@media(max-width:360px)]:grid-cols-[10px_minmax(0,1fr)_auto_78px]'
+          ? 'tablet:min-h-[52px] tablet:grid-cols-[10px_minmax(0,1fr)_auto_44px] grid-cols-[12px_minmax(0,1fr)_auto_52px] min-[641px]:min-h-[76px] min-[641px]:grid-cols-[14px_minmax(0,1fr)_auto_64px] [@media(max-width:360px)]:grid-cols-[10px_minmax(0,1fr)_auto_44px]'
+          : 'tablet:min-h-[52px] tablet:grid-cols-[10px_minmax(0,1fr)_auto_64px] grid-cols-[12px_minmax(0,1fr)_auto_84px] min-[641px]:min-h-[88px] min-[641px]:grid-cols-[14px_minmax(0,1fr)_auto_96px] [@media(max-width:360px)]:grid-cols-[10px_minmax(0,1fr)_auto_78px]'
       )}
     >
       <span
         className={cn(
-          'size-[12px] rounded-[3px] min-[601px]:size-[14px]',
+          'tablet:size-[10px] size-[12px] rounded-[3px] min-[641px]:size-[14px]',
           color
         )}
         data-asset={asset}
@@ -38,14 +38,14 @@ export default function AllocationRow({
       />
       <Label
         htmlFor={saved ? undefined : `allocation-${asset}`}
-        className="mobile:app-body block leading-[1.2] font-bold min-[601px]:flex min-[601px]:items-baseline min-[601px]:gap-[12px] min-[601px]:text-[22px]"
+        className="mobile:app-body tablet:block tablet:app-caption block leading-[1.2] font-bold min-[641px]:flex min-[641px]:items-baseline min-[641px]:gap-[12px] min-[641px]:text-[22px]"
       >
         {name}
-        <span className="text-player-muted mobile:mt-app-1 mobile:app-caption block font-normal whitespace-nowrap min-[601px]:mt-0 min-[601px]:text-[16px]">
+        <span className="text-player-muted mobile:mt-app-1 mobile:app-caption tablet:whitespace-normal tablet:text-[12px] tablet:leading-[1.3] block font-normal whitespace-nowrap min-[641px]:mt-0 min-[641px]:text-[16px]">
           {risk}
         </span>
       </Label>
-      <Amount className="text-player-muted mobile:app-caption m-0 whitespace-nowrap tabular-nums min-[601px]:text-[18px] [@media(max-width:360px)]:text-[13px]">
+      <Amount className="text-player-muted mobile:app-caption tablet:text-[12px] tablet:leading-[1.3] m-0 whitespace-nowrap tabular-nums min-[641px]:text-[18px] [@media(max-width:360px)]:text-[13px]">
         {amount === null ? '—' : formatCHF(amount)}
       </Amount>
       {children}

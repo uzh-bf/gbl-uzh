@@ -1,8 +1,20 @@
 # Log
 
+## 2026-10-06
+
+**Update**: [UI Building Blocks](ui-components.md) — use width-only tablet mode from 641px, retaining compact phone sizing through 640px. Bonds/Stocks fill the tablet row with fixed-height charts and centered headings, dice, and metrics; desktop retains its left-column layout and 768px content cap. Reuse History’s tablet state and remove overridden shell/Market sizing rules. Verify phone sizing against 566px, tablet touch/mouse boundaries, chart geometry, drafts, navigation, and results.
+
+**Update**: [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — adapt welcome to the tablet designs with a wider introduction, shared popup bank choices and live preview with circular avatars, retaining the separate review step, mobile layout/picker behavior and profile Save/Cancel flow. Review consolidates the step heading and uses CSS alone for preview visibility, avoiding duplicate viewport state.
+
+**Update**: [UI Building Blocks](ui-components.md) — align quarter/year strips across phone and tablet layouts and give both the same compact year tabs and bring learning/story sheets onto the cockpit typography, control and spacing scale while retaining phone sheet styling.
+
 ## 2026-10-02
 
 **Update**: [API Layer](api-layer.md), [Developing a Game](developing-a-game.md), [UI Building Blocks](ui-components.md) — carry dev's mobile redesign, market dice reveal, admin report, and achievement guidance into the tRPC stack: the `market` router extension, `results.specific` report reads, the app-local learning hook, and tRPC Playwright interception.
+
+## 2026-09-30
+
+**Update**: [UI Building Blocks](ui-components.md), [Developing a Game](developing-a-game.md), [Game Lifecycle](game-lifecycle.md) — add the tablet/desktop cockpit with Decisions/History navigation, compact allocation and Team panels, full-width Market beneath them, and responsive History charts and filters. Retain phone layouts, game identity, controller state, colors, content and instructor-controlled Ready behavior; document browser coverage and opt-in compact Market charts.
 
 ## 2026-09-28
 

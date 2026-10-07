@@ -11,7 +11,7 @@ import {
 } from '../src/trpc/init.js'
 import { createPlatformRouter } from '../src/trpc/createPlatformRouter.js'
 import { UserRole } from '../src/types.js'
-import { createMockPrisma, createTestContext } from './helpers.js'
+import { createMockPrisma, createTestContext, testSchemas } from './helpers.js'
 
 describe('assertGameOwnership (direct)', () => {
   it('throws NOT_FOUND when prisma.game.findFirst resolves null', async () => {
@@ -54,7 +54,7 @@ describe('assertGameOwnership (direct)', () => {
 })
 
 describe('assertGameOwnership through a real admin route (game.toggleSwitch)', () => {
-  const router = createPlatformRouter({})
+  const router = createPlatformRouter({ schemas: testSchemas })
   const createCaller = createCallerFactory(router)
 
   it('rejects NOT_FOUND before the handler runs when the admin does not own the game', async () => {

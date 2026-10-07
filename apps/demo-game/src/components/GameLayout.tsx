@@ -11,6 +11,7 @@ import { shouldRefetchDemoGame } from '~/lib/gameEvents'
 import { queueRefetch } from '~/lib/queuedRefetch'
 import type { ResultView } from '~/lib/results'
 import { trpc } from '~/lib/trpc'
+import { useTabletLayout } from '~/lib/usePlayerLayout'
 import type { GameData } from '~/types/api'
 import CantonFlagBadge from './CantonFlagBadge'
 import CompactCountdown from './cockpit/CompactCountdown'
@@ -50,14 +51,17 @@ function GameLayout({
   const activeSegment = activePeriod?.activeSegment
   const running = currentGame?.status === 'RUNNING'
   const router = useRouter()
-  const tab =
+  // Navigation, columns, and embedded panels must switch in the same render.
+  const tablet = useTabletLayout()
+  const requestedTab =
     typeof router.query.tab === 'string' &&
     tabs.some(({ id }) => id === router.query.tab)
       ? router.query.tab
       : 'cockpit'
+  const tab = tablet && requestedTab !== 'history' ? 'cockpit' : requestedTab
+  const marketVisible = tab === 'market' || (tablet && tab === 'cockpit')
   const detailTab = tab !== 'cockpit'
   const resultScreen = !!resultView && !detailTab
-  const expandedHeader = detailTab || resultScreen
   const { toast } = useToast()
 
   const countdownNotifications = useRef({
@@ -92,12 +96,11 @@ function GameLayout({
         /* Retry on the next focus, reconnect, or refresh. */
       })
     }
-    const timer =
-      tab === 'market'
-        ? window.setInterval(() => {
-            if (document.visibilityState === 'visible') refresh()
-          }, 30_000)
-        : undefined
+    const timer = marketVisible
+      ? window.setInterval(() => {
+          if (document.visibilityState === 'visible') refresh()
+        }, 30_000)
+      : undefined
     window.addEventListener('focus', refresh)
     window.addEventListener('online', refresh)
     return () => {
@@ -105,7 +108,7 @@ function GameLayout({
       window.removeEventListener('focus', refresh)
       window.removeEventListener('online', refresh)
     }
-  }, [queuedRefetch, tab])
+  }, [queuedRefetch, marketVisible])
 
   // A string key keeps the countdown effects from re-running on every refetch,
   // which returns a new Date instance for the same deadline.
@@ -138,6 +141,7 @@ function GameLayout({
     return null
   }
 
+  const gameName = self.game?.name ?? `Game ${currentGame.id}`
   const facts = parseFacts(self.facts)
   const location =
     typeof facts.location === 'string' ? facts.location : undefined
@@ -212,21 +216,47 @@ function GameLayout({
 
   return (
     <>
-      <div className="font-player text-player-text min-[785px]:border-player-border phone:app-body phone:fixed phone:inset-0 phone:overflow-hidden mx-auto flex h-dvh w-full max-w-[784px] flex-col bg-white text-[16px] min-[785px]:border-x [&_*]:box-border">
-        <header
-          className={cn(
-            'border-player-divider phone:gap-app-3 phone:px-app-4 phone:py-app-3 flex shrink-0 items-center border-b min-[601px]:gap-[16px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
-            expandedHeader &&
-              'min-[601px]:gap-[20px] min-[601px]:px-[32px] min-[601px]:py-[24px]'
-          )}
-        >
+      <div className="font-player text-player-text min-[785px]:border-player-border phone:app-body phone:fixed phone:inset-0 phone:overflow-hidden tablet:max-w-[1440px] mx-auto flex h-dvh w-full max-w-[784px] flex-col bg-white text-[16px] min-[785px]:border-x [&_*]:box-border">
+        <header className="border-player-divider phone:gap-app-3 phone:px-app-4 phone:py-app-3 tablet:h-[48px] tablet:gap-[16px] tablet:px-[16px] tablet:py-0 flex shrink-0 items-center border-b">
+          <h1
+            className={cn(
+              'm-0 max-w-[40%] min-w-0 truncate text-[16px] font-bold',
+              !tablet && 'hidden'
+            )}
+            title={gameName}
+          >
+            {gameName}
+          </h1>
+          <nav
+            className={cn(
+              'h-full min-w-0 flex-1 items-stretch gap-[24px]',
+              tablet ? 'flex' : 'hidden'
+            )}
+            aria-label="Cockpit navigation"
+          >
+            {tabs
+              .filter(({ id }) => id === 'cockpit' || id === 'history')
+              .map(({ id, label }) => (
+                <Link
+                  key={id}
+                  href={`/play/cockpit?tab=${id}`}
+                  shallow
+                  aria-current={tab === id ? 'page' : undefined}
+                  className="text-player-muted aria-[current=page]:border-player-primary aria-[current=page]:text-player-primary focus-visible:outline-player-primary flex items-center border-b-[3px] border-transparent text-[16px] no-underline focus-visible:outline-2 focus-visible:outline-offset-[-4px] aria-[current=page]:font-bold"
+                >
+                  {label}
+                </Link>
+              ))}
+          </nav>
           <Link
-            href={{ pathname: '/play/welcome', query: { edit: '1', tab } }}
+            href={{
+              pathname: '/play/welcome',
+              query: { edit: '1', tab: requestedTab },
+            }}
             aria-label="Edit player profile"
             className={cn(
-              'text-player-primary focus-visible:outline-player-primary phone:size-app-header-avatar phone:app-body relative shrink-0 rounded-full font-bold focus-visible:outline-2 focus-visible:outline-offset-4 min-[601px]:size-[44px] min-[601px]:text-[18px]',
-              expandedHeader &&
-                'min-[601px]:size-[60px] min-[601px]:text-[24px]'
+              'text-player-primary focus-visible:outline-player-primary phone:size-app-header-avatar phone:app-body relative shrink-0 rounded-full font-bold focus-visible:outline-2 focus-visible:outline-offset-4',
+              tablet && 'hidden'
             )}
           >
             <div className="bg-player-progress grid size-full place-items-center overflow-hidden rounded-full">
@@ -244,30 +274,15 @@ function GameLayout({
             </div>
             <CantonFlagBadge location={location} />
           </Link>
-          <div className="min-w-0 flex-1">
-            <div
-              className={cn(
-                'phone:app-body block leading-[1.15] font-bold [overflow-wrap:anywhere] min-[601px]:text-[22px]',
-                expandedHeader && 'min-[601px]:text-[28px]'
-              )}
-            >
-              <h1 className="m-0 text-inherit">{self.name}</h1>
+          <div className={cn('min-w-0 flex-1', tablet && 'hidden')}>
+            <div className="phone:app-body block leading-[1.15] font-bold [overflow-wrap:anywhere]">
+              <h1 className="m-0 text-inherit">{gameName}</h1>
             </div>
-            <p
-              className={cn(
-                'text-player-muted phone:app-caption m-0 min-[601px]:text-[16px]',
-                expandedHeader && 'leading-[1.25] min-[601px]:text-[22px]'
-              )}
-            >
-              HQ {cantonNames[location] ?? location ?? '—'}
+            <p className="text-player-muted phone:app-caption m-0">
+              {self.name} · HQ {cantonNames[location] ?? location ?? '—'}
             </p>
           </div>
-          <div
-            className={cn(
-              'phone:app-value shrink-0 [font-family:monospace] font-bold tabular-nums min-[601px]:text-[28px]',
-              detailTab && 'min-[601px]:text-[36px]'
-            )}
-          >
+          <div className="phone:app-value tablet:app-value shrink-0 [font-family:monospace] font-bold tabular-nums">
             {expiresAtDate && Number.isFinite(expiresAtDate.getTime()) ? (
               <CompactCountdown
                 expiresAt={expiresAtDate}
@@ -281,19 +296,14 @@ function GameLayout({
         <section
           hidden={detailTab}
           className={cn(
-            'border-player-divider phone:px-app-4 phone:py-app-3 shrink-0 border-b min-[601px]:px-[24px] min-[601px]:py-[20px]',
-            resultScreen && 'min-[601px]:px-[32px] min-[601px]:py-[28px]'
+            'border-player-divider phone:min-h-[72px] phone:px-app-4 phone:py-[6px] tablet:min-h-[72px] tablet:px-[16px] tablet:py-[12px] shrink-0 border-b',
+            !detailTab && 'phone:flex phone:flex-col phone:justify-center'
           )}
           aria-label="Game progress"
           data-game-status={currentGame.status}
         >
-          <div className="phone:gap-x-app-3 phone:gap-y-app-1 phone:app-body flex flex-wrap items-baseline justify-between gap-x-[12px] gap-y-[4px] text-[17px] [@media(max-width:360px)]:items-start">
-            <h2
-              className={cn(
-                'text-player-muted phone:app-caption m-0 font-semibold tracking-[0.8px] uppercase min-[601px]:text-[14px]',
-                resultScreen && 'min-[601px]:text-[22px]'
-              )}
-            >
+          <div className="phone:gap-x-app-3 phone:gap-y-0 phone:app-body flex flex-wrap items-baseline justify-between gap-x-[12px] gap-y-[4px] text-[17px] [@media(max-width:360px)]:items-start">
+            <h2 className="text-player-muted phone:app-caption tablet:text-[14px] m-0 font-semibold tracking-[0.8px] uppercase">
               {resultView
                 ? resultCopy.heading
                 : activePeriod
@@ -305,7 +315,7 @@ function GameLayout({
                 className={cn(
                   'font-semibold [@media(max-width:360px)]:whitespace-nowrap',
                   resultScreen &&
-                    'text-player-body phone:app-caption min-[601px]:text-[24px]'
+                    'text-player-body phone:app-caption tablet:app-caption'
                 )}
               >
                 {resultView ? resultCopy.detail : status}
@@ -316,20 +326,17 @@ function GameLayout({
             <>
               <div
                 className={cn(
-                  'phone:mt-app-3 phone:gap-app-2 flex gap-[8px] min-[601px]:mt-[16px]',
+                  'phone:mt-app-2 phone:gap-app-2 tablet:mt-app-3 flex gap-[8px]',
                   !running &&
                     !resultView &&
-                    'phone:mb-app-3 min-[601px]:mb-[16px]'
+                    'phone:mb-app-3 min-[641px]:mb-[16px]'
                 )}
                 aria-hidden="true"
               >
                 {Array.from({ length: segmentCount }, (_, index) => (
                   <span
                     key={index}
-                    className={cn(
-                      'bg-player-progress data-[state=done]:bg-player-progress-done data-[state=active]:bg-player-primary h-[8px] min-w-0 flex-1 rounded-[6px] min-[601px]:h-[10px]',
-                      resultScreen && 'min-[601px]:h-[16px]'
-                    )}
+                    className="bg-player-progress data-[state=done]:bg-player-progress-done data-[state=active]:bg-player-primary h-[8px] min-w-0 flex-1 rounded-[6px]"
                     data-state={
                       (running || resultView?.status === 'PAUSED') &&
                       index === segmentIndex
@@ -350,27 +357,40 @@ function GameLayout({
             </>
           )}
         </section>
-        <main className="phone:overscroll-y-contain min-h-0 flex-1 overflow-auto">
+        <main
+          className={cn(
+            'phone:overscroll-y-contain tablet:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] min-h-0 flex-1 overflow-auto',
+            tablet && 'grid',
+            tab === 'history'
+              ? 'tablet:grid-rows-[auto_minmax(min-content,1fr)]'
+              : 'tablet:grid-rows-[minmax(min-content,1fr)_auto]'
+          )}
+        >
           <div
             hidden={tab !== 'cockpit'}
             className={cn(
               tab !== 'cockpit' && 'hidden',
+              'tablet:col-start-1 tablet:row-start-1 tablet:min-w-0 tablet:overflow-hidden',
               !running &&
                 !resultView &&
-                'mobile:p-app-4 p-[16px] min-[601px]:px-[24px] min-[601px]:py-[20px]'
+                'mobile:p-app-4 p-[16px] min-[641px]:px-[24px] min-[641px]:py-[20px]'
             )}
           >
             {children}
           </div>
           <div
-            hidden={tab !== 'market'}
-            className={cn(tab !== 'market' && 'hidden')}
+            hidden={!marketVisible}
+            data-cy="market-block"
+            className={cn(
+              !marketVisible && 'hidden',
+              'tablet:col-span-2 tablet:row-start-2 tablet:min-w-0 tablet:border-t tablet:border-player-divider tablet:min-[1024px]:col-span-1 tablet:min-[1024px]:col-start-1'
+            )}
           >
-            <MarketPanel data={data} />
+            <MarketPanel data={data} embedded={tablet} />
           </div>
           <div
             hidden={tab !== 'history'}
-            className={cn(tab !== 'history' && 'hidden')}
+            className={cn(tab !== 'history' ? 'hidden' : 'tablet:contents')}
           >
             <HistoryPanel
               key={currentGame.id}
@@ -381,28 +401,76 @@ function GameLayout({
           <TeamContent
             key={`${currentGame.id}:${self.id}`}
             data={data}
-            active={tab === 'team'}
+            active={tablet || tab === 'team'}
+            className={cn(
+              'tablet:col-start-2 tablet:relative tablet:z-[1] tablet:isolate tablet:min-w-0 tablet:border-l tablet:border-player-divider tablet:bg-white',
+              tab === 'history'
+                ? 'tablet:row-start-2'
+                : 'tablet:row-start-1 tablet:min-[1024px]:row-span-2'
+            )}
+            identity={
+              <div
+                className={cn(
+                  'border-player-border items-center gap-[8px] border-b px-[12px] py-[8px]',
+                  tablet ? 'flex' : 'hidden'
+                )}
+              >
+                <Link
+                  href={{
+                    pathname: '/play/welcome',
+                    query: { edit: '1', tab: requestedTab },
+                  }}
+                  aria-label="Edit player profile"
+                  className="text-player-primary focus-visible:outline-player-primary relative size-[32px] shrink-0 rounded-full text-[14px] font-bold focus-visible:outline-2 focus-visible:outline-offset-4"
+                >
+                  <div className="bg-player-progress grid size-full place-items-center overflow-hidden rounded-full">
+                    {avatar ? (
+                      <Image
+                        src={avatar}
+                        width={32}
+                        height={32}
+                        alt=""
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      initials
+                    )}
+                  </div>
+                  <CantonFlagBadge location={location} />
+                </Link>
+                <div className="min-w-0">
+                  <h2 className="m-0 text-[14px] leading-[1.3] font-bold [overflow-wrap:anywhere]">
+                    {self.name}
+                  </h2>
+                  <p className="text-player-muted m-0 text-[12px] leading-[1.3]">
+                    HQ {cantonNames[location] ?? location ?? '—'}
+                  </p>
+                </div>
+              </div>
+            }
             expiresAt={expiresAtDate}
           />
         </main>
         <div className="relative z-[3] shrink-0 bg-white">
           {tab === 'cockpit' && (running || resultView) && (
-            <div
-              className={cn(
-                'border-player-divider phone:min-h-0 phone:gap-app-3 phone:px-app-4 phone:py-app-3 flex items-center justify-between gap-[12px] border-t min-[601px]:min-h-[96px] min-[601px]:px-[24px] min-[601px]:py-[16px]',
-                resultScreen && 'min-[601px]:px-[32px]'
-              )}
-            >
+            <div className="border-player-divider phone:min-h-0 phone:gap-app-3 phone:px-app-4 phone:py-app-3 tablet:min-h-[68px] tablet:px-[16px] tablet:py-[12px] flex items-center justify-between gap-[12px] border-t">
               {resultView ? (
-                <p className="text-player-muted phone:app-caption m-0 min-[601px]:text-[24px]">
+                <p className="text-player-muted phone:app-caption tablet:app-caption m-0">
                   Waiting for the instructor to continue.
                 </p>
               ) : (
-                action
+                <>
+                  <p className="text-player-muted tablet:mr-auto tablet:block m-0 hidden text-[14px]">
+                    {status}
+                  </p>
+                  <div className="tablet:order-3 tablet:block contents">
+                    {action}
+                  </div>
+                </>
               )}
               {running && (
                 <div
-                  className="phone:gap-app-3 ml-auto flex items-center gap-[10px]"
+                  className="phone:gap-app-3 tablet:gap-app-3 tablet:order-2 tablet:ml-0 ml-auto flex items-center gap-[10px]"
                   data-cy="ready-switch"
                   data-ready={self.isReady}
                   data-disabled={readyControl.disabled}
@@ -410,7 +478,7 @@ function GameLayout({
                   <label
                     htmlFor="isReady"
                     className={cn(
-                      'phone:app-body text-[17px] font-semibold',
+                      'phone:app-body tablet:app-body text-[17px] font-semibold',
                       readyControl.disabled
                         ? 'text-player-disabled'
                         : self.isReady
@@ -427,7 +495,7 @@ function GameLayout({
                     size="lg"
                     className={{
                       element: cn(
-                        'phone:app-switch-target h-[30px] w-[52px]',
+                        'phone:app-switch-target tablet:app-switch-target h-[30px] w-[52px]',
                         self.isReady
                           ? 'bg-player-success disabled:bg-player-success'
                           : 'bg-player-switch disabled:bg-player-switch'
@@ -444,7 +512,10 @@ function GameLayout({
             </div>
           )}
           <nav
-            className="border-player-border grid grid-cols-4 border-t pb-[env(safe-area-inset-bottom)]"
+            className={cn(
+              'border-player-border grid-cols-4 border-t pb-[env(safe-area-inset-bottom)]',
+              tablet ? 'hidden' : 'grid'
+            )}
             aria-label="Player navigation"
           >
             {tabs.map(({ id, label }) => (
@@ -452,11 +523,7 @@ function GameLayout({
                 key={id}
                 href={`/play/cockpit?tab=${id}`}
                 shallow
-                className={cn(
-                  'text-player-muted aria-[current=page]:border-player-primary aria-[current=page]:text-player-primary focus-visible:outline-player-primary phone:min-h-app-nav phone:app-body flex items-center justify-center border-t-[3px] border-transparent text-[17px] no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] aria-[current=page]:font-bold min-[601px]:min-h-[60px]',
-                  resultScreen &&
-                    'min-[601px]:min-h-[108px] min-[601px]:text-[24px]'
-                )}
+                className="text-player-muted aria-[current=page]:border-player-primary aria-[current=page]:text-player-primary focus-visible:outline-player-primary phone:min-h-app-nav phone:app-body flex items-center justify-center border-t-[3px] border-transparent text-[17px] no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] aria-[current=page]:font-bold"
                 aria-current={tab === id ? 'page' : undefined}
               >
                 {label}

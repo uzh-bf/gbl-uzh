@@ -10,20 +10,23 @@ type PubSubChannels = {
   'user:events': [userId: string, events: any]
 }
 
-const PUBSUB_KEY = Symbol.for('__gbl_pubsub')
-
 function createDefaultPubSub() {
   return createPubSub<PubSubChannels>()
 }
 
+declare global {
+  var __gbl_pubsub: ReturnType<typeof createDefaultPubSub> | undefined
+  var __gbl_realtime_pubsub_bridge: boolean | undefined
+}
+
 function getOrCreatePubSub() {
   if (process.env.NODE_ENV !== 'production') {
-    const cached = (globalThis as any)[PUBSUB_KEY]
+    const cached = globalThis.__gbl_pubsub
     if (cached) return cached
   }
   const instance = createDefaultPubSub()
   if (process.env.NODE_ENV !== 'production') {
-    ;(globalThis as any)[PUBSUB_KEY] = instance
+    globalThis.__gbl_pubsub = instance
   }
   return instance
 }
@@ -38,11 +41,9 @@ export let pubSub = currentPubSub
 // fire. Guarded on globalThis so dev HMR re-evaluation cannot double-publish,
 // and resolved through getPubSub() so a later setPubSub() swap (e.g. Redis)
 // keeps receiving bridged events.
-const BRIDGE_KEY = Symbol.for('__gbl_realtime_pubsub_bridge')
-
 function ensureRealtimeBridge() {
-  if ((globalThis as any)[BRIDGE_KEY]) return
-  ;(globalThis as any)[BRIDGE_KEY] = true
+  if (globalThis.__gbl_realtime_pubsub_bridge) return
+  globalThis.__gbl_realtime_pubsub_bridge = true
 
   bridgeRealtimeEvents({
     onGlobal: (event) => {
@@ -59,13 +60,13 @@ ensureRealtimeBridge()
 /** @deprecated Retained only for published GraphQL subscription compatibility. */
 export function getPubSub() {
   if (process.env.NODE_ENV !== 'production') {
-    const cached = (globalThis as any)[PUBSUB_KEY]
+    const cached = globalThis.__gbl_pubsub
     if (cached) {
       currentPubSub = cached
       pubSub = cached
       return cached
     }
-    ;(globalThis as any)[PUBSUB_KEY] = currentPubSub
+    globalThis.__gbl_pubsub = currentPubSub
   }
 
   return currentPubSub
@@ -81,6 +82,6 @@ export function configurePubSub(eventTarget: EventTarget) {
   currentPubSub = createPubSub<PubSubChannels>({ eventTarget })
   pubSub = currentPubSub
   if (process.env.NODE_ENV !== 'production') {
-    ;(globalThis as any)[PUBSUB_KEY] = currentPubSub
+    globalThis.__gbl_pubsub = currentPubSub
   }
 }

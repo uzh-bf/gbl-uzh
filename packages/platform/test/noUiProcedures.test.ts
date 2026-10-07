@@ -8,13 +8,13 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { createPlatformRouter } from '../src/trpc/createPlatformRouter.js'
 import { createCallerFactory } from '../src/trpc/init.js'
 import { UserRole } from '../src/types.js'
-import { createMockPrisma, createTestContext } from './helpers.js'
+import { createMockPrisma, createTestContext, testSchemas } from './helpers.js'
 
 beforeEach(() => {
   process.env.NEXTAUTH_SECRET = 'test-secret'
 })
 
-const router = createPlatformRouter({})
+const router = createPlatformRouter({ schemas: testSchemas })
 const createCaller = createCallerFactory(router)
 
 describe('game.toggleSwitch (admin, gameId input)', () => {

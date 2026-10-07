@@ -8,15 +8,6 @@ import type {
   StoryElementRefDto,
 } from './contracts.js'
 
-export type {
-  ActiveSegmentDto,
-  AdminGameDto,
-  AdminPlayerDto,
-  GameListItemDto,
-  PeriodDto,
-  StoryElementRefDto,
-} from './contracts.js'
-
 function asId(value: unknown): string | null {
   if (typeof value === 'string' || typeof value === 'number') {
     return `${value}`
@@ -33,6 +24,21 @@ export function toDate(value: unknown): Date | null {
 
   const maybeDate = new Date(value)
   return Number.isNaN(maybeDate.getTime()) ? null : maybeDate
+}
+
+// An explicit null on the game means no segment is active. The active
+// period's index is only a fallback when the game field was not loaded.
+function resolveActiveSegmentIx(game: {
+  activeSegmentIx?: unknown
+  activePeriod?: unknown
+}): number | null {
+  if (game.activeSegmentIx === null) return null
+
+  return (
+    normalizeNumber(game.activeSegmentIx) ??
+    normalizeNumber((game.activePeriod as any)?.activeSegmentIx) ??
+    null
+  )
 }
 
 function normalizeNumber(value: unknown): number | null {
@@ -187,10 +193,7 @@ export function toGameListItemDto(
     status: game.status,
     name: game.name,
     activePeriodIx: game.activePeriodIx,
-    activeSegmentIx:
-      normalizeNumber(game.activeSegmentIx) ??
-      normalizeNumber(game.activePeriod?.activeSegmentIx) ??
-      null,
+    activeSegmentIx: resolveActiveSegmentIx(game),
     facts: game.facts,
     playersCount: game._count?.players ?? 0,
   }
@@ -228,12 +231,7 @@ export function toAdminGameDto(
     version: game.version,
     facts: game.facts,
     activePeriodIx: game.activePeriodIx,
-    activeSegmentIx:
-      game.activeSegmentIx === null
-        ? null
-        : (normalizeNumber(game.activeSegmentIx) ??
-          normalizeNumber((game.activePeriod as any)?.activeSegmentIx) ??
-          null),
+    activeSegmentIx: resolveActiveSegmentIx(game),
     players: Array.isArray(game.players)
       ? game.players.map((player) =>
           mapAdminPlayer(

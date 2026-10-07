@@ -64,14 +64,16 @@ The demo game merges a game-specific `market` router through
 query reads authoritative precomputed outcomes, and `market.revealRoll`
 persists reveal indices without rerolling. Its `MARKET_ROLL_REVEALED` global
 event carries only `gameId`; the player refetches its existing `play.result`
-data.
+data. `play.result` passes segment facts through the router's
+`playerFacts.segment` redactor, so players receive `null` for the dice and
+returns of months that are not revealed yet.
 
 ## Pages Router client pattern
 
 Use `createTRPCNext<AppRouter>` from `@trpc/next` and export
-`trpc.withTRPC(App)` from `pages/_app.tsx`. Keep `ssr: false` unless a game has a
-reviewed SSR requirement. The browser URL is relative (`/api/trpc`); only a
-server-side client needs an absolute origin.
+`trpc.withTRPC(App)` from `pages/_app.tsx`. Keep the default (SSR off) unless a
+game has a reviewed SSR requirement. All calls then run in the browser, so the
+links use the relative URL `/api/trpc`.
 
 The link chain has two terminating branches:
 
@@ -81,7 +83,10 @@ The link chain has two terminating branches:
   `maxBatchSize`; `maxURLLength` independently caps the encoded request URL.
 
 Both terminating links use the same SuperJSON transformer configured in
-`initTRPC`. Same-origin browser cookies are sent automatically; add explicit
+`initTRPC`. The server pings each subscription stream every 3 s, tells the
+client to reconnect after 5 s without a message, and ends streams after
+5 minutes; the client's `onStarted` refetch covers events missed while
+reconnecting. Same-origin browser cookies are sent automatically; add explicit
 credentials only for a reviewed cross-origin deployment.
 
 This follows the official [Pages Router setup](https://trpc.io/docs/client/nextjs/pages-router/setup),
@@ -95,8 +100,7 @@ coverage is focused on representative contracts rather than every procedure;
 the real Playwright lifecycle remains the primary end-to-end behavior check.
 
 The browser client does not need `NEXT_PUBLIC_API_URL` because it uses the
-same-origin relative route. Server-side construction uses the deployed Vercel
-origin, a configured API origin, or the local development origin as a fallback.
+same-origin relative route.
 
 ## Published package boundary
 
