@@ -1,6 +1,7 @@
 import { createPlatformRouter } from '@gbl-uzh/platform'
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { allocationSchema } from '../../lib/allocation'
+import { redactUnrevealedRolls } from '../../lib/market'
 import {
   GameFactsSchema,
   PeriodFactsSchema,
@@ -22,6 +23,8 @@ export const appRouter = createPlatformRouter({
     PeriodSegmentFactsSchema,
     PlayerFactsSchema,
   },
+  // Players must not receive dice or returns before the admin reveals them.
+  playerFacts: { segment: redactUnrevealedRolls },
   extensions: {
     market: marketRouter,
   },

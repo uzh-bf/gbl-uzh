@@ -8,7 +8,7 @@ Target: `dev`
 
 PR: #144, `feat: migrate demo-game and platform from GraphQL to tRPC v11`
 
-Worktree: `/Users/rschlae/Git/gbl/gbl-uzh/.claude/worktrees/pensive-dhawan-df481b`
+Worktree: `<repo>/.claude/worktrees/pensive-dhawan-df481b`
 
 History:
 

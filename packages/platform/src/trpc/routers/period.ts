@@ -19,24 +19,30 @@ export function createPeriodRouter({
   services = {},
   schemas = {},
 }: RouterDeps = {}) {
-  const addInput = z.object({
-    gameId: gameIdSchema,
-    facts: jsonObjectSchema,
-    segmentCount: z.number().int().positive(),
-  })
-
   return createTRPCRouter({
-    add: adminProcedure.input(addInput).mutation(async ({ input, ctx }) => {
-      await assertGameOwnership(ctx, input.gameId)
-      const period = await GameService.addGamePeriod(input as any, ctx as any, {
-        schema: requireFactsSchema(
-          schemas.PeriodFactsSchema,
-          'PeriodFactsSchema'
-        ),
-        services: services as any,
-      })
+    add: adminProcedure
+      .input(
+        z.object({
+          gameId: gameIdSchema,
+          facts: jsonObjectSchema,
+          segmentCount: z.number().int().positive(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        await assertGameOwnership(ctx, input.gameId)
+        const period = await GameService.addGamePeriod(
+          input as any,
+          ctx as any,
+          {
+            schema: requireFactsSchema(
+              schemas.PeriodFactsSchema,
+              'PeriodFactsSchema'
+            ),
+            services: services as any,
+          }
+        )
 
-      return toPeriodDto(period as any)
-    }),
+        return toPeriodDto(period as any)
+      }),
   })
 }

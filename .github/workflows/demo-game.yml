@@ -37,9 +37,9 @@ jobs:
           run_install: false
 
       - name: Install dependencies
-        # The lint job builds the required workspace artifacts explicitly below;
-        # skipping dependency postinstall downloads keeps CI independent of
-        # unrelated native-binary mirrors.
+        # ESLint only reads the source tree, so no workspace package builds are
+        # needed; skipping dependency postinstall downloads keeps CI independent
+        # of unrelated native-binary mirrors.
         run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Lint demo-game

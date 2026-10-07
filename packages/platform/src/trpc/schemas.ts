@@ -35,7 +35,7 @@ export interface JsonRecord {
 export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
   z.union([
     z.string(),
-    z.number(),
+    z.number().finite(),
     z.boolean(),
     z.null(),
     z.record(jsonValueSchema),

@@ -6,6 +6,7 @@ import {
   marketPeriod,
   readMarketRoll,
   readScenario,
+  redactUnrevealedRolls,
 } from './market'
 
 const facts = {
@@ -110,4 +111,29 @@ test('final results retain the last period after the active pointer disconnects'
     `${FIRST_GAME_YEAR} · Quarter 2 · Month 2`
   )
   expect(readScenario(marketPeriod(game).facts)).toStrictEqual(scenario)
+})
+
+test('player segment facts carry only revealed dice and returns', () => {
+  const roll = (n: number) => ({ shared: n, bonds: n + 1, stocks: n + 2 })
+  const returns = (n: number) => ({ bank: n, bonds: n, stocks: n })
+  const segmentFacts = {
+    diceRolls: [roll(1), roll(2), roll(3)],
+    returns: [returns(0.1), returns(0.2), returns(0.3)],
+    revealedRollIndices: [1],
+    other: 'kept',
+  }
+
+  expect(redactUnrevealedRolls(segmentFacts)).toStrictEqual({
+    diceRolls: [null, roll(2), null],
+    returns: [null, returns(0.2), null],
+    revealedRollIndices: [1],
+    other: 'kept',
+  })
+  expect(
+    redactUnrevealedRolls({ ...segmentFacts, revealedRollIndices: undefined })
+  ).toMatchObject({
+    diceRolls: [null, null, null],
+    returns: [null, null, null],
+  })
+  expect(redactUnrevealedRolls(null)).toBeNull()
 })

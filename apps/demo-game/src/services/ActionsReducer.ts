@@ -6,8 +6,6 @@ import { allocationSchema } from '../lib/allocation'
 import { ActionTypes, Decisions } from '../types/facts'
 import { GameFacts, PeriodFacts, PeriodSegmentFacts } from '../types/index'
 
-export { ActionTypes }
-
 type PayloadType = {
   playerArgs: Decisions
   segmentFacts: PeriodSegmentFacts
