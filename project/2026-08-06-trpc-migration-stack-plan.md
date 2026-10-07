@@ -34,7 +34,7 @@ and provenance, but its original Gate 1 design sections below are historical.
 The implemented stack expanded into the eight-layer chain recorded in the active
 continuation plan. The shared CI install is owned by #197; platform privacy and
 compatibility corrections are in #196; demo-game lifecycle proof is in #195;
-#194 owns its independent CI, devcontainer, and auth-origin corrections; #201
+PR #194 owns its independent CI, devcontainer, and auth-origin corrections; #201
 owns the canonical Pages Router pattern; #202 and #204 own their game-specific
 transition fixes; and #205 owns the compatibility boundary, verification
 fixtures, and reconciliation ledger.
@@ -57,6 +57,10 @@ above; the integrated review evidence is recorded there because it covers the
 complete eight-layer stack.
 
 ### Package boundary
+
+The `project/_local/reviews/` reports cited below are local, gitignored
+files from the authoring session. They are not published; the identity
+tuples name the reviewed ranges.
 
 ```json
 {
@@ -106,7 +110,7 @@ complete eight-layer stack.
     "head": "5919b72265643a60db6000a05601acc9bff1191b",
     "base": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99",
     "branch": "trpc-stack/00-absorb-dev-toolchain",
-    "worktree": "/Users/rschlae/Git/gbl/gbl-uzh/trees/trpc-examples-stack"
+    "worktree": "<repo>/trees/trpc-examples-stack"
   }
 }
 ```
