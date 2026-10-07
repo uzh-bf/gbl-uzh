@@ -23,12 +23,12 @@ function Games() {
     },
   })
 
-  if (gamesQuery.isLoading || !gamesQuery.data) {
-    return <div>loading...</div>
-  }
-
   if (gamesQuery.error) {
     return <div>{gamesQuery.error.message}</div>
+  }
+
+  if (gamesQuery.isLoading || !gamesQuery.data) {
+    return <div>loading...</div>
   }
 
   return (
