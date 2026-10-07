@@ -1,5 +1,5 @@
 import { createPlatformRouter } from '@gbl-uzh/platform'
-import { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
+import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { allocationSchema } from '../../lib/allocation'
 import { redactUnrevealedRolls } from '../../lib/market'
 import {

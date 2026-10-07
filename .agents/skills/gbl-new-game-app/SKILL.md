@@ -23,6 +23,10 @@ Design the game FIRST (`gbl-game-design` skill) — the scaffold asks for your f
 5. Replace game content, in this order:
    - `src/types/` — your facts types + yup schemas (Game/Period/PeriodSegment/Player facts).
    - `src/services/` — the six computation modules (`gbl-backend-computations` skill).
+   - `src/server/trpc/`, `src/lib/trpc.tsx`, and
+     `src/pages/api/trpc/[trpc].ts` — keep the canonical server router,
+     `createTRPCNext<AppRouter>` client, and Pages Router handler; replace only
+     the injected services and fact schemas.
    - `prisma/seed.ts` — your level ladder, story/learning elements, achievements.
    - `src/pages/` + `src/components/` — your cockpit/admin UI (`gbl-frontend-game-ui` skill).
    - Branding: `public/` assets, app name in layout/nav.
@@ -68,6 +72,7 @@ Before calling the scaffold complete, verify all of:
 - `pnpm --filter @gbl-uzh/<game> run check` is green (lint + `check:ts`; no unused imports, no demo-game types).
 - No residue grep hits from the decontamination list above (`rg "assetsWithReturns|spotPrice|futuresPrice|cashBalance|storageAmount" apps/<game>/src` returns nothing; `bank`/`bonds`/`stocks` only appear if they are your game's actual concepts).
 - The `/` route renders your game, not demo-game content.
+- `rg -n "@apollo/client|graphql-yoga|graphql-sse|graphql-codegen|/api/graphql|src/graphql/generated" apps/<game>` returns no active game-code or manifest matches.
 - If you keep a progress tracker (e.g. `task.md`), update it. A stale checklist that says "results view not done" when it is done is a real review hazard.
 
 > [!WARNING]
@@ -79,4 +84,6 @@ Before calling the scaffold complete, verify all of:
 - Do not edit `platform.prisma`; schema changes for your game go in `specific.prisma`, platform-level changes go in `packages/platform/public/schema.prisma` (affects every game).
 - Do not add a second React or pin different versions of shared deps — check `pnpm-workspace.yaml` overrides before touching dependency versions.
 - Keep the demo game intact as the working reference; never repurpose it in place.
-- The copied `src/graphql/` (or `src/server/trpc/` after the migration — see [docs/api-layer.md](../../../docs/api-layer.md)) is wiring, not game logic: adjust the injected `services`/schemas, don't rewrite the transport.
+- The copied `src/server/trpc/`, `src/lib/trpc.tsx`, and
+  `src/pages/api/trpc/[trpc].ts` are wiring, not game logic: adjust the injected
+  services and schemas without replacing the transport.

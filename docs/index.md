@@ -16,7 +16,7 @@ An [Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-cata
 - [What Kinds of Games Work Here](game-types.md) - Which game shapes fit the platform (and which do not), with a fit checklist
 - [Developing a Game](developing-a-game.md) - Backend computations, frontend pages, scaffolding, local dev
 - [UI Building Blocks](ui-components.md) - `@gbl-uzh/ui` and `@uzh-bf/design-system` usage, gaps
-- [API Layer and Realtime](api-layer.md) - GraphQL today, the tRPC migration, realtime events
+- [API Layer and Realtime](api-layer.md) - The supported tRPC Pages Router pattern, authorization, caching, and realtime events
 - [Deploying a Game to Staging](deploying-a-game.md) - The easy Vercel + Neon path to a shareable staging URL (CLI-first), distinct from the k8s production path
 
 ## Related resources
@@ -28,5 +28,5 @@ An [Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-cata
 ## Caveats (check before trusting details)
 
 - `apps/demo-game` is the only game built on the platform - generic-contract claims are inferred from one worked example plus platform source
-- The tRPC migration (branch `codex/trpc-migration-work-packages`) replaces GraphQL entirely; check `src/pages/api/trpc/` vs `src/pages/api/graphql.ts` to see what a checkout runs
+- Demo-game is the current tRPC reference. Rate Wars and Central Bank retain deprecated GraphQL compatibility until their migration layers are complete; do not copy their API wiring into a new game.
 - Pages cite `path:Symbol` instead of line numbers; if a symbol moved, search for it

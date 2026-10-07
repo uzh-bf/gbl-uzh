@@ -1,4 +1,4 @@
-import { Action } from '@gbl-uzh/platform'
+import type { Action } from '@gbl-uzh/platform'
 import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
 import type { PrismaClient } from 'src/generated/prisma/client'

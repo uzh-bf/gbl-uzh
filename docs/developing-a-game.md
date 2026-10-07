@@ -46,7 +46,7 @@ There is no generator. The supported path is copying the reference game inside a
 4. The workspace glob `apps/*` picks the package up automatically; run from the repo root with turbo or from the app directory.
 5. Local dev environment: the **starter** config (`.devcontainer/starter/`, published localhost ports) and the **devrouter** config (`.devcontainer/README.md`, namespaced maintainer routing) select `demo`, `central-bank`, or `rate-wars` through `GBL_GAME_TARGET`. Both use the shared mock OIDC contract described above, and so does native host mode — it selects the same games with an argument to `pnpm bootstrap` / `pnpm dev`, or with `GBL_GAME_TARGET`.
 
-Demo-game's standalone Nexus and GraphQL scripts run before Next.js can load environment files. Its Prisma bootstrap loads `.env.<mode>.local`, `.env.local`, `.env.<mode>`, and `.env` in Next's precedence order before authentication is resolved (`apps/demo-game/src/lib/prisma.ts:default`). Existing process or container variables still take priority.
+Demo-game's standalone scripts, such as the seed, run before Next.js can load environment files. Its Prisma bootstrap loads `.env.<mode>.local`, `.env.local`, `.env.<mode>`, and `.env` in Next's precedence order before authentication is resolved (`apps/demo-game/src/lib/prisma.ts:default`). Existing process or container variables still take priority.
 
 > **WARNING:** Decontaminate the copy. `cp -R apps/demo-game apps/<your-game>` also copies the demo game's domain logic, and the build will not fail on residue you leave behind. After step 3, hunt down demo-game leftovers: `.env.production` URLs still pointing at `demo-game.stg.env.bf-app.ch`, the `src/pages/index.tsx` trading showcase, portfolio helpers in `src/lib/results.ts` and `src/services/PeriodResultService.ts`, demo time constants (`MONTHS`/`NUM_MONTHS`), and the `GameFacts.myInt` stub. The full hit-list and a "definition of done" are in the `gbl-new-game-app` skill. Grep your `src/` for `assetsWithReturns`, `spotPrice`, `bank`/`bonds`/`stocks` — any hit is residue.
 
@@ -97,7 +97,12 @@ Define TypeScript types + yup schemas for `GameFacts`, `PeriodFacts`, `PeriodSeg
 
 ### Wiring it together
 
-The `services` object, yup schemas, and facts input types are passed into the platform's API builder, which exposes all queries/mutations/subscriptions. What that builder looks like depends on the transport — GraphQL today, tRPC after the migration. See [api-layer.md](api-layer.md); reference: `apps/demo-game/src/graphql/index.ts` (`generateBaseMutations({ services, schemas, inputTypes })`).
+The `services` object and yup fact schemas are passed to
+`createPlatformRouter`, which exposes the platform queries, mutations, and
+subscriptions. The game hosts that router at `src/pages/api/trpc/[trpc].ts` and
+exports its `AppRouter` type for the Pages Router client. See
+[API Layer and Realtime](api-layer.md); the reference wiring is
+`apps/demo-game/src/server/trpc/router.ts`.
 
 ## Frontend: built per game
 
@@ -137,8 +142,15 @@ The player avatar links to `/play/welcome?edit=1&tab=<tab>` for profile edits. T
 
 The cockpit pattern (from `apps/demo-game/src/pages/play/cockpit.tsx`):
 
-1. The cockpit page fetches **one aggregate query** and passes its data/refetch function to the `GameLayout` wrapper (player result + previous results + current game with active period/segment + attached content + self).
-2. `GameLayout` subscribes to global events and, on `PERIOD_ACTIVATED` / `SEGMENT_ACTIVATED` / `COUNTDOWN_UPDATED`, **refetches that query** — events are a poke, never a data source.
+1. The cockpit page composes the player-facing `play.result` and `play.self`
+   queries and passes their data and refresh function to the `GameLayout`
+   wrapper. Result data carries the current game, active
+   period/segment, attached content, current and past results, and the safe
+   co-player identity list.
+2. `GameLayout` subscribes to `events.global` and, on relevant lifecycle or countdown
+   changes, invalidates only the affected tRPC query through
+   `trpc.useUtils()`. Subscribe to `events.user` as well only when the game
+   handles personalized notifications. Events are a poke, never a data source.
 3. On phones, the demo-game layout renders a compact team header, live countdown, active-period/segment progress, and bottom navigation. Tablet/desktop use Decisions and History in a top bar, a persistent Team sidebar, and the full Market beneath every Decisions state; History year filters span both columns. The 641px threshold depends only on viewport width, including touch and landscape screens. `/play/cockpit?tab=cockpit|market|history|team` selects the tab without discarding the allocation draft. The Decisions tab retains the `cockpit` URL key; Ready appears there only during RUNNING. Team shows the profile, level/XP, settled portfolio statistics, learning activities, and a library of released stories. Market shows the active scenario’s outlook and the latest admin-revealed monthly result; History shows cumulative portfolio values and expandable quarterly results, with a year selector that filters only the breakdown table. Blocking story popups remain global.
 4. The page body is a `switch (game.status)`: decision form under `RUNNING`, read-only results under `PAUSED`/`CONSOLIDATION`, period report under `RESULTS`, placeholders otherwise ([game-lifecycle.md](game-lifecycle.md) lists the expected view per status).
 
@@ -155,7 +167,7 @@ The RUNNING allocation flow follows `apps/demo-game/design/cockpit.png`, `cockpi
 - **Submission marker** (`apps/demo-game/src/services/ActionsReducer.ts:apply`, `apps/demo-game/src/services/SegmentResultService.ts:initialize`/`start`): optional `allocationSubmitted` in result facts records an explicit submission, even for the unchanged/default mix. Both segment entry hooks reset it while carrying forward percentages. Missing markers mean unsubmitted; existing Ready players still see the locked mix. No schema migration is needed.
 - **Context** (`apps/demo-game/src/components/cockpit/AllocationForm.tsx:AllocationForm`): CHF previews follow draft percentages and available assets; Market outlook appears only while editing on phones and shows Bonds/Stocks expected value, gap, and volatility from the validated active scenario and shared probability calculation. Expected values use the Market tab’s colors: red for negative values and green otherwise. Compact Bonds and Stocks columns sit beneath the Market outlook title; navigation uses the phone Market tab. Tablet/desktop omit this duplicate outlook and use the embedded Market below Decisions. Missing or invalid scenarios show an unavailable message. Closed-round segment results and period reports remain in Decisions.
 - **Market** (`apps/demo-game/src/components/market/MarketPanel.tsx:MarketPanel`): active-period Bonds/Stocks probabilities show expected return, gap, calculated volatility, and every possible return. Heights encode probability; the latest revealed totals are highlighted independently. The revealed month appears beneath Expected for both assets; the comparison heading includes the revealed quarter/calendar month (for example, “Monthly returns · Q2 · Apr”). In the player view, the shared die is orange, Bonds is yellow, and Stocks is green. Revealed dice appear beneath each asset title; the comparison uses recorded segment returns. Both persist across quarter/year changes and stay hidden before the first reveal.
-- **Admin reveals** (`apps/demo-game/src/services/MarketRevealService.ts:revealMarketRoll`): dice and returns are generated when a segment is created. The admin animation publishes an existing monthly outcome through the app-local ADMIN/MASTER-only mutation, including while allocations are open. Optional `revealedRollIndices` in segment facts persist visibility; serializable transactions with conflict retries merge concurrent reveals. Replaying a month cannot reroll outcomes or replace a later result. Future segments cannot be revealed; closing a quarter does not reveal it automatically. `MARKET_ROLL_REVEALED` tells players to refetch the aggregate query. `apps/demo-game/src/lib/gameEvents.ts:shouldRefetchDemoGame` combines the platform lifecycle events with the app-specific reveal event for both player and admin dice views. `apps/demo-game/src/lib/queuedRefetch.ts:queueRefetch` schedules another read when a notification arrives during an in-flight refresh, so Apollo deduplication cannot drop the newer reveal. Market also refreshes on focus/reconnect and every 30 seconds while visible, including the embedded tablet/desktop Decisions panel. These markers control the Market UI, not access to raw facts or existing cockpit result timing.
+- **Admin reveals** (`apps/demo-game/src/services/MarketRevealService.ts:revealMarketRoll`): dice and returns are generated when a segment is created. The admin animation publishes an existing monthly outcome through the app-local ADMIN/MASTER-only mutation, including while allocations are open. Optional `revealedRollIndices` in segment facts persist visibility; serializable transactions with conflict retries merge concurrent reveals. Replaying a month cannot reroll outcomes or replace a later result. Future segments cannot be revealed; closing a quarter does not reveal it automatically. `MARKET_ROLL_REVEALED` tells players to refetch `play.result`, which carries only revealed months' dice and returns. `apps/demo-game/src/lib/gameEvents.ts:shouldRefetchDemoGame` combines the platform lifecycle events with the app-specific reveal event for both player and admin dice views. `apps/demo-game/src/lib/queuedRefetch.ts:queueRefetch` schedules another read when a notification arrives during an in-flight refresh, so Apollo deduplication cannot drop the newer reveal. Market also refreshes on focus/reconnect and every 30 seconds while visible, including the embedded tablet/desktop Decisions panel. These markers control the Market UI, not access to raw facts or existing cockpit result timing.
 
 ### Decisions result screens
 
@@ -171,9 +183,18 @@ The three review states follow `segment_end.png`, `consolidation.png`, and `peri
 
 > [!WARNING]
 >
-> **Prisma enum trap:** `@prisma/client` exports runtime enum objects (`GameStatus`, etc.) that Next.js strips from client bundles. Code like `DB.GameStatus.RESULTS` will be `undefined` in the browser. In the cockpit `switch` and any shared utility reachable from the frontend, compare against string literals (`'RUNNING'`, `'PAUSED'`, etc.) or the GraphQL-generated enum from `src/graphql/generated/ops.ts`. Use `import type` for Prisma imports in shared files.
+> **Prisma enum trap:** `@prisma/client` exports runtime enum objects
+> (`GameStatus`, etc.) that Next.js can strip from client bundles. Code like
+> `DB.GameStatus.RESULTS` can be `undefined` in the browser. In cockpit switches
+> and shared frontend utilities, compare the router's inferred status value to
+> string literals (`'RUNNING'`, `'PAUSED'`, etc.). Use `import type` for Prisma
+> and `AppRouter` imports in browser-reachable files.
 
 Your game-specific work is almost entirely: the decision form (validate with yup: same constraints as your `Actions.apply`), the results/report visualizations (the demo game uses recharts), and the admin authoring forms for your period/segment facts.
+
+The player-facing co-player list intentionally exposes only `id` and `name`.
+It is enough to label leaderboards; do not depend on another player's facts or
+admin-only game queries from the player UI.
 
 The adapters share settlement selection, contiguous balance-sample parsing, initial-capital lookup, saved allocations, and numeric calculations through `apps/demo-game/src/lib/results.ts`. `src/lib/facts.ts:parseFacts` handles persisted objects and legacy single/double-encoded JSON for welcome, player chrome, market data, and results. `src/lib/results.ts` also owns player amount/percentage formatting; `src/lib/constants.ts` holds asset display metadata, canton names, the starting year, and month names. Avatar names stay local to the welcome flow. Market presentation reuses the shared UI's `signedPercent` formatter. These helpers retain each view's existing rounding, missing-value, and reveal rules.
 
@@ -181,7 +202,7 @@ The adapters share settlement selection, contiguous balance-sample parsing, init
 
 `apps/demo-game/src/components/history/HistoryPanel.tsx:HistoryPanel` follows the player History reference: shared header/countdown, year pills, cumulative CHF value and gain, quarterly portfolio bars, and a year-filtered breakdown. The latest started year is selected on first load; selection persists across tabs and refetches. Future years stay hidden. Each quarter expands into monthly asset returns, portfolio CHF changes, and dice totals. Dice remain “Not revealed” until the instructor publishes that month, even when the quarter has closed; settled financial results remain visible.
 
-`apps/demo-game/src/lib/results.ts:buildHistory` adapts the existing aggregate result query without another API. Shared `src/lib/results.ts:readResultHistory` uses `PERIOD_END` records and active-quarter lifecycle state to identify completed `SEGMENT_END` records: the latter also exist during allocation with carried-forward facts. It handles an upcoming active period during between-year `RESULTS` and a disconnected final-period pointer. Portfolio amounts and monthly changes come from persisted `assetsWithReturns`; quarterly bond/stock rates compound the monthly market rates, not allocation-dependent asset changes. Missing values render as dashes; before the first completed quarter, known initial capital appears with an empty state. Chart and table scroll independently on narrow screens.
+`apps/demo-game/src/lib/results.ts:buildHistory` adapts the existing `play.result` data without another procedure. Shared `src/lib/results.ts:readResultHistory` uses `PERIOD_END` records and active-quarter lifecycle state to identify completed `SEGMENT_END` records: the latter also exist during allocation with carried-forward facts. It handles an upcoming active period during between-year `RESULTS` and a disconnected final-period pointer. Portfolio amounts and monthly changes come from persisted `assetsWithReturns`; quarterly bond/stock rates compound the monthly market rates, not allocation-dependent asset changes. Missing values render as dashes; before the first completed quarter, known initial capital appears with an empty state. Chart and table scroll independently on narrow screens.
 
 The History lifecycle browser test covers two years, quarter completion, delayed dice reveals, year filtering, selection and allocation-draft retention, final results, keyboard expansion, and screenshots at 784px, 390px, and 320px.
 
@@ -191,7 +212,7 @@ The History lifecycle browser test covers two years, quarter completion, delayed
 
 `src/lib/team.ts:storyLibrary` lists released stories, deduplicated by ID with first-release quarter metadata, newest release first and title order within each quarter. Future segments stay hidden, and finished-year stories remain available in final results. `StorySheet` renders the existing generic or role-specific Markdown and images. Unread active-quarter cards open automatically in title order. Continue persists Read status and advances; Close, Escape, and Skip stories dismiss the sequence for this page visit without marking skipped cards Read. Clicking outside does not dismiss. Library entries can reopen any card in its original sequence, including Read cards. Failed progress writes keep the card open for retry. A newly activated unread story preempts a learning sheet.
 
-`LearningSheet` retains the existing single-answer quiz and server scoring rules. Incorrect answers can be retried; solved answers are read-only with feedback and motivation. The shared `useLearningActivities` hook uses `preserveDrafts` for page-visit answer retention and guards against stale query/submission responses. New becomes Open when first opened; viewed IDs are remembered in browser storage per game/team, with an in-memory fallback. Solved is server-backed. Active-quarter unsolved and previously solved lessons retain their existing eligibility. The sheet shows advisory quarter time remaining, never a timer-based submission cutoff. Loading, unavailable content, query retry, and failed submissions have explicit states.
+`LearningSheet` retains the existing single-answer quiz and server scoring rules. Incorrect answers can be retried; solved answers are read-only with feedback and motivation. The app-local `src/hooks/useLearningActivities.ts` hook keeps page-visit answer drafts and guards against stale query/submission responses. New becomes Open when first opened; viewed IDs are remembered in browser storage per game/team, with an in-memory fallback. Solved is server-backed. Active-quarter unsolved and previously solved lessons retain their existing eligibility. The sheet shows advisory quarter time remaining, never a timer-based submission cutoff. Loading, unavailable content, query retry, and failed submissions have explicit states.
 
 The sheets share an app-local, accessible dialog shell with a 784px width cap, a 90dvh height cap, scrollable content, visible footer actions, safe-area padding, focus trapping and restoration. The Team lifecycle browser test covers story skip/read/reopen, query and mutation failures, quiz states and drafts, a new quarter preempting an activity, final-result archives, and screenshots at 784px, 390px, and 320px.
 
@@ -208,7 +229,7 @@ Demo-game service tests use the generated Prisma clients and platform distributi
 
 ### Demo-game calendar and learning reward maintenance
 
-`src/lib/constants.ts` owns `NUM_MONTHS_PER_SEGMENT = 3` and the runtime `FIRST_GAME_YEAR`. Every period advances the displayed year by its index; each segment contains three months. The admin still chooses the segment count and scenario, but cannot set a monthly roll count. `src/types/Period.ts:PeriodFactsSchema` strips legacy `rollsPerSegment` JSON, and the GraphQL input no longer exposes it. `SegmentService.initialize` uses the constant; `SegmentResultService.end` rejects stored segments whose dice/return arrays do not each contain three months. Existing outcomes are never regenerated by this change.
+`src/lib/constants.ts` owns `NUM_MONTHS_PER_SEGMENT = 3` and the runtime `FIRST_GAME_YEAR`. Every period advances the displayed year by its index; each segment contains three months. The admin still chooses the segment count and scenario, but cannot set a monthly roll count. `src/types/Period.ts:PeriodFactsSchema` strips legacy `rollsPerSegment` JSON, so `period.add` ignores it. `SegmentService.initialize` uses the constant; `SegmentResultService.end` rejects stored segments whose dice/return arrays do not each contain three months. Existing outcomes are never regenerated by this change.
 
 The XP changes from commit `a11456d6` were reverted: the demo seed no longer assigns lesson rewards, and the platform awards XP only through configured achievements. This is a code-only revert; existing player XP and persisted lesson rewards remain unchanged. Re-running the seed does not clear old reward values because the reverted seed omits the reward field from its updates.
 

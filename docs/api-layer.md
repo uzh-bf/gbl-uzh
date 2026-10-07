@@ -1,54 +1,120 @@
 ---
 type: API Overview
 title: API Layer and Realtime
-description: Transport-independent API semantics, the current GraphQL layer, and the upcoming tRPC architecture with realtime events.
+description: The supported tRPC v11 Pages Router architecture, authorization, cache invalidation, and realtime events.
 tags:
   - api
   - graphql
   - trpc
   - realtime
-timestamp: "2026-09-28T07:53:26Z"
+timestamp: "2026-10-02T00:00:00Z"
 ---
 
 # API Layer and Realtime
 
-The platform owns the entire client↔server transport; a game app only plugs its `services` object and facts schemas into a platform-provided builder and hosts one API route. **The transport is being replaced**: today (branch `dev`) it is GraphQL; a completed tRPC rewrite exists on the branch `codex/trpc-migration-work-packages` and is intended to replace GraphQL entirely.
+The supported game API is tRPC v11 on the Next.js Pages Router. The platform
+owns procedures, authorization, data transfer objects, and realtime semantics;
+each game supplies its services and fact schemas, creates one router, and hosts
+one `/api/trpc` route. The reference implementation is `apps/demo-game`.
 
-**How to tell what a checkout runs:** `apps/<game>/src/pages/api/trpc/` exists → tRPC; `apps/<game>/src/pages/api/graphql.ts` exists → GraphQL. Do not assume from this wiki — check.
+Rate Wars and Central Bank still contain the deprecated GraphQL compatibility
+client on the first migration layer. They are migration inputs, not templates
+for new games. Public GraphQL exports remain available temporarily for unknown
+external consumers, but repository code and documentation must use tRPC.
 
-## Transport-independent semantics
+## Server contract
 
-These hold in both worlds and are what game code should rely on:
+- Initialize tRPC once in `packages/platform/src/trpc/init.ts`. Export named
+  router, procedure, and caller helpers rather than the entire `t` object.
+- `createPlatformRouter({ services, schemas, roleAssigner?, extensions? })`
+  composes the `auth`, `game`, `period`, `segment`, `play`, `learning`, `events`,
+  `story`, and `results` routers.
+- A game exports `AppRouter = typeof appRouter`; browser modules import this as
+  a type so server code cannot enter the client bundle.
+- Zod validates transport inputs. Yup continues to validate game-specific facts
+  before service computations run.
+- Known domain failures are mapped to `TRPCError`. Unexpected internal errors
+  are logged server-side and returned with a generic client message.
 
-- **One aggregate "result" query** drives the player cockpit (player result + game + active period/segment + content + self). The admin panel polls/queries a game-detail operation.
-- **Mutations map 1:1 to platform service calls**: create game, add period/segment, activate next period/segment, perform action, save decisions, update ready state, add countdown, attempt learning element, mark story element, login as team, update player data.
-- **Realtime is notify-then-refetch.** The server publishes small events on two channels — global (game-wide: `GAME_STATE_UPDATED`, `PERIOD_ACTIVATED`, `SEGMENT_ACTIVATED`, `COUNTDOWN_UPDATED`, `ACTION_PERFORMED`, `SWITCH_TOGGLED`, `RESET_READY_STATE`) and per-user (`LEARNING_ELEMENT_SOLVED`, `LEARNING_ELEMENT_INCORRECT`, `ACHIEVEMENT_RECEIVED`, `LEVEL_UP`) — enums in `packages/platform/src/types.ts`. Clients treat events as a signal to refetch/invalidate the aggregate query, never as a data source. Transport is Server-Sent Events in both worlds (no websockets).
-- **Realtime is in-process** (single server replica). There is no Redis/cross-instance bus; the GraphQL side has a `configurePubSub` hook to swap one in, the tRPC side documents single-replica as a known limitation.
+## Authorization
 
-## Current on `dev`: GraphQL (kept brief — being replaced)
+`publicProcedure`, `protectedProcedure`, `adminProcedure`, and
+`playerProcedure` are typed middleware layers. Role checks authenticate a role,
+not resource ownership: every admin operation with a client-supplied `gameId`
+also calls `assertGameOwnership`, returning `NOT_FOUND` for a different owner's
+game.
 
-- Schema: code-first via nexus in `packages/platform/src/types/` (`Query`, `Mutation`, `Subscription`, object types); served by graphql-yoga from the game app at `/api/graphql` (`apps/demo-game/src/pages/api/graphql.ts`), with `prisma`, session user, and `pubSub` in context.
-- Admin reports: `packages/platform/src/services/PlayService.ts:getSpecificResults` includes player, period, and segment relations. Quarter metadata must accompany `SEGMENT_END` facts so clients can place monthly samples on the settled timeline; period-level results may have a null segment.
-- Game wiring: `generateBaseMutations({ services, schemas, inputTypes })` from the platform, called in `apps/demo-game/src/graphql/index.ts`.
-- Client: Apollo Client with a split link — subscriptions over `graphql-sse` (`packages/platform/src/lib/SSELink.ts`), everything else over HTTP. Shared operation documents ship with the platform (`packages/platform/public/ops/*.graphql`); each game runs codegen against them for typed hooks.
-- If you are building a new game while this is still current: copy the demo game's `src/graphql/` + `codegen.ts` wholesale and do not invest in custom GraphQL; it will be removed when the tRPC branch merges.
+The API route builds context from the NextAuth session and the app's Prisma
+client. Keep that work per request; never place a user or request context in a
+module singleton.
 
-The demo game extends the base GraphQL schema with ADMIN/MASTER-only `marketDice(segmentId)` and `revealMarketRoll(segmentId, rollIndex)` fields (`apps/demo-game/src/graphql/market.ts`). The query reads authoritative precomputed outcomes; the mutation persists reveal indices without rerolling. Its `MARKET_ROLL_REVEALED` global event carries only `gameId`; the player refetches its existing aggregate result. Game-local operation documents in `src/graphql/ops/` are included alongside platform operations by the demo-game codegen config.
+Admin reports read `results.specific`, backed by
+`PlayService.getSpecificResults`, which includes the player, period, and segment
+relations. Quarter metadata must accompany `SEGMENT_END` facts so clients can
+place monthly samples on the settled timeline; period-level results may have a
+null segment.
 
-## Upcoming: tRPC (branch `codex/trpc-migration-work-packages`, not merged)
+The demo game merges a game-specific `market` router through
+`createPlatformRouter({ extensions })`
+(`apps/demo-game/src/server/trpc/market.ts`). The admin-only `market.dice`
+query reads authoritative precomputed outcomes, and `market.revealRoll`
+persists reveal indices without rerolling. Its `MARKET_ROLL_REVEALED` global
+event carries only `gameId`; the player refetches its existing `play.result`
+data. `play.result` passes segment facts through the router's
+`playerFacts.segment` redactor, so players receive `null` for the dice and
+returns of months that are not revealed yet.
 
-A complete tRPC v11 rewrite of platform + demo game; GraphQL/Apollo/nexus/codegen are fully removed there. The developer experience for a new game becomes:
+## Pages Router client pattern
 
-- **Server**: the platform exports `createPlatformRouter({ services, schemas, roleAssigner?, extensions? })` (`packages/platform/src/trpc/createPlatformRouter.ts` on that branch), composing sub-routers `auth`, `game`, `period`, `segment`, `play`, `learning`, `events`, `story`, `results`. The game app calls it with its services + yup facts schemas and exports `AppRouter`, `RouterInputs`, `RouterOutputs` (`apps/demo-game/src/server/trpc/router.ts`).
-- **Endpoint**: one Pages-Router route `src/pages/api/trpc/[trpc].ts` with `externalResolver: true` and `responseLimit: false` (required for long-lived SSE subscription responses).
-- **Client**: `createTRPCReact<AppRouter>` + React Query; a split link sends subscriptions over `httpSubscriptionLink` (SSE) and the rest over `httpBatchLink`, both with superjson.
-- **Types**: no codegen. UI types derive from the router, e.g. `NonNullable<RouterOutputs['play']['result']>`, collected in a per-app `src/types/api.ts`.
-- **Realtime**: `trpc.events.global.useSubscription(..., { onData: e => /* filter by gameId+type */ utils.play.result.invalidate() })` — same notify-then-refetch pattern, now via React Query invalidation. Server side is an async-iterable over a `globalThis`-cached Node `EventEmitter` (`packages/platform/src/lib/realtime.ts` on that branch).
-- **Validation split**: zod validates shapes at the RPC boundary (`packages/platform/src/trpc/schemas.ts`); yup keeps validating game-domain facts inside services — games keep authoring yup schemas exactly as before.
-- **Authz**: `publicProcedure` / `protectedProcedure` / `adminProcedure` / `playerProcedure`, plus `assertGameOwnership(ctx, gameId)` on every admin procedure that takes a game id — stricter than the GraphQL layer ever was.
+Use `createTRPCNext<AppRouter>` from `@trpc/next` and export
+`trpc.withTRPC(App)` from `pages/_app.tsx`. Keep the default (SSR off) unless a
+game has a reviewed SSR requirement. All calls then run in the browser, so the
+links use the relative URL `/api/trpc`.
 
-Known deferred gaps on that branch (check before relying): no cross-instance realtime bus, no SSE reconnect replay, no rate limiting on `auth.loginAsTeam`, no behavioral test coverage of procedures beyond the Playwright E2E suite.
+The link chain has two terminating branches:
 
-## Guidance for doc/agent consumers
+- subscriptions: `httpSubscriptionLink` over Server-Sent Events;
+- queries and mutations: `httpBatchLink` with finite `maxItems` and
+  `maxURLLength` bounds. Keep `maxItems` no higher than the server's
+  `maxBatchSize`; `maxURLLength` independently caps the encoded request URL.
 
-When the tRPC branch merges to `dev`, the GraphQL section above becomes historical and should be deleted; until then, treat tRPC details as a preview of the intended architecture, sourced from that branch (read files with `git show codex/trpc-migration-work-packages:<path>` — do not expect them on `dev`).
+Both terminating links use the same SuperJSON transformer configured in
+`initTRPC`. The server pings each subscription stream every 3 s, tells the
+client to reconnect after 5 s without a message, and ends streams after
+5 minutes; the client's `onStarted` refetch covers events missed while
+reconnecting. Same-origin browser cookies are sent automatically; add explicit
+credentials only for a reviewed cross-origin deployment.
+
+This follows the official [Pages Router setup](https://trpc.io/docs/client/nextjs/pages-router/setup),
+[HTTP subscription link](https://trpc.io/docs/client/links/httpSubscriptionLink),
+[HTTP batch link](https://trpc.io/docs/client/links/httpBatchLink), and
+[transformer](https://trpc.io/docs/server/data-transformers) guidance.
+
+Known deferred gaps remain: the event bus has no cross-instance delivery or
+SSE reconnect replay, `auth.loginAsTeam` is not rate-limited, and procedure
+coverage is focused on representative contracts rather than every procedure;
+the real Playwright lifecycle remains the primary end-to-end behavior check.
+
+The browser client does not need `NEXT_PUBLIC_API_URL` because it uses the
+same-origin relative route.
+
+## Cache and realtime semantics
+
+Realtime is notify-then-refetch. The server publishes small global and per-user
+events; clients filter relevant events and invalidate the narrowest affected
+query with `trpc.useUtils()`. Events signal that authoritative data changed;
+they are not an alternate data store.
+
+Server subscriptions return async iterables and pass the request
+`AbortSignal` to the event source so disconnects release listeners. The current
+event bus is process-local, so a game must run a single app replica. There is no
+cross-instance delivery, retained history, or reconnect replay. Do not use
+`tracked()` until events have stable IDs and durable history that can fill a
+reconnect gap.
+
+## Verification
+
+For an API migration, run both TypeScript compilers, lint, a production build,
+the platform procedure tests, and the app's real Playwright lifecycle. A green
+type check is not proof of session, ownership, cache-refresh, or subscription
+behavior; retain those assertions at their stable integration or browser seam.

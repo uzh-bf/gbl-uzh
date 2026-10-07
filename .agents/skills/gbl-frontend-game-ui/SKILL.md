@@ -25,14 +25,20 @@ Copy the structure from the demo game's `pages/play/welcome.tsx` and customise t
 
 One page, four layers — keep this shape:
 
-1. **One aggregate query** for everything the player sees (result + game + active period/segment + content + self).
-2. **Realtime = poke, then refetch.** Subscribe to global events; on `PERIOD_ACTIVATED` / `SEGMENT_ACTIVATED` / `COUNTDOWN_UPDATED` (filtered by your game id) refetch/invalidate the aggregate query. Never render data out of the event payload.
+1. **Compose the player contract from `play.result` and `play.self`.** The result
+   procedure carries current and past results, game state, active content, and
+   safe co-player identities; the self procedure carries session-player state.
+2. **Realtime = poke, then refetch.** Subscribe to `events.global`; on
+   relevant lifecycle or countdown events use `trpc.useUtils()` to invalidate
+   the narrowest affected query. Add `events.user` only when the game handles
+   personalized notifications. Never render authoritative state from the event
+   payload.
 3. **Shared chrome** in a `GameLayout` wrapper: nav + team identity + Ready toggle + countdown + learning activities + blocking story-element popups. On phones, the demo game uses bottom tabs at `/play/cockpit?tab=cockpit|market|history|team`: the first tab is labeled Decisions while retaining its `cockpit` URL key; Ready appears there only during RUNNING. Profile, XP, settled portfolio statistics, learning activities, and released stories live in Team, Market shows scenario probabilities and admin-revealed monthly outcomes, and History shows cumulative portfolio values with year-filtered expandable quarterly results. Tablet/desktop (641px upward, based only on viewport width, including touch landscape) use Decisions/History top navigation, a persistent Team sidebar, and full Market beneath every Decisions state in a shell capped at 1440px. History filters span both columns. Keep phone styles unchanged; use the complementary `tablet:` variant and `useTabletLayout`, keep controllers mounted, and retain legacy Market/Team URLs across resizing. Other games may retain a sidebar.
 4. **Body = `switch (game.status)`**: `RUNNING` → decision form; `PAUSED`/`CONSOLIDATION` → read-only segment results; `RESULTS` → period report; other statuses → placeholders. Full per-status expectations: [docs/game-lifecycle.md](../../../docs/game-lifecycle.md). **Important:** narrative context from the `RUNNING` state (event banners, shock descriptions, scenario headlines) must persist into `PAUSED`/`CONSOLIDATION`/`RESULTS` — players need to see _what happened_ while reviewing _why_ their numbers moved. Extract the event display into a shared component rendered across all post-decision states.
 
 > [!WARNING]
 >
-> **Do not import `@prisma/client` in frontend code — not even indirectly.** If a shared utility (e.g. from `@gbl-uzh/platform`) uses Prisma enums like `DB.GameStatus`, those will be `undefined` in the browser and crash. Compare game status against string literals (`'RUNNING'`, `'PAUSED'`, `'RESULTS'`, etc.) or the generated GraphQL enum (`GameStatus` from `src/graphql/generated/ops.ts`).
+> **Do not import `@prisma/client` in frontend code — not even indirectly.** If a shared utility (e.g. from `@gbl-uzh/platform`) uses Prisma enums like `DB.GameStatus`, those will be `undefined` in the browser and crash. Compare game status against string literals (`'RUNNING'`, `'PAUSED'`, `'RESULTS'`, etc.), or define a narrow alias inferred from `RouterOutputs<AppRouter>`. Keep `AppRouter` imports type-only.
 
 The demo-game allocation form uses `src/lib/allocation.ts:allocationSchema` on both client and server: numeric percentages in 0.1% steps totaling 1000 integer tenths. Two slider boundaries push each other on contact; independent typed edits temporarily disable the slider and submission until valid. Preserve dirty drafts across tab switches/refetches, reset on round changes, and keep decimal values in the mutation payload.
 
@@ -74,7 +80,7 @@ Design the RESULTS screen to enable the facilitator to draw **didactical conclus
 The platform supports two types of content overlays that integrate learning into gameplay:
 
 - **Story elements** (blocking narrative popups): shown at segment activation, before the player decides. They contextualise the round ("A supply shock has hit the market…") and build the game's narrative arc. Seeded as `StoryElement` rows per segment. Other games render with `StoryElements` from `@gbl-uzh/ui`; it blocks interaction until dismissed. Demo-game uses app-local `team/TeamContent` and `StorySheet` to add historical rereading: Continue persists Read; Close/Escape/Skip dismiss the automatic sequence for the page visit without marking skipped cards Read. Library entries retain first-release metadata and exclude future segments.
-- **Learning elements** (Team tab in demo-game; sidebar in other games): optional MC questions or reflection prompts available during play. They reinforce the theory behind the game mechanic ("According to the Phillips Curve, what happens to unemployment when inflation rises?"). Seeded as `LearningElement` rows. Compose `LearningActivitiesList`, `LearningActivityModal`, and `useLearningActivities` from `@gbl-uzh/ui` with the game's generated GraphQL documents. Demo-game uses local `TeamPanel`/`LearningSheet` presentation with the shared hook's opt-in `preserveDrafts`, query retry, and submission errors. Viewed IDs are browser-local per game/team (New → Open); Solved remains server-backed. The countdown is advisory. Show only configured `reward.xp`, not screenshot rewards.
+- **Learning elements** (Team tab in demo-game; sidebar in other games): optional MC questions or reflection prompts available during play. They reinforce the theory behind the game mechanic ("According to the Phillips Curve, what happens to unemployment when inflation rises?"). Seeded as `LearningElement` rows. Compose `LearningActivitiesList` and `LearningActivityModal` from `@gbl-uzh/ui` with an app-local adapter built on the platform `learning` tRPC procedures. Do not use the package's deprecated Apollo-backed `useLearningActivities` compatibility hook in new code. Demo-game uses local `TeamPanel`/`LearningSheet` presentation with its app-local `useLearningActivities` hook (page-visit drafts, query retry, and submission errors). Viewed IDs are browser-local per game/team (New → Open); Solved remains server-backed. The countdown is advisory. Show only configured `reward.xp`, not screenshot rewards.
 
 Both are selected by the admin in the add-segment dialog and attached to specific segments. Plan the content in the game design phase (`gbl-game-design` Step 6) and seed it in `prisma/seed.ts`.
 
@@ -101,7 +107,7 @@ Priority order:
 
 1. **`@uzh-bf/design-system`** (v4): `Card` family, `Button`, `Modal`, `Switch`, `Progress`, `ShadcnTable*` (alias to `Table`...), `ChartContainer`, and the Formik fields (`FormikTextField`, `FormikNumberField`, `FormikSelectField`). Game-specific and admin authoring forms use **Formik + yup**. Shared UI fields may use the package's exported React Hook Form `Form` and `ReusableFormField` contract.
 2. **`@gbl-uzh/ui`**: shared shell, player display, story/learning flow, countdown, reusable fields, `MultiSelect`, and game widgets — see the [inventory with statuses](../../../docs/ui-components.md). Use the design system's `Button`; `TimelineAdmin` remains a stub.
-3. **Copy/adapt from `apps/demo-game`** only when neither package provides the behavior: game-specific layouts, decisions, result charts, GraphQL adapters, and thin Formik wrappers around shared controls.
+3. **Copy/adapt from `apps/demo-game`** only when neither package provides the behavior: game-specific layouts, decisions, result charts, app-local tRPC adapters, and thin Formik wrappers around shared controls.
 4. **recharts** directly for game charts.
 
 ## Styling setup
@@ -112,11 +118,17 @@ Use colocated Tailwind utilities for player layouts and states. The demo-game `s
 
 ## Leaderboards / cross-team views
 
-The player's aggregate `result` query exposes a **token-free** co-player list at `currentGame.players` (`id`, `name`, `facts` — `PlayService.ts:getPlayerResult`) — use it to resolve display names for leaderboards. Result facts from computations carry only `playerId`s. Do NOT reach for the `game`/`games` queries from player pages: they are ADMIN/MASTER-only because the full `Player` type exposes login tokens.
+The player's `play.result` query exposes a **token-free** co-player list at
+`currentGame.players` containing only `id` and `name` — use it to resolve
+display names for leaderboards. Result facts from computations carry only
+`playerId`s. Keep player pages on this token-free projection: admin-only game
+procedures expose the full player shape, including login tokens, and must not
+be called from player pages.
 
 ## Conventions + verify
 
 - Test selectors: design-system `Button data={{ cy: '...', test: '...' }}` renders `data-cy` and `data-test` attributes (there is no `data-testid`); Playwright is configured with `testIdAttribute: 'data-cy'` (`playwright/playwright.config.ts`), so `getByTestId` matches `data-cy`. The game-detail page exposes `data-game-status` for lifecycle assertions. The design-system `Card` does **not** forward a raw `data-cy` attribute — put test ids on plain wrapper `div`s or anchor tests on visible headline text.
 - Verify in a real browser through the full lifecycle (admin + one player window): decisions submit, realtime refresh fires on transitions, story popups block, charts render. Automate with an adapted `playwright/tests/demo-game-flow.spec.ts` (or `rate-wars-flow.spec.ts` for a single-segment-per-period game).
+- For a mutation that drives a critical transition, arm a wait for its exact tRPC POST before clicking. Retry the click only until that request is observed, then require the response to succeed before asserting durable UI state.
 - One browser profile = one session: player login overwrites the admin's `next-auth.session-token` cookie (`AccountService.ts:loginAsTeam`). Use separate browser contexts/profiles for admin and players when verifying manually.
 - Windows + Docker bind mounts do not deliver file-watch events into the container — the dev server does NOT hot-reload on host edits; restart the app's dev server (or set `WATCHPACK_POLLING=true` and `CHOKIDAR_USEPOLLING=true`) after changes.

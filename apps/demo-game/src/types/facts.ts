@@ -1,4 +1,4 @@
-import { OutputFacts } from '@gbl-uzh/platform'
+import type { OutputFacts } from '@gbl-uzh/platform'
 
 // TODO: replace these hand-written fact types with zod schemas once the
 // design-system upgrade removes the Formik forms that consume them.

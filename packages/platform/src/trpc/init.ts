@@ -7,6 +7,18 @@ import { throwAsTRPCError } from './errors.js'
 
 const t = initTRPC.context<PlatformContext>().create({
   transformer: superjson,
+  sse: {
+    ping: {
+      enabled: true,
+      intervalMs: 3_000,
+    },
+    // Ends each stream after 5 minutes; the client reconnects and its
+    // onStarted handler refetches anything missed in between.
+    maxDurationMs: 5 * 60 * 1_000,
+    client: {
+      reconnectAfterInactivityMs: 5_000,
+    },
+  },
   // Never leak raw internal error messages (Prisma/service internals) to
   // clients. Mapped errors (UNAUTHORIZED/FORBIDDEN/BAD_REQUEST) keep their
   // message; anything that fell through to INTERNAL_SERVER_ERROR is genericized.

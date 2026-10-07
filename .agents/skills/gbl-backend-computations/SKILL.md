@@ -39,11 +39,13 @@ Every hook: `(facts, payload) => OutputFacts`. Payloads carry what you need (`ga
 - **Escape hatch only when facts blobs are not enough:** optional `updateDBAfterInitialize` / `updateDBBeforeActivation` / `updateDBAfterEnd` / `updateDBAfterApply` receive the open Prisma transaction (use with tables you added in `prisma/schema/specific.prisma`).
 
 > [!WARNING]
-> **Never use `@prisma/client` enums in code that reaches the frontend.** Next.js stubs backend-only imports for the client bundle, so `DB.GameStatus.RESULTS` evaluates to `undefined` at runtime and crashes the page. In shared utilities imported by both server and client (like `packages/platform/src/lib/util.ts`), use string literals (`'RESULTS'`, `'PAUSED'`, etc.) or the GraphQL-generated enum from `src/graphql/generated/ops.ts`. Keep Prisma imports as `import type` when the file is consumed by frontend code.
+> **Never use `@prisma/client` enums in code that reaches the frontend.** Next.js stubs backend-only imports for the client bundle, so `DB.GameStatus.RESULTS` evaluates to `undefined` at runtime and crashes the page. In shared utilities imported by both server and client, use string literals (`'RESULTS'`, `'PAUSED'`, etc.) or a narrow type inferred from the app's tRPC `RouterOutputs`. Keep Prisma and `AppRouter` imports type-only in browser-reachable files.
 
 ## Facts types + validation
 
 Define types and yup schemas for `GameFacts`, `PeriodFacts`, `PeriodSegmentFacts`, `PlayerFacts` in `src/types/` (copy the demo game's file layout). The schemas gate admin inputs at the API boundary — the DB accepts any JSON, so schemas are the only validation.
+
+Pass the player-decision schema as `ActionFactsSchema` when creating the app router. The platform tRPC `play.performAction` procedure validates the transport object before the service reducer runs; keep reducer validation as the domain backstop and mirror the same rules in the frontend form.
 
 > [!WARNING]
 > **Server-computed segment facts must be `.optional()` in the schema.** The admin "Add segment" action submits `{}` as the initial facts; `SegmentService.initialize` fills the computed fields (e.g. `shock`, `roll`) afterwards. If your `PeriodSegmentFacts` schema marks those fields `.required()`, `schema.validateSync({})` throws and the mutation silently aborts — the segment never appears in the admin UI (no error surfaces). Mark server-filled fields `.optional()`/`.nullable()`; reserve `.required()` for facts the admin actually provides. (This is the same trap the `gbl-playwright-e2e` skill warns about from the test side.)
