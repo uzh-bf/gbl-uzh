@@ -29,17 +29,11 @@ type PlayerSession = {
 const players: PlayerPlan[] = [
   {
     name: 'Gov Team Hawk',
-    decisions: [
-      { rate: '6.0' },
-      { rate: '5.5' },
-    ],
+    decisions: [{ rate: '6.0' }, { rate: '5.5' }],
   },
   {
     name: 'Gov Team Dove',
-    decisions: [
-      { rate: '3.0' },
-      { rate: '3.5' },
-    ],
+    decisions: [{ rate: '3.0' }, { rate: '3.5' }],
   },
 ]
 
@@ -80,7 +74,9 @@ async function createGame(
   await input(page, 'playerCount').fill(String(playerCount))
   await page.getByRole('button', { name: 'Create Game' }).click()
   await page.getByRole('link', { name: new RegExp(name) }).click()
-  await expect(page.getByTestId('game-detail')).toBeVisible()
+  await expect(page.getByTestId('game-detail')).toBeVisible({
+    timeout: 30_000,
+  })
 }
 
 async function addPeriod(
@@ -101,7 +97,10 @@ async function addPeriod(
   await expect(page.getByTestId(`period-${index}`)).toBeVisible()
 }
 
-async function addSegment(page: Page, { periodIndex }: { periodIndex: number }) {
+async function addSegment(
+  page: Page,
+  { periodIndex }: { periodIndex: number }
+) {
   const segmentIndex = await page
     .getByTestId(`period-${periodIndex}`)
     .locator('text=Roll:')
@@ -109,7 +108,9 @@ async function addSegment(page: Page, { periodIndex }: { periodIndex: number }) 
 
   await page.getByRole('button', { name: 'Add segment' }).click()
   await page.getByRole('button', { name: 'Submit' }).click()
-  const segment = page.getByTestId(`period-${periodIndex}-segment-${segmentIndex}`)
+  const segment = page.getByTestId(
+    `period-${periodIndex}-segment-${segmentIndex}`
+  )
   await expect(segment.locator('text=Roll:')).toBeVisible()
 }
 
@@ -128,10 +129,8 @@ async function joinPlayer(
   await page.goto(joinUrl)
   await page.waitForURL('**/play/welcome')
   await input(page, 'name').fill(plan.name)
-  await Promise.all([
-    page.waitForURL('**/play/cockpit'),
-    page.getByRole('button', { name: 'Start Game' }).click(),
-  ])
+  await page.getByRole('button', { name: 'Start Game' }).click()
+  await expect(page).toHaveURL(/\/play\/cockpit$/, { timeout: 30_000 })
 
   return { context, page, plan }
 }
@@ -161,13 +160,21 @@ async function submitDecision(page: Page, values: DecisionValues) {
   await expect(rateInput).toBeVisible()
   await rateInput.fill(values.rate)
   const submitButton = page.getByRole('button', { name: 'Submit Policy Rate' })
-  await submitButton.click()
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (candidate) =>
+        candidate.request().method() === 'POST' &&
+        candidate.url().includes('/api/trpc/play.performAction')
+    ),
+    submitButton.click(),
+  ])
+  expect(response.ok()).toBe(true)
   await expect(submitButton).toBeEnabled()
-  
-  const readyButton = page.getByRole('button', { name: 'Set Ready' })
-  await expect(readyButton).toBeVisible()
-  await readyButton.click()
-  await expect(page.getByRole('button', { name: 'Ready' })).toBeVisible()
+
+  const readySwitch = page.getByTestId('ready-switch').getByRole('switch')
+  await expect(readySwitch).toBeVisible()
+  await readySwitch.click()
+  await expect(readySwitch).toBeChecked()
 }
 
 async function advanceGame(
@@ -182,15 +189,41 @@ async function advanceGame(
 ) {
   const button = page.getByRole('button', { name: action })
   await expect(button).toBeEnabled()
-  await button.click()
+  // The status poll reloads the page. Wait for the tRPC mutation response
+  // first so that reload cannot abort a just-dispatched client request.
+  const procedure =
+    action === 'Next Segment' || action === 'Segment Results'
+      ? 'game.activateNextSegment'
+      : 'game.activateNextPeriod'
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (candidate) =>
+        candidate.request().method() === 'POST' &&
+        candidate.url().includes(`/api/trpc/${procedure}`)
+    ),
+    button.click(),
+  ])
+  expect(response.ok()).toBe(true)
   await expectGameStatusEventually(page, expectedStatus)
 }
 
+async function setCountdown(page: Page, seconds: string) {
+  await page.getByTestId('countdown-seconds').getByRole('textbox').fill(seconds)
+  await page.getByRole('button', { name: 'Set Countdown' }).click()
+}
+
+async function assertCountdownVisible(page: Page) {
+  // Do not reload: this assertion proves that the already-connected player
+  // receives the SSE event and invalidates play.result after the admin update.
+  await expect(page.getByTestId('countdown')).toBeVisible({ timeout: 60_000 })
+}
+
 async function assertPlayerDecisionForm(sessions: PlayerSession[]) {
-  await Promise.all(sessions.map(({ page }) => page.reload()))
   await Promise.all(
     sessions.map(({ page }) =>
-      expect(page.getByRole('button', { name: 'Submit Policy Rate' })).toBeVisible()
+      expect(
+        page.getByRole('button', { name: 'Submit Policy Rate' })
+      ).toBeVisible({ timeout: 30_000 })
     )
   )
 }
@@ -256,7 +289,9 @@ test('admin and players complete central-bank flow', async ({
   const gameName = `Central Bank Test ${Date.now()}`
 
   await createGame(page, { name: gameName, playerCount: players.length })
-  await expect(page.getByRole('button', { name: 'Start Period' })).toBeDisabled()
+  await expect(
+    page.getByRole('button', { name: 'Start Period' })
+  ).toBeDisabled()
 
   const joinUrls = await assertUniqueJoinUrls(page, appBaseURL, players.length)
 
@@ -265,9 +300,6 @@ test('admin and players complete central-bank flow', async ({
   await expect(page.getByRole('button', { name: 'Add period' })).toBeDisabled()
   await addSegment(page, { periodIndex: 0 })
   await addSegment(page, { periodIndex: 0 })
-
-  // Add Period 2 (sentinel period as required by GBL platform for CONSOLIDATION -> RESULTS transition)
-  await addPeriod(page, { name: 'Period 2 (Sentinel)', segmentCount: '1', index: 1 })
 
   const playerSessions: PlayerSession[] = []
 
@@ -284,6 +316,9 @@ test('admin and players complete central-bank flow', async ({
       action: 'Next Segment',
       expectedStatus: 'RUNNING',
     })
+
+    await setCountdown(page, '120')
+    await assertCountdownVisible(playerSessions[0].page)
 
     // Segment 0
     await runSegment(page, playerSessions, {
@@ -310,8 +345,9 @@ test('admin and players complete central-bank flow', async ({
     })
 
     // Verify leaderboard on player cockpit
-    await expect(playerSessions[0].page.getByText('Leaderboard').first()).toBeVisible()
-
+    await expect(
+      playerSessions[0].page.getByText('Leaderboard').first()
+    ).toBeVisible()
   } finally {
     await Promise.all(playerSessions.map(({ context }) => context.close()))
   }

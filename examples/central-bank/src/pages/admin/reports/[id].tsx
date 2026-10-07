@@ -1,4 +1,3 @@
-import { useQuery } from '@apollo/client'
 import {
   Card,
   CardContent,
@@ -13,45 +12,43 @@ import {
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
 import { useRouter } from 'next/router'
-import {
-  GameDocument,
-  SpecificResultsDocument,
-} from 'src/graphql/generated/ops'
+import { PlayerResultType } from 'src/generated/prisma/enums'
+import { trpc } from '~/lib/trpc'
 
 export default function ReportGame() {
   const router = useRouter()
   const gameId = Number(router.query.id)
+  const hasGameId = Number.isFinite(gameId)
 
-  const { data, error, loading } = useQuery(GameDocument, {
-    variables: { id: gameId },
-    skip: !router.query.id,
-  })
-
-  const { data: periodResultsData, loading: periodResultsLoading } = useQuery(
-    SpecificResultsDocument,
-    {
-      variables: {
-        gameId,
-        type: 'PERIOD_END',
-      },
-      skip: !router.query.id,
-    }
+  const {
+    data: game,
+    error,
+    isLoading,
+  } = trpc.game.byId.useQuery(
+    { id: hasGameId ? gameId : 0 },
+    { enabled: hasGameId }
   )
 
-  if (loading || periodResultsLoading) {
+  const { data: periodResults = [], isLoading: periodResultsLoading } =
+    trpc.results.specific.useQuery(
+      {
+        gameId: hasGameId ? gameId : 0,
+        type: PlayerResultType.PERIOD_END,
+      },
+      { enabled: hasGameId }
+    )
+
+  if (isLoading || periodResultsLoading) {
     return <div className="p-8 text-center">Loading Report...</div>
   }
 
-  if (error || !data?.game) {
+  if (error || !game) {
     return (
       <div className="p-8 text-red-500">
         Error loading game: {error?.message}
       </div>
     )
   }
-
-  const game = data.game
-  const periodResults = periodResultsData?.specificResults || []
 
   // Group and compile player results
   const playerSummaryMap: Record<
