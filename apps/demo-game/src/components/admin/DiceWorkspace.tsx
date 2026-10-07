@@ -419,7 +419,7 @@ export function DiceWorkspace({
                   </p>
                   {!segment.canReveal && (
                     <p className="text-player-muted m-0">
-                      Start this segment before revealing its dice.
+                      Dice can only be rolled for the current closed segment.
                     </p>
                   )}
                 </>

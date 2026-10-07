@@ -66,8 +66,8 @@ export default function AllocationSummary({
       </dl>
       {ready ? (
         <AllocationNotice variant="informational">
-          Results appear automatically when the instructor closes the quarter.
-          Market and History stay open while you wait.
+          Results appear after the instructor closes the quarter and reveals all
+          three monthly dice rolls. Market and History stay open while you wait.
         </AllocationNotice>
       ) : (
         <AllocationNotice variant="pending" title="Not ready yet">

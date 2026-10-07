@@ -275,3 +275,5 @@ Common failures:
   - `test(demo-game): cover multi-team multi-period flow`
   - `test(playwright): add breadth flow timeout headroom`
   - `test(demo-game): add countdown e2e smoke`
+
+Demo-game dice flow: close the quarter before revealing. Assert only the current closed segment has an enabled dice link, with direct API rejection during allocation and for other segments. General lifecycle helpers may publish all three rolls after closing; reveal-focused tests must opt out to verify zero/one/two hidden result states, publication retry, third-roll release, and blocked advancement.

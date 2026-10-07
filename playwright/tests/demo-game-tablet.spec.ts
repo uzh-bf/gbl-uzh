@@ -185,6 +185,8 @@ test('tablet and desktop compose Decisions, Market, Team and all result designs'
   ] as const) {
     data.result.currentGame.status =
       status as typeof data.result.currentGame.status
+    data.result.currentGame.activePeriod!.segments[1].facts.revealedRollIndices =
+      [0, 1, 2]
     if (status === 'RESULTS')
       data.result.previousResults.push({
         ...data.result.previousResults.at(-1)!,
@@ -289,9 +291,10 @@ test('tablet and desktop compose Decisions, Market, Team and all result designs'
       const stocksPlot = (await market
         .getByRole('img', { name: /^Stocks: bar height/ })
         .boundingBox())!
-      const comparison = (await market
-        .getByTestId('market-comparison')
-        .boundingBox())!
+      const comparison =
+        status === 'RUNNING'
+          ? null
+          : await market.getByTestId('market-comparison').boundingBox()
       for (const asset of ['Bonds', 'Stocks']) {
         const chart = market.getByRole('img', {
           name: new RegExp(`^${asset}: bar height`),
@@ -337,12 +340,13 @@ test('tablet and desktop compose Decisions, Market, Team and all result designs'
         }
         previousMarketSize = bondsBlock
       }
-      expect(comparison.y).toBeGreaterThanOrEqual(
-        Math.max(
-          bondsPlot.y + bondsPlot.height,
-          stocksPlot.y + stocksPlot.height
+      if (comparison)
+        expect(comparison.y).toBeGreaterThanOrEqual(
+          Math.max(
+            bondsPlot.y + bondsPlot.height,
+            stocksPlot.y + stocksPlot.height
+          )
         )
-      )
       const ready = page.getByRole('switch', { name: 'Ready', exact: true })
       if (status === 'RUNNING') {
         await expect(ready).toBeDisabled()
@@ -411,17 +415,23 @@ test('tablet and desktop compose Decisions, Market, Team and all result designs'
         .click()
     }
     await market.scrollIntoViewIfNeeded()
-    await expect(market.getByText('Monthly returns · Q2 · Apr')).toBeVisible()
-    await expect(market.getByRole('img', { name: 'Bonds die: 4' })).toHaveCSS(
-      'background-color',
-      'rgb(255, 224, 0)'
-    )
-    await expect(market.getByRole('img', { name: 'Stocks die: 3' })).toHaveCSS(
-      'background-color',
-      'rgb(38, 131, 104)'
-    )
+    if (status === 'RUNNING') {
+      await expect(market.getByTestId('market-comparison')).toHaveCount(0)
+      continue
+    }
+    await expect(market.getByText('Monthly returns · Q2 · Jun')).toBeVisible()
+    await expect(
+      market
+        .getByTestId('market-month-bonds-0')
+        .getByRole('img', { name: 'Bonds die: 4' })
+    ).toHaveCSS('background-color', 'rgb(255, 224, 0)')
+    await expect(
+      market
+        .getByTestId('market-month-stocks-0')
+        .getByRole('img', { name: 'Stocks die: 3' })
+    ).toHaveCSS('background-color', 'rgb(38, 131, 104)')
     await expect(market.getByTestId('market-return-stocks')).toContainText(
-      '-1.8%'
+      '+0.7%'
     )
   }
   expect(errors).toEqual([])
@@ -432,7 +442,10 @@ test('tablet navigation, resizes, refetches and Ready preserve allocation and Hi
 }, testInfo) => {
   await page.setViewportSize({ width: 784, height: 1114 })
   const data = await openCockpit(page)
-  const savings = page.getByRole('spinbutton', { name: 'Savings', exact: true })
+  const savings = page.getByRole('spinbutton', {
+    name: 'Savings',
+    exact: true,
+  })
   const bonds = page.getByRole('spinbutton', { name: 'Bonds', exact: true })
   const stocks = page.getByRole('spinbutton', { name: 'Stocks', exact: true })
   await savings.fill('33.3')
@@ -483,9 +496,7 @@ test('tablet navigation, resizes, refetches and Ready preserve allocation and Hi
   data.result.currentGame.activePeriod!.segments[1].facts.revealedRollIndices =
     [0, 1]
   await page.evaluate(() => window.dispatchEvent(new Event('focus')))
-  await expect(
-    page.getByTestId('market-panel').getByText('Monthly returns · Q2 · May')
-  ).toBeVisible()
+  await expect(page.getByTestId('market-comparison')).toHaveCount(0)
   await expect(savings).toHaveValue('33.3')
   await page.setViewportSize({ width: 390, height: 844 })
   await expect(savings).toHaveValue('33.3')
@@ -546,19 +557,22 @@ test('legacy Market and Team links map to Decisions only on wider screens', asyn
   }
 })
 
-test('embedded Market polls revealed outcomes without discarding drafts and handles missing forecasts', async ({
+test('embedded Market stays forecast-only during allocation and handles missing forecasts', async ({
   page,
 }) => {
   await page.clock.install()
   await page.setViewportSize({ width: 641, height: 1024 })
   const data = await openCockpit(page)
   const market = page.getByTestId('market-panel')
-  const savings = page.getByRole('spinbutton', { name: 'Savings', exact: true })
+  const savings = page.getByRole('spinbutton', {
+    name: 'Savings',
+    exact: true,
+  })
   await savings.fill('54.9')
   data.result.currentGame.activePeriod!.segments[1].facts.revealedRollIndices =
     [0, 1]
   await page.clock.fastForward(30_001)
-  await expect(market.getByText('Monthly returns · Q2 · May')).toBeVisible()
+  await expect(market.getByTestId('market-comparison')).toHaveCount(0)
   await expect(savings).toHaveValue('54.9')
   await expect(
     page.getByRole('button', { name: 'Submit allocation', exact: true })
@@ -702,4 +716,56 @@ test('phone reference captures preserve the existing shell and content', async (
   } finally {
     await context.close()
   }
+})
+
+test('closed quarter reveals all months before portfolio results, including repeated totals', async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 784, height: 1000 })
+  const data = await openCockpit(page)
+  const game = data.result.currentGame
+  const segment = game.activePeriod!.segments[1]
+  const previousValue = await page.getByTestId('team-panel').textContent()
+  game.status = 'PAUSED' as typeof game.status
+  segment.facts.diceRolls[1] = { ...segment.facts.diceRolls[0] }
+  for (const indices of [[], [0], [0, 1]]) {
+    segment.facts.revealedRollIndices = indices
+    await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+    await expect(page.getByTestId('awaiting-dice')).toContainText(
+      `${indices.length} of 3`
+    )
+    await expect(page.getByTestId('result-total')).toHaveCount(0)
+    await expect(page.getByTestId('team-panel')).toHaveText(previousValue ?? '')
+    const months = page.getByTestId('market-months-bonds')
+    for (const label of ['Apr', 'May', 'Jun'])
+      await expect(months.getByText(label, { exact: true })).toBeVisible()
+    await expect(months.getByRole('img', { name: /Shared die:/ })).toHaveCount(
+      indices.length
+    )
+  }
+  await expect(
+    page
+      .getByTestId('market-bonds')
+      .locator('[data-roll="7"] linearGradient stop')
+  ).toHaveCount(4)
+  await page.reload()
+  await expect(page.getByTestId('awaiting-dice')).toContainText('2 of 3')
+  for (const width of [320, 390, 641, 784, 1440]) {
+    await page.setViewportSize({ width, height: 1000 })
+    if (width < 641)
+      await page.getByRole('link', { name: 'Market', exact: true }).click()
+    await expectNoPageOverflow(page)
+    await capturePlayerScreenshot(page, {
+      path: testInfo.outputPath(`monthly-reveals-${width}.png`),
+    })
+  }
+  segment.facts.revealedRollIndices = [0, 1, 2]
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+  await expect(page.getByTestId('awaiting-dice')).toHaveCount(0)
+  await expect(page.getByTestId('quarter-results')).toBeVisible()
+  await expect(
+    page
+      .getByTestId('market-months-bonds')
+      .getByRole('img', { name: /Shared die:/ })
+  ).toHaveCount(3)
 })

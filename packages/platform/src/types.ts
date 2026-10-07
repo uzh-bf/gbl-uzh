@@ -248,6 +248,8 @@ interface Segment<
   EventType,
   PrismaType,
 > {
+  /** Validate leaving a closed segment before any transition side effects. */
+  validateAdvance?: (facts: PeriodSegmentFactsType) => void
   initialize: (
     facts: FactsType,
     payload: PayloadSegment<

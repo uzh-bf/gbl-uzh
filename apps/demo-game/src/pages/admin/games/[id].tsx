@@ -13,7 +13,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { twMerge } from 'tailwind-merge'
 import { NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import {
   computePeriodStatus,
   computeSegmentStatus,
@@ -25,16 +25,16 @@ import {
   ShadcnTableHeader as TableHeader,
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
   AddCountdownDocument,
   AddGamePeriodDocument,
   AddPeriodSegmentDocument,
-  Game,
   GameDocument,
   GameStatus,
+  GlobalEventsDocument,
   LearningElementsDocument,
   Player,
   StoryElementsDocument,
@@ -66,6 +66,15 @@ import {
   TREND_BONDS,
   TREND_STOCKS,
 } from '~/lib/constants'
+
+import { shouldRefetchDemoGame } from '~/lib/gameEvents'
+import {
+  allMarketRollsRevealed,
+  canRevealMarketRoll,
+  readMarketRoll,
+  revealedIndices,
+} from '~/lib/market'
+import { queueRefetch } from '~/lib/queuedRefetch'
 
 interface PeriodFormValues {
   segmentCount: number
@@ -169,10 +178,24 @@ function ManageGame() {
     })
   }
 
-  const { data, error, loading } = useQuery(GameDocument, {
+  const { data, error, loading, refetch } = useQuery(GameDocument, {
     variables: { id: Number(router.query.id) },
     pollInterval: 15000,
     skip: !router.query.id,
+  })
+
+  const queuedRefetch = useMemo(() => queueRefetch(refetch), [refetch])
+  useSubscription(GlobalEventsDocument, {
+    skip: !data?.game,
+    onData: ({ data: eventData }) => {
+      if (
+        shouldRefetchDemoGame(
+          eventData.data?.eventsGlobal,
+          Number(data?.game?.id)
+        )
+      )
+        void queuedRefetch().catch(() => {})
+    },
   })
 
   const {
@@ -267,13 +290,29 @@ function ManageGame() {
     }
   }, [data?.game])
 
-  const getButton = useCallback(() => {
-    const game = data.game as Game
-    // const disabled = game.periods.length === 0
-    const activePeriod = game?.activePeriod
-    const segments = activePeriod?.segments
-    const activeSegmentIx = activePeriod?.activeSegmentIx
+  if (loading || !data?.game) {
+    return <div>loading...</div>
+  }
 
+  if (error) {
+    return <div>{error.message}</div>
+  }
+
+  const game = data.game
+  // The activePeriod relation only selects segment IDs; periods includes facts.
+  const activePeriod = game.periods.find(
+    (period) => period.index === game.activePeriodIx
+  )
+  const segments = activePeriod?.segments ?? []
+  const activeSegmentIx = activePeriod?.activeSegmentIx
+  const activeSegment = segments.find(
+    (segment) => segment.index === activeSegmentIx
+  )
+  const awaitingDice =
+    ['PAUSED', 'CONSOLIDATION'].includes(game.status) &&
+    !allMarketRollsRevealed(activeSegment?.facts)
+
+  const getButton = () => {
     switch (game.status) {
       case GameStatus.Preparation: {
         const atLastSegment = activeSegmentIx >= segments.length - 1
@@ -330,7 +369,7 @@ function ManageGame() {
         const atLastSegment = activeSegmentIx >= segments.length - 1
         return (
           <Button
-            disabled={nextSegmentLoading || atLastSegment}
+            disabled={nextSegmentLoading || atLastSegment || awaitingDice}
             onClick={nextSegment}
           >
             Next Segment
@@ -345,7 +384,10 @@ function ManageGame() {
       //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
       case GameStatus.Consolidation:
         return (
-          <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+          <Button
+            disabled={nextPeriodLoading || awaitingDice}
+            onClick={nextPeriod}
+          >
             Period Results
           </Button>
         )
@@ -365,17 +407,7 @@ function ManageGame() {
           </Button>
         )
     }
-  }, [data?.game])
-
-  if (loading || !data?.game) {
-    return <div>loading...</div>
   }
-
-  if (error) {
-    return <div>{error.message}</div>
-  }
-
-  const game = data.game
 
   const learningElementsAll = (
     learningElementsData?.learningElements || []
@@ -516,37 +548,63 @@ function ManageGame() {
                           periodStatus === STATUS.COMPLETED ||
                           segmentStatus === STATUS.COMPLETED
 
-                        const diceBonds = segment?.facts.diceRolls.map(
-                          (dice) => dice.bonds
+                        const canRoll =
+                          segment &&
+                          canRevealMarketRoll({
+                            index: segment.index,
+                            periodIx: period.index,
+                            period: { activeSegmentIx: period.activeSegmentIx },
+                            game: {
+                              status: game.status,
+                              activePeriodIx: game.activePeriodIx,
+                            },
+                          })
+                        const revealedCount = revealedIndices(
+                          segment?.facts
+                        ).length
+                        const rolls = Array.from(
+                          { length: NUM_MONTHS_PER_SEGMENT },
+                          (_, index) => readMarketRoll(segment?.facts, index)
                         )
-                        const diceStocks = segment?.facts.diceRolls.map(
-                          (dice) => dice.stocks
+                        const diceOutcomes = (
+                          <span className="grid gap-1">
+                            {(['bonds', 'stocks'] as const).map((asset) => (
+                              <span
+                                key={asset}
+                                className="flex justify-between gap-4 text-nowrap"
+                              >
+                                <span>
+                                  Dice {asset === 'bonds' ? 'Bonds' : 'Stocks'}:
+                                </span>
+                                <span className="flex gap-2 tabular-nums">
+                                  {rolls.map((roll, index) => (
+                                    <span
+                                      key={index}
+                                      aria-label={`Month ${index + 1}: ${roll?.dice[asset] ?? 'unavailable'}`}
+                                    >
+                                      {roll?.dice[asset] ?? '—'}
+                                    </span>
+                                  ))}
+                                </span>
+                              </span>
+                            ))}
+                          </span>
                         )
-                        const diceShared = segment?.facts.diceRolls.map(
-                          (dice) => dice.shared
-                        )
-
-                        const dataToEncode = {
-                          diceBonds,
-                          diceShared,
-                          diceStocks,
-                          trendBonds,
-                          gapBonds,
-                          trendStocks,
-                          gapStocks,
-                        }
-                        const encoded = btoa(JSON.stringify(dataToEncode))
 
                         return (
                           <div
                             className={twMerge(
                               'flex-initial rounded border p-2 text-center',
-                              (!segment || isSegmentCompleted) &&
+                              (!segment || (isSegmentCompleted && !canRoll)) &&
                                 'bg-gray-100 text-gray-400',
-                              isSegmentActive && 'border-green-600 bg-green-100'
+                              isSegmentActive &&
+                                'border-green-600 bg-green-100',
+                              canRoll &&
+                                'border-blue-600 bg-blue-50 text-blue-900'
                             )}
                             key={ix}
                             data-cy={`period-${period.index}-segment-${ix}`}
+                            data-segment-id={segment?.id}
                           >
                             <div className="flex flex-row items-center gap-2">
                               <div>
@@ -580,30 +638,31 @@ function ManageGame() {
                               </div>
                             </div>
 
-                            {segment && (
-                              <Link
-                                href={`/admin/dice/${segment.id}/${encoded}`}
-                                target="_blank"
-                                className="flex flex-col rounded border border-gray-300 p-2"
-                              >
-                                <div className="flex justify-between text-nowrap">
-                                  Dice Bonds:
-                                  <div className="flex flex-row gap-2">
-                                    {diceBonds?.map((dice, ix) => (
-                                      <div key={ix}>{dice}</div>
-                                    ))}
-                                  </div>
-                                </div>
-                                <div className="flex justify-between gap-2 text-nowrap">
-                                  Dice Stocks:
-                                  <div className="flex flex-row gap-2">
-                                    {diceStocks?.map((dice, ix) => (
-                                      <div key={ix}>{dice}</div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </Link>
-                            )}
+                            {segment &&
+                              (canRoll ? (
+                                <Link
+                                  href={`/admin/dice/${segment.id}/roll`}
+                                  target="_blank"
+                                  data-cy={`segment-dice-${segment.id}`}
+                                  className="mt-2 block rounded border border-blue-600 bg-white p-2 font-semibold text-blue-900"
+                                >
+                                  {diceOutcomes}
+                                  <span className="mt-2 block text-xs">
+                                    {allMarketRollsRevealed(segment.facts)
+                                      ? 'Dice revealed · 3/3'
+                                      : `Awaiting dice · ${revealedCount}/3 revealed`}
+                                  </span>
+                                </Link>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled
+                                  data-cy={`segment-dice-${segment.id}`}
+                                  className="mt-2 w-full cursor-not-allowed rounded border border-gray-300 p-2 text-left text-gray-500"
+                                >
+                                  {diceOutcomes}
+                                </button>
+                              ))}
                           </div>
                         )
                       }
@@ -835,6 +894,12 @@ function ManageGame() {
       </div>
       <div className="mt-2 flex flex-row gap-2">
         {getButton()}
+        {awaitingDice && (
+          <p role="status" className="self-center text-sm">
+            Reveal all three monthly dice rolls in the closed segment before
+            continuing.
+          </p>
+        )}
         <Link target="_blank" href={`/admin/reports/${game?.id}`}>
           <Button>Report</Button>
         </Link>

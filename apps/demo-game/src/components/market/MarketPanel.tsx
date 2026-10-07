@@ -2,12 +2,16 @@ import { cn, ProbabilityChart, signedPercent } from '@gbl-uzh/ui'
 import type { ResultQuery } from '~/graphql/generated/ops'
 import { assetLabels, MONTHS, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 import {
-  latestRevealedRoll,
+  currentMarketReview,
   marketPeriod,
+  readMarketRoll,
   readScenario,
+  revealedIndices,
   type MarketRoll,
 } from '~/lib/market'
 import { useFullWidthMarketLayout } from '~/lib/usePlayerLayout'
+
+const monthColors = ['#0028a5', '#8a3e98', '#a85600']
 
 const sectionClass =
   'border-player-border border-b mobile:px-app-4 mobile:py-app-4 tablet:min-w-0 tablet:px-[16px] tablet:py-[12px]'
@@ -102,11 +106,24 @@ export default function MarketPanel({
 }) {
   const fullWidthMarket = useFullWidthMarketLayout()
   const game = data.result?.currentGame
-  const scenario = readScenario(marketPeriod(game)?.facts)
-  const latest = latestRevealedRoll(game)
+  const review = currentMarketReview(game)
+  const scenario = readScenario((review?.period ?? marketPeriod(game))?.facts)
+  const indices = revealedIndices(review?.segment.facts)
+  const months = review
+    ? Array.from({ length: NUM_MONTHS_PER_SEGMENT }, (_, index) => ({
+        index,
+        label: MONTHS[review.segment.index * NUM_MONTHS_PER_SEGMENT + index],
+        color: monthColors[index],
+        roll: indices.includes(index)
+          ? readMarketRoll(review.segment.facts, index)
+          : null,
+      }))
+    : []
+  const revealedMonths = months.filter((month) => month.roll)
+  const latest = revealedMonths.at(-1)
   const roll = latest?.roll
-  const monthLabel = roll
-    ? `Q${latest.segmentIndex + 1} · ${MONTHS[latest.segmentIndex * NUM_MONTHS_PER_SEGMENT + latest.index]}`
+  const monthLabel = latest
+    ? `Q${review.segment.index + 1} · ${latest.label}`
     : undefined
   const values = roll ? Object.values(roll.returns) : []
   const min = Math.min(0, ...values)
@@ -145,14 +162,44 @@ export default function MarketPanel({
               compact={embedded}
               fixedHeight={embedded && fullWidthMarket ? 206 : undefined}
               title={asset.label}
-              titleContent={
-                roll && <AssetDice dice={roll.dice} asset={asset} />
-              }
               trendE={scenario[asset.trend]}
               trendGap={scenario[asset.gap]}
-              totalEyes={roll ? String(roll.dice[asset.key]) : undefined}
-              monthLabel={monthLabel}
+              monthlyHighlights={revealedMonths.map((month) => ({
+                totalEyes: String(month.roll.dice[asset.key]),
+                label: month.label,
+                color: month.color,
+              }))}
             />
+            {review && (
+              <div
+                className="mt-[12px] grid gap-[8px]"
+                aria-label={`${asset.label} monthly dice`}
+                data-cy={`market-months-${asset.key}`}
+              >
+                {months.map((month) => (
+                  <div
+                    key={month.index}
+                    className="flex flex-wrap items-center justify-between gap-[6px] border-l-[4px] pl-[8px]"
+                    style={{ borderColor: month.color }}
+                    data-cy={`market-month-${asset.key}-${month.index}`}
+                  >
+                    <strong style={{ color: month.color }}>
+                      {month.label}
+                    </strong>
+                    {month.roll ? (
+                      <AssetDice dice={month.roll.dice} asset={asset} />
+                    ) : (
+                      <span
+                        className="text-player-muted text-[12px]"
+                        aria-label={`${month.label}: dice not revealed`}
+                      >
+                        – + – = – · Not rolled
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))
       ) : (

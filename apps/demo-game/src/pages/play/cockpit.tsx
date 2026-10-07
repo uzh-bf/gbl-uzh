@@ -6,14 +6,20 @@ import {
   UpdateReadyStateDocument,
 } from 'src/graphql/generated/ops'
 import GameLayout from '~/components/GameLayout'
+import AllocationBar from '~/components/cockpit/AllocationBar'
 import AllocationForm from '~/components/cockpit/AllocationForm'
+import AllocationNotice from '~/components/cockpit/AllocationNotice'
 import AllocationSummary from '~/components/cockpit/AllocationSummary'
 import PlayerActionButton from '~/components/cockpit/PlayerActionButton'
 import ResultPanel from '~/components/cockpit/ResultPanels'
 import { useAllocationForm } from '~/components/cockpit/useAllocationForm'
 import { useToast } from '~/components/ui/use-toast'
-import { readScenario } from '~/lib/market'
-import { buildResultView } from '~/lib/results'
+import {
+  pendingMarketReveal,
+  readScenario,
+  revealedIndices,
+} from '~/lib/market'
+import { buildResultView, readAllocation } from '~/lib/results'
 
 function Cockpit() {
   const { loading, error, data, refetch } = useQuery(ResultDocument, {
@@ -79,6 +85,10 @@ function Cockpit() {
   const currentGame = playerDataResult.currentGame
 
   const resultView = buildResultView(data)
+  const pendingReveal = pendingMarketReveal(currentGame)
+  const savedAllocation = readAllocation(
+    playerDataResult.playerResult?.facts?.decisions
+  )
   let body: ReactNode
   let action: ReactNode
 
@@ -101,7 +111,34 @@ function Cockpit() {
     case 'PAUSED':
     case 'CONSOLIDATION':
     case 'RESULTS':
-      body = <ResultPanel view={resultView} />
+      body = pendingReveal ? (
+        <div data-cy="awaiting-dice">
+          <AllocationNotice
+            variant="pending"
+            title={`Waiting for all monthly dice rolls · ${revealedIndices(pendingReveal.facts).length} of 3 revealed`}
+          >
+            Your allocation is locked. Portfolio results appear after all three
+            months are revealed.
+          </AllocationNotice>
+          <section
+            aria-label={
+              savedAllocation
+                ? `Saved allocation: Savings ${savedAllocation.bank}%, Bonds ${savedAllocation.bonds}%, Stocks ${savedAllocation.stocks}%`
+                : 'Saved allocation'
+            }
+            className="p-[16px]"
+          >
+            <h2 className="mb-[12px] text-[14px] font-semibold">
+              Saved allocation
+            </h2>
+            {savedAllocation && (
+              <AllocationBar className="h-[44px]" value={savedAllocation} />
+            )}
+          </section>
+        </div>
+      ) : (
+        <ResultPanel view={resultView} />
+      )
       break
     case 'RUNNING': {
       const resultFacts = playerDataResult.playerResult?.facts

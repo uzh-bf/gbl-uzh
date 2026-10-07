@@ -1,6 +1,10 @@
 import type { PrismaClient } from '../generated/prisma/client'
 import { parseFacts } from '../lib/facts'
-import { readMarketRoll, revealedIndices } from '../lib/market'
+import {
+  canRevealMarketRoll,
+  readMarketRoll,
+  revealedIndices,
+} from '../lib/market'
 
 type Context = {
   prisma: PrismaClient
@@ -16,19 +20,6 @@ type Context = {
 export function requireMarketAdmin(user?: { role?: string }) {
   if (user?.role !== 'ADMIN' && user?.role !== 'MASTER')
     throw new Error('Only admins can reveal market rolls.')
-}
-
-export function canRevealMarketRoll(segment: {
-  periodIx: number
-  index: number
-  game: { activePeriodIx: number }
-  period: { activeSegmentIx: number }
-}) {
-  return (
-    segment.periodIx < segment.game.activePeriodIx ||
-    (segment.periodIx === segment.game.activePeriodIx &&
-      segment.index <= segment.period.activeSegmentIx)
-  )
 }
 
 export async function getMarketDice(
@@ -60,7 +51,7 @@ export async function revealMarketRoll(
           })
           if (!segment) throw new Error('Segment not found.')
           if (!canRevealMarketRoll(segment))
-            throw new Error('Future segments cannot be revealed.')
+            throw new Error('Only the current closed segment can reveal dice.')
           if (!readMarketRoll(segment.facts, rollIndex))
             throw new Error('Invalid or unavailable monthly roll.')
           const indices = revealedIndices(segment.facts)
