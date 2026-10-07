@@ -1,3 +1,4 @@
+import type { PlayerFactsRedaction } from './dto/results.js'
 import { createTRPCRouter } from './init.js'
 import { createAuthRouter } from './routers/auth.js'
 import { createGameRouter } from './routers/game.js'
@@ -16,29 +17,35 @@ type PlatformRoleAssigner = (ix: number, facts: unknown) => unknown
 
 type RouterDeps = {
   services?: PlatformRouterServices
-  schemas?: {
-    ActionFactsSchema?: unknown
-    GameFactsSchema?: unknown
-    PeriodFactsSchema?: unknown
-    PeriodSegmentFactsSchema?: unknown
-    PlayerFactsSchema?: unknown
+  // The game's yup facts schemas. Required because game.create, period.add,
+  // segment.add and play.performAction reject every call without them.
+  schemas: {
+    ActionFactsSchema: unknown
+    GameFactsSchema: unknown
+    PeriodFactsSchema: unknown
+    PeriodSegmentFactsSchema: unknown
+    PlayerFactsSchema: unknown
   }
   roleAssigner?: PlatformRoleAssigner
+  playerFacts?: PlayerFactsRedaction
   extensions?: Record<string, unknown>
 }
 
+export type { PlayerFactsRedaction }
+
 export function createPlatformRouter({
   services = {},
-  schemas = {},
+  schemas,
   roleAssigner,
+  playerFacts,
   extensions = {},
-}: RouterDeps = {}) {
+}: RouterDeps) {
   return createTRPCRouter({
     auth: createAuthRouter(),
     game: createGameRouter({ services, schemas, roleAssigner }),
     period: createPeriodRouter({ services, schemas }),
     segment: createSegmentRouter({ services, schemas }),
-    play: createPlayRouter({ services, schemas }),
+    play: createPlayRouter({ services, schemas, playerFacts }),
     learning: createLearningRouter(),
     events: createEventsRouter(),
     story: createStoryRouter(),

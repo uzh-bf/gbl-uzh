@@ -13,18 +13,13 @@ import type {
   StoryElementDto,
 } from './contracts.js'
 
-export type {
-  ActiveSegmentSummaryDto,
-  PastResultDto,
-  PlayerResultCoreDto,
-  PlayerResultDto,
-  PlayerTransactionDto,
-  ResultPeriodSummaryDto,
-  ResultPlayerDto,
-  SpecificResultDto,
-  LearningElementRefDto,
-  StoryElementDto,
-} from './contracts.js'
+// Lets a game hide parts of period and segment facts from players before
+// play.result validates its output, e.g. simulation inputs that the game
+// reveals step by step. Without a hook the facts pass through unchanged.
+export type PlayerFactsRedaction = {
+  period?: (facts: unknown) => unknown
+  segment?: (facts: unknown) => unknown
+}
 
 function toResultPlayerDto(player: unknown): ResultPlayerDto | null {
   if (!player || typeof player !== 'object') return null
@@ -104,7 +99,8 @@ function toResultPeriodSummaryDto(
     facts?: unknown
     segmentCount?: number | null
     segments?: unknown
-  } | null
+  } | null,
+  redaction: PlayerFactsRedaction = {}
 ): ResultPeriodSummaryDto | null {
   if (!period?.id || typeof period.id !== 'number') return null
 
@@ -112,11 +108,13 @@ function toResultPeriodSummaryDto(
     id: period.id,
     index: period.index ?? 0,
     activeSegmentIx: period.activeSegmentIx ?? null,
-    facts: period.facts,
+    facts: redaction.period ? redaction.period(period.facts) : period.facts,
     segmentCount: period.segmentCount ?? null,
     segments: Array.isArray(period.segments)
       ? period.segments
-          .map((segment: any) => toResultSegmentSummaryDto(segment))
+          .map((segment: any) =>
+            toResultSegmentSummaryDto(segment, false, redaction)
+          )
           .filter(
             (segment): segment is ActiveSegmentSummaryDto => segment !== null
           )
@@ -134,14 +132,15 @@ function toResultSegmentSummaryDto(
     learningElements?: unknown
     storyElements?: unknown
   } | null,
-  includeStoryContent = false
+  includeStoryContent = false,
+  redaction: PlayerFactsRedaction = {}
 ): ActiveSegmentSummaryDto | null {
   if (!segment?.id || typeof segment.id !== 'number') return null
 
   return {
     id: segment.id,
     index: segment.index ?? 0,
-    facts: segment.facts,
+    facts: redaction.segment ? redaction.segment(segment.facts) : segment.facts,
     countdownExpiresAt: toDate(segment.countdownExpiresAt),
     countdownDurationMs:
       typeof segment.countdownDurationMs === 'number'
@@ -165,8 +164,8 @@ export function toPlayerResultCoreDto(
     id?: number
     type?: DB.PlayerResultType
     facts?: unknown
-    period?: { id?: number; index?: number; facts?: unknown }
-    segment?: { id?: number; index?: number; facts?: unknown } | null
+    period?: { id?: number; index?: number }
+    segment?: { id?: number; index?: number } | null
   } | null
 ): PlayerResultCoreDto | null {
   if (!source?.id || !source?.type) return null
@@ -236,7 +235,8 @@ export function toPlayerResultDto(
         transactions?: any
       }
     | null
-    | undefined
+    | undefined,
+  redaction: PlayerFactsRedaction = {}
 ): PlayerResultDto | null {
   if (!source?.currentGame?.id) return null
 
@@ -248,11 +248,12 @@ export function toPlayerResultDto(
   }
 
   const activePeriod = toResultPeriodSummaryDto(
-    rawCurrentGame.activePeriod as any
+    rawCurrentGame.activePeriod as any,
+    redaction
   )
   const periods = Array.isArray(rawCurrentGame.periods)
     ? rawCurrentGame.periods
-        .map((period: any) => toResultPeriodSummaryDto(period))
+        .map((period: any) => toResultPeriodSummaryDto(period, redaction))
         .filter((period): period is ResultPeriodSummaryDto => period !== null)
     : []
 
@@ -265,14 +266,15 @@ export function toPlayerResultDto(
             .map(toResultPlayerDto)
             .filter((player): player is ResultPlayerDto => player !== null)
         : [],
-      nextAutoContinueAt: rawCurrentGame.nextAutoContinueAt,
+      nextAutoContinueAt: toDate(rawCurrentGame.nextAutoContinueAt),
       periods,
       activePeriod: activePeriod
         ? {
             ...activePeriod,
             activeSegment: toResultSegmentSummaryDto(
               (rawCurrentGame.activePeriod as any)?.activeSegment as any,
-              true
+              true,
+              redaction
             ),
           }
         : undefined,
@@ -339,8 +341,8 @@ export function toPastResultDto(
     id?: number
     type?: DB.PlayerResultType
     facts?: unknown
-    period?: { id?: number; index?: number; facts?: unknown }
-    segment?: { id?: number; index?: number; facts?: unknown } | null
+    period?: { id?: number; index?: number }
+    segment?: { id?: number; index?: number } | null
     player?: {
       id?: string
       name?: string

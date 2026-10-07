@@ -51,19 +51,19 @@ export interface LearningElementAttemptDto {
   }
 }
 
-function toLearningElementOptionDto(option: unknown): LearningElementOptionDto | null {
-  if (!option || typeof option !== 'object') return null
+// Grading resolves a selection by option position, so a malformed option
+// becomes an empty placeholder instead of being dropped.
+function toLearningElementOptionDto(option: unknown): LearningElementOptionDto {
+  if (!option || typeof option !== 'object') return { content: '' }
 
   const candidate = option as {
     id?: string | number
     content?: unknown
   }
 
-  if (typeof candidate.content !== 'string' || candidate.content.length === 0) return null
-
   return {
     id: candidate.id,
-    content: candidate.content,
+    content: typeof candidate.content === 'string' ? candidate.content : '',
   }
 }
 
@@ -117,11 +117,9 @@ export function toLearningElementStateDto(
       motivation: state.element?.motivation ?? null,
       feedback: state.element?.feedback ?? null,
       options: Array.isArray(state.element?.options)
-        ? state.element.options
-            .map((option) => toLearningElementOptionDto(option))
-            .filter(
-              (option): option is LearningElementOptionDto => option !== null
-            )
+        ? state.element.options.map((option) =>
+            toLearningElementOptionDto(option)
+          )
         : undefined,
     },
     state: toLearningElementState(state.state),

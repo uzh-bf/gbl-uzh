@@ -15,11 +15,6 @@ import {
   specificResultDtoSchema,
 } from '../dto/contracts.js'
 
-const specificInput = z.object({
-  gameId: gameIdSchema,
-  type: playerResultTypeSchema,
-})
-
 function present<T>(value: T | null): value is T {
   return value !== null
 }
@@ -37,7 +32,12 @@ export function createResultsRouter() {
       }),
 
     specific: protectedProcedure
-      .input(specificInput)
+      .input(
+        z.object({
+          gameId: gameIdSchema,
+          type: playerResultTypeSchema,
+        })
+      )
       .output(z.array(specificResultDtoSchema))
       .query(async ({ input, ctx }) => {
         // Players may only read results for their own game; admins (reports)

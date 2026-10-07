@@ -8,9 +8,9 @@ import { publishGlobalNotification } from '../src/services/EventService.js'
 import { createCallerFactory } from '../src/trpc/init.js'
 import { createPlatformRouter } from '../src/trpc/createPlatformRouter.js'
 import { UserRole } from '../src/types.js'
-import { createTestContext } from './helpers.js'
+import { createTestContext, testSchemas } from './helpers.js'
 
-const router = createPlatformRouter({})
+const router = createPlatformRouter({ schemas: testSchemas })
 const createCaller = createCallerFactory(router)
 
 describe('game-scoped realtime events', () => {
