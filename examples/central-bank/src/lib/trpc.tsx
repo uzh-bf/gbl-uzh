@@ -4,19 +4,6 @@ import superjson from 'superjson'
 
 import type { AppRouter } from '../server/trpc/router'
 
-function getUrl() {
-  if (typeof window !== 'undefined') return '/api/trpc'
-
-  const fallbackApiUrl = process.env.NEXT_PUBLIC_API_URL
-  if (fallbackApiUrl) {
-    return new URL('/api/trpc', fallbackApiUrl).toString()
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}/api/trpc`
-  }
-  return 'http://localhost:3000/api/trpc'
-}
-
 export const trpc = createTRPCNext<AppRouter>({
   transformer: superjson,
   config() {
@@ -25,11 +12,11 @@ export const trpc = createTRPCNext<AppRouter>({
         splitLink({
           condition: (op) => op.type === 'subscription',
           true: httpSubscriptionLink({
-            url: getUrl(),
+            url: '/api/trpc',
             transformer: superjson,
           }),
           false: httpBatchLink({
-            url: getUrl(),
+            url: '/api/trpc',
             transformer: superjson,
             maxItems: 10,
             maxURLLength: 2083,
@@ -38,5 +25,4 @@ export const trpc = createTRPCNext<AppRouter>({
       ],
     }
   },
-  ssr: false,
 })

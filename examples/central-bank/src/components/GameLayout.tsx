@@ -115,18 +115,20 @@ function GameLayout({ children }: { children: React.ReactNode }) {
   })
 
   const currentGameId = resultData?.currentGame?.id
+  const refreshResult = () =>
+    Promise.all([
+      utils.play.result.invalidate(),
+      utils.play.self.invalidate(),
+    ]).catch((error) => {
+      console.error('GameLayout: Failed to refresh result:', error)
+    })
   trpc.events.global.useSubscription(undefined, {
     enabled: Boolean(currentGameId),
+    // Fires on every (re)connection; events sent while disconnected are lost.
+    onStarted: refreshResult,
     onData(event) {
       if (!currentGameId) return
-      if (shouldRefetchGameResult(event, currentGameId)) {
-        Promise.all([
-          utils.play.result.invalidate(),
-          utils.play.self.invalidate(),
-        ]).catch((error) => {
-          console.error('GameLayout: Failed to refresh result:', error)
-        })
-      }
+      if (shouldRefetchGameResult(event, currentGameId)) refreshResult()
     },
     onError: (err) => {
       console.error('GameLayout: Subscription error:', err)
