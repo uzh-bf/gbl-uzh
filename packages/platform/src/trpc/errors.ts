@@ -36,5 +36,6 @@ export function throwAsTRPCError(error: unknown): never {
   throw new TRPCError({
     code,
     message,
+    cause: error,
   })
 }

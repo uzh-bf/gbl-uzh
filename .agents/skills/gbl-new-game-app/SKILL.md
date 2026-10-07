@@ -86,4 +86,5 @@ Before calling the scaffold complete, verify all of:
 - Keep the demo game intact as the working reference; never repurpose it in place.
 - The copied `src/server/trpc/`, `src/lib/trpc.tsx`, and
   `src/pages/api/trpc/[trpc].ts` are wiring, not game logic: adjust the injected
-  services and schemas without replacing the transport.
+  `services` and schemas without replacing the transport. New games must not
+  add Apollo, Nexus, GraphQL code generation, or an `/api/graphql` endpoint.

@@ -18,7 +18,9 @@ Playwright docs/skills only for API details; keep repo-specific decisions here.
 - Support helpers: `playwright/tests/support/*.ts`; `demoGame.ts` shares game creation, welcome-session setup, no-overflow checks, and overlay-free captures. Keep detailed welcome assertions in `demo-game-welcome.spec.ts`; ordinary player joins follow the happy path.
 - Config: `playwright/playwright.config.ts`
 - CI workflow: `.github/workflows/playwright-testing.yml`
-- App under test: `apps/demo-game`
+- Apps under test: `apps/demo-game`, `examples/rate-wars`, and
+  `examples/central-bank`; each has a matching lifecycle spec and only one app
+  serves the shared base URL at a time.
 - Local routing: `.devrouter.yml`
 - Plan/history: `project/2026-06-28-demo-game-playwright-plan.md`
 
@@ -77,7 +79,7 @@ Use `CI=true` for pnpm commands when non-interactive module cleanup can trigger.
 CI=true pnpm --filter @gbl-uzh/playwright check:ts
 CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium
 CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium tests/demo-game-flow.spec.ts
-CI=true npm_config_verify_deps_before_run=false pnpm --dir playwright exec playwright test --list --project=chromium --shard=1/2
+CI=true npm_config_verify_deps_before_run=false pnpm --dir playwright exec playwright test --list --project=chromium
 git diff --check -- .github .agents playwright apps/demo-game project
 ```
 
@@ -97,7 +99,7 @@ claim prettier verification unless the binary exists.
 - Use `PLAYWRIGHT_BASE_URL` only to override default
   `https://demo-game.localhost`.
 - Set file-local timeout only with measured runtime evidence. Local broad flow
-  runs about `1.1m-1.6m`, but the GitHub-hosted shard has reached the old
+  runs about `1.1m-1.6m`, but the GitHub-hosted CI job has reached the old
   `120_000` timeout after CI setup and slower player actions. The file default
   remains `300_000`; the multi-team lifecycle test uses `420_000` after a local
   run reached the final report at ~250s and exceeded the old popup wait during
@@ -109,25 +111,26 @@ Keep `.github/workflows/playwright-testing.yml` close to the Klicker pattern, bu
 adapt it to GBL's smaller stack:
 
 - Use the Playwright Docker image matching `playwright/package.json`
-  (`mcr.microsoft.com/playwright:v1.62.0-noble` for Playwright `1.62.0`).
-- Use Node `24` and pnpm `11.18.0`, matching the root package manager metadata.
+  (`mcr.microsoft.com/playwright:v1.61.1-noble` for Playwright `1.61.1`).
+- Use Node `24` and pnpm `11.6.0`, matching the root package manager metadata.
 - Pin third-party GitHub Actions to a full commit SHA. SonarCloud flags
   floating third-party action tags such as `pnpm/action-setup@v4`.
 - Run Postgres and `ghcr.io/navikt/mock-oauth2-server:2.1.11` as job services.
 - In CI, do not use devrouter/TLS. Use:
-  - `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000`
-  - `NEXTAUTH_URL=http://127.0.0.1:3000`
-  - `AUTH0_ISSUER=http://oidc:8090/default`
-- Build `@gbl-uzh/platform` and `@gbl-uzh/ui` before starting `demo-game`.
-- Prepare Prisma with `prisma:copy`, `prisma:generate`, `prisma:push`, and
-  `prisma:seed`.
-- Start `pnpm --filter @gbl-uzh/demo-game dev` in the background, wait for both
-  OIDC discovery and `/admin/login`, then run the shard.
-- Use matrix shards with `fail-fast: false`, upload one blob report per shard,
-  and merge them in a separate job.
-- Current suite has one real spec file, so two shards means one shard can be
-  empty. Use `--pass-with-no-tests` only for sharded CI; split future breadth
-  coverage into separate spec files before increasing shard count.
+  - `PLAYWRIGHT_BASE_URL=http://localhost:3000`
+  - `NEXTAUTH_URL=http://localhost:3000`
+  - `GBL_AUTH_MODE=mock`
+  - `GBL_MOCK_OIDC_ISSUER=http://oidc:8090/default`
+  - matching `GBL_MOCK_OIDC_CLIENT_ID` and `GBL_MOCK_OIDC_CLIENT_SECRET`
+- Run one matrix job per game (`demo-game`, `rate-wars`, `central-bank`) with
+  `fail-fast: false`. Each job builds `@gbl-uzh/platform` and `@gbl-uzh/ui`,
+  then prepares that game's Prisma client and database with `prisma:copy`,
+  `prisma:generate`, `prisma:push`, and `prisma:seed`.
+- Start `pnpm --filter @gbl-uzh/${{ matrix.game }} dev` in the background,
+  wait for both OIDC discovery and `/admin/login`, then run only
+  `tests/${{ matrix.game }}-flow.spec.ts`. The other demo-game specs (welcome,
+  sign-in, report, tablet) run locally, not in CI.
+- Upload one blob report per game and merge them in a separate job.
 
 ## Auth And Data Rules
 
@@ -150,20 +153,24 @@ adapt it to GBL's smaller stack:
 > **Segment facts validation schemas must allow empty/partial input.** When the admin clicks "Add Segment", the platform submits `{}` as the initial facts before calling `SegmentService.initialize`. If your yup schema marks fields as `.required()`, the mutation silently fails. Make segment-facts schema fields `.optional()` (or `.nullable()`) and let `SegmentService.initialize` fill them.
 
 > [!TIP]
+> **Wait for the exact tRPC mutation response.** Start `page.waitForResponse`
+> with a predicate for the intended procedure path and POST method before the
+> click, then require `response.ok()`. Follow that transport assertion with the
+> next durable UI state. Button enabled/disabled timing alone is not proof that
+> the intended mutation succeeded.
+>
 > **After clicking submit, assert the durable resulting state.** In the demo game, submission replaces the button and editor with the “Allocation submitted” summary. Assert that summary and its saved percentages, including after reload. Do not expect the removed submit button to re-enable. For forms that retain their submit button, asserting re-enablement is preferable to transient loading-state assertions.
 
 ## GBL Game Flow Rules
 
-Current stable broad flow (demo game):
+Current stable lifecycle matrix:
 
-- 4 teams.
-- 2 played periods.
-- 4 played segments.
-- Admin setup guards.
-- Dice page smoke.
-- Player decision/ready/result states.
-- Countdown smoke.
-- Final report smoke.
+- Demo-game: four teams, two periods, four segments, dice, countdown, player
+  decisions/results, and final report.
+- Rate Wars: its complete multi-bank, multi-period lifecycle.
+- Central Bank: its complete monetary-policy lifecycle, including decision and
+  admin mutation response checks, no-reload SSE countdown, period results, and
+  leaderboard.
 
 Platform notes:
 
@@ -234,9 +241,14 @@ The demo-game spec (`playwright/tests/demo-game-flow.spec.ts`) is the template f
 - **Decision form**: swap the demo's allocation inputs (`bank` / `bonds` / `stocks` summing to 100) for your game's single decision. Update the input locator (e.g. `getByPlaceholder`, `input[name=...]`), the yup validation values, and the submit button name. Mirror the constraints your `Actions.apply` reducer enforces.
 - **Player plan**: replace the `decisions` array with your game's per-segment decision values (e.g. `[{ rate: '6.0' }, { rate: '5.5' }]`).
 - **Dashboard assertions**: replace demo-game metric labels (`To allocate`, `Savings`, `Bonds`, `Stocks`) with your game's (`Current Inflation`, `Unemployment`, `GDP Growth`, `Cumulative Loss`). Assert durable headings, not chart pixels or transient numbers.
-- **Cover final results without a sentinel period.** The demo breadth scenario deliberately includes an upcoming period; the result-design scenario covers the disconnected final pointer. New game flows need no artificial final period.
+- **Do not add a sentinel period.** Final-period consolidation disconnects the
+  next-period pointer safely; the lifecycle spec should prove that the real last
+  period reaches `RESULTS` without a fabricated extra period.
 - **Keep the admin flow**: `createGame` -> `addPeriod` -> `addSegment` (per period) -> join players -> advance transitions. The state-transition sequence is game-agnostic.
-- **Keep `expectGameStatusEventually`** (or equivalent reload-aware polling) for admin status assertions - UI data lags mutations.
+- **Prove transition mutations without reloads.** Arm exact tRPC request and
+  response waits before the click, require a successful response, then assert
+  the durable `data-game-status` update. Reload fallbacks hide broken targeted
+  invalidation.
 - **Segment count via stable child content**: count real segments by a child that only exists after `SegmentService.initialize` (e.g. `text=Roll:`), not by placeholder card count.
 - **One browser context per player**, close in `finally`, submit decisions sequentially.
 

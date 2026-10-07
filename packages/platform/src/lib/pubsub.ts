@@ -33,6 +33,7 @@ function getOrCreatePubSub() {
 
 let currentPubSub = getOrCreatePubSub()
 
+/** @deprecated Retained only for published GraphQL subscription compatibility. */
 export let pubSub = currentPubSub
 
 // EventService publishes to the shared realtime bus only; mirror those events
@@ -56,6 +57,7 @@ function ensureRealtimeBridge() {
 
 ensureRealtimeBridge()
 
+/** @deprecated Retained only for published GraphQL subscription compatibility. */
 export function getPubSub() {
   if (process.env.NODE_ENV !== 'production') {
     const cached = globalThis.__gbl_pubsub
@@ -71,6 +73,8 @@ export function getPubSub() {
 }
 
 /**
+ * @deprecated Retained only for published GraphQL subscription compatibility.
+ *
  * Replace the default in-memory pubSub with one backed by a custom event target
  * (e.g. Redis). Must be called before the first GraphQL request is handled.
  */

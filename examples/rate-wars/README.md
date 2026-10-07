@@ -14,7 +14,8 @@ computations.
 
 All in-repo games use the platform's shared `resolveAdminOidcConfig()` resolver.
 Starter, devrouter, and CI use mock OIDC through `GBL_AUTH_MODE=mock` and
-`GBL_MOCK_OIDC_*`; native host mock startup is unsupported for this example.
+`GBL_MOCK_OIDC_*`. Native host mode uses the same mock defaults from this
+example's committed `.env.development` when the local OIDC service is reachable.
 
 For a native host real-tenant run, copy `.env.local.template` to ignored
 `.env.local`, keep `GBL_AUTH_MODE=auth0`, and fill the real `AUTH0_*` values.

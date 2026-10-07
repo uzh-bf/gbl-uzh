@@ -14,6 +14,29 @@ Evidence base: three Opus reviews run 2026-07-29 — dependency currency (npm re
 dev-restructure impact analysis (`66ed4e0..origin/dev`), production-readiness review of the
 branch tree. Findings below are from those reports unless marked otherwise.
 
+## Outcome note (2026-10-06)
+
+The example migration shipped as the eight-PR stack #197 → #205, now carrying
+`dev` through #216 and the 2026-09 review fixes. Current heads, CI state and
+the remaining improvement list live in
+`project/2026-08-10-pr-205-trpc-examples-stack-plan.md` under
+`## 2026-10-06 stack state and pre-merge improvements`. The W7 follow-ups
+below that are still open (ui hook decoupling, Redis bus, SSE replay,
+`@trpc/tanstack-react-query`) are restated there; this file is not updated
+further.
+The 2026-10-07 section of the same plan schedules the review-thread fixes
+and the `dev` #217 integration.
+
+## Outcome note (2026-08-10)
+
+W7's repository-example migration is no longer future work: Rate Wars and
+Central Bank have complete tRPC draft layers in PRs #202 and #204, each with
+real lifecycle proof. The public platform GraphQL exports and UI Apollo-backed
+hook are intentionally retained as deprecated compatibility under
+`docs/adr/0001-deprecate-graphql-compatibility.md`; consumer confirmation, not
+repository game migration, is now the removal gate. This roadmap remains the
+historical record for PR #144.
+
 ## Current state
 
 - PR #144: all 9 checks green on `37f4878` (lint+tsc gate, Docker build, Playwright shards,

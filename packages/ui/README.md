@@ -10,9 +10,13 @@ The package is ESM-only and pre-1.0. Pin a tested version and review release not
 pnpm add @gbl-uzh/ui
 ```
 
-The game must declare compatible framework and shared-context peers, including Next.js, React, Apollo Client, React Hook Form, and the UZH design system. Use the versions accepted by this package's `peerDependencies`.
+The game must declare compatible framework and shared-context peers, including Next.js, React, Apollo Client, React Hook Form, and the UZH design system. Use the versions accepted by this package's `peerDependencies`. Apollo remains required because the package root still exports a deprecated GraphQL learning hook; repository games do not use that hook.
 
-The React 18 reference games use Apollo Client 3.11. React 19 consumers should use Apollo Client 3.14.1 or newer; that combination is covered by the strict external-consumer build.
+`useLearningActivities` is retained only for published GraphQL compatibility
+and is deprecated. New games keep a small app-local tRPC hook tied to their
+`AppRouter` and use targeted `trpc.useUtils()` invalidation. React 19 consumers
+that still use the compatibility hook should use Apollo Client 3.14.1 or newer;
+that combination is covered by the strict external-consumer build.
 
 ## Use
 
