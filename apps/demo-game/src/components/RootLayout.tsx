@@ -14,7 +14,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
           --theme-font-primary: ${sourceSansPro.variable};
         }
         /* Portals do not inherit the font variable from the app wrapper. */
-        @media (width < 601px) {
+        @media (width < 641px) {
           :root {
             --source-sans-pro: ${sourceSansPro.style.fontFamily};
             --theme-font-primary: ${sourceSansPro.style.fontFamily};
