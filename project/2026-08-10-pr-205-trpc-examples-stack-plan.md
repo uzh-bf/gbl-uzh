@@ -567,7 +567,7 @@ review remains the next action; merging is not included.
     "head": "47a430f319ebb4383a6ff8a0bf94f438b1397ddf",
     "base": "6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99",
     "branch": "rs/trpc-examples/03-graphql-deprecation-docs",
-    "worktree": "/Users/rschlae/Git/gbl/gbl-uzh/trees/trpc-examples-stack"
+    "worktree": "<repo>/trees/trpc-examples-stack"
   }
 }
 ```

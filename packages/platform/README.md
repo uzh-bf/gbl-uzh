@@ -12,7 +12,7 @@ New games call `createPlatformRouter({ services, schemas })`, export
 `AppRouter = typeof appRouter`, and host the router at `/api/trpc` in a Next.js
 Pages Router app. The maintained setup, authorization, transport, and realtime
 patterns are documented in the
-[GBL platform wiki](../../docs/api-layer.md).
+[GBL platform wiki](https://github.com/uzh-bf/gbl-uzh/blob/dev/docs/api-layer.md).
 
 ```ts
 import { createPlatformRouter } from "@gbl-uzh/platform";
@@ -33,7 +33,7 @@ any game in this repository. Do not use them for new work.
 
 They may be removed only after external-consumer usage is confirmed. The
 decision, removal condition, and restoration path are recorded in
-[ADR 0001](../../docs/adr/0001-deprecate-graphql-compatibility.md).
+[ADR 0001](https://github.com/uzh-bf/gbl-uzh/blob/dev/docs/adr/0001-deprecate-graphql-compatibility.md).
 
 ## Verification
 

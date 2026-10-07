@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import {
   cpSync,
+  existsSync,
   readFileSync,
   realpathSync,
   rmSync,
@@ -9,7 +10,7 @@ import {
 import { mkdir, mkdtemp } from 'node:fs/promises'
 import { isBuiltin } from 'node:module'
 import { tmpdir } from 'node:os'
-import { isAbsolute, join, resolve } from 'node:path'
+import { dirname, isAbsolute, join, resolve } from 'node:path'
 import ts from 'typescript'
 
 export function assert(condition, message) {
@@ -95,18 +96,44 @@ function pathOption(name, { required = false } = {}) {
     : undefined
 }
 
+// Node refuses to spawn `npm.cmd` without a shell, and a shell would
+// reinterpret the output path, so Windows runs npm's JavaScript entry point
+// through the current Node binary.
+function npmCommand() {
+  if (process.platform !== 'win32') return ['npm', []]
+
+  const npmCli = join(
+    dirname(process.execPath),
+    'node_modules',
+    'npm',
+    'bin',
+    'npm-cli.js'
+  )
+  if (!existsSync(npmCli)) {
+    throw new Error(`Cannot find npm CLI beside Node: ${process.execPath}`)
+  }
+  return [process.execPath, [npmCli]]
+}
+
 export async function preparePackedPackage({ packageRoot, temporaryPrefix }) {
   const configuredOutputRoot = pathOption('--output')
   const temporaryRoot = await mkdtemp(join(tmpdir(), temporaryPrefix))
   const outputRoot = configuredOutputRoot ?? temporaryRoot
-  const npmExecutable = process.platform === 'win32' ? 'npm.cmd' : 'npm'
+  const [npmExecutable, npmArgs] = npmCommand()
   const tarExecutable = process.platform === 'win32' ? 'tar.exe' : 'tar'
 
   try {
     await mkdir(outputRoot, { recursive: true })
     const packOutput = execFileSync(
       npmExecutable,
-      ['pack', '--ignore-scripts', '--json', '--pack-destination', outputRoot],
+      [
+        ...npmArgs,
+        'pack',
+        '--ignore-scripts',
+        '--json',
+        '--pack-destination',
+        outputRoot,
+      ],
       {
         cwd: packageRoot,
         encoding: 'utf8',

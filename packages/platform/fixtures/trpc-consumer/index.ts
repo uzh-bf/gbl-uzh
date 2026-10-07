@@ -7,7 +7,15 @@ import {
 } from '@gbl-uzh/platform'
 import type { inferRouterOutputs } from '@trpc/server'
 
+// Stub schemas: the fixture checks types and wiring, never fact validation.
 const router = createPlatformRouter({
+  schemas: {
+    ActionFactsSchema: {},
+    GameFactsSchema: {},
+    PeriodFactsSchema: {},
+    PeriodSegmentFactsSchema: {},
+    PlayerFactsSchema: {},
+  },
   extensions: {
     custom: createTRPCRouter({
       ping: publicProcedure.query(() => 'pong' as const),

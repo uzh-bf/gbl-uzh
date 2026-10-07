@@ -94,7 +94,7 @@ try {
     'utf8'
   )
   assert(
-    rootDeclaration.includes('export { createPlatformRouter }'),
+    /export \{[^}]*\bcreatePlatformRouter\b/.test(rootDeclaration),
     'Root declarations do not export createPlatformRouter'
   )
 

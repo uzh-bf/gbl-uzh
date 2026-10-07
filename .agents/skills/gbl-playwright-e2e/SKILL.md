@@ -117,21 +117,20 @@ adapt it to GBL's smaller stack:
   floating third-party action tags such as `pnpm/action-setup@v4`.
 - Run Postgres and `ghcr.io/navikt/mock-oauth2-server:2.1.11` as job services.
 - In CI, do not use devrouter/TLS. Use:
-  - `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000`
-  - `NEXTAUTH_URL=http://127.0.0.1:3000`
+  - `PLAYWRIGHT_BASE_URL=http://localhost:3000`
+  - `NEXTAUTH_URL=http://localhost:3000`
   - `GBL_AUTH_MODE=mock`
   - `GBL_MOCK_OIDC_ISSUER=http://oidc:8090/default`
   - matching `GBL_MOCK_OIDC_CLIENT_ID` and `GBL_MOCK_OIDC_CLIENT_SECRET`
-- Build `@gbl-uzh/platform` and `@gbl-uzh/ui` before starting `demo-game`.
-- Prepare Prisma with `prisma:copy`, `prisma:generate`, `prisma:push`, and
-  `prisma:seed`.
-- Start `pnpm --filter @gbl-uzh/demo-game dev` in the background, wait for both
-  OIDC discovery and `/admin/login`, then run the shard.
-- Use matrix shards with `fail-fast: false`, upload one blob report per shard,
-  and merge them in a separate job.
-- Current suite has one real spec file, so two shards means one shard can be
-  empty. Use `--pass-with-no-tests` only for sharded CI; split future breadth
-  coverage into separate spec files before increasing shard count.
+- Run one matrix job per game (`demo-game`, `rate-wars`, `central-bank`) with
+  `fail-fast: false`. Each job builds `@gbl-uzh/platform` and `@gbl-uzh/ui`,
+  then prepares that game's Prisma client and database with `prisma:copy`,
+  `prisma:generate`, `prisma:push`, and `prisma:seed`.
+- Start `pnpm --filter @gbl-uzh/${{ matrix.game }} dev` in the background,
+  wait for both OIDC discovery and `/admin/login`, then run only
+  `tests/${{ matrix.game }}-flow.spec.ts`. The other demo-game specs (welcome,
+  sign-in, report, tablet) run locally, not in CI.
+- Upload one blob report per game and merge them in a separate job.
 
 ## Auth And Data Rules
 
@@ -159,7 +158,7 @@ adapt it to GBL's smaller stack:
 > click, then require `response.ok()`. Follow that transport assertion with the
 > next durable UI state. Button enabled/disabled timing alone is not proof that
 > the intended mutation succeeded.
-
+>
 > **After clicking submit, assert the durable resulting state.** In the demo game, submission replaces the button and editor with the “Allocation submitted” summary. Assert that summary and its saved percentages, including after reload. Do not expect the removed submit button to re-enable. For forms that retain their submit button, asserting re-enablement is preferable to transient loading-state assertions.
 
 ## GBL Game Flow Rules

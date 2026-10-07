@@ -32,7 +32,7 @@ their active manifests except prose that explicitly says an old surface is not
 used:
 
 ```bash
-rg -n "@apollo/client|graphql-yoga|graphql-sse|graphql-codegen|/api/graphql|src/graphql/generated" \
+rg -n "@apollo/client|graphql-yoga|graphql-sse|graphql-codegen|/api/graphql|src/graphql/generated|nexus" \
   apps/demo-game examples/rate-wars examples/central-bank
 
 rg -n "build:nexus|generate:graphql|graphql-codegen|nodemon.*graphql" \
@@ -44,7 +44,7 @@ The broader repository search is reviewed by category rather than expected to
 be empty:
 
 ```bash
-rg -n "@apollo/client|graphql-yoga|graphql-sse|graphql-codegen|/api/graphql|build:nexus" \
+rg -n "@apollo/client|graphql-yoga|graphql-sse|graphql-codegen|/api/graphql|nexus" \
   apps examples packages .github docs project package.json pnpm-lock.yaml
 ```
 
