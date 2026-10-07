@@ -10,10 +10,13 @@ const t = initTRPC.context<PlatformContext>().create({
   sse: {
     ping: {
       enabled: true,
-      intervalMs: 15_000,
+      intervalMs: 3_000,
     },
+    // Ends each stream after 5 minutes; the client reconnects and its
+    // onStarted handler refetches anything missed in between.
+    maxDurationMs: 5 * 60 * 1_000,
     client: {
-      reconnectAfterInactivityMs: 30_000,
+      reconnectAfterInactivityMs: 5_000,
     },
   },
   // Never leak raw internal error messages (Prisma/service internals) to

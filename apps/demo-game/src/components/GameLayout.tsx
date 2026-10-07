@@ -78,6 +78,10 @@ function GameLayout({
 
   trpc.events.global.useSubscription(undefined, {
     enabled: Boolean(currentGameId),
+    // Fires on every (re)connection; events sent while disconnected are lost.
+    onStarted: () => {
+      void queuedRefetch().catch(() => {})
+    },
     onData: (event) => {
       if (currentGameId && shouldRefetchDemoGame(event, currentGameId)) {
         void queuedRefetch().catch(() => {})
