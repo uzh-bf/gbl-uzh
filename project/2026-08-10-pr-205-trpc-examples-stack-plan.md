@@ -13,7 +13,8 @@ SonarCloud duplication gate stays red on #195, #202, #204 and #205 until the
 the 2026-08-13 sections below are historical.
 Next (2026-10-07): the section "2026-10-07 review-comment fixes and `dev`
 #217 integration (plan)" fixes the open review threads and merges `dev` #217
-across the stack. It is waiting for approval.
+across the stack. It is approved and executed locally; its Progress list
+records the commits, departures and remaining steps.
 Provider: GitHub stacked changes
 Base: `dev`; #197 is one commit behind (`07f296f38`, #217) as of 2026-10-07
 Worktree: `trees/review-trpc-stack-205` (tracks all eight layer branches)
@@ -396,6 +397,45 @@ Both are self-reviews.
 #### Progress
 
 - 2026-10-07: plan written. Waiting for approval and the F1-a decision.
+- 2026-10-07: approved, including F1-a as the per-game redaction hook.
+  Executed bottom to top; every layer merged its parent and then took its
+  fixes:
+
+  | Layer | Merge | Fixes |
+  | --- | --- | --- |
+  | #197 | `0136be61b` (`dev` #217) | `abc123697` (197.3, 197.4, 197.6, 197.7) |
+  | #196 | `1763aa6af` | `ba05449cd` (F1-a hook, F2, F3, F4 incl. 196.6, F5) |
+  | #195 | `6eca31ef1` (I1 spec port) | `29eca6b92` (F1-b redactor, F6) |
+  | #194 | `56093e9ec` | `ed753e41d` (local path) |
+  | #201 | `e4a7cf421` | `044687895` (F7) |
+  | #202 | `8836a9d2d` | `b00f49f38` (F9), `8b74937f5` (F7) |
+  | #204 | `11b7b4955` | `e5bc4db1b` (F9), `f10a75059` (F7) |
+  | #205 | `752b79d16` | `12634bc26` (F8, consumer fixture schemas) |
+
+  Departures from the plan, each named in its thread reply:
+  - The one-argument `publishGlobalNotification(event)` overload stays for
+    external consumers (196.20, 196.23).
+  - `cockpitFixture.ts` is typed loosely, not from `RouterOutputs`.
+    Playwright cannot import the server type graph, and facts are `unknown`
+    on the wire.
+  - SSE settings: ping every 3 s, client reconnect after 5 s without a
+    message, streams end after 5 minutes.
+  - The `onStarted` refetch existed only on #205. It is now added on #195
+    through #204, so every game refetches after a reconnect.
+  - Rate Wars and Central Bank also take the F7 client simplification.
+  - `NEXT_PUBLIC_API_URL` stays in the env examples and CI; only the
+    browser client stops reading it.
+  - The #205 package verifier accepted only `export { createPlatformRouter }`
+    and broke on the F1-a type re-export; it now matches either form.
+
+  Local checks passed on each layer: the platform tests (75 on #205), the
+  demo-game tests (55), standard and native `tsc` for the three games and
+  Playwright, lint with no errors, and on #205 `verify:package` for both
+  packages plus the packed consumer. Locally, `verify:consumer` needs a
+  JavaScript pnpm entry point in `npm_execpath`; the native `@pnpm/exe`
+  binary cannot run under `node`. CI is unaffected.
+  Next: push all eight branches, compare CI with the `dev` baseline, and
+  approve the R1 reply file before anything is posted.
 
 ## 2026-08-13 final pushed state
 
