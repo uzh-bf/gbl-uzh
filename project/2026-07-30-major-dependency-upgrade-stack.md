@@ -9,7 +9,7 @@
 ## Plan identity
 
 - Plan: `project/2026-07-30-major-dependency-upgrade-stack.md`
-- Worktree: `/Users/rschlae/Git/gbl/gbl-uzh/trees/major-dependency-upgrades`
+- Worktree: `<repo>/trees/major-dependency-upgrades`
 - Base: `dev` at `5cac12cfc2813e7b68b10649a43a1fd942e2dd79`
 - Provider: GitHub stacked PRs with `gh stack`
 - Mode: Progressive, with the separately required disposable PostgreSQL approval before Prisma database verification.
