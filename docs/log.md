@@ -1,5 +1,9 @@
 # Log
 
+## 2026-10-07
+
+**Update**: [Game Lifecycle](game-lifecycle.md), [Developing a Game](developing-a-game.md), and [UI Components](ui-components.md) — restrict rolling to the current closed quarter, gate advancement and player results on three reveals, and display all monthly dice with colored probability overlays.
+
 ## 2026-10-06
 
 **Update**: [UI Building Blocks](ui-components.md) — use width-only tablet mode from 641px, retaining compact phone sizing through 640px. Bonds/Stocks fill the tablet row with fixed-height charts and centered headings, dice, and metrics; desktop retains its left-column layout and 768px content cap. Reuse History’s tablet state and remove overridden shell/Market sizing rules. Verify phone sizing against 566px, tablet touch/mouse boundaries, chart geometry, drafts, navigation, and results.

@@ -116,7 +116,7 @@ async function addSegment(
 ) {
   const segmentIndex = await page
     .getByTestId(`period-${periodIndex}`)
-    .locator('a[href*="/admin/dice/"]')
+    .locator('[data-segment-id]')
     .count()
 
   await page.getByRole('button', { name: 'Add segment' }).click()
@@ -142,7 +142,7 @@ async function addSegment(
   const segment = page.getByTestId(
     `period-${periodIndex}-segment-${segmentIndex}`
   )
-  await expect(segment.locator('a[href*="/admin/dice/"]')).toBeVisible()
+  await expect(segment.locator('[data-cy^="segment-dice-"]')).toBeDisabled()
 }
 
 async function joinPlayer(
@@ -609,14 +609,32 @@ async function submitDecision(page: Page, values: DecisionValues) {
   ).toBeChecked()
 }
 
+async function revealClosedSegment(page: Page) {
+  const link = page.locator('a[href*="/admin/dice/"]').first()
+  await expect(link).toBeVisible()
+  const segmentId = Number((await link.getAttribute('href'))!.split('/')[3])
+  for (const rollIndex of [0, 1, 2]) {
+    const response = await page.request.post('/api/graphql', {
+      data: {
+        query:
+          'mutation RevealMarketRoll($segmentId:Int!,$rollIndex:Int!){revealMarketRoll(segmentId:$segmentId,rollIndex:$rollIndex){id facts}}',
+        variables: { segmentId, rollIndex },
+      },
+    })
+    expect(await response.json()).not.toHaveProperty('errors')
+  }
+}
+
 async function advanceGame(
   page: Page,
   {
     action,
     expectedStatus,
+    reveal = true,
   }: {
     action: string
     expectedStatus: string
+    reveal?: boolean
   }
 ) {
   const button = page.getByRole('button', { name: action })
@@ -631,6 +649,8 @@ async function advanceGame(
   const response = await responsePromise
   expect(await response.json()).not.toHaveProperty('errors')
   await expectGameStatusEventually(page, expectedStatus)
+  if (reveal && ['PAUSED', 'CONSOLIDATION'].includes(expectedStatus))
+    await revealClosedSegment(page)
 }
 
 async function assertPlayerDecisionForm(sessions: PlayerSession[]) {
@@ -649,9 +669,15 @@ async function assertPlayerPortfolio(page: Page, timeout = 10_000) {
   await expect(page.getByText('To allocate', { exact: true })).toBeVisible({
     timeout,
   })
-  await expect(page.getByText('Savings').first()).toBeVisible({ timeout })
-  await expect(page.getByText('Bonds').first()).toBeVisible({ timeout })
-  await expect(page.getByText('Stocks').first()).toBeVisible({ timeout })
+  await expect(
+    page.getByRole('spinbutton', { name: 'Savings', exact: true })
+  ).toBeVisible({ timeout })
+  await expect(
+    page.getByRole('spinbutton', { name: 'Bonds', exact: true })
+  ).toBeVisible({ timeout })
+  await expect(
+    page.getByRole('spinbutton', { name: 'Stocks', exact: true })
+  ).toBeVisible({ timeout })
 }
 
 async function setCountdown(page: Page, seconds: string) {
@@ -711,16 +737,11 @@ async function assertUniqueJoinUrls(
 }
 
 async function assertDicePage(page: Page) {
-  const diceLink = page
-    .getByTestId('period-0-segment-0')
-    .locator('a[href*="/admin/dice/"]')
-  await expect(diceLink).toBeVisible()
-
-  const [dicePage] = await Promise.all([
-    // Popup events wait for the initial response, including a cold dev build.
-    page.waitForEvent('popup', { timeout: 60_000 }),
-    diceLink.click(),
-  ])
+  const segment = page.getByTestId('period-0-segment-0')
+  const segmentId = await segment.getAttribute('data-segment-id')
+  await expect(segment.locator('[data-cy^="segment-dice-"]')).toBeDisabled()
+  const dicePage = await page.context().newPage()
+  await dicePage.goto(`/admin/dice/${segmentId}/preview`)
 
   try {
     for (let month = 1; month <= 3; month++) {
@@ -1144,7 +1165,7 @@ test('trading actions submit one validated modifier and reset after success', as
   await expect(volume).toHaveValue('0')
 })
 
-test('Market shows fixed admin reveals to two players during allocation', async ({
+test('Market reveals the closed quarter before releasing results to two players', async ({
   page,
   browser,
   baseURL,
@@ -1188,6 +1209,44 @@ test('Market shows fixed admin reveals to two players during allocation', async 
           .locator('[data-highlighted="true"]')
       ).toHaveCount(0)
     }
+    await player.getByRole('link', { name: 'Decisions', exact: true }).click()
+    await player
+      .getByRole('button', { name: 'Submit allocation', exact: true })
+      .click()
+    const currentCard = page.getByTestId('period-0-segment-0')
+    await expect(
+      currentCard.locator('[data-cy^="segment-dice-"]')
+    ).toBeDisabled()
+    const closedId = Number(await currentCard.getAttribute('data-segment-id'))
+    const whileRunning = await page.request.post('/api/graphql', {
+      data: {
+        query: revealQuery,
+        variables: { segmentId: closedId, rollIndex: 0 },
+      },
+    })
+    expect(await whileRunning.json()).toHaveProperty('errors')
+    await advanceGame(page, {
+      action: 'Segment Results',
+      expectedStatus: 'PAUSED',
+      reveal: false,
+    })
+    await expect(player.getByTestId('awaiting-dice')).toContainText('0 of 3')
+    await expect(
+      page.getByRole('button', { name: 'Next Segment', exact: true })
+    ).toBeDisabled()
+    const blocked = await page.request.post('/api/graphql', {
+      data: {
+        query:
+          'mutation($gameId:Int!){activateNextSegment(gameId:$gameId){id}}',
+        variables: {
+          gameId: Number(new URL(page.url()).pathname.split('/').at(-1)),
+        },
+      },
+    })
+    expect(await blocked.json()).toHaveProperty('errors')
+    await page.reload()
+    await expectGameStatusEventually(page, 'PAUSED')
+    await player.getByRole('link', { name: 'Market', exact: true }).click()
     const link = page
       .getByTestId('period-0-segment-0')
       .locator('a[href*="/admin/dice/"]')
@@ -1208,11 +1267,15 @@ test('Market shows fixed admin reveals to two players during allocation', async 
     expect(forbidden.errors).toHaveLength(1)
     expect(forbidden.data?.revealMarketRoll).toBeNull()
     const futureId = Number(
-      (await page
+      await page
         .getByTestId('period-0-segment-1')
-        .locator('a[href*="/admin/dice/"]')
-        .getAttribute('href'))!.split('/')[3]
+        .getAttribute('data-segment-id')
     )
+    await expect(
+      page
+        .getByTestId('period-0-segment-1')
+        .locator('[data-cy^="segment-dice-"]')
+    ).toBeDisabled()
     const future = await (
       await page.request.post('/api/graphql', {
         data: {
@@ -1256,17 +1319,14 @@ test('Market shows fixed admin reveals to two players during allocation', async 
     }
     await captureDice('unrevealed')
     const originalDiceUrl = dicePage.url()
-    await dicePage.goto(
-      (await page
-        .getByTestId('period-0-segment-1')
-        .locator('a[href*="/admin/dice/"]')
-        .getAttribute('href'))!
-    )
+    await dicePage.goto(`/admin/dice/${futureId}/preview`)
     await expect(
       dicePage.getByRole('button', { name: 'Roll', exact: true })
     ).toBeDisabled()
     await expect(
-      dicePage.getByText('Start this segment before revealing its dice.')
+      dicePage.getByText(
+        'Dice can only be rolled for the current closed segment.'
+      )
     ).toBeVisible()
     await dicePage.goto(originalDiceUrl)
     let failOnce = true
@@ -1343,27 +1403,25 @@ test('Market shows fixed admin reveals to two players during allocation', async 
         for (const asset of ['bonds', 'stocks']) {
           const chart = session.page.getByTestId(`market-${asset}`)
           const dice = original.diceRolls[index]
+          const month = chart.getByTestId(`market-month-${asset}-${index}`)
           await expect(
-            chart.getByText(`Q1 · ${MONTHS[index]}`, { exact: true })
+            month.getByText(MONTHS[index], { exact: true })
           ).toBeVisible()
           await expect(chart).not.toContainText('Highlighted:')
           await expect(
-            chart.locator('[data-highlighted="true"]')
-          ).toHaveAttribute(
-            'data-roll',
-            String(original.diceRolls[index][asset])
-          )
+            chart.locator(`[data-roll="${original.diceRolls[index][asset]}"]`)
+          ).toHaveAttribute('data-highlighted', 'true')
           await expect(chart).toContainText(
             `= ${original.diceRolls[index][asset]}`
           )
           await expect(
-            chart.getByRole('img', {
+            month.getByRole('img', {
               name: `Shared die: ${dice.shared}`,
               exact: true,
             })
           ).toBeVisible()
           await expect(
-            chart.getByRole('img', {
+            month.getByRole('img', {
               name: `${asset === 'bonds' ? 'Bonds' : 'Stocks'} die: ${dice[asset] - dice.shared}`,
               exact: true,
             })
@@ -1377,15 +1435,8 @@ test('Market shows fixed admin reveals to two players during allocation', async 
     }
     await checkRoll(0)
     await player.getByRole('link', { name: 'Decisions', exact: true }).click()
-    await expect(
-      player.getByRole('spinbutton', { name: 'Savings', exact: true })
-    ).toHaveValue('50')
-    await expect(
-      player.getByRole('spinbutton', { name: 'Bonds', exact: true })
-    ).toHaveValue('30')
-    await expect(
-      player.getByRole('spinbutton', { name: 'Stocks', exact: true })
-    ).toHaveValue('20')
+    await expect(player.getByTestId('awaiting-dice')).toContainText('1 of 3')
+    await expect(player.getByTestId('result-total')).toHaveCount(0)
     await player.getByRole('link', { name: 'Market', exact: true }).click()
     // A failed event refetch must preserve the selected month and allow recovery.
     const thirdTab = dicePage.getByRole('tab', { name: /Month 3/ })
@@ -1490,14 +1541,13 @@ test('Market shows fixed admin reveals to two players during allocation', async 
       }
     }
     await advanceGame(page, {
-      action: 'Segment Results',
-      expectedStatus: 'PAUSED',
-    })
-    await advanceGame(page, {
       action: 'Next Segment',
       expectedStatus: 'RUNNING',
     })
-    await checkRoll(2)
+    await expect(player.getByTestId('market-comparison')).toHaveCount(0)
+    await expect(
+      dicePage.getByRole('button', { name: 'Roll', exact: true })
+    ).toHaveCount(0)
     await advanceGame(page, {
       action: 'Consolidate',
       expectedStatus: 'CONSOLIDATION',
@@ -1506,8 +1556,9 @@ test('Market shows fixed admin reveals to two players during allocation', async 
       action: 'Period Results',
       expectedStatus: 'RESULTS',
     })
-    // Closing an unrevealed quarter does not publish its precomputed outcomes.
-    await checkRoll(2)
+    await expect(player.getByTestId('market-comparison')).toContainText(
+      'Q2 · Jun'
+    )
     await addPeriod(page, {
       segmentCount: '1',
       index: 1,
@@ -1526,7 +1577,7 @@ test('Market shows fixed admin reveals to two players during allocation', async 
       action: 'Next Segment',
       expectedStatus: 'RUNNING',
     })
-    await checkRoll(2)
+    await expect(player.getByTestId('market-comparison')).toHaveCount(0)
     for (const session of sessions) {
       await expect(session.page.getByTestId('market-stocks')).toContainText(
         'Expected +1.20%'
@@ -1537,9 +1588,7 @@ test('Market shows fixed admin reveals to two players during allocation', async 
       await expect(session.page.getByTestId('market-stocks')).toContainText(
         'Volatility 19.32%'
       )
-      await expect(session.page.getByTestId('market-comparison')).toContainText(
-        '+0.2%'
-      )
+      await expect(session.page.getByTestId('market-comparison')).toHaveCount(0)
     }
   } finally {
     await dicePage?.close()
@@ -1547,7 +1596,7 @@ test('Market shows fixed admin reveals to two players during allocation', async 
   }
 })
 
-test('History follows settled quarters, filters years and preserves hidden dice', async ({
+test('History follows released quarters, filters years and preserves dice', async ({
   page,
   browser,
   baseURL,
@@ -1616,7 +1665,7 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     })
     await expect(
       monthly.getByText('Not revealed', { exact: true })
-    ).toHaveCount(3)
+    ).toHaveCount(0)
     const segmentLink = await page
       .getByTestId('period-0-segment-0')
       .locator('a[href*="/admin/dice/"]')
@@ -1634,7 +1683,7 @@ test('History follows settled quarters, filters years and preserves hidden dice'
     expect(await reveal.json()).not.toHaveProperty('errors')
     await expect(
       monthly.getByText('Not revealed', { exact: true })
-    ).toHaveCount(2)
+    ).toHaveCount(0)
     await advanceGame(page, {
       action: 'Next Segment',
       expectedStatus: 'RUNNING',

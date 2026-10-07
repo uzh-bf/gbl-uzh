@@ -1,4 +1,4 @@
-import { useMemo, type ComponentType, type ReactNode } from 'react'
+import { useId, useMemo, type ComponentType, type ReactNode } from 'react'
 import {
   Bar,
   BarChart,
@@ -32,6 +32,7 @@ function ProbabilityChart({
   monthLabel,
   compact = false,
   fixedHeight,
+  monthlyHighlights,
 }: {
   trendE: number
   trendGap: number
@@ -44,7 +45,9 @@ function ProbabilityChart({
   compact?: boolean
   /** Market-only: distribute bars horizontally without scaling height or text. */
   fixedHeight?: number
+  monthlyHighlights?: { totalEyes: string; label: string; color: string }[]
 }) {
+  const chartId = useId().replace(/:/g, '')
   const { data, vola } = useMemo(() => {
     const { data, volatility } = probabilityDistribution(trendE, trendGap)
     return {
@@ -57,6 +60,13 @@ function ProbabilityChart({
   }, [trendE, trendGap])
 
   if (variant === 'market') {
+    const revealDescription = monthlyHighlights
+      ? monthlyHighlights
+          .map((item) => `${item.label}: ${item.totalEyes}`)
+          .join('. ') || 'No roll revealed.'
+      : totalEyes
+        ? `Latest revealed total: ${totalEyes}.`
+        : 'No roll revealed.'
     const barStep = compact ? 40 : 66
     const barWidth = compact ? 30 : 52
     const chartWidth = data.length * barStep
@@ -169,7 +179,7 @@ function ProbabilityChart({
             height={fixedHeight}
             className="block w-full"
             role="img"
-            aria-label={`${title}: bar height is probability; labels show return. ${totalEyes ? `Latest revealed total: ${totalEyes}.` : 'No roll revealed.'}`}
+            aria-label={`${title}: bar height is probability; labels show return. ${revealDescription}`}
           >
             <line
               x1="0"
@@ -179,7 +189,13 @@ function ProbabilityChart({
               stroke="var(--color-player-border, #e9e9e9)"
             />
             {data.map((item, index) => {
-              const selected = item.eyes === totalEyes
+              const highlights =
+                monthlyHighlights?.filter(
+                  (highlight) => highlight.totalEyes === item.eyes
+                ) ?? []
+              const selected = monthlyHighlights
+                ? highlights.length > 0
+                : item.eyes === totalEyes
               const height = (item.prob / 0.1667) * 168
               const x = index * barStep + (barStep - barWidth) / 2
               // Fixed-size edge labels need room for signed multi-digit returns.
@@ -191,7 +207,33 @@ function ProbabilityChart({
                   data-roll={item.eyes}
                   data-highlighted={selected}
                 >
-                  <title>{`Roll ${item.eyes}: ${(item.prob * 100).toFixed(2)}% probability, ${signedPercent(item.value)} return${selected ? ', latest revealed roll' : ''}`}</title>
+                  <title>{`Roll ${item.eyes}: ${(item.prob * 100).toFixed(2)}% probability, ${signedPercent(item.value)} return${highlights.length ? `, ${highlights.map((highlight) => highlight.label).join(', ')}` : selected ? ', latest revealed roll' : ''}`}</title>
+                  {highlights.length > 0 && (
+                    <defs>
+                      <linearGradient
+                        id={`${chartId}-roll-${item.eyes}`}
+                        x1="0"
+                        x2="1"
+                        y1="0"
+                        y2="0"
+                      >
+                        {highlights.flatMap((highlight, highlightIndex) => [
+                          <stop
+                            key={`${highlightIndex}-start`}
+                            offset={`${(highlightIndex / highlights.length) * 100}%`}
+                            stopColor={highlight.color}
+                            stopOpacity={0.7}
+                          />,
+                          <stop
+                            key={`${highlightIndex}-end`}
+                            offset={`${((highlightIndex + 1) / highlights.length) * 100}%`}
+                            stopColor={highlight.color}
+                            stopOpacity={0.7}
+                          />,
+                        ])}
+                      </linearGradient>
+                    </defs>
+                  )}
                   <rect
                     x={horizontal(x)}
                     y={(200 - height) * verticalScale}
@@ -199,9 +241,11 @@ function ProbabilityChart({
                     height={height * verticalScale}
                     rx={8 * verticalScale}
                     fill={
-                      selected
-                        ? 'var(--theme-color-primary, #0028a5)'
-                        : 'var(--color-player-progress, #bfcaea)'
+                      highlights.length
+                        ? `url(#${chartId}-roll-${item.eyes})`
+                        : selected
+                          ? 'var(--theme-color-primary, #0028a5)'
+                          : 'var(--color-player-progress, #bfcaea)'
                     }
                   />
                   <text

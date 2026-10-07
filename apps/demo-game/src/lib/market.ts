@@ -76,6 +76,54 @@ export function revealedIndices(raw: unknown): number[] {
     : []
 }
 
+/** Only the current closed quarter can publish dice. Safe for client and server. */
+export function canRevealMarketRoll(segment: {
+  periodIx: number
+  index: number
+  game: { activePeriodIx: number; status: string }
+  period: { activeSegmentIx: number }
+}) {
+  return (
+    ['PAUSED', 'CONSOLIDATION'].includes(segment.game.status) &&
+    segment.periodIx === segment.game.activePeriodIx &&
+    segment.index === segment.period.activeSegmentIx
+  )
+}
+
+export function allMarketRollsRevealed(facts: unknown) {
+  const indices = revealedIndices(facts)
+  return (
+    indices.length === NUM_MONTHS_PER_SEGMENT &&
+    indices.every((index) => readMarketRoll(facts, index) !== null)
+  )
+}
+
+export function pendingMarketReveal(
+  game: ResultQuery['result']['currentGame']
+) {
+  if (!game || !['PAUSED', 'CONSOLIDATION'].includes(game.status)) return null
+  const segment = currentMarketReview(game)?.segment
+  return segment && !allMarketRollsRevealed(segment.facts) ? segment : null
+}
+
+/** The Market belongs to this review quarter, never a historical reveal. */
+export function currentMarketReview(
+  game: ResultQuery['result']['currentGame']
+) {
+  if (!game || !['PAUSED', 'CONSOLIDATION', 'RESULTS'].includes(game.status))
+    return null
+  const period =
+    game.status === 'RESULTS'
+      ? [...game.periods]
+          .filter((item) => item.activeSegmentIx >= 0)
+          .sort((a, b) => b.index - a.index)[0]
+      : game.activePeriod
+  const segment = period?.segments?.find(
+    (item) => item.index === period.activeSegmentIx
+  )
+  return period && segment ? { period, segment } : null
+}
+
 export function marketTimeLabel(
   periodIndex: number,
   segmentIndex: number,

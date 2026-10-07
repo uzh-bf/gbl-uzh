@@ -7,10 +7,16 @@ import {
 import { produce } from 'immer'
 import * as R from 'ramda'
 import { NUM_MONTHS_PER_SEGMENT } from '../lib/constants'
+import { allMarketRollsRevealed } from '../lib/market'
 import { GameFacts } from '../types/Game'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 
 type InputSegmentFacts = {}
+
+export function validateAdvance(facts: PeriodSegmentFacts) {
+  if (!allMarketRollsRevealed(facts))
+    throw new Error('Reveal all three monthly dice rolls before continuing.')
+}
 type OutputSegmentFacts = OutputFacts<
   InputSegmentFacts & PeriodSegmentFacts,
   any,

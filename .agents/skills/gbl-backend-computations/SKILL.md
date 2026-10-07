@@ -41,6 +41,8 @@ Every hook: `(facts, payload) => OutputFacts`. Payloads carry what you need (`ga
 > [!WARNING]
 > **Never use `@prisma/client` enums in code that reaches the frontend.** Next.js stubs backend-only imports for the client bundle, so `DB.GameStatus.RESULTS` evaluates to `undefined` at runtime and crashes the page. In shared utilities imported by both server and client (like `packages/platform/src/lib/util.ts`), use string literals (`'RESULTS'`, `'PAUSED'`, etc.) or the GraphQL-generated enum from `src/graphql/generated/ops.ts`. Keep Prisma imports as `import type` when the file is consumed by frontend code.
 
+The optional `Segment.validateAdvance(segmentFacts)` hook runs before PAUSED → RUNNING and CONSOLIDATION → RESULTS computations or writes, including for games with no players. Throw to reject advancement. Demo-game uses it to require three valid monthly reveals; games without the hook are unchanged.
+
 ## Facts types + validation
 
 Define types and yup schemas for `GameFacts`, `PeriodFacts`, `PeriodSegmentFacts`, `PlayerFacts` in `src/types/` (copy the demo game's file layout). The schemas gate admin inputs at the API boundary — the DB accepts any JSON, so schemas are the only validation.

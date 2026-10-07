@@ -612,6 +612,8 @@ export async function activateNextPeriod(
     case DB.GameStatus.CONSOLIDATION: {
       if (!game.activePeriod?.activeSegment) return null
 
+      services.Segment.validateAdvance?.(game.activePeriod.activeSegment.facts)
+
       const { results, extras, promises } = await computePeriodEndResults(
         {
           segmentEndResults: game.results,
@@ -921,6 +923,10 @@ export async function activateNextSegment(
     // PAUSED -> RUNNING
     case DB.GameStatus.PREPARATION:
     case DB.GameStatus.PAUSED: {
+      if (game.status === DB.GameStatus.PAUSED)
+        services.Segment.validateAdvance?.(
+          game.activePeriod.activeSegment?.facts
+        )
       const { results, extras } = computeSegmentStartResults(game, ctx, {
         services,
       })

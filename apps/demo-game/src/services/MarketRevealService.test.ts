@@ -8,7 +8,7 @@ function fixture() {
     index: 0,
     periodIx: 0,
     period: { activeSegmentIx: 0 },
-    game: { activePeriodIx: 0 },
+    game: { activePeriodIx: 0, status: 'PAUSED' },
     facts: {
       diceRolls: [
         { shared: 2, bonds: 4, stocks: 8 },
@@ -96,10 +96,14 @@ test('rejects non-admins, missing/invalid rolls and future segments', async () =
   for (const index of [-1, 0.5, 2])
     await expect(revealMarketRoll(1, index, f.ctx)).rejects.toThrow(/Invalid/)
   f.segment.index = 1
-  await expect(revealMarketRoll(1, 0, f.ctx)).rejects.toThrow(/Future/)
+  await expect(revealMarketRoll(1, 0, f.ctx)).rejects.toThrow(
+    /current closed segment/
+  )
   f.segment.index = 0
   f.segment.periodIx = 1
-  await expect(revealMarketRoll(1, 0, f.ctx)).rejects.toThrow(/Future/)
+  await expect(revealMarketRoll(1, 0, f.ctx)).rejects.toThrow(
+    /current closed segment/
+  )
   expect(f.events.length).toBe(0)
 })
 
@@ -115,4 +119,34 @@ test('failed notification can be retried without changing a persisted reveal', a
   await revealMarketRoll(1, 0, f.ctx)
   expect(f.segment.facts.revealedRollIndices).toStrictEqual([0])
   expect(f.events.length).toBe(1)
+})
+
+test('only the current closed segment accepts reveals', async () => {
+  for (const status of [
+    'RUNNING',
+    'PREPARATION',
+    'SCHEDULED',
+    'RESULTS',
+    'COMPLETED',
+  ]) {
+    const f = fixture()
+    f.segment.game.status = status
+    await expect(revealMarketRoll(1, 0, f.ctx)).rejects.toThrow(
+      /current closed segment/
+    )
+    expect(f.events).toHaveLength(0)
+    expect(f.segment.facts.revealedRollIndices).toEqual([])
+  }
+  for (const earlier of ['period', 'segment']) {
+    const f = fixture()
+    if (earlier === 'period') f.segment.game.activePeriodIx = 1
+    else f.segment.period.activeSegmentIx = 1
+    await expect(revealMarketRoll(1, 0, f.ctx)).rejects.toThrow(
+      /current closed segment/
+    )
+  }
+  const f = fixture()
+  f.segment.game.status = 'CONSOLIDATION'
+  await revealMarketRoll(1, 0, f.ctx)
+  expect(f.segment.facts.revealedRollIndices).toEqual([0])
 })

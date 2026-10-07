@@ -11,7 +11,7 @@ import {
   NUM_MONTHS_PER_SEGMENT,
 } from './constants'
 import { parseFacts } from './facts'
-import { readMarketRoll, revealedIndices } from './market'
+import { pendingMarketReveal, readMarketRoll, revealedIndices } from './market'
 
 type Asset = keyof Allocation
 export type ResultBalance = Record<Asset, number | null> & {
@@ -55,6 +55,7 @@ export function balanceMix(value: ResultBalance): Allocation | null {
 /** Only settled rows enter these views; PERIOD_END identifies the displayed year. */
 export function buildResultView(data: ResultQuery) {
   const game = data.result?.currentGame
+  if (pendingMarketReveal(game)) return null
   if (!game || !['PAUSED', 'CONSOLIDATION', 'RESULTS'].includes(game.status))
     return null
   const { results: rows, settled } = readResultHistory(data)
@@ -209,7 +210,9 @@ export type HistoryQuarter = {
 export function buildHistory(data: ResultQuery) {
   const game = data.result?.currentGame
   const active = game?.activePeriod
-  const { results, settled, inPeriod } = readResultHistory(data)
+  const { results, settled: settledRows, inPeriod } = readResultHistory(data)
+  const pending = pendingMarketReveal(game)
+  const settled = settledRows.filter((row) => row.segment.id !== pending?.id)
   const quarters: HistoryQuarter[] = settled.map((row) => {
     const { facts } = row
     const segment = game?.periods

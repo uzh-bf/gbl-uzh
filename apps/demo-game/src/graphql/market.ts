@@ -1,6 +1,6 @@
 import { extendType, intArg, nonNull, objectType } from 'nexus'
+import { canRevealMarketRoll } from '../lib/market'
 import {
-  canRevealMarketRoll,
   getMarketDice,
   revealMarketRoll,
 } from '../services/MarketRevealService'

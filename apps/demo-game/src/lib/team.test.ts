@@ -102,6 +102,12 @@ test('team value and last quarter use settled balances, not the cumulative retur
     lastQuarter: null,
   })
   data.result!.currentGame!.status = 'PAUSED' as never
+  expect(teamStatistics(data).value).toBe(10000)
+  data.result!.currentGame!.activePeriod!.segments[0].facts = {
+    revealedRollIndices: [0, 1, 2],
+    diceRolls: Array(3).fill({ shared: 3, bonds: 7, stocks: 6 }),
+    returns: Array(3).fill({ bank: 0.002, bonds: 0.0031, stocks: -0.0185 }),
+  }
   expect(teamStatistics(data)).toStrictEqual({
     value: 12600,
     lastQuarter: 0.05,
