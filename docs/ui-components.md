@@ -7,7 +7,7 @@ tags:
   - design-system
   - tailwind
   - components
-timestamp: "2026-10-07T14:30:00Z"
+timestamp: "2026-10-07T13:52:26Z"
 ---
 
 # UI Building Blocks
@@ -86,7 +86,7 @@ Copy the demo game's setup (`apps/demo-game/src/globals.css`, `postcss.config.js
 
 `apps/demo-game/src/components/admin/DiceWorkspace.tsx:DiceWorkspace` presents the admin dice route as three month tabs and one dice/sidebar-and-charts workspace, without a top header. The initial selection is the first unrevealed month (Month 1 when all are revealed); selection persists during refetches and after publication. Calendar names derive from the quarter, and the year uses `FIRST_GAME_YEAR`. Background refresh errors keep the loaded workspace and selected month visible with a retry action.
 
-Both forecasts remain visible before reveal, using the shared `probabilityDistribution` and `signedPercent` helpers in an app-local SVG presentation. Unrevealed dice are blank and neither chart highlights an outcome. After publication, Bonds/Shared/Stocks dice are green/orange/yellow; the charts highlight stored totals and show persisted returns with the shared-plus-asset calculation. The Roll button is replaced by the month's revealed status. Animation and publication temporarily disable month navigation; failed publication offers a retry without rerolling. Rolling eligibility is shared with the admin segment card and server: only the current closed segment in PAUSED/CONSOLIDATION can roll. Other segments show disabled controls and an explanatory message. Authoritative outcomes, realtime refetches, and backend idempotency are preserved.
+Both forecasts remain visible before reveal, using the shared `probabilityDistribution` and `signedPercent` helpers in an app-local SVG presentation. Unrevealed dice are blank and neither chart highlights an outcome. After publication, Bonds/Shared/Stocks dice are green/orange/yellow; the charts highlight stored totals and show persisted returns with the shared-plus-asset calculation. The Roll button is replaced by the month's revealed status. Animation and publication temporarily disable month navigation; failed publication offers a retry without rerolling. Rolling eligibility is shared with the admin segment card and server: only the current closed segment in PAUSED/CONSOLIDATION can roll. Admin segment cards show all three Bonds/Stocks outcome totals. The current closed segment has an enabled dice link with reveal progress; other segments retain their outcome totals in disabled buttons without an unavailable message. The dice workspace explains its disabled Roll control. Authoritative outcomes, realtime refetches, and backend idempotency are preserved.
 
 At 1200px the workspace uses three columns; below that the dice section sits above the charts, and below 900px the charts stack. Tabs support arrow keys, Home and End, while labeled dice/charts and live status text expose outcomes to assistive technology. Shared `ProbabilityChart` defaults and player Market presentation remain unchanged.
 

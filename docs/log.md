@@ -2,6 +2,8 @@
 
 ## 2026-10-07
 
+**Update**: [UI Components](ui-components.md) — restore Bonds/Stocks outcome totals on admin segment cards, retaining disabled outcome buttons for non-rollable segments.
+
 **Update**: [Game Lifecycle](game-lifecycle.md), [Developing a Game](developing-a-game.md), and [UI Components](ui-components.md) — restrict rolling to the current closed quarter, gate advancement and player results on three reveals, and display all monthly dice with colored probability overlays.
 
 ## 2026-10-06

@@ -71,6 +71,7 @@ import { shouldRefetchDemoGame } from '~/lib/gameEvents'
 import {
   allMarketRollsRevealed,
   canRevealMarketRoll,
+  readMarketRoll,
   revealedIndices,
 } from '~/lib/market'
 import { queueRefetch } from '~/lib/queuedRefetch'
@@ -561,6 +562,34 @@ function ManageGame() {
                         const revealedCount = revealedIndices(
                           segment?.facts
                         ).length
+                        const rolls = Array.from(
+                          { length: NUM_MONTHS_PER_SEGMENT },
+                          (_, index) => readMarketRoll(segment?.facts, index)
+                        )
+                        const diceOutcomes = (
+                          <span className="grid gap-1">
+                            {(['bonds', 'stocks'] as const).map((asset) => (
+                              <span
+                                key={asset}
+                                className="flex justify-between gap-4 text-nowrap"
+                              >
+                                <span>
+                                  Dice {asset === 'bonds' ? 'Bonds' : 'Stocks'}:
+                                </span>
+                                <span className="flex gap-2 tabular-nums">
+                                  {rolls.map((roll, index) => (
+                                    <span
+                                      key={index}
+                                      aria-label={`Month ${index + 1}: ${roll?.dice[asset] ?? 'unavailable'}`}
+                                    >
+                                      {roll?.dice[asset] ?? '—'}
+                                    </span>
+                                  ))}
+                                </span>
+                              </span>
+                            ))}
+                          </span>
+                        )
 
                         return (
                           <div
@@ -617,18 +646,21 @@ function ManageGame() {
                                   data-cy={`segment-dice-${segment.id}`}
                                   className="mt-2 block rounded border border-blue-600 bg-white p-2 font-semibold text-blue-900"
                                 >
-                                  {allMarketRollsRevealed(segment.facts)
-                                    ? 'Dice revealed · 3/3'
-                                    : `Awaiting dice · ${revealedCount}/3 revealed`}
+                                  {diceOutcomes}
+                                  <span className="mt-2 block text-xs">
+                                    {allMarketRollsRevealed(segment.facts)
+                                      ? 'Dice revealed · 3/3'
+                                      : `Awaiting dice · ${revealedCount}/3 revealed`}
+                                  </span>
                                 </Link>
                               ) : (
                                 <button
                                   type="button"
                                   disabled
                                   data-cy={`segment-dice-${segment.id}`}
-                                  className="mt-2 w-full cursor-not-allowed rounded border border-gray-300 p-2 text-gray-400"
+                                  className="mt-2 w-full cursor-not-allowed rounded border border-gray-300 p-2 text-left text-gray-500"
                                 >
-                                  Rolling unavailable
+                                  {diceOutcomes}
                                 </button>
                               ))}
                           </div>
