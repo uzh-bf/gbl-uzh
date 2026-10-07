@@ -5,6 +5,7 @@
 // never read from them directly; only AccountService touches `res` via
 // nookies, which no-ops when `getHeader`/`setHeader` are absent).
 import { vi } from 'vitest'
+import * as yup from 'yup'
 import type { PlatformContext, PlatformUser } from '../src/trpc/context.js'
 
 export function createMockPrisma() {
@@ -82,4 +83,14 @@ export function createTestContext({
     res: {} as any,
     user,
   }
+}
+
+// Permissive stand-ins for the five game facts schemas that
+// createPlatformRouter requires.
+export const testSchemas = {
+  ActionFactsSchema: yup.object(),
+  GameFactsSchema: yup.object(),
+  PeriodFactsSchema: yup.object(),
+  PeriodSegmentFactsSchema: yup.object(),
+  PlayerFactsSchema: yup.object(),
 }

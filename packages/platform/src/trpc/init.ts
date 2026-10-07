@@ -1,5 +1,6 @@
 import superjson from 'superjson'
 import { TRPCError, initTRPC } from '@trpc/server'
+import { ZodError } from 'zod'
 import { UserRole } from '../types.js'
 import type { PlatformContext, PlatformUser } from './context.js'
 import { throwAsTRPCError } from './errors.js'
@@ -18,11 +19,24 @@ const t = initTRPC.context<PlatformContext>().create({
   // Never leak raw internal error messages (Prisma/service internals) to
   // clients. Mapped errors (UNAUTHORIZED/FORBIDDEN/BAD_REQUEST) keep their
   // message; anything that fell through to INTERNAL_SERVER_ERROR is genericized.
-  errorFormatter({ shape }) {
+  errorFormatter({ shape, error }) {
     if (shape.data.code === 'INTERNAL_SERVER_ERROR') {
       return {
         ...shape,
         message: 'Internal server error',
+      }
+    }
+
+    // Input validation failures otherwise reach clients as serialized issue
+    // JSON; one line per issue keeps toasts readable.
+    if (error.cause instanceof ZodError) {
+      return {
+        ...shape,
+        message: error.cause.issues
+          .map(
+            (issue) => `${issue.path.join('.') || 'input'}: ${issue.message}`
+          )
+          .join('; '),
       }
     }
 
