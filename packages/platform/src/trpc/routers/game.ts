@@ -8,12 +8,12 @@ import {
   jsonObjectSchema,
   requireFactsSchema,
 } from '../schemas.js'
+import { toAdminGameDto, toGameListItemDto } from '../dto/game.js'
 import {
-  toAdminGameDto,
-  toGameListItemDto,
+  adminGameDtoSchema,
+  gameListItemDtoSchema,
   type GameListItemDto,
-} from '../dto/game.js'
-import { adminGameDtoSchema, gameListItemDtoSchema } from '../dto/contracts.js'
+} from '../dto/contracts.js'
 import * as GameService from '../../services/GameService.js'
 import * as PlayService from '../../services/PlayService.js'
 import { z } from 'zod'
@@ -39,21 +39,6 @@ export function createGameRouter({
   schemas = {},
   roleAssigner,
 }: RouterDeps = {}) {
-  const createGameInput = z.object({
-    name: z.string().trim().min(1),
-    playerCount: z.number().int().positive(),
-    facts: jsonObjectSchema,
-  })
-
-  const byIdInput = z.object({ id: gameIdSchema })
-  const countdownInput = z.object({
-    gameId: gameIdSchema,
-    seconds: z.number().int().nonnegative(),
-  })
-  const switchInput = z.object({
-    gameId: gameIdSchema,
-    toggle: z.boolean(),
-  })
   const nextPeriodInput = z.object({ gameId: gameIdSchema })
 
   return createTRPCRouter({
@@ -68,7 +53,7 @@ export function createGameRouter({
       }),
 
     byId: adminProcedure
-      .input(byIdInput)
+      .input(z.object({ id: gameIdSchema }))
       .output(adminGameDtoSchema.nullable())
       .query(async ({ input, ctx }) => {
         await assertGameOwnership(ctx, input.id)
@@ -78,7 +63,13 @@ export function createGameRouter({
       }),
 
     create: adminProcedure
-      .input(createGameInput)
+      .input(
+        z.object({
+          name: z.string().trim().min(1),
+          playerCount: z.number().int().positive(),
+          facts: jsonObjectSchema,
+        })
+      )
       .output(adminGameDtoSchema.nullable())
       .mutation(async ({ input, ctx }) => {
         const game = await GameService.createGame(input as any, ctx as any, {
@@ -125,14 +116,24 @@ export function createGameRouter({
       }),
 
     addCountdown: adminProcedure
-      .input(countdownInput)
+      .input(
+        z.object({
+          gameId: gameIdSchema,
+          seconds: z.number().int().nonnegative(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         await assertGameOwnership(ctx, input.gameId)
         return PlayService.addCountdown(input, ctx as any)
       }),
 
     toggleSwitch: adminProcedure
-      .input(switchInput)
+      .input(
+        z.object({
+          gameId: gameIdSchema,
+          toggle: z.boolean(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         await assertGameOwnership(ctx, input.gameId)
         return PlayService.toggleSwitch(input, ctx as any)

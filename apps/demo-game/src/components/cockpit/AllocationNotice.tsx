@@ -4,12 +4,12 @@ import type { ReactNode } from 'react'
 
 export const playerNoticeStyles = {
   surface:
-    'mobile:gap-app-3 mobile:p-app-3 mobile:app-caption mobile:rounded-app-card flex items-start rounded-[14px] border leading-[1.5] min-[601px]:gap-[18px] min-[601px]:rounded-[18px] min-[601px]:p-[24px] min-[601px]:text-[21px]',
+    'mobile:gap-app-3 mobile:p-app-3 mobile:app-caption mobile:rounded-app-card tablet:gap-app-3 tablet:p-app-3 tablet:app-caption tablet:rounded-app-card flex items-start rounded-[14px] border leading-[1.5] min-[641px]:gap-[18px] min-[641px]:rounded-[18px] min-[641px]:p-[24px] min-[641px]:text-[21px]',
   success:
     'border-player-success bg-player-success-surface text-player-success',
-  icon: 'mobile:mt-app-1 mt-[3px] size-[20px] shrink-0 min-[601px]:size-[24px]',
+  icon: 'mobile:mt-app-1 tablet:size-app-icon mt-[3px] size-[20px] shrink-0 min-[641px]:size-[24px]',
   title:
-    'mobile:mb-app-1 mobile:app-body mb-[4px] block leading-[1.3] min-[601px]:text-[24px]',
+    'mobile:mb-app-1 mobile:app-body tablet:app-body mb-[4px] block leading-[1.3] min-[641px]:text-[24px]',
   body: 'text-player-body m-0',
 } as const
 
@@ -44,21 +44,33 @@ export default function AllocationNotice({
   return (
     <div
       className={cn(
-        'mobile:p-app-4 min-[601px]:p-[24px]',
+        'mobile:p-app-4 tablet:px-[12px] tablet:py-[8px] min-[641px]:p-[24px]',
         variant === 'success' && 'border-player-border border-b'
       )}
     >
       <div
-        className={cn(playerNoticeStyles.surface, className)}
+        className={cn(
+          playerNoticeStyles.surface,
+          className,
+          'tablet:p-[8px] tablet:gap-[8px] tablet:text-[12px] tablet:leading-[1.3]'
+        )}
         role={variant === 'success' ? 'status' : undefined}
       >
         <Icon
           aria-hidden="true"
-          className={cn(playerNoticeStyles.icon, iconClassName)}
+          className={cn(
+            playerNoticeStyles.icon,
+            iconClassName,
+            'tablet:size-[16px]'
+          )}
         />
         <div>
           {title && (
-            <strong className={playerNoticeStyles.title}>{title}</strong>
+            <strong
+              className={cn(playerNoticeStyles.title, 'tablet:app-caption')}
+            >
+              {title}
+            </strong>
           )}
           <p className={playerNoticeStyles.body}>{children}</p>
         </div>

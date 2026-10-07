@@ -34,6 +34,52 @@ describe('toPlayerResultDto', () => {
     ])
   })
 
+  it('applies the game redaction to period and segment facts only', () => {
+    const segment = { id: 20, index: 0, facts: { rolls: [1, 2, 3] } }
+    const result = toPlayerResultDto(
+      {
+        currentGame: {
+          id: 1,
+          status: 'RUNNING' as any,
+          periods: [
+            { id: 10, index: 0, facts: { rate: 1 }, segments: [segment] },
+          ],
+          activePeriod: {
+            id: 10,
+            index: 0,
+            facts: { rate: 1 },
+            activeSegment: segment,
+          },
+          players: [],
+        },
+        playerResult: {
+          id: 5,
+          type: PlayerResultType.SEGMENT_END,
+          facts: { cash: 100 },
+          period: { id: 10, index: 0 },
+        },
+        previousResults: [],
+        transactions: [],
+      },
+      {
+        period: () => ({ hidden: true }),
+        segment: (facts) => ({
+          rolls: (facts as { rolls: number[] }).rolls.slice(0, 1),
+        }),
+      }
+    )
+
+    expect(result?.currentGame.periods[0]?.facts).toEqual({ hidden: true })
+    expect(result?.currentGame.periods[0]?.segments[0]?.facts).toEqual({
+      rolls: [1],
+    })
+    expect(result?.currentGame.activePeriod?.facts).toEqual({ hidden: true })
+    expect(result?.currentGame.activePeriod?.activeSegment?.facts).toEqual({
+      rolls: [1],
+    })
+    expect(result?.playerResult?.facts).toEqual({ cash: 100 })
+  })
+
   it('maps result player identity without private player fields', () => {
     const player = {
       id: 'player-1',
@@ -66,7 +112,7 @@ describe('toPlayerResultDto', () => {
       player: {
         id: 'player-2',
         name: 'Governor Two',
-        role: 'private-role',
+        role: 'ANALYST',
         facts: { private: true },
         experience: 75,
         experienceToNext: 100,

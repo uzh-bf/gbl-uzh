@@ -8,11 +8,9 @@ export type PlatformUser = {
   gameId?: number
 }
 
-type RawPlatformUser = {
-  sub?: unknown
-  role?: unknown
-  gameId?: unknown
-}
+// The decoded token has the same keys as PlatformUser, but nothing about
+// their values is checked yet.
+type RawPlatformUser = Partial<Record<keyof PlatformUser, unknown>>
 
 export type PlatformContext = {
   prisma: DB.PrismaClient
@@ -20,12 +18,11 @@ export type PlatformContext = {
   res: NextApiResponse
   user?: PlatformUser
   services?: Record<string, unknown>
-  schemas?: Record<string, unknown>
 }
 
 function normalizeGameId(gameId: unknown): number | undefined {
   if (typeof gameId === 'number') {
-    return gameId
+    return Number.isFinite(gameId) ? gameId : undefined
   }
 
   if (typeof gameId === 'string' && gameId.trim().length > 0) {

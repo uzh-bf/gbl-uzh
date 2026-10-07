@@ -15,9 +15,9 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { createCallerFactory } from '../src/trpc/init.js'
 import { createPlatformRouter } from '../src/trpc/createPlatformRouter.js'
 import { UserRole } from '../src/types.js'
-import { createMockPrisma, createTestContext } from './helpers.js'
+import { createMockPrisma, createTestContext, testSchemas } from './helpers.js'
 
-const router = createPlatformRouter({})
+const router = createPlatformRouter({ schemas: testSchemas })
 const createCaller = createCallerFactory(router)
 
 beforeEach(() => {
@@ -37,6 +37,7 @@ describe('public tier: auth.loginAsTeam', () => {
       facts: {},
       experience: 0,
       experienceToNext: 100,
+      tutorialCompleted: false,
       level: { id: 1, index: 0 },
       achievements: [],
       achievementKeys: [],

@@ -19,14 +19,29 @@ import {
   toQuestAchievementDto,
 } from '../dto/content.js'
 
-const byIdInput = z.object({ id: idSchema })
+const selectionSchema = z.array(z.number().int().nonnegative())
 
+// The service grades a JSON array of option positions. A string selection is
+// parsed and checked here, because the service turns parse errors into null.
 function normalizeSelection(selection: string | number[]) {
-  if (Array.isArray(selection)) {
-    return JSON.stringify(selection)
+  let parsed: unknown = selection
+  if (typeof selection === 'string') {
+    try {
+      parsed = JSON.parse(selection)
+    } catch {
+      parsed = undefined
+    }
   }
 
-  return selection
+  const result = selectionSchema.safeParse(parsed)
+  if (!result.success) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'Invalid learning element selection payload',
+    })
+  }
+
+  return JSON.stringify(result.data)
 }
 
 export function createLearningRouter() {
@@ -41,48 +56,34 @@ export function createLearningRouter() {
         )
     }),
 
-    byId: playerProcedure.input(byIdInput).query(async ({ input, ctx }) => {
-      const state = await PlayService.getLearningElement(
-        { id: input.id },
-        ctx as any
-      )
+    byId: playerProcedure
+      .input(z.object({ id: idSchema }))
+      .query(async ({ input, ctx }) => {
+        const state = await PlayService.getLearningElement(
+          { id: input.id },
+          ctx as any
+        )
 
-      return toLearningElementStateDto(state as any)
-    }),
+        return toLearningElementStateDto(state as any)
+      }),
 
     attempt: playerProcedure
       .input(
         z.object({
           elementId: idSchema,
-          selection: z.union([z.array(z.number().int()), z.string()]),
+          selection: z.union([selectionSchema, z.string()]),
         })
       )
       .mutation(async ({ input, ctx }) => {
-        try {
-          const serializedSelection = normalizeSelection(input.selection)
+        const attempt = await PlayService.attemptLearningElement(
+          {
+            elementId: input.elementId,
+            selection: normalizeSelection(input.selection),
+          },
+          ctx as any
+        )
 
-          const attempt = await PlayService.attemptLearningElement(
-            {
-              elementId: input.elementId,
-              selection: serializedSelection,
-            } as any,
-            ctx as any
-          )
-
-          return toLearningElementAttemptDto(attempt as any)
-        } catch (error) {
-          // The service JSON.parses the stored/submitted selection; a
-          // SyntaxError therefore signals a malformed player payload, not a
-          // server fault. Everything else is mapped by the shared middleware.
-          if (error instanceof SyntaxError) {
-            throw new TRPCError({
-              code: 'BAD_REQUEST',
-              message: 'Invalid learning element selection payload',
-            })
-          }
-
-          throw error
-        }
+        return toLearningElementAttemptDto(attempt as any)
       }),
 
     questAchievements: playerProcedure

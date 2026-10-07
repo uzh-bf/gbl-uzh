@@ -1,4 +1,5 @@
 import type { TRPCCreateRouterOptions } from '@trpc/server'
+import type { PlayerFactsRedaction } from './dto/results.js'
 import { createTRPCRouter } from './init.js'
 import { createAuthRouter } from './routers/auth.js'
 import { createGameRouter } from './routers/game.js'
@@ -17,33 +18,39 @@ type PlatformRoleAssigner = (ix: number, facts: unknown) => unknown
 
 type RouterDeps<TExtensions extends TRPCCreateRouterOptions> = {
   services?: PlatformRouterServices
-  schemas?: {
-    ActionFactsSchema?: unknown
-    GameFactsSchema?: unknown
-    PeriodFactsSchema?: unknown
-    PeriodSegmentFactsSchema?: unknown
-    PlayerFactsSchema?: unknown
+  // The game's yup facts schemas. Required because game.create, period.add,
+  // segment.add and play.performAction reject every call without them.
+  schemas: {
+    ActionFactsSchema: unknown
+    GameFactsSchema: unknown
+    PeriodFactsSchema: unknown
+    PeriodSegmentFactsSchema: unknown
+    PlayerFactsSchema: unknown
   }
   roleAssigner?: PlatformRoleAssigner
+  playerFacts?: PlayerFactsRedaction
   // Game-specific routers merged at the top level. Kept generic so their
   // procedures stay part of the game's AppRouter type.
   extensions?: TExtensions
 }
 
+export type { PlayerFactsRedaction }
+
 export function createPlatformRouter<
   TExtensions extends TRPCCreateRouterOptions = Record<never, never>,
 >({
   services = {},
-  schemas = {},
+  schemas,
   roleAssigner,
+  playerFacts,
   extensions = {} as TExtensions,
-}: RouterDeps<TExtensions> = {}) {
+}: RouterDeps<TExtensions>) {
   return createTRPCRouter({
     auth: createAuthRouter(),
     game: createGameRouter({ services, schemas, roleAssigner }),
     period: createPeriodRouter({ services, schemas }),
     segment: createSegmentRouter({ services, schemas }),
-    play: createPlayRouter({ services, schemas }),
+    play: createPlayRouter({ services, schemas, playerFacts }),
     learning: createLearningRouter(),
     events: createEventsRouter(),
     story: createStoryRouter(),
