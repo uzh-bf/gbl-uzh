@@ -1,0 +1,17 @@
+name: OCR draft review
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  draft:
+    uses: uzh-bf/ocr-review/.github/workflows/draft-review.yml@4563f8ad516b59be73b56bf3f23438dc18acec98
+    secrets:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+      CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
