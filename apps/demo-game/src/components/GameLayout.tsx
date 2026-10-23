@@ -476,6 +476,7 @@ function GameLayout({
                   data-disabled={readyControl.disabled}
                 >
                   <label
+                    id="ready-control-label"
                     htmlFor="isReady"
                     className={cn(
                       'phone:app-body tablet:app-body text-[17px] font-semibold',
@@ -490,6 +491,7 @@ function GameLayout({
                   </label>
                   <Switch
                     id="isReady"
+                    aria-labelledby="ready-control-label"
                     checked={self.isReady}
                     disabled={readyControl.disabled}
                     size="lg"

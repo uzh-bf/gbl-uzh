@@ -12,7 +12,7 @@ export default function PlayerActionButton({
   variant = 'primary',
   className,
   ...props
-}: Omit<ButtonProps, 'primary' | 'className'> & {
+}: Omit<Extract<ButtonProps, { asChild?: false }>, 'primary' | 'className'> & {
   variant?: keyof typeof variants
   className?: string
 }) {

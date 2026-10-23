@@ -13,10 +13,6 @@ export function requireBaseURL(baseURL: string | undefined) {
   return baseURL
 }
 
-function input(scope: Page, name: string) {
-  return scope.locator(`input[name="${name}"]`)
-}
-
 export async function playerJoinUrl(
   page: Page,
   baseURL: string,
@@ -39,8 +35,8 @@ export async function createGame(
   { name, playerCount }: { name: string; playerCount: number }
 ) {
   await page.goto('/admin/games', { waitUntil: 'domcontentloaded' })
-  await input(page, 'name').fill(name)
-  await input(page, 'playerCount').fill(String(playerCount))
+  await page.getByTestId('game-name').fill(name)
+  await page.getByTestId('game-player-count').fill(String(playerCount))
   await page.getByRole('button', { name: 'Create Game' }).click()
   await page.getByRole('link', { name: new RegExp(name) }).click()
   await expect(page.getByTestId('game-detail')).toBeVisible({

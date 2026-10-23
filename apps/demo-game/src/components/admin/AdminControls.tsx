@@ -1,5 +1,6 @@
 import { cn } from '@gbl-uzh/ui'
 import * as UI from '@uzh-bf/design-system'
+import { Table, TableCell, TableHead } from '@uzh-bf/design-system/primitives'
 import type { ComponentProps } from 'react'
 
 // App-local sizing adapters: desktop and other games retain design-system defaults.
@@ -145,30 +146,23 @@ export function H4({ className, ...props }: ComponentProps<typeof UI.H4>) {
 export function ShadcnTable({
   className,
   ...props
-}: ComponentProps<typeof UI.ShadcnTable>) {
-  return (
-    <UI.ShadcnTable {...props} className={cn('mobile:app-body', className)} />
-  )
+}: ComponentProps<typeof Table>) {
+  return <Table {...props} className={cn('mobile:app-body', className)} />
 }
 
 export function ShadcnTableCell({
   className,
   ...props
-}: ComponentProps<typeof UI.ShadcnTableCell>) {
-  return (
-    <UI.ShadcnTableCell
-      {...props}
-      className={cn('mobile:app-cell', className)}
-    />
-  )
+}: ComponentProps<typeof TableCell>) {
+  return <TableCell {...props} className={cn('mobile:app-cell', className)} />
 }
 
 export function ShadcnTableHead({
   className,
   ...props
-}: ComponentProps<typeof UI.ShadcnTableHead>) {
+}: ComponentProps<typeof TableHead>) {
   return (
-    <UI.ShadcnTableHead
+    <TableHead
       {...props}
       className={cn(
         'mobile:app-caption mobile:px-app-2 mobile:py-app-2',

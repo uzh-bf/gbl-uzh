@@ -1,5 +1,9 @@
 # Log
 
+## 2026-10-23
+
+**Update**: [UI Building Blocks](ui-components.md), [Game Patterns](game-patterns.md) — refresh the demo-game v5 pilot against current player layouts, compose admin RHF controls from the dedicated entry and retain shared v4/Formik compatibility. Distinguish the portable registry baseline from exact unpublished candidate verification and later publication/manual-accessibility gates.
+
 ## 2026-10-07
 
 **Update**: [UI Components](ui-components.md) — restore Bonds/Stocks outcome totals on admin segment cards, retaining disabled outcome buttons for non-rollable segments.

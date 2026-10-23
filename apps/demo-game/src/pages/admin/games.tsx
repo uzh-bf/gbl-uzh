@@ -1,4 +1,9 @@
 import { useMutation, useQuery } from '@apollo/client'
+import {
+  Form,
+  RhfNumberField,
+  RhfTextField,
+} from '@uzh-bf/design-system/react-hook-form'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -9,11 +14,18 @@ import {
   GamesDocument,
 } from 'src/graphql/generated/ops'
 import { Button } from '~/components/admin/AdminControls'
-import { AdminInputField } from '~/components/fields/AdminInputField'
 
 interface CreateGameFormValues {
   name: string
-  playerCount: number
+  playerCount: number | ''
+}
+
+const adminFieldClassName = {
+  root: 'mobile:gap-app-1 gap-1',
+  label: 'mobile:app-caption pb-1 text-sm font-medium text-slate-700',
+  input:
+    'mobile:app-control w-full rounded border border-slate-300 bg-white p-2 text-sm focus:ring-2 focus:ring-slate-500 focus:outline-none',
+  error: 'mobile:app-caption text-xs text-red-500',
 }
 
 function Games() {
@@ -43,12 +55,7 @@ function Games() {
     },
   })
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<CreateGameFormValues>({
+  const form = useForm<CreateGameFormValues>({
     defaultValues: {
       name: '',
       playerCount: 1,
@@ -73,7 +80,7 @@ function Games() {
         },
         refetchQueries: [GamesDocument],
       })
-      reset()
+      form.reset()
     } catch (e) {
       console.error(e)
     }
@@ -95,41 +102,49 @@ function Games() {
         </Button>
       )}
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="mobile:app-card mobile:gap-app-3 my-4 flex max-w-md flex-col gap-4 rounded border p-4"
-      >
-        <AdminInputField
-          label="Name"
-          name="name"
-          register={register}
-          error={errors.name}
-          required
-          placeholder="Game Name"
-          testId="game-name"
-        />
-
-        <AdminInputField
-          label="Player Count"
-          name="playerCount"
-          type="number"
-          register={register}
-          error={errors.playerCount}
-          required
-          min={1}
-          step={1}
-          testId="game-player-count"
-          minMessage="Must be at least 1"
-        />
-
-        <Button
-          type="submit"
-          data={{ cy: 'create-game' }}
-          className={{ root: 'w-max' }}
+      <Form {...form}>
+        <form
+          noValidate
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="mobile:app-card mobile:gap-app-3 my-4 flex max-w-md flex-col gap-4 rounded border p-4"
         >
-          Create Game
-        </Button>
-      </form>
+          <RhfTextField
+            control={form.control}
+            label="Name"
+            name="name"
+            rules={{ required: 'Required' }}
+            required
+            placeholder="Game Name"
+            data={{ cy: 'game-name' }}
+            className={adminFieldClassName}
+          />
+
+          <RhfNumberField
+            control={form.control}
+            label="Player Count"
+            name="playerCount"
+            rules={{
+              required: 'Required',
+              min: { value: 1, message: 'Must be at least 1' },
+              validate: (value) =>
+                value === '' || Number.isInteger(value) || 'Use a whole number',
+            }}
+            required
+            min={1}
+            step={1}
+            data={{ cy: 'game-player-count' }}
+            className={adminFieldClassName}
+          />
+
+          <Button
+            type="submit"
+            data={{ cy: 'create-game' }}
+            className={{ root: 'w-max' }}
+          >
+            Create Game
+          </Button>
+        </form>
+      </Form>
 
       <div className="mt-4 flex flex-col gap-1">
         {data.games.map((game) => {
@@ -140,6 +155,7 @@ function Games() {
               key={game?.id}
             >
               <Button
+                fluid
                 className={{
                   root: 'mobile:app-card mobile:gap-app-2 flex w-full flex-col items-start justify-around text-left',
                 }}
