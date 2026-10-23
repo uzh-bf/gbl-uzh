@@ -692,7 +692,13 @@ function ManageGame() {
                         ) : (
                           <Modal
                             open={isSegmentModalOpen}
-                            onClose={() => setIsSegmentModalOpen(false)}
+                            onClose={() => {
+                              if (
+                                !segmentForm.formState.isSubmitting &&
+                                !addPeriodSegmentLoading
+                              )
+                                setIsSegmentModalOpen(false)
+                            }}
                             trigger={
                               <Button
                                 disabled={
@@ -710,11 +716,29 @@ function ManageGame() {
                             }
                             title="Add Segment"
                             onSecondaryAction={() => {
+                              if (
+                                segmentForm.formState.isSubmitting ||
+                                addPeriodSegmentLoading
+                              )
+                                return
                               segmentForm.reset()
                               setIsSegmentModalOpen(false)
                             }}
                             secondaryLabel="Discard"
+                            primaryDisabled={
+                              segmentForm.formState.isSubmitting ||
+                              addPeriodSegmentLoading
+                            }
+                            primaryLoading={
+                              segmentForm.formState.isSubmitting ||
+                              addPeriodSegmentLoading
+                            }
                             onPrimaryAction={() => {
+                              if (
+                                segmentForm.formState.isSubmitting ||
+                                addPeriodSegmentLoading
+                              )
+                                return
                               segmentForm.setValue('periodIx', period.index)
                               void segmentForm.handleSubmit(onSegmentSubmit)()
                             }}
@@ -768,7 +792,13 @@ function ManageGame() {
             return (
               <Modal
                 open={isPeriodModalOpen}
-                onClose={() => setIsPeriodModalOpen(false)}
+                onClose={() => {
+                  if (
+                    !periodForm.formState.isSubmitting &&
+                    !addGamePeriodLoading
+                  )
+                    setIsPeriodModalOpen(false)
+                }}
                 trigger={
                   <Button
                     disabled={disabled}
@@ -782,11 +812,21 @@ function ManageGame() {
                 }
                 title="Add Period"
                 onSecondaryAction={() => {
+                  if (periodForm.formState.isSubmitting || addGamePeriodLoading)
+                    return
                   periodForm.reset()
                   setIsPeriodModalOpen(false)
                 }}
                 secondaryLabel="Discard"
+                primaryDisabled={
+                  periodForm.formState.isSubmitting || addGamePeriodLoading
+                }
+                primaryLoading={
+                  periodForm.formState.isSubmitting || addGamePeriodLoading
+                }
                 onPrimaryAction={() => {
+                  if (periodForm.formState.isSubmitting || addGamePeriodLoading)
+                    return
                   void periodForm.handleSubmit(onPeriodSubmit)()
                 }}
                 primaryLabel="Submit"
@@ -939,7 +979,13 @@ function ManageGame() {
                   <RhfNumberField
                     label="Countdown in seconds"
                     name="countdownSeconds"
-                    rules={{ required: 'Required' }}
+                    rules={{
+                      required: 'Required',
+                      validate: (value) =>
+                        value === '' ||
+                        Number.isInteger(value) ||
+                        'Use a whole number',
+                    }}
                     required
                     step={1}
                     data={{ cy: 'countdownSeconds' }}

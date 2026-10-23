@@ -126,6 +126,8 @@ function Games() {
             rules={{
               required: 'Required',
               min: { value: 1, message: 'Must be at least 1' },
+              validate: (value) =>
+                value === '' || Number.isInteger(value) || 'Use a whole number',
             }}
             required
             min={1}

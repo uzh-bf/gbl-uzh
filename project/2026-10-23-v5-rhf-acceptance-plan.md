@@ -305,9 +305,25 @@ allocation/Ready/navigation at responsive boundaries. The complete synthetic
 browser suite and packed TradingForm v4/v5 browser cells are running or pending.
 Private receipts are in `project/_local/`; screenshots show synthetic data only.
 
-Remaining: finish source checks and browser cells, committed simplification and
-risk review, integrated final review, one draft PR with inspected screenshots
-and exact-head CI, then stop and verify the owned runtime. Preserve final-tip
+Draft [GBL consumer PR](https://github.com/uzh-bf/gbl-uzh/pull/224) is open
+against dev. Both packed v4/v5 TradingForm browser cells, exact archive/installed
+proof and inspected synthetic admin screenshots pass. Source simplification is
+complete. The hosted candidate digest and Sonar correction are passing; current
+game-matrix CI remains pending. Responsive reference coverage now asserts the
+existing independent minimum strip heights and tablet Market composition.
+
+Focused responsive checks now pass: countdown notifications, forecast and the
+phone reference capture. Both runtime graph and bundle behavior were checked;
+restart after candidate installation is required because Next evaluates aliases
+on startup. Source review found a lost integer restriction on real create-game
+and countdown forms; explicit RHF rules now preserve it. Existing authoring
+modals retain their prior decimal behavior. Pending period/segment submission
+blocks another Submit and ignores discard/close until completion. The existing
+admin scenario proves integer rejection and delayed-request disabling.
+
+Six synthetic admin screenshots are attached to the draft and verified to render.
+Remaining: integrated final review and exact-head CI qualification, then stop and
+verify the owned runtime. Preserve final-tip
 CI results in private receipts and the draft description to avoid status-only
 CI restart commits. Package publication and manual AT/Safari/device checks
 remain separate readiness gates. No merge, release or deployment is authorized.

@@ -142,7 +142,9 @@ try {
     const uiDsRequire = createRequire(join(uiDsRoot, 'package.json'))
     const resolvers =
       name === 'react-hook-form' && designSystemVersion.startsWith('4.')
-        ? [consumerRequire, uiRequire]
+        ? workspaceRoot
+          ? [uiRequire]
+          : [consumerRequire, uiRequire]
         : [consumerRequire, uiRequire, dsRequire, uiDsRequire]
     const paths = resolvers.map((require) =>
       realpathSync(require.resolve(name))

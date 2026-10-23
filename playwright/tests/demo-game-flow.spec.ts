@@ -122,6 +122,22 @@ function operationRequests(
   return requests.filter((request) => request.operationName === operationName)
 }
 
+async function holdGraphQLOperation(page: Page, operationName: string) {
+  let release!: () => void
+  const gate = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  const handler = async (route: import('@playwright/test').Route) => {
+    if (isGraphQLOperation(route.request(), operationName)) await gate
+    await route.fallback()
+  }
+  await page.route('**/api/graphql', handler)
+  return async () => {
+    release()
+    await page.unroute('**/api/graphql', handler)
+  }
+}
+
 async function expectLinkedError(scope: Locator | Page, field: Locator) {
   await expect(field).toHaveAttribute('aria-invalid', 'true')
   const errorIds = ((await field.getAttribute('aria-describedby')) ?? '')
@@ -936,6 +952,10 @@ test('admin RHF forms validate, recover, reset and submit structured state', asy
   }
 
   await name.fill(gameName)
+  await playerCount.fill('1.5')
+  await create.click()
+  await expectLinkedError(page, playerCount)
+  expect(operationRequests(requests, 'CreateGame')).toHaveLength(0)
   await playerCount.fill('2')
   await expectRecovered(name, nameErrorIds)
   await expectRecovered(playerCount, playerCountErrorIds)
@@ -978,6 +998,7 @@ test('admin RHF forms validate, recover, reset and submit structured state', asy
 
   await segmentCount.fill('1')
   await expectRecovered(segmentCount, segmentCountErrorIds)
+  const releasePeriod = await holdGraphQLOperation(page, 'AddGamePeriod')
   const [periodRequest] = await Promise.all([
     page.waitForRequest((request) =>
       isGraphQLOperation(request, 'AddGamePeriod')
@@ -1003,6 +1024,8 @@ test('admin RHF forms validate, recover, reset and submit structured state', asy
       },
     },
   })
+  await expect(dialog.getByRole('button', { name: 'Submit' })).toBeDisabled()
+  await releasePeriod()
   await expect(dialog).toBeHidden()
   await expect(page.getByTestId('period-0')).toBeVisible()
   expect(operationRequests(requests, 'AddGamePeriod')).toHaveLength(1)
@@ -1039,6 +1062,7 @@ test('admin RHF forms validate, recover, reset and submit structured state', asy
       animations: 'disabled',
     })
   }
+  const releaseSegment = await holdGraphQLOperation(page, 'AddPeriodSegment')
   const [segmentRequest] = await Promise.all([
     page.waitForRequest((request) =>
       isGraphQLOperation(request, 'AddPeriodSegment')
@@ -1057,6 +1081,8 @@ test('admin RHF forms validate, recover, reset and submit structured state', asy
     storyElements: [storyId],
     learningElements: [learningId],
   })
+  await expect(dialog.getByRole('button', { name: 'Submit' })).toBeDisabled()
+  await releaseSegment()
   await expect(dialog).toBeHidden()
   await expect(page.getByTestId('period-0-segment-0')).toBeVisible()
   expect(operationRequests(requests, 'AddPeriodSegment')).toHaveLength(1)
@@ -1080,6 +1106,10 @@ test('admin RHF forms validate, recover, reset and submit structured state', asy
   const countdownErrorIds = await expectLinkedError(page, countdown)
   expect(operationRequests(requests, 'AddCountdown')).toHaveLength(0)
 
+  await countdown.fill('90.5')
+  await setCountdownButton.click()
+  await expectLinkedError(page, countdown)
+  expect(operationRequests(requests, 'AddCountdown')).toHaveLength(0)
   await countdown.fill('120')
   await expectRecovered(countdown, countdownErrorIds)
   const [countdownRequest] = await Promise.all([
@@ -3039,9 +3069,19 @@ test('Decisions forecast matches Market and handles unavailable scenarios', asyn
       ).toHaveText(values)
     for (const width of [784, 390, 320]) {
       await player.setViewportSize({ width, height: 1024 })
-      await forecast.scrollIntoViewIfNeeded()
+      if (width >= 641) {
+        await expect(forecast).toBeHidden()
+        for (const { asset, values } of fixtures)
+          await expect(
+            player
+              .getByTestId(`market-${asset.toLowerCase()}`)
+              .locator('strong')
+          ).toHaveText(values)
+      } else {
+        await forecast.scrollIntoViewIfNeeded()
+        await expect(forecast).toBeInViewport()
+      }
       await expectNoPageOverflow(player)
-      await expect(forecast).toBeInViewport()
       await capturePlayerScreenshot(player, {
         path: testInfo.outputPath(`decisions-forecast-${width}.png`),
       })
