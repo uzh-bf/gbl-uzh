@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { Logo, TradingForm, XpBar } from "@gbl-uzh/ui";
+import { Logo, TradingForm, XpBar } from '@gbl-uzh/ui'
 
 export default function Page() {
   return (
@@ -15,5 +15,5 @@ export default function Page() {
         onSubmit={async (values) => console.log(values)}
       />
     </main>
-  );
+  )
 }

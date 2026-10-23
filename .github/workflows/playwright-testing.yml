@@ -34,7 +34,7 @@ permissions:
 env:
   CI: "true"
   CYPRESS_INSTALL_BINARY: "0"
-  npm_config_verify_deps_before_run: "false"
+  pnpm_config_verify_deps_before_run: "false"
   DATABASE_URL: postgres://prisma:prisma@postgres:5432/prisma?schema=public&connection_limit=20
   SHADOW_DATABASE_URL: postgres://prisma:prisma@postgres:5432/shadow?schema=public&connection_limit=20
   NEXTAUTH_SECRET: ci-demo-game-not-a-secret
@@ -72,7 +72,7 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm --filter @uzh-bf/design-system build
           mkdir candidate
-          (cd packages/design-system && npm pack --ignore-scripts --pack-destination ../../candidate)
+          (cd packages/design-system && pnpm pack --pack-destination ../../candidate)
           echo 'b237f0d7f9b384c84f4027768d5c5391e72e22591c1146ef890f0603a7994f06  candidate/uzh-bf-design-system-5.0.0-alpha.5.tgz' | sha256sum --check
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
