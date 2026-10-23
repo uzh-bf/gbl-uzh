@@ -28,13 +28,13 @@ export function PlayerCompact({ player }: PlayerCompactProps) {
         <img width="20px" src={avatar} alt={`${player.name} avatar`} />
       </div>
       <div className="flex justify-between mt-1">
-        <div className="flex flex-col justify-between text-sm">
+        <div className="flex flex-col justify-between text-[length:var(--gbl-caption-size,0.875rem)] leading-[var(--gbl-caption-leading,1.25rem)]">
           <div>{role}</div>
           {token && (
             <Link
               href={`/join/${token}`}
               target="_blank"
-              className="text-red-400 font-medium hover:underline"
+              className="text-red-400 font-medium hover:underline [display:var(--gbl-link-display,inline)] min-h-[var(--gbl-control-height,0px)] items-center"
               data-cy="player-login-link"
             >
               Login

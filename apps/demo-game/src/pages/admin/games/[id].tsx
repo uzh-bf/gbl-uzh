@@ -6,58 +6,59 @@ import {
   faSync,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  Button,
-  Form,
-  H3,
-  H4,
-  Modal,
-  RhfMultiSelect,
-  RhfNumberField,
-} from '@uzh-bf/design-system'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@uzh-bf/design-system/primitives'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form'
 import { twMerge } from 'tailwind-merge'
+import { NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery, useSubscription } from '@apollo/client'
 import {
   computePeriodStatus,
   computeSegmentStatus,
   PlayerCompact,
   STATUS,
 } from '@gbl-uzh/ui'
-import { useCallback, useEffect, useState } from 'react'
+import {
+  TableBody,
+  TableHeader,
+  TableRow,
+} from '@uzh-bf/design-system/primitives'
+import {
+  Form,
+  RhfMultiSelect,
+  RhfNumberField,
+} from '@uzh-bf/design-system/react-hook-form'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
   AddCountdownDocument,
   AddGamePeriodDocument,
   AddPeriodSegmentDocument,
-  Game,
   GameDocument,
   GameStatus,
+  GlobalEventsDocument,
   LearningElementsDocument,
   Player,
   StoryElementsDocument,
 } from 'src/graphql/generated/ops'
 
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@uzh-bf/design-system'
+  H3,
+  H4,
+  Modal,
+  ShadcnTable as Table,
+  ShadcnTableCell as TableCell,
+  ShadcnTableHead as TableHead,
+} from '~/components/admin/AdminControls'
 
 import { useToast } from '~/components/ui/use-toast'
 import {
@@ -67,7 +68,22 @@ import {
   INTEREST_BANK,
   TREND_BONDS,
   TREND_STOCKS,
-} from '~/types/Period'
+} from '~/lib/constants'
+
+import { shouldRefetchDemoGame } from '~/lib/gameEvents'
+import {
+  allMarketRollsRevealed,
+  canRevealMarketRoll,
+  readMarketRoll,
+  revealedIndices,
+} from '~/lib/market'
+import { queueRefetch } from '~/lib/queuedRefetch'
+
+interface SegmentFormValues {
+  periodIx: number
+  storyElements: string[]
+  learningElements: string[]
+}
 
 interface PeriodFormValues {
   segmentCount: number | ''
@@ -79,14 +95,23 @@ interface PeriodFormValues {
   gapStocks: number | ''
 }
 
-interface SegmentFormValues {
-  periodIx: number
-  storyElements: string[]
-  learningElements: string[]
-}
-
 interface CountdownFormValues {
   countdownSeconds: number | ''
+}
+
+const adminFieldClassName = {
+  root: 'mobile:gap-app-1 gap-1',
+  label: 'mobile:app-caption pb-1 text-sm font-medium text-slate-700',
+  input:
+    'mobile:app-control w-full rounded border border-slate-300 bg-white p-2 text-sm focus:ring-2 focus:ring-slate-500 focus:outline-none',
+  error: 'mobile:app-caption text-xs text-red-500',
+}
+
+const adminMultiSelectClassName = {
+  root: 'mobile:gap-app-1 gap-1',
+  label: 'mobile:app-caption pb-1 text-sm font-medium text-slate-700',
+  trigger: 'mobile:app-control',
+  error: 'mobile:app-caption text-xs text-red-500',
 }
 
 function ManageGame() {
@@ -98,16 +123,10 @@ function ManageGame() {
   const segmentForm = useForm<SegmentFormValues>({
     defaultValues: {
       periodIx: -1,
-      storyElements: [],
-      learningElements: [],
+      storyElements: [] as string[],
+      learningElements: [] as string[],
     },
   })
-  const {
-    control: segmentControl,
-    handleSubmit: handleSegmentSubmit,
-    reset: resetSegment,
-    setValue: setSegmentValue,
-  } = segmentForm
 
   const periodForm = useForm<PeriodFormValues>({
     defaultValues: {
@@ -120,19 +139,12 @@ function ManageGame() {
       gapStocks: GAP_STOCKS,
     },
   })
-  const {
-    handleSubmit: handlePeriodSubmit,
-    reset: resetPeriod,
-    control: periodControl,
-  } = periodForm
 
   const countdownForm = useForm<CountdownFormValues>({
     defaultValues: {
       countdownSeconds: 300,
     },
   })
-  const { handleSubmit: handleCountdownSubmit, control: countdownControl } =
-    countdownForm
 
   const onSegmentSubmit = async (values: SegmentFormValues) => {
     await addPeriodSegment({
@@ -144,7 +156,8 @@ function ManageGame() {
         learningElements: values.learningElements,
       },
     })
-    resetSegment()
+    segmentForm.reset()
+    setIsSegmentModalOpen(false)
   }
 
   const onPeriodSubmit = async (values: PeriodFormValues) => {
@@ -164,22 +177,37 @@ function ManageGame() {
         segmentCount: Math.trunc(Number(values.segmentCount)),
       },
     })
-    resetPeriod()
+    periodForm.reset()
+    setIsPeriodModalOpen(false)
   }
 
   const onCountdownSubmit = (values: CountdownFormValues) => {
-    addCountdown({
+    void addCountdown({
       variables: {
         gameId: Number(router.query.id),
-        seconds: Math.trunc(Number(values.countdownSeconds)),
+        seconds: Number(values.countdownSeconds),
       },
     })
   }
 
-  const { data, error, loading } = useQuery(GameDocument, {
+  const { data, error, loading, refetch } = useQuery(GameDocument, {
     variables: { id: Number(router.query.id) },
     pollInterval: 15000,
     skip: !router.query.id,
+  })
+
+  const queuedRefetch = useMemo(() => queueRefetch(refetch), [refetch])
+  useSubscription(GlobalEventsDocument, {
+    skip: !data?.game,
+    onData: ({ data: eventData }) => {
+      if (
+        shouldRefetchDemoGame(
+          eventData.data?.eventsGlobal,
+          Number(data?.game?.id)
+        )
+      )
+        void queuedRefetch().catch(() => {})
+    },
   })
 
   const {
@@ -274,13 +302,29 @@ function ManageGame() {
     }
   }, [data?.game])
 
-  const getButton = useCallback(() => {
-    const game = data.game as Game
-    // const disabled = game.periods.length === 0
-    const activePeriod = game?.activePeriod
-    const segments = activePeriod?.segments
-    const activeSegmentIx = activePeriod?.activeSegmentIx
+  if (loading || !data?.game) {
+    return <div>loading...</div>
+  }
 
+  if (error) {
+    return <div>{error.message}</div>
+  }
+
+  const game = data.game
+  // The activePeriod relation only selects segment IDs; periods includes facts.
+  const activePeriod = game.periods.find(
+    (period) => period.index === game.activePeriodIx
+  )
+  const segments = activePeriod?.segments ?? []
+  const activeSegmentIx = activePeriod?.activeSegmentIx
+  const activeSegment = segments.find(
+    (segment) => segment.index === activeSegmentIx
+  )
+  const awaitingDice =
+    ['PAUSED', 'CONSOLIDATION'].includes(game.status) &&
+    !allMarketRollsRevealed(activeSegment?.facts)
+
+  const getButton = () => {
     switch (game.status) {
       case GameStatus.Preparation: {
         const atLastSegment = activeSegmentIx >= segments.length - 1
@@ -337,7 +381,7 @@ function ManageGame() {
         const atLastSegment = activeSegmentIx >= segments.length - 1
         return (
           <Button
-            disabled={nextSegmentLoading || atLastSegment}
+            disabled={nextSegmentLoading || atLastSegment || awaitingDice}
             onClick={nextSegment}
           >
             Next Segment
@@ -352,7 +396,10 @@ function ManageGame() {
       //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
       case GameStatus.Consolidation:
         return (
-          <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
+          <Button
+            disabled={nextPeriodLoading || awaitingDice}
+            onClick={nextPeriod}
+          >
             Period Results
           </Button>
         )
@@ -372,17 +419,7 @@ function ManageGame() {
           </Button>
         )
     }
-  }, [data?.game])
-
-  if (loading || !data?.game) {
-    return <div>loading...</div>
   }
-
-  if (error) {
-    return <div>{error.message}</div>
-  }
-
-  const game = data.game
 
   const learningElementsAll = (
     learningElementsData?.learningElements || []
@@ -399,7 +436,11 @@ function ManageGame() {
   )
 
   return (
-    <div className="p-4" data-cy="game-detail" data-game-status={game.status}>
+    <div
+      className="mobile:app-panel mobile:app-body p-4"
+      data-cy="game-detail"
+      data-game-status={game.status}
+    >
       <div>
         <div className="mb-4 flex flex-col gap-2 overflow-x-auto md:flex-row">
           {game.periods.map((period, ix) => {
@@ -435,7 +476,7 @@ function ManageGame() {
               >
                 <div
                   className={twMerge(
-                    'flex flex-1 flex-col gap-1 rounded border p-2',
+                    'mobile:app-card mobile:min-w-0 flex flex-1 flex-col gap-1 rounded border p-2',
                     isPeriodPaused && 'border-orange-300 bg-orange-100',
                     isPeriodActive && 'border-green-300 bg-green-50',
                     isPeriodCompleted && 'bg-gray-100 text-gray-400'
@@ -477,7 +518,7 @@ function ManageGame() {
                           <div>{savingsInterest}</div>
                         </div>
                       </div>
-                      <Table className="border-l text-base">
+                      <Table className="mobile:app-body border-l text-base">
                         <TableHeader>
                           <TableRow className="border-none py-0">
                             <TableHead></TableHead>
@@ -519,37 +560,63 @@ function ManageGame() {
                           periodStatus === STATUS.COMPLETED ||
                           segmentStatus === STATUS.COMPLETED
 
-                        const diceBonds = segment?.facts.diceRolls.map(
-                          (dice) => dice.bonds
+                        const canRoll =
+                          segment &&
+                          canRevealMarketRoll({
+                            index: segment.index,
+                            periodIx: period.index,
+                            period: { activeSegmentIx: period.activeSegmentIx },
+                            game: {
+                              status: game.status,
+                              activePeriodIx: game.activePeriodIx,
+                            },
+                          })
+                        const revealedCount = revealedIndices(
+                          segment?.facts
+                        ).length
+                        const rolls = Array.from(
+                          { length: NUM_MONTHS_PER_SEGMENT },
+                          (_, index) => readMarketRoll(segment?.facts, index)
                         )
-                        const diceStocks = segment?.facts.diceRolls.map(
-                          (dice) => dice.stocks
+                        const diceOutcomes = (
+                          <span className="grid gap-1">
+                            {(['bonds', 'stocks'] as const).map((asset) => (
+                              <span
+                                key={asset}
+                                className="flex justify-between gap-4 text-nowrap"
+                              >
+                                <span>
+                                  Dice {asset === 'bonds' ? 'Bonds' : 'Stocks'}:
+                                </span>
+                                <span className="flex gap-2 tabular-nums">
+                                  {rolls.map((roll, index) => (
+                                    <span
+                                      key={index}
+                                      aria-label={`Month ${index + 1}: ${roll?.dice[asset] ?? 'unavailable'}`}
+                                    >
+                                      {roll?.dice[asset] ?? '—'}
+                                    </span>
+                                  ))}
+                                </span>
+                              </span>
+                            ))}
+                          </span>
                         )
-                        const diceShared = segment?.facts.diceRolls.map(
-                          (dice) => dice.shared
-                        )
-
-                        const dataToEncode = {
-                          diceBonds,
-                          diceShared,
-                          diceStocks,
-                          trendBonds,
-                          gapBonds,
-                          trendStocks,
-                          gapStocks,
-                        }
-                        const encoded = btoa(JSON.stringify(dataToEncode))
 
                         return (
                           <div
                             className={twMerge(
                               'flex-initial rounded border p-2 text-center',
-                              (!segment || isSegmentCompleted) &&
+                              (!segment || (isSegmentCompleted && !canRoll)) &&
                                 'bg-gray-100 text-gray-400',
-                              isSegmentActive && 'border-green-600 bg-green-100'
+                              isSegmentActive &&
+                                'border-green-600 bg-green-100',
+                              canRoll &&
+                                'border-blue-600 bg-blue-50 text-blue-900'
                             )}
                             key={ix}
                             data-cy={`period-${period.index}-segment-${ix}`}
+                            data-segment-id={segment?.id}
                           >
                             <div className="flex flex-row items-center gap-2">
                               <div>
@@ -574,39 +641,40 @@ function ManageGame() {
                             </div>
                             <div className="my-2">
                               <div className="flex flex-row gap-2">
-                                <div className="text-sm">
+                                <div className="mobile:app-caption text-sm">
                                   Story: {segment?.storyElements.length ?? 0}
                                 </div>
-                                <div className="text-sm">
+                                <div className="mobile:app-caption text-sm">
                                   Learn: {segment?.learningElements.length ?? 0}
                                 </div>
                               </div>
                             </div>
 
-                            {segment && (
-                              <Link
-                                href={`/admin/dice/${segment.id}/${encoded}`}
-                                target="_blank"
-                                className="flex flex-col rounded border border-gray-300 p-2"
-                              >
-                                <div className="flex justify-between text-nowrap">
-                                  Dice Bonds:
-                                  <div className="flex flex-row gap-2">
-                                    {diceBonds?.map((dice, ix) => (
-                                      <div key={ix}>{dice}</div>
-                                    ))}
-                                  </div>
-                                </div>
-                                <div className="flex justify-between gap-2 text-nowrap">
-                                  Dice Stocks:
-                                  <div className="flex flex-row gap-2">
-                                    {diceStocks?.map((dice, ix) => (
-                                      <div key={ix}>{dice}</div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </Link>
-                            )}
+                            {segment &&
+                              (canRoll ? (
+                                <Link
+                                  href={`/admin/dice/${segment.id}/roll`}
+                                  target="_blank"
+                                  data-cy={`segment-dice-${segment.id}`}
+                                  className="mt-2 block rounded border border-blue-600 bg-white p-2 font-semibold text-blue-900"
+                                >
+                                  {diceOutcomes}
+                                  <span className="mt-2 block text-xs">
+                                    {allMarketRollsRevealed(segment.facts)
+                                      ? 'Dice revealed · 3/3'
+                                      : `Awaiting dice · ${revealedCount}/3 revealed`}
+                                  </span>
+                                </Link>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled
+                                  data-cy={`segment-dice-${segment.id}`}
+                                  className="mt-2 w-full cursor-not-allowed rounded border border-gray-300 p-2 text-left text-gray-500"
+                                >
+                                  {diceOutcomes}
+                                </button>
+                              ))}
                           </div>
                         )
                       }
@@ -642,34 +710,33 @@ function ManageGame() {
                             }
                             title="Add Segment"
                             onSecondaryAction={() => {
-                              resetSegment()
+                              segmentForm.reset()
                               setIsSegmentModalOpen(false)
                             }}
                             secondaryLabel="Discard"
                             onPrimaryAction={() => {
-                              setSegmentValue('periodIx', period.index)
-                              handleSegmentSubmit(onSegmentSubmit)()
-                              setIsSegmentModalOpen(false)
+                              segmentForm.setValue('periodIx', period.index)
+                              void segmentForm.handleSubmit(onSegmentSubmit)()
                             }}
                             primaryLabel="Submit"
                           >
-                            <Form<SegmentFormValues> {...segmentForm}>
-                              <div className="flex w-1/2 flex-col gap-2">
+                            <Form {...segmentForm}>
+                              <div className="mobile:w-full flex w-1/2 flex-col gap-2">
                                 <RhfMultiSelect
-                                  control={segmentControl}
-                                  name="storyElements"
+                                  control={segmentForm.control}
                                   label="Story Elements"
+                                  name="storyElements"
                                   items={storyElementsAll}
                                   searchPlaceholder="Search story elements..."
-                                  data={{ cy: 'story-elements' }}
+                                  className={adminMultiSelectClassName}
                                 />
                                 <RhfMultiSelect
-                                  control={segmentControl}
-                                  name="learningElements"
+                                  control={segmentForm.control}
                                   label="Learning Elements"
+                                  name="learningElements"
                                   items={learningElementsAll}
                                   searchPlaceholder="Search learning elements..."
-                                  data={{ cy: 'learning-elements' }}
+                                  className={adminMultiSelectClassName}
                                 />
                               </div>
                             </Form>
@@ -681,7 +748,7 @@ function ManageGame() {
                 </div>
                 <div
                   className={twMerge(
-                    'flex flex-row items-center rounded border bg-gray-50 p-2 text-xl text-gray-300',
+                    'mobile:app-heading flex flex-row items-center rounded border bg-gray-50 p-2 text-xl text-gray-300',
                     periodStatus === STATUS.RESULTS &&
                       'border-red-200 text-red-400'
                   )}
@@ -715,106 +782,112 @@ function ManageGame() {
                 }
                 title="Add Period"
                 onSecondaryAction={() => {
-                  resetPeriod()
+                  periodForm.reset()
                   setIsPeriodModalOpen(false)
                 }}
                 secondaryLabel="Discard"
                 onPrimaryAction={() => {
-                  handlePeriodSubmit(onPeriodSubmit)()
-                  setIsPeriodModalOpen(false)
+                  void periodForm.handleSubmit(onPeriodSubmit)()
                 }}
                 primaryLabel="Submit"
               >
-                <Form<PeriodFormValues> {...periodForm}>
-                  <div className="flex w-1/2 flex-col gap-2">
+                <Form {...periodForm}>
+                  <div className="mobile:w-full flex w-1/2 flex-col gap-2">
                     <RhfNumberField
-                      control={periodControl}
-                      name="segmentCount"
+                      control={periodForm.control}
                       label="Number of segments"
-                      tooltip={
-                        'One period corresponds to one year. The number of segments is used to compute the number of months in the period.'
-                      }
+                      name="segmentCount"
+                      tooltip={`One period corresponds to one year. Each segment contains ${NUM_MONTHS_PER_SEGMENT} months.`}
                       required
                       rules={{ required: 'Required' }}
-                      data={{ cy: 'segment-count' }}
+                      step={1}
+                      data={{ cy: 'segmentCount' }}
+                      className={adminFieldClassName}
                     />
                   </div>
                   <div className="mt-4">
                     <H3>Scenario Parameters</H3>
-                    <div className="flex w-1/2 flex-col gap-2">
+                    <div className="mobile:w-full flex w-1/2 flex-col gap-2">
                       <RhfNumberField
-                        control={periodControl}
-                        name="seed"
+                        control={periodForm.control}
                         label="Seed"
-                        tooltip="Seed ...."
+                        name="seed"
+                        tooltip={'Seed ....'}
                         required
                         rules={{ required: 'Required' }}
+                        step={1}
                         data={{ cy: 'seed' }}
+                        className={adminFieldClassName}
                       />
                     </div>
                   </div>
                   <div className="mt-4">
                     <H4>Bank</H4>
-                    <div className="flex w-1/2 flex-col gap-2">
+                    <div className="mobile:w-full flex w-1/2 flex-col gap-2">
                       <RhfNumberField
-                        control={periodControl}
-                        name="interestBank"
+                        control={periodForm.control}
                         label="Saving Interest"
+                        name="interestBank"
                         step={0.0001}
-                        tooltip="Saving interest ...."
+                        tooltip={'Saving interest ....'}
                         required
                         rules={{ required: 'Required' }}
-                        data={{ cy: 'interest-bank' }}
+                        data={{ cy: 'interestBank' }}
+                        className={adminFieldClassName}
                       />
                     </div>
                   </div>
                   <div className="mt-4">
                     <H4>Bonds</H4>
-                    <div className="flex w-1/2 gap-2">
+                    <div className="mobile:w-full flex w-1/2 gap-2">
                       <RhfNumberField
-                        control={periodControl}
-                        name="trendBonds"
+                        control={periodForm.control}
                         label="Trend"
+                        name="trendBonds"
                         step={0.0001}
-                        tooltip="Trend is the expectation value."
+                        tooltip={'Trend is the expectation value.'}
                         required
                         rules={{ required: 'Required' }}
-                        data={{ cy: 'trend-bonds' }}
+                        data={{ cy: 'trendBonds' }}
+                        className={adminFieldClassName}
                       />
                       <RhfNumberField
-                        control={periodControl}
-                        name="gapBonds"
+                        control={periodForm.control}
                         label="Gap"
+                        name="gapBonds"
                         step={0.0001}
-                        tooltip="TODO."
+                        tooltip={'TODO.'}
                         required
                         rules={{ required: 'Required' }}
-                        data={{ cy: 'gap-bonds' }}
+                        data={{ cy: 'gapBonds' }}
+                        className={adminFieldClassName}
                       />
                     </div>
                   </div>
                   <div className="mt-4">
                     <H4>Stocks</H4>
-                    <div className="flex w-1/2 gap-2">
+                    <div className="mobile:w-full flex w-1/2 gap-2">
                       <RhfNumberField
-                        control={periodControl}
-                        name="trendStocks"
+                        control={periodForm.control}
                         label="Trend"
+                        name="trendStocks"
                         step={0.0001}
-                        tooltip="Trend is the expectation value."
+                        tooltip={'Trend is the expectation value.'}
                         required
                         rules={{ required: 'Required' }}
-                        data={{ cy: 'trend-stocks' }}
+                        data={{ cy: 'trendStocks' }}
+                        className={adminFieldClassName}
                       />
                       <RhfNumberField
-                        control={periodControl}
-                        name="gapStocks"
+                        control={periodForm.control}
                         label="Gap"
+                        name="gapStocks"
                         step={0.0001}
-                        tooltip="TODO."
+                        tooltip={'TODO.'}
                         required
                         rules={{ required: 'Required' }}
-                        data={{ cy: 'gap-stocks' }}
+                        data={{ cy: 'gapStocks' }}
+                        className={adminFieldClassName}
                       />
                     </div>
                   </div>
@@ -826,13 +899,19 @@ function ManageGame() {
       </div>
       <div className="mt-2 flex flex-row gap-2">
         {getButton()}
+        {awaitingDice && (
+          <p role="status" className="self-center text-sm">
+            Reveal all three monthly dice rolls in the closed segment before
+            continuing.
+          </p>
+        )}
         <Link target="_blank" href={`/admin/reports/${game?.id}`}>
           <Button>Report</Button>
         </Link>
       </div>
 
-      <div className="mt-4 flex w-full flex-row justify-between">
-        <div className="w-1/2">
+      <div className="mobile:flex-col mobile:gap-app-4 mt-4 flex w-full flex-row justify-between">
+        <div className="mobile:w-full w-1/2">
           <div className="font-bold">Players</div>
           <div className="mt-2 flex flex-col gap-4">
             {game.players.map((player, ix) => (
@@ -843,8 +922,11 @@ function ManageGame() {
           </div>
         </div>
 
-        <Form<CountdownFormValues> {...countdownForm}>
-          <form onSubmit={handleCountdownSubmit(onCountdownSubmit)}>
+        <Form {...countdownForm}>
+          <form
+            noValidate
+            onSubmit={countdownForm.handleSubmit(onCountdownSubmit)}
+          >
             <Card className="flex flex-col">
               <CardHeader>
                 <CardTitle>Countdown</CardTitle>
@@ -855,11 +937,13 @@ function ManageGame() {
               <CardContent>
                 <div data-cy="countdown-seconds">
                   <RhfNumberField
-                    control={countdownControl}
-                    name="countdownSeconds"
                     label="Countdown in seconds"
-                    required
+                    name="countdownSeconds"
                     rules={{ required: 'Required' }}
+                    required
+                    step={1}
+                    data={{ cy: 'countdownSeconds' }}
+                    className={adminFieldClassName}
                   />
                 </div>
                 {/* TODO(JJ): @RS Do we want to show the following? If no we

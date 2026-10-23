@@ -100,6 +100,14 @@ no password. You are authenticated as the fixed dev admin `gbl-dev@df.uzh.ch`
 consistent; the app resolves that host to the host gateway (`extra_hosts`) and
 trusts the mkcert CA via `NODE_EXTRA_CA_CERTS` (see `docker-compose.yml`).
 
+All in-repo games use the platform's shared `resolveAdminOidcConfig()` resolver.
+Starter, devrouter, and CI use mock OIDC through `GBL_AUTH_MODE=mock` and
+`GBL_MOCK_OIDC_*`. These container variables override `.env.local`, so container
+modes support mock login only; native host mode runs every game against the same
+mock through its committed `.env.development`. A native host real-tenant run requires explicit
+`GBL_AUTH_MODE=auth0` with real `AUTH0_*` values in ignored `.env.local`.
+Production defaults to real `AUTH0_*` and forbids mock mode.
+
 ## What's inside
 
 | Service    | Image                       | Purpose                                          |
@@ -110,5 +118,14 @@ trusts the mkcert CA via `NODE_EXTRA_CA_CERTS` (see `docker-compose.yml`).
 
 Environment lives in `devcontainer.env` (committed, dev-only values). Lifecycle:
 `post-create.sh` (install + build platform/ui + prisma generate/push/seed) then
-`post-start.sh` (launch dev server). `node_modules` are named volumes (not the
-host's), so native binaries match the Linux container.
+`post-start.sh` (launch dev server). `node_modules` and each game's generated
+`.next` cache are named volumes (not the host's), so native binaries match the
+Linux container and switching between native and container modes cannot reuse
+an incompatible build cache.
+
+The OIDC mock's config is shared by the container modes and native demo-game run:
+`docker/oidc-config.json`, mounted via `JSON_CONFIG_PATH`. Sanity-check any
+running container mode from inside the app container with
+`bash .devcontainer/smoke.sh http://localhost:3000 <issuer-url>`; probe the
+devrouter app URL separately from the host. Native host mode runs the same
+script from the repository root.

@@ -738,6 +738,7 @@ export async function getSpecificResults(
     include: {
       period: true,
       player: true,
+      segment: true,
     },
   })
 

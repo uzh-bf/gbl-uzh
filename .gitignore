@@ -22,3 +22,4 @@ playwright/playwright-report/
 playwright/test-results/
 service.log
 trees/
+project/_local/

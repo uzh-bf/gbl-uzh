@@ -3,16 +3,14 @@ import {
   PayloadPeriodResult,
   PayloadPeriodResultEnd,
 } from '@gbl-uzh/platform'
-import { debugLog } from '@gbl-uzh/platform/dist/lib/util'
+import { debugLog, standardDeviation } from '@gbl-uzh/platform/dist/lib/util'
 import { produce } from 'immer'
 import { PlayerResult } from 'src/graphql/generated/ops'
-import { computeRiskAndReturnOfPlayer } from '../lib/analysis'
+import { INITIAL_CAPITAL, NUM_MONTHS } from '../lib/constants'
 import { PlayerRole } from '../settings/Constants'
 import { GameFacts } from '../types/Game'
 import { PeriodFacts, PeriodSegmentFacts } from '../types/Period'
 import { OutputResultFacts, ResultFacts, ResultFactsInit } from '../types/facts'
-
-const INITIAL_CAPITAL = 10000
 
 type InputPeriodResultFactsInit = {}
 type OutputPeriodResultFactsInit = OutputFacts<
@@ -116,4 +114,38 @@ export function end(
 
   debugLog('PeriodResultEnd', facts, payload, resultFacts)
   return resultFacts
+}
+
+const computeRiskAndReturnOfPlayer = (
+  segmentEndResultsOfPlayer: PlayerResult[]
+) => {
+  const totalAssetsReturns = segmentEndResultsOfPlayer.flatMap(({ facts }) => {
+    const assetsWithReturns = facts?.assetsWithReturns.slice(1) || []
+    return assetsWithReturns.map(({ totalAssetsReturn }) => totalAssetsReturn)
+  })
+
+  const num = totalAssetsReturns.length
+
+  const numResults = segmentEndResultsOfPlayer.length
+  const lastResult = segmentEndResultsOfPlayer[numResults - 1]
+  const assetsWithReturns = lastResult.facts?.assetsWithReturns
+
+  const bankReturnPA: number =
+    Math.pow(
+      1 + assetsWithReturns.slice(-1)[0].accBankBenchmarkReturn,
+      NUM_MONTHS / num
+    ) - 1
+
+  const lastAccReturn = assetsWithReturns.slice(-1)[0].accTotalAssetsReturn
+
+  const risk = standardDeviation(totalAssetsReturns) * Math.sqrt(NUM_MONTHS)
+  const returns = Math.pow(1 + lastAccReturn, NUM_MONTHS / num) - 1
+  const sharpeRatio =
+    risk > 0.0001 ? (returns - bankReturnPA) / risk : undefined
+
+  return {
+    returns,
+    risk,
+    sharpeRatio,
+  }
 }

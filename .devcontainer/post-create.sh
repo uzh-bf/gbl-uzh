@@ -29,6 +29,9 @@ resolve_gbl_game_target
 #     prisma:*, dev) from re-running an implicit install that would hang on stdin.
 # post-create owns dependency installation, so this verification is redundant.
 export CI=true
+# The full workspace install can exceed Node's default heap on a fresh
+# devcontainer. Keep the override configurable for smaller hosts/CI runners.
+export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}"
 export npm_config_verify_deps_before_run=false
 
 echo "[post-create] Installing dependencies (pnpm, full workspace)..."

@@ -4,19 +4,15 @@ export async function expectGameStatusEventually(page: Page, status: string) {
   await expect
     .poll(
       async () => {
-        const gameDetail = page.getByTestId('game-detail')
-        const currentStatus = await gameDetail
-          .getAttribute('data-game-status', { timeout: 2_000 })
-          .catch(() => null)
+        const currentStatus = await page
+          .getByTestId('game-detail')
+          .getAttribute('data-game-status')
 
         if (currentStatus !== status) {
-          if (currentStatus !== null) {
-            await page.reload({ waitUntil: 'domcontentloaded' })
-          }
-
-          return gameDetail
-            .getAttribute('data-game-status', { timeout: 2_000 })
-            .catch(() => null)
+          await page.reload({ waitUntil: 'domcontentloaded' })
+          return page
+            .getByTestId('game-detail')
+            .getAttribute('data-game-status')
         }
 
         return currentStatus

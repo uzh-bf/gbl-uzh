@@ -1,10 +1,9 @@
 import { useMutation, useQuery } from '@apollo/client'
 import {
-  Button,
   Form,
   RhfNumberField,
   RhfTextField,
-} from '@uzh-bf/design-system'
+} from '@uzh-bf/design-system/react-hook-form'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -14,10 +13,19 @@ import {
   GameDataFragmentDoc,
   GamesDocument,
 } from 'src/graphql/generated/ops'
+import { Button } from '~/components/admin/AdminControls'
 
 interface CreateGameFormValues {
   name: string
   playerCount: number | ''
+}
+
+const adminFieldClassName = {
+  root: 'mobile:gap-app-1 gap-1',
+  label: 'mobile:app-caption pb-1 text-sm font-medium text-slate-700',
+  input:
+    'mobile:app-control w-full rounded border border-slate-300 bg-white p-2 text-sm focus:ring-2 focus:ring-slate-500 focus:outline-none',
+  error: 'mobile:app-caption text-xs text-red-500',
 }
 
 function Games() {
@@ -53,7 +61,6 @@ function Games() {
       playerCount: 1,
     },
   })
-  const { handleSubmit, reset, control } = form
 
   if (loading || !data) {
     return <div>loading...</div>
@@ -68,19 +75,19 @@ function Games() {
       await createGame({
         variables: {
           name: values.name,
-          playerCount: Math.trunc(Number(values.playerCount)),
+          playerCount: parseInt(String(values.playerCount), 10),
           facts: { myInt: 1 },
         },
         refetchQueries: [GamesDocument],
       })
-      reset()
+      form.reset()
     } catch (e) {
       console.error(e)
     }
   }
 
   return (
-    <div className="p-4">
+    <div className="mobile:app-panel mobile:app-body p-4">
       {session && (
         <Button
           onClick={async () => {
@@ -95,33 +102,36 @@ function Games() {
         </Button>
       )}
 
-      <Form<CreateGameFormValues> {...form}>
+      <Form {...form}>
         <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="my-4 flex max-w-md flex-col gap-4 rounded border p-4"
+          noValidate
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="mobile:app-card mobile:gap-app-3 my-4 flex max-w-md flex-col gap-4 rounded border p-4"
         >
           <RhfTextField
-            control={control}
-            name="name"
+            control={form.control}
             label="Name"
-            required
+            name="name"
             rules={{ required: 'Required' }}
+            required
             placeholder="Game Name"
             data={{ cy: 'game-name' }}
+            className={adminFieldClassName}
           />
 
           <RhfNumberField
-            control={control}
-            name="playerCount"
+            control={form.control}
             label="Player Count"
-            required
-            min={1}
-            step={1}
+            name="playerCount"
             rules={{
               required: 'Required',
               min: { value: 1, message: 'Must be at least 1' },
             }}
+            required
+            min={1}
+            step={1}
             data={{ cy: 'game-player-count' }}
+            className={adminFieldClassName}
           />
 
           <Button
@@ -138,20 +148,25 @@ function Games() {
         {data.games.map((game) => {
           return (
             <Link
-              className="w-96 font-medium text-slate-700"
+              className="mobile:w-full mobile:min-w-0 w-96 font-medium text-slate-700"
               href={`/admin/games/${game?.id}`}
               key={game?.id}
             >
               <Button
+                fluid
                 className={{
-                  root: 'flex w-full flex-col items-start justify-around text-left',
+                  root: 'mobile:app-card mobile:gap-app-2 flex w-full flex-col items-start justify-around text-left',
                 }}
               >
-                <div className="flex w-full justify-between p-2">
-                  <div>{game?.name}</div>
-                  <div className="flex w-10">Id: {game?.id}</div>
+                <div className="mobile:gap-app-2 mobile:p-0 flex w-full justify-between p-2">
+                  <div className="mobile:min-w-0 mobile:[overflow-wrap:anywhere]">
+                    {game?.name}
+                  </div>
+                  <div className="mobile:shrink-0 flex w-10">
+                    Id: {game?.id}
+                  </div>
                 </div>
-                <div className="flex w-full items-end justify-between p-2 text-sm">
+                <div className="mobile:app-caption mobile:flex-wrap mobile:gap-app-2 mobile:p-0 flex w-full items-end justify-between p-2 text-sm">
                   <div className="flex flex-col justify-between gap-y-1 text-left">
                     <div>Player count: {game?.playerCount}</div>
                     <div>

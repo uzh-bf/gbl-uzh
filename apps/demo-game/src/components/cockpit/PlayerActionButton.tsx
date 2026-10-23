@@ -1,0 +1,31 @@
+import { cn } from '@gbl-uzh/ui'
+import { Button, type ButtonProps } from '@uzh-bf/design-system'
+
+const variants = {
+  primary:
+    'bg-player-primary text-white hover:bg-player-primary hover:text-white disabled:bg-player-primary disabled:opacity-50 disabled:hover:bg-player-primary',
+  secondary:
+    'border-player-input bg-white text-player-text hover:bg-white hover:text-player-text disabled:border-transparent disabled:bg-player-disabled-surface disabled:text-player-disabled disabled:font-semibold disabled:opacity-100 disabled:hover:bg-player-disabled-surface disabled:hover:text-player-disabled',
+} as const
+
+export default function PlayerActionButton({
+  variant = 'primary',
+  className,
+  ...props
+}: Omit<Extract<ButtonProps, { asChild?: false }>, 'primary' | 'className'> & {
+  variant?: keyof typeof variants
+  className?: string
+}) {
+  return (
+    <Button
+      {...props}
+      className={{
+        root: cn(
+          'mobile:app-control tablet:app-control tablet:w-[180px] w-[180px] min-w-0 shrink rounded-[9px] font-normal transition-[background-color,opacity] duration-150 min-[641px]:min-h-[60px] min-[641px]:w-[220px] min-[641px]:px-[20px] min-[641px]:py-[12px] min-[641px]:text-[20px]',
+          variants[variant],
+          className
+        ),
+      }}
+    />
+  )
+}

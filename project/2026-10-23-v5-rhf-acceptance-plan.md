@@ -283,17 +283,31 @@ No merge/readiness/release request is implied by green candidate CI.
 
 ## Progress
 
-Status: executing; native planner round 2 returned APPROVED on October 23.
-The bounded native goal is active for this consumer draft package. The current user
-“proceed” continues the already-approved roadmap batch into this bounded consumer
-acceptance package; no second generic approval is needed.
-No consumer source edit, integration, runtime start, branch push or PR creation
-has occurred. The merge simulation wrote only Git objects. The exact DS archive
-rehash and repeat-build digest match; its temporary tool container is stopped.
+Status: executing the approved consumer package. Native planner round 2
+approved this plan. Main owns integration and delivery in standard mode.
 
-Completed: current refs/ownership preflight, public-source form mapping and
-thirteen-path merge simulation. Explorer `01a16948-15fc-7092-a890-a97a81206bb9`
-returned DONE_WITH_CONCERNS and was closed; its verified findings are embodied
-above. Required delivery remains the single consumer draft and exact-package
-proof. Next action: commit this reviewed plan, reconcile the recorded target and
-execute the three slices under the existing bounded go-ahead. A genuinely material new decision still returns to the user.
+Current dev `a0ce9f99b031c52bf0e1b0b4581e67c912adb78c` is reconciled in the
+ordinary pending merge. Current player forms/layouts, shared TradingForm and
+public UI exports are retained. Admin creation, period/segment and countdown
+use the dedicated DS RHF entry with inline errors, reset and recovery.
+
+Two executors supplied bounded admin source/test edits; a third completed the
+verifier's RHF peer-context probe and CI receipt/restoration paths. Main checked
+and integrated their changes. Main owns graph, runtime and external effects.
+Candidate manifests and runtime compatibility edits are restored byte-for-byte
+before source delivery; the baseline dependency graph stays portable.
+
+Passing local evidence: demo and shared UI unit suites; affected type checks;
+platform/UI and registry demo builds; strict external v4/v5 Next consumer builds;
+exact candidate digest and 264 matching package files in game/UI contexts;
+admin invalid-submit, recovery, mutation payload and reset behavior; cockpit
+allocation/Ready/navigation at responsive boundaries. The complete synthetic
+browser suite and packed TradingForm v4/v5 browser cells are running or pending.
+Private receipts are in `project/_local/`; screenshots show synthetic data only.
+
+Remaining: finish source checks and browser cells, committed simplification and
+risk review, integrated final review, one draft PR with inspected screenshots
+and exact-head CI, then stop and verify the owned runtime. Preserve final-tip
+CI results in private receipts and the draft description to avoid status-only
+CI restart commits. Package publication and manual AT/Safari/device checks
+remain separate readiness gates. No merge, release or deployment is authorized.

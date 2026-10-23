@@ -15,7 +15,7 @@ Playwright docs/skills only for API details; keep repo-specific decisions here.
 
 - Specs: `playwright/tests/**/*.spec.ts`
 - Setup auth: `playwright/tests/setup/admin-auth.setup.ts`
-- Support helpers: `playwright/tests/support/*.ts`
+- Support helpers: `playwright/tests/support/*.ts`; `demoGame.ts` shares game creation, welcome-session setup, no-overflow checks, and overlay-free captures. Keep detailed welcome assertions in `demo-game-welcome.spec.ts`; ordinary player joins follow the happy path.
 - Config: `playwright/playwright.config.ts`
 - CI workflow: `.github/workflows/playwright-testing.yml`
 - App under test: `apps/demo-game`
@@ -31,11 +31,11 @@ There are two local stacks. Use the one that matches how the app is running. **T
 The getting-started / building-with-an-agent path: the app is published on `http://localhost:3000`, there is no devrouter, DevPod, or `<game>.localhost`. Run Playwright **inside the container**, prefixing every command with the exec container:
 
 ```bash
-# Install browsers once per container (the binary persists in the container volume)
-docker compose -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && pnpm --filter @gbl-uzh/playwright exec playwright install --with-deps chromium'
+# Install browsers once per app container (reinstall after a container rebuild)
+docker compose -f .devcontainer/starter/docker-compose.yml -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && pnpm --filter @gbl-uzh/playwright exec playwright install --with-deps chromium'
 
 # Run the suite
-docker compose -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium'
+docker compose -f .devcontainer/starter/docker-compose.yml -p <name> exec app bash -lc 'cd /workspaces/gbl-uzh && CI=true pnpm --filter @gbl-uzh/playwright test:run --project=chromium'
 ```
 
 Point tests at `http://localhost:3000` - set `PLAYWRIGHT_BASE_URL=http://localhost:3000` if the config defaults elsewhere. Everything below is the devrouter/DevPod maintainer stack only.
@@ -56,6 +56,10 @@ Expected routes:
 - app: `https://demo-game.localhost`
 - OIDC mock: `https://oidc.demo-game.localhost/default`
 - Postgres SNI route: `db.demo-game.localhost:5432`
+
+The Playwright config maps the routed app and OIDC hostnames to
+`devrouter-traefik` when Chromium runs inside the app container. Keep that
+resolver rule scoped to HTTPS `*.localhost` URLs so staging URLs use normal DNS.
 
 Probe before blaming tests:
 
@@ -98,34 +102,35 @@ claim prettier verification unless the binary exists.
   `https://demo-game.localhost`.
 - Set file-local timeout only with measured runtime evidence. Local broad flow
   runs about `1.1m-1.6m`, but the GitHub-hosted shard has reached the old
-  `120_000` timeout after CI setup and slower player actions; current file-local
-  timeout is `300_000`.
+  `120_000` timeout after CI setup and slower player actions. The file default
+  remains `300_000`; the multi-team lifecycle test uses `420_000` after a local
+  run reached the final report at ~250s and exceeded the old popup wait during
+  cold compilation. Dice/report popup waits allow `60_000`.
 
 ## GitHub Actions Rules
 
 Keep `.github/workflows/playwright-testing.yml` close to the Klicker pattern, but
 adapt it to GBL's smaller stack:
 
-- Use the Playwright Docker image matching `playwright/package.json`
-  (`mcr.microsoft.com/playwright:v1.61.1-noble` for Playwright `1.61.1`).
 - Use Node `24` and pnpm `11.6.0`, matching the root package manager metadata.
 - Pin third-party GitHub Actions to a full commit SHA. SonarCloud flags
   floating third-party action tags such as `pnpm/action-setup@v4`.
-- Run Postgres and `ghcr.io/navikt/mock-oauth2-server:2.1.11` as job services.
+- Run Postgres and `mock-oauth2-server` as job services; the job container reaches the issuer through the `oidc` service alias.
 - In CI, do not use devrouter/TLS. Use:
-  - `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000`
-  - `NEXTAUTH_URL=http://127.0.0.1:3000`
-  - `AUTH0_ISSUER=http://oidc:8090/default`
-- Build `@gbl-uzh/platform` and `@gbl-uzh/ui` before starting `demo-game`.
+  - `PLAYWRIGHT_BASE_URL=http://localhost:3000`
+  - `NEXTAUTH_URL=http://localhost:3000`
+  - `GBL_AUTH_MODE=mock`
+  - `GBL_MOCK_OIDC_ISSUER=http://oidc:8090/default`
+- Build `@gbl-uzh/platform` and `@gbl-uzh/ui` before starting the selected game.
 - Prepare Prisma with `prisma:copy`, `prisma:generate`, `prisma:push`, and
   `prisma:seed`.
-- Start `pnpm --filter @gbl-uzh/demo-game dev` in the background, wait for both
-  OIDC discovery and `/admin/login`, then run the shard.
-- Use matrix shards with `fail-fast: false`, upload one blob report per shard,
+- Start the selected game in the background, wait for OIDC discovery and
+  `/admin/login`, then run its matching flow spec.
+- Use a game matrix with `fail-fast: false`, upload one blob report per game,
   and merge them in a separate job.
-- Current suite has one real spec file, so two shards means one shard can be
-  empty. Use `--pass-with-no-tests` only for sharded CI; split future breadth
-  coverage into separate spec files before increasing shard count.
+- A missing game spec must fail the unsharded matrix job. Reserve
+  `--pass-with-no-tests` for genuine Playwright sharding where empty shards are
+  expected.
 
 ## Auth And Data Rules
 
@@ -148,7 +153,8 @@ adapt it to GBL's smaller stack:
 > **Segment facts validation schemas must allow empty/partial input.** When the admin clicks "Add Segment", the platform submits `{}` as the initial facts before calling `SegmentService.initialize`. If your yup schema marks fields as `.required()`, the mutation silently fails. Make segment-facts schema fields `.optional()` (or `.nullable()`) and let `SegmentService.initialize` fill them.
 
 > [!TIP]
-> **After clicking submit, assert `toBeEnabled()`, not `toBeDisabled()`.** GraphQL mutations resolve fast; by the time Playwright checks, the button has already re-enabled. Asserting `toBeDisabled()` flakes. The stable idiom is: click submit, then `await expect(submitButton).toBeEnabled()` to confirm the mutation finished processing, then assert the next durable UI state (e.g. the "Set Ready" button appears).
+> **After clicking submit, assert the durable resulting state.** In the demo game, submission replaces the button and editor with the “Allocation submitted” summary. Assert that summary and its saved percentages, including after reload. Do not expect the removed submit button to re-enable. For forms that retain their submit button, asserting re-enablement is preferable to transient loading-state assertions.
+
 ## GBL Game Flow Rules
 
 Current stable broad flow (demo game):
@@ -197,9 +203,9 @@ Return the post-reload status in the same poll cycle.
   weak accessible labels.
 - Avoid CSS class locators and structural selectors such as `svg text`.
 - Avoid toast assertions as primary outcomes; assert durable UI state instead.
-- `RhfNumberField` exposes the input name and the design-system label. Prefer
-  role/name or a `data-cy` selector; if a positional textbox locator becomes
-  necessary, scope it tightly and leave a short comment.
+- Demo-game admin `RhfNumberField` exposes the input name and label; prefer
+  role/name or `data-cy`. Retained v4 `FormikNumberField` callers may need a
+  tightly scoped positional textbox locator or a plain `data-cy` wrapper.
 - For countdown:
   - admin field wrapper: `countdown-seconds`
   - player widget: `countdown`
@@ -208,15 +214,21 @@ Return the post-reload status in the same poll cycle.
 
 ## Assertion Scope
 
-- Report: assert `report-loaded`, team names, `Player Decisions`, period/segment
-  row labels, and stable section titles (`Risk-Return`, `Sharpe Ratio`). Do not
-  overfit chart internals or transient exact numeric rendering.
+- Report: assert `report-loaded`, team row headers, `Decisions`, year/quarter
+  column labels, and headings `Risk and return` / `Sharpe ratio`. The focused
+  `demo-game-report.spec.ts` uses deterministic 15- and 60-team query fixtures for the
+  four reference views, scope/mode switches, keyboard focus and allocation
+  tooltips, bounded scrolling lists, last-team access, responsive overflow,
+  focus refresh after settlement, retry, and empty/missing-game states. Keep the
+  multi-team flow smoke against real settled results: assert the eligible team
+  count, numeric ranking values, and allocation bars, not only headings. Missing
+  segment relations in the API can otherwise pass an empty dashboard. Do not overfit chart
+  internals or transient exact numeric rendering.
 - Dice: one configured segment dice page smoke is enough unless user asks for
   dice animation coverage.
 - Countdown: set countdown, assert player widget appears, never wait for expiry
   in CI.
-- Player cockpit: assert form/result states (`Submit`, `Assets Overview`,
-  `Savings`, `Bonds`, `Stocks`, `Total`) rather than chart pixels.
+- Demo-game cockpit: assert `Submit allocation`, `To allocate`, and the named Savings/Bonds/Stocks spinbuttons. Allocation sliders are named `Savings boundary` and `Stocks boundary`. Check decimal persistence, invalid totals, pushing/keyboard behavior, tab draft retention, and failed-save recovery; preserve existing result-screen assertions. Cover submitted summaries, Ready/unready, resubmission, failed Ready mutations, and summary/Ready reload persistence. Ready disables editing and is unavailable in the editor until resubmission; all-ready does not advance the instructor-controlled lifecycle. Compare action-button and shared-chrome dimensions across editing, submitted, and Ready at mobile/tablet widths. Wait for viewport layout to settle before measuring. The tab is labeled Decisions with the existing `cockpit` URL key. Ready is only visible there during RUNNING; review states show the instructor waiting message. Verify editing-only forecast values against Market and keep mobile forecast/footer coverage, and learning activities live in Team on phones and the persistent sidebar on tablet/desktop. `demo-game-tablet.spec.ts` adds deterministic responsive fixtures: two top links, embedded Market/Team, result states, dice colors/month labels, drafts and History selection/expansion across resizing, legacy URLs, and phone captures (including touch landscape). Existing mobile navigation assertions must run in phone viewports; wider screens have no Market/Team navigation links.
 
 ## Adapting the demo-game spec to your game
 
@@ -224,8 +236,8 @@ The demo-game spec (`playwright/tests/demo-game-flow.spec.ts`) is the template f
 
 - **Decision form**: swap the demo's allocation inputs (`bank` / `bonds` / `stocks` summing to 100) for your game's single decision. Update the input locator (e.g. `getByPlaceholder`, `input[name=...]`), the yup validation values, and the submit button name. Mirror the constraints your `Actions.apply` reducer enforces.
 - **Player plan**: replace the `decisions` array with your game's per-segment decision values (e.g. `[{ rate: '6.0' }, { rate: '5.5' }]`).
-- **Dashboard assertions**: replace demo-game metric labels (`Assets Overview`, `Savings`, `Bonds`, `Stocks`, `Total`) with your game's (`Current Inflation`, `Unemployment`, `GDP Growth`, `Cumulative Loss`). Assert durable headings, not chart pixels or transient numbers.
-- **Keep the sentinel period** (see the WARNING above). Add one unplayed period after your last played period.
+- **Dashboard assertions**: replace demo-game metric labels (`To allocate`, `Savings`, `Bonds`, `Stocks`) with your game's (`Current Inflation`, `Unemployment`, `GDP Growth`, `Cumulative Loss`). Assert durable headings, not chart pixels or transient numbers.
+- **Cover final results without a sentinel period.** The demo breadth scenario deliberately includes an upcoming period; the result-design scenario covers the disconnected final pointer. New game flows need no artificial final period.
 - **Keep the admin flow**: `createGame` -> `addPeriod` -> `addSegment` (per period) -> join players -> advance transitions. The state-transition sequence is game-agnostic.
 - **Keep `expectGameStatusEventually`** (or equivalent reload-aware polling) for admin status assertions - UI data lags mutations.
 - **Segment count via stable child content**: count real segments by a child that only exists after `SegmentService.initialize` (e.g. `text=Roll:`), not by placeholder card count.
@@ -263,3 +275,5 @@ Common failures:
   - `test(demo-game): cover multi-team multi-period flow`
   - `test(playwright): add breadth flow timeout headroom`
   - `test(demo-game): add countdown e2e smoke`
+
+Demo-game dice flow: close the quarter before revealing. Assert only the current closed segment has an enabled dice link, with direct API rejection during allocation and for other segments. General lifecycle helpers may publish all three rolls after closing; reveal-focused tests must opt out to verify zero/one/two hidden result states, publication retry, third-roll release, and blocked advancement.

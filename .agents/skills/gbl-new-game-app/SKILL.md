@@ -26,14 +26,14 @@ Design the game FIRST (`gbl-game-design` skill) — the scaffold asks for your f
    - `prisma/seed.ts` — your level ladder, story/learning elements, achievements.
    - `src/pages/` + `src/components/` — your cockpit/admin UI (`gbl-frontend-game-ui` skill).
    - Branding: `public/` assets, app name in layout/nav.
-6. Auth env: copy `.env.local.template`; local dev works without a real OIDC tenant via the devcontainer's mock OIDC server (see `.devcontainer/README.md`); production needs real Auth0/OIDC credentials + `NEXTAUTH_SECRET`.
+6. Auth env: devcontainers supply mock OIDC process variables and need no `.env.local`. Demo-game's `.env.local.template` is a native-host-only real-Auth0 opt-in, not container setup. Production needs real Auth0/OIDC credentials + `NEXTAUTH_SECRET`.
 
 ## Starter-mode (Docker-only) specifics
 
 If you run the starter stack (`.devcontainer/starter/`, app on `http://localhost:3000`), four things the checklist above doesn't cover:
 
-1. **Add a `node_modules` volume for the new app** in `.devcontainer/starter/docker-compose.yml` (copy the `node_modules_demo_game` pattern, then `docker compose -p <name> up -d` to recreate). Without it the new app's `node_modules` land on the host bind mount — slow on Windows/macOS and wrong-OS binaries.
-2. **`DATABASE_URL` from `starter.env` is container env and beats your app's `.env`.** "Point DATABASE_URL at a fresh database" only works if you `export DATABASE_URL=...` explicitly for every prisma command AND the dev-server start. Create the DB first: `docker compose -p <name> exec postgres psql -U prisma -d prisma -c 'CREATE DATABASE <game>;'`
+1. **Add `node_modules` and `.next` volumes for the new app** in `.devcontainer/starter/docker-compose.yml` (copy the `node_modules_demo_game` and `next_demo_game` patterns, then `docker compose -f .devcontainer/starter/docker-compose.yml -p <name> up -d` to recreate). Without them, Linux-native dependencies and generated Next.js artifacts land on the host bind mount.
+2. **`DATABASE_URL` from `starter.env` is container env and beats your app's `.env`.** "Point DATABASE_URL at a fresh database" only works if you `export DATABASE_URL=...` explicitly for every prisma command AND the dev-server start. Create the DB first: `docker compose -f .devcontainer/starter/docker-compose.yml -p <name> exec postgres psql -U prisma -d prisma -c 'CREATE DATABASE <game>;'`
 3. **Port 3000 is single-tenant.** `post-start.sh` starts the demo-game dev server on every container start — kill it (`pkill -f next-server` inside the container) before starting your game's dev server on 3000. Only one game app runs at a time.
 4. **A fresh database has no admin.** The dev admin `User`+`Account` rows are created on first OIDC login — sign in once via `/admin/login` in a browser before any admin API/seed work that references the owner.
 

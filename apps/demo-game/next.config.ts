@@ -24,6 +24,12 @@ const appApolloDir = path.dirname(
   require.resolve('@apollo/client/package.json', { paths: [__dirname] })
 )
 
+// Linked UI keeps v4 for its other consumers; this app supplies the v5 runtime.
+const appDesignSystemDir = path.dirname(
+  require.resolve('@uzh-bf/design-system/package.json', { paths: [__dirname] })
+)
+const appRhfEntry = require.resolve('react-hook-form', { paths: [__dirname] })
+
 const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
@@ -41,6 +47,11 @@ const nextConfig: NextConfig = {
   // ensure every client import uses the app's one React/ReactDOM module.
 
   webpack: (config, { isServer }) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@uzh-bf/design-system$': path.join(appDesignSystemDir, 'dist/index.js'),
+      'react-hook-form$': appRhfEntry,
+    }
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,

@@ -61,7 +61,7 @@ export function MultiSelect({
         variant="outline"
         role="combobox"
         aria-expanded={open}
-        className="relative h-fit min-w-full justify-between"
+        className="relative h-fit min-h-[var(--gbl-control-height,0px)] min-w-full justify-between text-[length:var(--gbl-body-size,0.875rem)] leading-[var(--gbl-body-leading,1.25rem)]"
         onClick={() => setOpen(!open)}
       >
         <div className="flex flex-wrap justify-start gap-2">
@@ -69,7 +69,7 @@ export function MultiSelect({
             ? value.map((val) => (
                 <div
                   key={val}
-                  className="rounded-xl border bg-slate-200 px-2 py-1 text-xs font-medium"
+                  className="rounded-xl border bg-slate-200 px-2 py-1 text-[length:var(--gbl-caption-size,0.75rem)] leading-[var(--gbl-caption-leading,1rem)] font-medium"
                 >
                   {options.find((option) => option.value === val)?.label}
                 </div>
@@ -80,13 +80,14 @@ export function MultiSelect({
       </Button>
       {open && (
         <Command className="absolute z-10 mt-1 h-fit border bg-white">
-          <CommandInput placeholder={searchPlaceholder} />
+          <CommandInput placeholder={searchPlaceholder} className="min-h-[var(--gbl-control-height,0px)] text-[length:var(--gbl-body-size,0.875rem)] leading-[var(--gbl-body-leading,1.25rem)]" />
           <CommandList>
             <CommandEmpty>{emptyText}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
+                  className="min-h-[var(--gbl-control-height,0px)] text-[length:var(--gbl-body-size,0.875rem)] leading-[var(--gbl-body-leading,1.25rem)]"
                   value={option.value}
                   onSelect={() => {
                     handleValueChange(option.value)

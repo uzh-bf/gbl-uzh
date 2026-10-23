@@ -16,7 +16,7 @@ services:
       POSTGRES_PASSWORD: prisma
       POSTGRES_DB: prisma
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U prisma -d prisma']
+      test: ["CMD-SHELL", "pg_isready -U prisma -d prisma"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -47,16 +47,12 @@ services:
     # with zero host-port collisions). The OIDC mock has its own
     # `${WORKSPACE:-demo-game}-oidc` alias.
     #
-    # OIDC server-side reachability: the app validates the token issuer against
-    # AUTH0_ISSUER and fetches discovery/
-    # token/jwks from it server-side. So that host must resolve + be reachable from
-    # INSIDE this container too — map it to the host gateway (where Traefik listens
-    # on :443). The server-side HTTPS fetch trusts the local mkcert CA, mounted
-    # read-only and pointed to by NODE_EXTRA_CA_CERTS (devcontainer.env). Browser +
-    # server thus use the SAME issuer host over verified TLS → consistent `iss`.
+    # NextAuth must reach the routed OIDC host server-side, so map it to Traefik
+    # on the host gateway. The mkcert CA is mounted below and trusted through
+    # NODE_EXTRA_CA_CERTS. Playwright maps browser traffic to Traefik separately.
     extra_hosts:
-      - 'oidc.demo-game.localhost:host-gateway'
-      - 'oidc.demo-game.${WORKSPACE:-demo-game}.localhost:host-gateway'
+      - "oidc.demo-game.localhost:host-gateway"
+      - "oidc.demo-game.${WORKSPACE:-demo-game}.localhost:host-gateway"
     networks:
       default: {}
       devnet:
@@ -72,6 +68,12 @@ services:
       - node_modules_demo_game:/workspaces/gbl-uzh/apps/demo-game/node_modules
       - node_modules_central_bank:/workspaces/gbl-uzh/examples/central-bank/node_modules
       - node_modules_rate_wars:/workspaces/gbl-uzh/examples/rate-wars/node_modules
+      # Keep Linux-generated Next.js caches out of the host checkout. Native
+      # and container runs can otherwise overwrite each other's platform-
+      # specific artifacts or leave a stale dev-server lock behind.
+      - next_demo_game:/workspaces/gbl-uzh/apps/demo-game/.next
+      - next_central_bank:/workspaces/gbl-uzh/examples/central-bank/.next
+      - next_rate_wars:/workspaces/gbl-uzh/examples/rate-wars/.next
       - node_modules_platform:/workspaces/gbl-uzh/packages/platform/node_modules
       - node_modules_ui:/workspaces/gbl-uzh/packages/ui/node_modules
       - node_modules_website:/workspaces/gbl-uzh/apps/website/node_modules
@@ -81,7 +83,7 @@ services:
       # https://oidc.demo-game.localhost cert server-side. Override
       # DEVROUTER_MKCERT_CAROOT on non-macOS (Linux: ~/.local/share/mkcert,
       # Windows: %LOCALAPPDATA%\mkcert).
-      - '${DEVROUTER_MKCERT_CAROOT:-${HOME}/Library/Application Support/mkcert}/rootCA.pem:/etc/devrouter/mkcert-rootCA.pem:ro'
+      - "${DEVROUTER_MKCERT_CAROOT:-${HOME}/Library/Application Support/mkcert}/rootCA.pem:/etc/devrouter/mkcert-rootCA.pem:ro"
     command: sleep infinity
     depends_on:
       postgres:
@@ -98,31 +100,12 @@ services:
         aliases:
           - ${WORKSPACE:-demo-game}-oidc
     environment:
-      SERVER_PORT: '8090'
-      # interactiveLogin=false -> one-click auto-login as the fixed dev admin.
-      # Constant `sub` keeps the same User/Account across restarts.
-      # Keep JSON_CONFIG identical to the oidc service in starter/docker-compose.yml.
-      JSON_CONFIG: >-
-        {
-          "interactiveLogin": false,
-          "tokenCallbacks": [
-            {
-              "issuerId": "default",
-              "requestMappings": [
-                {
-                  "requestParam": "grant_type",
-                  "match": "*",
-                  "claims": {
-                    "sub": "dev-admin",
-                    "email": "gbl-dev@df.uzh.ch",
-                    "name": "GBL Dev",
-                    "email_verified": true
-                  }
-                }
-              ]
-            }
-          ]
-        }
+      SERVER_PORT: "8090"
+      # Shared config (one-click auto-login as the fixed dev admin, constant
+      # `sub` across restarts) — single source for all run modes.
+      JSON_CONFIG_PATH: /etc/mock-oauth2/config.json
+    volumes:
+      - ./docker/oidc-config.json:/etc/mock-oauth2/config.json:ro
 
 networks:
   # Created by `dev up` (devrouter). Must exist before this stack starts.
@@ -135,6 +118,9 @@ volumes:
   node_modules_demo_game:
   node_modules_central_bank:
   node_modules_rate_wars:
+  next_demo_game:
+  next_central_bank:
+  next_rate_wars:
   node_modules_platform:
   node_modules_ui:
   node_modules_website:

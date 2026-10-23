@@ -1,13 +1,13 @@
-import { UserRole } from '@gbl-uzh/platform/dist/index'
+import { resolveAdminOidcConfig, UserRole } from '@gbl-uzh/platform/dist/index'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
+import JWT from 'jsonwebtoken'
 import type { DefaultSession, NextAuthOptions } from 'next-auth'
 import type { DefaultJWT } from 'next-auth/jwt'
 import Auth0Provider from 'next-auth/providers/auth0'
 
-// we use our own decode and encode to allow manual cookie creation in the team login scenario
-import { decode, encode } from './jwt'
-
 import prisma from './prisma'
+
+const oidcConfig = resolveAdminOidcConfig()
 
 interface ExtendedSession extends DefaultSession {
   user?: DefaultSession['user'] & {
@@ -19,19 +19,19 @@ interface ExtendedSession extends DefaultSession {
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
-  providers: [
-    Auth0Provider({
-      clientId: process.env.AUTH0_CLIENT_ID as string,
-      clientSecret: process.env.AUTH0_CLIENT_SECRET as string,
-      issuer: process.env.AUTH0_ISSUER,
-    }),
-  ],
+  providers: [Auth0Provider(oidcConfig)],
   session: {
     strategy: 'jwt',
   },
   jwt: {
-    encode,
-    decode,
+    // Custom JWT handling also supports manually created team-login cookies.
+    async encode({ token, secret }) {
+      return JWT.sign(token as object, secret)
+    },
+    async decode({ token, secret }) {
+      if (!token) return null
+      return JWT.verify(token, secret) as DefaultJWT
+    },
   },
   callbacks: {
     async jwt({ token, user, account }) {
