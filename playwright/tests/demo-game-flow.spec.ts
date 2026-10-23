@@ -2924,7 +2924,13 @@ test('countdown notifications match player notices across tabs and viewport size
     let seconds = 600
     for (const width of [320, 390, 784]) {
       await player.setViewportSize({ width, height: 1000 })
-      await player.getByRole('link', { name: 'Decisions', exact: true }).click()
+      const navigation = player.getByRole('navigation', {
+        name: width >= 641 ? 'Cockpit navigation' : 'Player navigation',
+      })
+      await expect(navigation).toBeVisible()
+      await navigation
+        .getByRole('link', { name: 'Decisions', exact: true })
+        .click()
       const allocation = player
         .getByRole('status')
         .filter({ hasText: 'Allocation submitted' })
@@ -2939,7 +2945,7 @@ test('countdown notifications match player notices across tabs and viewport size
       for (const tab of width >= 641
         ? ['Decisions', 'History']
         : ['Decisions', 'Market', 'History', 'Team']) {
-        await player.getByRole('link', { name: tab, exact: true }).click()
+        await navigation.getByRole('link', { name: tab, exact: true }).click()
         await setCountdown(admin, String(seconds++))
         const notification = player
           .getByRole('region', { name: 'Notifications (F8)' })
