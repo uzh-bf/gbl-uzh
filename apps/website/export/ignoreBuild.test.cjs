@@ -89,11 +89,7 @@ function commitChanges(fixture, files, message = 'change') {
   return fixture.headSha
 }
 
-function invokeIgnoreCommand(
-  fixture,
-  overrides = {},
-  useRepositoryRoot = false
-) {
+function invokeIgnoreCommand(fixture, overrides = {}) {
   const env = { ...process.env }
   delete env.VERCEL_ENV
   delete env.VERCEL_GIT_COMMIT_SHA
@@ -113,22 +109,15 @@ function invokeIgnoreCommand(
   }
 
   return spawnSync(process.execPath, [SCRIPT_PATH], {
-    cwd: useRepositoryRoot
-      ? fixture.root
-      : path.join(fixture.root, 'apps', 'website'),
+    cwd: path.join(fixture.root, 'apps', 'website'),
     encoding: 'utf8',
     env,
     windowsHide: true,
   })
 }
 
-function assertBuildDecision(
-  fixture,
-  expectedStatus,
-  overrides,
-  useRepositoryRoot = false
-) {
-  const result = invokeIgnoreCommand(fixture, overrides, useRepositoryRoot)
+function assertBuildDecision(fixture, expectedStatus, overrides) {
+  const result = invokeIgnoreCommand(fixture, overrides)
   assert.equal(result.error, undefined, result.error && result.error.message)
   assert.equal(result.status, expectedStatus, result.stderr)
 }

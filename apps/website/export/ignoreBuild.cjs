@@ -4,22 +4,6 @@ const { spawnSync } = require('node:child_process')
 const { TextDecoder } = require('node:util')
 
 const SAFE_ROOTS = ['apps/demo-game/', 'examples/', 'cypress/', 'playwright/']
-const PACKAGE_MANAGER_LOCKFILES = new Set([
-  'bun.lock',
-  'bun.lockb',
-  'cargo.lock',
-  'composer.lock',
-  'deno.lock',
-  'gemfile.lock',
-  'npm-shrinkwrap.json',
-  'package-lock.json',
-  'pdm.lock',
-  'pipfile.lock',
-  'pnpm-lock.yaml',
-  'poetry.lock',
-  'uv.lock',
-  'yarn.lock',
-])
 const WORKSPACE_CONFIGS = new Set([
   '.npmrc',
   '.pnpmfile.cjs',
@@ -89,7 +73,7 @@ function isBuildSensitivePath(changedPath) {
     .toLowerCase()
 
   if (basename === 'package.json') return true
-  if (PACKAGE_MANAGER_LOCKFILES.has(basename) || basename.includes('lock'))
+  if (basename === 'npm-shrinkwrap.json' || basename.includes('lock'))
     return true
   if (WORKSPACE_CONFIGS.has(basename) || basename.includes('workspace'))
     return true
