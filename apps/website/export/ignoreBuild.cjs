@@ -19,7 +19,7 @@ const PATH_DECODER = new TextDecoder('utf-8', { fatal: true })
 const MAX_GIT_OUTPUT = 16 * 1024 * 1024
 
 function runGit(args, cwd, encoding = 'utf8') {
-  return spawnSync('git', args, {
+  return spawnSync('/usr/bin/git', args, {
     cwd,
     encoding,
     maxBuffer: MAX_GIT_OUTPUT,
@@ -33,7 +33,7 @@ function succeeded(result) {
 
 function outputLine(result) {
   if (!succeeded(result) || typeof result.stdout !== 'string') return null
-  return result.stdout.replace(/[\r\n]+$/, '')
+  return result.stdout.replace(/\r?\n$/, '')
 }
 
 function isFullSha(value, expectedLength) {

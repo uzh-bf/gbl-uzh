@@ -34,7 +34,7 @@ function run(command, args, cwd) {
     )
   }
 
-  return result.stdout.replace(/[\r\n]+$/, '')
+  return result.stdout.replace(/\r?\n$/, '')
 }
 
 function createFixture(t, initialFiles = {}) {
