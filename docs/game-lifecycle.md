@@ -6,7 +6,7 @@ tags:
   - lifecycle
   - state-machine
   - admin
-timestamp: "2026-10-07T14:30:00Z"
+timestamp: "2026-10-07T16:00:00Z"
 ---
 
 # Game Lifecycle
@@ -57,7 +57,7 @@ The player cockpit is a single page that switches on `game.status` (`apps/demo-g
 
 | Status        | Player view                                                                                           |
 | ------------- | ----------------------------------------------------------------------------------------------------- |
-| SCHEDULED     | "Game is scheduled" placeholder                                                                       |
+| SCHEDULED     | Joined confirmation and waiting message                                                               |
 | PREPARATION   | Header only — waiting while the admin sets up                                                         |
 | RUNNING       | Demo game: allocation editor → submitted summary → reversible Ready lock                              |
 | PAUSED        | Demo game: reveal progress, then closed-quarter balances and returns after all three monthly reveals  |
@@ -65,6 +65,10 @@ The player cockpit is a single page that switches on `game.status` (`apps/demo-g
 | RESULTS       | Demo game: completed-year asset totals, accumulated portfolio return, and annual asset market returns |
 
 Independent of status: story elements attached to a newly activated segment appear as blocking popups until acknowledged; demo-game learning elements sit in the Team tab (other games may use a sidebar); achievements/level-ups arrive as notifications.
+
+## Registration concurrency
+
+`RegistrationService.ts:registrationTransaction` runs enrollment, registration controls, and initial start at serializable isolation with bounded conflict retries. Each writes the game row; initial start reads players and creates results/actions inside that same transaction. A concurrent join either receives initial results or is rejected as closed. Capacity and per-browser uniqueness are enforced server-side. Registration changes publish `REGISTRATION_CHANGED` after commit; the admin's existing event subscription refetches its roster, with polling as fallback. Later lifecycle transitions retain the dice-reveal gates below.
 
 ## Coordination mechanics
 
@@ -78,11 +82,11 @@ Independent of status: story elements attached to a newly activated segment appe
 
 Verified by `playwright/tests/demo-game-flow.spec.ts`:
 
-1. Admin signs in (`/admin/login`, OIDC) and creates a game with a name and player count. The platform creates one `Player` row per team with a unique login token. Status: `SCHEDULED`.
+1. Admin signs in (`/admin/login`, OIDC) and creates a named game. Shared registration is the UI default, with optional capacity; fixed-count mode creates the requested players up front. Status: `SCHEDULED`.
 2. Admin adds one or more periods (per-period facts/scenario) and their segments (optionally attaching story/learning elements).
-3. Admin distributes each team's join link (`/join/<token>`) — shown next to each player in the game detail page.
-4. Players open their link → logged in without a password → land on a welcome page to pick a team name/avatar → arrive at the cockpit.
-5. Admin: **Start Period** → `PREPARATION`; then **Next Segment** → `RUNNING`.
+3. For open games, admin shares `/join/game/<registrationToken>` or its QR code. Participants complete bank setup, then register separate entries. Fixed-count games use individual `/join/<token>` links. Admins can copy those private links for recovery.
+4. New participants complete the introduction/setup/review flow and arrive in the waiting cockpit. Returning participants resume their entry through the shared link while their browser identity is available, or through their private return link.
+5. Admin: **Start Period** closes registration and initializes the complete roster atomically → `PREPARATION`; then **Next Segment** → `RUNNING`. Starting requires at least one player and a configured first period/segment. Registration can be closed/reopened manually only while `SCHEDULED`; existing players can always resume.
 6. Players submit their decision(s) for the segment and toggle Ready. Optionally the admin sets a countdown.
 7. Admin advances through the transition table above: **Segment Results** / **Next Segment** per segment, **Consolidate** + **Period Results** on the last one, **Next Period** to loop back to step 5 for the next period.
 8. After the final period, the admin opens the report dashboard (`/admin/reports/[id]`) for cross-period analytics; the game remains in `RESULTS` (no `COMPLETED` transition today).

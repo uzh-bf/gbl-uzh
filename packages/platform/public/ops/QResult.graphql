@@ -55,6 +55,7 @@ query Result {
   }
 
   self {
+    token
     ...PlayerData
   }
 

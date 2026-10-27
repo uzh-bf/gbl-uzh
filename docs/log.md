@@ -1,6 +1,14 @@
 # Log
 
+## 2026-10-27
+
+**Update**: Shared registration - renamed the enrollment mode from `OPEN` to `SHARED_LINK`, preserving the separate open/closed control. Consolidated the schema changes into one additive migration that creates the final enum directly. Private player links now use `useMutation` for login.
+
 ## 2026-10-07
+
+**Update**: Shared registration review - simplified creation form state and cache refreshes, exposed retryable creation failures, combined join preparation/resume into one request, and prevented profile edits from repeating shared-registration setup rewards.
+
+**Update**: Shared registration - documented open/fixed enrollment, QR and private return links, browser identity, atomic roster initialization, deferred setup rewards, GraphQL access rules, and additive migration.
 
 **Update**: [UI Components](ui-components.md) — restore Bonds/Stocks outcome totals on admin segment cards, retaining disabled outcome buttons for non-rollable segments.
 

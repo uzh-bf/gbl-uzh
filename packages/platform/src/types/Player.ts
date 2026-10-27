@@ -1,4 +1,5 @@
 import * as DB from '../generated/prisma/client.js'
+import { isGameManager } from '../services/RegistrationService.js'
 
 import { enumType, objectType } from 'nexus'
 import { AchievementInstance } from './Achievement.js'
@@ -54,7 +55,20 @@ export const Player = objectType({
 
     t.nonNull.int('number')
     t.nonNull.string('name')
-    t.nonNull.string('token')
+    t.string('token', {
+      async resolve(player, _args, ctx) {
+        if (!ctx.user) return null
+        if (ctx.user.role === 'PLAYER' && ctx.user.sub === player.id)
+          return player.token
+        if (!['ADMIN', 'MASTER'].includes(ctx.user.role)) return null
+        const game = await ctx.prisma.game.findUnique({
+          where: { id: player.gameId },
+        })
+        return game && isGameManager(ctx.user, game.ownerId)
+          ? player.token
+          : null
+      },
+    })
     t.nonNull.boolean('tutorialCompleted')
     t.string('role')
     t.nonNull.int('experience')

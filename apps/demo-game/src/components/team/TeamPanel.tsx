@@ -4,6 +4,7 @@ import { useId, type ReactNode } from 'react'
 import type { ResultQuery } from '~/graphql/generated/ops'
 import { playerAmount, playerPercent } from '~/lib/results'
 import { learningXP, teamStatistics, type StoryEntry } from '~/lib/team'
+import ReturnLink from './ReturnLink'
 
 type Activity = { id: string; title: string; reward?: unknown }
 
@@ -36,6 +37,7 @@ export default function TeamPanel({
     threshold > 0 ? Math.min(100, (experience / threshold) * 100) : 0
   return (
     <section data-cy="team-panel">
+      <ReturnLink token={self?.token} />
       <div className="border-player-border mobile:px-app-4 mobile:py-app-4 tablet:px-[12px] tablet:py-[8px] border-b min-[641px]:px-[32px] min-[641px]:py-[28px]">
         <div className="mobile:mb-app-4 mobile:gap-app-2 mobile:app-body tablet:text-[14px] tablet:leading-[1.4] tablet:mb-[8px] mb-[16px] flex flex-wrap justify-between gap-[8px] min-[641px]:text-[26px]">
           <span className="font-semibold">Level {self?.level?.index ?? 0}</span>

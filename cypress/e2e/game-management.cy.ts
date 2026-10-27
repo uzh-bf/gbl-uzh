@@ -25,6 +25,7 @@ function joinAsTeam(cy, joinLink) {
 function createGame(cy, name = undefined) {
   const gameName = name ?? `Game ${Math.round(Math.random() * 1000000)}`
   cy.get('input[data-cy="game-name"]').type(gameName)
+  cy.get('select[name="registrationMode"]').select('FIXED')
   cy.get('input[data-cy="game-player-count"]').clear().type('2')
   cy.get('button[data-cy="create-game"]').click()
   return gameName

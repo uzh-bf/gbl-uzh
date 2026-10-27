@@ -230,7 +230,9 @@ test('welcome layouts, picker drafts, validation, and failed-save recovery', asy
       waitUntil: 'domcontentloaded',
       timeout: 60_000,
     })
-    await expect(page.getByText('Game is scheduled.')).toBeVisible({
+    await expect(
+      page.getByText('You’ve joined. Waiting for the instructor to start.')
+    ).toBeVisible({
       timeout: 30_000,
     })
     const readProgress = async () => {

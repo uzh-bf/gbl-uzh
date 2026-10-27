@@ -1,4 +1,5 @@
 import * as DB from '../generated/prisma/client.js'
+import { isGameManager } from '../services/RegistrationService.js'
 
 import { enumType, objectType } from 'nexus'
 import { LearningElement } from './LearningElement.js'
@@ -8,6 +9,19 @@ import { StoryElement } from './StoryElement.js'
 export const GameStatus = enumType({
   name: 'GameStatus',
   members: Object.values(DB.GameStatus),
+})
+
+export const RegistrationMode = enumType({
+  name: 'RegistrationMode',
+  members: ['FIXED', 'SHARED_LINK'],
+})
+export const RegistrationInfo = objectType({
+  name: 'RegistrationInfo',
+  definition(t) {
+    t.nonNull.string('name')
+    t.nonNull.field('status', { type: GameStatus })
+    t.nonNull.string('availability')
+  },
 })
 
 export interface GenerateBaseGameOpts {
@@ -34,6 +48,16 @@ export function generateBaseGame(opts?: GenerateBaseGameOpts) {
         type: GameStatus,
       })
       t.nonNull.string('name')
+      t.nonNull.field('registrationMode', { type: RegistrationMode })
+      t.nonNull.boolean('registrationOpen')
+      t.int('maxPlayers')
+      t.string('registrationToken', {
+        resolve(game, _args, ctx) {
+          return isGameManager(ctx.user, game.ownerId)
+            ? game.registrationToken
+            : null
+        },
+      })
       t.nonNull.int('version')
       t.int('activePeriodIx')
       t.field('activePeriod', {

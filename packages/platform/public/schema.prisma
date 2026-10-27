@@ -81,12 +81,22 @@ enum GameStatus {
   COMPLETED
 }
 
+enum RegistrationMode {
+  FIXED
+  SHARED_LINK
+}
+
 model Game {
   id Int @id @default(autoincrement())
 
   status GameStatus @default(SCHEDULED)
 
   name String
+
+  registrationMode RegistrationMode @default(FIXED)
+  registrationToken String? @unique
+  registrationOpen Boolean @default(false)
+  maxPlayers Int?
 
   facts Json
   version Int @default(0)
@@ -199,6 +209,8 @@ model Player {
   role String?
 
   token String @unique
+  enrollmentKey String?
+  setupEventPending Boolean @default(false)
 
   actions   PlayerAction[]
   results   PlayerResult[]
@@ -219,6 +231,8 @@ model Player {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([gameId, enrollmentKey])
 }
 
 model PlayerAction {

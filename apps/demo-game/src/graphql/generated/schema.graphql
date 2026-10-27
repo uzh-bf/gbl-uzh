@@ -50,11 +50,15 @@ type Game {
   activeSegmentIx: Int
   facts: JSONObject!
   id: ID!
+  maxPlayers: Int
   name: String!
   nextAutoContinueAt: DateTime
   periods: [Period!]!
   playerCount: Int!
   players: [Player!]!
+  registrationMode: RegistrationMode!
+  registrationOpen: Boolean!
+  registrationToken: String
   status: GameStatus!
   version: Int!
 }
@@ -137,13 +141,17 @@ type Mutation {
   addGamePeriod(facts: PeriodFactsInput!, gameId: Int!, segmentCount: Int!): Period
   addPeriodSegment(facts: PeriodSegmentFactsInput!, gameId: Int!, learningElements: [String], periodIx: Int!, storyElements: [String]): PeriodSegment
   attemptLearningElement(elementId: ID!, selection: String!): LearningElementAttempt
-  createGame(facts: GameFactsInput!, name: String!, playerCount: Int!): Game
+  createGame(facts: GameFactsInput!, maxPlayers: Int, name: String!, playerCount: Int, registrationMode: RegistrationMode): Game
   loginAsTeam(token: String!): Player
   logoutAsTeam: Boolean
   markStoryElement(elementId: ID!): Player
   performAction(payload: String!, type: String!): PlayerResult
+  prepareRegistration(token: String!): RegistrationInfo
+  registerPlayer(facts: String!, name: String!, token: String!): Boolean
+  resumeRegistration(token: String!): Boolean
   revealMarketRoll(rollIndex: Int!, segmentId: Int!): MarketRollReveal
   saveConsolidationDecision(payload: String!): PlayerDecision
+  setRegistrationOpen(gameId: Int!, open: Boolean!): Game
   toggleSwitch(gameId: Int!, toggle: Boolean!): Boolean
   updatePlayerData(facts: String, name: String): Player
   updateReadyState(isReady: Boolean!): Player
@@ -210,7 +218,7 @@ type Player {
   name: String!
   number: Int!
   role: String
-  token: String!
+  token: String
   tutorialCompleted: Boolean!
   visitedStoryElementIds: [String!]!
   visitedStoryElements: [StoryElement!]!
@@ -282,11 +290,23 @@ type Query {
   marketDice(segmentId: Int!): MarketDice
   pastResults: [PlayerResult!]
   questAchievements: [Achievement!]
+  registrationInfo(token: String!): RegistrationInfo
   result: PlayerState
   results: [PlayerResult!]
   self: Player
   specificResults(gameId: Int!, type: String!): [PlayerResult!]
   storyElements: [StoryElement!]
+}
+
+type RegistrationInfo {
+  availability: String!
+  name: String!
+  status: GameStatus!
+}
+
+enum RegistrationMode {
+  FIXED
+  SHARED_LINK
 }
 
 type StoryElement {

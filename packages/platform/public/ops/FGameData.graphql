@@ -5,6 +5,10 @@ fragment GameData on Game {
   name
   activePeriodIx
   activeSegmentIx
+  registrationMode
+  registrationOpen
+  registrationToken
+  maxPlayers
   playerCount
   facts
 }
