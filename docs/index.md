@@ -19,7 +19,17 @@ An [Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-cata
 - [API Layer and Realtime](api-layer.md) - GraphQL today, the tRPC migration, realtime events
 - [Deploying a Game to Staging](deploying-a-game.md) - The easy Vercel + Neon path to a shareable staging URL (CLI-first), distinct from the k8s production path
 
+## Architecture decisions
+
+- [ADR-0001: Keep production admin authentication fail-closed](adr/0001-fail-closed-production-admin-auth.md) - superseded by ADR-0002
+- [ADR-0002: Standardize game admin authentication](adr/0002-standardize-game-admin-auth.md) - shared provider policy across games
+- [ADR-0003: Support shared game registration](adr/0003-support-shared-game-registration.md) - enrollment modes, availability, and compatibility
+- [ADR-0004: Identify browser enrollment and protect return links](adr/0004-identify-browser-enrollment-and-protect-return-links.md) - retries, privacy, and recovery
+- [ADR-0005: Serialize enrollment with initial game start](adr/0005-serialize-enrollment-with-initial-game-start.md) - capacity, roster initialization, and commit boundaries
+
 ## Related resources
+
+- [Registration glossary](glossary.md) - shared terms for enrollment, player identity, and availability
 
 - [Agent skills](../.agents/skills/) - `gbl-game-design`, `gbl-new-game-app`, `gbl-backend-computations`, `gbl-frontend-game-ui`, `gbl-playwright-e2e`, `gbl-deploy-staging`, `gbl-environment-doctor`, `gbl-wiki-maintenance`
 - [Reference game](../apps/demo-game/) - the single worked implementation all pages cite
