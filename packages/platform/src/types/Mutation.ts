@@ -229,6 +229,12 @@ export function generateBaseMutations<
           GameService.activateNextPeriod(args, ctx, { services }),
       })
 
+      t.nonNull.field('finishGame', {
+        type: 'Game',
+        args: { gameId: nonNull(intArg()) },
+        resolve: (_, { gameId }, ctx) => GameService.finishGame(gameId, ctx),
+      })
+
       t.field('activateNextSegment', {
         type: 'Game',
         args: {

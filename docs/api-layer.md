@@ -7,7 +7,7 @@ tags:
   - graphql
   - trpc
   - realtime
-timestamp: "2026-10-27T00:00:00Z"
+timestamp: "2026-11-02T13:20:00Z"
 ---
 
 # API Layer and Realtime
@@ -22,7 +22,7 @@ These hold in both worlds and are what game code should rely on:
 
 - **One aggregate "result" query** drives the player cockpit (player result + game + active period/segment + content + self). The admin panel polls/queries a game-detail operation.
 - **Mutations map 1:1 to platform service calls**: create game, add period/segment, activate next period/segment, perform action, save decisions, update ready state, add countdown, attempt learning element, mark story element, login as team, update player data.
-- **Realtime is notify-then-refetch.** The server publishes small events on two channels — global (game-wide: `GAME_STATE_UPDATED`, `PERIOD_ACTIVATED`, `SEGMENT_ACTIVATED`, `COUNTDOWN_UPDATED`, `ACTION_PERFORMED`, `SWITCH_TOGGLED`, `RESET_READY_STATE`) and per-user (`LEARNING_ELEMENT_SOLVED`, `LEARNING_ELEMENT_INCORRECT`, `ACHIEVEMENT_RECEIVED`, `LEVEL_UP`) — enums in `packages/platform/src/types.ts`. Clients treat events as a signal to refetch/invalidate the aggregate query, never as a data source. Transport is Server-Sent Events in both worlds (no websockets).
+- **Realtime is notify-then-refetch.** The server publishes small events on two channels — global (game-wide: `GAME_STATE_UPDATED`, `PERIOD_ACTIVATED`, `GAME_COMPLETED`, `SEGMENT_ACTIVATED`, `COUNTDOWN_UPDATED`, `ACTION_PERFORMED`, `SWITCH_TOGGLED`, `RESET_READY_STATE`) and per-user (`LEARNING_ELEMENT_SOLVED`, `LEARNING_ELEMENT_INCORRECT`, `ACHIEVEMENT_RECEIVED`, `LEVEL_UP`) — enums in `packages/platform/src/types.ts`. Clients treat events as a signal to refetch/invalidate the aggregate query, never as a data source. Transport is Server-Sent Events in both worlds (no websockets).
 - **Realtime is in-process** (single server replica). There is no Redis/cross-instance bus; the GraphQL side has a `configurePubSub` hook to swap one in, the tRPC side documents single-replica as a known limitation.
 
 ## Current on `dev`: GraphQL (kept brief — being replaced)

@@ -6,14 +6,14 @@ tags:
   - lifecycle
   - state-machine
   - admin
-timestamp: "2026-11-02T09:02:00Z"
+timestamp: "2026-11-02T13:20:00Z"
 ---
 
 # Game Lifecycle
 
 The whole game runs on **one shared state machine per game** (`Game.status` plus the active period/segment pointers from [game-model.md](game-model.md)). Every transition is triggered by an admin clicking one button; it applies to all players at once. This is what "synchronous" means on this platform — there is no per-player pacing.
 
-Engine: `packages/platform/src/services/GameService.ts` — two driver mutations, `activateNextPeriod` and `activateNextSegment`, each a `switch` over the current status.
+Engine: `packages/platform/src/services/GameService.ts` — the instructor advances through periods and segments with `activateNextPeriod` and `activateNextSegment`, and ends play with `finishGame`.
 
 ## State machine
 
@@ -27,9 +27,10 @@ stateDiagram-v2
     RUNNING --> CONSOLIDATION: Consolidate (last segment)
     CONSOLIDATION --> RESULTS: Period Results
     RESULTS --> PREPARATION: Next Period
+    RESULTS --> COMPLETED: Finish Game
 ```
 
-`COMPLETED` exists in the `GameStatus` enum but **no code path currently sets it** (only commented-out TODOs in `GameService.ts`) — after the final period the game simply stays in `RESULTS`.
+At any period’s results, the owning admin or a master can click **Finish Game**. The game can also stay in `RESULTS` until the instructor chooses to continue.
 
 ## Transition table
 
@@ -44,6 +45,7 @@ Button labels from the admin cockpit (`apps/demo-game/src/pages/admin/games/[id]
 | RUNNING → CONSOLIDATION | "Consolidate"     | `activateNextPeriod`  | Only on the **last** segment: closes it (`SegmentResult.end`), then `Period.consolidate` updates period facts; resets `isReady`                                                   |
 | CONSOLIDATION → RESULTS | "Period Results"  | `activateNextPeriod`  | `PeriodResult.end` per player (gets segment-end results, other players' results, consolidation decisions) writes `PERIOD_END` rows; optional `PeriodResult.updateDBAfterEnd` hook |
 | RESULTS → PREPARATION   | "Next Period"     | `activateNextPeriod`  | Advances `activePeriodIx`; writes `PERIOD_START` rows for the new period via `PeriodResult.start`                                                                                 |
+| RESULTS → COMPLETED     | "Finish Game"     | `finishGame`          | Disconnects the upcoming period and preserves the settled results. Concurrent Finish Game and Next Period requests can commit only one transition.                                |
 
 Notes:
 
@@ -64,6 +66,7 @@ The player cockpit is a single page that switches on `game.status` (`apps/demo-g
 | PAUSED        | Demo game: reveal progress, then closed-quarter balances and returns after all three monthly reveals  |
 | CONSOLIDATION | Demo game: reveal progress, then holdings and benchmarks after all three monthly reveals              |
 | RESULTS       | Demo game: completed-year asset totals, accumulated portfolio return, and annual asset market returns |
+| COMPLETED     | Game completed above the last settled year’s results. History remains available.                      |
 
 Independent of status: story elements attached to a newly activated segment appear as blocking popups until acknowledged; demo-game learning elements sit in the Team tab (other games may use a sidebar); achievements/level-ups arrive as notifications.
 
@@ -90,4 +93,4 @@ Verified by `playwright/tests/demo-game-flow.spec.ts`:
 5. Admin: **Start Period** closes registration and initializes the complete roster atomically → `PREPARATION`; then **Next Segment** → `RUNNING`. Starting requires at least one player and a configured first period/segment. Registration can be closed/reopened manually only while `SCHEDULED`; existing players can always resume.
 6. Players submit their decision(s) for the segment and toggle Ready. Optionally the admin sets a countdown.
 7. Admin advances through the transition table above: **Segment Results** / **Next Segment** per segment, **Consolidate** + **Period Results** on the last one, **Next Period** to loop back to step 5 for the next period.
-8. After the final period, the admin opens the report dashboard (`/admin/reports/[id]`) for cross-period analytics; the game remains in `RESULTS` (no `COMPLETED` transition today).
+8. The instructor clicks **Finish Game** to end play in one click. Players can revisit their final results and History after reload. The instructor can open the report dashboard (`/admin/reports/[id]`) for cross-period analytics.

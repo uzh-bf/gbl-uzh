@@ -1169,6 +1169,90 @@ test('trading actions submit one validated modifier and reset after success', as
   await expect(volume).toHaveValue('0')
 })
 
+for (const hasSuccessor of [false, true]) {
+  test(`Finish Game keeps the settled results ${hasSuccessor ? 'with' : 'without'} a successor`, async ({
+    page,
+    browser,
+    baseURL,
+  }) => {
+    const url = requireBaseURL(baseURL)
+    await createGame(page, {
+      name: `Finish game ${Date.now()}`,
+      playerCount: 1,
+    })
+    await addPeriod(page, { segmentCount: '1', index: 0 })
+    await addSegment(page, { periodIndex: 0 })
+    if (hasSuccessor) {
+      await addPeriod(page, { segmentCount: '1', index: 1 })
+      await addSegment(page, { periodIndex: 1 })
+    }
+    const session = await joinPlayer(
+      browser,
+      url,
+      await playerJoinUrl(page, url, 0),
+      players[0]
+    )
+    const player = session.page
+    try {
+      await advanceGame(page, {
+        action: 'Start Period',
+        expectedStatus: 'PREPARATION',
+      })
+      await advanceGame(page, {
+        action: 'Next Segment',
+        expectedStatus: 'RUNNING',
+      })
+      await advanceGame(page, {
+        action: 'Consolidate',
+        expectedStatus: 'CONSOLIDATION',
+      })
+      await advanceGame(page, {
+        action: 'Period Results',
+        expectedStatus: 'RESULTS',
+      })
+
+      const assets = player.getByTestId('result-yearly-assets')
+      await expect(assets).toContainText(String(FIRST_GAME_YEAR))
+      const settled = await assets.innerText()
+      await expect(
+        page.getByRole('button', { name: 'Next Period' })
+      ).toHaveCount(hasSuccessor ? 1 : 0)
+      await page.getByRole('button', { name: 'Finish Game' }).click()
+      await expect(page.getByTestId('game-detail')).toHaveAttribute(
+        'data-game-status',
+        'COMPLETED'
+      )
+      await expect(
+        page.getByRole('button', {
+          name: /Finish Game|Next Period|Add period|Add segment/,
+        })
+      ).toHaveCount(0)
+      await expect(page.getByRole('link', { name: 'Report' })).toBeVisible()
+      await expect(
+        player.getByRole('heading', { name: 'Game completed' })
+      ).toBeVisible()
+      await expect(assets).toHaveText(settled, { useInnerText: true })
+      await expect(
+        player.getByText('Waiting for the instructor to continue.')
+      ).toHaveCount(0)
+      await player.reload()
+      await expect(assets).toHaveText(settled, { useInnerText: true })
+      await player.getByRole('link', { name: 'History', exact: true }).click()
+      await expect(player.getByTestId('history-panel')).toContainText(
+        String(FIRST_GAME_YEAR)
+      )
+      await expect(player.getByTestId('history-panel')).not.toContainText(
+        String(FIRST_GAME_YEAR + 1)
+      )
+      const reportLink = page.getByRole('link', { name: 'Report' })
+      await page.goto((await reportLink.getAttribute('href'))!)
+      await expect(page.getByTestId('report-loaded')).toContainText('completed')
+    } finally {
+      await session.context.close()
+    }
+  })
+}
+
 test('Market reveals the closed quarter before releasing results to two players', async ({
   page,
   browser,

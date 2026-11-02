@@ -142,6 +142,7 @@ type Mutation {
   addPeriodSegment(facts: PeriodSegmentFactsInput!, gameId: Int!, learningElements: [String], periodIx: Int!, storyElements: [String]): PeriodSegment
   attemptLearningElement(elementId: ID!, selection: String!): LearningElementAttempt
   createGame(facts: GameFactsInput!, maxPlayers: Int, name: String!, playerCount: Int, registrationMode: RegistrationMode): Game
+  finishGame(gameId: Int!): Game!
   loginAsTeam(token: String!): Player
   logoutAsTeam: Boolean
   markStoryElement(elementId: ID!): Player

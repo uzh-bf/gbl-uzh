@@ -65,6 +65,7 @@ function GameLayout({
   const marketVisible = tab === 'market' || (tablet && tab === 'cockpit')
   const detailTab = tab !== 'cockpit'
   const resultScreen = !!resultView && !detailTab
+  const awaitingInstructor = !!resultView && currentGame?.status !== 'COMPLETED'
   const { toast } = useToast()
 
   const countdownNotifications = useRef({
@@ -158,7 +159,9 @@ function GameLayout({
       ? 0
       : running
         ? segmentIndex
-        : ['PAUSED', 'CONSOLIDATION', 'RESULTS'].includes(currentGame.status)
+        : ['PAUSED', 'CONSOLIDATION', 'RESULTS', 'COMPLETED'].includes(
+              currentGame.status
+            )
           ? segmentIndex + 1
           : 0
   const status = {
@@ -452,7 +455,7 @@ function GameLayout({
           />
         </main>
         <div className="relative z-[3] shrink-0 bg-white">
-          {tab === 'cockpit' && (running || resultView) && (
+          {tab === 'cockpit' && (running || awaitingInstructor) && (
             <div className="border-player-divider phone:min-h-0 phone:gap-app-3 phone:px-app-4 phone:py-app-3 tablet:min-h-[68px] tablet:px-[16px] tablet:py-[12px] flex items-center justify-between gap-[12px] border-t">
               {resultView ? (
                 <p className="text-player-muted phone:app-caption tablet:app-caption m-0">

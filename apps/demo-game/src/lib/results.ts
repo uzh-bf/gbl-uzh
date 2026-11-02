@@ -56,12 +56,15 @@ export function balanceMix(value: ResultBalance): Allocation | null {
 export function buildResultView(data: ResultQuery) {
   const game = data.result?.currentGame
   if (pendingMarketReveal(game)) return null
-  if (!game || !['PAUSED', 'CONSOLIDATION', 'RESULTS'].includes(game.status))
+  const status = game?.status === 'COMPLETED' ? 'RESULTS' : game?.status
+  if (
+    !game ||
+    (status !== 'PAUSED' && status !== 'CONSOLIDATION' && status !== 'RESULTS')
+  )
     return null
   const { results: rows, settled } = readResultHistory(data)
   const ended = rows.filter((row) => row.type === 'PERIOD_END')
-  const period =
-    game.status === 'RESULTS' ? ended.at(-1)?.period : game.activePeriod
+  const period = status === 'RESULTS' ? ended.at(-1)?.period : game.activePeriod
   if (!period) return null
   const year = FIRST_GAME_YEAR + period.index
   const periodConfig = game.periods.find((item) => item.id === period.id)
@@ -69,7 +72,7 @@ export function buildResultView(data: ResultQuery) {
     .filter((row) => row.period.id === period.id)
     .map((row) => ({ ...row, samples: readBalanceSamples(row.facts) }))
   const quarterIndex =
-    game.status === 'RESULTS'
+    status === 'RESULTS'
       ? (periodConfig?.activeSegmentIx ??
         quarterRows.at(-1)?.segment?.index ??
         0)
@@ -116,9 +119,9 @@ export function buildResultView(data: ResultQuery) {
   opening.label = startMonth === 0 ? 'Start' : opening.label
   const close = balance(quarterSamples.at(-1))
   const current =
-    game.status === 'RESULTS'
+    status === 'RESULTS'
       ? balance(parseFacts(ended.at(-1)?.facts).assets)
-      : game.status === 'CONSOLIDATION'
+      : status === 'CONSOLIDATION'
         ? balance(parseFacts(data.result?.playerResult?.facts).assets)
         : close
   const years = ended.map((row) => {
@@ -148,7 +151,7 @@ export function buildResultView(data: ResultQuery) {
         row.segment.index === index &&
         row.samples.length === monthsPerQuarter + 1
     ) &&
-    (game.status !== 'RESULTS' ||
+    (status !== 'RESULTS' ||
       !periodConfig ||
       quarterRows.length === periodConfig.segmentCount)
   const monthlySamples = quarterRows.flatMap((row) => row.samples.slice(1))
@@ -161,7 +164,7 @@ export function buildResultView(data: ResultQuery) {
     })
   ) as Record<Asset, number | null>
   return {
-    status: game.status as 'PAUSED' | 'CONSOLIDATION' | 'RESULTS',
+    status,
     year,
     quarter,
     segmentCount: periodConfig?.segmentCount ?? quarter,

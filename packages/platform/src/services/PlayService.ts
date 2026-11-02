@@ -360,13 +360,23 @@ export async function getPlayerResult(args: GetPlayerResultArgs, ctx: Context) {
 
   if (!currentGame) return null
 
-  if (!currentGame.activePeriod) {
-    if (currentGame.status === DB.GameStatus.RESULTS) {
-      const lastPeriod = currentGame.periods[currentGame.periods.length - 1]
-      if (lastPeriod) {
-        currentGame.activePeriod = lastPeriod as any
-        currentGame.activePeriodIx = lastPeriod.index
+  if (
+    !currentGame.activePeriod &&
+    (currentGame.status === 'RESULTS' || currentGame.status === 'COMPLETED')
+  ) {
+    // The persisted RESULTS cursor points one past the settled period, even
+    // when more periods were authored while the instructor reviewed results.
+    const settled = currentGame.periods.find(
+      (p) => p.index === currentGame.activePeriodIx - 1
+    )
+    if (settled) {
+      currentGame.activePeriod = {
+        ...settled,
+        activeSegment:
+          settled.segments.find((s) => s.id === settled.activeSegmentId) ??
+          null,
       }
+      currentGame.activePeriodIx = settled.index
     }
   }
 

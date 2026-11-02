@@ -174,7 +174,7 @@ Platform notes:
   the `GameService` consolidation fix (the pointer is disconnected instead of
   connecting a missing record) — the old "unplayed sentinel period" workaround
   is obsolete; `playwright/tests/rate-wars-flow.spec.ts` asserts the fixed
-  behavior. `COMPLETED` is still never set — do not test it.
+  behavior. In Demo Game, verify Finish Game from RESULTS both with and without an authored successor, including live player results and reload.
 - One app per stack: specs assume THEIR app is the one serving
   `PLAYWRIGHT_BASE_URL`. The demo spec needs `apps/demo-game` on :3000, the
   rate-wars spec needs `examples/rate-wars`. Run the matching spec file, not the

@@ -779,29 +779,6 @@ export async function activateNextPeriod(
         return null
       }
 
-      // if (game.activePeriodIx >= game.periods.length) {
-      //   const result = await ctx.prisma.$transaction([
-      //     ctx.prisma.game.update({
-      //       where: {
-      //         id: gameId,
-      //       },
-      //       include: {
-      //         periods: {
-      //           include: {
-      //             segments: true,
-      //           },
-      //         },
-      //       },
-      //       data: {
-      //         // TODO(JJ): Double-check there is not else to update?
-      //         status: DB.GameStatus.COMPLETED,
-      //       },
-      //     }),
-      //   ])
-
-      //   return result
-      // }
-
       const { results, extras } = computePeriodStartResults(
         {
           results: upcomingPeriod.previousPeriod[0]?.results,
@@ -819,6 +796,8 @@ export async function activateNextPeriod(
         ctx.prisma.game.update({
           where: {
             id: gameId,
+            status: DB.GameStatus.RESULTS,
+            version: game.version,
           },
           include: gameInclude,
           data: {
@@ -889,6 +868,46 @@ export async function activateNextPeriod(
     )
   }
   return updatedGame
+}
+
+/** Finish a settled game. The RESULTS cursor still identifies the first unplayed period. */
+export async function finishGame(gameId: number, ctx: Context) {
+  const { game, changed } = await ctx.prisma.$transaction(async (tx) => {
+    const current = await tx.game.findUniqueOrThrow({
+      where: { id: gameId },
+      select: { ownerId: true, status: true, version: true },
+    })
+    assertGameManager(ctx, current.ownerId)
+    if (current.status !== 'RESULTS' && current.status !== 'COMPLETED')
+      throw new Error('Game can only be finished from period results.')
+
+    const update = await tx.game.updateMany({
+      where: { id: gameId, status: 'RESULTS', version: current.version },
+      data: {
+        status: 'COMPLETED',
+        activePeriodId: null,
+        version: { increment: 1 },
+      },
+    })
+    const game = await tx.game.findUniqueOrThrow({
+      where: { id: gameId },
+      include: {
+        periods: { include: { segments: true } },
+        players: true,
+        activePeriod: true,
+      },
+    })
+    if (game.status !== 'COMPLETED') throw new Error('Game has changed.')
+    return { game, changed: update.count === 1 }
+  })
+
+  if (changed) {
+    EventService.publishGlobalNotification({
+      type: BaseGlobalNotificationType.GAME_COMPLETED,
+      facts: EventService.buildGameRealtimeFacts(gameId, game),
+    })
+  }
+  return game
 }
 
 interface ActivateSegmentArgs {

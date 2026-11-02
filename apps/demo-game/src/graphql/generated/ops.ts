@@ -159,6 +159,7 @@ export type Mutation = {
   addPeriodSegment?: Maybe<PeriodSegment>;
   attemptLearningElement?: Maybe<LearningElementAttempt>;
   createGame?: Maybe<Game>;
+  finishGame: Game;
   loginAsTeam?: Maybe<Player>;
   logoutAsTeam?: Maybe<Scalars['Boolean']['output']>;
   markStoryElement?: Maybe<Player>;
@@ -219,6 +220,11 @@ export type MutationCreateGameArgs = {
   name: Scalars['String']['input'];
   playerCount?: InputMaybe<Scalars['Int']['input']>;
   registrationMode?: InputMaybe<RegistrationMode>;
+};
+
+
+export type MutationFinishGameArgs = {
+  gameId: Scalars['Int']['input'];
 };
 
 
@@ -746,6 +752,13 @@ export type UserEventsSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 export type UserEventsSubscription = { __typename?: 'Subscription', eventsUser?: Array<{ __typename?: 'Event', type?: string | null }> | null };
 
+export type FinishGameMutationVariables = Exact<{
+  gameId: Scalars['Int']['input'];
+}>;
+
+
+export type FinishGameMutation = { __typename?: 'Mutation', finishGame: { __typename?: 'Game', id: string, status: GameStatus, version: number } };
+
 export type MarketDiceQueryVariables = Exact<{
   segmentId: Scalars['Int']['input'];
 }>;
@@ -1038,6 +1051,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   addPeriodSegment?: Resolver<Maybe<ResolversTypes['PeriodSegment']>, ParentType, ContextType, RequireFields<MutationAddPeriodSegmentArgs, 'facts' | 'gameId' | 'periodIx'>>;
   attemptLearningElement?: Resolver<Maybe<ResolversTypes['LearningElementAttempt']>, ParentType, ContextType, RequireFields<MutationAttemptLearningElementArgs, 'elementId' | 'selection'>>;
   createGame?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<MutationCreateGameArgs, 'facts' | 'name'>>;
+  finishGame?: Resolver<ResolversTypes['Game'], ParentType, ContextType, RequireFields<MutationFinishGameArgs, 'gameId'>>;
   loginAsTeam?: Resolver<Maybe<ResolversTypes['Player']>, ParentType, ContextType, RequireFields<MutationLoginAsTeamArgs, 'token'>>;
   logoutAsTeam?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   markStoryElement?: Resolver<Maybe<ResolversTypes['Player']>, ParentType, ContextType, RequireFields<MutationMarkStoryElementArgs, 'elementId'>>;
@@ -1264,6 +1278,7 @@ export const RegisterPlayerDocument = {"kind":"Document","definitions":[{"kind":
 export const SetRegistrationOpenDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SetRegistrationOpen"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gameId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"open"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"setRegistrationOpen"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"gameId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gameId"}}},{"kind":"Argument","name":{"kind":"Name","value":"open"},"value":{"kind":"Variable","name":{"kind":"Name","value":"open"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"registrationOpen"}}]}}]}}]} as unknown as DocumentNode<SetRegistrationOpenMutation, SetRegistrationOpenMutationVariables>;
 export const GlobalEventsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"GlobalEvents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"eventsGlobal"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"sub"}},{"kind":"Field","name":{"kind":"Name","value":"facts"}}]}}]}}]} as unknown as DocumentNode<GlobalEventsSubscription, GlobalEventsSubscriptionVariables>;
 export const UserEventsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"UserEvents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"eventsUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}}]}}]}}]} as unknown as DocumentNode<UserEventsSubscription, UserEventsSubscriptionVariables>;
+export const FinishGameDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"FinishGame"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gameId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"finishGame"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"gameId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gameId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"version"}}]}}]}}]} as unknown as DocumentNode<FinishGameMutation, FinishGameMutationVariables>;
 export const MarketDiceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"MarketDice"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"segmentId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"marketDice"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"segmentId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"segmentId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"gameId"}},{"kind":"Field","name":{"kind":"Name","value":"periodIx"}},{"kind":"Field","name":{"kind":"Name","value":"index"}},{"kind":"Field","name":{"kind":"Name","value":"facts"}},{"kind":"Field","name":{"kind":"Name","value":"periodFacts"}},{"kind":"Field","name":{"kind":"Name","value":"canReveal"}}]}}]}}]} as unknown as DocumentNode<MarketDiceQuery, MarketDiceQueryVariables>;
 export const RevealMarketRollDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RevealMarketRoll"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"segmentId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"rollIndex"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"revealMarketRoll"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"segmentId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"segmentId"}}},{"kind":"Argument","name":{"kind":"Name","value":"rollIndex"},"value":{"kind":"Variable","name":{"kind":"Name","value":"rollIndex"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"facts"}}]}}]}}]} as unknown as DocumentNode<RevealMarketRollMutation, RevealMarketRollMutationVariables>;
 

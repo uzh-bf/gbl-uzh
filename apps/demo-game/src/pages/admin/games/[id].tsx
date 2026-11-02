@@ -33,6 +33,7 @@ import {
   AddCountdownDocument,
   AddGamePeriodDocument,
   AddPeriodSegmentDocument,
+  FinishGameDocument,
   GameDocument,
   GameStatus,
   GlobalEventsDocument,
@@ -211,16 +212,32 @@ function ManageGame() {
     error: storyElementsError,
   } = useQuery(StoryElementsDocument)
 
+  const { toast } = useToast()
+  const periodTransitionOptions = {
+    variables: { gameId: Number(router.query.id) },
+    refetchQueries: [GameDocument],
+    awaitRefetchQueries: true,
+    onError: () => {
+      toast({
+        title: 'Could not change the game',
+        description: 'Refreshing the current status.',
+      })
+      void queuedRefetch().catch(() => {})
+    },
+  }
+  const [finishGame, { loading: finishing }] = useMutation(
+    FinishGameDocument,
+    periodTransitionOptions
+  )
   const [activateNextPeriod, { loading: nextPeriodLoading }] = useMutation(
     ActivateNextPeriodDocument,
     {
-      onCompleted() {
-        try {
-          const anchor = document.querySelector('#active-period')
-          if (anchor)
-            anchor.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        } catch (e) {}
-      },
+      ...periodTransitionOptions,
+      onCompleted: () =>
+        document.querySelector('#active-period')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        }),
     }
   )
   const [activateNextSegment, { loading: nextSegmentLoading }] = useMutation(
@@ -254,15 +271,7 @@ function ManageGame() {
       }),
   })
 
-  const { toast } = useToast()
-
-  const nextPeriod = () =>
-    activateNextPeriod({
-      variables: {
-        gameId: Number(router.query.id),
-      },
-      refetchQueries: [GameDocument],
-    })
+  const nextPeriod = () => activateNextPeriod()
 
   const nextSegment = () =>
     activateNextSegment({
@@ -381,11 +390,6 @@ function ManageGame() {
         )
       }
 
-      // TODO(JJ):
-      // - Fix consolidation for the last period
-      // - const periods = game?.periods
-      //   const activePeriodIx = game?.activePeriodIx
-      //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
       case GameStatus.Consolidation:
         return (
           <Button
@@ -396,19 +400,25 @@ function ManageGame() {
           </Button>
         )
       case GameStatus.Results: {
-        const anotherPeriod = game.activePeriodIx > game.periods.length - 1
+        const pending = finishing || nextPeriodLoading
         return (
-          <Button disabled={anotherPeriod} onClick={nextPeriod}>
-            Next Period
-          </Button>
+          <>
+            {activePeriod && (
+              <Button disabled={pending} onClick={nextPeriod}>
+                Next Period
+              </Button>
+            )}
+            <Button disabled={pending} onClick={() => finishGame()}>
+              Finish Game
+            </Button>
+          </>
         )
       }
-
       case GameStatus.Completed:
         return (
-          <Button disabled onClick={() => null}>
-            Completed
-          </Button>
+          <span role="status" className="self-center font-semibold">
+            Game completed
+          </span>
         )
     }
   }
@@ -452,6 +462,10 @@ function ManageGame() {
               periodStatus === STATUS.COMPLETED ||
               periodStatus === STATUS.RESULTS
 
+            const canAddSegment =
+              game.status !== GameStatus.Completed &&
+              !isPeriodCompleted &&
+              ix === game.periods.length - 1
             const scenario = period.facts.scenario
             const trendBonds = scenario.trendBonds
             const gapBonds = scenario.gapBonds
@@ -672,7 +686,7 @@ function ManageGame() {
                         )
                       }
                     )}
-                    {!isPeriodCompleted && game.periods.length - 1 === ix && (
+                    {canAddSegment && (
                       <>
                         {storyElementsLoading || learningElementsLoading ? (
                           <div>Loading...</div>
@@ -770,6 +784,7 @@ function ManageGame() {
           })}
 
           {(() => {
+            if (game.status === GameStatus.Completed) return null
             const lastPeriod = game.periods[game.periods.length - 1]
             const disabled =
               lastPeriod &&
@@ -922,7 +937,10 @@ function ManageGame() {
           </div>
         </div>
 
-        <form onSubmit={handleCountdownSubmit(onCountdownSubmit)}>
+        <form
+          hidden={game.status === GameStatus.Completed}
+          onSubmit={handleCountdownSubmit(onCountdownSubmit)}
+        >
           <Card className="flex flex-col">
             <CardHeader>
               <CardTitle>Countdown</CardTitle>
