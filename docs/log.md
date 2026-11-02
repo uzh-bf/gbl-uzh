@@ -1,5 +1,9 @@
 # Log
 
+## 2026-11-02
+
+**Update**: [Game Lifecycle](game-lifecycle.md) — documented the Period Results response when the last authored period ends and how to continue with a newly added period.
+
 ## 2026-10-27
 
 **Creation**: [Shared registration ADRs](adr/0003-support-shared-game-registration.md), [browser identity and recovery](adr/0004-identify-browser-enrollment-and-protect-return-links.md), [atomic enrollment/start](adr/0005-serialize-enrollment-with-initial-game-start.md), and a [registration glossary](glossary.md) - recorded the agreed design, alternatives, and consequences and linked the decision records from the wiki index.

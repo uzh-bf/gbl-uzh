@@ -6,7 +6,7 @@ tags:
   - lifecycle
   - state-machine
   - admin
-timestamp: "2026-10-07T16:00:00Z"
+timestamp: "2026-11-02T09:02:00Z"
 ---
 
 # Game Lifecycle
@@ -49,6 +49,7 @@ Notes:
 
 - The "Consolidate" button appears when the game is RUNNING **and** the active segment is the last one (`activeSegmentIx >= segments.length - 1` with `segmentCount` reached) — and it calls `activateNextPeriod`, not `activateNextSegment`.
 - Periods and segments are **authored during play or before**: "Add period" (with per-period facts, e.g. a market scenario) and "Add segment" (with attached learning/story elements). Segment facts (e.g. random returns) are computed at _creation_ time by `Segment.initialize`, not at activation time.
+- **Period Results** works with a single authored period. `GameService.ts:activateNextPeriod` saves the period-end results and returns the game in `RESULTS`. If the instructor adds another period later, **Next Period** starts it.
 - Segment/period transitions reset `Player.isReady` to false for the whole game. (Exception: the initial SCHEDULED → PREPARATION has no explicit reset — players start at `false` anyway.)
 
 ## What players see per status

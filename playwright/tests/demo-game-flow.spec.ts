@@ -649,10 +649,12 @@ async function advanceGame(
   )
   await button.click()
   const response = await responsePromise
-  expect(await response.json()).not.toHaveProperty('errors')
+  const payload = await response.json()
+  expect(payload).not.toHaveProperty('errors')
   await expectGameStatusEventually(page, expectedStatus)
   if (reveal && ['PAUSED', 'CONSOLIDATION'].includes(expectedStatus))
     await revealClosedSegment(page)
+  return payload.data
 }
 
 async function assertPlayerDecisionForm(sessions: PlayerSession[]) {
@@ -1554,9 +1556,28 @@ test('Market reveals the closed quarter before releasing results to two players'
       action: 'Consolidate',
       expectedStatus: 'CONSOLIDATION',
     })
-    await advanceGame(page, {
+    const { activateNextPeriod } = await advanceGame(page, {
       action: 'Period Results',
       expectedStatus: 'RESULTS',
+    })
+    expect(activateNextPeriod).toMatchObject({
+      status: 'RESULTS',
+      periods: [{ index: 0 }],
+    })
+    const results = await page.request.post('/api/graphql', {
+      data: {
+        query: `query($gameId: Int!) {
+          specificResults(gameId: $gameId, type: "PERIOD_END") { player { name } }
+        }`,
+        variables: { gameId: Number(activateNextPeriod.id) },
+      },
+    })
+    expect(await results.json()).toEqual({
+      data: {
+        specificResults: players.slice(0, 2).map(({ name }) => ({
+          player: { name },
+        })),
+      },
     })
     await expect(player.getByTestId('market-comparison')).toContainText(
       'Q2 · Jun'

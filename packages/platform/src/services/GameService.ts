@@ -429,8 +429,8 @@ export async function activateNextPeriod(
   //   type: GlobalNotificationType.PERIOD_ACTIVATED,
   // })
 
-  let finalTransactionResult
-  let didUpdate = false
+  const gameInclude = { periods: { include: { segments: true } } } as const
+  let updatedGame: DB.Prisma.GameGetPayload<{ include: typeof gameInclude }>
   switch (game.status) {
     // SCHEDULED -> PREPARATION
     // if the game is scheduled, initialize period results and move to PREPARATION
@@ -456,7 +456,7 @@ export async function activateNextPeriod(
         if (!fresh.players.length) throw new Error('NO_PLAYERS')
         if (!fresh.periods[0]?.segments.length)
           throw new Error('GAME_NOT_CONFIGURED')
-        const updated = await tx.game.update({
+        const updatedGame_ = await tx.game.update({
           where: { id: gameId },
           data: {
             status: DB.GameStatus.PREPARATION,
@@ -465,7 +465,7 @@ export async function activateNextPeriod(
             activePeriod: { connect: { gameId_index: { gameId, index: 0 } } },
             version: { increment: 1 },
           },
-          include: { periods: { include: { segments: true } } },
+          include: gameInclude,
         })
         const { results, extras } = computePeriodStartResults(
           {
@@ -478,7 +478,7 @@ export async function activateNextPeriod(
           { ...ctx, prisma: tx },
           { services }
         )
-        const period = await tx.period.update({
+        await tx.period.update({
           where: { gameId_index: { gameId, index: 0 } },
           data: { results: { create: results } },
         })
@@ -513,11 +513,10 @@ export async function activateNextPeriod(
             data: { setupEventPending: false },
           })
         }
-        return { rows: [updated, period], notifications }
+        return { game: updatedGame_, notifications }
       })
-      finalTransactionResult = started.rows
+      updatedGame = started.game
       started.notifications.forEach((notify) => notify())
-      didUpdate = true
 
       break
     }
@@ -536,7 +535,7 @@ export async function activateNextPeriod(
       )
         return null
 
-      finalTransactionResult = await ctx.prisma.$transaction(
+      updatedGame = await ctx.prisma.$transaction(
         async (tx) => {
           if (services.Segment.updateDBBeforeActivation) {
             await services.Segment.updateDBBeforeActivation(tx, {
@@ -574,20 +573,14 @@ export async function activateNextPeriod(
               segmentCount: gameLocal?.activePeriod?.segmentCount,
             })
 
-          const updatedGame = await tx.game.update({
+          const updatedGame_ = await tx.game.update({
             data: {
               status: DB.GameStatus.CONSOLIDATION,
               version: {
                 increment: 1,
               },
             },
-            include: {
-              periods: {
-                include: {
-                  segments: true,
-                },
-              },
-            },
+            include: gameInclude,
             where: {
               id: gameId,
             },
@@ -638,11 +631,10 @@ export async function activateNextPeriod(
             await extra
           }
 
-          return updatedGame
+          return updatedGame_
         },
         { timeout: 120000 }
       )
-      didUpdate = true
 
       break
     }
@@ -690,9 +682,7 @@ export async function activateNextPeriod(
           : { disconnect: true },
       }
 
-      // TODO(JJ): Check with RS
-      // - when updating the game with the nextPeriodIx it crashes
-      finalTransactionResult = await ctx.prisma.$transaction(
+      updatedGame = await ctx.prisma.$transaction(
         async (tx) => {
           // TODO(JJ):
           // - Here we have all the latest results of all players
@@ -720,9 +710,9 @@ export async function activateNextPeriod(
           })
 
           // update the status and active period of the current game
-          const updatedGame = await tx.game.update({
+          const updatedGame_ = await tx.game.update({
             where: { id: gameId },
-            include: { periods: { include: { segments: true } } },
+            include: gameInclude,
             data: {
               ...gameData,
               version: {
@@ -748,11 +738,10 @@ export async function activateNextPeriod(
             await extra
           }
 
-          return updatedGame
+          return updatedGame_
         },
         { timeout: 120000 }
       )
-      didUpdate = true
 
       break
     }
@@ -825,19 +814,13 @@ export async function activateNextPeriod(
         { services }
       )
 
-      finalTransactionResult = await ctx.prisma.$transaction([
+      const [preparedGame] = await ctx.prisma.$transaction([
         // update the status and active period of the current game
         ctx.prisma.game.update({
           where: {
             id: gameId,
           },
-          include: {
-            periods: {
-              include: {
-                segments: true,
-              },
-            },
-          },
+          include: gameInclude,
           data: {
             status: DB.GameStatus.PREPARATION,
             // re-connect in case consolidation left the pointer disconnected
@@ -876,7 +859,7 @@ export async function activateNextPeriod(
 
         ...extras,
       ])
-      didUpdate = true
+      updatedGame = preparedGame
 
       break
     }
@@ -889,25 +872,23 @@ export async function activateNextPeriod(
       return null
   }
 
-  if (didUpdate) {
-    const gameAfterUpdate = await EventService.getGameRealtimeState(
-      ctx.prisma,
-      gameId
-    )
+  const gameAfterUpdate = await EventService.getGameRealtimeState(
+    ctx.prisma,
+    gameId
+  )
 
-    if (gameAfterUpdate) {
-      const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
-        type: BaseGlobalNotificationType.PERIOD_ACTIVATED,
-        facts: EventService.buildGameRealtimeFacts(gameId, gameAfterUpdate),
-      }
-      EventService.publishGlobalNotification(eventToPublish)
-      log.info(
-        `Published ${eventToPublish.type} for game ${gameId}`,
-        eventToPublish.facts
-      )
+  if (gameAfterUpdate) {
+    const eventToPublish: PlatformEvent<BaseGlobalNotificationType> = {
+      type: BaseGlobalNotificationType.PERIOD_ACTIVATED,
+      facts: EventService.buildGameRealtimeFacts(gameId, gameAfterUpdate),
     }
+    EventService.publishGlobalNotification(eventToPublish)
+    log.info(
+      `Published ${eventToPublish.type} for game ${gameId}`,
+      eventToPublish.facts
+    )
   }
-  return finalTransactionResult
+  return updatedGame
 }
 
 interface ActivateSegmentArgs {
