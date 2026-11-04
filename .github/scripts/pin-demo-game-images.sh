@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Pins the demo-game app and migration images in a deploy/demo-game overlay,
-# records the source commit, and pushes the change to dev.
+# records the source commit, and pushes the change to dev. Commits that are not
+# newer than the pinned one are skipped, so a slow older run cannot overwrite a
+# newer STG deploy. PRD is never pinned by CI (see deploy/demo-game/README.md).
 # Usage: pin-demo-game-images.sh <overlay> <commit> <app-digest> <migration-digest>
-# FORWARD_ONLY=1 skips commits that are not newer than the pinned one, so a
-# slow older run cannot overwrite a newer STG deploy.
 set -euo pipefail
 
 overlay=$1 commit=$2 app_digest=$3 migration_digest=$4
@@ -13,7 +13,7 @@ done
 git cat-file -e "$commit^{commit}"
 
 source_file=$overlay/SOURCE_COMMIT
-if [[ ${FORWARD_ONLY:-0} == 1 && -s $source_file ]]; then
+if [[ -s $source_file ]]; then
   pinned=$(cat "$source_file")
   if ! git merge-base --is-ancestor "$pinned" "$commit" || [[ $pinned == "$commit" ]]; then
     echo "$overlay already pins $pinned, which is not older than $commit; skipping."

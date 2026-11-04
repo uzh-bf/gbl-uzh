@@ -7,7 +7,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
-# Updated by .github/workflows/demo-game-promote-prd.yml. Edit by hand only to roll back.
+# Updated by hand: commit the digests of a tested dev build (see ../README.md).
 images:
   - name: demo-game
     newName: ghcr.io/uzh-bf/gbl-uzh/demo-game

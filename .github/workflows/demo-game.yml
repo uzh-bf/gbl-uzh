@@ -218,7 +218,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=demo-game-migration-arm64
 
   # Pins the new STG images in deploy/demo-game/stg; Argo CD auto-syncs STG.
-  # PRD is promoted separately (demo-game-promote-prd.yml) and synced by hand.
+  # PRD digests are committed by hand in deploy/demo-game/prd and synced by hand.
   deploy_stg:
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     needs: [build_startinvest_arm64, build_migration_arm64]
@@ -230,7 +230,6 @@ jobs:
       contents: write
     env:
       OVERLAY: deploy/demo-game/stg
-      FORWARD_ONLY: '1'
       APP_DIGEST: ${{ needs.build_startinvest_arm64.outputs.digest }}
       MIGRATION_DIGEST: ${{ needs.build_migration_arm64.outputs.digest }}
     steps:
