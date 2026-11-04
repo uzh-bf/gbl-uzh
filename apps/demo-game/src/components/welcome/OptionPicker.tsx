@@ -1,8 +1,10 @@
 import { cn } from '@gbl-uzh/ui'
 import * as Dialog from '@radix-ui/react-dialog'
 import { Check } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useState, type ReactElement } from 'react'
+import { LanguageSwitch } from '~/i18n/Language'
 import {
   WelcomeActionButton,
   WelcomeTextButton,
@@ -26,6 +28,7 @@ export default function OptionPicker({
   children: ReactElement
   searchable?: boolean
 }) {
+  const t = useTranslations()
   const [open, setOpen] = useState(false)
   const [pending, setPending] = useState(value)
   const [search, setSearch] = useState('')
@@ -55,17 +58,20 @@ export default function OptionPicker({
               {title}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <WelcomeTextButton>Cancel</WelcomeTextButton>
+              <WelcomeTextButton>
+                {t('shared.actions.cancel')}
+              </WelcomeTextButton>
             </Dialog.Close>
+            <LanguageSwitch />
           </div>
           <Dialog.Description className="sr-only">
-            Choose an option, then confirm your selection below.
+            {t('player.setup.pickerHint')}
           </Dialog.Description>
           {searchable && (
             <WelcomeTextInput
               className="shrink-0"
-              aria-label="Search canton"
-              placeholder="Search canton"
+              aria-label={t('player.setup.searchCanton')}
+              placeholder={t('player.setup.searchCanton')}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
             />
@@ -108,7 +114,7 @@ export default function OptionPicker({
             ))}
             {filtered.length === 0 && (
               <p role="status" className="text-player-muted">
-                No cantons found. Try a name or abbreviation.
+                {t('player.setup.noCantons')}
               </p>
             )}
           </div>
@@ -123,7 +129,15 @@ export default function OptionPicker({
               }
             }}
           >
-            Use {selected?.label ?? (searchable ? 'canton' : 'avatar')}
+            {t('player.setup.useOption', {
+              option:
+                selected?.label ??
+                t(
+                  searchable
+                    ? 'player.setup.canton'
+                    : 'player.setup.avatarPlaceholder'
+                ),
+            })}
           </WelcomeActionButton>
         </Dialog.Content>
       </Dialog.Portal>

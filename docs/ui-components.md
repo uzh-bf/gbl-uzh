@@ -7,7 +7,7 @@ tags:
   - design-system
   - tailwind
   - components
-timestamp: "2026-10-07T13:52:26Z"
+timestamp: "2026-11-04T08:00:00Z"
 ---
 
 # UI Building Blocks
@@ -15,6 +15,10 @@ timestamp: "2026-10-07T13:52:26Z"
 Two component sources for game frontends: the game-specific library `@gbl-uzh/ui` (`packages/ui`) and the general-purpose UZH design system `@uzh-bf/design-system` (external npm package). Games also use plain [recharts](https://recharts.org) for charts and Formik + yup for forms.
 
 **Maturity warning:** `@gbl-uzh/ui` remains pre-1.0. Its exported package contract is verified and shared by three games, but `TimelineAdmin` is still a stub and `ProbabilityChart` remains demo-game flavored. Treat minor releases as potentially breaking until a stable 1.0 API is declared.
+
+## Language-aware game components
+
+The demo calls `next-intl`’s `useTranslations` for interface text and its own `useLanguage` for Swiss CHF, percentage, count and month formatting. Shared components receive these values through props and default to English. For example, a demo caller can pass `labels={{ login: t('shared.player.login'), avatar: (player) => t('shared.player.avatar', { player }) }}` to `PlayerCompact`. `ProbabilityChart` accepts a partial `labels` object with text and callbacks for dynamic descriptions, plus a `formatPercent(value, digits, signed?)` formatter. `HelpTooltip` accepts an accessible `label`. Other games can use these components without a translation provider. `MultiSelect` searches both the localized display label and stored option value.
 
 ## Distribution and installation
 

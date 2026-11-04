@@ -1,13 +1,15 @@
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 export default function ReturnLink({ token }: { token?: string | null }) {
+  const t = useTranslations()
   const [copied, setCopied] = useState(false)
   const [fallback, setFallback] = useState('')
   if (!token) return null
   return (
     <section
       className="border-player-border tablet:p-3 border-b p-4"
-      aria-label="Return to your bank"
+      aria-label={t('player.returnLink.title')}
     >
       <button
         className="text-player-primary min-h-[44px] font-semibold underline"
@@ -21,15 +23,14 @@ export default function ReturnLink({ token }: { token?: string | null }) {
           }
         }}
       >
-        {copied ? 'Return link copied' : 'Copy my return link'}
+        {copied ? t('player.returnLink.copied') : t('player.returnLink.copy')}
       </button>
       <p className="text-player-muted text-sm">
-        Save this private link to reopen your bank on another device. Anyone
-        with it can access your bank.
+        {t('player.returnLink.description')}
       </p>
       {fallback && (
         <input
-          aria-label="My return link"
+          aria-label={t('player.returnLink.label')}
           readOnly
           value={fallback}
           onFocus={(event) => event.target.select()}

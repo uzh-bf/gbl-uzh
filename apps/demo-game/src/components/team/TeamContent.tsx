@@ -1,5 +1,6 @@
 import { useMutation } from '@apollo/client'
 import { useLearningActivities } from '@gbl-uzh/ui'
+import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   AttemptLearningElementDocument,
@@ -8,6 +9,8 @@ import {
   ResultDocument,
   type ResultQuery,
 } from '~/graphql/generated/ops'
+import { contentText } from '~/i18n/content'
+import { MessageText, useLanguage } from '~/i18n/Language'
 import { FIRST_GAME_YEAR } from '~/lib/constants'
 import {
   sortStories,
@@ -39,6 +42,8 @@ export default function TeamContent({
   className?: string
   identity?: ReactNode
 }) {
+  const t = useTranslations()
+  const { language } = useLanguage()
   const game = data.result?.currentGame
   const self = data.self
   const segment = game?.activePeriod?.activeSegment
@@ -78,7 +83,11 @@ export default function TeamContent({
     activeSegmentLearningElements: segment?.learningElements ?? [],
     allPeriods: game?.periods ?? [],
     preserveDrafts: true,
-    toast,
+    toast: () =>
+      toast({
+        title: <MessageText message="player.quiz.wrongAnswer" />,
+        description: <MessageText message="player.quiz.retryNotice" />,
+      }),
   })
   const stories = useMemo(() => storyLibrary(data), [data])
   const automaticSequence = useMemo<StorySequence | null>(
@@ -179,7 +188,17 @@ export default function TeamContent({
       {!reading && !pendingAutomatic && learning.activeLearningId && (
         <LearningSheet
           key={learning.activeLearningId}
-          title={activeActivity?.title ?? 'Learning activity'}
+          title={
+            activeActivity
+              ? contentText(
+                  language,
+                  'lesson',
+                  activeActivity.id,
+                  'title',
+                  activeActivity.title
+                )
+              : t('player.quiz.category')
+          }
           element={learning.learningElementData?.learningElement?.element}
           isNew={openedAsNew}
           state={learning.learningElementState}

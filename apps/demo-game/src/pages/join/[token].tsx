@@ -1,4 +1,5 @@
 import { useMutation } from '@apollo/client'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { LoginAsTeamDocument } from 'src/graphql/generated/ops'
@@ -7,10 +8,11 @@ import { parseFacts } from '~/lib/facts'
 import { bankSetupSchema } from '~/lib/registration'
 
 export default function Join() {
+  const t = useTranslations()
   const router = useRouter()
   const [loginAsTeam, { client }] = useMutation(LoginAsTeamDocument)
   const token = typeof router.query.token === 'string' ? router.query.token : ''
-  const [error, setError] = useState('')
+  const [error, setError] = useState(false)
   useEffect(() => {
     if (!token) return
     let cancelled = false
@@ -29,10 +31,7 @@ export default function Join() {
         await client.clearStore()
         await router.replace(complete ? '/play/cockpit' : '/play/welcome')
       } catch {
-        if (!cancelled)
-          setError(
-            'We couldn’t open your bank. Check your private link or ask your instructor for a new copy.'
-          )
+        if (!cancelled) setError(true)
       }
     }
     void login()
@@ -42,7 +41,9 @@ export default function Join() {
   }, [token, loginAsTeam, client, router])
   return (
     <WelcomeMessage role={error ? 'alert' : 'status'}>
-      {error || 'Opening your bank…'}
+      {error
+        ? t('player.registration.returnError')
+        : t('player.registration.openingBank')}
     </WelcomeMessage>
   )
 }

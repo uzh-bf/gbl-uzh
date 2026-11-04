@@ -1,4 +1,5 @@
 import type { ResultQuery } from '../graphql/generated/ops'
+import { languageTools } from '../i18n/locale'
 import {
   ALLOCATION_KEYS,
   isAllocationValid,
@@ -53,7 +54,10 @@ export function balanceMix(value: ResultBalance): Allocation | null {
 }
 
 /** Only settled rows enter these views; PERIOD_END identifies the displayed year. */
-export function buildResultView(data: ResultQuery) {
+export function buildResultView(
+  data: ResultQuery,
+  monthLabel = (index: number) => MONTHS[index] ?? `Month ${index + 1}`
+) {
   const game = data.result?.currentGame
   if (pendingMarketReveal(game)) return null
   const status = game?.status === 'COMPLETED' ? 'RESULTS' : game?.status
@@ -92,7 +96,7 @@ export function buildResultView(data: ResultQuery) {
     return {
       ...assets,
       month,
-      label: MONTHS[month] ?? `Month ${month + 1}`,
+      label: monthLabel(month),
       bankBenchmark: finiteNumber(facts.bankBenchmark),
       bondsBenchmark: finiteNumber(facts.bondsBenchmark),
       stocksBenchmark: finiteNumber(facts.stocksBenchmark),
@@ -181,7 +185,7 @@ export function buildResultView(data: ResultQuery) {
     consolidationChange: difference(current.totalAssets, close.totalAssets),
     yearGain: years.at(-1)?.gain ?? null,
     accumulatedReturn: rate(current.totalAssets, initialCapital),
-    monthRange: `${MONTHS[startMonth] ?? `Month ${startMonth + 1}`} – ${MONTHS[startMonth + monthsPerQuarter - 1] ?? `Month ${startMonth + monthsPerQuarter}`}`,
+    monthRange: `${monthLabel(startMonth)} – ${monthLabel(startMonth + monthsPerQuarter - 1)}`,
   }
 }
 
@@ -371,21 +375,7 @@ export function readResultHistory(data: ResultQuery) {
   }
 }
 
-const amountFormat = new Intl.NumberFormat('de-CH', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-})
-
-export function playerAmount(value: number | null, signed = false) {
-  if (value === null) return '—'
-  const formatted = amountFormat.format(value).replaceAll('’', "'")
-  if (formatted === '-0.00' || formatted === '0.00') return '0.00'
-  return `${signed && value > 0 ? '+' : ''}${formatted}`
-}
-
-export function playerPercent(value: number | null) {
-  return value === null ? '—' : `${playerAmount(value * 100, true)}%`
-}
+export const { playerAmount, playerPercent } = languageTools('en')
 
 export const composeChartData = (dataPerPeriod: any, key: string) => {
   const output = []

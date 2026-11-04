@@ -1,6 +1,9 @@
 import { cn } from '@gbl-uzh/ui'
 import * as UI from '@uzh-bf/design-system'
+import { X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { ComponentProps } from 'react'
+import { LanguageSwitch } from '~/i18n/Language'
 
 // App-local sizing adapters: desktop and other games retain design-system defaults.
 export function Button({
@@ -18,12 +21,15 @@ export function Button({
   )
 }
 export function Modal({
+  children,
   className,
   ...props
 }: ComponentProps<typeof UI.Modal>) {
+  const t = useTranslations()
   return (
     <UI.Modal
       {...props}
+      hideCloseButton
       className={{
         ...className,
         content: cn(
@@ -39,7 +45,24 @@ export function Modal({
         primary: cn('mobile:app-control', className?.primary),
         secondary: cn('mobile:app-control', className?.secondary),
       }}
-    />
+    >
+      {children}
+      {!props.hideCloseButton && (
+        <button
+          type="button"
+          aria-label={t('shared.actions.close')}
+          data-cy={props.dataCloseButton?.cy}
+          data-test={props.dataCloseButton?.test}
+          onClick={props.onClose}
+          className="absolute top-1 right-1 inline-flex size-11 items-center justify-center rounded"
+        >
+          <X size={18} aria-hidden="true" />
+        </button>
+      )}
+      <div className="mt-2 flex justify-end">
+        <LanguageSwitch />
+      </div>
+    </UI.Modal>
   )
 }
 

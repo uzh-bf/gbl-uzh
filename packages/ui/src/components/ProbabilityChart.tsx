@@ -21,12 +21,44 @@ const CompatibleBar = Bar as unknown as ComponentType<BarProps>
 const CompatibleXAxis = XAxis as unknown as ComponentType<XAxisProps>
 const CompatibleYAxis = YAxis as unknown as ComponentType<YAxisProps>
 
+const defaultLabels = {
+  noReveal: 'No roll revealed.',
+  latestTotal: (total: string) => `Latest revealed total: ${total}.`,
+  expected: 'Expected',
+  monthNumber: (month: number) => `Month ${month}`,
+  trendGap: 'Trend gap',
+  volatility: 'Volatility',
+  probabilities: (asset: string) => `${asset} return probabilities`,
+  description: (asset: string, reveal: string) =>
+    `${asset}: bar height is probability; labels show return. ${reveal}`,
+  rollTooltip: (
+    roll: string,
+    probability: string,
+    change: string,
+    highlight: string
+  ) => `Roll ${roll}: ${probability} probability, ${change} return${highlight}`,
+  latestRoll: ', latest revealed roll',
+  expectationLabel: 'Expectation:',
+  trendGapLabel: 'Trend Gap:',
+  volatilityLabel: 'Volatility:',
+  diceRoll: 'Dice Roll',
+  probability: 'Probability',
+}
+
+function defaultPercent(value: number, digits: number, signed = false) {
+  return signed
+    ? signedPercent(value, digits)
+    : `${(value * 100).toFixed(digits)}%`
+}
+
 function ProbabilityChart({
+  labels: overrides,
+  formatPercent = defaultPercent,
   trendE,
   trendGap,
   totalEyes,
   variant = 'default',
-  title,
+  title = '',
   titleContent,
   month,
   monthLabel,
@@ -34,6 +66,8 @@ function ProbabilityChart({
   fixedHeight,
   monthlyHighlights,
 }: {
+  labels?: Partial<typeof defaultLabels>
+  formatPercent?: (value: number, digits: number, signed?: boolean) => string
   trendE: number
   trendGap: number
   totalEyes?: string
@@ -47,26 +81,27 @@ function ProbabilityChart({
   fixedHeight?: number
   monthlyHighlights?: { totalEyes: string; label: string; color: string }[]
 }) {
+  const labels = { ...defaultLabels, ...overrides }
   const chartId = useId().replace(/:/g, '')
   const { data, vola } = useMemo(() => {
     const { data, volatility } = probabilityDistribution(trendE, trendGap)
     return {
       data: data.map((item) => ({
         ...item,
-        change: `${(item.value * 100).toFixed(1)}%`,
+        change: formatPercent(item.value, 1),
       })),
       vola: volatility,
     }
-  }, [trendE, trendGap])
+  }, [trendE, trendGap, formatPercent])
 
   if (variant === 'market') {
     const revealDescription = monthlyHighlights
       ? monthlyHighlights
           .map((item) => `${item.label}: ${item.totalEyes}`)
-          .join('. ') || 'No roll revealed.'
+          .join('. ') || labels.noReveal
       : totalEyes
-        ? `Latest revealed total: ${totalEyes}.`
-        : 'No roll revealed.'
+        ? labels.latestTotal(totalEyes)
+        : labels.noReveal
     const barStep = compact ? 40 : 66
     const barWidth = compact ? 30 : 52
     const chartWidth = data.length * barStep
@@ -122,7 +157,7 @@ function ProbabilityChart({
             }
           >
             <span>
-              Expected{' '}
+              {labels.expected}{' '}
               <strong
                 className={cn(
                   metricClass,
@@ -131,7 +166,7 @@ function ProbabilityChart({
                     : 'text-[var(--color-player-success,#557018)]'
                 )}
               >
-                {signedPercent(trendE, 2)}
+                {formatPercent(trendE, 2, true)}
               </strong>
               {(monthLabel !== undefined || month !== undefined) && (
                 <span
@@ -141,30 +176,32 @@ function ProbabilityChart({
                       : 'mt-[4px] block text-[14px] min-[601px]:text-[length:var(--market-month-size,16px)]'
                   }
                 >
-                  {monthLabel ?? `Month ${month}`}
+                  {month !== undefined && monthLabel === undefined
+                    ? labels.monthNumber(month)
+                    : monthLabel}
                 </span>
               )}
             </span>
             <span>
-              Trend gap{' '}
+              {labels.trendGap}{' '}
               <strong
                 className={cn(
                   metricClass,
                   'text-[var(--color-player-text,#151515)]'
                 )}
               >
-                {(trendGap * 100).toFixed(2)}%
+                {formatPercent(trendGap, 2)}
               </strong>
             </span>
             <span>
-              Volatility{' '}
+              {labels.volatility}{' '}
               <strong
                 className={cn(
                   metricClass,
                   'text-[var(--color-player-text,#151515)]'
                 )}
               >
-                {(vola * 100).toFixed(2)}%
+                {formatPercent(vola, 2)}
               </strong>
             </span>
           </div>
@@ -172,14 +209,14 @@ function ProbabilityChart({
         <div
           className="mt-[var(--market-chart-gap,20px)]"
           role="region"
-          aria-label={`${title} return probabilities`}
+          aria-label={labels.probabilities(title)}
         >
           <svg
             viewBox={fixedSize ? undefined : `0 0 ${chartWidth} 258`}
             height={fixedHeight}
             className="block w-full"
             role="img"
-            aria-label={`${title}: bar height is probability; labels show return. ${revealDescription}`}
+            aria-label={labels.description(title, revealDescription)}
           >
             <line
               x1="0"
@@ -207,7 +244,18 @@ function ProbabilityChart({
                   data-roll={item.eyes}
                   data-highlighted={selected}
                 >
-                  <title>{`Roll ${item.eyes}: ${(item.prob * 100).toFixed(2)}% probability, ${signedPercent(item.value)} return${highlights.length ? `, ${highlights.map((highlight) => highlight.label).join(', ')}` : selected ? ', latest revealed roll' : ''}`}</title>
+                  <title>
+                    {labels.rollTooltip(
+                      item.eyes,
+                      formatPercent(item.prob, 2),
+                      formatPercent(item.value, 1, true),
+                      highlights.length
+                        ? `, ${highlights.map((highlight) => highlight.label).join(', ')}`
+                        : selected
+                          ? labels.latestRoll
+                          : ''
+                    )}
+                  </title>
                   {highlights.length > 0 && (
                     <defs>
                       <linearGradient
@@ -269,7 +317,7 @@ function ProbabilityChart({
                         : 'var(--color-player-muted, #707070)'
                     }
                   >
-                    {signedPercent(item.value).replace('%', '')}
+                    {formatPercent(item.value, 1, true).replace(/\s*%$/, '')}
                   </text>
                   <text
                     x={horizontal(x + barWidth / 2)}
@@ -298,9 +346,15 @@ function ProbabilityChart({
   return (
     <div>
       <div className="flex flex-row gap-4 px-2 py-1 text-sm">
-        <div>Expectation: {(trendE * 100).toFixed(2)}%</div>
-        <div>Trend Gap: {(trendGap * 100).toFixed(2)}%</div>
-        <div>Volatility: {(vola * 100).toFixed(2)}%</div>
+        <div>
+          {labels.expectationLabel} {formatPercent(trendE, 2)}
+        </div>
+        <div>
+          {labels.trendGapLabel} {formatPercent(trendGap, 2)}
+        </div>
+        <div>
+          {labels.volatilityLabel} {formatPercent(vola, 2)}
+        </div>
       </div>
 
       <ResponsiveContainer width="100%" height={200}>
@@ -309,13 +363,18 @@ function ProbabilityChart({
           margin={{ left: 15, bottom: 15, top: 30, right: 15 }}
         >
           <CompatibleXAxis dataKey="eyes">
-            <Label value="Dice Roll" position="bottom" offset={0} />
+            <Label value={labels.diceRoll} position="bottom" offset={0} />
           </CompatibleXAxis>
           <CompatibleYAxis
             dataKey="prob"
-            tickFormatter={(value) => `${(value * 100).toFixed(1)}%`}
+            tickFormatter={(value) => formatPercent(value, 1)}
           >
-            <Label value="Probability" angle={-90} position="left" offset={0} />
+            <Label
+              value={labels.probability}
+              angle={-90}
+              position="left"
+              offset={0}
+            />
           </CompatibleYAxis>
           <CompatibleBar dataKey="prob">
             <LabelList

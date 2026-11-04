@@ -1,5 +1,9 @@
 # Log
 
+## 2026-11-04
+
+**Update**: [Developing a Game](developing-a-game.md) and [UI Building Blocks](ui-components.md) — documented the demo’s next-intl catalogs, per-browser language selection in the Team profile, built-in content lookup and shared component label inputs.
+
 ## 2026-11-02
 
 **Update**: [Game Lifecycle](game-lifecycle.md) and [API Layer](api-layer.md) — documented instructor completion from period results and the game-scoped completion notification.

@@ -131,7 +131,10 @@ async function addSegment(
     ] as const) {
       for (const id of ids) {
         await dialog.getByRole('combobox').nth(picker).click()
-        await dialog.getByRole('option', { name: id, exact: true }).click()
+        await dialog
+          .getByRole('option')
+          .and(dialog.locator(`[data-value="${id}"]`))
+          .click()
         await dialog
           .getByRole('heading', { name: 'Add Segment', exact: true })
           .click()
@@ -283,7 +286,7 @@ async function assertAllocationControls(page: Page, admin: Page) {
   await expect(learning).toBeVisible()
   await learning
     .getByRole('radio', {
-      name: 'Eine Anleihe beinhaltet ein geringeres erwartetes Risiko als eine Aktie.',
+      name: 'A bond generally carries less risk than a share.',
     })
     .click()
   await learning
@@ -2862,9 +2865,12 @@ test('Decisions forecast matches Market and handles unavailable scenarios', asyn
       ).toHaveText(values)
     for (const width of [784, 390, 320]) {
       await player.setViewportSize({ width, height: 1024 })
-      await forecast.scrollIntoViewIfNeeded()
+      // The tablet layout embeds the Market panel beside Decisions.
+      const visibleForecast =
+        width >= 641 ? player.getByTestId('market-panel') : forecast
+      await visibleForecast.scrollIntoViewIfNeeded()
       await expectNoPageOverflow(player)
-      await expect(forecast).toBeInViewport()
+      await expect(visibleForecast).toBeInViewport()
       await capturePlayerScreenshot(player, {
         path: testInfo.outputPath(`decisions-forecast-${width}.png`),
       })

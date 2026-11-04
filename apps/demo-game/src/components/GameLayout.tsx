@@ -2,6 +2,7 @@ import { useSubscription } from '@apollo/client'
 import { cn, getCountdownNotification } from '@gbl-uzh/ui'
 import { Switch } from '@uzh-bf/design-system'
 import dayjs from 'dayjs'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -10,7 +11,9 @@ import {
   GlobalEventsDocument,
   type ResultQuery,
 } from 'src/graphql/generated/ops'
-import { cantonNames, FIRST_GAME_YEAR } from '~/lib/constants'
+import { MessageText } from '~/i18n/Language'
+import { cantonLabel } from '~/i18n/labels'
+import { FIRST_GAME_YEAR } from '~/lib/constants'
 import { parseFacts } from '~/lib/facts'
 import { shouldRefetchDemoGame } from '~/lib/gameEvents'
 import { queueRefetch } from '~/lib/queuedRefetch'
@@ -24,11 +27,11 @@ import TeamContent from './team/TeamContent'
 import { useToast } from './ui/use-toast'
 
 const tabs = [
-  { id: 'cockpit', label: 'Decisions' },
-  { id: 'market', label: 'Market' },
-  { id: 'history', label: 'History' },
-  { id: 'team', label: 'Team' },
-]
+  { id: 'cockpit', label: 'player.nav.decisions' },
+  { id: 'market', label: 'player.nav.market' },
+  { id: 'history', label: 'player.nav.history' },
+  { id: 'team', label: 'player.nav.team' },
+] as const
 
 function GameLayout({
   children,
@@ -48,6 +51,7 @@ function GameLayout({
     onChange: (isReady: boolean) => Promise<void>
   }
 }) {
+  const t = useTranslations()
   const { self, result } = data
   const currentGame = result?.currentGame
   const activePeriod = currentGame?.activePeriod
@@ -132,8 +136,13 @@ function GameLayout({
     if (secondsRemaining > 0) {
       toast({
         variant: 'countdown',
-        title: 'Countdown set/updated!',
-        description: `${secondsRemaining} seconds remaining! Please press ready once you are done playing.`,
+        title: <MessageText message="player.progress.countdownSet" />,
+        description: (
+          <MessageText
+            message="player.progress.countdownSetDescription"
+            values={{ seconds: secondsRemaining }}
+          />
+        ),
       })
     }
   }, [running, strExpiresAt, countdownDurationMs, toast])
@@ -142,10 +151,12 @@ function GameLayout({
     return null
   }
 
-  const gameName = self.game?.name ?? `Game ${currentGame.id}`
+  const gameName =
+    self.game?.name ?? t('player.progress.gameName', { game: currentGame.id })
   const facts = parseFacts(self.facts)
   const location =
     typeof facts.location === 'string' ? facts.location : undefined
+  const locationName = location ? cantonLabel(t, location) : '—'
   const segmentIndex = resultView
     ? resultView.quarter - 1
     : activePeriod?.activeSegment?.index
@@ -165,28 +176,34 @@ function GameLayout({
           ? segmentIndex + 1
           : 0
   const status = {
-    RUNNING: 'Allocation open',
-    PAUSED: 'Allocation closed',
-    CONSOLIDATION: 'Allocation closed',
-    RESULTS: 'Period results',
-    PREPARATION: 'Preparing',
-    SCHEDULED: 'Scheduled',
-    COMPLETED: 'Completed',
+    RUNNING: t('player.progress.allocationOpen'),
+    PAUSED: t('player.progress.allocationClosed'),
+    CONSOLIDATION: t('player.progress.allocationClosed'),
+    RESULTS: t('player.progress.periodResults'),
+    PREPARATION: t('player.progress.preparing'),
+    SCHEDULED: t('player.progress.scheduled'),
+    COMPLETED: t('player.progress.completed'),
   }[currentGame.status]
   const resultCopy =
     resultView &&
     {
       PAUSED: {
-        heading: `Game ${currentGame.id} · ${resultView.year} · Quarter ${resultView.quarter} closed`,
+        heading: t('player.progress.quarterClosed', {
+          game: currentGame.id,
+          year: resultView.year,
+          quarter: resultView.quarter,
+        }),
         detail: resultView.monthRange,
       },
       CONSOLIDATION: {
-        heading: `After quarter ${resultView.quarter}`,
-        detail: 'Consolidation · held',
+        heading: t('player.progress.afterQuarter', {
+          quarter: resultView.quarter,
+        }),
+        detail: t('player.progress.consolidation'),
       },
       RESULTS: {
-        heading: `${resultView.year} closed`,
-        detail: 'All quarters closed',
+        heading: t('player.progress.yearClosed', { year: resultView.year }),
+        detail: t('player.progress.quartersClosed'),
       },
     }[resultView.status]
   const initials =
@@ -211,8 +228,13 @@ function GameLayout({
     if (!notification) return
     toast({
       variant: 'countdown',
-      title: 'Countdown Update',
-      description: `Less than ${notification.friendlyMinutes} min remaining! Please press ready.`,
+      title: <MessageText message="player.progress.countdownUpdate" />,
+      description: (
+        <MessageText
+          message="player.progress.countdownReminder"
+          values={{ minutes: notification.friendlyMinutes }}
+        />
+      ),
     })
     countdownNotifications.current[notification.secondsKey] = true
   }
@@ -235,7 +257,7 @@ function GameLayout({
               'h-full min-w-0 flex-1 items-stretch gap-[24px]',
               tablet ? 'flex' : 'hidden'
             )}
-            aria-label="Cockpit navigation"
+            aria-label={t('player.progress.navigation')}
           >
             {tabs
               .filter(({ id }) => id === 'cockpit' || id === 'history')
@@ -247,7 +269,7 @@ function GameLayout({
                   aria-current={tab === id ? 'page' : undefined}
                   className="text-player-muted aria-[current=page]:border-player-primary aria-[current=page]:text-player-primary focus-visible:outline-player-primary flex items-center border-b-[3px] border-transparent text-[16px] no-underline focus-visible:outline-2 focus-visible:outline-offset-[-4px] aria-[current=page]:font-bold"
                 >
-                  {label}
+                  {t(label)}
                 </Link>
               ))}
           </nav>
@@ -256,7 +278,7 @@ function GameLayout({
               pathname: '/play/welcome',
               query: { edit: '1', tab: requestedTab },
             }}
-            aria-label="Edit player profile"
+            aria-label={t('player.progress.editProfile')}
             className={cn(
               'text-player-primary focus-visible:outline-player-primary phone:size-app-header-avatar phone:app-body relative shrink-0 rounded-full font-bold focus-visible:outline-2 focus-visible:outline-offset-4',
               tablet && 'hidden'
@@ -282,7 +304,7 @@ function GameLayout({
               <h1 className="m-0 text-inherit">{gameName}</h1>
             </div>
             <p className="text-player-muted phone:app-caption m-0">
-              {self.name} · HQ {cantonNames[location] ?? location ?? '—'}
+              {self.name} {t('player.progress.locationPrefix')} {locationName}
             </p>
           </div>
           <div className="phone:app-value tablet:app-value shrink-0 [font-family:monospace] font-bold tabular-nums">
@@ -292,17 +314,19 @@ function GameLayout({
                 onUpdate={handleCountdownUpdate}
               />
             ) : (
-              !resultScreen && <span aria-label="No countdown">—</span>
+              !resultScreen && (
+                <span aria-label={t('player.progress.noCountdown')}>—</span>
+              )
             )}
           </div>
         </header>
         <section
           hidden={detailTab}
           className={cn(
-            'border-player-divider phone:min-h-[72px] phone:px-app-4 phone:py-[6px] tablet:min-h-[72px] tablet:px-[16px] tablet:py-[12px] shrink-0 border-b',
+            'border-player-divider phone:min-h-[72px] phone:px-app-4 phone:py-[4px] tablet:min-h-[72px] tablet:px-[16px] tablet:py-[12px] shrink-0 border-b',
             !detailTab && 'phone:flex phone:flex-col phone:justify-center'
           )}
-          aria-label="Game progress"
+          aria-label={t('player.progress.title')}
           data-game-status={currentGame.status}
         >
           <div className="phone:gap-x-app-3 phone:gap-y-0 phone:app-body flex flex-wrap items-baseline justify-between gap-x-[12px] gap-y-[4px] text-[17px] [@media(max-width:360px)]:items-start">
@@ -310,13 +334,13 @@ function GameLayout({
               {resultView
                 ? resultCopy.heading
                 : activePeriod
-                  ? `${FIRST_GAME_YEAR + activePeriod.index}${segmentIndex == null ? '' : ` · Quarter ${segmentIndex + 1} of ${segmentCount}`}`
-                  : 'Waiting for the game'}
+                  ? `${FIRST_GAME_YEAR + activePeriod.index}${segmentIndex == null ? '' : t('player.progress.quarterOf', { quarter: segmentIndex + 1, total: segmentCount })}`
+                  : t('player.progress.waiting')}
             </h2>
             {!running && (
               <span
                 className={cn(
-                  'font-semibold [@media(max-width:360px)]:whitespace-nowrap',
+                  'phone:app-caption font-semibold [@media(max-width:360px)]:whitespace-nowrap',
                   resultScreen &&
                     'text-player-body phone:app-caption tablet:app-caption'
                 )}
@@ -332,7 +356,7 @@ function GameLayout({
                   'phone:mt-app-2 phone:gap-app-2 tablet:mt-app-3 flex gap-[8px]',
                   !running &&
                     !resultView &&
-                    'phone:mb-app-3 min-[641px]:mb-[16px]'
+                    'phone:my-app-1 min-[641px]:mb-[16px]'
                 )}
                 aria-hidden="true"
               >
@@ -352,9 +376,11 @@ function GameLayout({
                 ))}
               </div>
               {!running && !resultView && (
-                <p className="text-player-muted phone:app-body m-0 text-[16px]">
-                  {done} {done === 1 ? 'quarter' : 'quarters'} done ·{' '}
-                  {Math.max(0, segmentCount - done)} to come
+                <p className="text-player-muted phone:app-caption m-0 text-[16px]">
+                  {t('player.progress.quarterCount', {
+                    done,
+                    remaining: Math.max(0, segmentCount - done),
+                  })}
                 </p>
               )}
             </>
@@ -423,7 +449,7 @@ function GameLayout({
                     pathname: '/play/welcome',
                     query: { edit: '1', tab: requestedTab },
                   }}
-                  aria-label="Edit player profile"
+                  aria-label={t('player.progress.editProfile')}
                   className="text-player-primary focus-visible:outline-player-primary relative size-[32px] shrink-0 rounded-full text-[14px] font-bold focus-visible:outline-2 focus-visible:outline-offset-4"
                 >
                   <div className="bg-player-progress grid size-full place-items-center overflow-hidden rounded-full">
@@ -446,7 +472,7 @@ function GameLayout({
                     {self.name}
                   </h2>
                   <p className="text-player-muted m-0 text-[12px] leading-[1.3]">
-                    HQ {cantonNames[location] ?? location ?? '—'}
+                    {t('player.progress.location')} {locationName}
                   </p>
                 </div>
               </div>
@@ -459,7 +485,7 @@ function GameLayout({
             <div className="border-player-divider phone:min-h-0 phone:gap-app-3 phone:px-app-4 phone:py-app-3 tablet:min-h-[68px] tablet:px-[16px] tablet:py-[12px] flex items-center justify-between gap-[12px] border-t">
               {resultView ? (
                 <p className="text-player-muted phone:app-caption tablet:app-caption m-0">
-                  Waiting for the instructor to continue.
+                  {t('player.progress.waitingForInstructor')}
                 </p>
               ) : (
                 <>
@@ -489,7 +515,7 @@ function GameLayout({
                           : 'text-player-primary'
                     )}
                   >
-                    Ready
+                    {t('player.progress.ready')}
                   </label>
                   <Switch
                     id="isReady"
@@ -519,7 +545,7 @@ function GameLayout({
               'border-player-border grid-cols-4 border-t pb-[env(safe-area-inset-bottom)]',
               tablet ? 'hidden' : 'grid'
             )}
-            aria-label="Player navigation"
+            aria-label={t('player.progress.playerNavigation')}
           >
             {tabs.map(({ id, label }) => (
               <Link
@@ -529,7 +555,7 @@ function GameLayout({
                 className="text-player-muted aria-[current=page]:border-player-primary aria-[current=page]:text-player-primary focus-visible:outline-player-primary phone:min-h-app-nav phone:app-body flex items-center justify-center border-t-[3px] border-transparent text-[17px] no-underline focus-visible:outline-[3px] focus-visible:outline-offset-[-4px] aria-[current=page]:font-bold"
                 aria-current={tab === id ? 'page' : undefined}
               >
-                {label}
+                {t(label)}
               </Link>
             ))}
           </nav>

@@ -1,4 +1,5 @@
 import * as yup from 'yup'
+import { languageTools } from '../i18n/locale'
 
 export const ALLOCATION_KEYS = ['bank', 'bonds', 'stocks'] as const
 export type Allocation = Record<(typeof ALLOCATION_KEYS)[number], number>
@@ -78,6 +79,4 @@ export function moveBoundary(
     : [Math.min(bounds[0], value), value]
 }
 
-export function formatCHF(value: number): string {
-  return `${value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "'")} CHF`
-}
+export const { formatCHF } = languageTools('en')

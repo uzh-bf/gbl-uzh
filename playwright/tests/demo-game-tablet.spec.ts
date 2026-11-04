@@ -160,6 +160,43 @@ for (const hasTouch of [false, true]) {
   })
 }
 
+test('German Market bars leave room for asset labels and returns', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  const data = await openCockpit(page)
+  await page.getByRole('link', { name: 'Team', exact: true }).click()
+  const language = page.getByTestId('team-panel').getByRole('combobox')
+  await language.selectOption('de')
+  await page.getByRole('link', { name: 'Markt', exact: true }).click()
+  await expect(language).toBeHidden()
+  data.result.currentGame.status =
+    'PAUSED' as typeof data.result.currentGame.status
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+
+  const comparison = page.getByTestId('market-comparison')
+  await expect(comparison).toBeVisible()
+  for (const width of [320, 375, 641, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 812 })
+    if (width >= 641) await expect(language).toBeVisible()
+    for (const label of ['Obligationen', 'Aktien', 'Sparguthaben']) {
+      const name = comparison.getByText(label, { exact: true })
+      const row = name.locator('..')
+      const labelRight = await name.evaluate((element) => {
+        const range = document.createRange()
+        range.selectNodeContents(element)
+        return range.getBoundingClientRect().right
+      })
+      const bar = (await row.locator('[aria-hidden="true"]').boundingBox())!
+      const value = (await row.locator('strong').boundingBox())!
+      expect(labelRight).toBeLessThan(bar.x)
+      expect(bar.width).toBeGreaterThan(0)
+      expect(bar.x + bar.width).toBeLessThan(value.x)
+    }
+    await expectNoPageOverflow(page)
+  }
+})
+
 test('tablet and desktop compose Decisions, Market, Team and all result designs', async ({
   page,
 }, testInfo) => {

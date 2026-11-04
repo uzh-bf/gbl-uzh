@@ -112,6 +112,7 @@ export function cockpitFixture() {
     self: {
       __typename: 'Player',
       id: 'tablet-player',
+      token: 'fixture-private-return-token',
       name: 'Team 1',
       role: 'Trader',
       isReady: false,
@@ -122,7 +123,12 @@ export function cockpitFixture() {
       visitedStoryElementIds: [],
       achievementKeys: [],
       achievements: [],
-      level: { __typename: 'PlayerLevel', id: 'tablet-level', index: 2 },
+      level: {
+        __typename: 'PlayerLevel',
+        id: 'tablet-level',
+        index: 2,
+        description: 'Levelling Up',
+      },
       game: currentGame,
     },
     result: {
@@ -148,6 +154,7 @@ export function cockpitFixture() {
         player: {
           __typename: 'Player',
           id: 'tablet-player',
+      token: 'fixture-private-return-token',
           completedLearningElementIds: [],
           visitedStoryElementIds: [],
         },
