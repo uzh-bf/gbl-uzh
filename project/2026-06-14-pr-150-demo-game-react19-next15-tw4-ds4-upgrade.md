@@ -18,9 +18,9 @@ THEN migrate to DS v5 local alpha tarball (keep UZH branding). Visualize everyth
 ## Plan identity
 
 - Plan: `project/2026-06-14-demo-game-react19-tw4-ds5-upgrade.md`
-- Repo: gbl-uzh (github uzh-bf/gbl-uzh). Worktree: `/Users/rschlae/Git/gbl/gbl-uzh-wt-demo-upgrade`
+- Repo: gbl-uzh (github uzh-bf/gbl-uzh). Worktree: `<repo>-wt-demo-upgrade`
 - Branch: `feat/demo-game-react19-tw4-ds5`  Target: `dev`  PR: #150 (draft) — https://github.com/uzh-bf/gbl-uzh/pull/150 (M1 only)
-- DS source: `/Users/rschlae/Git/df/design-system` branch `v5` (PR #179). v4 = 4.1.6 on main.
+- DS source: `<workspace>/df/design-system` branch `v5` (PR #179). v4 = 4.1.6 on main.
 
 ## Decisions (user-confirmed 2026-06-14)
 
@@ -114,7 +114,7 @@ tsc/build first, then dev boot + agent-browser for app screens. Review + simplif
       - website React-18/19 @types clash: monorepo now has @types/react 18 (website) + 19 (rest); TS resolves React 19 ReactNode (bigint) for next's d.ts → spurious "Link not a JSX component". website next.config → typescript.ignoreBuildErrors only (ESLint left enabled — clash is TS-only; frozen app, runtime unaffected; remove on website upgrade).
       - Accepted side-effect: website's transitive `yup` (via DS v3 peer) deduped 1.4.0→1.6.1 from the workspace yup unification. Backward-compatible 1.x minor; website declares no direct yup and is a content site unlikely to run yup validation. Re-verify when website is upgraded; pin website yup 1.4.0 if a regression surfaces.
       - syncpack: GREEN. .syncpackrc.js versionGroups: (1) ignore website (legacy stack), (2) ignore ui/platform broad react/react-dom peer ranges. Aligned upgraded-set peers (ui/platform next ^15.5.19, platform next-auth ^4.24.14, ui/platform yup ^1.6.1, platform tsx ~4.19.3, ui fortawesome ^6.7.2, ui eslint ~8.57.1). Fixed `~` dev-range on my new deps (tailwindcss, @tailwindcss/postcss, tw-animate-css, @tailwindcss/typography, ui DS devDep). nodemon ^→~. Pre-existing prettier 2-vs-3 drift left as-is (not introduced here; syncpack not CI-gated).
-- [x] M2-S5 v5 swap — DONE (committed 79f9c8d). Decision changed from tarball → **point at v5 branch** (user pick): root `pnpm-workspace.yaml` overrides `@uzh-bf/design-system` → `file:/Users/rschlae/Git/df/design-system/packages/design-system` (LOCAL-DEV ONLY, loud DO-NOT-PUSH comment). globals.css `:root` UZH block removed; `_document.tsx` `<Html data-theme="uzh">`. Resolved DS css confirmed dual-theme (`[data-theme=neutral]`+`[data-theme=uzh]`).
+- [x] M2-S5 v5 swap — DONE (committed 79f9c8d). Decision changed from tarball → **point at v5 branch** (user pick): root `pnpm-workspace.yaml` overrides `@uzh-bf/design-system` → `file:<workspace>/df/design-system/packages/design-system` (LOCAL-DEV ONLY, loud DO-NOT-PUSH comment). globals.css `:root` UZH block removed; `_document.tsx` `<Html data-theme="uzh">`. Resolved DS css confirmed dual-theme (`[data-theme=neutral]`+`[data-theme=uzh]`).
 - [x] M2-S6 visualize — DONE. demo-game run locally on v5 + agent-browser.
       - Runtime: demo-game own `docker-compose.yml` postgres on host :5432; prisma copy/generate/push; `next dev -p 3001` (`:3000` taken by an unrelated derivatives-game devcontainer). Dummy NEXTAUTH_SECRET; Auth0 has no dev bypass so only unauthenticated pages reachable — but the v5 theme pipeline is global (globals.css + `data-theme` on `<html>`) so any page fully exercises it.
       - **Evidence**: index (cockpit) renders fully on DS v5 + React19 + Next15.5 + TW4 — nav, Storage panel, recharts probability chart, Period/Segment cards, Volume Input + Buy/Sell Buttons, timeline cards. Clean console + server log (`GET / 200`, `/api/auth/session 200`). Screenshots `/tmp/m2-index-{uzh,neutral}.png`.
