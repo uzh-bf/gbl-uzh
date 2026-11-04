@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
 export default function CompactCountdown({
@@ -7,6 +8,7 @@ export default function CompactCountdown({
   expiresAt: Date
   onUpdate: (seconds: number) => void
 }) {
+  const t = useTranslations()
   const [seconds, setSeconds] = useState(0)
   const update = useRef(onUpdate)
   useEffect(() => {
@@ -24,7 +26,11 @@ export default function CompactCountdown({
     return () => clearInterval(timer)
   }, [expiry])
   return (
-    <span data-cy="countdown" aria-label="Time remaining" role="timer">
+    <span
+      data-cy="countdown"
+      aria-label={t('player.allocation.timeRemaining')}
+      role="timer"
+    >
       {String(Math.floor(seconds / 60)).padStart(2, '0')}:
       {String(seconds % 60).padStart(2, '0')}
     </span>

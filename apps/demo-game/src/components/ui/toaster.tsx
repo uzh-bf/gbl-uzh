@@ -1,4 +1,5 @@
 'use client'
+import { useTranslations } from 'next-intl'
 // TODO(JJ): This will be replaced by the design system
 import { Clock3 } from 'lucide-react'
 import { playerNoticeStyles } from '../cockpit/AllocationNotice'
@@ -13,10 +14,11 @@ import {
 import { useToast } from './use-toast'
 
 export function Toaster() {
+  const t = useTranslations()
   const { toasts } = useToast()
 
   return (
-    <ToastProvider>
+    <ToastProvider label={t('shared.notifications.title')}>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         const countdown = props.variant === 'countdown'
         return (
@@ -46,7 +48,7 @@ export function Toaster() {
             </div>
             {action}
             <ToastClose
-              aria-label="Dismiss notification"
+              aria-label={t('shared.notifications.dismiss')}
               className={
                 countdown
                   ? 'text-player-success top-1 right-1 flex min-h-[44px] min-w-[44px] items-center justify-center opacity-100'
@@ -56,7 +58,9 @@ export function Toaster() {
           </Toast>
         )
       })}
-      <ToastViewport />
+      <ToastViewport
+        label={t('shared.notifications.viewport', { hotkey: '{hotkey}' })}
+      />
     </ToastProvider>
   )
 }

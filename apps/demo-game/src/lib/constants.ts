@@ -115,20 +115,20 @@ export const cantonNames: Record<string, string> = {
 
 export const assetLabels = {
   bank: {
-    name: 'Savings',
-    risk: 'No risk',
+    name: 'shared.assets.savings',
+    risk: 'shared.risk.none',
     color: 'bg-player-savings',
     chartColor: 'var(--color-player-savings)',
   },
   bonds: {
-    name: 'Bonds',
-    risk: 'Some risk',
+    name: 'shared.assets.bonds',
+    risk: 'shared.risk.some',
     color: 'bg-player-bonds',
     chartColor: 'var(--color-player-bonds)',
   },
   stocks: {
-    name: 'Stocks',
-    risk: 'High risk',
+    name: 'shared.assets.stocks',
+    risk: 'shared.risk.high',
     color: 'bg-player-stocks',
     chartColor: 'var(--color-player-stocks)',
   },

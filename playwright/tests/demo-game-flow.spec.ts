@@ -131,7 +131,10 @@ async function addSegment(
     ] as const) {
       for (const id of ids) {
         await dialog.getByRole('combobox').nth(picker).click()
-        await dialog.getByRole('option', { name: id, exact: true }).click()
+        await dialog
+          .getByRole('option')
+          .and(dialog.locator(`[data-value="${id}"]`))
+          .click()
         await dialog
           .getByRole('heading', { name: 'Add Segment', exact: true })
           .click()
@@ -178,7 +181,9 @@ async function joinPlayer(
       page.waitForURL('**/play/cockpit', { waitUntil: 'domcontentloaded' }),
       page.getByRole('button', { name: 'Start the game', exact: true }).click(),
     ])
-    await expect(page.getByText('Game is scheduled.')).toBeVisible({
+    await expect(
+      page.getByText('You’ve joined. Waiting for the instructor to start.')
+    ).toBeVisible({
       timeout: 30_000,
     })
     // Tab-specific assertions exercise the unchanged phone navigation; the
@@ -281,7 +286,7 @@ async function assertAllocationControls(page: Page, admin: Page) {
   await expect(learning).toBeVisible()
   await learning
     .getByRole('radio', {
-      name: 'Eine Anleihe beinhaltet ein geringeres erwartetes Risiko als eine Aktie.',
+      name: 'A bond generally carries less risk than a share.',
     })
     .click()
   await learning
@@ -647,10 +652,12 @@ async function advanceGame(
   )
   await button.click()
   const response = await responsePromise
-  expect(await response.json()).not.toHaveProperty('errors')
+  const payload = await response.json()
+  expect(payload).not.toHaveProperty('errors')
   await expectGameStatusEventually(page, expectedStatus)
   if (reveal && ['PAUSED', 'CONSOLIDATION'].includes(expectedStatus))
     await revealClosedSegment(page)
+  return payload.data
 }
 
 async function assertPlayerDecisionForm(sessions: PlayerSession[]) {
@@ -1165,6 +1172,90 @@ test('trading actions submit one validated modifier and reset after success', as
   await expect(volume).toHaveValue('0')
 })
 
+for (const hasSuccessor of [false, true]) {
+  test(`Finish Game keeps the settled results ${hasSuccessor ? 'with' : 'without'} a successor`, async ({
+    page,
+    browser,
+    baseURL,
+  }) => {
+    const url = requireBaseURL(baseURL)
+    await createGame(page, {
+      name: `Finish game ${Date.now()}`,
+      playerCount: 1,
+    })
+    await addPeriod(page, { segmentCount: '1', index: 0 })
+    await addSegment(page, { periodIndex: 0 })
+    if (hasSuccessor) {
+      await addPeriod(page, { segmentCount: '1', index: 1 })
+      await addSegment(page, { periodIndex: 1 })
+    }
+    const session = await joinPlayer(
+      browser,
+      url,
+      await playerJoinUrl(page, url, 0),
+      players[0]
+    )
+    const player = session.page
+    try {
+      await advanceGame(page, {
+        action: 'Start Period',
+        expectedStatus: 'PREPARATION',
+      })
+      await advanceGame(page, {
+        action: 'Next Segment',
+        expectedStatus: 'RUNNING',
+      })
+      await advanceGame(page, {
+        action: 'Consolidate',
+        expectedStatus: 'CONSOLIDATION',
+      })
+      await advanceGame(page, {
+        action: 'Period Results',
+        expectedStatus: 'RESULTS',
+      })
+
+      const assets = player.getByTestId('result-yearly-assets')
+      await expect(assets).toContainText(String(FIRST_GAME_YEAR))
+      const settled = await assets.innerText()
+      await expect(
+        page.getByRole('button', { name: 'Next Period' })
+      ).toHaveCount(hasSuccessor ? 1 : 0)
+      await page.getByRole('button', { name: 'Finish Game' }).click()
+      await expect(page.getByTestId('game-detail')).toHaveAttribute(
+        'data-game-status',
+        'COMPLETED'
+      )
+      await expect(
+        page.getByRole('button', {
+          name: /Finish Game|Next Period|Add period|Add segment/,
+        })
+      ).toHaveCount(0)
+      await expect(page.getByRole('link', { name: 'Report' })).toBeVisible()
+      await expect(
+        player.getByRole('heading', { name: 'Game completed' })
+      ).toBeVisible()
+      await expect(assets).toHaveText(settled, { useInnerText: true })
+      await expect(
+        player.getByText('Waiting for the instructor to continue.')
+      ).toHaveCount(0)
+      await player.reload()
+      await expect(assets).toHaveText(settled, { useInnerText: true })
+      await player.getByRole('link', { name: 'History', exact: true }).click()
+      await expect(player.getByTestId('history-panel')).toContainText(
+        String(FIRST_GAME_YEAR)
+      )
+      await expect(player.getByTestId('history-panel')).not.toContainText(
+        String(FIRST_GAME_YEAR + 1)
+      )
+      const reportLink = page.getByRole('link', { name: 'Report' })
+      await page.goto((await reportLink.getAttribute('href'))!)
+      await expect(page.getByTestId('report-loaded')).toContainText('completed')
+    } finally {
+      await session.context.close()
+    }
+  })
+}
+
 test('Market reveals the closed quarter before releasing results to two players', async ({
   page,
   browser,
@@ -1552,9 +1643,28 @@ test('Market reveals the closed quarter before releasing results to two players'
       action: 'Consolidate',
       expectedStatus: 'CONSOLIDATION',
     })
-    await advanceGame(page, {
+    const { activateNextPeriod } = await advanceGame(page, {
       action: 'Period Results',
       expectedStatus: 'RESULTS',
+    })
+    expect(activateNextPeriod).toMatchObject({
+      status: 'RESULTS',
+      periods: [{ index: 0 }],
+    })
+    const results = await page.request.post('/api/graphql', {
+      data: {
+        query: `query($gameId: Int!) {
+          specificResults(gameId: $gameId, type: "PERIOD_END") { player { name } }
+        }`,
+        variables: { gameId: Number(activateNextPeriod.id) },
+      },
+    })
+    expect(await results.json()).toEqual({
+      data: {
+        specificResults: players.slice(0, 2).map(({ name }) => ({
+          player: { name },
+        })),
+      },
     })
     await expect(player.getByTestId('market-comparison')).toContainText(
       'Q2 · Jun'
@@ -2755,9 +2865,12 @@ test('Decisions forecast matches Market and handles unavailable scenarios', asyn
       ).toHaveText(values)
     for (const width of [784, 390, 320]) {
       await player.setViewportSize({ width, height: 1024 })
-      await forecast.scrollIntoViewIfNeeded()
+      // The tablet layout embeds the Market panel beside Decisions.
+      const visibleForecast =
+        width >= 641 ? player.getByTestId('market-panel') : forecast
+      await visibleForecast.scrollIntoViewIfNeeded()
       await expectNoPageOverflow(player)
-      await expect(forecast).toBeInViewport()
+      await expect(visibleForecast).toBeInViewport()
       await capturePlayerScreenshot(player, {
         path: testInfo.outputPath(`decisions-forecast-${width}.png`),
       })

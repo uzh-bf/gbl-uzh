@@ -8,21 +8,25 @@ import {
   ShadcnTableHeader as TableHeader,
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
+import { useTranslations } from 'next-intl'
 import { Fragment, useState } from 'react'
 import type { ResultQuery } from '~/graphql/generated/ops'
-import { assetLabels, MONTHS, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
-import {
-  buildHistory,
-  playerAmount,
-  playerPercent,
-  type HistoryQuarter,
-} from '~/lib/results'
+import { useLanguage } from '~/i18n/Language'
+import { assetLabels, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
+import { buildHistory, type HistoryQuarter } from '~/lib/results'
 import AllocationBar from '../cockpit/AllocationBar'
 import PortfolioHistoryChart from './PortfolioHistoryChart'
 
 const padding = 'mobile:px-app-4 min-[641px]:px-[32px] tablet:px-[16px]'
 const cell =
   'px-[12px] py-[20px] mobile:app-cell first:pl-[16px] last:pr-[16px] min-[641px]:first:pl-[32px] min-[641px]:last:pr-[32px] tablet:px-[8px] tablet:py-[10px] tablet:first:pl-[16px] tablet:last:pr-[16px]'
+const quarterColumns = [
+  'player.history.quarter',
+  'player.allocation.mix',
+  'shared.assets.bonds',
+  'shared.assets.stocks',
+  'player.history.result',
+] as const
 const tone = (value: number | null) =>
   value === null || value === 0
     ? 'text-player-muted'
@@ -31,20 +35,25 @@ const tone = (value: number | null) =>
       : 'text-player-error'
 
 function MonthlyResults({ quarter }: { quarter: HistoryQuarter }) {
+  const t = useTranslations()
+  const { shortMonth, playerAmount, playerPercent } = useLanguage()
   return (
     <table
       className="mobile:app-caption tablet:text-[14px] w-full min-[641px]:text-[17px]"
-      aria-label={`${quarter.year} Quarter ${quarter.quarter} monthly results`}
+      aria-label={t('player.history.monthlyResults', {
+        year: quarter.year,
+        quarter: quarter.quarter,
+      })}
     >
       <thead className="text-player-muted">
         <tr>
           {[
-            'Month',
-            'Dice B / S',
-            'Savings',
-            'Bonds',
-            'Stocks',
-            'Result (CHF)',
+            t('manage.dice.month'),
+            t('player.history.diceAssets'),
+            t('shared.assets.savings'),
+            t('shared.assets.bonds'),
+            t('shared.assets.stocks'),
+            t('player.history.resultChf'),
           ].map((label, index) => (
             <th
               key={label}
@@ -66,16 +75,16 @@ function MonthlyResults({ quarter }: { quarter: HistoryQuarter }) {
               scope="row"
               className="mobile:py-[var(--app-table-cell-y)] py-[10px] text-left font-semibold"
             >
-              {MONTHS[
+              {shortMonth(
                 (quarter.quarter - 1) * NUM_MONTHS_PER_SEGMENT + month.index
-              ] ?? '—'}
+              )}
             </th>
             <td className="text-player-muted">
               {month.dice
                 ? `${month.dice.bonds} / ${month.dice.stocks}`
                 : month.revealed
                   ? '—'
-                  : 'Not revealed'}
+                  : t('player.history.notRevealed')}
             </td>
             {(['bank', 'bonds', 'stocks'] as const).map((asset) => (
               <td
@@ -102,6 +111,8 @@ function QuarterRows({
   quarter: HistoryQuarter
   showYear: boolean
 }) {
+  const t = useTranslations()
+  const { playerAmount, playerPercent } = useLanguage()
   const [expanded, setExpanded] = useState(false)
   const detailId = `history-detail-${quarter.id}`
   return (
@@ -115,7 +126,10 @@ function QuarterRows({
             type="button"
             aria-expanded={expanded}
             aria-controls={detailId}
-            aria-label={`${quarter.year} Quarter ${quarter.quarter} monthly details`}
+            aria-label={t('player.history.monthlyDetails', {
+              year: quarter.year,
+              quarter: quarter.quarter,
+            })}
             className="text-player-text focus-visible:outline-player-primary mobile:app-touch mobile:gap-app-2 flex min-h-[44px] items-center gap-[8px] rounded-[4px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-4"
             onClick={() => setExpanded(!expanded)}
           >
@@ -132,7 +146,11 @@ function QuarterRows({
           {quarter.allocation ? (
             <div
               role="img"
-              aria-label={`Savings ${quarter.allocation.bank}%, Bonds ${quarter.allocation.bonds}%, Stocks ${quarter.allocation.stocks}%`}
+              aria-label={t('player.history.allocation', {
+                savings: quarter.allocation.bank,
+                bonds: quarter.allocation.bonds,
+                stocks: quarter.allocation.stocks,
+              })}
               className="mobile:w-app-mix w-[116px]"
             >
               <AllocationBar
@@ -159,7 +177,9 @@ function QuarterRows({
         ))}
         <TableCell
           className={cn(cell, 'text-right font-semibold tabular-nums')}
-          aria-label={`Result ${playerAmount(quarter.gain, true)} CHF`}
+          aria-label={t('player.history.resultAmount', {
+            amount: playerAmount(quarter.gain, true),
+          })}
         >
           {playerAmount(quarter.gain, true)}
         </TableCell>
@@ -176,7 +196,7 @@ function QuarterRows({
             {quarter.months.length ? (
               <MonthlyResults quarter={quarter} />
             ) : (
-              <p className="m-0">Monthly results are unavailable.</p>
+              <p className="m-0">{t('player.history.monthlyUnavailable')}</p>
             )}
           </div>
         </TableCell>
@@ -192,6 +212,8 @@ export default function HistoryPanel({
   data: ResultQuery
   active: boolean
 }) {
+  const t = useTranslations()
+  const { playerAmount, playerPercent } = useLanguage()
   const history = buildHistory(data)
   const [selectedYear, setSelectedYear] = useState<number | 'all' | null>(null)
   const latestYear = history.years.at(-1) ?? null
@@ -206,7 +228,7 @@ export default function HistoryPanel({
   )
   return (
     <section
-      aria-label="History"
+      aria-label={t('player.nav.history')}
       data-cy="history-panel"
       className="tablet:contents"
     >
@@ -214,7 +236,7 @@ export default function HistoryPanel({
         <div
           className="border-player-divider focus-visible:outline-player-primary phone:gap-app-2 phone:p-app-3 phone:min-h-[72px] phone:items-center tablet:min-h-[72px] tablet:items-center tablet:box-border tablet:gap-[8px] tablet:px-[16px] tablet:col-span-2 tablet:row-start-1 tablet:py-[12px] flex max-w-full min-w-0 gap-[12px] overflow-x-auto overscroll-x-contain border-b py-[20px] focus-visible:outline-2 focus-visible:outline-offset-[-2px] min-[641px]:px-[32px]"
           role="group"
-          aria-label="History year"
+          aria-label={t('player.history.year')}
           tabIndex={0}
         >
           {(['all', ...history.years] as const).map((option) => (
@@ -231,7 +253,7 @@ export default function HistoryPanel({
                 ),
               }}
             >
-              {option === 'all' ? 'All' : option}
+              {option === 'all' ? t('player.history.all') : option}
             </Button>
           ))}
         </div>
@@ -245,7 +267,7 @@ export default function HistoryPanel({
         >
           <div className="mobile:gap-x-app-3 mobile:gap-y-app-2 flex flex-wrap items-baseline justify-between gap-x-[16px] gap-y-[6px]">
             <span className="text-player-muted mobile:app-body tablet:text-[16px] min-[641px]:text-[26px]">
-              Portfolio value
+              {t('player.history.portfolioValue')}
             </span>
             <span className="mobile:gap-app-3 flex items-baseline gap-[14px]">
               <strong
@@ -266,14 +288,14 @@ export default function HistoryPanel({
               tone(history.gain)
             )}
           >
-            {playerAmount(history.gain, true)} since the start ·{' '}
+            {playerAmount(history.gain, true)} {t('player.history.sinceStart')}{' '}
             {playerPercent(history.gainRate)}
           </p>
           {history.quarters.length > 0 ? (
             active && <PortfolioHistoryChart quarters={history.quarters} />
           ) : (
             <p className="text-player-muted mobile:py-app-4 py-[32px]">
-              Your history will appear after the first quarter closes.
+              {t('player.history.emptyQuarterHint')}
             </p>
           )}
         </div>
@@ -283,13 +305,13 @@ export default function HistoryPanel({
             'text-player-muted mobile:mt-app-6 tablet:mt-[20px] tablet:mb-[12px] mobile:mb-app-4 mobile:app-caption tablet:text-[14px] mt-[36px] mb-[24px] font-semibold tracking-[1px] uppercase min-[641px]:text-[22px]'
           )}
         >
-          What each quarter paid
+          {t('player.history.quarterPayouts')}
         </h2>
         {quarters.length ? (
           <div
             className="overflow-x-auto"
             role="region"
-            aria-label="Quarterly results"
+            aria-label={t('player.history.quarterlyResults')}
             tabIndex={0}
           >
             <Table
@@ -298,26 +320,24 @@ export default function HistoryPanel({
             >
               <TableHeader>
                 <TableRow className="border-player-border hover:bg-transparent">
-                  {['Quarter', 'Your mix', 'Bonds', 'Stocks', 'Result'].map(
-                    (label, index) => (
-                      <TableHead
-                        key={label}
-                        className={cn(
-                          cell,
-                          'text-player-muted h-auto font-normal whitespace-nowrap',
-                          index > 1 && 'text-right'
-                        )}
-                      >
-                        {label === 'Result' ? (
-                          <span title="Quarterly gain or loss in CHF">
-                            Result <span className="sr-only">(CHF)</span>
-                          </span>
-                        ) : (
-                          label
-                        )}
-                      </TableHead>
-                    )
-                  )}
+                  {quarterColumns.map((key, index) => (
+                    <TableHead
+                      key={key}
+                      className={cn(
+                        cell,
+                        'text-player-muted h-auto font-normal whitespace-nowrap',
+                        index > 1 && 'text-right'
+                      )}
+                    >
+                      {key === 'player.history.result' ? (
+                        <span title={t('player.history.quarterlyGain')}>
+                          {t(key)} <span className="sr-only">(CHF)</span>
+                        </span>
+                      ) : (
+                        t(key)
+                      )}
+                    </TableHead>
+                  ))}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -339,8 +359,8 @@ export default function HistoryPanel({
             )}
           >
             {typeof year === 'number'
-              ? `No completed quarters in ${year} yet.`
-              : 'No completed quarters yet.'}
+              ? t('player.history.noCompletedQuartersInYear', { year: year })
+              : t('player.history.noCompletedQuarters')}
           </p>
         )}
         <div
@@ -361,7 +381,7 @@ export default function HistoryPanel({
                   asset.color
                 )}
               />
-              {asset.name}
+              {t(asset.name)}
             </span>
           ))}
         </div>

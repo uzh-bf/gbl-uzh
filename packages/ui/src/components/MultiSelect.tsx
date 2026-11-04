@@ -89,6 +89,7 @@ export function MultiSelect({
                   key={option.value}
                   className="min-h-[var(--gbl-control-height,0px)] text-[length:var(--gbl-body-size,0.875rem)] leading-[var(--gbl-body-leading,1.25rem)]"
                   value={option.value}
+                  keywords={[option.label]}
                   onSelect={() => {
                     handleValueChange(option.value)
                   }}

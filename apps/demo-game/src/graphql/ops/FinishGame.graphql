@@ -1,0 +1,7 @@
+mutation FinishGame($gameId: Int!) {
+  finishGame(gameId: $gameId) {
+    id
+    status
+    version
+  }
+}

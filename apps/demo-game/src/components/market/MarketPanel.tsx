@@ -1,6 +1,8 @@
-import { cn, ProbabilityChart, signedPercent } from '@gbl-uzh/ui'
+import { cn, ProbabilityChart } from '@gbl-uzh/ui'
+import { useTranslations } from 'next-intl'
 import type { ResultQuery } from '~/graphql/generated/ops'
-import { assetLabels, MONTHS, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
+import { useLanguage } from '~/i18n/Language'
+import { assetLabels, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 import {
   currentMarketReview,
   marketPeriod,
@@ -78,17 +80,18 @@ function AssetDice({
   dice: MarketRoll
   asset: (typeof marketAssets)[number]
 }) {
+  const t = useTranslations()
   return (
     <div className="mobile:gap-app-2 flex items-center gap-[6px]">
       <StaticDie
         value={dice.shared}
         color="bg-[#e85c24] text-white"
-        label="Shared die"
+        label={t('player.market.sharedDie')}
       />
       <StaticDie
         value={dice[asset.key] - dice.shared}
         color={asset.dieColor}
-        label={`${asset.label} die`}
+        label={t('player.market.assetDie', { asset: t(asset.label) })}
       />
       <strong className="text-player-body mobile:app-body tablet:text-[14px] min-w-[32px] text-[18px]">
         = {dice[asset.key]}
@@ -104,6 +107,8 @@ export default function MarketPanel({
   data: ResultQuery
   embedded?: boolean
 }) {
+  const t = useTranslations()
+  const { shortMonth, percent, signedPercent } = useLanguage()
   const fullWidthMarket = useFullWidthMarketLayout()
   const game = data.result?.currentGame
   const review = currentMarketReview(game)
@@ -112,7 +117,9 @@ export default function MarketPanel({
   const months = review
     ? Array.from({ length: NUM_MONTHS_PER_SEGMENT }, (_, index) => ({
         index,
-        label: MONTHS[review.segment.index * NUM_MONTHS_PER_SEGMENT + index],
+        label: shortMonth(
+          review.segment.index * NUM_MONTHS_PER_SEGMENT + index
+        ),
         color: monthColors[index],
         roll: indices.includes(index)
           ? readMarketRoll(review.segment.facts, index)
@@ -132,7 +139,7 @@ export default function MarketPanel({
   const zero = (-min / span) * 100
   return (
     <section
-      aria-label="Market"
+      aria-label={t('player.nav.market')}
       data-cy="market-panel"
       className={cn(
         embedded &&
@@ -142,9 +149,9 @@ export default function MarketPanel({
       {embedded && (
         <div className="text-player-muted col-span-2 flex flex-wrap items-baseline justify-between gap-[8px] px-[16px] pt-[12px] text-[14px]">
           <h2 className="m-0 text-[14px] font-semibold tracking-[1px] uppercase">
-            Market
+            {t('player.nav.market')}
           </h2>
-          <span>Return % per dice roll · bar height is how likely it is</span>
+          <span>{t('player.market.chartHint')}</span>
         </div>
       )}
       {scenario ? (
@@ -158,10 +165,37 @@ export default function MarketPanel({
             data-cy={`market-${asset.key}`}
           >
             <ProbabilityChart
+              labels={{
+                noReveal: t('manage.dice.noReveal'),
+                latestTotal: (total) =>
+                  t('shared.chart.latestTotal', { total }),
+                expected: t('shared.chart.expected'),
+                monthNumber: (month) => t('manage.dice.monthNumber', { month }),
+                trendGap: t('manage.dice.trendGap'),
+                volatility: t('manage.dice.volatility'),
+                probabilities: (asset) =>
+                  t('shared.chart.probabilities', { asset }),
+                description: (asset, reveal) =>
+                  t('shared.chart.description', { asset, reveal }),
+                rollTooltip: (roll, probability, change, highlight) =>
+                  t('manage.dice.rollTooltip', {
+                    roll,
+                    probability,
+                    change,
+                    highlight,
+                  }),
+                latestRoll: t('shared.chart.latestRoll'),
+                expectationLabel: t('shared.chart.expectationLabel'),
+                trendGapLabel: t('shared.chart.trendGapLabel'),
+                volatilityLabel: t('shared.chart.volatilityLabel'),
+                diceRoll: t('shared.chart.diceRoll'),
+                probability: t('shared.chart.probability'),
+              }}
+              formatPercent={percent}
               variant="market"
               compact={embedded}
               fixedHeight={embedded && fullWidthMarket ? 206 : undefined}
-              title={asset.label}
+              title={t(asset.label)}
               trendE={scenario[asset.trend]}
               trendGap={scenario[asset.gap]}
               monthlyHighlights={revealedMonths.map((month) => ({
@@ -173,7 +207,9 @@ export default function MarketPanel({
             {review && (
               <div
                 className="mt-[12px] grid gap-[8px]"
-                aria-label={`${asset.label} monthly dice`}
+                aria-label={t('player.market.monthlyDice', {
+                  asset: t(asset.label),
+                })}
                 data-cy={`market-months-${asset.key}`}
               >
                 {months.map((month) => (
@@ -191,9 +227,11 @@ export default function MarketPanel({
                     ) : (
                       <span
                         className="text-player-muted text-[12px]"
-                        aria-label={`${month.label}: dice not revealed`}
+                        aria-label={t('player.market.hiddenDice', {
+                          month: month.label,
+                        })}
                       >
-                        – + – = – · Not rolled
+                        {t('player.market.noRoll')}
                       </span>
                     )}
                   </div>
@@ -204,7 +242,7 @@ export default function MarketPanel({
         ))
       ) : (
         <p className={cn(sectionClass, 'tablet:col-span-2')}>
-          Market outlook is not available yet.
+          {t('player.allocation.noOutlook')}
         </p>
       )}
       {roll && (
@@ -214,24 +252,24 @@ export default function MarketPanel({
           aria-live="polite"
         >
           <p className="text-player-muted mobile:mb-app-4 mobile:app-caption tablet:mb-[16px] tablet:text-[16px] m-0 mb-[24px]">
-            Monthly returns · {monthLabel}
+            {t('player.market.monthlyReturns')} {monthLabel}
           </p>
-          <div className="mobile:gap-app-3 grid gap-[18px]">
+          <div className="mobile:gap-app-3 tablet:gap-x-[8px] grid grid-cols-[max-content_minmax(0,1fr)_max-content] gap-x-[12px] gap-y-[18px]">
             {assets.map(({ key, label, color }) => {
               const value = roll.returns[key]
               const end = ((value - min) / span) * 100
               return (
                 <div
-                  className="mobile:gap-app-3 tablet:grid-cols-[70px_minmax(0,1fr)_55px] tablet:gap-[8px] grid grid-cols-[90px_1fr_65px] items-center gap-[12px]"
+                  className="col-span-full grid grid-cols-subgrid items-center"
                   key={key}
                   data-cy={`market-return-${key}`}
-                  aria-label={`${label}: ${signedPercent(value)}`}
+                  aria-label={`${t(label)}: ${signedPercent(value)}`}
                 >
                   <div className="text-player-body mobile:gap-app-3 mobile:app-body tablet:gap-[8px] tablet:text-[14px] flex items-center">
                     <span
                       className={`tablet:size-[12px] size-[14px] shrink-0 rounded-[4px] ${color}`}
                     />
-                    {label}
+                    {t(label)}
                   </div>
                   <div
                     className="bg-player-progress tablet:h-[14px] relative h-[16px] rounded-[5px]"

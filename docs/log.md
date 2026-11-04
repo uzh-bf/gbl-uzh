@@ -1,6 +1,26 @@
 # Log
 
+## 2026-11-04
+
+**Update**: [Developing a Game](developing-a-game.md) and [UI Building Blocks](ui-components.md) — documented the demo’s next-intl catalogs, per-browser language selection in the Team profile, built-in content lookup and shared component label inputs.
+
+## 2026-11-02
+
+**Update**: [Game Lifecycle](game-lifecycle.md) and [API Layer](api-layer.md) — documented instructor completion from period results and the game-scoped completion notification.
+
+**Update**: [Game Lifecycle](game-lifecycle.md) — documented the Period Results response when the last authored period ends and how to continue with a newly added period.
+
+## 2026-10-27
+
+**Creation**: [Shared registration ADRs](adr/0003-support-shared-game-registration.md), [browser identity and recovery](adr/0004-identify-browser-enrollment-and-protect-return-links.md), [atomic enrollment/start](adr/0005-serialize-enrollment-with-initial-game-start.md), and a [registration glossary](glossary.md) - recorded the agreed design, alternatives, and consequences and linked the decision records from the wiki index.
+
+**Update**: Shared registration - renamed the enrollment mode from `OPEN` to `SHARED_LINK`, preserving the separate open/closed control. Consolidated the schema changes into one additive migration that creates the final enum directly. Private player links now use `useMutation` for login.
+
 ## 2026-10-07
+
+**Update**: Shared registration review - simplified creation form state and cache refreshes, exposed retryable creation failures, combined join preparation/resume into one request, and prevented profile edits from repeating shared-registration setup rewards.
+
+**Update**: Shared registration - documented open/fixed enrollment, QR and private return links, browser identity, atomic roster initialization, deferred setup rewards, GraphQL access rules, and additive migration.
 
 **Update**: [UI Components](ui-components.md) — restore Bonds/Stocks outcome totals on admin segment cards, retaining disabled outcome buttons for non-rollable segments.
 

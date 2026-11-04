@@ -1,6 +1,9 @@
 import { cn } from '@gbl-uzh/ui'
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
+import { contentText } from '~/i18n/content'
+import { useLanguage } from '~/i18n/Language'
 import type { StorySequence } from '~/lib/team'
 import PlayerActionButton from '../cockpit/PlayerActionButton'
 import ContentSheet, {
@@ -26,6 +29,8 @@ export default function StorySheet({
   onMark: (id: string) => Promise<void>
   onClose: () => void
 }) {
+  const t = useTranslations()
+  const { language } = useLanguage()
   const [index, setIndex] = useState(startIndex)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(false)
@@ -37,6 +42,7 @@ export default function StorySheet({
     []
   )
   const story = sequence.stories[index]
+  const title = contentText(language, 'story', story.id, 'title', story.title)
   const content =
     story.type === 'ROLE_BASED' ? story.contentRole?.[role] : story.content
   const close = () => {
@@ -65,20 +71,23 @@ export default function StorySheet({
   }
   return (
     <ContentSheet
-      title={story.title}
-      label={`Story element · ${sequence.year} · Quarter ${sequence.quarter}`}
+      title={title}
+      label={t('player.story.context', {
+        year: sequence.year,
+        quarter: sequence.quarter,
+      })}
       onClose={close}
       footer={
         <>
           <SheetTextButton onClick={close}>
-            {automatic ? 'Skip stories' : 'Close'}
+            {automatic ? t('player.story.skip') : t('shared.actions.close')}
           </SheetTextButton>
           <PlayerActionButton
             onClick={next}
             disabled={saving}
             className="min-[641px]:min-h-[88px] min-[641px]:text-[32px]"
           >
-            {saving ? 'Saving…' : 'Continue'}
+            {saving ? t('player.story.saving') : t('player.story.continue')}
           </PlayerActionButton>
         </>
       }
@@ -87,13 +96,14 @@ export default function StorySheet({
         data-cy="content-sheet-heading"
         className={`mobile:pb-app-4 mobile:app-heading tablet:app-heading tablet:pb-app-3 m-0 pb-[20px] text-[24px] leading-[1.25] font-bold min-[641px]:pb-[32px] min-[641px]:text-[36px] ${sheetPadding}`}
       >
-        {story.title}
+        {title}
       </h2>
       <div
         className={`border-player-border mobile:gap-app-3 mobile:py-app-4 tablet:py-app-3 flex flex-wrap items-center justify-between gap-[12px] border-y py-[16px] min-[641px]:py-[24px] ${sheetPadding}`}
       >
         <span className="mobile:app-body tablet:app-caption font-semibold min-[641px]:text-[26px]">
-          Card {index + 1} of {sequence.stories.length}
+          {t('player.story.card')} {index + 1} {t('player.story.of')}{' '}
+          {sequence.stories.length}
         </span>
         <div
           className="mobile:gap-app-2 flex max-w-[50%] flex-wrap gap-[8px]"
@@ -121,8 +131,10 @@ export default function StorySheet({
         <div className={contentProse}>
           <Markdown>
             {typeof content === 'string' && content.trim()
-              ? content
-              : 'No story content is available for your role.'}
+              ? story.type === 'ROLE_BASED'
+                ? content
+                : contentText(language, 'story', story.id, 'content', content)
+              : t('player.story.noRoleContent')}
           </Markdown>
         </div>
         {error && (
@@ -130,7 +142,7 @@ export default function StorySheet({
             role="alert"
             className="text-player-error mobile:app-body tablet:app-body min-[641px]:text-[24px]"
           >
-            Could not save your progress. Select Continue to try again.
+            {t('player.story.saveError')}
           </p>
         )}
       </div>

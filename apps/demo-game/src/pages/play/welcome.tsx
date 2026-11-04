@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { WelcomeMessage } from 'src/components/welcome/WelcomeControls'
@@ -9,6 +10,7 @@ import {
 } from 'src/graphql/generated/ops'
 
 function Welcome() {
+  const t = useTranslations()
   const router = useRouter()
   const editing = router.query.edit === '1'
   const tab =
@@ -24,30 +26,36 @@ function Welcome() {
   const [updatePlayerData] = useMutation(UpdatePlayerDataDocument)
 
   if (!router.isReady || loading)
-    return <WelcomeMessage role="status">Loading your bank…</WelcomeMessage>
+    return (
+      <WelcomeMessage role="status">
+        {t('player.setup.loadingBank')}
+      </WelcomeMessage>
+    )
 
   if (error || !data?.self) {
     return (
       <WelcomeMessage>
-        <h1 className="mobile:app-heading">We couldn’t load your bank</h1>
+        <h1 className="mobile:app-heading">
+          {t('player.setup.loadBankError')}
+        </h1>
         <p role="alert">
-          {error
-            ? 'Please try again. Your bank details have not been changed.'
-            : 'Open the join link from your instructor to set up your bank.'}
+          {error ? t('player.setup.retryHint') : t('player.setup.joinLinkHint')}
         </p>
         {error && (
           <button
             className="text-player-primary mobile:app-control"
             onClick={() => void refetch()}
           >
-            Try again
+            {t('player.quiz.retry')}
           </button>
         )}
         <Link
           href={editing ? returnUrl : '/'}
           className="text-player-primary mobile:app-control"
         >
-          {editing ? 'Back to game' : 'Back to Minigame'}
+          {editing
+            ? t('player.setup.backToGame')
+            : t('player.setup.backToMinigame')}
         </Link>
       </WelcomeMessage>
     )

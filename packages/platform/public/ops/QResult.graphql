@@ -55,7 +55,11 @@ query Result {
   }
 
   self {
+    token
     ...PlayerData
+    level {
+      description
+    }
   }
 
   decision {

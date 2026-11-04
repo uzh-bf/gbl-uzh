@@ -7,10 +7,15 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { MultiSelect } from '@gbl-uzh/ui'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Controller, useForm } from 'react-hook-form'
 import { twMerge } from 'tailwind-merge'
+import RegistrationPanel from '~/components/admin/RegistrationPanel'
+import { contentText } from '~/i18n/content'
+import { statusKeys } from '~/i18n/labels'
+import { MessageText, useLanguage } from '~/i18n/Language'
 import { NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 
 import { useMutation, useQuery, useSubscription } from '@apollo/client'
@@ -25,13 +30,14 @@ import {
   ShadcnTableHeader as TableHeader,
   ShadcnTableRow as TableRow,
 } from '@uzh-bf/design-system'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
   ActivateNextSegmentDocument,
   AddCountdownDocument,
   AddGamePeriodDocument,
   AddPeriodSegmentDocument,
+  FinishGameDocument,
   GameDocument,
   GameStatus,
   GlobalEventsDocument,
@@ -87,6 +93,8 @@ interface PeriodFormValues {
 }
 
 function ManageGame() {
+  const t = useTranslations()
+  const { language } = useLanguage()
   const router = useRouter()
 
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
@@ -210,16 +218,32 @@ function ManageGame() {
     error: storyElementsError,
   } = useQuery(StoryElementsDocument)
 
+  const { toast } = useToast()
+  const periodTransitionOptions = {
+    variables: { gameId: Number(router.query.id) },
+    refetchQueries: [GameDocument],
+    awaitRefetchQueries: true,
+    onError: () => {
+      toast({
+        title: <MessageText message="manage.controls.updateError" />,
+        description: <MessageText message="manage.controls.refreshing" />,
+      })
+      void queuedRefetch().catch(() => {})
+    },
+  }
+  const [finishGame, { loading: finishing }] = useMutation(
+    FinishGameDocument,
+    periodTransitionOptions
+  )
   const [activateNextPeriod, { loading: nextPeriodLoading }] = useMutation(
     ActivateNextPeriodDocument,
     {
-      onCompleted() {
-        try {
-          const anchor = document.querySelector('#active-period')
-          if (anchor)
-            anchor.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        } catch (e) {}
-      },
+      ...periodTransitionOptions,
+      onCompleted: () =>
+        document.querySelector('#active-period')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        }),
     }
   )
   const [activateNextSegment, { loading: nextSegmentLoading }] = useMutation(
@@ -242,26 +266,18 @@ function ManageGame() {
     refetchQueries: [GameDocument],
     onCompleted: () =>
       toast({
-        title: 'Countdown added',
-        description: 'Players were notified.',
+        title: <MessageText message="manage.controls.countdownAdded" />,
+        description: <MessageText message="manage.controls.playersNotified" />,
       }),
     onError: (err) =>
       toast({
-        title: 'Countdown failed',
-        description: err.message,
+        title: <MessageText message="manage.controls.countdownError" />,
+        description: <MessageText message="player.progress.retry" />,
         variant: 'destructive',
       }),
   })
 
-  const { toast } = useToast()
-
-  const nextPeriod = () =>
-    activateNextPeriod({
-      variables: {
-        gameId: Number(router.query.id),
-      },
-      refetchQueries: [GameDocument],
-    })
+  const nextPeriod = () => activateNextPeriod()
 
   const nextSegment = () =>
     activateNextSegment({
@@ -271,31 +287,34 @@ function ManageGame() {
       refetchQueries: [GameDocument],
     })
 
-  useEffect(() => {
+  const notifyReady = useEffectEvent(() => {
     const game = data?.game
     if (game?.status !== GameStatus.Running) return
 
     const allPlayersReady = game.players.every((player) => player.isReady)
     if (allPlayersReady) {
       toast({
-        title: 'All players are ready!',
-        description: 'All players are ready to continue.',
+        title: <MessageText message="manage.controls.readyTitle" />,
+        description: <MessageText message="manage.controls.readyDescription" />,
       })
 
       const audio = new Audio('/sounds/notification.mp3')
       audio.play().catch((err) => {
-        alert('Autoplay restrictions. Please enable autoplay in your browser.')
+        alert(t('manage.controls.autoplayWarning'))
         console.error('Error playing notification sound:', err)
       })
     }
+  })
+  useEffect(() => {
+    notifyReady()
   }, [data?.game])
 
   if (loading || !data?.game) {
-    return <div>loading...</div>
+    return <div>{t('manage.controls.loading')}</div>
   }
 
   if (error) {
-    return <div>{error.message}</div>
+    return <div role="alert">{t('manage.games.loadGameError')}</div>
   }
 
   const game = data.game
@@ -319,7 +338,7 @@ function ManageGame() {
         if (!atLastSegment) {
           return (
             <Button disabled={nextSegmentLoading} onClick={nextSegment}>
-              Next Segment
+              {t('manage.controls.nextSegment')}
             </Button>
           )
         }
@@ -327,21 +346,28 @@ function ManageGame() {
           game.periods.length === 0 || activePeriod.segments.length === 0
         return (
           <Button disabled={disabled} onClick={nextPeriod}>
-            Start Period
+            {t('manage.controls.startPeriod')}
           </Button>
         )
       }
       case GameStatus.Scheduled:
         if (!activePeriod) {
           const disabled =
-            game.periods.length === 0 || game.periods[0].segments.length === 0
+            game.playerCount === 0 ||
+            nextPeriodLoading ||
+            game.periods.length === 0 ||
+            game.periods[0].segments.length === 0
           return (
             <Button disabled={disabled} onClick={nextPeriod}>
-              Start Period
+              {t('manage.controls.startPeriod')}
             </Button>
           )
         }
-        return <Button onClick={nextPeriod}>Start Segment</Button>
+        return (
+          <Button onClick={nextPeriod}>
+            {t('manage.controls.startSegment')}
+          </Button>
+        )
       case GameStatus.Running: {
         const atLastSegment =
           activeSegmentIx >= segments.length - 1 &&
@@ -349,7 +375,7 @@ function ManageGame() {
         if (atLastSegment) {
           return (
             <Button disabled={nextPeriodLoading} onClick={nextPeriod}>
-              Consolidate
+              {t('manage.controls.consolidate')}
             </Button>
           )
         }
@@ -361,7 +387,7 @@ function ManageGame() {
             disabled={nextSegmentLoading || disabled}
             onClick={nextSegment}
           >
-            Segment Results
+            {t('manage.controls.segmentResults')}
           </Button>
         )
       }
@@ -372,39 +398,40 @@ function ManageGame() {
             disabled={nextSegmentLoading || atLastSegment || awaitingDice}
             onClick={nextSegment}
           >
-            Next Segment
+            {t('manage.controls.nextSegment')}
           </Button>
         )
       }
 
-      // TODO(JJ):
-      // - Fix consolidation for the last period
-      // - const periods = game?.periods
-      //   const activePeriodIx = game?.activePeriodIx
-      //   const atLastPeriodIx = activePeriodIx >= periods.length - 1
       case GameStatus.Consolidation:
         return (
           <Button
             disabled={nextPeriodLoading || awaitingDice}
             onClick={nextPeriod}
           >
-            Period Results
+            {t('manage.controls.periodResults')}
           </Button>
         )
       case GameStatus.Results: {
-        const anotherPeriod = game.activePeriodIx > game.periods.length - 1
+        const pending = finishing || nextPeriodLoading
         return (
-          <Button disabled={anotherPeriod} onClick={nextPeriod}>
-            Next Period
-          </Button>
+          <>
+            {activePeriod && (
+              <Button disabled={pending} onClick={nextPeriod}>
+                {t('manage.controls.nextPeriod')}
+              </Button>
+            )}
+            <Button disabled={pending} onClick={() => finishGame()}>
+              {t('manage.controls.finish')}
+            </Button>
+          </>
         )
       }
-
       case GameStatus.Completed:
         return (
-          <Button disabled onClick={() => null}>
-            Completed
-          </Button>
+          <span role="status" className="self-center font-semibold">
+            {t('manage.controls.completed')}
+          </span>
         )
     }
   }
@@ -412,13 +439,13 @@ function ManageGame() {
   const learningElementsAll = (
     learningElementsData?.learningElements || []
   ).map((e) => ({
-    label: e.id,
+    label: contentText(language, 'lesson', e.id, 'title', e.title),
     value: e.id,
   }))
 
   const storyElementsAll = (storyElementsData?.storyElements || []).map(
     (e) => ({
-      label: e.id,
+      label: contentText(language, 'story', e.id, 'title', e.title),
       value: e.id,
     })
   )
@@ -429,6 +456,7 @@ function ManageGame() {
       data-cy="game-detail"
       data-game-status={game.status}
     >
+      <RegistrationPanel game={game} onChange={refetch} />
       <div>
         <div className="mb-4 flex flex-col gap-2 overflow-x-auto md:flex-row">
           {game.periods.map((period, ix) => {
@@ -447,6 +475,10 @@ function ManageGame() {
               periodStatus === STATUS.COMPLETED ||
               periodStatus === STATUS.RESULTS
 
+            const canAddSegment =
+              game.status !== GameStatus.Completed &&
+              !isPeriodCompleted &&
+              ix === game.periods.length - 1
             const scenario = period.facts.scenario
             const trendBonds = scenario.trendBonds
             const gapBonds = scenario.gapBonds
@@ -482,8 +514,12 @@ function ManageGame() {
                           <FontAwesomeIcon icon={faCheck} />
                         )}
                       </div>
-                      <div className="font-bold">Period {period.index + 1}</div>
-                      {isPeriodActive && <div>{game.status}</div>}
+                      <div className="font-bold">
+                        {t('manage.controls.period')} {period.index + 1}
+                      </div>
+                      {isPeriodActive && (
+                        <div>{t(statusKeys[game.status])}</div>
+                      )}
                     </div>
                     <div className="flex flex-row gap-1">
                       {labels.map((label) => (
@@ -495,14 +531,18 @@ function ManageGame() {
                         </div>
                       ))}
                     </div>
-                    <div className="flex flex-row gap-2">
+                    <div className="mobile:w-full mobile:flex-col flex flex-row gap-2">
                       <div className="flex flex-col justify-end gap-1">
                         <div className="flex items-end justify-between gap-4 pr-2">
-                          <div className="text-nowrap">Seed</div>
+                          <div className="text-nowrap">
+                            {t('manage.controls.seed')}
+                          </div>
                           <div>{seed}</div>
                         </div>
                         <div className="flex items-end justify-between gap-4 pr-2">
-                          <div className="text-nowrap">Saving Interest</div>
+                          <div className="text-nowrap">
+                            {t('manage.controls.savingsInterest')}
+                          </div>
                           <div>{savingsInterest}</div>
                         </div>
                       </div>
@@ -510,18 +550,26 @@ function ManageGame() {
                         <TableHeader>
                           <TableRow className="border-none py-0">
                             <TableHead></TableHead>
-                            <TableHead className="py-0">Trend</TableHead>
-                            <TableHead className="py-0">Gap</TableHead>
+                            <TableHead className="py-0">
+                              {t('manage.controls.trend')}
+                            </TableHead>
+                            <TableHead className="py-0">
+                              {t('player.allocation.gap')}
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           <TableRow className="border-none py-0">
-                            <TableCell className="py-0">Bonds</TableCell>
+                            <TableCell className="py-0">
+                              {t('shared.assets.bonds')}
+                            </TableCell>
                             <TableCell className="py-0">{trendBonds}</TableCell>
                             <TableCell className="py-0">{gapBonds}</TableCell>
                           </TableRow>
                           <TableRow className="border-none py-0">
-                            <TableCell className="py-0">Stocks</TableCell>
+                            <TableCell className="py-0">
+                              {t('shared.assets.stocks')}
+                            </TableCell>
                             <TableCell className="py-0">
                               {trendStocks}
                             </TableCell>
@@ -531,7 +579,7 @@ function ManageGame() {
                       </Table>
                     </div>
                   </div>
-                  <div className="mt-1 flex flex-row gap-1">
+                  <div className="mobile:flex-col mt-1 flex flex-row gap-1">
                     {Array.apply(null, Array(period.segmentCount)).map(
                       (_, ix) => {
                         const segment = period.segments[ix]
@@ -574,13 +622,25 @@ function ManageGame() {
                                 className="flex justify-between gap-4 text-nowrap"
                               >
                                 <span>
-                                  Dice {asset === 'bonds' ? 'Bonds' : 'Stocks'}:
+                                  {t('manage.dice.title')}{' '}
+                                  {asset === 'bonds'
+                                    ? t('shared.assets.bonds')
+                                    : t('shared.assets.stocks')}
+                                  :
                                 </span>
                                 <span className="flex gap-2 tabular-nums">
                                   {rolls.map((roll, index) => (
                                     <span
                                       key={index}
-                                      aria-label={`Month ${index + 1}: ${roll?.dice[asset] ?? 'unavailable'}`}
+                                      aria-label={t(
+                                        'manage.controls.monthlyOutcome',
+                                        {
+                                          month: index + 1,
+                                          outcome:
+                                            roll?.dice[asset] ??
+                                            t('manage.dice.missingOutcome'),
+                                        }
+                                      )}
                                     >
                                       {roll?.dice[asset] ?? '—'}
                                     </span>
@@ -620,7 +680,7 @@ function ManageGame() {
                               </div>
                               {
                                 <div>
-                                  Segment{' '}
+                                  {t('manage.controls.segment')}{' '}
                                   {segment?.index !== undefined
                                     ? segment.index + 1
                                     : ''}
@@ -630,10 +690,12 @@ function ManageGame() {
                             <div className="my-2">
                               <div className="flex flex-row gap-2">
                                 <div className="mobile:app-caption text-sm">
-                                  Story: {segment?.storyElements.length ?? 0}
+                                  {t('manage.controls.story')}{' '}
+                                  {segment?.storyElements.length ?? 0}
                                 </div>
                                 <div className="mobile:app-caption text-sm">
-                                  Learn: {segment?.learningElements.length ?? 0}
+                                  {t('manage.controls.learn')}{' '}
+                                  {segment?.learningElements.length ?? 0}
                                 </div>
                               </div>
                             </div>
@@ -649,8 +711,10 @@ function ManageGame() {
                                   {diceOutcomes}
                                   <span className="mt-2 block text-xs">
                                     {allMarketRollsRevealed(segment.facts)
-                                      ? 'Dice revealed · 3/3'
-                                      : `Awaiting dice · ${revealedCount}/3 revealed`}
+                                      ? t('manage.controls.diceRevealed')
+                                      : t('manage.controls.awaitingDice', {
+                                          count: revealedCount,
+                                        })}
                                   </span>
                                 </Link>
                               ) : (
@@ -667,15 +731,14 @@ function ManageGame() {
                         )
                       }
                     )}
-                    {!isPeriodCompleted && game.periods.length - 1 === ix && (
+                    {canAddSegment && (
                       <>
                         {storyElementsLoading || learningElementsLoading ? (
-                          <div>Loading...</div>
+                          <div>{t('manage.controls.loading')}</div>
                         ) : storyElementsError || learningElementsError ? (
                           <div>
-                            Error loading elements:{' '}
-                            {storyElementsError?.message ||
-                              learningElementsError?.message}
+                            {t('manage.controls.contentError')}{' '}
+                            {t('player.progress.retry')}
                           </div>
                         ) : (
                           <Modal
@@ -690,29 +753,31 @@ function ManageGame() {
                                   root: 'h-full w-12 font-bold text-gray-500',
                                 }}
                                 onClick={() => setIsSegmentModalOpen(true)}
-                                aria-label="Add segment"
+                                aria-label={t(
+                                  'manage.controls.addSegmentLabel'
+                                )}
                                 data={{ cy: 'add-segment' }}
                               >
                                 <FontAwesomeIcon icon={faPlus} />
                               </Button>
                             }
-                            title="Add Segment"
+                            title={t('manage.controls.addSegment')}
                             onSecondaryAction={() => {
                               resetSegment()
                               setIsSegmentModalOpen(false)
                             }}
-                            secondaryLabel="Discard"
+                            secondaryLabel={t('shared.actions.discard')}
                             onPrimaryAction={() => {
                               setSegmentValue('periodIx', period.index)
                               handleSegmentSubmit(onSegmentSubmit)()
                               setIsSegmentModalOpen(false)
                             }}
-                            primaryLabel="Submit"
+                            primaryLabel={t('shared.actions.submit')}
                           >
                             <div className="mobile:w-full flex w-1/2 flex-col gap-2">
                               <div className="flex flex-col gap-2">
                                 <span className="mobile:app-caption text-sm font-normal text-gray-700">
-                                  Story Elements
+                                  {t('player.team.stories')}
                                 </span>
                                 <Controller
                                   control={segmentControl}
@@ -722,14 +787,18 @@ function ManageGame() {
                                       options={storyElementsAll}
                                       value={field.value}
                                       onChange={field.onChange}
-                                      searchPlaceholder="Search story elements..."
+                                      emptyText={t('manage.controls.noMatches')}
+                                      placeholder={t('manage.controls.options')}
+                                      searchPlaceholder={t(
+                                        'manage.controls.searchStories'
+                                      )}
                                     />
                                   )}
                                 />
                               </div>
                               <div className="flex flex-col gap-2">
                                 <span className="mobile:app-caption text-sm font-normal text-gray-700">
-                                  Learning Elements
+                                  {t('manage.controls.lessons')}
                                 </span>
                                 <Controller
                                   control={segmentControl}
@@ -739,7 +808,11 @@ function ManageGame() {
                                       options={learningElementsAll}
                                       value={field.value}
                                       onChange={field.onChange}
-                                      searchPlaceholder="Search learning elements..."
+                                      emptyText={t('manage.controls.noMatches')}
+                                      placeholder={t('manage.controls.options')}
+                                      searchPlaceholder={t(
+                                        'manage.controls.searchLessons'
+                                      )}
                                     />
                                   )}
                                 />
@@ -765,6 +838,7 @@ function ManageGame() {
           })}
 
           {(() => {
+            if (game.status === GameStatus.Completed) return null
             const lastPeriod = game.periods[game.periods.length - 1]
             const disabled =
               lastPeriod &&
@@ -779,43 +853,45 @@ function ManageGame() {
                     disabled={disabled}
                     className={{ root: 'font-bold text-gray-500 md:w-48' }}
                     onClick={() => setIsPeriodModalOpen(true)}
-                    aria-label="Add period"
+                    aria-label={t('manage.controls.addPeriodLabel')}
                     data={{ cy: 'add-period' }}
                   >
                     <FontAwesomeIcon icon={faPlus} />
                   </Button>
                 }
-                title="Add Period"
+                title={t('manage.controls.addPeriod')}
                 onSecondaryAction={() => {
                   resetPeriod()
                   setIsPeriodModalOpen(false)
                 }}
-                secondaryLabel="Discard"
+                secondaryLabel={t('shared.actions.discard')}
                 onPrimaryAction={() => {
                   handlePeriodSubmit(onPeriodSubmit)()
                   setIsPeriodModalOpen(false)
                 }}
-                primaryLabel="Submit"
+                primaryLabel={t('shared.actions.submit')}
               >
                 <div className="mobile:w-full flex w-1/2 flex-col gap-2">
                   <AdminInputField
-                    label="Number of segments"
+                    label={t('manage.controls.segmentCount')}
                     name="segmentCount"
                     type="number"
-                    tooltip={`One period corresponds to one year. Each segment contains ${NUM_MONTHS_PER_SEGMENT} months.`}
+                    tooltip={t('manage.controls.periodHint', {
+                      months: NUM_MONTHS_PER_SEGMENT,
+                    })}
                     required
                     register={registerPeriod}
                     error={errorsPeriod.segmentCount}
                   />
                 </div>
                 <div className="mt-4">
-                  <H3>Scenario Parameters</H3>
+                  <H3>{t('manage.controls.scenario')}</H3>
                   <div className="mobile:w-full flex w-1/2 flex-col gap-2">
                     <AdminInputField
-                      label="Seed"
+                      label={t('manage.controls.seed')}
                       name="seed"
                       type="number"
-                      tooltip={'Seed ....'}
+                      tooltip={t('manage.controls.seedHint')}
                       required
                       register={registerPeriod}
                       error={errorsPeriod.seed}
@@ -823,14 +899,14 @@ function ManageGame() {
                   </div>
                 </div>
                 <div className="mt-4">
-                  <H4>Bank</H4>
+                  <H4>{t('manage.controls.bank')}</H4>
                   <div className="mobile:w-full flex w-1/2 flex-col gap-2">
                     <AdminInputField
-                      label="Saving Interest"
+                      label={t('manage.controls.savingsInterest')}
                       name="interestBank"
                       type="number"
                       step={0.0001}
-                      tooltip={'Saving interest ....'}
+                      tooltip={t('manage.controls.savingsHint')}
                       required
                       register={registerPeriod}
                       error={errorsPeriod.interestBank}
@@ -838,24 +914,24 @@ function ManageGame() {
                   </div>
                 </div>
                 <div className="mt-4">
-                  <H4>Bonds</H4>
+                  <H4>{t('shared.assets.bonds')}</H4>
                   <div className="mobile:w-full flex w-1/2 gap-2">
                     <AdminInputField
-                      label="Trend"
+                      label={t('manage.controls.trend')}
                       name="trendBonds"
                       type="number"
                       step={0.0001}
-                      tooltip={'Trend is the expectation value.'}
+                      tooltip={t('manage.controls.trendHint')}
                       required
                       register={registerPeriod}
                       error={errorsPeriod.trendBonds}
                     />
                     <AdminInputField
-                      label="Gap"
+                      label={t('player.allocation.gap')}
                       name="gapBonds"
                       type="number"
                       step={0.0001}
-                      tooltip={'TODO.'}
+                      tooltip={t('manage.controls.gapHint')}
                       required
                       register={registerPeriod}
                       error={errorsPeriod.gapBonds}
@@ -863,24 +939,24 @@ function ManageGame() {
                   </div>
                 </div>
                 <div className="mt-4">
-                  <H4>Stocks</H4>
+                  <H4>{t('shared.assets.stocks')}</H4>
                   <div className="mobile:w-full flex w-1/2 gap-2">
                     <AdminInputField
-                      label="Trend"
+                      label={t('manage.controls.trend')}
                       name="trendStocks"
                       type="number"
                       step={0.0001}
-                      tooltip={'Trend is the expectation value.'}
+                      tooltip={t('manage.controls.trendHint')}
                       required
                       register={registerPeriod}
                       error={errorsPeriod.trendStocks}
                     />
                     <AdminInputField
-                      label="Gap"
+                      label={t('player.allocation.gap')}
                       name="gapStocks"
                       type="number"
                       step={0.0001}
-                      tooltip={'TODO.'}
+                      tooltip={t('manage.controls.gapHint')}
                       required
                       register={registerPeriod}
                       error={errorsPeriod.gapStocks}
@@ -896,39 +972,49 @@ function ManageGame() {
         {getButton()}
         {awaitingDice && (
           <p role="status" className="self-center text-sm">
-            Reveal all three monthly dice rolls in the closed segment before
-            continuing.
+            {t('manage.controls.revealHint')}
           </p>
         )}
         <Link target="_blank" href={`/admin/reports/${game?.id}`}>
-          <Button>Report</Button>
+          <Button>{t('manage.report.title')}</Button>
         </Link>
       </div>
 
       <div className="mobile:flex-col mobile:gap-app-4 mt-4 flex w-full flex-row justify-between">
         <div className="mobile:w-full w-1/2">
-          <div className="font-bold">Players</div>
+          <div className="font-bold">{t('manage.controls.players')}</div>
           <div className="mt-2 flex flex-col gap-4">
             {game.players.map((player, ix) => (
               <div key={player.id} data-cy={`player-${ix}`}>
-                <PlayerCompact player={player as Player} />
+                <PlayerCompact
+                  labels={{
+                    trader: t('shared.player.trader'),
+                    name: t('shared.player.name'),
+                    avatar: (player) => t('shared.player.avatar', { player }),
+                    login: t('shared.player.login'),
+                  }}
+                  player={player as Player}
+                />
               </div>
             ))}
           </div>
         </div>
 
-        <form onSubmit={handleCountdownSubmit(onCountdownSubmit)}>
+        <form
+          hidden={game.status === GameStatus.Completed}
+          onSubmit={handleCountdownSubmit(onCountdownSubmit)}
+        >
           <Card className="flex flex-col">
             <CardHeader>
-              <CardTitle>Countdown</CardTitle>
+              <CardTitle>{t('manage.controls.countdown')}</CardTitle>
               <CardDescription>
-                Set a countdown for the segment.
+                {t('manage.controls.countdownHint')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div data-cy="countdown-seconds">
                 <AdminInputField
-                  label="Countdown in seconds"
+                  label={t('manage.controls.countdownSeconds')}
                   name="countdownSeconds"
                   type="number"
                   register={registerCountdown}
@@ -942,7 +1028,9 @@ function ManageGame() {
               {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
             </CardContent>
             <CardFooter>
-              <Button type="submit">Set Countdown</Button>
+              <Button type="submit">
+                {t('manage.controls.startCountdown')}
+              </Button>
             </CardFooter>
           </Card>
         </form>

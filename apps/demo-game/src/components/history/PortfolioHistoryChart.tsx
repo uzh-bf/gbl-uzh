@@ -1,7 +1,8 @@
 import { ChartContainer } from '@uzh-bf/design-system'
+import { useTranslations } from 'next-intl'
 import { Bar, BarChart, Tooltip, XAxis, YAxis } from 'recharts'
+import { useLanguage } from '~/i18n/Language'
 import type { HistoryQuarter } from '~/lib/results'
-import { playerAmount } from '~/lib/results'
 import { useTabletLayout } from '~/lib/usePlayerLayout'
 
 export default function PortfolioHistoryChart({
@@ -9,6 +10,8 @@ export default function PortfolioHistoryChart({
 }: {
   quarters: HistoryQuarter[]
 }) {
+  const t = useTranslations()
+  const { playerAmount } = useLanguage()
   const tablet = useTabletLayout()
 
   return (
@@ -16,7 +19,7 @@ export default function PortfolioHistoryChart({
       <div
         className="overflow-x-auto"
         role="region"
-        aria-label="Portfolio value by quarter"
+        aria-label={t('player.history.portfolioByQuarter')}
         tabIndex={0}
       >
         <div
@@ -28,7 +31,7 @@ export default function PortfolioHistoryChart({
           <ChartContainer
             config={{
               value: {
-                label: 'Portfolio value',
+                label: t('player.history.portfolioValue'),
                 color: 'var(--color-player-primary)',
               },
             }}
@@ -57,7 +60,7 @@ export default function PortfolioHistoryChart({
                 cursor={false}
                 formatter={(value: number) => [
                   `${playerAmount(value)} CHF`,
-                  'Portfolio value',
+                  t('player.history.portfolioValue'),
                 ]}
               />
               <Bar
@@ -71,7 +74,7 @@ export default function PortfolioHistoryChart({
           </ChartContainer>
         </div>
       </div>
-      <ul className="sr-only" aria-label="Quarterly portfolio values">
+      <ul className="sr-only" aria-label={t('player.history.quarterlyValues')}>
         {quarters.map((quarter) => (
           <li key={quarter.id}>
             {quarter.year} Q{quarter.quarter}: {playerAmount(quarter.value)} CHF

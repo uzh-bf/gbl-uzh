@@ -1,4 +1,6 @@
 import { cn } from '@gbl-uzh/ui'
+import { useTranslations } from 'next-intl'
+import { useLanguage } from '~/i18n/Language'
 import { ALLOCATION_KEYS, type Allocation } from '~/lib/allocation'
 import { assetLabels } from '~/lib/constants'
 
@@ -6,13 +8,17 @@ export default function AllocationBar({
   value,
   className,
   compact = false,
+  withHandles = false,
   report = false,
 }: {
   value: Allocation
   className?: string
   compact?: boolean
+  withHandles?: boolean
   report?: boolean
 }) {
+  const t = useTranslations()
+  const { share } = useLanguage()
   return (
     <div
       className={cn(
@@ -26,7 +32,7 @@ export default function AllocationBar({
         <div
           key={key}
           className={cn(
-            '@container relative min-w-0 overflow-hidden',
+            'relative min-w-0 overflow-hidden',
             !compact && !report && 'not-first:shadow-[inset_2px_0_white]',
             assetLabels[key].color,
             (key === 'bonds' || (report && key === 'stocks')) && 'text-white'
@@ -34,24 +40,26 @@ export default function AllocationBar({
           data-asset={key}
           style={{ width: `${value[key]}%` }}
         >
-          {report ? (
-            <span className="grid h-full place-items-center text-[11px] font-semibold [@container(max-width:25px)]:invisible">
-              {Number(value[key].toFixed(1))}
-            </span>
-          ) : compact ? null : value[key] < 20 ? (
-            <div className="mobile:px-app-2 mobile:app-annotation grid h-full place-items-center px-[8px] text-[13px] [@container(max-width:30px)]:invisible [@container(max-width:56px)]:px-0 [@container(max-width:56px)]:text-[11px]">
-              <strong>{value[key]}%</strong>
-            </div>
-          ) : (
-            <div className="mobile:px-app-3 flex h-full flex-col items-center justify-center px-[12px] text-center leading-[1.1] whitespace-nowrap [@container(max-width:56px)]:invisible [@container(max-width:80px)]:px-0">
-              <strong className="mobile:app-body tablet:app-caption tablet:leading-[var(--app-leading-value)] mobile:leading-[var(--app-leading-value)] min-[641px]:text-[21px]">
-                {value[key]}%
-              </strong>
-              <span className="mobile:mt-app-1 mobile:app-annotation tablet:app-annotation tablet:mt-0 mt-[4px] font-semibold min-[641px]:text-[15px] [@container(max-width:80px)]:hidden">
-                {assetLabels[key].name}
+          <div className={cn('@container h-full', withHandles && 'mx-[16px]')}>
+            {report ? (
+              <span className="grid h-full place-items-center text-[11px] font-semibold [@container(max-width:25px)]:invisible">
+                {Number(value[key].toFixed(1))}
               </span>
-            </div>
-          )}
+            ) : compact ? null : value[key] < 20 ? (
+              <div className="mobile:px-app-2 mobile:app-annotation grid h-full place-items-center px-[8px] text-[13px] [@container(max-width:30px)]:invisible [@container(max-width:56px)]:px-0 [@container(max-width:56px)]:text-[11px]">
+                <strong>{share(value[key])}</strong>
+              </div>
+            ) : (
+              <div className="mobile:px-app-3 flex h-full flex-col items-center justify-center px-[12px] text-center leading-[1.1] whitespace-nowrap [@container(max-width:56px)]:invisible [@container(max-width:80px)]:px-0">
+                <strong className="mobile:app-body tablet:app-caption tablet:leading-[var(--app-leading-value)] mobile:leading-[var(--app-leading-value)] min-[641px]:text-[21px]">
+                  {share(value[key])}
+                </strong>
+                <span className="mobile:mt-app-1 mobile:app-annotation tablet:app-annotation tablet:mt-0 mt-[4px] font-semibold min-[641px]:text-[15px] [@container(max-width:80px)]:hidden">
+                  {t(assetLabels[key].name)}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       ))}
     </div>

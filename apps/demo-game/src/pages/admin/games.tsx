@@ -1,22 +1,29 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import {
   CreateGameDocument,
-  GameDataFragmentDoc,
   GamesDocument,
+  RegistrationMode,
 } from 'src/graphql/generated/ops'
 import { Button } from '~/components/admin/AdminControls'
 import { AdminInputField } from '~/components/fields/AdminInputField'
+import { statusKeys } from '~/i18n/labels'
+import { useLanguage } from '~/i18n/Language'
 
 interface CreateGameFormValues {
   name: string
   playerCount: number
+  registrationMode: RegistrationMode
+  maxPlayers: number | ''
 }
 
 function Games() {
+  const t = useTranslations()
+  const { count } = useLanguage()
   const router = useRouter()
 
   const session = useSession({
@@ -27,55 +34,54 @@ function Games() {
   })
 
   const { data, error, loading } = useQuery(GamesDocument)
-  const [createGame] = useMutation(CreateGameDocument, {
-    update(cache, { data: { createGame: createGameResult } }) {
-      cache.modify({
-        fields: {
-          games(existingGames = []) {
-            const newGameRef = cache.writeFragment({
-              data: createGameResult,
-              fragment: GameDataFragmentDoc,
-            })
-            return [...existingGames, newGameRef]
-          },
-        },
-      })
-    },
-  })
+  const [createGame, { loading: creating, error: createError }] = useMutation(
+    CreateGameDocument,
+    { refetchQueries: [GamesDocument] }
+  )
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<CreateGameFormValues>({
+    shouldUnregister: true,
     defaultValues: {
       name: '',
       playerCount: 1,
+      registrationMode: RegistrationMode.SharedLink,
+      maxPlayers: '',
     },
   })
 
-  if (loading || !data) {
-    return <div>loading...</div>
-  }
+  const registrationMode = useWatch({ control, name: 'registrationMode' })
 
-  if (error) {
-    return <div>{error.message}</div>
-  }
+  if (error) return <div role="alert">{t('manage.games.loadGamesError')}</div>
+  if (loading || !data) return <div>{t('manage.controls.loading')}</div>
 
   const onSubmit = async (values: CreateGameFormValues) => {
     try {
       await createGame({
         variables: {
           name: values.name,
-          playerCount: parseInt(String(values.playerCount), 10),
+          playerCount:
+            values.registrationMode === RegistrationMode.Fixed
+              ? values.playerCount
+              : null,
+          registrationMode: values.registrationMode,
+          maxPlayers:
+            values.registrationMode === RegistrationMode.SharedLink &&
+            typeof values.maxPlayers === 'number' &&
+            Number.isFinite(values.maxPlayers)
+              ? values.maxPlayers
+              : null,
           facts: { myInt: 1 },
         },
-        refetchQueries: [GamesDocument],
       })
       reset()
-    } catch (e) {
-      console.error(e)
+    } catch {
+      // The mutation error is shown below; keep the form values for retry.
     }
   }
 
@@ -91,7 +97,7 @@ function Games() {
             router.push(data.url)
           }}
         >
-          Logout
+          {t('manage.games.logout')}
         </Button>
       )}
 
@@ -100,35 +106,66 @@ function Games() {
         className="mobile:app-card mobile:gap-app-3 my-4 flex max-w-md flex-col gap-4 rounded border p-4"
       >
         <AdminInputField
-          label="Name"
+          label={t('manage.games.name')}
           name="name"
           register={register}
           error={errors.name}
           required
-          placeholder="Game Name"
+          placeholder={t('manage.games.gameName')}
           testId="game-name"
         />
 
-        <AdminInputField
-          label="Player Count"
-          name="playerCount"
-          type="number"
-          register={register}
-          error={errors.playerCount}
-          required
-          min={1}
-          step={1}
-          testId="game-player-count"
-          minMessage="Must be at least 1"
-        />
+        <div className="flex flex-col gap-1">
+          <label htmlFor="registrationMode">
+            {t('manage.games.registration')}
+          </label>
+          <select
+            id="registrationMode"
+            {...register('registrationMode')}
+            className="rounded border p-2"
+          >
+            <option value="SHARED_LINK">{t('manage.registration.link')}</option>
+            <option value="FIXED">{t('manage.games.fixedPlayers')}</option>
+          </select>
+        </div>
+        {registrationMode === RegistrationMode.Fixed ? (
+          <AdminInputField
+            key="playerCount"
+            label={t('manage.games.playerCount')}
+            name="playerCount"
+            type="number"
+            register={register}
+            error={errors.playerCount}
+            required
+            min={1}
+            step={1}
+            testId="game-player-count"
+            minMessage="manage.games.minPlayers"
+          />
+        ) : (
+          <AdminInputField
+            key="maxPlayers"
+            label={t('manage.games.maxPlayers')}
+            name="maxPlayers"
+            type="number"
+            register={register}
+            error={errors.maxPlayers}
+            min={1}
+            minMessage="manage.games.minPlayers"
+            step={1}
+            placeholder={t('manage.games.noLimit')}
+          />
+        )}
 
         <Button
           type="submit"
+          disabled={creating}
           data={{ cy: 'create-game' }}
           className={{ root: 'w-max' }}
         >
-          Create Game
+          {t('manage.games.create')}
         </Button>
+        {createError && <p role="alert">{t('manage.games.createError')}</p>}
       </form>
 
       <div className="mt-4 flex flex-col gap-1">
@@ -149,18 +186,23 @@ function Games() {
                     {game?.name}
                   </div>
                   <div className="mobile:shrink-0 flex w-10">
-                    Id: {game?.id}
+                    {t('manage.games.id')} {game?.id}
                   </div>
                 </div>
                 <div className="mobile:app-caption mobile:flex-wrap mobile:gap-app-2 mobile:p-0 flex w-full items-end justify-between p-2 text-sm">
                   <div className="flex flex-col justify-between gap-y-1 text-left">
-                    <div>Player count: {game?.playerCount}</div>
                     <div>
-                      Active Period/Segment: {game?.activePeriodIx}/
+                      {t('manage.games.playerCountLabel')}{' '}
+                      {game?.playerCount != null && count(game.playerCount)}
+                    </div>
+                    <div>
+                      {t('manage.games.currentRound')} {game?.activePeriodIx}/
                       {game?.activeSegmentIx}
                     </div>
                   </div>
-                  <div className="text-right">Status: {game?.status}</div>
+                  <div className="text-right">
+                    {t('manage.games.status')} {t(statusKeys[game.status])}
+                  </div>
                 </div>
               </Button>
             </Link>

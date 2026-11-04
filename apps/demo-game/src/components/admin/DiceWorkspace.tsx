@@ -1,7 +1,9 @@
-import { probabilityDistribution, signedPercent } from '@gbl-uzh/ui'
+import { probabilityDistribution } from '@gbl-uzh/ui'
+import { useTranslations } from 'next-intl'
 import dynamic from 'next/dynamic'
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import type { MarketDiceQuery } from '~/graphql/generated/ops'
+import { useLanguage } from '~/i18n/Language'
 import { FIRST_GAME_YEAR, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 import {
   readMarketRoll,
@@ -18,26 +20,31 @@ const months = Array.from(
   (_, index) => index
 )
 const diceRows = [
-  { name: 'Bonds', description: 'Bonds only', color: '#268368', dots: 'white' },
   {
-    name: 'Shared',
-    description: 'Bonds and stocks',
+    name: 'shared.assets.bonds',
+    description: 'shared.assets.bondsOnly',
+    color: '#268368',
+    dots: 'white',
+  },
+  {
+    name: 'shared.assets.shared',
+    description: 'shared.assets.bondsAndStocks',
     color: '#e85c24',
     dots: 'white',
   },
   {
-    name: 'Stocks',
-    description: 'Stocks only',
+    name: 'shared.assets.stocks',
+    description: 'shared.assets.stocksOnly',
     color: '#ffe000',
     dots: '#151515',
   },
 ] as const
 const sectionPadding = 'mobile:p-app-4 p-[28px]'
 const phaseMessages = {
-  idle: 'Not rolled yet',
-  rolling: 'Rolling…',
-  publishing: 'Publishing to players…',
-  error: 'Could not publish the roll to players.',
+  idle: 'manage.dice.pending',
+  rolling: 'manage.dice.rolling',
+  publishing: 'manage.dice.publishing',
+  error: 'manage.dice.publishError',
 } as const
 type Phase = keyof typeof phaseMessages
 
@@ -52,12 +59,15 @@ function ReturnChart({
   gap: number
   roll: ReturnType<typeof readMarketRoll>
 }) {
-  const title = asset === 'bonds' ? 'Bonds' : 'Stocks'
+  const t = useTranslations()
+  const { signedPercent, language, percent, share } = useLanguage()
+  const title =
+    asset === 'bonds' ? t('shared.assets.bonds') : t('shared.assets.stocks')
   const { data, volatility } = probabilityDistribution(trend, gap)
   const total = roll?.dice[asset]
   return (
     <section
-      aria-label={`${title} dice outcome`}
+      aria-label={t('manage.dice.outcome', { asset: title })}
       data-cy={`admin-dice-${asset}`}
       className={`${sectionPadding} border-player-border min-w-0 border-t min-[900px]:last:border-l min-[1200px]:border-t-0 min-[1200px]:border-l`}
     >
@@ -65,20 +75,22 @@ function ReturnChart({
         <h2 className="m-0 text-[16px] font-semibold tracking-[1px] uppercase">
           {title}
         </h2>
-        <p className="m-0 text-[16px]">Dice outcome for {asset}</p>
+        <p className="m-0 text-[16px]">
+          {t('manage.dice.outcomePrefix')} {language === 'en' ? asset : title}
+        </p>
       </div>
       <dl className="mt-[24px] flex flex-wrap gap-x-[28px] gap-y-[12px]">
         {(
           [
-            ['Expectation', trend],
-            ['Trend gap', gap],
-            ['Volatility', volatility],
+            [t('manage.dice.expectation'), trend],
+            [t('manage.dice.trendGap'), gap],
+            [t('manage.dice.volatility'), volatility],
           ] as const
         ).map(([label, value]) => (
           <div key={label}>
             <dt className="text-player-muted text-[16px]">{label}</dt>
             <dd className="m-0 mt-[4px] text-[22px] font-bold">
-              {(value * 100).toFixed(2)}%
+              {percent(value, 2)}
             </dd>
           </div>
         ))}
@@ -86,7 +98,13 @@ function ReturnChart({
       <svg
         viewBox="0 0 740 354"
         role="img"
-        aria-label={`${title}: bar height is probability; labels show monthly return. ${total === undefined ? 'No roll revealed.' : `Revealed total: ${total}.`}`}
+        aria-label={t('manage.dice.chartDescription', {
+          asset: title,
+          reveal:
+            total === undefined
+              ? t('manage.dice.noReveal')
+              : t('manage.dice.revealedTotal', { total: total }),
+        })}
         className="mobile:mt-app-6 mt-[40px] block w-full"
       >
         {[0, 0.045, 0.09, 0.135, 0.18].map((probability) => {
@@ -108,7 +126,7 @@ function ReturnChart({
                 className="mobile:text-[22px]"
                 fill="var(--color-player-muted)"
               >
-                {Number((probability * 100).toFixed(1))}%
+                {share(Number((probability * 100).toFixed(1)))}
               </text>
             </g>
           )
@@ -126,7 +144,14 @@ function ReturnChart({
               data-roll={item.eyes}
               data-highlighted={selected}
             >
-              <title>{`Roll ${item.eyes}: ${(item.prob * 100).toFixed(2)}% probability, ${signedPercent(item.value)} return${selected ? ', revealed roll' : ''}`}</title>
+              <title>
+                {t('manage.dice.rollTooltip', {
+                  roll: item.eyes,
+                  probability: percent(item.prob, 2),
+                  change: signedPercent(item.value),
+                  highlight: selected ? t('manage.dice.highlighted') : '',
+                })}
+              </title>
               <rect
                 x={x}
                 y={316 - height}
@@ -169,14 +194,15 @@ function ReturnChart({
         aria-hidden="true"
         className="text-player-muted mobile:app-caption mt-[8px] flex justify-between gap-[12px] pl-[8.4%] text-[16px]"
       >
-        <span>Probability per roll</span>
-        <span>Dice roll</span>
+        <span>{t('manage.dice.probabilityPerRoll')}</span>
+        <span>{t('manage.dice.diceRoll')}</span>
       </div>
       <div className="border-player-border text-player-muted mobile:app-body mt-[24px] flex min-h-[60px] flex-wrap items-center justify-between gap-[12px] border-t pt-[24px] text-[18px]">
         {roll ? (
           <>
             <span>
-              Shared {roll.dice.shared} + {asset}{' '}
+              {t('shared.assets.shared')} {roll.dice.shared} +{' '}
+              {language === 'en' ? asset : title}{' '}
               {roll.dice[asset] - roll.dice.shared} = {total}
             </span>
             <strong
@@ -187,7 +213,7 @@ function ReturnChart({
             </strong>
           </>
         ) : (
-          <span>Not rolled yet</span>
+          <span>{t('manage.dice.pending')}</span>
         )}
       </div>
     </section>
@@ -203,6 +229,8 @@ export function DiceWorkspace({
   scenario: MarketScenario
   publish: (rollIndex: number) => Promise<void>
 }) {
+  const t = useTranslations()
+  const { locale } = useLanguage()
   const indices = revealedIndices(segment.facts)
   const [selected, setSelected] = useState(
     () => months.find((index) => !indices.includes(index)) ?? 0
@@ -220,7 +248,7 @@ export function DiceWorkspace({
   )
 
   const monthName = (index: number) =>
-    new Intl.DateTimeFormat('en', { month: 'long', timeZone: 'UTC' }).format(
+    new Intl.DateTimeFormat(locale, { month: 'long', timeZone: 'UTC' }).format(
       new Date(
         Date.UTC(
           FIRST_GAME_YEAR + segment.periodIx,
@@ -283,14 +311,15 @@ export function DiceWorkspace({
   }
 
   return (
-    <main className="font-player text-player-text mobile:app-body min-h-screen bg-white text-[18px]">
+    <main className="font-player text-player-text mobile:app-body min-h-[calc(100dvh-36px)] bg-white text-[18px]">
       <div className="border-player-divider mobile:px-app-4 flex flex-wrap items-end gap-x-[28px] border-b px-[28px]">
         <h1 className="text-player-muted m-0 py-[20px] text-[16px] font-semibold tracking-[1px] uppercase">
-          {FIRST_GAME_YEAR + segment.periodIx} · Quarter {segment.index + 1}
+          {FIRST_GAME_YEAR + segment.periodIx} {t('manage.dice.quarter')}{' '}
+          {segment.index + 1}
         </h1>
         <div
           role="tablist"
-          aria-label="Quarter months"
+          aria-label={t('manage.dice.quarterMonths')}
           className="mobile:gap-app-4 flex max-w-full gap-[24px] overflow-x-auto"
         >
           {months.map((index) => (
@@ -313,11 +342,13 @@ export function DiceWorkspace({
               <span
                 className={`block ${selected === index ? 'font-bold' : 'font-semibold'}`}
               >
-                Month {index + 1}
+                {t('manage.dice.month')} {index + 1}
               </span>
               <span className="text-player-muted mobile:app-caption mt-[6px] block text-[16px]">
                 {monthName(index)} ·{' '}
-                {indices.includes(index) ? 'Rolled' : 'Not rolled'}
+                {indices.includes(index)
+                  ? t('manage.dice.rolled')
+                  : t('manage.dice.notRolled')}
               </span>
             </button>
           ))}
@@ -336,11 +367,11 @@ export function DiceWorkspace({
           data-cy={`admin-roll-${selected}`}
         >
           <section
-            aria-label="Dice"
+            aria-label={t('manage.dice.title')}
             className="min-w-0 min-[900px]:col-span-2 min-[1200px]:col-span-1"
           >
             <h2 className="border-player-border text-player-muted mobile:px-app-4 mobile:py-app-4 m-0 border-b px-[28px] py-[24px] text-[16px] font-semibold tracking-[1px] uppercase">
-              Dice
+              {t('manage.dice.title')}
             </h2>
             <div className="min-[900px]:max-[1199px]:grid min-[900px]:max-[1199px]:grid-cols-3">
               {diceRows.map((die, dieIndex) => (
@@ -351,7 +382,14 @@ export function DiceWorkspace({
                   <div
                     className="bg-player-disabled-surface flex size-[64px] shrink-0 items-center justify-center rounded-[14px]"
                     role="img"
-                    aria-label={`${die.name} die: ${visibleRoll ? values[dieIndex] : phase === 'rolling' ? 'rolling' : 'not revealed'}`}
+                    aria-label={t('manage.dice.dieOutcome', {
+                      asset: t(die.name),
+                      value: visibleRoll
+                        ? values[dieIndex]
+                        : phase === 'rolling'
+                          ? t('manage.dice.inProgress')
+                          : t('manage.dice.notRevealed'),
+                    })}
                   >
                     {(visibleRoll || phase === 'rolling') && roll && (
                       <div
@@ -371,9 +409,9 @@ export function DiceWorkspace({
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="m-0 text-[20px] font-bold">{die.name}</h3>
+                    <h3 className="m-0 text-[20px] font-bold">{t(die.name)}</h3>
                     <p className="text-player-muted mobile:app-caption m-0 text-[16px]">
-                      {die.description}
+                      {t(die.description)}
                     </p>
                   </div>
                   <strong className="mobile:app-value text-[28px]">
@@ -386,7 +424,10 @@ export function DiceWorkspace({
               className={`${sectionPadding} flex flex-col items-start gap-[16px]`}
             >
               {!roll ? (
-                <p role="alert">Month {selected + 1}: dice unavailable.</p>
+                <p role="alert">
+                  {t('manage.dice.month')} {selected + 1}
+                  {t('manage.dice.unavailable')}
+                </p>
               ) : revealed && !busy ? (
                 <p
                   role="status"
@@ -396,8 +437,8 @@ export function DiceWorkspace({
                     aria-hidden="true"
                     className="bg-player-success size-[8px] shrink-0 rounded-full"
                   />
-                  Month {selected + 1} · {monthName(selected)} · revealed to
-                  players
+                  {t('manage.dice.month')} {selected + 1} ·{' '}
+                  {monthName(selected)} {t('manage.dice.published')}
                 </p>
               ) : (
                 <>
@@ -409,17 +450,19 @@ export function DiceWorkspace({
                       root: 'min-h-[48px] rounded-[6px] px-[24px] text-[20px]',
                     }}
                   >
-                    {phase === 'error' ? 'Retry publishing' : 'Roll'}
+                    {phase === 'error'
+                      ? t('manage.dice.retry')
+                      : t('manage.dice.roll')}
                   </Button>
                   <p
                     role={phase === 'error' ? 'alert' : 'status'}
                     className="text-player-muted m-0"
                   >
-                    {phaseMessages[phase]}
+                    {t(phaseMessages[phase])}
                   </p>
                   {!segment.canReveal && (
                     <p className="text-player-muted m-0">
-                      Dice can only be rolled for the current closed segment.
+                      {t('manage.dice.closedOnly')}
                     </p>
                   )}
                 </>

@@ -1,4 +1,5 @@
 import type { ResultQuery } from '../graphql/generated/ops'
+import { languageTools } from '../i18n/locale'
 import {
   ALLOCATION_KEYS,
   isAllocationValid,
@@ -53,15 +54,21 @@ export function balanceMix(value: ResultBalance): Allocation | null {
 }
 
 /** Only settled rows enter these views; PERIOD_END identifies the displayed year. */
-export function buildResultView(data: ResultQuery) {
+export function buildResultView(
+  data: ResultQuery,
+  monthLabel = (index: number) => MONTHS[index] ?? `Month ${index + 1}`
+) {
   const game = data.result?.currentGame
   if (pendingMarketReveal(game)) return null
-  if (!game || !['PAUSED', 'CONSOLIDATION', 'RESULTS'].includes(game.status))
+  const status = game?.status === 'COMPLETED' ? 'RESULTS' : game?.status
+  if (
+    !game ||
+    (status !== 'PAUSED' && status !== 'CONSOLIDATION' && status !== 'RESULTS')
+  )
     return null
   const { results: rows, settled } = readResultHistory(data)
   const ended = rows.filter((row) => row.type === 'PERIOD_END')
-  const period =
-    game.status === 'RESULTS' ? ended.at(-1)?.period : game.activePeriod
+  const period = status === 'RESULTS' ? ended.at(-1)?.period : game.activePeriod
   if (!period) return null
   const year = FIRST_GAME_YEAR + period.index
   const periodConfig = game.periods.find((item) => item.id === period.id)
@@ -69,7 +76,7 @@ export function buildResultView(data: ResultQuery) {
     .filter((row) => row.period.id === period.id)
     .map((row) => ({ ...row, samples: readBalanceSamples(row.facts) }))
   const quarterIndex =
-    game.status === 'RESULTS'
+    status === 'RESULTS'
       ? (periodConfig?.activeSegmentIx ??
         quarterRows.at(-1)?.segment?.index ??
         0)
@@ -89,7 +96,7 @@ export function buildResultView(data: ResultQuery) {
     return {
       ...assets,
       month,
-      label: MONTHS[month] ?? `Month ${month + 1}`,
+      label: monthLabel(month),
       bankBenchmark: finiteNumber(facts.bankBenchmark),
       bondsBenchmark: finiteNumber(facts.bondsBenchmark),
       stocksBenchmark: finiteNumber(facts.stocksBenchmark),
@@ -116,9 +123,9 @@ export function buildResultView(data: ResultQuery) {
   opening.label = startMonth === 0 ? 'Start' : opening.label
   const close = balance(quarterSamples.at(-1))
   const current =
-    game.status === 'RESULTS'
+    status === 'RESULTS'
       ? balance(parseFacts(ended.at(-1)?.facts).assets)
-      : game.status === 'CONSOLIDATION'
+      : status === 'CONSOLIDATION'
         ? balance(parseFacts(data.result?.playerResult?.facts).assets)
         : close
   const years = ended.map((row) => {
@@ -148,7 +155,7 @@ export function buildResultView(data: ResultQuery) {
         row.segment.index === index &&
         row.samples.length === monthsPerQuarter + 1
     ) &&
-    (game.status !== 'RESULTS' ||
+    (status !== 'RESULTS' ||
       !periodConfig ||
       quarterRows.length === periodConfig.segmentCount)
   const monthlySamples = quarterRows.flatMap((row) => row.samples.slice(1))
@@ -161,7 +168,7 @@ export function buildResultView(data: ResultQuery) {
     })
   ) as Record<Asset, number | null>
   return {
-    status: game.status as 'PAUSED' | 'CONSOLIDATION' | 'RESULTS',
+    status,
     year,
     quarter,
     segmentCount: periodConfig?.segmentCount ?? quarter,
@@ -178,7 +185,7 @@ export function buildResultView(data: ResultQuery) {
     consolidationChange: difference(current.totalAssets, close.totalAssets),
     yearGain: years.at(-1)?.gain ?? null,
     accumulatedReturn: rate(current.totalAssets, initialCapital),
-    monthRange: `${MONTHS[startMonth] ?? `Month ${startMonth + 1}`} – ${MONTHS[startMonth + monthsPerQuarter - 1] ?? `Month ${startMonth + monthsPerQuarter}`}`,
+    monthRange: `${monthLabel(startMonth)} – ${monthLabel(startMonth + monthsPerQuarter - 1)}`,
   }
 }
 
@@ -368,21 +375,7 @@ export function readResultHistory(data: ResultQuery) {
   }
 }
 
-const amountFormat = new Intl.NumberFormat('de-CH', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-})
-
-export function playerAmount(value: number | null, signed = false) {
-  if (value === null) return '—'
-  const formatted = amountFormat.format(value).replaceAll('’', "'")
-  if (formatted === '-0.00' || formatted === '0.00') return '0.00'
-  return `${signed && value > 0 ? '+' : ''}${formatted}`
-}
-
-export function playerPercent(value: number | null) {
-  return value === null ? '—' : `${playerAmount(value * 100, true)}%`
-}
+export const { playerAmount, playerPercent } = languageTools('en')
 
 export const composeChartData = (dataPerPeriod: any, key: string) => {
   const output = []

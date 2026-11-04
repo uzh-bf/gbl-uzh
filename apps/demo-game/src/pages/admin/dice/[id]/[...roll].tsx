@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useSubscription } from '@apollo/client'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { Button } from '~/components/admin/AdminControls'
@@ -13,6 +14,7 @@ import { readScenario } from '~/lib/market'
 import { queueRefetch } from '~/lib/queuedRefetch'
 
 export default function Forecast() {
+  const t = useTranslations()
   const router = useRouter()
   const segmentId = Number(router.query.id)
   const { data, loading, error, refetch } = useQuery(MarketDiceDocument, {
@@ -31,12 +33,11 @@ export default function Forecast() {
         void queuedRefetch().catch(() => {})
     },
   })
-  if (loading && !segment) return <p>Loading…</p>
-  if (error && !segment)
-    return <p role="alert">Could not load dice. Please reload the page.</p>
-  if (!segment) return <p>Segment not found.</p>
+  if (loading && !segment) return <p>{t('manage.dice.loading')}</p>
+  if (error && !segment) return <p role="alert">{t('manage.dice.loadError')}</p>
+  if (!segment) return <p>{t('manage.dice.segmentNotFound')}</p>
   const scenario = readScenario(segment.periodFacts)
-  if (!scenario) return <p>Market data is unavailable.</p>
+  if (!scenario) return <p>{t('manage.dice.marketUnavailable')}</p>
   return (
     <>
       {error && (
@@ -44,11 +45,9 @@ export default function Forecast() {
           role="alert"
           className="mobile:p-app-4 flex flex-wrap items-center gap-[12px] p-[28px]"
         >
-          <p className="m-0">
-            Could not refresh dice. Showing the last loaded data.
-          </p>
+          <p className="m-0">{t('manage.dice.refreshError')}</p>
           <Button onClick={() => void queuedRefetch().catch(() => {})}>
-            Retry loading
+            {t('manage.dice.retryLoading')}
           </Button>
         </div>
       )}

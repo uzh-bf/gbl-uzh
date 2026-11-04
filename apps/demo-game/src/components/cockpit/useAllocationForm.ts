@@ -49,10 +49,7 @@ export function useAllocationForm(
           helpers.resetForm({ values })
         } catch {
           if (currentRound.current === submittingRound)
-            helpers.setStatus({
-              error:
-                'Could not save your allocation. Please try submitting again.',
-            })
+            helpers.setStatus({ error: true })
         } finally {
           if (currentRound.current === submittingRound)
             helpers.setSubmitting(false)

@@ -1,9 +1,12 @@
 import { cn } from '@gbl-uzh/ui'
 import { BookOpen, ChevronRight, Lightbulb } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useId, type ReactNode } from 'react'
 import type { ResultQuery } from '~/graphql/generated/ops'
-import { playerAmount, playerPercent } from '~/lib/results'
+import { contentText } from '~/i18n/content'
+import { LanguageSwitch, useLanguage } from '~/i18n/Language'
 import { learningXP, teamStatistics, type StoryEntry } from '~/lib/team'
+import ReturnLink from './ReturnLink'
 
 type Activity = { id: string; title: string; reward?: unknown }
 
@@ -24,6 +27,8 @@ export default function TeamPanel({
   onLearning: (id: string) => void
   onStory: (entry: StoryEntry) => void
 }) {
+  const t = useTranslations()
+  const { count, playerAmount, playerPercent, language } = useLanguage()
   const self = data.self
   const stats = teamStatistics(data)
   const completedIds = new Set(
@@ -36,20 +41,45 @@ export default function TeamPanel({
     threshold > 0 ? Math.min(100, (experience / threshold) * 100) : 0
   return (
     <section data-cy="team-panel">
+      <div className="border-player-border tablet:px-3 tablet:py-2 border-b p-4">
+        <LanguageSwitch showLabel />
+      </div>
+      <ReturnLink token={self?.token} />
       <div className="border-player-border mobile:px-app-4 mobile:py-app-4 tablet:px-[12px] tablet:py-[8px] border-b min-[641px]:px-[32px] min-[641px]:py-[28px]">
         <div className="mobile:mb-app-4 mobile:gap-app-2 mobile:app-body tablet:text-[14px] tablet:leading-[1.4] tablet:mb-[8px] mb-[16px] flex flex-wrap justify-between gap-[8px] min-[641px]:text-[26px]">
-          <span className="font-semibold">Level {self?.level?.index ?? 0}</span>
+          <span className="font-semibold">
+            {t('player.team.level')} {count(self?.level?.index ?? 0)}
+            {self?.level?.description && (
+              <>
+                {' '}
+                ·{' '}
+                {contentText(
+                  language,
+                  'level',
+                  self.level.index,
+                  'description',
+                  self.level.description
+                )}
+              </>
+            )}
+          </span>
           <span className="text-player-muted">
-            {experience} / {threshold > 0 ? threshold : '—'} XP
+            {count(experience)} / {threshold > 0 ? count(threshold) : '—'} XP
           </span>
         </div>
         <div
           role="progressbar"
-          aria-label="Experience"
+          aria-label={t('player.team.experience')}
           aria-valuemin={0}
           aria-valuemax={threshold > 0 ? threshold : 100}
           aria-valuenow={threshold > 0 ? Math.min(experience, threshold) : 0}
-          aria-valuetext={`${experience} XP${threshold > 0 ? ` of ${threshold}` : ''}`}
+          aria-valuetext={t('player.team.xp', {
+            experience: count(experience),
+            threshold:
+              threshold > 0
+                ? t('player.team.xpThreshold', { threshold: count(threshold) })
+                : '',
+          })}
           className="bg-player-progress tablet:h-[6px] h-[12px] overflow-hidden rounded-[6px] min-[641px]:h-[16px]"
         >
           <div
@@ -60,12 +90,12 @@ export default function TeamPanel({
       </div>
       <dl className="border-player-border m-0 grid grid-cols-2 border-b">
         <Statistic
-          title="Value"
+          title={t('player.team.value')}
           value={playerAmount(stats.value)}
           testId="team-value"
         />
         <Statistic
-          title="Last quarter"
+          title={t('player.team.lastQuarter')}
           value={playerPercent(stats.lastQuarter)}
           testId="team-last-quarter"
           color={
@@ -77,21 +107,29 @@ export default function TeamPanel({
           }
         />
       </dl>
-      <SectionHeading title="Learning Activities" />
+      <SectionHeading title={t('player.team.activities')} />
       <ul className="m-0 list-none p-0">
         {[...openActivities, ...completedActivities].map((activity) => {
           const completed = completedIds.has(activity.id)
           const state = completed
-            ? 'Solved'
+            ? t('player.quiz.solved')
             : openedIds.has(activity.id)
-              ? 'Open'
-              : 'New'
+              ? t('manage.registration.open')
+              : t('player.quiz.new')
           const xp = learningXP(activity.reward)
           return (
             <ContentRow
               key={activity.id}
-              title={activity.title}
-              description={`Quiz${xp !== null ? ` · ${xp} XP` : ''}`}
+              title={contentText(
+                language,
+                'lesson',
+                activity.id,
+                'title',
+                activity.title
+              )}
+              description={t('player.team.quiz', {
+                reward: xp !== null ? ` · ${count(xp)} XP` : '',
+              })}
               state={state}
               onClick={() => onLearning(activity.id)}
               icon={
@@ -104,17 +142,35 @@ export default function TeamPanel({
           )
         })}
         {!openActivities.length && !completedActivities.length && (
-          <Empty>No learning activities available yet.</Empty>
+          <Empty>{t('player.team.noActivities')}</Empty>
         )}
       </ul>
-      <SectionHeading title="Story Elements" note="Read any time" />
+      <SectionHeading
+        title={t('player.team.stories')}
+        note={t('player.story.readAnyTime')}
+      />
       <ul className="m-0 list-none p-0">
         {stories.map((entry) => (
           <ContentRow
             key={entry.story.id}
-            title={entry.story.title}
-            description={`Card ${entry.index + 1} of ${entry.sequence.stories.length} · ${entry.sequence.year} · Q${entry.sequence.quarter}`}
-            state={visited.has(entry.story.id) ? 'Read' : 'New'}
+            title={contentText(
+              language,
+              'story',
+              entry.story.id,
+              'title',
+              entry.story.title
+            )}
+            description={t('player.team.cardProgress', {
+              card: entry.index + 1,
+              total: entry.sequence.stories.length,
+              year: entry.sequence.year,
+              quarter: entry.sequence.quarter,
+            })}
+            state={
+              visited.has(entry.story.id)
+                ? t('player.team.read')
+                : t('player.quiz.new')
+            }
             onClick={() => onStory(entry)}
             icon={
               <BookOpen
@@ -124,9 +180,7 @@ export default function TeamPanel({
             }
           />
         ))}
-        {!stories.length && (
-          <Empty>Stories will appear when a quarter begins.</Empty>
-        )}
+        {!stories.length && <Empty>{t('player.team.emptyStories')}</Empty>}
       </ul>
     </section>
   )
@@ -187,6 +241,7 @@ function ContentRow({
   icon: ReactNode
   onClick: () => void
 }) {
+  const t = useTranslations()
   const descriptionId = useId()
   const stateId = useId()
   return (
@@ -202,7 +257,7 @@ function ContentRow({
           aria-hidden="true"
           className={cn(
             'tablet:size-[28px] tablet:rounded-[8px] grid size-[40px] shrink-0 place-items-center rounded-[12px] min-[641px]:size-[52px]',
-            state === 'New'
+            state === t('player.quiz.new')
               ? 'bg-player-warning-surface text-player-warning'
               : 'bg-player-progress text-player-primary'
           )}

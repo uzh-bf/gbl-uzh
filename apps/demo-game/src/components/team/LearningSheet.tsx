@@ -1,6 +1,9 @@
 import { cn } from '@gbl-uzh/ui'
+import { useTranslations } from 'next-intl'
 import Markdown from 'react-markdown'
 import type { LearningElementQuery } from '~/graphql/generated/ops'
+import { contentText } from '~/i18n/content'
+import { useLanguage } from '~/i18n/Language'
 import { learningXP } from '~/lib/team'
 import CompactCountdown from '../cockpit/CompactCountdown'
 import PlayerActionButton from '../cockpit/PlayerActionButton'
@@ -44,16 +47,28 @@ export default function LearningSheet({
   onRetry: () => void
   expiresAt?: Date | null
 }) {
+  const t = useTranslations()
+  const { language, count } = useLanguage()
+  function text(field: 'title' | 'question' | 'feedback' | 'motivation') {
+    const original = element?.[field]
+    return (
+      original && contentText(language, 'lesson', element.id, field, original)
+    )
+  }
   const solved = state === 'SOLVED'
   const xp = learningXP(element?.reward)
   return (
     <ContentSheet
-      title="Learning Activity"
+      title={t('player.quiz.title')}
       label={
         <>
-          <span>Learning activity</span>
+          <span>{t('player.quiz.category')}</span>
           <span className="bg-player-success-surface text-player-success mobile:px-app-4 mobile:py-app-2 tablet:px-app-2 tablet:py-app-1 rounded-[8px] px-[16px] py-[6px] tracking-normal normal-case">
-            {solved ? 'Solved' : isNew ? 'New' : 'Open'}
+            {solved
+              ? t('player.quiz.solved')
+              : isNew
+                ? t('player.quiz.new')
+                : t('manage.registration.open')}
           </span>
         </>
       }
@@ -61,7 +76,7 @@ export default function LearningSheet({
       footer={
         <>
           <SheetTextButton onClick={onClose}>
-            {solved ? 'Close' : 'Later'}
+            {solved ? t('shared.actions.close') : t('player.quiz.later')}
           </SheetTextButton>
           {!solved && (
             <PlayerActionButton
@@ -71,7 +86,7 @@ export default function LearningSheet({
                 !element || loading || queryError || saving || !selection.length
               }
             >
-              {saving ? 'Submitting…' : 'Submit answer'}
+              {saving ? t('player.quiz.submitting') : t('player.quiz.submit')}
             </PlayerActionButton>
           )}
         </>
@@ -85,21 +100,21 @@ export default function LearningSheet({
             data-cy="content-sheet-heading"
             className="mobile:app-heading tablet:app-heading m-0 leading-[1.25] font-bold min-[641px]:text-[36px]"
           >
-            {element?.title ?? title}
+            {text('title') ?? title}
           </h2>
           {element && !queryError && (
             <div className={contentProse}>
-              <Markdown>{element.question}</Markdown>
+              <Markdown>{text('question')}</Markdown>
             </div>
           )}
         </div>
         {xp !== null && (
           <div className="bg-player-success-surface text-player-success mobile:px-app-3 mobile:py-app-3 mobile:rounded-app-card tablet:p-app-2 tablet:rounded-app-card shrink-0 rounded-[18px] py-[14px] text-center min-[641px]:px-[20px]">
             <span className="mobile:app-caption tablet:app-caption block font-semibold tracking-[1px] uppercase min-[641px]:text-[22px]">
-              {solved ? 'Reward' : 'Awards'}
+              {solved ? t('player.quiz.reward') : t('player.quiz.awards')}
             </span>
             <span className="mobile:app-heading tablet:app-heading font-bold min-[641px]:text-[32px]">
-              {xp} XP
+              {count(xp)} XP
             </span>
           </div>
         )}
@@ -108,21 +123,25 @@ export default function LearningSheet({
         className={`mobile:py-app-4 tablet:py-app-3 py-[20px] min-[641px]:py-[28px] ${sheetPadding}`}
       >
         {loading ? (
-          <p role="status">Loading activity…</p>
+          <p role="status">{t('player.quiz.loading')}</p>
         ) : queryError ? (
           <div role="alert">
-            <p>Could not load this activity.</p>
-            <SheetTextButton onClick={onRetry}>Try again</SheetTextButton>
+            <p>{t('player.quiz.loadError')}</p>
+            <SheetTextButton onClick={onRetry}>
+              {t('player.quiz.retry')}
+            </SheetTextButton>
           </div>
         ) : !element ? (
-          <p role="status">This activity is unavailable.</p>
+          <p role="status">{t('player.quiz.unavailable')}</p>
         ) : (
           <>
             <fieldset
               disabled={solved || saving}
               className="mobile:gap-app-3 tablet:gap-app-3 m-0 flex min-w-0 flex-col border-0 p-0 min-[641px]:gap-[20px]"
             >
-              <legend className="sr-only">Choose one answer</legend>
+              <legend className="sr-only">
+                {t('player.quiz.chooseAnswer')}
+              </legend>
               {element.options.map((option, ix) => (
                 <label
                   key={ix}
@@ -146,18 +165,24 @@ export default function LearningSheet({
                         p: ({ children }) => <span>{children}</span>,
                       }}
                     >
-                      {option.content}
+                      {contentText(
+                        language,
+                        'lesson',
+                        element.id,
+                        'option',
+                        option.content
+                      )}
                     </Markdown>
                   </span>
                 </label>
               ))}
             </fieldset>
             <p className="text-player-muted mobile:mt-app-4 mobile:app-body tablet:app-caption tablet:mt-app-3 mt-[20px] mb-0 min-[641px]:text-[24px]">
-              One answer.
+              {t('player.quiz.singleAnswer')}
               {!solved && expiresAt && Number.isFinite(expiresAt.getTime()) && (
                 <>
                   {' '}
-                  Quarter time remaining:{' '}
+                  {t('player.quiz.timeRemaining')}{' '}
                   <CompactCountdown
                     expiresAt={expiresAt}
                     onUpdate={ignoreTick}
@@ -171,7 +196,7 @@ export default function LearningSheet({
                 role="status"
                 className="text-player-error mobile:mt-app-4 mobile:app-body tablet:app-body tablet:mt-app-3 mt-[16px] min-[641px]:text-[24px]"
               >
-                That answer is not correct. Try again.
+                {t('player.quiz.incorrect')}
               </p>
             )}
             {attemptError && (
@@ -179,7 +204,7 @@ export default function LearningSheet({
                 role="alert"
                 className="text-player-error mobile:mt-app-4 mobile:app-body tablet:app-body tablet:mt-app-3 mt-[16px] min-[641px]:text-[24px]"
               >
-                {attemptError}
+                {t('player.quiz.submitError')}
               </p>
             )}
             {solved && (
@@ -188,20 +213,22 @@ export default function LearningSheet({
                 role="status"
               >
                 <p className="text-player-success font-semibold">
-                  Correct answer
+                  {t('player.quiz.correct')}
                 </p>
                 {element.feedback && (
                   <div className={contentProse}>
-                    <h3 className="font-semibold text-inherit">Explanation</h3>
-                    <Markdown>{element.feedback}</Markdown>
+                    <h3 className="font-semibold text-inherit">
+                      {t('player.quiz.explanation')}
+                    </h3>
+                    <Markdown>{text('feedback')}</Markdown>
                   </div>
                 )}
                 {element.motivation && (
                   <div className={contentProse}>
                     <h3 className="font-semibold text-inherit">
-                      Why is it relevant?
+                      {t('player.quiz.relevance')}
                     </h3>
-                    <Markdown>{element.motivation}</Markdown>
+                    <Markdown>{text('motivation')}</Markdown>
                   </div>
                 )}
               </div>

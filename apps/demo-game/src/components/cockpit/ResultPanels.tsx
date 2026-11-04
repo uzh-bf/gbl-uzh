@@ -1,5 +1,6 @@
 import { cn } from '@gbl-uzh/ui'
 import { ChartContainer } from '@uzh-bf/design-system'
+import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 import {
   Area,
@@ -16,15 +17,10 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { useLanguage } from '~/i18n/Language'
 import { ALLOCATION_KEYS } from '~/lib/allocation'
 import { assetLabels, MONTHS } from '~/lib/constants'
-import {
-  balanceMix,
-  playerAmount,
-  playerPercent,
-  type ResultBalance,
-  type ResultView,
-} from '~/lib/results'
+import { balanceMix, type ResultBalance, type ResultView } from '~/lib/results'
 import AllocationBar from './AllocationBar'
 
 const inset = 'mobile:px-app-4 min-[641px]:px-[32px] tablet:px-[16px]'
@@ -33,28 +29,6 @@ const colors = {
   bonds: assetLabels.bonds.chartColor,
   stocks: assetLabels.stocks.chartColor,
   totalAssets: 'var(--color-player-primary)',
-}
-const benchmarkConfig = {
-  totalAssets: { label: 'You', color: colors.totalAssets },
-  bankBenchmark: { label: assetLabels.bank.name, color: colors.bank },
-  bondsBenchmark: { label: assetLabels.bonds.name, color: colors.bonds },
-  stocksBenchmark: { label: assetLabels.stocks.name, color: colors.stocks },
-}
-const benchmarkAmount = new Intl.NumberFormat('en', {
-  notation: 'compact',
-  maximumFractionDigits: 2,
-})
-const assetConfig = Object.fromEntries(
-  ALLOCATION_KEYS.map((key) => [
-    key,
-    {
-      label: assetLabels[key].name,
-      color: colors[key],
-    },
-  ])
-)
-const returnConfig = {
-  accumulatedReturn: { label: 'Accumulated return', color: colors.totalAssets },
 }
 const resultTone = (value: number | null) =>
   value === null || Math.abs(value) < 0.0000001
@@ -113,6 +87,8 @@ function TotalAssets({
   label: string
   change: number | null
 }) {
+  const t = useTranslations()
+  const { playerAmount } = useLanguage()
   return (
     <section
       data-cy="result-total"
@@ -125,7 +101,7 @@ function TotalAssets({
     >
       <div className="min-w-0">
         <h2 className="text-player-muted mobile:mb-app-3 mobile:app-caption tablet:text-[14px] m-0 mb-[10px] font-semibold tracking-[1px] uppercase min-[641px]:text-[22px]">
-          Total assets
+          {t('player.results.totalAssets')}
         </h2>
         <p className="mobile:app-value tablet:app-value m-0 leading-[1.2] font-bold tabular-nums min-[641px]:text-[48px]">
           {playerAmount(view.current.totalAssets)}{' '}
@@ -160,6 +136,8 @@ function BalanceRow({
   muted?: boolean
   held?: boolean
 }) {
+  const t = useTranslations()
+  const { percent, playerAmount } = useLanguage()
   const mix = balanceMix(value)
   return (
     <div
@@ -188,7 +166,7 @@ function BalanceRow({
           className="tablet:h-[14px] h-[14px] min-[641px]:h-[20px]"
           role="img"
           aria-label={ALLOCATION_KEYS.map(
-            (key) => `${assetLabels[key].name} ${mix[key].toFixed(1)}%`
+            (key) => `${t(assetLabels[key].name)} ${percent(mix[key] / 100, 1)}`
           ).join(', ')}
         >
           <AllocationBar compact value={mix} className="rounded-[6px]" />
@@ -210,6 +188,8 @@ function BalanceRow({
 }
 
 function AssetRows({ view }: { view: ResultView }) {
+  const t = useTranslations()
+  const { playerAmount, playerPercent, share } = useLanguage()
   const annual = view.status === 'RESULTS'
   const mix = balanceMix(view.current)
   return (
@@ -230,7 +210,7 @@ function AssetRows({ view }: { view: ResultView }) {
                 assetLabels[key].color
               )}
             />
-            {assetLabels[key].name}
+            {t(assetLabels[key].name)}
           </dt>
           <dd
             className={cn(
@@ -241,7 +221,7 @@ function AssetRows({ view }: { view: ResultView }) {
             {annual
               ? playerPercent(view.annualReturns[key])
               : mix
-                ? `${Number(mix[key].toFixed(1))}%`
+                ? share(Number(mix[key].toFixed(1)))
                 : '—'}
           </dd>
           <dd className="mobile:app-body tablet:app-body m-0 text-right font-semibold tabular-nums min-[641px]:text-[28px]">
@@ -254,14 +234,28 @@ function AssetRows({ view }: { view: ResultView }) {
 }
 
 function Benchmarks({ view }: { view: ResultView }) {
+  const t = useTranslations()
+  const benchmarkConfig = {
+    totalAssets: { label: t('player.results.you'), color: colors.totalAssets },
+    bankBenchmark: { label: t(assetLabels.bank.name), color: colors.bank },
+    bondsBenchmark: { label: t(assetLabels.bonds.name), color: colors.bonds },
+    stocksBenchmark: {
+      label: t(assetLabels.stocks.name),
+      color: colors.stocks,
+    },
+  } as const
+
+  const { playerAmount, compact } = useLanguage()
   const held = view.status === 'CONSOLIDATION'
   return (
     <Section
-      title="You against the benchmarks"
+      title={t('player.results.benchmarks')}
       detail={
         held
-          ? `Unchanged since quarter ${view.quarter}`
-          : `Jan – ${view.monthly.at(-1)?.label ?? '—'}, CHF`
+          ? t('player.results.unchangedSinceQuarter', { quarter: view.quarter })
+          : t('player.results.monthRange', {
+              month: view.monthly.at(-1)?.label ?? '—',
+            })
       }
       testId="result-benchmarks"
     >
@@ -300,9 +294,7 @@ function Benchmarks({ view }: { view: ResultView }) {
               tickCount={4}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value: number) =>
-                benchmarkAmount.format(value).replace('K', 'k')
-              }
+              tickFormatter={(value: number) => compact(value)}
               tick={{ fill: 'var(--color-player-muted)', fontSize: 12 }}
             />
             <Tooltip
@@ -340,7 +332,7 @@ function Benchmarks({ view }: { view: ResultView }) {
         </ChartContainer>
         <div
           className="text-player-muted mobile:mt-app-4 mobile:gap-x-app-3 mobile:gap-y-app-2 mobile:app-body tablet:text-[14px] mt-[18px] flex flex-wrap gap-x-[24px] gap-y-[8px] min-[641px]:text-[22px]"
-          aria-label="Benchmark legend"
+          aria-label={t('player.results.benchmarkLegend')}
         >
           {Object.entries(benchmarkConfig).map(([key, config]) => (
             <span
@@ -357,10 +349,10 @@ function Benchmarks({ view }: { view: ResultView }) {
         </div>
         <div className="sr-only">
           <table>
-            <caption>Monthly portfolio and benchmark balances in CHF</caption>
+            <caption>{t('player.results.benchmarkBalances')}</caption>
             <thead>
               <tr>
-                <th>Month</th>
+                <th>{t('manage.dice.month')}</th>
                 {Object.values(benchmarkConfig).map((item) => (
                   <th key={item.label}>{item.label}</th>
                 ))}
@@ -388,8 +380,10 @@ function Benchmarks({ view }: { view: ResultView }) {
 }
 
 function MonthlyReturns({ view }: { view: ResultView }) {
-  const bars = MONTHS.map((label, month) => ({
-    label,
+  const t = useTranslations()
+  const { shortMonth, playerAmount, playerPercent } = useLanguage()
+  const bars = MONTHS.map((_, month) => ({
+    label: shortMonth(month),
     month,
     accumulatedReturn: view.monthly[month]?.accumulatedReturn ?? null,
   }))
@@ -398,18 +392,25 @@ function MonthlyReturns({ view }: { view: ResultView }) {
   )
   return (
     <Section
-      title="Accumulated return by month"
+      title={t('player.results.monthlyReturn')}
       detail={
         <strong className={resultTone(view.accumulatedReturn)}>
-          {playerPercent(view.accumulatedReturn)} since the{' '}
-          {playerAmount(view.initialCapital)} start
+          {t('player.results.sinceStartingCapital', {
+            amount: playerPercent(view.accumulatedReturn),
+            capital: playerAmount(view.initialCapital),
+          })}
         </strong>
       }
       testId="result-monthly-returns"
     >
       <div className={inset}>
         <ChartContainer
-          config={returnConfig}
+          config={{
+            accumulatedReturn: {
+              label: t('manage.report.accumulatedReturn'),
+              color: colors.totalAssets,
+            },
+          }}
           className="mobile:h-app-chart-monthly aspect-auto w-full min-[641px]:h-[140px]"
         >
           <BarChart
@@ -446,7 +447,7 @@ function MonthlyReturns({ view }: { view: ResultView }) {
               cursor={false}
               formatter={(value: number) => [
                 playerPercent(value),
-                'Since start',
+                t('player.results.sinceStart'),
               ]}
             />
             <Bar
@@ -468,7 +469,7 @@ function MonthlyReturns({ view }: { view: ResultView }) {
             </Bar>
           </BarChart>
         </ChartContainer>
-        <ul className="sr-only" aria-label="Accumulated monthly returns">
+        <ul className="sr-only" aria-label={t('player.results.monthlyReturns')}>
           {bars.map((bar) => (
             <li key={bar.month}>
               {bar.label}: {playerPercent(bar.accumulatedReturn)}
@@ -481,12 +482,18 @@ function MonthlyReturns({ view }: { view: ResultView }) {
 }
 
 function QuarterResults({ view }: { view: ResultView }) {
+  const t = useTranslations()
+  const { share } = useLanguage()
   return (
     <div data-cy="quarter-results">
-      <TotalAssets view={view} label="This quarter" change={view.quarterGain} />
+      <TotalAssets
+        view={view}
+        label={t('player.results.thisQuarter')}
+        change={view.quarterGain}
+      />
       <Section
-        title="Assets per month"
-        detail="Mix · total CHF"
+        title={t('player.results.monthlyAssets')}
+        detail={t('player.results.mixTotal')}
         testId="monthly-assets"
       >
         <BalanceRow label={view.opening.label} value={view.opening} muted />
@@ -510,8 +517,8 @@ function QuarterResults({ view }: { view: ResultView }) {
                   assetLabels[key].color
                 )}
               />
-              {assetLabels[key].name}{' '}
-              {view.allocation ? `${view.allocation[key]}%` : '—'}
+              {t(assetLabels[key].name)}{' '}
+              {view.allocation ? share(view.allocation[key]) : '—'}
             </span>
           ))}
         </div>
@@ -523,21 +530,25 @@ function QuarterResults({ view }: { view: ResultView }) {
 }
 
 function ConsolidationResults({ view }: { view: ResultView }) {
+  const t = useTranslations()
   return (
     <div data-cy="consolidation-results">
       <TotalAssets
         view={view}
-        label="Change"
+        label={t('player.results.change')}
         change={view.consolidationChange}
       />
-      <Section title="Assets held" detail="Carried over">
+      <Section
+        title={t('player.results.held')}
+        detail={t('player.results.carriedOver')}
+      >
         <BalanceRow
-          label={`Quarter ${view.quarter} close`}
+          label={t('player.results.quarterClose', { quarter: view.quarter })}
           value={view.close}
           muted
           held
         />
-        <BalanceRow label="Now" value={view.current} held />
+        <BalanceRow label={t('player.results.now')} value={view.current} held />
       </Section>
       <AssetRows view={view} />
       <Benchmarks view={view} />
@@ -546,16 +557,34 @@ function ConsolidationResults({ view }: { view: ResultView }) {
 }
 
 function YearResults({ view }: { view: ResultView }) {
+  const t = useTranslations()
+  const { playerAmount, playerPercent } = useLanguage()
+  const assetConfig = Object.fromEntries(
+    ALLOCATION_KEYS.map((key) => [
+      key,
+      {
+        label: t(assetLabels[key].name),
+        color: colors[key],
+      },
+    ])
+  )
   const referenceGutter = view.initialCapital === null ? 0 : 72
   const accumulated = [
-    { label: 'Start', accumulatedReturn: view.initialCapital > 0 ? 0 : null },
+    {
+      label: t('player.results.start'),
+      accumulatedReturn: view.initialCapital > 0 ? 0 : null,
+    },
     ...view.years,
   ]
   return (
     <div data-cy="year-results">
-      <TotalAssets view={view} label="This year" change={view.yearGain} />
+      <TotalAssets
+        view={view}
+        label={t('player.results.thisYear')}
+        change={view.yearGain}
+      />
       <Section
-        title="Assets per year"
+        title={t('player.results.annualAssets')}
         detail="CHF"
         testId="result-yearly-assets"
         compactHeader
@@ -563,7 +592,7 @@ function YearResults({ view }: { view: ResultView }) {
         <div
           className={cn(inset, 'relative overflow-x-auto')}
           role="region"
-          aria-label="Assets by year"
+          aria-label={t('player.results.assetsByYear')}
           tabIndex={0}
         >
           <div style={{ minWidth: Math.max(260, view.years.length * 180) }}>
@@ -640,7 +669,8 @@ function YearResults({ view }: { view: ResultView }) {
                     {playerAmount(year.gain, true)}
                   </strong>
                   <span className="sr-only">
-                    ; total {playerAmount(year.totalAssets)} CHF
+                    {t('player.results.totalSuffix')}{' '}
+                    {playerAmount(year.totalAssets)} CHF
                   </span>
                 </div>
               ))}
@@ -649,7 +679,7 @@ function YearResults({ view }: { view: ResultView }) {
         </div>
       </Section>
       <Section
-        title="Accumulated return"
+        title={t('manage.report.accumulatedReturn')}
         detail={
           <strong
             className={cn(
@@ -665,12 +695,17 @@ function YearResults({ view }: { view: ResultView }) {
         <div
           className={cn(inset, 'relative overflow-x-auto')}
           role="region"
-          aria-label="Accumulated return by year"
+          aria-label={t('player.results.annualReturn')}
           tabIndex={0}
         >
           <div style={{ minWidth: Math.max(260, accumulated.length * 130) }}>
             <ChartContainer
-              config={returnConfig}
+              config={{
+                accumulatedReturn: {
+                  label: t('manage.report.accumulatedReturn'),
+                  color: colors.totalAssets,
+                },
+              }}
               className="mobile:h-app-chart-return aspect-auto w-full min-[641px]:h-[174px]"
             >
               <AreaChart
@@ -688,7 +723,7 @@ function YearResults({ view }: { view: ResultView }) {
                 <Tooltip
                   formatter={(value: number) => [
                     playerPercent(value),
-                    'Since start',
+                    t('player.results.sinceStart'),
                   ]}
                 />
                 <Area
@@ -740,6 +775,7 @@ function YearResults({ view }: { view: ResultView }) {
 }
 
 export default function ResultPanel({ view }: { view: ResultView | null }) {
+  const t = useTranslations()
   switch (view?.status) {
     case 'PAUSED':
       return <QuarterResults view={view} />
@@ -750,7 +786,7 @@ export default function ResultPanel({ view }: { view: ResultView | null }) {
     default:
       return (
         <p className="text-player-muted mobile:p-app-4 p-[24px]">
-          Results are not available yet.
+          {t('player.results.unavailable')}
         </p>
       )
   }

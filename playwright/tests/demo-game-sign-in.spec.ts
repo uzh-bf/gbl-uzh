@@ -36,6 +36,8 @@ for (const route of ['/', '/admin/login']) {
     }
 
     await page.keyboard.press('Tab')
+    await expect(page.getByTestId('language-switch')).toBeFocused()
+    await page.keyboard.press('Tab')
     await expect(
       page.getByRole('button', { name: 'Sign in', exact: true })
     ).toBeFocused()

@@ -1,5 +1,6 @@
 import { cn } from '@gbl-uzh/ui'
 import { Button, ChartContainer, ChartTooltip } from '@uzh-bf/design-system'
+import { useTranslations } from 'next-intl'
 import {
   Area,
   CartesianGrid,
@@ -11,12 +12,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import {
-  type AdminReport,
-  type ReportMode,
-  reportAmount,
-  reportPercent,
-} from '~/lib/adminReport'
+import { useLanguage } from '~/i18n/Language'
+import { type AdminReport, type ReportMode } from '~/lib/adminReport'
 import { FIRST_GAME_YEAR } from '~/lib/constants'
 import { headingClass, ReportMessage, TeamDot } from './ReportOverview'
 
@@ -27,7 +24,7 @@ const axis = {
   tickMargin: 10,
   tick: { fill: '#707070', fontSize: 12 },
 }
-const amountAxis = new Intl.NumberFormat('de-CH', { maximumFractionDigits: 0 })
+
 const configFor = (report: AdminReport) =>
   Object.fromEntries(
     report.teams.map((team) => [
@@ -42,6 +39,8 @@ export function PerformanceChart({
   mode,
   onMode,
 }: Props & { mode: ReportMode; onMode: (mode: ReportMode) => void }) {
+  const t = useTranslations()
+  const { integer, reportPercent, playerAmount: reportAmount } = useLanguage()
   const formatValue = (value: number) =>
     mode === 'assets' ? `${reportAmount(value)} CHF` : reportPercent(value)
   const focusedTeam = report.teams.find((team) => team.id === focusedId)
@@ -60,19 +59,24 @@ export function PerformanceChart({
   )
   return (
     <section
-      aria-label="Performance"
+      aria-label={t('manage.report.performance')}
       data-mode={mode}
       data-focused-team={focusedId ?? ''}
       className="flex min-w-0 flex-col px-[24px] pt-[20px] pb-[26px]"
     >
       <div className="mb-[20px] flex flex-wrap items-center justify-between gap-[12px]">
         <h2 className={headingClass}>
-          {mode === 'assets' ? 'Assets over time' : 'Accumulated return'}{' '}
+          {mode === 'assets'
+            ? t('manage.report.assetsOverTime')
+            : t('manage.report.accumulatedReturn')}{' '}
           <span className="ml-[8px] font-normal tracking-normal">
             {mode === 'assets' ? 'CHF' : '%'}
           </span>
         </h2>
-        <div className="flex gap-[6px]" aria-label="Chart measure">
+        <div
+          className="flex gap-[6px]"
+          aria-label={t('manage.report.chartMeasure')}
+        >
           {(['assets', 'return'] as const).map((value) => (
             <Button
               key={value}
@@ -86,13 +90,17 @@ export function PerformanceChart({
                 ),
               }}
             >
-              {value === 'assets' ? 'Assets' : 'Return'}
+              {value === 'assets'
+                ? t('manage.report.assets')
+                : t('manage.report.return')}
             </Button>
           ))}
         </div>
       </div>
       {!report.hasResults ? (
-        <ReportMessage>No settled results in this scope yet.</ReportMessage>
+        <ReportMessage>
+          {t('manage.report.noSettledResultsInScope')}
+        </ReportMessage>
       ) : (
         <ChartContainer
           config={configFor(report)}
@@ -130,7 +138,7 @@ export function PerformanceChart({
               width={65}
               domain={['auto', 'auto']}
               tickFormatter={(v) =>
-                mode === 'assets' ? amountAxis.format(v) : reportPercent(v)
+                mode === 'assets' ? integer(v) : reportPercent(v)
               }
             />
             {mode === 'return' && <ReferenceLine y={0} stroke="#aaaaaa" />}
@@ -273,17 +281,19 @@ export function PerformanceChart({
 }
 
 export function RiskReturnChart({ report, focusedId }: Props) {
+  const t = useTranslations()
+  const { reportPercent } = useLanguage()
   const valid = report.teams.filter((t) => t.risk !== null && t.return !== null)
   return (
     <section
-      aria-label="Risk and return"
+      aria-label={t('manage.report.riskAndReturn')}
       data-focused-team={focusedId ?? ''}
       className="min-w-0 p-[24px]"
     >
       <div className="mb-[24px] flex flex-wrap justify-between gap-[12px]">
-        <h2 className={headingClass}>Risk and return</h2>
+        <h2 className={headingClass}>{t('manage.report.riskAndReturn')}</h2>
         <span className="text-player-muted text-[13px]">
-          Up and to the left is better
+          {t('manage.report.riskReturnHint')}
         </span>
       </div>
       {valid.length ? (
@@ -300,7 +310,7 @@ export function RiskReturnChart({ report, focusedId }: Props) {
               {...axis}
               dataKey="risk"
               type="number"
-              name="Volatility, annualised"
+              name={t('manage.report.volatilityAnnualised')}
               domain={[0, 'auto']}
               tickFormatter={reportPercent}
             />
@@ -308,7 +318,7 @@ export function RiskReturnChart({ report, focusedId }: Props) {
               {...axis}
               dataKey="return"
               type="number"
-              name="Return in scope"
+              name={t('manage.report.returnInScope')}
               width={60}
               domain={[
                 (min: number) => Math.min(0, min),
@@ -324,8 +334,13 @@ export function RiskReturnChart({ report, focusedId }: Props) {
                 return active && team ? (
                   <div className="border-player-border rounded-[6px] border bg-white p-[12px] text-[13px] shadow-lg">
                     <strong>{team.name}</strong>
-                    <p>Return {reportPercent(team.return)}</p>
-                    <p>Annualised volatility {reportPercent(team.risk)}</p>
+                    <p>
+                      {t('manage.report.return')} {reportPercent(team.return)}
+                    </p>
+                    <p>
+                      {t('manage.report.annualisedVolatility')}{' '}
+                      {reportPercent(team.risk)}
+                    </p>
                   </div>
                 ) : null
               }}
@@ -363,19 +378,18 @@ export function RiskReturnChart({ report, focusedId }: Props) {
           </ScatterChart>
         </ChartContainer>
       ) : (
-        <ReportMessage>
-          Not enough monthly results to compare risk and return.
-        </ReportMessage>
+        <ReportMessage>{t('manage.report.insufficientResults')}</ReportMessage>
       )}
       <div className="text-player-muted mt-[14px] flex justify-between gap-[12px] text-[12px]">
-        <span>Return in scope, vertical</span>
-        <span>Volatility, annualised</span>
+        <span>{t('manage.report.returnAxis')}</span>
+        <span>{t('manage.report.volatilityAnnualised')}</span>
       </div>
     </section>
   )
 }
 
 export function SharpeChart({ report, focusedId }: Props) {
+  const t = useTranslations()
   const values = report.teams.flatMap((t) =>
     t.sharpe === null ? [] : [t.sharpe]
   )
@@ -385,20 +399,20 @@ export function SharpeChart({ report, focusedId }: Props) {
   const origin = (-min / span) * 100
   return (
     <section
-      aria-label="Sharpe ratio"
+      aria-label={t('manage.report.sharpeRatio')}
       data-focused-team={focusedId ?? ''}
       className="border-player-border min-w-0 border-t p-[24px] min-[1024px]:border-t-0 min-[1024px]:border-l"
     >
       <div className="mb-[20px] flex flex-wrap justify-between gap-[12px]">
-        <h2 className={headingClass}>Sharpe ratio</h2>
+        <h2 className={headingClass}>{t('manage.report.sharpeRatio')}</h2>
         <span className="text-player-muted text-[13px]">
-          Return per unit of risk
+          {t('manage.report.returnPerRisk')}
         </span>
       </div>
       <ol
         className="max-h-[368px] overflow-y-auto"
         tabIndex={0}
-        aria-label="Team Sharpe ratios"
+        aria-label={t('manage.report.teamSharpeRatios')}
       >
         {report.sharpeRanking.map((team) => (
           <li
@@ -433,7 +447,7 @@ export function SharpeChart({ report, focusedId }: Props) {
             </span>
             <span className="text-right tabular-nums">
               {team.risk !== null && team.risk <= 0.0001
-                ? 'No risk'
+                ? t('shared.risk.none')
                 : (team.sharpe?.toFixed(2) ?? '—')}
             </span>
           </li>

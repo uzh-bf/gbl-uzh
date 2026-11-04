@@ -7,12 +7,24 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: "2026-10-07T14:30:00Z"
+timestamp: "2026-11-04T10:10:00Z"
 ---
 
 # Developing a Game
 
 How to build a new game on the platform. Read [game-model.md](game-model.md) and [game-lifecycle.md](game-lifecycle.md) first — this page assumes their vocabulary. For mechanical and didactical patterns (e.g. formative feedback, roles, seeded randomness), see [game-patterns.md](game-patterns.md). Related skills: `gbl-game-design` (design), `gbl-new-game-app` (scaffolding), `gbl-backend-computations` (backend), `gbl-frontend-game-ui` (frontend).
+
+## Demo game languages
+
+Players and instructors can choose English or Swiss Standard German independently. The language selector is available on entry pages, in the Team tab on phones and the Team sidebar on larger screens, and on instructor and projection screens. On the first visit, the app checks the browser’s preferred languages in order and falls back to English. An explicit choice is stored under `demo-game.language` on the demo’s origin. Switching changes the document language and updates the current screen in place. The Pages Router mounts one `NextIntlClientProvider` in `apps/demo-game/src/pages/_app.tsx` with the active catalog and the Europe/Zurich time zone. KlickerUZH uses an account or router locale. Demo participants can join before they have an account, and instructors share join and projection URLs across languages, so the demo keeps this preference in the browser. See the reference [KlickerUZH Pages Router setup](https://github.com/uzh-bf/klicker-uzh/blob/2022901047ca0925cc7e5c9df5d1ad0f9817bbf3/apps/frontend-pwa/src/pages/_app.tsx) and [TypeScript catalogs](https://github.com/uzh-bf/klicker-uzh/tree/2022901047ca0925cc7e5c9df5d1ad0f9817bbf3/packages/i18n/messages).
+
+Keep interface messages in the demo’s TypeScript catalogs. For example, to add a receipt notice, add `received: 'Received {amount}'` under `player.allocation` in `src/i18n/messages/en.ts` and `received: '{amount} erhalten'` at the same path in `de.ts`. In the component, call `const t = useTranslations('player.allocation')` and render `t('received', { amount: formatCHF(value) })`. The English catalog types the keys. Unit tests compile and exercise ICU messages and compare the named arguments in both languages.
+
+Built-in stories, quizzes and levels live under the catalogs’ `content` namespace. For seeded material, `apps/demo-game/src/i18n/content.ts:contentText` matches the record kind, ID, field and original database text. The English catalog reuses the original story text. Keep these originals stable because existing games store them. Edited fields and custom records display exactly as supplied. Translate each quiz option as received so its submitted index still refers to the same answer. The seed keeps correctness flags on the server. Existing installations can use both languages without reseeding.
+
+## Shared registration UI
+
+The demo game supports `/join/game/[token]` as a public introduction/setup/review flow. `WelcomeSetup` accepts minimal game/profile data rather than requiring an authenticated `SelfQuery`, and its registration mode submits through the platform registration mutation. Validation comes from `src/lib/registration.ts`, shared with the server. The admin `RegistrationPanel` displays the same absolute URL in its copy control and locally generated QR code. `team/ReturnLink` is composed into `TeamPanel`, covering phone tabs and the embedded tablet/desktop panel. Registration closure never prevents private-link recovery.
 
 ## 1. Game Design (before you code)
 
@@ -105,7 +117,7 @@ There is no generic frontend — each game builds its own Next.js pages (Pages R
 
 | Route                 | Purpose                                                                                                                                             |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/join/[token]`       | Player entry: calls the team-login mutation, redirects to the welcome page. Pure boilerplate — copy as-is.                                          |
+| `/join/[token]`       | Private return link: logs into an existing player; completed profiles open the cockpit and unfinished profiles open welcome.                        |
 | `/play/welcome`       | Initial team setup and avatar-linked profile editing (name, avatar, canton); writes `Player.facts`.                                                 |
 | `/play/cockpit`       | **The** player screen: one layout + a body that switches on `game.status`. Game-specific.                                                           |
 | `/`, `/admin/login`   | Shared StartInvest administrator OIDC sign-in; authenticated administrators continue to games.                                                      |
