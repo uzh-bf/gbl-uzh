@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-game
+  labels:
+    app.kubernetes.io/name: demo-game
+  annotations:
+    cert-manager.io/cluster-issuer: k8s-crt-mgr-iss-prd-apps-default
+spec:
+  ingressClassName: haproxy
+  tls:
+    - hosts:
+        - startinvest.df-app.ch
+      secretName: demo-game-tls
+  rules:
+    - host: startinvest.df-app.ch
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: demo-game
+                port:
+                  name: http

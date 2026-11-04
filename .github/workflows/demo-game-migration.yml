@@ -1,13 +1,11 @@
 name: Build Demo Game migration image
 
+# dev pushes and PRs to dev build the migration image in demo-game.yml, which
+# also pins it in deploy/demo-game/stg. This workflow only checks feat/** builds.
 on:
   push:
     branches:
-      - dev
       - 'feat/**'
-  pull_request:
-    branches:
-      - dev
 
 env:
   REGISTRY: ghcr.io

@@ -1,0 +1,56 @@
+name: Promote demo-game to PRD
+
+# Pins the PRD Startinvest and migration images built from one dev commit in
+# deploy/demo-game/prd. Argo CD does not auto-sync PRD: sync app-gbl-demo by
+# hand after reviewing the diff. The PreSync hook runs migrations on sync.
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: 'dev commit to promote (default: the commit pinned in STG)'
+        required: false
+        type: string
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}/demo-game
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: demo-game-deploy-prd
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      packages: read
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: Select commit
+        id: commit
+        env:
+          INPUT_COMMIT: ${{ inputs.commit }}
+        run: |
+          commit=${INPUT_COMMIT:-$(cat deploy/demo-game/stg/SOURCE_COMMIT)}
+          commit=$(git rev-parse --verify "$commit^{commit}")
+          git merge-base --is-ancestor "$commit" origin/dev || { echo "$commit is not on dev" >&2; exit 1; }
+          echo "sha=$commit" >> "$GITHUB_OUTPUT"
+
+      - name: Log into registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pin PRD image digests
+        env:
+          SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          digest() { docker buildx imagetools inspect "$IMAGE:$1" --format '{{json .Manifest}}' | jq -r .digest; }
+          .github/scripts/pin-demo-game-images.sh deploy/demo-game/prd "$SHA" \
+            "$(digest "prd-startinvest-arm64-$SHA")" "$(digest "dev-migration-$SHA")"
