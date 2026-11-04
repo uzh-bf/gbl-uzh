@@ -15,7 +15,41 @@ env:
   IMAGE_NAME: ${{ github.repository }}/demo-game
 
 jobs:
+  # Skips everything below unless demo-game, one of its workspace dependencies
+  # (packages/platform, packages/ui), the lockfile entries they use, root
+  # config, or this workflow changed. turbo reads the pnpm workspace graph, the
+  # same one `turbo prune` uses in apps/demo-game/Dockerfile.
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      demo-game: ${{ steps.affected.outputs.demo-game }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check whether demo-game is affected
+        id: affected
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          affected() {
+            # No usable base (new branch, force push): build to be safe.
+            git cat-file -e "${BASE:-0000000}^{commit}" 2>/dev/null || return 0
+            git diff --quiet "$BASE...HEAD" -- .github/workflows/demo-game.yml .github/scripts/pin-demo-game-images.sh || return 0
+            turbo_version=$(jq -r '.devDependencies.turbo' package.json)
+            npx -y "turbo@$turbo_version" ls --filter="...[$BASE...HEAD]" --output=json |
+              jq -e '.packages.items | any(.name == "@gbl-uzh/demo-game")' >/dev/null
+          }
+          if affected; then result=true; else result=false; fi
+          echo "demo-game=$result" | tee -a "$GITHUB_OUTPUT"
+
   lint:
+    needs: changes
+    if: needs.changes.outputs.demo-game == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -37,6 +71,8 @@ jobs:
         run: pnpm run lint
 
   build:
+    needs: changes
+    if: needs.changes.outputs.demo-game == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -102,7 +138,8 @@ jobs:
 
   # Separate ARM staging variant, excluded from the existing multi-arch manifest.
   build_startinvest_arm64:
-    if: github.ref == 'refs/heads/dev' || (github.event_name == 'pull_request' && github.base_ref == 'dev')
+    needs: changes
+    if: needs.changes.outputs.demo-game == 'true' && (github.ref == 'refs/heads/dev' || (github.event_name == 'pull_request' && github.base_ref == 'dev'))
     runs-on: ubuntu-24.04-arm
     outputs:
       digest: ${{ steps.build.outputs.digest }}
@@ -141,7 +178,8 @@ jobs:
 
   # Separate ARM production variant, matching the Startinvest staging build.
   build_startinvest_prd_arm64:
-    if: github.ref == 'refs/heads/dev' || (github.event_name == 'pull_request' && github.base_ref == 'dev')
+    needs: changes
+    if: needs.changes.outputs.demo-game == 'true' && (github.ref == 'refs/heads/dev' || (github.event_name == 'pull_request' && github.base_ref == 'dev'))
     runs-on: ubuntu-24.04-arm
     outputs:
       digest: ${{ steps.build.outputs.digest }}
@@ -181,7 +219,8 @@ jobs:
   # Migration image for the Argo CD PreSync hook in deploy/demo-game/{stg,prd}.
   # Built here (not only in demo-game-migration.yml) so deploy_stg can wait for it.
   build_migration_arm64:
-    if: github.ref == 'refs/heads/dev' || (github.event_name == 'pull_request' && github.base_ref == 'dev')
+    needs: changes
+    if: needs.changes.outputs.demo-game == 'true' && (github.ref == 'refs/heads/dev' || (github.event_name == 'pull_request' && github.base_ref == 'dev'))
     runs-on: ubuntu-24.04-arm
     outputs:
       digest: ${{ steps.build.outputs.digest }}
@@ -221,7 +260,8 @@ jobs:
   # PRD digests are committed by hand in deploy/demo-game/prd and synced by hand.
   deploy_stg:
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-    needs: [build_startinvest_arm64, build_migration_arm64]
+    # Lint must pass too; skipped jobs (nothing affected) skip the deploy.
+    needs: [lint, build_startinvest_arm64, build_migration_arm64]
     runs-on: ubuntu-latest
     concurrency:
       group: demo-game-deploy-stg
