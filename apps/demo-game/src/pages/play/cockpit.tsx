@@ -94,19 +94,18 @@ function Cockpit() {
 
   switch (currentGame?.status) {
     case 'PREPARATION':
+      body = <div className="font-semibold">Preparing the next year</div>
+      break
     case 'COMPLETED':
       body = (
-        <div className="w-full">
-          <div className="font-semibold">
-            {currentGame.status === 'PREPARATION'
-              ? 'Preparing the next year'
-              : 'Game completed'}
-          </div>
-        </div>
+        <>
+          <h2 className="font-semibold">Game completed</h2>
+          <ResultPanel view={resultView} />
+        </>
       )
       break
     case 'SCHEDULED':
-      body = <div>Game is scheduled.</div>
+      body = <div>You’ve joined. Waiting for the instructor to start.</div>
       break
     case 'PAUSED':
     case 'CONSOLIDATION':

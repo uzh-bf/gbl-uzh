@@ -25,6 +25,7 @@ export default createYoga<{
     return {
       ...ctx,
       prisma,
+      req,
       res,
       user: session?.user,
       pubSub,

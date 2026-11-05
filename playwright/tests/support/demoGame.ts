@@ -40,6 +40,7 @@ export async function createGame(
 ) {
   await page.goto('/admin/games', { waitUntil: 'domcontentloaded' })
   await input(page, 'name').fill(name)
+  await page.getByLabel('Registration', { exact: true }).selectOption('FIXED')
   await input(page, 'playerCount').fill(String(playerCount))
   await page.getByRole('button', { name: 'Create Game' }).click()
   await page.getByRole('link', { name: new RegExp(name) }).click()

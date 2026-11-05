@@ -24,7 +24,9 @@ export function createLoginToken({
   })
 }
 
-function isSecureRequest(ctx: { req?: { headers?: Record<string, unknown> } }) {
+export function isSecureRequest(ctx: {
+  req?: { headers?: Record<string, unknown> }
+}) {
   const forwardedProto = ctx.req?.headers?.['x-forwarded-proto']
   if (Array.isArray(forwardedProto)) return forwardedProto[0] === 'https'
   if (typeof forwardedProto === 'string') return forwardedProto === 'https'
@@ -84,9 +86,14 @@ export async function loginAsTeam(
     })
   } catch (err) {
     console.error(err)
-    return null
+    throw new Error('LOGIN_FAILED')
   }
 
+  ctx.user = {
+    sub: matchingPlayer.id,
+    role: UserRole.PLAYER,
+    gameId: matchingPlayer.gameId,
+  }
   return matchingPlayer
 }
 

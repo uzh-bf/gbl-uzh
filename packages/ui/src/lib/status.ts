@@ -10,24 +10,17 @@ export function computePeriodStatus(
   game: { status: string; activePeriodIx?: number | null },
   periodIndex: number
 ): string {
+  const { status, activePeriodIx } = game
+  if (typeof activePeriodIx !== 'number') return STATUS.COMPLETED
+  if (status === 'RESULTS' && periodIndex === activePeriodIx - 1)
+    return STATUS.RESULTS
   if (
-    typeof game.activePeriodIx === 'number' &&
-    game.status === 'RESULTS'
-      ? game.activePeriodIx - 1 === periodIndex
-      : game.activePeriodIx === periodIndex
-  ) {
-    if (game.status === 'PAUSED') return STATUS.PAUSED
-    if (game.status === 'RESULTS') return STATUS.RESULTS
-    return STATUS.ACTIVE
-  }
-
-  if (
-    typeof game.activePeriodIx === 'number' &&
-    game.activePeriodIx <= periodIndex
+    periodIndex === activePeriodIx &&
+    status !== 'RESULTS' &&
+    status !== 'COMPLETED'
   )
-    return STATUS.SCHEDULED
-
-  return STATUS.COMPLETED
+    return status === 'PAUSED' ? STATUS.PAUSED : STATUS.ACTIVE
+  return periodIndex < activePeriodIx ? STATUS.COMPLETED : STATUS.SCHEDULED
 }
 
 export function computeSegmentStatus(
@@ -36,9 +29,13 @@ export function computeSegmentStatus(
   segmentIndex: number
 ): string {
   if (
-    !['PAUSED', 'PREPARATION', 'CONSOLIDATION', 'RESULTS'].includes(
-      game.status
-    ) &&
+    ![
+      'PAUSED',
+      'PREPARATION',
+      'CONSOLIDATION',
+      'RESULTS',
+      'COMPLETED',
+    ].includes(game.status) &&
     period.activeSegmentIx === segmentIndex
   )
     return STATUS.ACTIVE

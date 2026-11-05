@@ -6,14 +6,14 @@ tags:
   - lifecycle
   - state-machine
   - admin
-timestamp: "2026-10-07T14:30:00Z"
+timestamp: "2026-11-02T13:20:00Z"
 ---
 
 # Game Lifecycle
 
 The whole game runs on **one shared state machine per game** (`Game.status` plus the active period/segment pointers from [game-model.md](game-model.md)). Every transition is triggered by an admin clicking one button; it applies to all players at once. This is what "synchronous" means on this platform — there is no per-player pacing.
 
-Engine: `packages/platform/src/services/GameService.ts` — two driver mutations, `activateNextPeriod` and `activateNextSegment`, each a `switch` over the current status.
+Engine: `packages/platform/src/services/GameService.ts` — the instructor advances through periods and segments with `activateNextPeriod` and `activateNextSegment`, and ends play with `finishGame`.
 
 ## State machine
 
@@ -27,9 +27,10 @@ stateDiagram-v2
     RUNNING --> CONSOLIDATION: Consolidate (last segment)
     CONSOLIDATION --> RESULTS: Period Results
     RESULTS --> PREPARATION: Next Period
+    RESULTS --> COMPLETED: Finish Game
 ```
 
-`COMPLETED` exists in the `GameStatus` enum but **no code path currently sets it** (only commented-out TODOs in `GameService.ts`) — after the final period the game simply stays in `RESULTS`.
+At any period’s results, the owning admin or a master can click **Finish Game**. The game can also stay in `RESULTS` until the instructor chooses to continue.
 
 ## Transition table
 
@@ -44,11 +45,13 @@ Button labels from the admin cockpit (`apps/demo-game/src/pages/admin/games/[id]
 | RUNNING → CONSOLIDATION | "Consolidate"     | `activateNextPeriod`  | Only on the **last** segment: closes it (`SegmentResult.end`), then `Period.consolidate` updates period facts; resets `isReady`                                                   |
 | CONSOLIDATION → RESULTS | "Period Results"  | `activateNextPeriod`  | `PeriodResult.end` per player (gets segment-end results, other players' results, consolidation decisions) writes `PERIOD_END` rows; optional `PeriodResult.updateDBAfterEnd` hook |
 | RESULTS → PREPARATION   | "Next Period"     | `activateNextPeriod`  | Advances `activePeriodIx`; writes `PERIOD_START` rows for the new period via `PeriodResult.start`                                                                                 |
+| RESULTS → COMPLETED     | "Finish Game"     | `finishGame`          | Disconnects the upcoming period and preserves the settled results. Concurrent Finish Game and Next Period requests can commit only one transition.                                |
 
 Notes:
 
 - The "Consolidate" button appears when the game is RUNNING **and** the active segment is the last one (`activeSegmentIx >= segments.length - 1` with `segmentCount` reached) — and it calls `activateNextPeriod`, not `activateNextSegment`.
 - Periods and segments are **authored during play or before**: "Add period" (with per-period facts, e.g. a market scenario) and "Add segment" (with attached learning/story elements). Segment facts (e.g. random returns) are computed at _creation_ time by `Segment.initialize`, not at activation time.
+- **Period Results** works with a single authored period. `GameService.ts:activateNextPeriod` saves the period-end results and returns the game in `RESULTS`. If the instructor adds another period later, **Next Period** starts it.
 - Segment/period transitions reset `Player.isReady` to false for the whole game. (Exception: the initial SCHEDULED → PREPARATION has no explicit reset — players start at `false` anyway.)
 
 ## What players see per status
@@ -57,14 +60,19 @@ The player cockpit is a single page that switches on `game.status` (`apps/demo-g
 
 | Status        | Player view                                                                                           |
 | ------------- | ----------------------------------------------------------------------------------------------------- |
-| SCHEDULED     | "Game is scheduled" placeholder                                                                       |
+| SCHEDULED     | Joined confirmation and waiting message                                                               |
 | PREPARATION   | Header only — waiting while the admin sets up                                                         |
 | RUNNING       | Demo game: allocation editor → submitted summary → reversible Ready lock                              |
 | PAUSED        | Demo game: reveal progress, then closed-quarter balances and returns after all three monthly reveals  |
 | CONSOLIDATION | Demo game: reveal progress, then holdings and benchmarks after all three monthly reveals              |
 | RESULTS       | Demo game: completed-year asset totals, accumulated portfolio return, and annual asset market returns |
+| COMPLETED     | Game completed above the last settled year’s results. History remains available.                      |
 
 Independent of status: story elements attached to a newly activated segment appear as blocking popups until acknowledged; demo-game learning elements sit in the Team tab (other games may use a sidebar); achievements/level-ups arrive as notifications.
+
+## Registration concurrency
+
+`RegistrationService.ts:registrationTransaction` runs enrollment, registration controls, and initial start at serializable isolation with bounded conflict retries. Each writes the game row; initial start reads players and creates results/actions inside that same transaction. A concurrent join either receives initial results or is rejected as closed. Capacity and per-browser uniqueness are enforced server-side. Registration changes publish `REGISTRATION_CHANGED` after commit; the admin's existing event subscription refetches its roster, with polling as fallback. Later lifecycle transitions retain the dice-reveal gates below.
 
 ## Coordination mechanics
 
@@ -78,11 +86,11 @@ Independent of status: story elements attached to a newly activated segment appe
 
 Verified by `playwright/tests/demo-game-flow.spec.ts`:
 
-1. Admin signs in (`/admin/login`, OIDC) and creates a game with a name and player count. The platform creates one `Player` row per team with a unique login token. Status: `SCHEDULED`.
+1. Admin signs in (`/admin/login`, OIDC) and creates a named game. Shared registration is the UI default, with optional capacity; fixed-count mode creates the requested players up front. Status: `SCHEDULED`.
 2. Admin adds one or more periods (per-period facts/scenario) and their segments (optionally attaching story/learning elements).
-3. Admin distributes each team's join link (`/join/<token>`) — shown next to each player in the game detail page.
-4. Players open their link → logged in without a password → land on a welcome page to pick a team name/avatar → arrive at the cockpit.
-5. Admin: **Start Period** → `PREPARATION`; then **Next Segment** → `RUNNING`.
+3. For open games, admin shares `/join/game/<registrationToken>` or its QR code. Participants complete bank setup, then register separate entries. Fixed-count games use individual `/join/<token>` links. Admins can copy those private links for recovery.
+4. New participants complete the introduction/setup/review flow and arrive in the waiting cockpit. Returning participants resume their entry through the shared link while their browser identity is available, or through their private return link.
+5. Admin: **Start Period** closes registration and initializes the complete roster atomically → `PREPARATION`; then **Next Segment** → `RUNNING`. Starting requires at least one player and a configured first period/segment. Registration can be closed/reopened manually only while `SCHEDULED`; existing players can always resume.
 6. Players submit their decision(s) for the segment and toggle Ready. Optionally the admin sets a countdown.
 7. Admin advances through the transition table above: **Segment Results** / **Next Segment** per segment, **Consolidate** + **Period Results** on the last one, **Next Period** to loop back to step 5 for the next period.
-8. After the final period, the admin opens the report dashboard (`/admin/reports/[id]`) for cross-period analytics; the game remains in `RESULTS` (no `COMPLETED` transition today).
+8. The instructor clicks **Finish Game** to end play in one click. Players can revisit their final results and History after reload. The instructor can open the report dashboard (`/admin/reports/[id]`) for cross-period analytics.

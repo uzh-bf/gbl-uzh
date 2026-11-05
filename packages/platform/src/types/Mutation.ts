@@ -1,3 +1,4 @@
+import { GraphQLError } from 'graphql'
 import {
   arg,
   booleanArg,
@@ -8,15 +9,46 @@ import {
   objectType,
   stringArg,
 } from 'nexus'
+import * as yup from 'yup'
 import * as DB from '../generated/prisma/client.js'
 import * as AccountService from '../services/AccountService.js'
 import * as GameService from '../services/GameService.js'
+import * as RegistrationService from '../services/RegistrationService.js'
 
 import * as EventService from '../services/EventService.js'
 import * as PlayService from '../services/PlayService.js'
 import { Period, PeriodSegment } from './Game.js'
 import { LearningElementAttempt } from './LearningElement.js'
 import { Player, PlayerDecision, PlayerResult } from './Player.js'
+
+// Yoga masks unexpected errors. Expose only the enrollment errors the UI can
+// act on; database failures and other internal details stay masked.
+async function registrationResponse<T>(work: () => Promise<T>): Promise<T> {
+  try {
+    return await work()
+  } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      throw new GraphQLError('Check your registration details.', {
+        extensions: { code: 'BAD_USER_INPUT' },
+      })
+    }
+    if (
+      error instanceof Error &&
+      [
+        'INVALID_REGISTRATION_LINK',
+        'REGISTRATION_CLOSED',
+        'REGISTRATION_FULL',
+        'REGISTRATION_SESSION_REQUIRED',
+        'FORBIDDEN',
+      ].includes(error.message)
+    ) {
+      throw new GraphQLError(error.message, {
+        extensions: { code: error.message },
+      })
+    }
+    throw error
+  }
+}
 
 const defaultServices = {}
 const defaultSchemas = {}
@@ -61,6 +93,52 @@ export function generateBaseMutations<
   return objectType({
     name: 'Mutation',
     definition(t) {
+      t.field('prepareRegistration', {
+        type: 'RegistrationInfo',
+        args: { token: nonNull(stringArg()) },
+        resolve: (_, { token }, ctx) =>
+          registrationResponse(() =>
+            RegistrationService.prepareRegistration(token, ctx)
+          ),
+      })
+      t.boolean('resumeRegistration', {
+        args: { token: nonNull(stringArg()) },
+        resolve: (_, { token }, ctx) =>
+          registrationResponse(() =>
+            RegistrationService.resumeRegistration(token, ctx)
+          ),
+      })
+      t.boolean('registerPlayer', {
+        args: {
+          token: nonNull(stringArg()),
+          name: nonNull(stringArg()),
+          facts: nonNull(stringArg()),
+        },
+        resolve: (_, args, ctx) =>
+          registrationResponse(() =>
+            RegistrationService.registerPlayer(
+              { ...args, facts: JSON.parse(args.facts) },
+              ctx,
+              {
+                schema:
+                  schemas.RegistrationSchema ??
+                  yup.object({
+                    name: yup.string().trim().required().max(100),
+                    facts: schemas.PlayerFactsSchema ?? yup.object(),
+                  }),
+                roleAssigner,
+              }
+            )
+          ),
+      })
+      t.field('setRegistrationOpen', {
+        type: 'Game',
+        args: { gameId: nonNull(intArg()), open: nonNull(booleanArg()) },
+        resolve: (_, { gameId, open }, ctx) =>
+          registrationResponse(() =>
+            RegistrationService.setRegistrationOpen(gameId, open, ctx)
+          ),
+      })
       t.field('updateReadyState', {
         type: Player,
         args: {
@@ -91,7 +169,9 @@ export function generateBaseMutations<
         type: 'Game',
         args: {
           name: nonNull(stringArg()),
-          playerCount: nonNull(intArg()),
+          playerCount: intArg(),
+          registrationMode: arg({ type: 'RegistrationMode' }),
+          maxPlayers: intArg(),
           facts: arg({
             type: nonNull(inputTypes.GameFactsInput),
           }),
@@ -145,13 +225,14 @@ export function generateBaseMutations<
         args: {
           gameId: nonNull(intArg()),
         },
-        async resolve(_, args, ctx) {
-          const results = await GameService.activateNextPeriod(args, ctx, {
-            services,
-          })
-          if (!results) return
-          return results[0] as any
-        },
+        resolve: (_, args, ctx) =>
+          GameService.activateNextPeriod(args, ctx, { services }),
+      })
+
+      t.nonNull.field('finishGame', {
+        type: 'Game',
+        args: { gameId: nonNull(intArg()) },
+        resolve: (_, { gameId }, ctx) => GameService.finishGame(gameId, ctx),
       })
 
       t.field('activateNextSegment', {
@@ -233,9 +314,12 @@ export function generateBaseMutations<
             select: {
               name: true,
               facts: true,
+              enrollmentKey: true,
             },
           })
-          const hadSetupBefore = hasCompletedCompanySetup(previousPlayer)
+          const hadSetupBefore =
+            Boolean(previousPlayer?.enrollmentKey) ||
+            hasCompletedCompanySetup(previousPlayer)
 
           const facts = args.facts ? JSON.parse(args.facts) : {}
           const player = await GameService.updatePlayerData<PlayerFacts>(
