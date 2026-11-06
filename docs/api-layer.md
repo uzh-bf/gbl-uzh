@@ -7,7 +7,7 @@ tags:
   - graphql
   - trpc
   - realtime
-timestamp: "2026-09-28T07:53:26Z"
+timestamp: "2026-10-27T00:00:00Z"
 ---
 
 # API Layer and Realtime
@@ -34,6 +34,14 @@ These hold in both worlds and are what game code should rely on:
 - If you are building a new game while this is still current: copy the demo game's `src/graphql/` + `codegen.ts` wholesale and do not invest in custom GraphQL; it will be removed when the tRPC branch merges.
 
 The demo game extends the base GraphQL schema with ADMIN/MASTER-only `marketDice(segmentId)` and `revealMarketRoll(segmentId, rollIndex)` fields (`apps/demo-game/src/graphql/market.ts`). The query reads authoritative precomputed outcomes; the mutation persists reveal indices without rerolling. Its `MARKET_ROLL_REVEALED` global event carries only `gameId`; the player refetches its existing aggregate result. Game-local operation documents in `src/graphql/ops/` are included alongside platform operations by the demo-game codegen config.
+
+### Shared registration API
+
+The GraphQL platform adds `registrationInfo`, `prepareRegistration`, `registerPlayer`, `resumeRegistration`, and `setRegistrationOpen`. `prepareRegistration` establishes the HttpOnly browser cookie before final submission; `registerPlayer` validates completed setup and issues the existing player session after commit. `resumeRegistration` works after closure or game start for a recognized entry. The join page combines prepare and resume into one GraphQL request; enrollment is a later request, after the browser has received its identity cookie. Request and response are explicitly passed in the demo-game GraphQL context for cookie access.
+
+`generateBaseMutations` accepts an optional `schemas.RegistrationSchema` for `{ name, facts }`; the demo shares its bank setup rules with the welcome form. Existing `createGame` callers retain fixed-count behavior; `registrationMode: SHARED_LINK` creates no players and accepts optional `maxPlayers`. Registration controls and initial start enforce owner/master authorization. Public registration information contains only game name, status, and availability. Private player tokens resolve only for that player or the owner/master; registration tokens resolve only for the owner/master. Self queries request return credentials without adding them to co-player fragments.
+
+Apply the additive shared-registration migration before deploying new application code. It creates `RegistrationMode` with `FIXED` and `SHARED_LINK` directly, alongside the independent `registrationOpen` setting. Existing games receive fixed-mode defaults and keep their private player links.
 
 ## Upcoming: tRPC (branch `codex/trpc-migration-work-packages`, not merged)
 

@@ -49,7 +49,12 @@ export function buildGameRealtimeFacts(
   }
 }
 
-export async function receiveEvents({ events, ctx, prisma }) {
+export async function receiveEvents({
+  events,
+  ctx,
+  prisma,
+  notify = publishUserNotification,
+}) {
   if (!Array.isArray(events) || events.length === 0) return []
 
   const definedEvents = await prisma.event.findMany({
@@ -62,7 +67,13 @@ export async function receiveEvents({ events, ctx, prisma }) {
 
   const perEventOps = await Promise.all(
     events.map(async (event) =>
-      receiveEvent({ ...event, ctx }, definedEvents, definedLevels, prisma)
+      receiveEvent(
+        { ...event, ctx },
+        definedEvents,
+        definedLevels,
+        prisma,
+        notify
+      )
     )
   )
 
@@ -129,7 +140,8 @@ export async function receiveEvent(
   event,
   definedEvents,
   definedLevels,
-  prisma
+  prisma,
+  notify = publishUserNotification
 ) {
   const matchingEvent = definedEvents.find((item) => item.id === event.type)
   // console.warn(event, matchingEvent)
@@ -248,7 +260,7 @@ export async function receiveEvent(
         event.ctx.experience + awardedAchievements.rewards.xp >=
         currentLevelPlus1.requiredXP
       ) {
-        publishUserNotification(
+        notify(
           {
             user: {
               sub: event.ctx.args.playerId,
@@ -260,7 +272,7 @@ export async function receiveEvent(
             },
           ]
         )
-        publishUserNotification(
+        notify(
           {
             user: {
               sub: event.ctx.args.playerId,
@@ -295,7 +307,7 @@ export async function receiveEvent(
           }),
         ]
       } else {
-        publishUserNotification(
+        notify(
           {
             user: {
               sub: event.ctx.args.playerId,

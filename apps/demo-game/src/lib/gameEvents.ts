@@ -7,6 +7,9 @@ export function shouldRefetchDemoGame(
 ) {
   return (
     shouldRefetchGameResult(event, gameId) ||
-    (event?.type === 'MARKET_ROLL_REVEALED' && event.facts?.gameId === gameId)
+    (['MARKET_ROLL_REVEALED', 'REGISTRATION_CHANGED'].includes(
+      event?.type ?? ''
+    ) &&
+      event?.facts?.gameId === gameId)
   )
 }

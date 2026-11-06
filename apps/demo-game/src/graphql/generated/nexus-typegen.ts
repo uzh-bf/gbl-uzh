@@ -72,6 +72,7 @@ export interface NexusGenEnums {
   GameStatus: "COMPLETED" | "CONSOLIDATION" | "PAUSED" | "PREPARATION" | "RESULTS" | "RUNNING" | "SCHEDULED"
   PlayerDecisionType: "CONSOLIDATION" | "PREPARATION"
   PlayerResultType: "PERIOD_END" | "PERIOD_START" | "SEGMENT_END" | "SEGMENT_START"
+  RegistrationMode: "FIXED" | "SHARED_LINK"
   StoryElementType: "GENERIC" | "ROLE_BASED"
   UserRole: "ADMIN" | "MASTER"
 }
@@ -118,9 +119,12 @@ export interface NexusGenObjects {
     activeSegmentIx?: number | null; // Int
     facts: NexusGenScalars['JSONObject']; // JSONObject!
     id: string; // ID!
+    maxPlayers?: number | null; // Int
     name: string; // String!
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
     players: NexusGenRootTypes['Player'][]; // [Player!]!
+    registrationMode: NexusGenEnums['RegistrationMode']; // RegistrationMode!
+    registrationOpen: boolean; // Boolean!
     status: NexusGenEnums['GameStatus']; // GameStatus!
     version: number; // Int!
   }
@@ -205,7 +209,6 @@ export interface NexusGenObjects {
     name: string; // String!
     number: number; // Int!
     role?: string | null; // String
-    token: string; // String!
     tutorialCompleted: boolean; // Boolean!
     visitedStoryElementIds: string[]; // [String!]!
     visitedStoryElements: NexusGenRootTypes['StoryElement'][]; // [StoryElement!]!
@@ -251,6 +254,11 @@ export interface NexusGenObjects {
     transactions?: NexusGenRootTypes['PlayerAction'][] | null; // [PlayerAction!]
   }
   Query: {};
+  RegistrationInfo: { // root type
+    availability: string; // String!
+    name: string; // String!
+    status: NexusGenEnums['GameStatus']; // GameStatus!
+  }
   StoryElement: { // root type
     content?: string | null; // String
     contentRole?: NexusGenScalars['JSONObject'] | null; // JSONObject
@@ -303,11 +311,15 @@ export interface NexusGenFieldTypes {
     activeSegmentIx: number | null; // Int
     facts: NexusGenScalars['JSONObject']; // JSONObject!
     id: string; // ID!
+    maxPlayers: number | null; // Int
     name: string; // String!
     nextAutoContinueAt: NexusGenScalars['DateTime'] | null; // DateTime
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
     playerCount: number; // Int!
     players: NexusGenRootTypes['Player'][]; // [Player!]!
+    registrationMode: NexusGenEnums['RegistrationMode']; // RegistrationMode!
+    registrationOpen: boolean; // Boolean!
+    registrationToken: string | null; // String
     status: NexusGenEnums['GameStatus']; // GameStatus!
     version: number; // Int!
   }
@@ -363,8 +375,12 @@ export interface NexusGenFieldTypes {
     logoutAsTeam: boolean | null; // Boolean
     markStoryElement: NexusGenRootTypes['Player'] | null; // Player
     performAction: NexusGenRootTypes['PlayerResult'] | null; // PlayerResult
+    prepareRegistration: NexusGenRootTypes['RegistrationInfo'] | null; // RegistrationInfo
+    registerPlayer: boolean | null; // Boolean
+    resumeRegistration: boolean | null; // Boolean
     revealMarketRoll: NexusGenRootTypes['MarketRollReveal'] | null; // MarketRollReveal
     saveConsolidationDecision: NexusGenRootTypes['PlayerDecision'] | null; // PlayerDecision
+    setRegistrationOpen: NexusGenRootTypes['Game'] | null; // Game
     toggleSwitch: boolean | null; // Boolean
     updatePlayerData: NexusGenRootTypes['Player'] | null; // Player
     updateReadyState: NexusGenRootTypes['Player'] | null; // Player
@@ -409,7 +425,7 @@ export interface NexusGenFieldTypes {
     name: string; // String!
     number: number; // Int!
     role: string | null; // String
-    token: string; // String!
+    token: string | null; // String
     tutorialCompleted: boolean; // Boolean!
     visitedStoryElementIds: string[]; // [String!]!
     visitedStoryElements: NexusGenRootTypes['StoryElement'][]; // [StoryElement!]!
@@ -463,11 +479,17 @@ export interface NexusGenFieldTypes {
     marketDice: NexusGenRootTypes['MarketDice'] | null; // MarketDice
     pastResults: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
     questAchievements: NexusGenRootTypes['Achievement'][] | null; // [Achievement!]
+    registrationInfo: NexusGenRootTypes['RegistrationInfo'] | null; // RegistrationInfo
     result: NexusGenRootTypes['PlayerState'] | null; // PlayerState
     results: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
     self: NexusGenRootTypes['Player'] | null; // Player
     specificResults: NexusGenRootTypes['PlayerResult'][] | null; // [PlayerResult!]
     storyElements: NexusGenRootTypes['StoryElement'][] | null; // [StoryElement!]
+  }
+  RegistrationInfo: { // field return type
+    availability: string; // String!
+    name: string; // String!
+    status: NexusGenEnums['GameStatus']; // GameStatus!
   }
   StoryElement: { // field return type
     content: string | null; // String
@@ -514,11 +536,15 @@ export interface NexusGenFieldTypeNames {
     activeSegmentIx: 'Int'
     facts: 'JSONObject'
     id: 'ID'
+    maxPlayers: 'Int'
     name: 'String'
     nextAutoContinueAt: 'DateTime'
     periods: 'Period'
     playerCount: 'Int'
     players: 'Player'
+    registrationMode: 'RegistrationMode'
+    registrationOpen: 'Boolean'
+    registrationToken: 'String'
     status: 'GameStatus'
     version: 'Int'
   }
@@ -574,8 +600,12 @@ export interface NexusGenFieldTypeNames {
     logoutAsTeam: 'Boolean'
     markStoryElement: 'Player'
     performAction: 'PlayerResult'
+    prepareRegistration: 'RegistrationInfo'
+    registerPlayer: 'Boolean'
+    resumeRegistration: 'Boolean'
     revealMarketRoll: 'MarketRollReveal'
     saveConsolidationDecision: 'PlayerDecision'
+    setRegistrationOpen: 'Game'
     toggleSwitch: 'Boolean'
     updatePlayerData: 'Player'
     updateReadyState: 'Player'
@@ -674,11 +704,17 @@ export interface NexusGenFieldTypeNames {
     marketDice: 'MarketDice'
     pastResults: 'PlayerResult'
     questAchievements: 'Achievement'
+    registrationInfo: 'RegistrationInfo'
     result: 'PlayerState'
     results: 'PlayerResult'
     self: 'Player'
     specificResults: 'PlayerResult'
     storyElements: 'StoryElement'
+  }
+  RegistrationInfo: { // field return type name
+    availability: 'String'
+    name: 'String'
+    status: 'GameStatus'
   }
   StoryElement: { // field return type name
     content: 'String'
@@ -724,8 +760,10 @@ export interface NexusGenArgTypes {
     }
     createGame: { // args
       facts: NexusGenInputs['GameFactsInput']; // GameFactsInput!
+      maxPlayers?: number | null; // Int
       name: string; // String!
-      playerCount: number; // Int!
+      playerCount?: number | null; // Int
+      registrationMode?: NexusGenEnums['RegistrationMode'] | null; // RegistrationMode
     }
     loginAsTeam: { // args
       token: string; // String!
@@ -737,12 +775,27 @@ export interface NexusGenArgTypes {
       payload: string; // String!
       type: string; // String!
     }
+    prepareRegistration: { // args
+      token: string; // String!
+    }
+    registerPlayer: { // args
+      facts: string; // String!
+      name: string; // String!
+      token: string; // String!
+    }
+    resumeRegistration: { // args
+      token: string; // String!
+    }
     revealMarketRoll: { // args
       rollIndex: number; // Int!
       segmentId: number; // Int!
     }
     saveConsolidationDecision: { // args
       payload: string; // String!
+    }
+    setRegistrationOpen: { // args
+      gameId: number; // Int!
+      open: boolean; // Boolean!
     }
     toggleSwitch: { // args
       gameId: number; // Int!
@@ -765,6 +818,9 @@ export interface NexusGenArgTypes {
     }
     marketDice: { // args
       segmentId: number; // Int!
+    }
+    registrationInfo: { // args
+      token: string; // String!
     }
     specificResults: { // args
       gameId: number; // Int!

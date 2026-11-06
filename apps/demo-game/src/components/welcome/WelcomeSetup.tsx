@@ -3,12 +3,11 @@ import { useFormik } from 'formik'
 import { ArrowLeft, Info, MapPin, UserRound } from 'lucide-react'
 import Image from 'next/image'
 import { useRef, useState, type ReactElement } from 'react'
-import type { SelfQuery } from 'src/graphql/generated/ops'
 import { AVATARS, COLORS, LOCATIONS, cantonNames } from 'src/lib/constants'
-import * as yup from 'yup'
 import { ALLOCATION_KEYS } from '~/lib/allocation'
 import { assetLabels } from '~/lib/constants'
 import { parseFacts } from '~/lib/facts'
+import { bankSetupSchema, registrationError } from '~/lib/registration'
 import CantonFlagBadge from '../CantonFlagBadge'
 import OptionPicker, { type Option } from './OptionPicker'
 import WelcomeBankPreview from './WelcomeBankPreview'
@@ -63,26 +62,18 @@ const locations: Option[] = LOCATIONS.Trader.map((value) => ({
   label: `${cantonNames[value]} (${value})`,
 }))
 
-const schema = yup.object({
-  name: yup
-    .string()
-    .trim()
-    .required('Enter a bank name.')
-    .min(2, 'Use at least 2 characters.')
-    .max(20, 'Use no more than 20 characters.'),
-  avatar: yup
-    .string()
-    .oneOf(avatars.map(({ value }) => value))
-    .required(),
-  location: yup.string().oneOf(LOCATIONS.Trader).required(),
-})
-
 export default function WelcomeSetup({
   player,
   onSave,
   onCancel,
+  registration = false,
 }: {
-  player: NonNullable<SelfQuery['self']>
+  player: {
+    name?: string
+    facts?: unknown
+    game: { name: string; status: string }
+  }
+  registration?: boolean
   onSave: (name: string, facts: Record<string, unknown>) => Promise<void>
   /** Supplying Cancel opens profile editing instead of first-time setup. */
   onCancel?: () => void
@@ -103,7 +94,7 @@ export default function WelcomeSetup({
       location:
         locations.find(({ value }) => value === facts.location)?.value ?? '',
     },
-    validationSchema: schema,
+    validationSchema: bankSetupSchema,
     validateOnMount: true,
     onSubmit: async (values) => {
       if (step === 'setup' && !editing) {
@@ -122,9 +113,11 @@ export default function WelcomeSetup({
               ? facts.color
               : 'Blue',
         })
-      } catch {
+      } catch (error) {
         setSubmitError(
-          'We couldn’t save your bank. Please try again. Your choices are still here.'
+          registration
+            ? registrationError(error)
+            : 'We couldn’t save your bank. Please try again. Your choices are still here.'
         )
       }
     },
@@ -136,7 +129,9 @@ export default function WelcomeSetup({
     ? 'Save changes'
     : step === 'setup'
       ? 'Review your bank'
-      : 'Start the game'
+      : registration
+        ? 'Join game'
+        : 'Start the game'
 
   function goTo(next: typeof step, editName = false) {
     setStep(next)

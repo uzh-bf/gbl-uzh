@@ -106,7 +106,7 @@ function Cockpit() {
       )
       break
     case 'SCHEDULED':
-      body = <div>Game is scheduled.</div>
+      body = <div>You’ve joined. Waiting for the instructor to start.</div>
       break
     case 'PAUSED':
     case 'CONSOLIDATION':

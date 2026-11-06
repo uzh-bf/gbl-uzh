@@ -2,6 +2,7 @@ import { idArg, intArg, nonNull, objectType, stringArg } from 'nexus'
 import * as DB from '../generated/prisma/client.js'
 import * as GameService from '../services/GameService.js'
 import * as PlayService from '../services/PlayService.js'
+import * as RegistrationService from '../services/RegistrationService.js'
 import { Achievement } from './Achievement.js'
 import { LearningElement, LearningElementState } from './LearningElement.js'
 import { Player, PlayerDecision, PlayerResult, PlayerState } from './Player.js'
@@ -11,6 +12,12 @@ export function generateBaseQueries() {
   return objectType({
     name: 'Query',
     definition(t) {
+      t.field('registrationInfo', {
+        type: 'RegistrationInfo',
+        args: { token: nonNull(stringArg()) },
+        resolve: (_, { token }, ctx) =>
+          RegistrationService.registrationInfo(token, ctx),
+      })
       t.list.nonNull.field('games', {
         type: 'Game',
         async resolve(_, args, ctx) {
