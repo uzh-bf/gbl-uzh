@@ -427,9 +427,31 @@ async function cockpitControlSizes(page: Page, action: Locator) {
       page.getByRole('navigation', { name: /^(Player|Cockpit) navigation$/ }),
     ].map(async (locator) => {
       const box = await locator.boundingBox()
-      return { width: Math.round(box!.width), height: Math.round(box!.height) }
+      return (
+        box && { width: Math.round(box.width), height: Math.round(box.height) }
+      )
     })
   )
+}
+
+// A resize re-renders the cockpit shell over several frames; measure only
+// once two consecutive reads agree and every control is laid out.
+async function settledControlSizes(page: Page, action: Locator) {
+  let previous = ''
+  let sizes: Awaited<ReturnType<typeof cockpitControlSizes>> = []
+  await expect
+    .poll(
+      async () => {
+        sizes = await cockpitControlSizes(page, action)
+        const key = JSON.stringify(sizes)
+        const settled = !sizes.includes(null) && key === previous
+        previous = key
+        return settled
+      },
+      { intervals: [100, 100, 250] }
+    )
+    .toBe(true)
+  return sizes
 }
 
 async function assertSubmittedStates(page: Page, admin: Page) {
@@ -456,7 +478,7 @@ async function assertSubmittedStates(page: Page, admin: Page) {
       .poll(() => page.evaluate(() => innerWidth))
       .toBe(viewport.width)
     await expectNoPageOverflow(page)
-    editingSizes.set(viewport.width, await cockpitControlSizes(page, submit))
+    editingSizes.set(viewport.width, await settledControlSizes(page, submit))
     if (viewport.width < 641) await expectPhoneScrollContained(page)
     await capturePlayerScreenshot(page, {
       path: test.info().outputPath(`cockpit-editing-${viewport.name}.png`),

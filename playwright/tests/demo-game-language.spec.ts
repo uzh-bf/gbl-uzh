@@ -103,6 +103,7 @@ test('German instructor and English player share a game and can switch mid-decis
       name: 'A. About the Savings Account',
     })
     await story.getByRole('button', { name: 'Continue' }).click()
+    await expect(story).toBeHidden()
     const teamLink = player.getByRole('link', { name: 'Team', exact: true })
     const teamLanguage = player.getByTestId('team-panel').getByRole('combobox')
     await expect(switcher).toBeHidden()
