@@ -131,7 +131,10 @@ async function addSegment(
     ] as const) {
       for (const id of ids) {
         await dialog.getByRole('combobox').nth(picker).click()
-        await dialog.getByRole('option', { name: id, exact: true }).click()
+        await dialog
+          .getByRole('option')
+          .and(dialog.locator(`[data-value="${id}"]`))
+          .click()
         await dialog
           .getByRole('heading', { name: 'Add Segment', exact: true })
           .click()
@@ -281,7 +284,7 @@ async function assertAllocationControls(page: Page, admin: Page) {
   await expect(learning).toBeVisible()
   await learning
     .getByRole('radio', {
-      name: 'Eine Anleihe beinhaltet ein geringeres erwartetes Risiko als eine Aktie.',
+      name: 'A bond generally carries less risk than a share.',
     })
     .click()
   await learning

@@ -1,4 +1,5 @@
 import type { GameQuery, SpecificResultsQuery } from '~/graphql/generated/ops'
+import { languageTools } from '../i18n/locale'
 import { ALLOCATION_KEYS, type Allocation } from './allocation'
 import { FIRST_GAME_YEAR, MONTHS, NUM_MONTHS_PER_SEGMENT } from './constants'
 import { parseFacts } from './facts'
@@ -75,7 +76,8 @@ export function buildAdminReport(
   game: Game,
   segmentResults: Result[],
   periodResults: Result[],
-  scope: ReportScope
+  scope: ReportScope,
+  monthLabel = (index: number) => MONTHS[index]
 ) {
   const periods = [...game.periods]
     .sort((a, b) => a.index - b.index)
@@ -132,7 +134,7 @@ export function buildAdminReport(
         label:
           offset === 0
             ? 'Start'
-            : `${MONTHS[(month - 1) % 12]}${scope === 'all' ? ` ${String(FIRST_GAME_YEAR + Math.floor((month - 1) / 12)).slice(-2)}` : ''}`,
+            : `${monthLabel((month - 1) % 12)}${scope === 'all' ? ` ${String(FIRST_GAME_YEAR + Math.floor((month - 1) / 12)).slice(-2)}` : ''}`,
         values: {},
       }
     }
@@ -285,8 +287,4 @@ export function buildAdminReport(
 
 export type AdminReport = ReturnType<typeof buildAdminReport>
 export { playerAmount as reportAmount } from './results'
-export const reportPercent = (value: number | null) => {
-  if (value === null) return '—'
-  const rounded = Math.round(value * 1000) / 10
-  return `${rounded > 0 ? '+' : ''}${(Object.is(rounded, -0) ? 0 : rounded).toFixed(1)}%`
-}
+export const { reportPercent } = languageTools('en')

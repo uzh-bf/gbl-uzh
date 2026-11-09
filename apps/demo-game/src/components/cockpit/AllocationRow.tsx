@@ -1,6 +1,8 @@
 import { cn } from '@gbl-uzh/ui'
+import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
-import { type Allocation, formatCHF } from '~/lib/allocation'
+import { useLanguage } from '~/i18n/Language'
+import { type Allocation } from '~/lib/allocation'
 import { assetLabels } from '~/lib/constants'
 
 /** Shared asset identity and CHF column in editable and saved allocations. */
@@ -15,6 +17,8 @@ export default function AllocationRow({
   saved?: boolean
   children: ReactNode
 }) {
+  const t = useTranslations()
+  const { formatCHF } = useLanguage()
   const Label = saved ? 'dt' : 'label'
   const Amount = saved ? 'dd' : 'span'
   const { name, risk, color } = assetLabels[asset]
@@ -40,9 +44,9 @@ export default function AllocationRow({
         htmlFor={saved ? undefined : `allocation-${asset}`}
         className="mobile:app-body tablet:block tablet:app-caption block leading-[1.2] font-bold min-[641px]:flex min-[641px]:items-baseline min-[641px]:gap-[12px] min-[641px]:text-[22px]"
       >
-        {name}
-        <span className="text-player-muted mobile:mt-app-1 mobile:app-caption tablet:whitespace-normal tablet:text-[12px] tablet:leading-[1.3] block font-normal whitespace-nowrap min-[641px]:mt-0 min-[641px]:text-[16px]">
-          {risk}
+        {t(name)}
+        <span className="text-player-muted mobile:mt-app-1 mobile:app-caption tablet:whitespace-normal tablet:text-[12px] tablet:leading-[1.3] block font-normal min-[641px]:mt-0 min-[641px]:text-[16px]">
+          {t(risk)}
         </span>
       </Label>
       <Amount className="text-player-muted mobile:app-caption tablet:text-[12px] tablet:leading-[1.3] m-0 whitespace-nowrap tabular-nums min-[641px]:text-[18px] [@media(max-width:360px)]:text-[13px]">

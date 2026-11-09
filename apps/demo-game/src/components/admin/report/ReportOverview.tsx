@@ -1,13 +1,13 @@
 import { cn } from '@gbl-uzh/ui'
 import { Button, Tooltip } from '@uzh-bf/design-system'
+import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 import AllocationBar from '~/components/cockpit/AllocationBar'
+import { useLanguage } from '~/i18n/Language'
 import {
   type AdminReport,
   type ReportScope,
   type ReportTeam,
-  reportAmount,
-  reportPercent,
 } from '~/lib/adminReport'
 import { ALLOCATION_KEYS, type Allocation } from '~/lib/allocation'
 import { assetLabels } from '~/lib/constants'
@@ -26,28 +26,31 @@ export function ReportScopeTabs({
   scope: ReportScope
   onScope: (scope: ReportScope) => void
 }) {
+  const t = useTranslations()
   const tabs: { value: ReportScope; label: string; detail: string }[] = [
     ...years.map(({ index, year, quarters }) => ({
       value: index,
       label: String(year),
       detail: quarters.length
         ? `Q${quarters[0]}${quarters.length > 1 ? `–Q${quarters.at(-1)}` : ''}`
-        : 'No quarters',
+        : t('manage.report.noQuarters'),
     })),
     {
       value: 'all',
-      label: 'Whole game',
+      label: t('manage.report.wholeGame'),
       detail: years.length
         ? `${years[0].year}${years.length > 1 ? `–${years.at(-1)!.year}` : ''}`
-        : 'No years',
+        : t('manage.report.noYears'),
     },
   ]
   return (
     <nav
-      aria-label="Report scope"
+      aria-label={t('manage.report.scope')}
       className="border-player-divider flex items-end gap-[28px] overflow-x-auto border-b px-[24px]"
     >
-      <span className={cn(headingClass, 'pb-[16px]')}>Report</span>
+      <span className={cn(headingClass, 'pb-[16px]')}>
+        {t('manage.report.title')}
+      </span>
       {tabs.map((tab) => (
         <Button
           key={tab.value}
@@ -91,6 +94,7 @@ export function TeamDot({ team }: { team: ReportTeam }) {
 }
 
 export function ReturnValue({ value }: { value: number | null }) {
+  const { reportPercent } = useLanguage()
   return (
     <span
       className={
@@ -107,6 +111,8 @@ export function ReturnValue({ value }: { value: number | null }) {
 }
 
 export function AllocationLegend({ value }: { value?: Allocation | null }) {
+  const t = useTranslations()
+  const { share } = useLanguage()
   return (
     <div className="text-player-body flex flex-wrap gap-x-[16px] gap-y-[4px] text-[12px]">
       {ALLOCATION_KEYS.map((key) => (
@@ -118,10 +124,10 @@ export function AllocationLegend({ value }: { value?: Allocation | null }) {
               assetLabels[key].color
             )}
           />
-          {assetLabels[key].name}
+          {t(assetLabels[key].name)}
           {value && (
             <strong className="text-player-text">
-              {Number(value[key].toFixed(1))}%
+              {share(Number(value[key].toFixed(1)))}
             </strong>
           )}
         </span>
@@ -137,14 +143,20 @@ export function ReportAllocation({
   value: Allocation | null
   label: string
 }) {
+  const t = useTranslations()
+  const { share } = useLanguage()
   if (!value)
     return (
-      <span className="text-player-muted" aria-label={`${label}: unavailable`}>
+      <span
+        className="text-player-muted"
+        aria-label={t('manage.report.unavailable', { label: label })}
+      >
         —
       </span>
     )
   const text = ALLOCATION_KEYS.map(
-    (key) => `${assetLabels[key].name} ${Number(value[key].toFixed(1))}%`
+    (key) =>
+      `${t(assetLabels[key].name)} ${share(Number(value[key].toFixed(1)))}`
   ).join(', ')
   return (
     <Tooltip
@@ -163,41 +175,42 @@ export function ReportAllocation({
 }
 
 export function ReportSummary({ report }: { report: AdminReport }) {
+  const t = useTranslations()
+  const { count, reportPercent, playerAmount: reportAmount } = useLanguage()
   const cell =
     'min-w-0 px-[24px] py-[20px] min-[600px]:border-r min-[600px]:border-player-border last:border-r-0'
   const label = 'mb-[5px] text-[13px] text-player-muted'
   const value = 'text-[25px] leading-[1.25] font-bold'
   return (
     <section
-      aria-label="Report summary"
+      aria-label={t('manage.report.summary')}
       className="divide-player-border border-player-border grid divide-y border-b min-[600px]:grid-cols-4 min-[600px]:divide-y-0"
     >
       <div className={cell}>
-        <p className={label}>Top team</p>
+        <p className={label}>{t('manage.report.topTeam')}</p>
         <p className={cn(value, 'truncate')}>{report.top?.name ?? '—'}</p>
         <p className="text-player-muted mt-[6px] text-[12px]">
           {report.top
             ? `${reportAmount(report.top.assets)} CHF · ${reportPercent(report.top.return)}`
-            : 'No settled results'}
+            : t('manage.report.noSettledResults')}
         </p>
       </div>
       <div className={cell}>
-        <p className={label}>Average return</p>
+        <p className={label}>{t('manage.report.averageReturn')}</p>
         <p className={value}>{reportPercent(report.averageReturn)}</p>
         <p className="text-player-muted mt-[6px] text-[12px]">
-          Across {report.eligibleCount}{' '}
-          {report.eligibleCount === 1 ? 'team' : 'teams'}
+          {t('manage.report.teamCount', { count: report.eligibleCount })}
         </p>
       </div>
       <div className={cell}>
-        <p className={label}>Best Sharpe ratio</p>
+        <p className={label}>{t('manage.report.bestSharpe')}</p>
         <p className={value}>{report.bestSharpe?.sharpe?.toFixed(2) ?? '—'}</p>
         <p className="text-player-muted mt-[6px] text-[12px]">
-          {report.bestSharpe?.name ?? 'No eligible teams'}
+          {report.bestSharpe?.name ?? t('manage.report.noEligibleTeams')}
         </p>
       </div>
       <div className={cell}>
-        <p className={label}>Average mix</p>
+        <p className={label}>{t('manage.report.averageMix')}</p>
         <div className="my-[14px] h-[12px]">
           {report.mix ? (
             <AllocationBar
@@ -225,18 +238,20 @@ export function Ranking({
   focusedId,
   onFocus,
 }: { report: AdminReport } & FocusProps) {
+  const t = useTranslations()
+  const { reportPercent, playerAmount: reportAmount } = useLanguage()
   const selected = report.teams.find((team) => team.id === focusedId)
   return (
     <section
-      aria-label="Ranking"
+      aria-label={t('manage.report.ranking')}
       className="border-player-border flex max-h-[468px] min-w-0 flex-col border-t min-[1024px]:border-t-0 min-[1024px]:border-l"
     >
       <div className="border-player-border flex flex-wrap items-center justify-between gap-[8px] border-b px-[24px] py-[16px]">
-        <h2 className={headingClass}>Ranking</h2>
+        <h2 className={headingClass}>{t('manage.report.ranking')}</h2>
         <span className="text-player-muted text-[12px]">
           {selected
-            ? `Click ${selected.name} again to show all`
-            : 'Click a team to focus it'}
+            ? t('manage.report.clearFocus', { team: selected.name })
+            : t('manage.report.focusHint')}
         </span>
       </div>
       <div
@@ -244,16 +259,16 @@ export function Ranking({
         aria-hidden="true"
       >
         <span>#</span>
-        <span>Team</span>
-        <span className="text-right">Assets CHF</span>
-        <span className="text-right">Return</span>
+        <span>{t('player.nav.team')}</span>
+        <span className="text-right">{t('manage.report.assetsChf')}</span>
+        <span className="text-right">{t('manage.report.return')}</span>
       </div>
       <ol className="min-h-0 overflow-y-auto pb-[10px]">
         {report.ranking.map((team, index) => (
           <li key={team.id}>
             <button
               type="button"
-              aria-label={`Focus ${team.name}`}
+              aria-label={t('manage.report.focusTeam', { team: team.name })}
               aria-describedby={`report-ranking-${team.seriesKey}`}
               aria-pressed={focusedId === team.id}
               onClick={() => onFocus(team.id)}
@@ -264,8 +279,9 @@ export function Ranking({
               )}
             >
               <span id={`report-ranking-${team.seriesKey}`} className="sr-only">
-                Rank {index + 1}. Assets {reportAmount(team.assets)} CHF. Return{' '}
-                {reportPercent(team.return)}.
+                {t('manage.report.rank')} {index + 1}
+                {t('manage.report.rankingAssets')} {reportAmount(team.assets)}{' '}
+                {t('manage.report.rankingReturn')} {reportPercent(team.return)}.
               </span>
               <span className="text-player-muted">{index + 1}</span>
               <span
@@ -298,6 +314,7 @@ export function Decisions({
   report: AdminReport
   focusedId: string | null
 }) {
+  const t = useTranslations()
   const row = (
     name: string,
     decisions: Record<string, Allocation | null>,
@@ -338,14 +355,14 @@ export function Decisions({
   )
   return (
     <section
-      aria-label="Decisions"
+      aria-label={t('player.nav.decisions')}
       className="border-player-border border-t px-[24px] py-[24px]"
     >
       <div className="mb-[14px] flex flex-wrap items-center justify-between gap-[12px]">
         <div className="flex flex-wrap items-center gap-[12px]">
-          <h2 className={headingClass}>Decisions</h2>
+          <h2 className={headingClass}>{t('player.nav.decisions')}</h2>
           <span className="text-player-muted text-[13px]">
-            Allocation per quarter in %, hover or focus a bar for all values
+            {t('manage.report.allocationHint')}
           </span>
         </div>
         <AllocationLegend />
@@ -356,7 +373,9 @@ export function Decisions({
             className="w-full table-fixed border-collapse text-[13px]"
             style={{ minWidth: 180 + report.quarters.length * 145 }}
           >
-            <caption className="sr-only">Team allocations by quarter</caption>
+            <caption className="sr-only">
+              {t('manage.report.teamAllocations')}
+            </caption>
             <colgroup>
               <col style={{ width: 180 }} />
               {report.quarters.map((q) => (
@@ -369,7 +388,7 @@ export function Decisions({
                   scope="col"
                   className="px-[8px] pb-[10px] text-left font-normal"
                 >
-                  Team
+                  {t('player.nav.team')}
                 </th>
                 {report.quarters.map((q) => (
                   <th
@@ -383,13 +402,15 @@ export function Decisions({
               </tr>
             </thead>
             <tbody>
-              {row('Average', report.averageDecisions)}
+              {row(t('manage.report.average'), report.averageDecisions)}
               {report.teams.map((team) => row(team.name, team.decisions, team))}
             </tbody>
           </table>
         </div>
       ) : (
-        <p className="text-player-muted">No quarters configured.</p>
+        <p className="text-player-muted">
+          {t('manage.report.noQuartersConfigured')}
+        </p>
       )}
     </section>
   )
@@ -402,6 +423,7 @@ export function ReportMessage({
   children: ReactNode
   onRetry?: () => void
 }) {
+  const t = useTranslations()
   return (
     <div
       role={onRetry ? 'alert' : 'status'}
@@ -413,7 +435,7 @@ export function ReportMessage({
           onClick={onRetry}
           className={{ root: 'mx-auto mt-[16px] block' }}
         >
-          Retry
+          {t('shared.actions.retry')}
         </Button>
       )}
     </div>

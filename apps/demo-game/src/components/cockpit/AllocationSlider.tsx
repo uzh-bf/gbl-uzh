@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
 import {
   allocationBoundaries,
@@ -17,6 +18,7 @@ export default function AllocationSlider({
   disabled: boolean
   onChange: (value: Allocation) => void
 }) {
+  const t = useTranslations()
   const track = useRef<HTMLDivElement>(null)
   const bounds = allocationBoundaries(value)
   const handles = useRef<(HTMLButtonElement | null)[]>([])
@@ -57,9 +59,9 @@ export default function AllocationSlider({
     <div className="border-player-border mobile:p-app-4 tablet:px-[12px] tablet:py-[8px] border-b p-[16px] min-[641px]:px-[24px] min-[641px]:pt-[20px] min-[641px]:pb-[24px]">
       <div className="text-player-muted mobile:mb-app-4 mobile:gap-app-3 mobile:app-body tablet:app-caption tablet:mb-[8px] flex items-baseline justify-between gap-[12px] text-[17px] min-[641px]:mb-[20px]">
         <h2 className="mobile:app-caption tablet:text-[12px] tablet:leading-[1.3] m-0 text-[15px] font-semibold tracking-[1.5px] uppercase">
-          Your mix
+          {t('player.allocation.mix')}
         </h2>
-        <span>Drag a handle</span>
+        <span>{t('player.allocation.dragHandle')}</span>
       </div>
       <div
         ref={track}
@@ -67,7 +69,7 @@ export default function AllocationSlider({
         data-cy="allocation-slider"
         aria-disabled={disabled}
       >
-        <AllocationBar value={value} />
+        <AllocationBar value={value} withHandles />
         {([0, 1] as const).map((handle) => (
           <button
             key={handle}
@@ -76,14 +78,24 @@ export default function AllocationSlider({
             }}
             type="button"
             role="slider"
-            aria-label={handle === 0 ? 'Savings boundary' : 'Stocks boundary'}
+            aria-label={
+              handle === 0
+                ? t('player.allocation.savingsBoundary')
+                : t('player.allocation.stocksBoundary')
+            }
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={bounds[handle] / 10}
             aria-valuetext={
               handle === 0
-                ? `Savings ${value.bank}%, Bonds ${value.bonds}%`
-                : `Bonds ${value.bonds}%, Stocks ${value.stocks}%`
+                ? t('player.allocation.savingsAndBonds', {
+                    savings: value.bank,
+                    bonds: value.bonds,
+                  })
+                : t('player.allocation.bondsAndStocks', {
+                    bonds: value.bonds,
+                    stocks: value.stocks,
+                  })
             }
             aria-orientation="horizontal"
             aria-describedby="allocation-help"
@@ -155,9 +167,7 @@ export default function AllocationSlider({
         ))}
       </div>
       <p id="allocation-help" className="sr-only">
-        Use arrow keys for 0.1%, or Shift and arrow keys for 1%. When handles
-        meet, they push each other. Start a new drag left or right to separate
-        overlapping handles. Use the percentage fields for exact values.
+        {t('player.allocation.sliderInstructions')}
       </p>
     </div>
   )

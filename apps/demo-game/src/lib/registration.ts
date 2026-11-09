@@ -1,13 +1,14 @@
 import * as yup from 'yup'
+import type { MessageKey } from '../i18n/catalogs'
 import { AVATARS, LOCATIONS } from './constants'
 
 export const bankSetupSchema = yup.object({
   name: yup
     .string()
     .trim()
-    .required('Enter a bank name.')
-    .min(2, 'Use at least 2 characters.')
-    .max(20, 'Use no more than 20 characters.'),
+    .required('shared.validation.bankNameRequired')
+    .min(2, 'shared.validation.nameTooShort')
+    .max(20, 'shared.validation.nameTooLong'),
   avatar: yup
     .string()
     .oneOf(
@@ -30,15 +31,15 @@ export const RegistrationSchema = yup.object({
     .required(),
 })
 
-export function registrationError(error: unknown) {
+export function registrationError(error: unknown): MessageKey {
   const message = error instanceof Error ? error.message : ''
   if (message.includes('REGISTRATION_CLOSED'))
-    return 'Registration is closed. Ask your instructor if you need help.'
+    return 'player.registration.closedHelp'
   if (message.includes('REGISTRATION_FULL'))
-    return 'This game is full. Ask your instructor if you need help.'
+    return 'player.registration.fullHelp'
   if (message.includes('INVALID_REGISTRATION_LINK'))
-    return 'This registration link is invalid.'
+    return 'player.registration.invalidLink'
   if (message.includes('REGISTRATION_SESSION_REQUIRED'))
-    return 'Allow cookies and reload this page to join. Your browser needs cookies to remember your entry.'
-  return 'We couldn’t join the game. Please try again. Your choices are still here.'
+    return 'player.registration.cookiesRequired'
+  return 'player.registration.joinError'
 }

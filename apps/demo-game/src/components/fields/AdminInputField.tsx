@@ -1,4 +1,5 @@
 import { HelpTooltip } from '@gbl-uzh/ui'
+import { useTranslations } from 'next-intl'
 import type { HTMLInputTypeAttribute } from 'react'
 import type {
   FieldError,
@@ -6,6 +7,7 @@ import type {
   Path,
   UseFormRegister,
 } from 'react-hook-form'
+import type { MessageKey } from '~/i18n/catalogs'
 
 interface AdminInputFieldProps<TFieldValues extends FieldValues> {
   label: string
@@ -19,7 +21,7 @@ interface AdminInputFieldProps<TFieldValues extends FieldValues> {
   min?: number
   step?: number
   testId?: string
-  minMessage?: string
+  minMessage?: MessageKey
 }
 
 export function AdminInputField<TFieldValues extends FieldValues>({
@@ -36,6 +38,7 @@ export function AdminInputField<TFieldValues extends FieldValues>({
   testId,
   minMessage,
 }: AdminInputFieldProps<TFieldValues>) {
+  const t = useTranslations()
   const errorId = `${name}-error`
 
   return (
@@ -47,7 +50,9 @@ export function AdminInputField<TFieldValues extends FieldValues>({
         >
           {label}
         </label>
-        {tooltip && <HelpTooltip content={tooltip} />}
+        {tooltip && (
+          <HelpTooltip label={t('shared.actions.help')} content={tooltip} />
+        )}
       </div>
       <input
         id={name}
@@ -59,14 +64,14 @@ export function AdminInputField<TFieldValues extends FieldValues>({
           name,
           type === 'number'
             ? {
-                required: required ? 'Required' : false,
+                required: required ? 'shared.validation.required' : false,
                 valueAsNumber: true,
                 min:
                   min !== undefined && minMessage
                     ? { value: min, message: minMessage }
                     : undefined,
               }
-            : { required: required ? 'Required' : false }
+            : { required: required ? 'shared.validation.required' : false }
         )}
         className="mobile:app-control w-full rounded border border-slate-300 bg-white p-2 text-sm focus:ring-2 focus:ring-slate-500 focus:outline-none"
         data-cy={testId ?? name}
@@ -79,7 +84,7 @@ export function AdminInputField<TFieldValues extends FieldValues>({
           role="alert"
           className="mobile:app-caption text-xs text-red-500"
         >
-          {error.message}
+          {error.message && t(error.message as MessageKey)}
         </span>
       )}
     </div>

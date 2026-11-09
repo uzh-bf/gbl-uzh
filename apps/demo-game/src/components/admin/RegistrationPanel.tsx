@@ -1,7 +1,9 @@
 import { useMutation } from '@apollo/client'
+import { useTranslations } from 'next-intl'
 import { QRCodeSVG } from 'qrcode.react'
 import { useState, useSyncExternalStore } from 'react'
 import { SetRegistrationOpenDocument } from '~/graphql/generated/ops'
+import { useLanguage } from '~/i18n/Language'
 import { Button, Modal } from './AdminControls'
 
 // The origin is immutable for this document; the empty server snapshot keeps hydration consistent.
@@ -25,6 +27,8 @@ export default function RegistrationPanel({
   }
   onChange: () => unknown
 }) {
+  const t = useTranslations()
+  const { count } = useLanguage()
   const origin = useSyncExternalStore(
     subscribeOrigin,
     getOrigin,
@@ -32,7 +36,7 @@ export default function RegistrationPanel({
   )
   const [projecting, setProjecting] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [copyError, setCopyError] = useState('')
+  const [copyError, setCopyError] = useState(false)
   const [toggle, { loading, error }] = useMutation(
     SetRegistrationOpenDocument,
     {
@@ -52,7 +56,7 @@ export default function RegistrationPanel({
       value={url}
       size={size}
       marginSize={4}
-      title={`Join ${game.name}`}
+      title={t('manage.registration.join', { game: game.name })}
       style={{ maxWidth: '100%', height: 'auto' }}
     />
   )
@@ -63,16 +67,26 @@ export default function RegistrationPanel({
       data-cy="registration-panel"
     >
       <h2 id="registration-heading" className="text-xl font-semibold">
-        Player registration
+        {t('manage.registration.title')}
       </h2>
       <p role="status">
-        {open ? (full ? 'Full' : 'Open') : 'Closed'} · {game.playerCount}
-        {game.maxPlayers != null ? ` / ${game.maxPlayers}` : ''} players joined
+        {open
+          ? full
+            ? t('manage.registration.full')
+            : t('manage.registration.open')
+          : t('manage.registration.closedStatus')}{' '}
+        · {count(game.playerCount)}
+        {game.maxPlayers != null ? ` / ${count(game.maxPlayers)}` : ''}{' '}
+        {t('manage.registration.joined', {
+          count: game.maxPlayers ?? game.playerCount,
+        })}
       </p>
-      <div className="mt-3 flex flex-wrap items-center gap-4">
+      <div className="mobile:flex-col mobile:items-stretch mt-3 flex flex-wrap items-center gap-4">
         {origin && qr(180)}
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <label htmlFor="registration-link">Shared registration link</label>
+          <label htmlFor="registration-link">
+            {t('manage.registration.link')}
+          </label>
           <input
             id="registration-link"
             readOnly
@@ -86,15 +100,19 @@ export default function RegistrationPanel({
                 try {
                   await navigator.clipboard.writeText(url)
                   setCopied(true)
-                  setCopyError('')
+                  setCopyError(false)
                 } catch {
-                  setCopyError('Select and copy the link above.')
+                  setCopyError(true)
                 }
               }}
             >
-              {copied ? 'Link copied' : 'Copy link'}
+              {copied
+                ? t('manage.registration.copied')
+                : t('manage.registration.copy')}
             </Button>
-            <Button onClick={() => setProjecting(true)}>Show QR code</Button>
+            <Button onClick={() => setProjecting(true)}>
+              {t('manage.registration.showQr')}
+            </Button>
             <Button
               disabled={loading || game.status !== 'SCHEDULED'}
               onClick={() =>
@@ -103,24 +121,28 @@ export default function RegistrationPanel({
                 }).catch(() => {})
               }
             >
-              {open ? 'Close registration' : 'Open registration'}
+              {open
+                ? t('manage.registration.close')
+                : t('manage.registration.openRegistration')}
             </Button>
           </div>
-          {copyError && <p role="status">{copyError}</p>}
-          {error && (
-            <p role="alert">Couldn’t change registration. Please try again.</p>
+          {copyError && (
+            <p role="status">{t('manage.registration.copyManually')}</p>
           )}
+          {error && <p role="alert">{t('manage.registration.updateError')}</p>}
         </div>
       </div>
       <Modal
         open={projecting}
         onClose={() => setProjecting(false)}
-        title={`Join ${game.name}`}
+        title={t('manage.registration.join', { game: game.name })}
       >
         <div className="flex flex-col items-center gap-4 p-4">
           {origin && qr(480)}
           <p className="text-center break-all">{url}</p>
-          <Button onClick={() => setProjecting(false)}>Close</Button>
+          <Button onClick={() => setProjecting(false)}>
+            {t('shared.actions.close')}
+          </Button>
         </div>
       </Modal>
     </section>

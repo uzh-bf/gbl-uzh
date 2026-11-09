@@ -1,11 +1,20 @@
 import { cn } from '@gbl-uzh/ui'
 import { useFormik } from 'formik'
 import { ArrowLeft, Info, MapPin, UserRound } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useRef, useState, type ReactElement } from 'react'
-import { AVATARS, COLORS, LOCATIONS, cantonNames } from 'src/lib/constants'
+import type { MessageKey } from '~/i18n/catalogs'
+import { cantonLabel } from '~/i18n/labels'
+import { useLanguage } from '~/i18n/Language'
 import { ALLOCATION_KEYS } from '~/lib/allocation'
-import { assetLabels } from '~/lib/constants'
+import {
+  assetLabels,
+  AVATARS,
+  COLORS,
+  INITIAL_CAPITAL,
+  LOCATIONS,
+} from '~/lib/constants'
 import { parseFacts } from '~/lib/facts'
 import { bankSetupSchema, registrationError } from '~/lib/registration'
 import CantonFlagBadge from '../CantonFlagBadge'
@@ -18,49 +27,40 @@ import {
   WelcomeTextInput,
 } from './WelcomeControls'
 
-const avatarNames: Record<string, string> = {
-  sparbaer: 'Bear',
-  sparbulle: 'Bull',
-  sparfalken: 'Falcon',
-  spargecko: 'Gecko',
-  spargeier: 'Vulture',
-  sparhai: 'Shark',
-  sparheuschrecke: 'Locust',
-  sparhund_1: 'Dog 1',
-  sparhund_2: 'Dog 2',
-  sparhund_3: 'Dog 3',
-  sparmaeuse: 'Mice',
-  sparpegasus: 'Pegasus',
-  sparschaf: 'Sheep',
-  sparschwein: 'Pig',
+const avatarNames: Record<
+  Exclude<keyof typeof AVATARS, 'avatar_placeholder'>,
+  MessageKey
+> = {
+  sparbaer: 'player.avatars.bear',
+  sparbulle: 'player.avatars.bull',
+  sparfalken: 'player.avatars.falcon',
+  spargecko: 'player.avatars.gecko',
+  spargeier: 'player.avatars.vulture',
+  sparhai: 'player.avatars.shark',
+  sparheuschrecke: 'player.avatars.locust',
+  sparhund_1: 'player.avatars.dogOne',
+  sparhund_2: 'player.avatars.dogTwo',
+  sparhund_3: 'player.avatars.dogThree',
+  sparmaeuse: 'player.avatars.mice',
+  sparpegasus: 'player.avatars.pegasus',
+  sparschaf: 'player.avatars.sheep',
+  sparschwein: 'player.avatars.pig',
 }
 
 const steps = {
   intro: {
-    title: 'You just won the lottery',
-    description:
-      "You picked five correct numbers. After spending a little, CHF 10'000 is left and you want to invest it.",
+    title: 'player.setup.introTitle',
+    description: 'player.setup.introDescription',
   },
   setup: {
-    title: 'Set up your bank',
-    description: 'Three things to choose. Make your bank your own.',
+    title: 'player.setup.setupTitle',
+    description: 'player.setup.setupDescription',
   },
   review: {
-    title: 'Your bank',
-    description: 'Check it once, then start.',
+    title: 'player.setup.bank',
+    description: 'player.setup.reviewDescription',
   },
-}
-
-const avatars: Option[] = Object.entries(AVATARS)
-  .filter(([key]) => key !== 'avatar_placeholder')
-  .map(([key, value]) => ({
-    value,
-    label: avatarNames[key] ?? key,
-  }))
-const locations: Option[] = LOCATIONS.Trader.map((value) => ({
-  value,
-  label: `${cantonNames[value]} (${value})`,
-}))
+} as const
 
 export default function WelcomeSetup({
   player,
@@ -78,11 +78,21 @@ export default function WelcomeSetup({
   /** Supplying Cancel opens profile editing instead of first-time setup. */
   onCancel?: () => void
 }) {
+  const t = useTranslations()
+  const { language, formatCHF } = useLanguage()
+  const locations: Option[] = LOCATIONS.Trader.map((value) => ({
+    value,
+    label: `${cantonLabel(t, value)} (${value})`,
+  }))
+  const avatars = Object.entries(avatarNames).map(([key, label]) => ({
+    value: AVATARS[key],
+    label: t(label),
+  }))
   const editing = Boolean(onCancel)
   const [step, setStep] = useState<keyof typeof steps>(
     editing ? 'setup' : 'intro'
   )
-  const [submitError, setSubmitError] = useState('')
+  const [submitError, setSubmitError] = useState<MessageKey | ''>('')
   const content = useRef<HTMLElement>(null)
   const heading = useRef<HTMLHeadingElement>(null)
   const nameInput = useRef<HTMLInputElement>(null)
@@ -115,9 +125,7 @@ export default function WelcomeSetup({
         })
       } catch (error) {
         setSubmitError(
-          registration
-            ? registrationError(error)
-            : 'We couldn’t save your bank. Please try again. Your choices are still here.'
+          registration ? registrationError(error) : 'player.setup.saveError'
         )
       }
     },
@@ -126,12 +134,12 @@ export default function WelcomeSetup({
   const location = locations.find(({ value }) => value === form.values.location)
   const canContinue = form.isValid && !form.isValidating
   const submitLabel = editing
-    ? 'Save changes'
+    ? t('player.setup.saveChanges')
     : step === 'setup'
-      ? 'Review your bank'
+      ? t('player.setup.review')
       : registration
-        ? 'Join game'
-        : 'Start the game'
+        ? t('player.setup.join')
+        : t('player.setup.start')
 
   function goTo(next: typeof step, editName = false) {
     setStep(next)
@@ -146,7 +154,7 @@ export default function WelcomeSetup({
   function avatarPicker(trigger: ReactElement) {
     return (
       <OptionPicker
-        title="Pick your avatar"
+        title={t('player.setup.pickAvatar')}
         options={avatars}
         value={form.values.avatar}
         onChange={(value) => void form.setFieldValue('avatar', value)}
@@ -158,7 +166,7 @@ export default function WelcomeSetup({
   function locationPicker(trigger: ReactElement) {
     return (
       <OptionPicker
-        title="Where is your bank?"
+        title={t('player.setup.pickLocation')}
         options={locations}
         value={form.values.location}
         searchable
@@ -176,22 +184,22 @@ export default function WelcomeSetup({
         tabIndex={-1}
         className="mobile:mb-app-2 mobile:app-heading tablet:app-heading m-0 mb-[8px] text-[24px] leading-[1.25] font-bold tracking-[-0.3px] focus:outline-none"
       >
-        {editing ? 'Edit your bank' : steps[step].title}
+        {editing ? t('player.setup.editBank') : t(steps[step].title)}
       </h1>
       <p className="text-player-body m-0 leading-[1.65]">
         {editing
-          ? 'Update your bank name, avatar, or location.'
-          : steps[step].description}
+          ? t('player.setup.editDescription')
+          : t(steps[step].description)}
       </p>
     </>
   )
 
   return (
-    <div className="font-player text-player-text min-[721px]:border-player-input mobile:app-body tablet:max-w-[1440px] tablet:app-body mx-auto flex h-dvh max-w-[720px] flex-col bg-white text-[16px] leading-[1.5] min-[721px]:border-x">
+    <div className="font-player text-player-text min-[721px]:border-player-input mobile:app-body tablet:max-w-[1440px] tablet:app-body mx-auto flex h-[calc(100dvh-36px)] max-w-[720px] flex-col bg-white text-[16px] leading-[1.5] min-[721px]:border-x">
       <header className="border-player-input mobile:gap-app-3 mobile:px-app-4 mobile:py-app-3 tablet:px-[20px] flex min-h-[54px] shrink-0 items-center justify-between gap-[12px] border-b px-[16px] py-[12px] min-[721px]:px-[32px]">
         <div className="mobile:gap-app-3 flex min-w-0 items-baseline gap-[10px]">
           <strong className="mobile:app-body tablet:app-body text-[18px]">
-            Minigame
+            {t('player.setup.minigame')}
           </strong>
           <span className="text-player-muted truncate" title={player.game.name}>
             {player.game.name}
@@ -208,8 +216,8 @@ export default function WelcomeSetup({
             aria-live="polite"
           >
             {step === 'review'
-              ? 'Complete'
-              : `Step ${step === 'intro' ? 1 : 2} of 2`}
+              ? t('player.setup.complete')
+              : t('player.setup.step', { step: step === 'intro' ? 1 : 2 })}
           </span>
         )}
       </header>
@@ -231,7 +239,7 @@ export default function WelcomeSetup({
             <Image
               className="border-player-input mobile:mb-app-3 tablet:mb-[32px] mb-[14px] aspect-[2/1] h-auto w-full rounded-[12px] border object-cover"
               src="/images/welcome.jpg"
-              alt="A winning lottery ticket surrounded by coins and a piggy bank"
+              alt={t('player.setup.lotteryImage')}
               width={720}
               height={360}
               sizes="(min-width: 641px) min(calc(100vw - 80px), 1358px), (max-width: 720px) calc(100vw - 32px), 654px"
@@ -250,17 +258,16 @@ export default function WelcomeSetup({
                     id="your-task"
                     className="text-player-muted mobile:mb-app-2 mobile:app-caption m-0 mb-[5px] text-[13px] font-bold tracking-[1px] uppercase"
                   >
-                    Your task
+                    {t('player.setup.task')}
                   </h2>
                   <p className="m-0 leading-[1.6]">
-                    Decide how much goes into savings, bonds and stocks. You
-                    repeat that decision every segment.
+                    {t('player.setup.allocationTask')}
                   </p>
                 </section>
               </div>
               <div className="min-w-0">
                 <h2 className="text-player-muted tablet:block m-0 mb-[8px] hidden text-[14px] font-bold tracking-[1px] uppercase">
-                  The three assets
+                  {t('player.setup.assets')}
                 </h2>
                 <ul className="mobile:mb-app-3 mobile:gap-app-2 tablet:gap-0 m-0 mb-[14px] grid list-none gap-[8px] p-0">
                   {ALLOCATION_KEYS.map((key) => {
@@ -271,15 +278,14 @@ export default function WelcomeSetup({
                         className="border-player-input mobile:gap-app-3 mobile:px-app-3 mobile:py-app-3 tablet:grid-cols-[10px_minmax(0,1fr)_auto] tablet:rounded-none tablet:border-x-0 tablet:border-t-0 tablet:px-0 tablet:py-[16px] grid grid-cols-[10px_78px_1fr] items-center gap-[10px] rounded-[12px] border px-[12px] py-[11px]"
                       >
                         <i className={cn('size-[10px] rounded-[2px]', color)} />
-                        <strong>{name}</strong>
-                        <span className="text-player-muted">{risk}</span>
+                        <strong>{t(name)}</strong>
+                        <span className="text-player-muted">{t(risk)}</span>
                       </li>
                     )
                   })}
                 </ul>
                 <p className="text-player-muted mobile:app-caption m-0 text-[14px] leading-[1.65]">
-                  Savings pay 0.2% a month. Bonds and stocks follow the market
-                  expectation, simulated by two dice.
+                  {t('player.setup.assetDescription')}
                 </p>
               </div>
             </div>
@@ -292,13 +298,13 @@ export default function WelcomeSetup({
                     <div className="mobile:mt-app-4 mobile:gap-app-3 tablet:gap-[24px] mt-[20px] grid gap-[20px]">
                       <div className="mobile:gap-app-2 flex flex-col gap-[8px]">
                         <label className="font-bold" htmlFor="bank-name">
-                          Bank name
+                          {t('player.setup.bankName')}
                         </label>
                         <WelcomeTextInput
                           ref={nameInput}
                           id="bank-name"
                           {...form.getFieldProps('name')}
-                          placeholder="e.g. Team 1"
+                          placeholder={t('player.setup.namePlaceholder')}
                           autoComplete="organization"
                           disabled={form.isSubmitting}
                           aria-invalid={Boolean(
@@ -310,19 +316,21 @@ export default function WelcomeSetup({
                           id="bank-name-help"
                           className="text-player-muted mobile:mt-app-2 mobile:app-caption m-0 mt-[6px] text-[14px] leading-[1.65]"
                         >
-                          Shown on the ranking and the projector.
+                          {t('player.setup.nameHint')}
                         </p>
                         <p
                           id="bank-name-error"
                           className="text-player-invalid mobile:app-caption m-0 text-[14px] empty:hidden"
                           aria-live="polite"
                         >
-                          {form.touched.name && form.errors.name}
+                          {form.touched.name &&
+                            form.errors.name &&
+                            t(form.errors.name as MessageKey)}
                         </p>
                       </div>
                       <div className="mobile:gap-app-2 flex flex-col gap-[8px]">
                         <span className="font-bold" id="avatar-label">
-                          Avatar
+                          {t('player.setup.avatar')}
                         </span>
                         {avatarPicker(
                           <WelcomePickerTrigger
@@ -346,13 +354,13 @@ export default function WelcomeSetup({
                               )
                             }
                           >
-                            {avatar?.label ?? 'Choose an animal'}
+                            {avatar?.label ?? t('player.setup.chooseAnimal')}
                           </WelcomePickerTrigger>
                         )}
                       </div>
                       <div className="mobile:gap-app-2 flex flex-col gap-[8px]">
                         <span className="font-bold" id="location-label">
-                          Location
+                          {t('player.setup.location')}
                         </span>
                         {locationPicker(
                           <WelcomePickerTrigger
@@ -366,7 +374,7 @@ export default function WelcomeSetup({
                               />
                             }
                           >
-                            {location?.label ?? 'Choose a canton'}
+                            {location?.label ?? t('player.setup.chooseCanton')}
                           </WelcomePickerTrigger>
                         )}
                       </div>
@@ -375,14 +383,14 @@ export default function WelcomeSetup({
                       <div className="border-player-input mobile:mt-app-4 mobile:gap-app-3 mobile:pt-app-4 tablet:hidden mt-[24px] flex items-center justify-between gap-[14px] border-t pt-[16px]">
                         <div>
                           <span className="text-player-body mobile:app-caption text-[14px]">
-                            Starting capital
+                            {t('player.setup.capital')}
                           </span>
                           <strong className="mobile:app-value block text-[22px] leading-[1.3] whitespace-nowrap">
-                            10&apos;000.00 CHF
+                            {formatCHF(INITIAL_CAPITAL)}
                           </strong>
                         </div>
                         <span className="text-player-body mobile:app-caption text-right text-[14px]">
-                          Same for every team
+                          {t('player.setup.sameForTeams')}
                         </span>
                       </div>
                     )}
@@ -407,44 +415,54 @@ export default function WelcomeSetup({
                           {form.values.name.trim()}
                         </strong>
                         <p className="text-player-muted mobile:app-caption m-0 text-[14px]">
-                          {avatar?.label} · HQ {location?.label}
+                          {avatar?.label} {t('player.progress.locationPrefix')}{' '}
+                          {location?.label}
                         </p>
                         <p className="text-player-muted mobile:app-caption m-0 text-[14px]">
-                          10&apos;000.00 CHF to invest
+                          {t('player.setup.investmentCapital', {
+                            amount: formatCHF(INITIAL_CAPITAL),
+                          })}
                         </p>
                       </div>
                     </div>
                     <div className="mobile:gap-app-2 tablet:mt-[20px] grid gap-[8px]">
-                      {[
-                        {
-                          label: 'Bank name',
-                          value: form.values.name.trim(),
-                        },
-                        {
-                          label: 'Avatar',
-                          value: avatar?.label,
-                          picker: avatarPicker,
-                        },
-                        {
-                          label: 'Location',
-                          value: location?.label,
-                          picker: locationPicker,
-                        },
-                      ].map(({ label, value, picker }) => {
+                      {(
+                        [
+                          {
+                            labelKey: 'player.setup.bankName',
+                            value: form.values.name.trim(),
+                            picker: undefined,
+                          },
+                          {
+                            labelKey: 'player.setup.avatar',
+                            value: avatar?.label,
+                            picker: avatarPicker,
+                          },
+                          {
+                            labelKey: 'player.setup.location',
+                            value: location?.label,
+                            picker: locationPicker,
+                          },
+                        ] as const
+                      ).map(({ labelKey, value, picker }) => {
+                        const label = t(labelKey)
                         const editButton = (
                           <WelcomeTextButton
-                            aria-label={`Edit ${label.toLowerCase()}`}
+                            aria-label={t('player.setup.editField', {
+                              field:
+                                language === 'en' ? label.toLowerCase() : label,
+                            })}
                             disabled={form.isSubmitting}
                             onClick={
                               picker ? undefined : () => goTo('setup', true)
                             }
                           >
-                            Edit
+                            {t('player.setup.edit')}
                           </WelcomeTextButton>
                         )
                         return (
                           <div
-                            key={label}
+                            key={labelKey}
                             className="border-player-input mobile:gap-app-3 mobile:px-app-3 mobile:py-app-2 flex min-h-[54px] items-center gap-[10px] rounded-[12px] border px-[14px] py-[5px]"
                           >
                             <span className="flex-1">{label}</span>
@@ -464,8 +482,8 @@ export default function WelcomeSetup({
                       <p className="m-0">
                         {player.game.status === 'SCHEDULED' ||
                         player.game.status === 'PREPARATION'
-                          ? 'Starting now puts you in the waiting room until the instructor opens segment 1.'
-                          : 'Your game is already underway. Start now to open your bank’s Decisions tab.'}
+                          ? t('player.setup.waitingHint')
+                          : t('player.setup.runningHint')}
                       </p>
                     </div>
                   </>
@@ -486,7 +504,7 @@ export default function WelcomeSetup({
               role="alert"
               className="text-player-invalid mobile:mb-app-3 mobile:app-caption m-0 mb-[10px] text-[14px] empty:hidden"
             >
-              {submitError}
+              {t(submitError)}
             </p>
           )}
           <div className="mobile:gap-app-3 tablet:justify-between flex items-center gap-[12px]">
@@ -505,7 +523,7 @@ export default function WelcomeSetup({
                   onClick={() => goTo('setup')}
                   className="tablet:ml-auto"
                 >
-                  Set up your bank
+                  {t('player.setup.setupTitle')}
                 </WelcomeActionButton>
               </>
             ) : (
@@ -515,7 +533,7 @@ export default function WelcomeSetup({
                     disabled={form.isSubmitting}
                     onClick={onCancel}
                   >
-                    Cancel
+                    {t('shared.actions.cancel')}
                   </WelcomeTextButton>
                 ) : (
                   <button
@@ -523,8 +541,8 @@ export default function WelcomeSetup({
                     className="border-player-input text-player-primary focus-visible:outline-player-primary tablet:min-h-[44px] grid min-h-[48px] min-w-[44px] cursor-pointer place-items-center rounded-[6px] border bg-white focus-visible:outline-2 focus-visible:outline-offset-[3px]"
                     aria-label={
                       step === 'setup'
-                        ? 'Back to introduction'
-                        : 'Back to bank setup'
+                        ? t('player.setup.backToIntroduction')
+                        : t('player.setup.backToSetup')
                     }
                     disabled={form.isSubmitting}
                     onClick={() => goTo(step === 'setup' ? 'intro' : 'setup')}
@@ -539,8 +557,8 @@ export default function WelcomeSetup({
                 >
                   {form.isSubmitting
                     ? editing
-                      ? 'Saving…'
-                      : 'Starting…'
+                      ? t('player.story.saving')
+                      : t('player.setup.starting')
                     : submitLabel}
                 </WelcomeActionButton>
               </>
@@ -548,7 +566,7 @@ export default function WelcomeSetup({
           </div>
           {step === 'setup' && !canContinue && (
             <p className="text-player-muted mobile:mt-app-2 mobile:app-caption m-0 mt-[8px] text-center text-[14px]">
-              Choose all three to continue
+              {t('player.setup.incomplete')}
             </p>
           )}
         </footer>

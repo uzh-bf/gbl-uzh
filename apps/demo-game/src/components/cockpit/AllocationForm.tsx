@@ -1,10 +1,7 @@
-import { cn, probabilityDistribution, signedPercent } from '@gbl-uzh/ui'
-import {
-  ALLOCATION_KEYS,
-  allocationDraft,
-  formatCHF,
-  toTenths,
-} from '~/lib/allocation'
+import { cn, probabilityDistribution } from '@gbl-uzh/ui'
+import { useTranslations } from 'next-intl'
+import { useLanguage } from '~/i18n/Language'
+import { ALLOCATION_KEYS, allocationDraft, toTenths } from '~/lib/allocation'
 import { assetLabels } from '~/lib/constants'
 import type { MarketScenario } from '~/lib/market'
 import AllocationRow from './AllocationRow'
@@ -22,6 +19,8 @@ export default function AllocationForm({
   assets: number
   scenario: MarketScenario | null
 }) {
+  const t = useTranslations()
+  const { percent, signedPercent, share, count, formatCHF } = useLanguage()
   const { form, allocation, valid, preview, setDraft } = controller
   const total = ALLOCATION_KEYS.reduce(
     (sum, key) =>
@@ -34,7 +33,7 @@ export default function AllocationForm({
     <form id="allocation-form" onSubmit={form.handleSubmit} noValidate>
       <div className="border-player-border mobile:gap-app-3 mobile:p-app-4 tablet:px-[12px] tablet:py-[8px] flex items-baseline justify-between gap-[12px] border-b p-[16px] min-[641px]:px-[24px] min-[641px]:py-[20px]">
         <span className="text-player-muted mobile:app-body tablet:app-caption text-[18px]">
-          To allocate
+          {t('player.allocation.availableCapital')}
         </span>
         <strong className="mobile:app-value tablet:text-[20px] tablet:leading-[1.2] leading-[1.5] font-bold tabular-nums min-[641px]:text-[30px]">
           {formatCHF(assets)}
@@ -47,7 +46,7 @@ export default function AllocationForm({
       />
       <div>
         {ALLOCATION_KEYS.map((key) => {
-          const label = assetLabels[key].name
+          const label = t(assetLabels[key].name)
           const fieldValid = toTenths(allocation[key]) !== null
           return (
             <AllocationRow
@@ -89,7 +88,7 @@ export default function AllocationForm({
                   id={`error-${key}`}
                   className="text-player-error mobile:app-body tablet:text-[12px] tablet:leading-[1.3] col-[2/-1] m-0 text-[16px]"
                 >
-                  Enter 0–100%, in steps of 0.1%.
+                  {t('player.allocation.inputHint')}
                 </p>
               )}
             </AllocationRow>
@@ -107,28 +106,31 @@ export default function AllocationForm({
       >
         {!valid && (
           <p className="m-0">
-            Total: {Math.round(total * 10) / 10}%.{' '}
+            {t('player.allocation.total')} {share(Math.round(total * 10) / 10)}.{' '}
             {difference > 0
-              ? `${difference}% remaining.`
+              ? t('player.allocation.remaining', {
+                  remaining: count(difference),
+                })
               : difference < 0
-                ? `Over by ${Math.abs(difference)}%.`
-                : 'Check the percentage fields.'}{' '}
-            Finish entering valid percentages totaling 100% to update the slider
-            and submit.
+                ? t('player.allocation.overAllocated', {
+                    excess: count(Math.abs(difference)),
+                  })
+                : t('player.allocation.checkFields')}{' '}
+            {t('player.allocation.validationHint')}
           </p>
         )}
         {form.status?.error && (
           <p role="alert" className="text-player-error m-0">
-            {form.status.error}
+            {t('player.allocation.saveError')}
           </p>
         )}
       </div>
       <section
-        aria-label="Market outlook"
+        aria-label={t('player.allocation.outlook')}
         className="tablet:hidden mobile:px-app-4 mobile:py-app-3 min-[641px]:px-[24px] min-[641px]:py-[16px]"
       >
         <h2 className="mobile:app-body m-0 font-bold min-[641px]:text-[18px]">
-          Market outlook
+          {t('player.allocation.outlook')}
         </h2>
         {scenario ? (
           <div className="mobile:mt-app-2 mobile:gap-app-6 grid grid-cols-2 min-[641px]:mt-[8px] min-[641px]:gap-[48px]">
@@ -141,26 +143,31 @@ export default function AllocationForm({
               return (
                 <section
                   key={asset}
-                  aria-label={`${assetLabels[asset].name} forecast`}
+                  aria-label={t('player.allocation.forecast', {
+                    asset: t(assetLabels[asset].name),
+                  })}
                   className="min-w-0"
                 >
                   <h3 className="mobile:app-body m-0 font-semibold min-[641px]:text-[16px]">
-                    {assetLabels[asset].name}
+                    {t(assetLabels[asset].name)}
                   </h3>
                   <dl className="mobile:mt-app-1 mobile:gap-app-1 mobile:app-caption m-0 grid min-[641px]:mt-[4px] min-[641px]:gap-[4px] min-[641px]:text-[14px]">
                     {[
                       {
-                        label: 'Expected value',
+                        label: t('player.allocation.expectedValue'),
                         value: signedPercent(trend, 2),
                         color:
                           trend < 0
                             ? 'text-player-error'
                             : 'text-player-success',
                       },
-                      { label: 'Gap', value: `${(gap * 100).toFixed(2)}%` },
                       {
-                        label: 'Volatility',
-                        value: `${(volatility * 100).toFixed(2)}%`,
+                        label: t('player.allocation.gap'),
+                        value: percent(gap, 2),
+                      },
+                      {
+                        label: t('manage.dice.volatility'),
+                        value: percent(volatility, 2),
                       },
                     ].map(({ label, value, color }) => (
                       <div
@@ -185,7 +192,7 @@ export default function AllocationForm({
           </div>
         ) : (
           <p className="text-player-muted mobile:app-caption min-[641px]:text-[17px]">
-            Market outlook is not available yet.
+            {t('player.allocation.noOutlook')}
           </p>
         )}
       </section>

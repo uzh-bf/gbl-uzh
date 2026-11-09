@@ -1,5 +1,6 @@
 import { useQuery, useSubscription } from '@apollo/client'
 import { useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -19,6 +20,8 @@ import {
   GlobalEventsDocument,
   SpecificResultsDocument,
 } from '~/graphql/generated/ops'
+import { statusKeys } from '~/i18n/labels'
+import { useLanguage } from '~/i18n/Language'
 import {
   buildAdminReport,
   type ReportMode,
@@ -28,6 +31,8 @@ import { shouldRefetchDemoGame } from '~/lib/gameEvents'
 import { queueRefetch } from '~/lib/queuedRefetch'
 
 export default function ReportGame() {
+  const t = useTranslations()
+  const { shortMonth, language } = useLanguage()
   const router = useRouter()
   const { data: session } = useSession()
   const [scope, setScope] = useState<ReportScope>('all')
@@ -86,10 +91,11 @@ export default function ReportGame() {
             game,
             segmentQuery.data?.specificResults ?? [],
             periodQuery.data?.specificResults ?? [],
-            scope
+            scope,
+            shortMonth
           )
         : null,
-    [game, segmentQuery.data, periodQuery.data, scope]
+    [game, segmentQuery.data, periodQuery.data, scope, shortMonth]
   )
   const loading =
     !router.isReady ||
@@ -108,27 +114,35 @@ export default function ReportGame() {
   const latestCompleted = report?.years.filter((year) => year.complete).at(-1)
   const status =
     latestCompleted && game?.status === 'RESULTS'
-      ? `${latestCompleted.year} complete`
-      : game?.status.toLowerCase().replaceAll('_', ' ')
+      ? t('manage.controls.complete', { progress: latestCompleted.year })
+      : game &&
+        (language === 'de'
+          ? t(statusKeys[game.status])
+          : game.status.toLowerCase().replaceAll('_', ' '))
   const focusTeam = (teamId: string) =>
     setFocusedId((current) => (current === teamId ? null : teamId))
 
   return (
     <main
-      className="font-player text-player-text min-h-screen w-full bg-white text-[14px] leading-[1.4]"
+      className="font-player text-player-text min-h-[calc(100dvh-36px)] w-full bg-white text-[14px] leading-[1.4]"
       data-cy={!loading && !error && report ? 'report-loaded' : undefined}
     >
       <header className="border-player-divider flex min-h-[58px] items-center justify-between gap-[16px] border-b px-[24px] py-[12px]">
         <div className="flex flex-wrap items-center gap-x-[16px] gap-y-[2px]">
-          <span className="text-[16px] font-bold">Minigame</span>
+          <span className="text-[16px] font-bold">
+            {t('player.setup.minigame')}
+          </span>
           <h1 className="text-player-muted text-[13px] font-normal">
-            Admin · {game ? `Game ${game.id}` : 'Report'}
+            {t('manage.report.adminPrefix')}{' '}
+            {game
+              ? t('player.progress.gameName', { game: game.id })
+              : t('manage.report.title')}
           </h1>
         </div>
         <div className="flex shrink-0 items-center gap-[16px]">
           <span className="text-player-muted text-[13px]">{status}</span>
           <span
-            aria-label={session?.user?.name ?? 'Admin'}
+            aria-label={session?.user?.name ?? t('manage.report.admin')}
             className="bg-player-progress text-player-primary grid h-[34px] w-[34px] place-items-center rounded-full text-[12px] font-bold"
           >
             {initials}
@@ -136,13 +150,13 @@ export default function ReportGame() {
         </div>
       </header>
       {loading ? (
-        <ReportMessage>Loading report…</ReportMessage>
+        <ReportMessage>{t('manage.report.loading')}</ReportMessage>
       ) : error ? (
         <ReportMessage onRetry={() => void refresh()}>
-          The report could not be loaded. Please try again.
+          {t('manage.report.loadError')}
         </ReportMessage>
       ) : !game || !report ? (
-        <ReportMessage>Game not found.</ReportMessage>
+        <ReportMessage>{t('manage.report.gameNotFound')}</ReportMessage>
       ) : (
         <>
           <ReportScopeTabs

@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client'
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, type ReactNode } from 'react'
 import {
   PerformActionDocument,
@@ -14,6 +15,7 @@ import PlayerActionButton from '~/components/cockpit/PlayerActionButton'
 import ResultPanel from '~/components/cockpit/ResultPanels'
 import { useAllocationForm } from '~/components/cockpit/useAllocationForm'
 import { useToast } from '~/components/ui/use-toast'
+import { MessageText, useLanguage } from '~/i18n/Language'
 import {
   pendingMarketReveal,
   readScenario,
@@ -22,6 +24,8 @@ import {
 import { buildResultView, readAllocation } from '~/lib/results'
 
 function Cockpit() {
+  const t = useTranslations()
+  const { shortMonth, count } = useLanguage()
   const { loading, error, data, refetch } = useQuery(ResultDocument, {
     // Returning from profile editing must initialize from the latest round
     // and saved allocation, rather than briefly exposing stale cached controls.
@@ -70,21 +74,21 @@ function Cockpit() {
       } catch {
         if (roundRef.current === changingRound)
           toast({
-            title: 'Could not update Ready',
-            description: 'Please try again.',
+            title: <MessageText message="player.progress.readyError" />,
+            description: <MessageText message="player.progress.retry" />,
           })
       }
     },
   }
 
   if (loading && !data) return null
-  if (error && !data) return `Error! ${error}`
+  if (error && !data) return t('manage.games.loadGameError')
 
   const playerDataResult = data.result
   if (!playerDataResult) return null
   const currentGame = playerDataResult.currentGame
 
-  const resultView = buildResultView(data)
+  const resultView = buildResultView(data, shortMonth)
   const pendingReveal = pendingMarketReveal(currentGame)
   const savedAllocation = readAllocation(
     playerDataResult.playerResult?.facts?.decisions
@@ -94,12 +98,16 @@ function Cockpit() {
 
   switch (currentGame?.status) {
     case 'PREPARATION':
-      body = <div className="font-semibold">Preparing the next year</div>
+      body = (
+        <div className="font-semibold">
+          {t('player.progress.preparingYear')}
+        </div>
+      )
       break
     case 'COMPLETED':
       body = (
         <>
-          <h2 className="font-semibold">Game completed</h2>
+          <h2 className="font-semibold">{t('manage.controls.completed')}</h2>
           <ResultPanel view={resultView} />
         </>
       )
@@ -107,7 +115,7 @@ function Cockpit() {
     case 'SCHEDULED':
       body = (
         <div data-cy="waiting-for-start">
-          You’ve joined. Waiting for the instructor to start.
+          {t('player.progress.waitingToStart')}
         </div>
       )
       break
@@ -118,21 +126,26 @@ function Cockpit() {
         <div data-cy="awaiting-dice">
           <AllocationNotice
             variant="pending"
-            title={`Waiting for all monthly dice rolls · ${revealedIndices(pendingReveal.facts).length} of 3 revealed`}
+            title={t('player.progress.waitingForReveals', {
+              count: revealedIndices(pendingReveal.facts).length,
+            })}
           >
-            Your allocation is locked. Portfolio results appear after all three
-            months are revealed.
+            {t('player.progress.lockedAllocation')}
           </AllocationNotice>
           <section
             aria-label={
               savedAllocation
-                ? `Saved allocation: Savings ${savedAllocation.bank}%, Bonds ${savedAllocation.bonds}%, Stocks ${savedAllocation.stocks}%`
-                : 'Saved allocation'
+                ? t('player.allocation.savedValues', {
+                    savings: count(savedAllocation.bank),
+                    bonds: count(savedAllocation.bonds),
+                    stocks: count(savedAllocation.stocks),
+                  })
+                : t('player.allocation.saved')
             }
             className="p-[16px]"
           >
             <h2 className="mb-[12px] text-[14px] font-semibold">
-              Saved allocation
+              {t('player.allocation.saved')}
             </h2>
             {savedAllocation && (
               <AllocationBar className="h-[44px]" value={savedAllocation} />
@@ -156,7 +169,9 @@ function Cockpit() {
               !allocationController.valid || form.isSubmitting || updatingReady
             }
           >
-            {form.isSubmitting ? 'Submitting…' : 'Submit allocation'}
+            {form.isSubmitting
+              ? t('player.quiz.submitting')
+              : t('player.allocation.submit')}
           </PlayerActionButton>
         ) : (
           <PlayerActionButton
@@ -166,7 +181,7 @@ function Cockpit() {
             disabled={view === 'ready' || form.isSubmitting || updatingReady}
             onClick={allocationController.beginEditing}
           >
-            Change allocation
+            {t('player.allocation.change')}
           </PlayerActionButton>
         )
       body =
@@ -190,7 +205,7 @@ function Cockpit() {
       break
     }
     default:
-      return <div>Game has not been created yet.</div>
+      return <div>{t('player.setup.missingGame')}</div>
   }
 
   return (
