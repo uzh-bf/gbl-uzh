@@ -36,7 +36,7 @@ Joins to the same game queue on its row lock instead of failing; 500 simultaneou
 
 Completed registration sets `setupEventPending`. Setup achievements require a period relation, but registration may happen before periods exist. Initial start therefore processes the pending setup event using period zero and clears the flag in the same transaction; reward notifications are also deferred until commit. Profile edits recognize registered players as already set up.
 
-This transaction change is limited to initial start. Later transitions keep their existing `Segment.validateAdvance` checks and dice-reveal requirements.
+This transaction change is limited to initial start. Later transitions keep their existing `Segment.validateAdvance` checks and dice-reveal requirements; the transitions that end a running segment also take the exclusive game lock so that in-flight player actions finish first (see [Game Model](../game-model.md)).
 
 ## References
 
