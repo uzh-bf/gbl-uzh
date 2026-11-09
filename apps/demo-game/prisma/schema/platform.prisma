@@ -81,11 +81,6 @@ enum GameStatus {
   COMPLETED
 }
 
-enum RegistrationMode {
-  FIXED
-  SHARED_LINK
-}
-
 model Game {
   id Int @id @default(autoincrement())
 
@@ -93,7 +88,6 @@ model Game {
 
   name String
 
-  registrationMode RegistrationMode @default(FIXED)
   registrationToken String? @unique
   registrationOpen Boolean @default(false)
   maxPlayers Int?
@@ -210,7 +204,6 @@ model Player {
 
   token String @unique
   enrollmentKey String?
-  setupEventPending Boolean @default(false)
 
   actions   PlayerAction[]
   results   PlayerResult[]

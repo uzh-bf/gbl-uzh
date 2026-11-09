@@ -123,7 +123,6 @@ export interface NexusGenObjects {
     name: string; // String!
     periods: NexusGenRootTypes['Period'][]; // [Period!]!
     players: NexusGenRootTypes['Player'][]; // [Player!]!
-    registrationMode: NexusGenEnums['RegistrationMode']; // RegistrationMode!
     registrationOpen: boolean; // Boolean!
     status: NexusGenEnums['GameStatus']; // GameStatus!
     version: number; // Int!
