@@ -200,7 +200,10 @@ export async function performAction<ActionTypes>(
   )
 
   if (globalNotificationToPublish) {
-    EventService.publishGlobalNotification(globalNotificationToPublish)
+    EventService.publishGlobalNotification(
+      args.gameId,
+      globalNotificationToPublish
+    )
     log.info(
       `Published ${globalNotificationToPublish.type} for game ${args.gameId}`,
       globalNotificationToPublish.facts
@@ -537,7 +540,9 @@ export async function getLearningElement(
       id: args.id,
     },
     include: {
-      options: true,
+      // Selections and solutions are option positions; attemptLearningElement
+      // must read the options in the same order.
+      options: { orderBy: { id: 'asc' } },
     },
   })
 
@@ -571,7 +576,7 @@ export async function attemptLearningElement(
 ) {
   const learningElement = await ctx.prisma.learningElement.findUnique({
     where: { id: args.elementId },
-    include: { options: true },
+    include: { options: { orderBy: { id: 'asc' } } },
   })
 
   if (!learningElement) return null
@@ -810,7 +815,7 @@ export async function updateReadyState(args, ctx: Context) {
         isReady: updatedPlayer.isReady,
       }),
     }
-    EventService.publishGlobalNotification(eventToPublish)
+    EventService.publishGlobalNotification(ctx.user.gameId, eventToPublish)
     log.info(
       `Published ${eventToPublish.type} for game ${ctx.user.gameId}`,
       eventToPublish.facts
@@ -871,7 +876,7 @@ export async function addCountdown(args, ctx: Context) {
       countdownDurationMs,
     }),
   }
-  EventService.publishGlobalNotification(eventToPublish)
+  EventService.publishGlobalNotification(args.gameId, eventToPublish)
   log.info(
     `Published ${eventToPublish.type} for game ${args.gameId}`,
     eventToPublish.facts
@@ -918,7 +923,7 @@ export async function toggleSwitch(args, ctx: Context) {
       toggle: args.toggle,
     }),
   }
-  EventService.publishGlobalNotification(eventToPublish)
+  EventService.publishGlobalNotification(args.gameId, eventToPublish)
   log.info(
     `Published ${eventToPublish.type} for game ${args.gameId}`,
     eventToPublish.facts
