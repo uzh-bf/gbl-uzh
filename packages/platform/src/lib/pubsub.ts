@@ -46,6 +46,33 @@ export function getPubSub() {
 }
 
 /**
+ * End a subscription iterator when its HTTP request is aborted.
+ *
+ * With graphql-yoga 4 behind a Node server (@whatwg-node/server 0.9), an SSE
+ * client disconnect aborts the request signal but never cancels the response
+ * stream, so the pubsub iterator is never returned. Its event listener then
+ * stays registered and queues every later event until the heap runs out.
+ */
+export function closeOnAbort<T>(
+  iterator: AsyncIterableIterator<T>,
+  signal: AbortSignal | undefined
+): AsyncIterableIterator<T> {
+  if (!signal) return iterator
+
+  const close = () => {
+    void iterator.return?.()
+  }
+
+  if (signal.aborted) {
+    close()
+  } else {
+    signal.addEventListener('abort', close, { once: true })
+  }
+
+  return iterator
+}
+
+/**
  * Replace the default in-memory pubSub with one backed by a custom event target
  * (e.g. Redis). Must be called before the first GraphQL request is handled.
  */
