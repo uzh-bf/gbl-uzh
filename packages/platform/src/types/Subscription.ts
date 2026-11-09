@@ -1,4 +1,5 @@
 import { subscriptionType } from 'nexus'
+import { closeOnAbort } from '../lib/pubsub.js'
 import { Event } from '../nexus.js'
 
 export function generateBaseSubscriptions() {
@@ -9,7 +10,10 @@ export function generateBaseSubscriptions() {
         async subscribe(_, args, ctx) {
           // ctx.pubSub should be the instance you configured in createYoga context
           if (ctx.pubSub) {
-            return ctx.pubSub.subscribe('global:events') // pubSub.subscribe() returns AsyncIterableIterator
+            return closeOnAbort(
+              ctx.pubSub.subscribe('global:events'), // pubSub.subscribe() returns AsyncIterableIterator
+              ctx.request?.signal
+            )
           }
           // Fallback or error handling if pubSub is not in context
           // This will likely lead to the "Expected Iterable" error if this path is taken
@@ -25,10 +29,16 @@ export function generateBaseSubscriptions() {
         type: Event,
         async subscribe(_, args, ctx) {
           if (ctx.user) {
-            return ctx.pubSub.subscribe('user:events', String(ctx.user.sub))
+            return closeOnAbort(
+              ctx.pubSub.subscribe('user:events', String(ctx.user.sub)),
+              ctx.request?.signal
+            )
           }
 
-          return ctx.pubSub.subscribe('user:events', 'anonymous')
+          return closeOnAbort(
+            ctx.pubSub.subscribe('user:events', 'anonymous'),
+            ctx.request?.signal
+          )
         },
         async resolve(payload) {
           return payload as any
