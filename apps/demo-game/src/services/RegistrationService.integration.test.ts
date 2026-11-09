@@ -114,6 +114,21 @@ describe.skipIf(process.env.REGISTRATION_DATABASE_TESTS !== '1')(
       expect(await prisma.player.count({ where: { gameId: row.id } })).toBe(1)
     })
 
+    test('a whole class joining at once is enrolled without failures', async () => {
+      const row = await game()
+      const outcomes = await Promise.allSettled(
+        Array.from({ length: 100 }, (_, ix) =>
+          join(row.registrationToken!, context(), `Bank ${ix}`)
+        )
+      )
+      expect(outcomes.filter((r) => r.status === 'rejected')).toEqual([])
+      const players = await prisma.player.findMany({
+        where: { gameId: row.id },
+        select: { number: true },
+      })
+      expect(new Set(players.map((player) => player.number)).size).toBe(100)
+    })
+
     test('manual closure and concurrent enrollment commit a consistent roster', async () => {
       const row = await game()
       const [joined] = await Promise.allSettled([

@@ -1,5 +1,9 @@
 # Log
 
+## 2026-11-09
+
+**Update**: [ADR-0005](adr/0005-serialize-enrollment-with-initial-game-start.md), [Game lifecycle](game-lifecycle.md) - roster changes now lock the game row at read-committed isolation instead of relying on serializable retries, so a whole class joining at once queues instead of failing.
+
 ## 2026-11-02
 
 **Update**: [Game Lifecycle](game-lifecycle.md) and [API Layer](api-layer.md) — documented instructor completion from period results and the game-scoped completion notification.

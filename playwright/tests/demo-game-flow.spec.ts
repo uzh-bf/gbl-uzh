@@ -178,9 +178,7 @@ async function joinPlayer(
       page.waitForURL('**/play/cockpit', { waitUntil: 'domcontentloaded' }),
       page.getByRole('button', { name: 'Start the game', exact: true }).click(),
     ])
-    await expect(
-      page.getByText('You’ve joined. Waiting for the instructor to start.')
-    ).toBeVisible({
+    await expect(page.getByTestId('waiting-for-start')).toBeVisible({
       timeout: 30_000,
     })
     // Tab-specific assertions exercise the unchanged phone navigation; the

@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: prd-gbl-demo
+resources:
+  - migration-job.yaml
+  - configmap.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+# Updated by hand: commit the digests of a tested dev build (see ../README.md).
+images:
+  - name: demo-game
+    newName: ghcr.io/uzh-bf/gbl-uzh/demo-game
+    digest: sha256:07db55a3c867f19d8e539ed15f867efe4f07cd77bf357afcde930c55fd2a44b8
+  - name: demo-game-migration
+    newName: ghcr.io/uzh-bf/gbl-uzh/demo-game
+    digest: sha256:ffac1b266f226e091c3a6dc804078026b8ea6576080613487f4311635217ead1

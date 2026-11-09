@@ -31,8 +31,14 @@ export async function registrationTransaction<T>(
 ): Promise<T> {
   for (let attempt = 0; ; attempt++) {
     try {
+      // Callers take the game row lock first (lockGame). Under read committed,
+      // concurrent enrollments and the initial start then queue on that row and
+      // each sees the roster committed before it, instead of aborting each other
+      // as serializable snapshots do when a whole class joins at once. maxWait
+      // covers the queue for a pooled connection during such a burst.
       return await prisma.$transaction(work, {
-        isolationLevel: 'Serializable',
+        isolationLevel: 'ReadCommitted',
+        maxWait: 30000,
         timeout: 15000,
       })
     } catch (error) {
@@ -43,6 +49,22 @@ export async function registrationTransaction<T>(
       )
     }
   }
+}
+
+// Serializes all roster changes of one game: enrollment, opening or closing
+// registration, and the initial start. Take it as the first statement of a
+// registrationTransaction so every later read sees the latest committed roster.
+export async function lockGame(
+  tx: Prisma.TransactionClient,
+  where: { id: number } | { registrationToken: string }
+) {
+  const rows =
+    'id' in where
+      ? await tx.$queryRaw<{ id: number }[]>`
+          SELECT id FROM "Game" WHERE id = ${where.id} FOR UPDATE`
+      : await tx.$queryRaw<{ id: number }[]>`
+          SELECT id FROM "Game" WHERE "registrationToken" = ${where.registrationToken} FOR UPDATE`
+  return rows[0]?.id ?? null
 }
 
 function browserIdentity(ctx: Context) {
@@ -142,6 +164,7 @@ export async function registerPlayer(
 ) {
   if (!browserIdentity(ctx)) throw new Error('REGISTRATION_SESSION_REQUIRED')
   const result = await registrationTransaction(ctx.prisma, async (tx) => {
+    await lockGame(tx, { registrationToken: token })
     const game = await tx.game.findUnique({
       where: { registrationToken: token },
     })
@@ -162,8 +185,6 @@ export async function registerPlayer(
       { name, facts },
       { abortEarly: false, stripUnknown: true }
     )
-    // All enrollment and initial-start transactions write the game row. This
-    // makes conflicting roster snapshots retry before any result can commit.
     await tx.game.update({
       where: { id: game.id },
       data: { version: { increment: 1 } },
@@ -201,6 +222,7 @@ export async function setRegistrationOpen(
   ctx: Context
 ) {
   const game = await registrationTransaction(ctx.prisma, async (tx) => {
+    await lockGame(tx, { id: gameId })
     const game = await tx.game.findUnique({ where: { id: gameId } })
     if (!game) throw new Error('GAME_NOT_FOUND')
     assertGameManager(ctx, game.ownerId)
