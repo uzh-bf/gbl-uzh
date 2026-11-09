@@ -4,6 +4,8 @@
 
 **Update**: [Game Model](game-model.md), [Platform Overview](platform-overview.md) - player actions now run under row locks instead of serializable transactions, so a whole class submitting at once no longer fails, and ending a segment waits for in-flight actions.
 
+**Update**: [Deploying a Game](deploying-a-game.md#upgrading-a-game-to-shared-registration), [Game Model](game-model.md), [ADR-0003](adr/0003-support-shared-game-registration.md), [ADR-0005](adr/0005-serialize-enrollment-with-initial-game-start.md) - simplified the shared-registration migration to four columns and two unique indexes that Prisma generates unchanged. The mode now follows from the registration token, and setup rewards follow from the enrollment key. Any admin can manage a game again, and starting needs a first period but no segment yet. Added upgrade steps for other games.
+
 **Update**: [ADR-0005](adr/0005-serialize-enrollment-with-initial-game-start.md), [Game lifecycle](game-lifecycle.md) - roster changes now lock the game row at read-committed isolation instead of relying on serializable retries, so a whole class joining at once queues instead of failing.
 
 ## 2026-11-04

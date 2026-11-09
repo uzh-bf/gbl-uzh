@@ -10,19 +10,14 @@ import * as EventService from './EventService.js'
 type Context = CtxWithPrisma<PrismaClient>
 const COOKIE = 'gbl-enrollment'
 
-export function isGameManager(
-  user: Context['user'] | undefined,
-  ownerId: string
-) {
-  return Boolean(
-    user &&
-    (String(user.role) === 'MASTER' ||
-      (user.role === 'ADMIN' && user.sub === ownerId))
-  )
+// Any instructor (ADMIN) or MASTER may manage every game; a class is often
+// run by several instructors, so ownership grants no extra rights.
+export function isGameManager(user: Context['user'] | undefined) {
+  return Boolean(user && ['ADMIN', 'MASTER'].includes(String(user.role)))
 }
 
-export function assertGameManager(ctx: Context, ownerId: string) {
-  if (!isGameManager(ctx.user, ownerId)) throw new Error('FORBIDDEN')
+export function assertGameManager(ctx: Context) {
+  if (!isGameManager(ctx.user)) throw new Error('FORBIDDEN')
 }
 
 export async function registrationTransaction<T>(
@@ -94,13 +89,12 @@ export async function registrationInfo(token: string, ctx: Context) {
     select: {
       name: true,
       status: true,
-      registrationMode: true,
       registrationOpen: true,
       maxPlayers: true,
       _count: { select: { players: true } },
     },
   })
-  if (!game || game.registrationMode !== 'SHARED_LINK') return null
+  if (!game) return null
   return {
     name: game.name,
     status: game.status,
@@ -152,8 +146,7 @@ export async function resumeRegistration(token: string, ctx: Context) {
   const game = await ctx.prisma.game.findUnique({
     where: { registrationToken: token },
   })
-  if (!game || game.registrationMode !== 'SHARED_LINK')
-    throw new Error('INVALID_REGISTRATION_LINK')
+  if (!game) throw new Error('INVALID_REGISTRATION_LINK')
   const player = await existingPlayer(ctx, game.id, ctx.prisma)
   if (!player) return false
   await loginAsTeam({ token: player.token }, ctx)
@@ -177,8 +170,7 @@ export async function registerPlayer(
     const game = await tx.game.findUnique({
       where: { registrationToken: token },
     })
-    if (!game || game.registrationMode !== 'SHARED_LINK')
-      throw new Error('INVALID_REGISTRATION_LINK')
+    if (!game) throw new Error('INVALID_REGISTRATION_LINK')
     const existing = await existingPlayer(ctx, game.id, tx)
     if (existing)
       return {
@@ -207,7 +199,6 @@ export async function registerPlayer(
         token: nanoid(),
         enrollmentKey: enrollmentKey(ctx, game.id),
         levelIx: 0,
-        setupEventPending: true,
         role: roleAssigner?.(count, game.facts),
       },
     })
@@ -234,8 +225,8 @@ export async function setRegistrationOpen(
     await lockGame(tx, { id: gameId })
     const game = await tx.game.findUnique({ where: { id: gameId } })
     if (!game) throw new Error('GAME_NOT_FOUND')
-    assertGameManager(ctx, game.ownerId)
-    if (game.registrationMode !== 'SHARED_LINK' || game.status !== 'SCHEDULED')
+    assertGameManager(ctx)
+    if (!game.registrationToken || game.status !== 'SCHEDULED')
       throw new Error('REGISTRATION_CLOSED')
     return tx.game.update({
       where: { id: gameId },

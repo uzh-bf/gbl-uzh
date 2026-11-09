@@ -48,12 +48,15 @@ export function generateBaseGame(opts?: GenerateBaseGameOpts) {
         type: GameStatus,
       })
       t.nonNull.string('name')
-      t.nonNull.field('registrationMode', { type: RegistrationMode })
+      t.nonNull.field('registrationMode', {
+        type: RegistrationMode,
+        resolve: (game) => (game.registrationToken ? 'SHARED_LINK' : 'FIXED'),
+      })
       t.nonNull.boolean('registrationOpen')
       t.int('maxPlayers')
       t.string('registrationToken', {
         resolve(game, _args, ctx) {
-          return isGameManager(ctx.user, game.ownerId)
+          return isGameManager(ctx.user)
             ? game.registrationToken
             : null
         },

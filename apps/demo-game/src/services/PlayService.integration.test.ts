@@ -48,7 +48,6 @@ describe.skipIf(process.env.GAMEPLAY_DATABASE_TESTS !== '1')(
           name: `Gameplay test ${randomUUID()}`,
           facts: {},
           ownerId: userId,
-          registrationMode: 'SHARED_LINK',
           registrationOpen: true,
           registrationToken: randomUUID(),
         },

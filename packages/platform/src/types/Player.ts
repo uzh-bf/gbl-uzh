@@ -7,25 +7,6 @@ import { Period, PeriodSegment } from './Game.js'
 import { LearningElement } from './LearningElement.js'
 import { StoryElement } from './StoryElement.js'
 
-// An admin roster resolves Player.token for every player of the same game.
-// Look the owner up once per request instead of once per player.
-const ownerIdsByRequest = new WeakMap<object, Map<number, Promise<string | null>>>()
-function gameOwnerId(
-  ctx: { prisma: DB.PrismaClient },
-  gameId: number
-): Promise<string | null> {
-  let owners = ownerIdsByRequest.get(ctx)
-  if (!owners) ownerIdsByRequest.set(ctx, (owners = new Map()))
-  let ownerId = owners.get(gameId)
-  if (!ownerId) {
-    ownerId = ctx.prisma.game
-      .findUnique({ where: { id: gameId }, select: { ownerId: true } })
-      .then((game) => game?.ownerId ?? null)
-    owners.set(gameId, ownerId)
-  }
-  return ownerId
-}
-
 export const PlayerDecisionType = enumType({
   name: 'PlayerDecisionType',
   members: Object.values(DB.PlayerDecisionType),
@@ -75,16 +56,10 @@ export const Player = objectType({
     t.nonNull.int('number')
     t.nonNull.string('name')
     t.string('token', {
-      async resolve(player, _args, ctx) {
-        if (!ctx.user) return null
-        if (ctx.user.role === 'PLAYER' && ctx.user.sub === player.id)
+      resolve(player, _args, ctx) {
+        if (ctx.user?.role === 'PLAYER' && ctx.user.sub === player.id)
           return player.token
-        if (String(ctx.user.role) === 'MASTER') return player.token
-        if (ctx.user.role !== 'ADMIN') return null
-        const ownerId = await gameOwnerId(ctx, player.gameId)
-        return ownerId && isGameManager(ctx.user, ownerId)
-          ? player.token
-          : null
+        return isGameManager(ctx.user) ? player.token : null
       },
     })
     t.nonNull.boolean('tutorialCompleted')
