@@ -106,7 +106,11 @@ function Cockpit() {
       )
       break
     case 'SCHEDULED':
-      body = <div>You’ve joined. Waiting for the instructor to start.</div>
+      body = (
+        <div data-cy="waiting-for-start">
+          You’ve joined. Waiting for the instructor to start.
+        </div>
+      )
       break
     case 'PAUSED':
     case 'CONSOLIDATION':

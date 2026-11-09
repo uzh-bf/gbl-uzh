@@ -102,9 +102,7 @@ test('shared registration creates separate banks, retries safely, resumes and st
     await expect(alice.getByRole('main')).toContainText('Alice Bank')
     await alice.getByRole('button', { name: 'Join game', exact: true }).click()
     await expect(alice).toHaveURL(/\/play\/cockpit/)
-    await expect(
-      alice.getByText('You’ve joined. Waiting for the instructor to start.')
-    ).toBeVisible()
+    await expect(alice.getByTestId('waiting-for-start')).toBeVisible()
     await bob.goto(url)
     await setupBank(bob, 'Bob Bank')
     await expectNoPageOverflow(bob)
