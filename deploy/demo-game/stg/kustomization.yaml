@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: stg-gbl-demo
+resources:
+  - migration-job.yaml
+  - configmap.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+# Updated by .github/workflows/demo-game.yml. Edit by hand only to roll back.
+images:
+  - name: demo-game
+    newName: ghcr.io/uzh-bf/gbl-uzh/demo-game
+    digest: sha256:2228ce4ed34d5454dc59445cde17443c63c946572450473717e8e3992413cffb
+  - name: demo-game-migration
+    newName: ghcr.io/uzh-bf/gbl-uzh/demo-game
+    digest: sha256:cbb1b4fe332b3e3408161e8e4afc3ceb8b39afeda9b1a8d55b686441c2287d1b

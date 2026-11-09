@@ -73,7 +73,7 @@ import {
   TREND_STOCKS,
 } from '~/lib/constants'
 
-import { shouldRefetchDemoGame } from '~/lib/gameEvents'
+import { shouldRefetchAdminGame } from '~/lib/gameEvents'
 import {
   allMarketRollsRevealed,
   canRevealMarketRoll,
@@ -197,7 +197,7 @@ function ManageGame() {
     skip: !data?.game,
     onData: ({ data: eventData }) => {
       if (
-        shouldRefetchDemoGame(
+        shouldRefetchAdminGame(
           eventData.data?.eventsGlobal,
           Number(data?.game?.id)
         )

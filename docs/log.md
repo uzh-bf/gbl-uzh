@@ -1,5 +1,9 @@
 # Log
 
+## 2026-11-09
+
+**Update**: [ADR-0005](adr/0005-serialize-enrollment-with-initial-game-start.md), [Game lifecycle](game-lifecycle.md) - roster changes now lock the game row at read-committed isolation instead of relying on serializable retries, so a whole class joining at once queues instead of failing.
+
 ## 2026-11-04
 
 **Update**: [Developing a Game](developing-a-game.md) and [UI Building Blocks](ui-components.md) — documented the demo’s next-intl catalogs, per-browser language selection in the Team profile, built-in content lookup and shared component label inputs.

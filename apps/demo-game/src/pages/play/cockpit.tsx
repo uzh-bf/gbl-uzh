@@ -113,7 +113,11 @@ function Cockpit() {
       )
       break
     case 'SCHEDULED':
-      body = <div>{t('player.progress.waitingToStart')}</div>
+      body = (
+        <div data-cy="waiting-for-start">
+          {t('player.progress.waitingToStart')}
+        </div>
+      )
       break
     case 'PAUSED':
     case 'CONSOLIDATION':
