@@ -15,6 +15,7 @@ on:
       - '**/*.tsx'
       - '**/package.json'
       - '**/tsconfig*.json'
+      - '**/*.prisma'
       - '.github/workflows/typescript-checks.yml'
       - 'package.json'
       - 'pnpm-lock.yaml'
@@ -93,3 +94,75 @@ jobs:
           pnpm --filter @gbl-uzh/website check:ts:typescript6
           pnpm --filter @gbl-uzh/cypress check:ts:typescript6
           pnpm --filter @gbl-uzh/playwright check:ts:typescript6
+
+  # Runs the demo game's database-gated integration tests against a real
+  # Postgres. They cover classroom-scale concurrency: simultaneous shared-link
+  # joins, simultaneous action submits and segment-ending transitions, which
+  # only hold while the platform takes its game row locks. Each suite skips
+  # itself unless its flag is set, so the flags below must stay in sync with
+  # the files listed in the test step.
+  database-tests:
+    name: Demo game database tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: prisma
+          POSTGRES_PASSWORD: prisma
+          POSTGRES_DB: prisma
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U prisma -d prisma"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      REGISTRATION_DATABASE_TESTS: '1'
+      FINISH_GAME_DATABASE_TESTS: '1'
+      GAMEPLAY_DATABASE_TESTS: '1'
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        with:
+          version: 11.6.0
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build platform and seed the demo game database
+        run: |
+          set -euo pipefail
+          pnpm --filter @gbl-uzh/platform build
+          pnpm --filter @gbl-uzh/ui build
+          pnpm --filter @gbl-uzh/demo-game prisma:copy
+          pnpm --filter @gbl-uzh/demo-game prisma:generate
+          pnpm --filter @gbl-uzh/demo-game prisma:push
+          pnpm --filter @gbl-uzh/demo-game prisma:seed
+
+      - name: Run database integration tests
+        working-directory: apps/demo-game
+        run: |
+          set -euo pipefail
+          pnpm exec vitest run \
+            --reporter=verbose --reporter=json \
+            --outputFile.json="$RUNNER_TEMP/database-tests.json" \
+            src/services/RegistrationService.integration.test.ts \
+            src/services/FinishGame.integration.test.ts \
+            src/services/PlayService.integration.test.ts
+          # A renamed flag would skip a suite and still exit 0; fail instead.
+          jq -e '.numPendingTests == 0 and .numTodoTests == 0 and .numPassedTests > 0' \
+            "$RUNNER_TEMP/database-tests.json"
