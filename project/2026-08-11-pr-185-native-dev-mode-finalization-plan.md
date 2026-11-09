@@ -4,7 +4,7 @@
 
 - Plan: `project/2026-08-11-pr-185-native-dev-mode-finalization-plan.md`
 - Branch: `enhance/native-dev-mode`
-- Worktree: `/Users/rschlae/Git/gbl/gbl-uzh/trees/enhance/native-dev-mode`
+- Worktree: `<repo>/trees/enhance/native-dev-mode`
 - Target: `dev`
 - Pull request: [#185](https://github.com/uzh-bf/gbl-uzh/pull/185)
 - Ceremony: full path; the branch changes authentication policy and exports a public platform resolver.
