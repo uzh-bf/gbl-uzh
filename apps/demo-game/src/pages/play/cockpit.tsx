@@ -25,7 +25,7 @@ import { buildResultView, readAllocation } from '~/lib/results'
 
 function Cockpit() {
   const t = useTranslations()
-  const { shortMonth } = useLanguage()
+  const { shortMonth, count } = useLanguage()
   const { loading, error, data, refetch } = useQuery(ResultDocument, {
     // Returning from profile editing must initialize from the latest round
     // and saved allocation, rather than briefly exposing stale cached controls.
@@ -136,9 +136,9 @@ function Cockpit() {
             aria-label={
               savedAllocation
                 ? t('player.allocation.savedValues', {
-                    savings: savedAllocation.bank,
-                    bonds: savedAllocation.bonds,
-                    stocks: savedAllocation.stocks,
+                    savings: count(savedAllocation.bank),
+                    bonds: count(savedAllocation.bonds),
+                    stocks: count(savedAllocation.stocks),
                   })
                 : t('player.allocation.saved')
             }

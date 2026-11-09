@@ -124,7 +124,7 @@ export default function ReportGame() {
 
   return (
     <main
-      className="font-player text-player-text min-h-screen w-full bg-white text-[14px] leading-[1.4]"
+      className="font-player text-player-text min-h-[calc(100dvh-36px)] w-full bg-white text-[14px] leading-[1.4]"
       data-cy={!loading && !error && report ? 'report-loaded' : undefined}
     >
       <header className="border-player-divider flex min-h-[58px] items-center justify-between gap-[16px] border-b px-[24px] py-[12px]">

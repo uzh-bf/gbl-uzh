@@ -20,7 +20,7 @@ export default function AllocationForm({
   scenario: MarketScenario | null
 }) {
   const t = useTranslations()
-  const { percent, signedPercent, share, formatCHF } = useLanguage()
+  const { percent, signedPercent, share, count, formatCHF } = useLanguage()
   const { form, allocation, valid, preview, setDraft } = controller
   const total = ALLOCATION_KEYS.reduce(
     (sum, key) =>
@@ -108,10 +108,12 @@ export default function AllocationForm({
           <p className="m-0">
             {t('player.allocation.total')} {share(Math.round(total * 10) / 10)}.{' '}
             {difference > 0
-              ? t('player.allocation.remaining', { remaining: difference })
+              ? t('player.allocation.remaining', {
+                  remaining: count(difference),
+                })
               : difference < 0
                 ? t('player.allocation.overAllocated', {
-                    excess: Math.abs(difference),
+                    excess: count(Math.abs(difference)),
                   })
                 : t('player.allocation.checkFields')}{' '}
             {t('player.allocation.validationHint')}
