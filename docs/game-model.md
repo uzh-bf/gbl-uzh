@@ -6,7 +6,7 @@ tags:
   - prisma
   - data-model
   - facts
-timestamp: "2026-09-23T14:38:48Z"
+timestamp: "2026-10-27T00:00:00Z"
 ---
 
 # Game Model (Data Model)
@@ -25,7 +25,7 @@ Game (status, facts, activePeriodIx/activePeriodId, version, owner)
 - **Progress pointers**: `Game.activePeriodId` + `Game.activePeriodIx` (default `-1` = none yet) and `Period.activeSegmentId` + `Period.activeSegmentIx`. These are advanced only by the state-machine transitions in `GameService` ([game-lifecycle.md](game-lifecycle.md)), never derived.
 - `Period.segmentCount` is the _planned_ number of segments, set when the period is created; the admin UI blocks adding more segments once reached, and "last segment" checks compare `activeSegmentIx` against it.
 - `PeriodSegment.countdownExpiresAt` / `countdownDurationMs` back the optional per-segment countdown timer.
-- `Game.version` increments on admin-driven game updates (status transitions, countdown, switch toggle) — not on player actions. Do not use it as an optimistic-concurrency token for player input.
+- `Game.version` increments on admin-driven game updates (status transitions, countdown, switch toggle) and registration changes — not on in-game player actions. Do not use it as an optimistic-concurrency token for player input.
 
 ## Facts: game-specific state as JSON
 
@@ -42,7 +42,11 @@ Two unrelated identity models:
 - **`User`** — an admin/facilitator account (standard NextAuth tables: `User`, `Account`, `Session`). `User.role` is `ADMIN` or `MASTER`. Admins own games (`Game.ownerId`).
 - **`Player`** — a participant _team_ inside one game. Key fields: uuid `id`, unique `token` (passwordless login: visiting `/join/[token]` signs the team in — `AccountService.ts:loginAsTeam`), `name`, optional `role` (drives role-based content and computations), `isReady` (advisory flag, reset on every transition), `facts`, gamification state (`experience`, `experienceToNext`, `levelIx` → `PlayerLevel`), and progress arrays (`completedLearningElementIds`, `visitedStoryElementIds`, `achievementKeys`).
 
-Players are created up front by `GameService.ts:createGame` (one row per team, default names, fresh tokens, optional `roleAssigner` callback for role-based games).
+Games have two enrollment modes (`Game.registrationMode`, derived from whether `registrationToken` is set): `FIXED` creates players up front through `GameService.ts:createGame`; `SHARED_LINK` starts empty and creates each player after completed setup through `RegistrationService.ts:registerPlayer`. The admin UI defaults new games to `SHARED_LINK`; existing games and API callers without a mode retain `FIXED` behavior. Role assignment and level-zero defaults apply to both.
+
+Shared-link games carry a unique `registrationToken`, `registrationOpen`, and nullable `maxPlayers` (null means no capacity limit). The shared token grants enrollment, not access to an existing player. A 30-day HttpOnly browser cookie identifies registrations; only a per-game SHA-256 digest is persisted as `Player.enrollmentKey`, unique with `gameId`. Repeated registration requests resume the original player without changing their profile. An existing authenticated player in the same game can resume without the enrollment cookie. Clearing cookies or changing browsers requires the private player link.
+
+Setup completed through open registration is rewarded at start: the initial period-start transaction dispatches `COMPANY_SETUP_COMPLETED` with period index 0 for every player with an `enrollmentKey`, so registration is possible before periods exist. Retryable transactions defer reward notifications until commit. Profile edits recognize browser enrollment as completed setup, including custom names such as `Team 1`, so they do not repeat the setup event before or after start.
 
 ## The results ledger: PlayerResult
 

@@ -5,6 +5,7 @@ import {
 } from '@gbl-uzh/platform/dist/nexus'
 import type { GameFacts } from '../../src/types/Game'
 import type { PeriodFacts, PeriodSegmentFacts } from '../../src/types/Period'
+import { RegistrationSchema } from '../lib/registration'
 import * as services from '../services'
 import {
   GameFactsInput,
@@ -31,6 +32,7 @@ export const Mutation = generateBaseMutations<
     PeriodFactsSchema,
     PeriodSegmentFactsSchema,
     PlayerFactsSchema,
+    RegistrationSchema,
   },
   inputTypes: {
     GameFactsInput,

@@ -1,0 +1,27 @@
+query RegistrationInfo($token: String!) {
+  registrationInfo(token: $token) {
+    name
+    status
+    availability
+  }
+}
+mutation PrepareRegistration($token: String!) {
+  prepareRegistration(token: $token) {
+    name
+    status
+    availability
+  }
+  resumeRegistration(token: $token)
+}
+mutation ResumeRegistration($token: String!) {
+  resumeRegistration(token: $token)
+}
+mutation RegisterPlayer($token: String!, $name: String!, $facts: String!) {
+  registerPlayer(token: $token, name: $name, facts: $facts)
+}
+mutation SetRegistrationOpen($gameId: Int!, $open: Boolean!) {
+  setRegistrationOpen(gameId: $gameId, open: $open) {
+    id
+    registrationOpen
+  }
+}

@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Controller, useForm } from 'react-hook-form'
 import { twMerge } from 'tailwind-merge'
+import RegistrationPanel from '~/components/admin/RegistrationPanel'
 import { NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 
 import { useMutation, useQuery, useSubscription } from '@apollo/client'
@@ -67,7 +68,7 @@ import {
   TREND_STOCKS,
 } from '~/lib/constants'
 
-import { shouldRefetchDemoGame } from '~/lib/gameEvents'
+import { shouldRefetchAdminGame } from '~/lib/gameEvents'
 import {
   allMarketRollsRevealed,
   canRevealMarketRoll,
@@ -189,7 +190,7 @@ function ManageGame() {
     skip: !data?.game,
     onData: ({ data: eventData }) => {
       if (
-        shouldRefetchDemoGame(
+        shouldRefetchAdminGame(
           eventData.data?.eventsGlobal,
           Number(data?.game?.id)
         )
@@ -334,7 +335,10 @@ function ManageGame() {
       case GameStatus.Scheduled:
         if (!activePeriod) {
           const disabled =
-            game.periods.length === 0 || game.periods[0].segments.length === 0
+            game.playerCount === 0 ||
+            nextPeriodLoading ||
+            game.periods.length === 0 ||
+            game.periods[0].segments.length === 0
           return (
             <Button disabled={disabled} onClick={nextPeriod}>
               Start Period
@@ -429,6 +433,7 @@ function ManageGame() {
       data-cy="game-detail"
       data-game-status={game.status}
     >
+      <RegistrationPanel game={game} onChange={refetch} />
       <div>
         <div className="mb-4 flex flex-col gap-2 overflow-x-auto md:flex-row">
           {game.periods.map((period, ix) => {

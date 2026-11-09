@@ -88,6 +88,10 @@ model Game {
 
   name String
 
+  registrationToken String? @unique
+  registrationOpen Boolean @default(false)
+  maxPlayers Int?
+
   facts Json
   version Int @default(0)
 
@@ -199,6 +203,7 @@ model Player {
   role String?
 
   token String @unique
+  enrollmentKey String?
 
   actions   PlayerAction[]
   results   PlayerResult[]
@@ -219,6 +224,8 @@ model Player {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([gameId, enrollmentKey])
 }
 
 model PlayerAction {

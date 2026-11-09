@@ -1,6 +1,22 @@
 # Log
 
+## 2026-11-09
+
+**Update**: [Deploying a Game](deploying-a-game.md#upgrading-a-game-to-shared-registration), [Game Model](game-model.md), [ADR-0003](adr/0003-support-shared-game-registration.md), [ADR-0005](adr/0005-serialize-enrollment-with-initial-game-start.md) - simplified the shared-registration migration to four columns and two unique indexes that Prisma generates unchanged. The mode now follows from the registration token, and setup rewards follow from the enrollment key. Any admin can manage a game again, and starting needs a first period but no segment yet. Added upgrade steps for other games.
+
+**Update**: [ADR-0005](adr/0005-serialize-enrollment-with-initial-game-start.md), [Game lifecycle](game-lifecycle.md) - roster changes now lock the game row at read-committed isolation instead of relying on serializable retries, so a whole class joining at once queues instead of failing.
+
+## 2026-10-27
+
+**Creation**: [Shared registration ADRs](adr/0003-support-shared-game-registration.md), [browser identity and recovery](adr/0004-identify-browser-enrollment-and-protect-return-links.md), [atomic enrollment/start](adr/0005-serialize-enrollment-with-initial-game-start.md), and a [registration glossary](glossary.md) - recorded the agreed design, alternatives, and consequences and linked the decision records from the wiki index.
+
+**Update**: Shared registration - renamed the enrollment mode from `OPEN` to `SHARED_LINK`, preserving the separate open/closed control. Consolidated the schema changes into one additive migration that creates the final enum directly. Private player links now use `useMutation` for login.
+
 ## 2026-10-07
+
+**Update**: Shared registration review - simplified creation form state and cache refreshes, exposed retryable creation failures, combined join preparation/resume into one request, and prevented profile edits from repeating shared-registration setup rewards.
+
+**Update**: Shared registration - documented open/fixed enrollment, QR and private return links, browser identity, atomic roster initialization, deferred setup rewards, GraphQL access rules, and additive migration.
 
 **Update**: [UI Components](ui-components.md) — restore Bonds/Stocks outcome totals on admin segment cards, retaining disabled outcome buttons for non-rollable segments.
 

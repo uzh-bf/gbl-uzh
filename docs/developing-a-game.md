@@ -7,12 +7,16 @@ tags:
   - backend
   - frontend
   - scaffolding
-timestamp: "2026-10-07T14:30:00Z"
+timestamp: "2026-10-07T16:00:00Z"
 ---
 
 # Developing a Game
 
 How to build a new game on the platform. Read [game-model.md](game-model.md) and [game-lifecycle.md](game-lifecycle.md) first — this page assumes their vocabulary. For mechanical and didactical patterns (e.g. formative feedback, roles, seeded randomness), see [game-patterns.md](game-patterns.md). Related skills: `gbl-game-design` (design), `gbl-new-game-app` (scaffolding), `gbl-backend-computations` (backend), `gbl-frontend-game-ui` (frontend).
+
+## Shared registration UI
+
+The demo game supports `/join/game/[token]` as a public introduction/setup/review flow. `WelcomeSetup` accepts minimal game/profile data rather than requiring an authenticated `SelfQuery`, and its registration mode submits through the platform registration mutation. Validation comes from `src/lib/registration.ts`, shared with the server. The admin `RegistrationPanel` displays the same absolute URL in its copy control and locally generated QR code. `team/ReturnLink` is composed into `TeamPanel`, covering phone tabs and the embedded tablet/desktop panel. Registration closure never prevents private-link recovery.
 
 ## 1. Game Design (before you code)
 
@@ -105,7 +109,7 @@ There is no generic frontend — each game builds its own Next.js pages (Pages R
 
 | Route                 | Purpose                                                                                                                                             |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/join/[token]`       | Player entry: calls the team-login mutation, redirects to the welcome page. Pure boilerplate — copy as-is.                                          |
+| `/join/[token]`       | Private return link: logs into an existing player; completed profiles open the cockpit and unfinished profiles open welcome.                        |
 | `/play/welcome`       | Initial team setup and avatar-linked profile editing (name, avatar, canton); writes `Player.facts`.                                                 |
 | `/play/cockpit`       | **The** player screen: one layout + a body that switches on `game.status`. Game-specific.                                                           |
 | `/`, `/admin/login`   | Shared StartInvest administrator OIDC sign-in; authenticated administrators continue to games.                                                      |
