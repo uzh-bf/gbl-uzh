@@ -2,20 +2,9 @@ import path from 'node:path'
 
 import type { NextConfig } from 'next'
 
-// @uzh-bf/design-system declares a React 18 peer, so pnpm resolves its subtree
-// to react@18 while this app runs react@19. In dev it is additionally consumed
-// as raw TypeScript source (its `development` export condition). Handle both.
-// Match `development` explicitly: an unset NODE_ENV must NOT enable
-// transpilePackages (transpiling the DS source breaks a production build), so
-// the unknown case defaults to the safe production path. `next dev` sets
-// NODE_ENV=development and `next build` sets production, so both real paths are
-// correct.
-const isDev = process.env.NODE_ENV === 'development'
-
-// Resolve the app's single React copy through pnpm's symlinks (not a hardcoded
-// node_modules path, which may not exist under pnpm hoisting in a clean Docker
-// build — there the alias would silently no-op and the duplicate React would
-// return). require/__dirname are injected by Next's config loader.
+// Resolve the app's single React copy through pnpm's symlinks. The workspace
+// packages are linked into the app, so without these client aliases webpack can
+// include a second physical React module even when all package versions are 19.x.
 const appReactDir = path.dirname(
   require.resolve('react', { paths: [__dirname] })
 )
@@ -35,6 +24,12 @@ const appApolloDir = path.dirname(
   require.resolve('@apollo/client/package.json', { paths: [__dirname] })
 )
 
+// Linked UI keeps v4 for its other consumers; this app supplies the v5 runtime.
+const appDesignSystemDir = path.dirname(
+  require.resolve('@uzh-bf/design-system/package.json', { paths: [__dirname] })
+)
+const appRhfEntry = require.resolve('react-hook-form', { paths: [__dirname] })
+
 const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
@@ -46,22 +41,22 @@ const nextConfig: NextConfig = {
   // runs during `next build`, so the old `eslint.ignoreDuringBuilds` is gone.
   // Lint runs standalone via the `lint` script (`eslint .`).
 
-  // Dev only: the design system's `development` export points at raw `.tsx`
-  // source that `next dev`'s webpack cannot parse on its own. A production build
-  // resolves the compiled `dist` instead — transpiling there breaks the build.
-  ...(isDev && { transpilePackages: ['@uzh-bf/design-system'] }),
+  // @uzh-bf/design-system 5.x ships a compiled `dist` with no `development`
+  // export condition, so no transpilePackages entry is needed in dev. The
+  // client aliases below still matter for linked workspace packages: they
+  // ensure every client import uses the app's one React/ReactDOM module.
 
   webpack: (config, { isServer }) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@uzh-bf/design-system$': path.join(appDesignSystemDir, 'dist/index.js'),
+      'react-hook-form$': appRhfEntry,
+    }
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
       }
-      // Client bundle only: pin React to this app's single react@19 copy.
-      // Without this the design system's react@18 peer adds a second physical
-      // React to the browser bundle and hooks crash ("Cannot read properties of
-      // null (reading 'useMemo')"). The server build keeps Next's own React
-      // resolution (aliasing it there breaks production page-data collection).
       config.resolve.alias = {
         ...config.resolve.alias,
         react: appReactDir,

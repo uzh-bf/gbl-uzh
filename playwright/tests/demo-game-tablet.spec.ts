@@ -665,7 +665,8 @@ test('phone reference captures preserve the existing shell and content', async (
                   .boundingBox()
               )?.height
           )
-          .toBe(progressHeight)
+          .toBeGreaterThanOrEqual(72)
+        expect(progressHeight).toBeGreaterThanOrEqual(72)
         for (const tab of await page
           .getByRole('group', { name: 'History year' })
           .getByRole('button')

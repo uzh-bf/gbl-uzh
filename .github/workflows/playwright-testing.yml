@@ -32,9 +32,9 @@ permissions:
   contents: read
 
 env:
-  CI: 'true'
-  CYPRESS_INSTALL_BINARY: '0'
-  npm_config_verify_deps_before_run: 'false'
+  CI: "true"
+  CYPRESS_INSTALL_BINARY: "0"
+  pnpm_config_verify_deps_before_run: "false"
   DATABASE_URL: postgres://prisma:prisma@postgres:5432/prisma?schema=public&connection_limit=20
   SHADOW_DATABASE_URL: postgres://prisma:prisma@postgres:5432/shadow?schema=public&connection_limit=20
   NEXTAUTH_SECRET: ci-demo-game-not-a-secret
@@ -48,7 +48,42 @@ env:
   PLAYWRIGHT_BASE_URL: http://localhost:3000
 
 jobs:
+  design-system-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out immutable design-system source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: uzh-bf/design-system
+          ref: e49a96a4b705a296cb4f337d9d788ead344bac85
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.16.0
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        with:
+          version: 10.30.0
+          run_install: false
+
+      - name: Build and verify exact candidate archive
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @uzh-bf/design-system build
+          mkdir candidate
+          (cd packages/design-system && pnpm pack --pack-destination ../../candidate)
+          echo 'b237f0d7f9b384c84f4027768d5c5391e72e22591c1146ef890f0603a7994f06  candidate/uzh-bf-design-system-5.0.0-alpha.5.tgz' | sha256sum --check
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: design-system-rhf-candidate
+          path: candidate/*.tgz
+          retention-days: 1
+          if-no-files-found: error
+
   playwright-run:
+    needs: [design-system-candidate]
     runs-on: ubuntu-24.04
     container:
       image: mcr.microsoft.com/playwright:v1.61.1-noble
@@ -72,7 +107,7 @@ jobs:
       oidc:
         image: ghcr.io/navikt/mock-oauth2-server:2.1.11
         env:
-          SERVER_PORT: '8090'
+          SERVER_PORT: "8090"
           JSON_CONFIG: >-
             {
               "interactiveLogin": false,
@@ -102,7 +137,7 @@ jobs:
       - name: Define node version
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 24.16.0
 
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
         with:
@@ -133,10 +168,73 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Download exact demo-game candidate
+        if: matrix.game == 'demo-game'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: design-system-rhf-candidate
+          path: project/_local/design-system-candidate
+
+      - name: Install exact demo-game candidate graph
+        if: matrix.game == 'demo-game'
+        shell: bash
+        run: |
+          archive="$PWD/project/_local/design-system-candidate/uzh-bf-design-system-5.0.0-alpha.5.tgz"
+          restore_root="$RUNNER_TEMP/design-system-candidate-originals"
+          mkdir -p "$restore_root/apps/demo-game" "$restore_root/packages/ui"
+          cp apps/demo-game/package.json "$restore_root/apps/demo-game/package.json"
+          cp packages/ui/package.json "$restore_root/packages/ui/package.json"
+          cp pnpm-lock.yaml "$restore_root/pnpm-lock.yaml"
+          echo "DS_CANDIDATE_RESTORE_ROOT=$restore_root" >> "$GITHUB_ENV"
+
+          echo "b237f0d7f9b384c84f4027768d5c5391e72e22591c1146ef890f0603a7994f06  $archive" | sha256sum --check
+          node --input-type=module - "$archive" <<'JS'
+          import { readFileSync, writeFileSync } from 'node:fs'
+          const archive = process.argv[2]
+          for (const [file, section] of [
+            ['apps/demo-game/package.json', 'dependencies'],
+            ['packages/ui/package.json', 'devDependencies'],
+          ]) {
+            const manifest = JSON.parse(readFileSync(file, 'utf8'))
+            manifest[section]['@uzh-bf/design-system'] = `file:${archive}`
+            writeFileSync(file, JSON.stringify(manifest, null, 2) + '\n')
+          }
+          JS
+          pnpm install --lockfile-only
+          receipt_root="$PWD/project/_local/design-system-candidate-evidence"
+          mkdir -p "$receipt_root"
+          cp apps/demo-game/package.json "$receipt_root/demo-game-package.json"
+          cp packages/ui/package.json "$receipt_root/ui-package.json"
+          cp pnpm-lock.yaml "$receipt_root/pnpm-lock.yaml"
+          pnpm install --frozen-lockfile
+
       - name: Build demo-game dependencies
         run: |
           pnpm --filter @gbl-uzh/platform build
           pnpm --filter @gbl-uzh/ui build
+
+      - name: Verify effective game package graph
+        shell: bash
+        run: |
+          game_path=examples/${{ matrix.game }}
+          if [ '${{ matrix.game }}' = demo-game ]; then game_path=apps/demo-game; fi
+          args=(--workspace "$PWD/$game_path" --evidence "$PWD/project/_local/game-proof")
+          if [ '${{ matrix.game }}' = demo-game ]; then
+            args+=(--design-system "file:$PWD/project/_local/design-system-candidate/uzh-bf-design-system-5.0.0-alpha.5.tgz" --expected-sha256 b237f0d7f9b384c84f4027768d5c5391e72e22591c1146ef890f0603a7994f06)
+          fi
+          pnpm --filter @gbl-uzh/ui verify:consumer "${args[@]}"
+
+      - name: Verify packed UI consumer
+        shell: bash
+        run: |
+          pnpm --filter @gbl-uzh/ui verify:package --output "$PWD/project/_local/ui-package"
+          args=(--package "$PWD/project/_local/ui-package/gbl-uzh-ui-0.4.13.tgz" --evidence "$PWD/project/_local/consumer-proof")
+          if [ '${{ matrix.game }}' = demo-game ]; then
+            args+=(--design-system "file:$PWD/project/_local/design-system-candidate/uzh-bf-design-system-5.0.0-alpha.5.tgz" --expected-sha256 b237f0d7f9b384c84f4027768d5c5391e72e22591c1146ef890f0603a7994f06)
+          else
+            args+=(--design-system 4.1.6)
+          fi
+          pnpm --filter @gbl-uzh/ui verify:consumer "${args[@]}" --browser-test
 
       - name: Prepare database
         run: |
@@ -192,6 +290,16 @@ jobs:
             --project=chromium \
             tests/${{ matrix.game }}-flow.spec.ts
 
+      - name: Restore registry manifests after candidate verification
+        if: always() && matrix.game == 'demo-game'
+        shell: bash
+        run: |
+          restore_root="${DS_CANDIDATE_RESTORE_ROOT:-}"
+          if [ -z "$restore_root" ]; then exit 0; fi
+          cp "$restore_root/apps/demo-game/package.json" apps/demo-game/package.json
+          cp "$restore_root/packages/ui/package.json" packages/ui/package.json
+          cp "$restore_root/pnpm-lock.yaml" pnpm-lock.yaml
+
       - name: Upload blob report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -209,6 +317,9 @@ jobs:
           path: |
             playwright/test-results
             service.log
+            project/_local/consumer-proof
+            project/_local/design-system-candidate-evidence
+            project/_local/game-proof
           retention-days: 7
           if-no-files-found: ignore
 
@@ -225,7 +336,7 @@ jobs:
       - name: Define node version
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 24.16.0
 
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
         with:

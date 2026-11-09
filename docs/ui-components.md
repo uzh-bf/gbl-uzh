@@ -7,12 +7,12 @@ tags:
   - design-system
   - tailwind
   - components
-timestamp: "2026-10-07T13:52:26Z"
+timestamp: "2026-10-23T17:40:00Z"
 ---
 
 # UI Building Blocks
 
-Two component sources for game frontends: the game-specific library `@gbl-uzh/ui` (`packages/ui`) and the general-purpose UZH design system `@uzh-bf/design-system` (external npm package). Games also use plain [recharts](https://recharts.org) for charts and Formik + yup for forms.
+Two component sources for game frontends: the game-specific library `@gbl-uzh/ui` (`packages/ui`) and the general-purpose UZH design system `@uzh-bf/design-system` (external npm package). Games use [recharts](https://recharts.org) for charts. Demo-game player forms retain Formik + yup; its admin forms use React Hook Form.
 
 **Maturity warning:** `@gbl-uzh/ui` remains pre-1.0. Its exported package contract is verified and shared by three games, but `TimelineAdmin` is still a stub and `ProbabilityChart` remains demo-game flavored. Treat minor releases as potentially breaking until a stable 1.0 API is declared.
 
@@ -62,21 +62,23 @@ CSS: the package ships a Tailwind v4 **utilities-only** stylesheet (no preflight
 
 ## `@uzh-bf/design-system` usage
 
-Version 4.1.6 (pinned in the demo game; peer `^4.1.6` in `packages/ui`). It exports ~260 named components; the slice actually exercised by the reference game, by import frequency:
+Demo-game pins registry `5.0.0-alpha.5` as a portable baseline. Its RHF acceptance uses a separately checksummed unpublished candidate; the registry baseline alone does not prove the candidate error behavior. Shared UI retains its v4 development graph and accepts v4 or v5 peers. Rate-wars and central-bank retain v4. The reference game uses:
 
 - **Structure**: `Card` family (`CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`) — the workhorse container; `Modal`; `NavigationMenu` family; headings `H3`/`H4`; `Prose`.
-- **Forms (Formik-first)**: `FormikTextField`, `FormikNumberField`, `FormikSelectField` inside a `<Formik>` + yup `validationSchema`. This is the sanctioned pattern; the design system's react-hook-form-based `Form*` exports are unused in game code.
+- **Forms**: admin creation, period/segment authoring and countdown use `Form`, `RhfTextField`, `RhfNumberField` and `RhfMultiSelect` from `@uzh-bf/design-system/react-hook-form`. Pass the typed `control`; numeric values accept `number | ''` while editing. RHF owns validation timing and linked inline errors. Keep invalid dialogs open, then close/reset after successful mutation. Player setup/allocation retain Formik + yup; shared `TradingForm`, `ReusableFormField`, `Form` and `MultiSelect` remain compatible with v4 consumers.
 - **Controls**: `Button` (with `data={{ cy, test }}` for test selectors), `Select`, `Switch`, `Progress`.
-- **Data display**: `ShadcnTable*` family (conventionally import-aliased to `Table`, `TableBody`, ...), `ChartContainer` for recharts wrappers.
+- **Data display**: v5 imports `Table*` from `@uzh-bf/design-system/primitives`; v4 consumers keep `ShadcnTable*`. `ChartContainer` remains the Recharts wrapper.
 
 ### Tailwind v4 integration (CSS-only, no `tailwind.config.js`)
 
 Copy the demo game's setup (`apps/demo-game/src/globals.css`, `postcss.config.js`). Known gotchas encoded there:
 
-1. The design system's compiled CSS must be imported via a **relative `node_modules` path** (`../node_modules/@uzh-bf/design-system/dist/design-system.css`) — the package's exports map does not expose the CSS file as a bare specifier.
-2. Skip your own Tailwind preflight — the design-system CSS already ships the base reset (double-applying breaks styles).
-3. `@layer utilities { .aspect-video { ... } }` is manually patched in because the design system's `ChartContainer` needs it but the shipped CSS doesn't emit it.
-4. Theming = CSS custom properties on `:root` (`--theme-color-primary`, `--theme-color-secondary`, with `-80/-60/-40/-20` shades).
+1. Demo-game imports v5 compiled CSS through `@uzh-bf/design-system/css`. V4 consumers retain their existing relative CSS workaround.
+2. Skip a second Tailwind preflight because the design-system CSS supplies the reset.
+3. Put `data-theme="uzh"` on the document root, preserving app-owned colors, the 14px root and the width-only 641px tablet boundary.
+4. Linked shared UI keeps a v4 development dependency. Demo-game resolves its DS and RHF imports through app-level aliases; other games retain their own graph.
+
+The external UI verifier resolves a temporary strict lock, installs it frozen and builds Next against separate v4 and exact-v5 cells. Candidate verification checks the archive digest and every installed file. CI rebuilds the immutable public DS source and rejects digest drift. A separately published version matching the accepted candidate remains required before merge or ready conversion.
 
 ### Market probability charts
 
@@ -150,7 +152,7 @@ The demo game keeps Team-specific presentation in `apps/demo-game/src/components
 
 Known holes, confirmed by how the demo game works around them (candidates for library improvement):
 
-- **No multi-select** in the design system. Use the shared UI package's `MultiSelect`; games can keep a thin Formik adapter when needed.
+- **Multi-select compatibility**: v5 provides `MultiSelect` and `RhfMultiSelect`; retained v4 games keep the shared UI `MultiSelect` contract.
 - **Local shadcn-style fallbacks** coexist with the design system in `apps/demo-game/src/components/ui/` (`select`, `dialog`, `popover`, `command`, `toast`/`toaster`, `button`) — e.g. the cockpit uses the local `Select`, and `_app.tsx` uses the local `Toaster`.
 - **No chart components** beyond `ProbabilityChart` — games assemble recharts (`LineChart`, `BarChart`, `AreaChart`, scatter) by hand; only `ChartContainer` is shared.
 - **`@gbl-uzh/ui` gaps**: use `Button` from the design system; the package still lacks a usable admin timeline, generic decision-form scaffold, and results-table component. Keep game-specific layouts, decisions, charts, and GraphQL adapters in the game.

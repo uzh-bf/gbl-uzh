@@ -1,13 +1,13 @@
 import { cn } from '@gbl-uzh/ui'
+import { Button } from '@uzh-bf/design-system'
 import {
-  Button,
-  ShadcnTable as Table,
-  ShadcnTableBody as TableBody,
-  ShadcnTableCell as TableCell,
-  ShadcnTableHead as TableHead,
-  ShadcnTableHeader as TableHeader,
-  ShadcnTableRow as TableRow,
-} from '@uzh-bf/design-system'
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@uzh-bf/design-system/primitives'
 import { Fragment, useState } from 'react'
 import type { ResultQuery } from '~/graphql/generated/ops'
 import { assetLabels, MONTHS, NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'

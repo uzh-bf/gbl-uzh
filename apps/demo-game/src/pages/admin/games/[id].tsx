@@ -6,10 +6,9 @@ import {
   faSync,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { MultiSelect } from '@gbl-uzh/ui'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { twMerge } from 'tailwind-merge'
 import { NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 
@@ -21,10 +20,15 @@ import {
   STATUS,
 } from '@gbl-uzh/ui'
 import {
-  ShadcnTableBody as TableBody,
-  ShadcnTableHeader as TableHeader,
-  ShadcnTableRow as TableRow,
-} from '@uzh-bf/design-system'
+  TableBody,
+  TableHeader,
+  TableRow,
+} from '@uzh-bf/design-system/primitives'
+import {
+  Form,
+  RhfMultiSelect,
+  RhfNumberField,
+} from '@uzh-bf/design-system/react-hook-form'
 import { useEffect, useMemo, useState } from 'react'
 import {
   ActivateNextPeriodDocument,
@@ -56,7 +60,6 @@ import {
   ShadcnTableHead as TableHead,
 } from '~/components/admin/AdminControls'
 
-import { AdminInputField } from '~/components/fields/AdminInputField'
 import { useToast } from '~/components/ui/use-toast'
 import {
   DEFAULT_SEED,
@@ -76,14 +79,39 @@ import {
 } from '~/lib/market'
 import { queueRefetch } from '~/lib/queuedRefetch'
 
+interface SegmentFormValues {
+  periodIx: number
+  storyElements: string[]
+  learningElements: string[]
+}
+
 interface PeriodFormValues {
-  segmentCount: number
-  seed: number
-  interestBank: number
-  trendBonds: number
-  gapBonds: number
-  trendStocks: number
-  gapStocks: number
+  segmentCount: number | ''
+  seed: number | ''
+  interestBank: number | ''
+  trendBonds: number | ''
+  gapBonds: number | ''
+  trendStocks: number | ''
+  gapStocks: number | ''
+}
+
+interface CountdownFormValues {
+  countdownSeconds: number | ''
+}
+
+const adminFieldClassName = {
+  root: 'mobile:gap-app-1 gap-1',
+  label: 'mobile:app-caption pb-1 text-sm font-medium text-slate-700',
+  input:
+    'mobile:app-control w-full rounded border border-slate-300 bg-white p-2 text-sm focus:ring-2 focus:ring-slate-500 focus:outline-none',
+  error: 'mobile:app-caption text-xs text-red-500',
+}
+
+const adminMultiSelectClassName = {
+  root: 'mobile:gap-app-1 gap-1',
+  label: 'mobile:app-caption pb-1 text-sm font-medium text-slate-700',
+  trigger: 'mobile:app-control',
+  error: 'mobile:app-caption text-xs text-red-500',
 }
 
 function ManageGame() {
@@ -92,12 +120,7 @@ function ManageGame() {
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false)
   const [isSegmentModalOpen, setIsSegmentModalOpen] = useState(false)
 
-  const {
-    control: segmentControl,
-    handleSubmit: handleSegmentSubmit,
-    reset: resetSegment,
-    setValue: setSegmentValue,
-  } = useForm({
+  const segmentForm = useForm<SegmentFormValues>({
     defaultValues: {
       periodIx: -1,
       storyElements: [] as string[],
@@ -105,12 +128,7 @@ function ManageGame() {
     },
   })
 
-  const {
-    register: registerPeriod,
-    handleSubmit: handlePeriodSubmit,
-    reset: resetPeriod,
-    formState: { errors: errorsPeriod },
-  } = useForm<PeriodFormValues>({
+  const periodForm = useForm<PeriodFormValues>({
     defaultValues: {
       segmentCount: 4,
       seed: DEFAULT_SEED,
@@ -122,21 +140,13 @@ function ManageGame() {
     },
   })
 
-  const {
-    register: registerCountdown,
-    handleSubmit: handleCountdownSubmit,
-    formState: { errors: errorsCountdown },
-  } = useForm({
+  const countdownForm = useForm<CountdownFormValues>({
     defaultValues: {
       countdownSeconds: 300,
     },
   })
 
-  const onSegmentSubmit = async (values: {
-    periodIx: number
-    storyElements: string[]
-    learningElements: string[]
-  }) => {
+  const onSegmentSubmit = async (values: SegmentFormValues) => {
     await addPeriodSegment({
       variables: {
         gameId: Number(router.query.id),
@@ -146,7 +156,8 @@ function ManageGame() {
         learningElements: values.learningElements,
       },
     })
-    resetSegment()
+    segmentForm.reset()
+    setIsSegmentModalOpen(false)
   }
 
   const onPeriodSubmit = async (values: PeriodFormValues) => {
@@ -155,22 +166,23 @@ function ManageGame() {
         gameId: Number(router.query.id),
         facts: {
           scenario: {
-            seed: Math.trunc(values.seed),
-            interestBank: values.interestBank,
-            trendBonds: values.trendBonds,
-            gapBonds: values.gapBonds,
-            trendStocks: values.trendStocks,
-            gapStocks: values.gapStocks,
+            seed: Math.trunc(Number(values.seed)),
+            interestBank: Number(values.interestBank),
+            trendBonds: Number(values.trendBonds),
+            gapBonds: Number(values.gapBonds),
+            trendStocks: Number(values.trendStocks),
+            gapStocks: Number(values.gapStocks),
           },
         },
-        segmentCount: Math.trunc(values.segmentCount),
+        segmentCount: Math.trunc(Number(values.segmentCount)),
       },
     })
-    resetPeriod()
+    periodForm.reset()
+    setIsPeriodModalOpen(false)
   }
 
-  const onCountdownSubmit = (values: { countdownSeconds: number }) => {
-    addCountdown({
+  const onCountdownSubmit = (values: CountdownFormValues) => {
+    void addCountdown({
       variables: {
         gameId: Number(router.query.id),
         seconds: Number(values.countdownSeconds),
@@ -680,7 +692,13 @@ function ManageGame() {
                         ) : (
                           <Modal
                             open={isSegmentModalOpen}
-                            onClose={() => setIsSegmentModalOpen(false)}
+                            onClose={() => {
+                              if (
+                                !segmentForm.formState.isSubmitting &&
+                                !addPeriodSegmentLoading
+                              )
+                                setIsSegmentModalOpen(false)
+                            }}
                             trigger={
                               <Button
                                 disabled={
@@ -698,53 +716,54 @@ function ManageGame() {
                             }
                             title="Add Segment"
                             onSecondaryAction={() => {
-                              resetSegment()
+                              if (
+                                segmentForm.formState.isSubmitting ||
+                                addPeriodSegmentLoading
+                              )
+                                return
+                              segmentForm.reset()
                               setIsSegmentModalOpen(false)
                             }}
                             secondaryLabel="Discard"
+                            primaryDisabled={
+                              segmentForm.formState.isSubmitting ||
+                              addPeriodSegmentLoading
+                            }
+                            primaryLoading={
+                              segmentForm.formState.isSubmitting ||
+                              addPeriodSegmentLoading
+                            }
                             onPrimaryAction={() => {
-                              setSegmentValue('periodIx', period.index)
-                              handleSegmentSubmit(onSegmentSubmit)()
-                              setIsSegmentModalOpen(false)
+                              if (
+                                segmentForm.formState.isSubmitting ||
+                                addPeriodSegmentLoading
+                              )
+                                return
+                              segmentForm.setValue('periodIx', period.index)
+                              void segmentForm.handleSubmit(onSegmentSubmit)()
                             }}
                             primaryLabel="Submit"
                           >
-                            <div className="mobile:w-full flex w-1/2 flex-col gap-2">
-                              <div className="flex flex-col gap-2">
-                                <span className="mobile:app-caption text-sm font-normal text-gray-700">
-                                  Story Elements
-                                </span>
-                                <Controller
-                                  control={segmentControl}
+                            <Form {...segmentForm}>
+                              <div className="mobile:w-full flex w-1/2 flex-col gap-2">
+                                <RhfMultiSelect
+                                  control={segmentForm.control}
+                                  label="Story Elements"
                                   name="storyElements"
-                                  render={({ field }) => (
-                                    <MultiSelect
-                                      options={storyElementsAll}
-                                      value={field.value}
-                                      onChange={field.onChange}
-                                      searchPlaceholder="Search story elements..."
-                                    />
-                                  )}
+                                  items={storyElementsAll}
+                                  searchPlaceholder="Search story elements..."
+                                  className={adminMultiSelectClassName}
                                 />
-                              </div>
-                              <div className="flex flex-col gap-2">
-                                <span className="mobile:app-caption text-sm font-normal text-gray-700">
-                                  Learning Elements
-                                </span>
-                                <Controller
-                                  control={segmentControl}
+                                <RhfMultiSelect
+                                  control={segmentForm.control}
+                                  label="Learning Elements"
                                   name="learningElements"
-                                  render={({ field }) => (
-                                    <MultiSelect
-                                      options={learningElementsAll}
-                                      value={field.value}
-                                      onChange={field.onChange}
-                                      searchPlaceholder="Search learning elements..."
-                                    />
-                                  )}
+                                  items={learningElementsAll}
+                                  searchPlaceholder="Search learning elements..."
+                                  className={adminMultiSelectClassName}
                                 />
                               </div>
-                            </div>
+                            </Form>
                           </Modal>
                         )}
                       </>
@@ -773,7 +792,13 @@ function ManageGame() {
             return (
               <Modal
                 open={isPeriodModalOpen}
-                onClose={() => setIsPeriodModalOpen(false)}
+                onClose={() => {
+                  if (
+                    !periodForm.formState.isSubmitting &&
+                    !addGamePeriodLoading
+                  )
+                    setIsPeriodModalOpen(false)
+                }}
                 trigger={
                   <Button
                     disabled={disabled}
@@ -787,106 +812,126 @@ function ManageGame() {
                 }
                 title="Add Period"
                 onSecondaryAction={() => {
-                  resetPeriod()
+                  if (periodForm.formState.isSubmitting || addGamePeriodLoading)
+                    return
+                  periodForm.reset()
                   setIsPeriodModalOpen(false)
                 }}
                 secondaryLabel="Discard"
+                primaryDisabled={
+                  periodForm.formState.isSubmitting || addGamePeriodLoading
+                }
+                primaryLoading={
+                  periodForm.formState.isSubmitting || addGamePeriodLoading
+                }
                 onPrimaryAction={() => {
-                  handlePeriodSubmit(onPeriodSubmit)()
-                  setIsPeriodModalOpen(false)
+                  if (periodForm.formState.isSubmitting || addGamePeriodLoading)
+                    return
+                  void periodForm.handleSubmit(onPeriodSubmit)()
                 }}
                 primaryLabel="Submit"
               >
-                <div className="mobile:w-full flex w-1/2 flex-col gap-2">
-                  <AdminInputField
-                    label="Number of segments"
-                    name="segmentCount"
-                    type="number"
-                    tooltip={`One period corresponds to one year. Each segment contains ${NUM_MONTHS_PER_SEGMENT} months.`}
-                    required
-                    register={registerPeriod}
-                    error={errorsPeriod.segmentCount}
-                  />
-                </div>
-                <div className="mt-4">
-                  <H3>Scenario Parameters</H3>
+                <Form {...periodForm}>
                   <div className="mobile:w-full flex w-1/2 flex-col gap-2">
-                    <AdminInputField
-                      label="Seed"
-                      name="seed"
-                      type="number"
-                      tooltip={'Seed ....'}
+                    <RhfNumberField
+                      control={periodForm.control}
+                      label="Number of segments"
+                      name="segmentCount"
+                      tooltip={`One period corresponds to one year. Each segment contains ${NUM_MONTHS_PER_SEGMENT} months.`}
                       required
-                      register={registerPeriod}
-                      error={errorsPeriod.seed}
+                      rules={{ required: 'Required' }}
+                      step={1}
+                      data={{ cy: 'segmentCount' }}
+                      className={adminFieldClassName}
                     />
                   </div>
-                </div>
-                <div className="mt-4">
-                  <H4>Bank</H4>
-                  <div className="mobile:w-full flex w-1/2 flex-col gap-2">
-                    <AdminInputField
-                      label="Saving Interest"
-                      name="interestBank"
-                      type="number"
-                      step={0.0001}
-                      tooltip={'Saving interest ....'}
-                      required
-                      register={registerPeriod}
-                      error={errorsPeriod.interestBank}
-                    />
+                  <div className="mt-4">
+                    <H3>Scenario Parameters</H3>
+                    <div className="mobile:w-full flex w-1/2 flex-col gap-2">
+                      <RhfNumberField
+                        control={periodForm.control}
+                        label="Seed"
+                        name="seed"
+                        tooltip={'Seed ....'}
+                        required
+                        rules={{ required: 'Required' }}
+                        step={1}
+                        data={{ cy: 'seed' }}
+                        className={adminFieldClassName}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="mt-4">
-                  <H4>Bonds</H4>
-                  <div className="mobile:w-full flex w-1/2 gap-2">
-                    <AdminInputField
-                      label="Trend"
-                      name="trendBonds"
-                      type="number"
-                      step={0.0001}
-                      tooltip={'Trend is the expectation value.'}
-                      required
-                      register={registerPeriod}
-                      error={errorsPeriod.trendBonds}
-                    />
-                    <AdminInputField
-                      label="Gap"
-                      name="gapBonds"
-                      type="number"
-                      step={0.0001}
-                      tooltip={'TODO.'}
-                      required
-                      register={registerPeriod}
-                      error={errorsPeriod.gapBonds}
-                    />
+                  <div className="mt-4">
+                    <H4>Bank</H4>
+                    <div className="mobile:w-full flex w-1/2 flex-col gap-2">
+                      <RhfNumberField
+                        control={periodForm.control}
+                        label="Saving Interest"
+                        name="interestBank"
+                        step={0.0001}
+                        tooltip={'Saving interest ....'}
+                        required
+                        rules={{ required: 'Required' }}
+                        data={{ cy: 'interestBank' }}
+                        className={adminFieldClassName}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="mt-4">
-                  <H4>Stocks</H4>
-                  <div className="mobile:w-full flex w-1/2 gap-2">
-                    <AdminInputField
-                      label="Trend"
-                      name="trendStocks"
-                      type="number"
-                      step={0.0001}
-                      tooltip={'Trend is the expectation value.'}
-                      required
-                      register={registerPeriod}
-                      error={errorsPeriod.trendStocks}
-                    />
-                    <AdminInputField
-                      label="Gap"
-                      name="gapStocks"
-                      type="number"
-                      step={0.0001}
-                      tooltip={'TODO.'}
-                      required
-                      register={registerPeriod}
-                      error={errorsPeriod.gapStocks}
-                    />
+                  <div className="mt-4">
+                    <H4>Bonds</H4>
+                    <div className="mobile:w-full flex w-1/2 gap-2">
+                      <RhfNumberField
+                        control={periodForm.control}
+                        label="Trend"
+                        name="trendBonds"
+                        step={0.0001}
+                        tooltip={'Trend is the expectation value.'}
+                        required
+                        rules={{ required: 'Required' }}
+                        data={{ cy: 'trendBonds' }}
+                        className={adminFieldClassName}
+                      />
+                      <RhfNumberField
+                        control={periodForm.control}
+                        label="Gap"
+                        name="gapBonds"
+                        step={0.0001}
+                        tooltip={'TODO.'}
+                        required
+                        rules={{ required: 'Required' }}
+                        data={{ cy: 'gapBonds' }}
+                        className={adminFieldClassName}
+                      />
+                    </div>
                   </div>
-                </div>
+                  <div className="mt-4">
+                    <H4>Stocks</H4>
+                    <div className="mobile:w-full flex w-1/2 gap-2">
+                      <RhfNumberField
+                        control={periodForm.control}
+                        label="Trend"
+                        name="trendStocks"
+                        step={0.0001}
+                        tooltip={'Trend is the expectation value.'}
+                        required
+                        rules={{ required: 'Required' }}
+                        data={{ cy: 'trendStocks' }}
+                        className={adminFieldClassName}
+                      />
+                      <RhfNumberField
+                        control={periodForm.control}
+                        label="Gap"
+                        name="gapStocks"
+                        step={0.0001}
+                        tooltip={'TODO.'}
+                        required
+                        rules={{ required: 'Required' }}
+                        data={{ cy: 'gapStocks' }}
+                        className={adminFieldClassName}
+                      />
+                    </div>
+                  </div>
+                </Form>
               </Modal>
             )
           })()}
@@ -917,35 +962,47 @@ function ManageGame() {
           </div>
         </div>
 
-        <form onSubmit={handleCountdownSubmit(onCountdownSubmit)}>
-          <Card className="flex flex-col">
-            <CardHeader>
-              <CardTitle>Countdown</CardTitle>
-              <CardDescription>
-                Set a countdown for the segment.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div data-cy="countdown-seconds">
-                <AdminInputField
-                  label="Countdown in seconds"
-                  name="countdownSeconds"
-                  type="number"
-                  register={registerCountdown}
-                  error={errorsCountdown.countdownSeconds}
-                  required
-                />
-              </div>
-              {/* TODO(JJ): @RS Do we want to show the following? If no we
-                we can remove the refetchQueries.
-              */}
-              {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
-            </CardContent>
-            <CardFooter>
-              <Button type="submit">Set Countdown</Button>
-            </CardFooter>
-          </Card>
-        </form>
+        <Form {...countdownForm}>
+          <form
+            noValidate
+            onSubmit={countdownForm.handleSubmit(onCountdownSubmit)}
+          >
+            <Card className="flex flex-col">
+              <CardHeader>
+                <CardTitle>Countdown</CardTitle>
+                <CardDescription>
+                  Set a countdown for the segment.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div data-cy="countdown-seconds">
+                  <RhfNumberField
+                    label="Countdown in seconds"
+                    name="countdownSeconds"
+                    rules={{
+                      required: 'Required',
+                      validate: (value) =>
+                        value === '' ||
+                        Number.isInteger(value) ||
+                        'Use a whole number',
+                    }}
+                    required
+                    step={1}
+                    data={{ cy: 'countdownSeconds' }}
+                    className={adminFieldClassName}
+                  />
+                </div>
+                {/* TODO(JJ): @RS Do we want to show the following? If no we
+                  we can remove the refetchQueries.
+                */}
+                {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
+              </CardContent>
+              <CardFooter>
+                <Button type="submit">Set Countdown</Button>
+              </CardFooter>
+            </Card>
+          </form>
+        </Form>
       </div>
     </div>
   )

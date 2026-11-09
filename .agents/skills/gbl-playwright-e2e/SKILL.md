@@ -203,9 +203,9 @@ Return the post-reload status in the same poll cycle.
   weak accessible labels.
 - Avoid CSS class locators and structural selectors such as `svg text`.
 - Avoid toast assertions as primary outcomes; assert durable UI state instead.
-- `FormikNumberField` often renders visible labels without usable accessible
-  names. If positional textbox locators become necessary, scope them tightly and
-  leave a short comment.
+- Demo-game admin `RhfNumberField` exposes the input name and label; prefer
+  role/name or `data-cy`. Retained v4 `FormikNumberField` callers may need a
+  tightly scoped positional textbox locator or a plain `data-cy` wrapper.
 - For countdown:
   - admin field wrapper: `countdown-seconds`
   - player widget: `countdown`
@@ -258,8 +258,8 @@ Common failures:
 
 - Welcome submit never reaches `/play/cockpit`: bank name likely exceeds
   welcome validation max length (`20` chars) or join token/session failed.
-- `input[name=...]` not found for design-system number field: component did not
-  forward stable name; add a small `data-cy` wrapper instead of broad CSS.
+- `input[name=...]` not found for a design-system number field: use the field's
+  `data-cy` selector or add a small plain wrapper instead of broad CSS.
 - Report strict-mode text failure: use exact text or scope/first deliberately.
 - Local `curl` refused inside sandbox while Docker route exists: rerun probe
   outside sandbox before changing app/test code.

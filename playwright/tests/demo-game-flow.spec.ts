@@ -5,6 +5,7 @@ import {
   type BrowserContext,
   type Locator,
   type Page,
+  type Request,
 } from '@playwright/test'
 import { FIRST_GAME_YEAR, MONTHS } from '../../apps/demo-game/src/lib/constants'
 import {
@@ -81,6 +82,96 @@ function input(scope: Locator | Page, name: string) {
   return scope.locator(`input[name="${name}"]`)
 }
 
+type TrackedGraphQLRequest = {
+  operationName: string
+}
+
+function graphQLRequest(request: Request): TrackedGraphQLRequest | undefined {
+  if (new URL(request.url()).pathname !== '/api/graphql') return
+
+  try {
+    const body = request.postDataJSON() as {
+      operationName?: unknown
+    }
+    if (typeof body?.operationName !== 'string') return
+    return {
+      operationName: body.operationName,
+    }
+  } catch {
+    return
+  }
+}
+
+function trackGraphQLRequests(page: Page) {
+  const requests: TrackedGraphQLRequest[] = []
+  page.on('request', (request) => {
+    const parsed = graphQLRequest(request)
+    if (parsed) requests.push(parsed)
+  })
+  return requests
+}
+
+function isGraphQLOperation(request: Request, operationName: string) {
+  return graphQLRequest(request)?.operationName === operationName
+}
+
+function operationRequests(
+  requests: TrackedGraphQLRequest[],
+  operationName: string
+) {
+  return requests.filter((request) => request.operationName === operationName)
+}
+
+async function holdGraphQLOperation(page: Page, operationName: string) {
+  let release!: () => void
+  const gate = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  const handler = async (route: import('@playwright/test').Route) => {
+    if (isGraphQLOperation(route.request(), operationName)) await gate
+    await route.fallback()
+  }
+  await page.route('**/api/graphql', handler)
+  return async () => {
+    release()
+    await page.unroute('**/api/graphql', handler)
+  }
+}
+
+async function expectLinkedError(scope: Locator | Page, field: Locator) {
+  await expect(field).toHaveAttribute('aria-invalid', 'true')
+  const errorIds = ((await field.getAttribute('aria-describedby')) ?? '')
+    .split(/\s+/)
+    .filter(Boolean)
+  expect(errorIds.length).toBeGreaterThan(0)
+  for (const id of errorIds)
+    await expect(scope.locator(`[id="${id}"]`)).toBeVisible()
+  return errorIds
+}
+
+async function expectRecovered(field: Locator, recoveredIds: string[]) {
+  await expect(field).not.toHaveAttribute('aria-invalid', 'true')
+  const describedBy = ((await field.getAttribute('aria-describedby')) ?? '')
+    .split(/\s+/)
+    .filter(Boolean)
+  for (const id of recoveredIds) expect(describedBy).not.toContain(id)
+}
+
+async function selectFirstMultiSelectOption(dialog: Locator, label: string) {
+  await dialog.getByRole('combobox', { name: label, exact: true }).click()
+  const option = dialog
+    .getByRole('listbox', { name: label, exact: true })
+    .getByRole('option')
+    .first()
+  await expect(option).toBeVisible()
+  const value = (await option.innerText()).trim()
+  await option.click()
+  await dialog
+    .getByRole('heading', { name: 'Add Segment', exact: true })
+    .click()
+  return value
+}
+
 async function addPeriod(
   page: Page,
   {
@@ -91,9 +182,7 @@ async function addPeriod(
 ) {
   await page.getByRole('button', { name: 'Add period' }).click()
   const dialog = page.getByRole('dialog', { name: 'Add Period' })
-  await dialog
-    .getByRole('spinbutton', { name: 'Number of segments' })
-    .fill(segmentCount)
+  await dialog.getByTestId('segmentCount').fill(segmentCount)
   for (const [key, value] of Object.entries(scenario ?? {}))
     await input(dialog, key).fill(value)
   await dialog.getByRole('button', { name: 'Submit' }).click()
@@ -125,12 +214,15 @@ async function addSegment(
       name: 'Add Segment',
       exact: true,
     })
-    for (const [picker, ids] of [
-      [0, storyIds ?? (withContent ? ['bank_account'] : [])],
-      [1, learningIds ?? (withContent ? ['bonds_intro'] : [])],
+    for (const [label, ids] of [
+      ['Story Elements', storyIds ?? (withContent ? ['bank_account'] : [])],
+      [
+        'Learning Elements',
+        learningIds ?? (withContent ? ['bonds_intro'] : []),
+      ],
     ] as const) {
       for (const id of ids) {
-        await dialog.getByRole('combobox').nth(picker).click()
+        await dialog.getByRole('combobox', { name: label, exact: true }).click()
         await dialog.getByRole('option', { name: id, exact: true }).click()
         await dialog
           .getByRole('heading', { name: 'Add Segment', exact: true })
@@ -424,7 +516,9 @@ async function cockpitControlSizes(page: Page, action: Locator) {
       page.getByRole('navigation', { name: /^(Player|Cockpit) navigation$/ }),
     ].map(async (locator) => {
       const box = await locator.boundingBox()
-      return { width: Math.round(box!.width), height: Math.round(box!.height) }
+      return box
+        ? { width: Math.round(box.width), height: Math.round(box.height) }
+        : null
     })
   )
 }
@@ -452,6 +546,13 @@ async function assertSubmittedStates(page: Page, admin: Page) {
     await expect
       .poll(() => page.evaluate(() => innerWidth))
       .toBe(viewport.width)
+    await expect(
+      page.getByRole('navigation', {
+        name:
+          viewport.width >= 641 ? 'Cockpit navigation' : 'Player navigation',
+        exact: true,
+      })
+    ).toBeVisible()
     await expectNoPageOverflow(page)
     editingSizes.set(viewport.width, await cockpitControlSizes(page, submit))
     if (viewport.width < 641) await expectPhoneScrollContained(page)
@@ -512,6 +613,12 @@ async function assertSubmittedStates(page: Page, admin: Page) {
     await page.getByRole('link', { name: 'Decisions', exact: true }).click()
     for (const { name, width, height } of cockpitViewports) {
       await page.setViewportSize({ width, height })
+      await expect(
+        page.getByRole('navigation', {
+          name: width >= 641 ? 'Cockpit navigation' : 'Player navigation',
+          exact: true,
+        })
+      ).toBeVisible()
       await expect
         .poll(() => cockpitControlSizes(page, change))
         .toEqual(editingSizes.get(width))
@@ -682,7 +789,8 @@ async function assertPlayerPortfolio(page: Page, timeout = 10_000) {
 
 async function setCountdown(page: Page, seconds: string) {
   await page
-    .getByRole('spinbutton', { name: 'Countdown in seconds' })
+    .getByTestId('countdown-seconds')
+    .getByRole('textbox', { name: 'Countdown in seconds' })
     .fill(seconds)
   await page.getByRole('button', { name: 'Set Countdown' }).click()
 }
@@ -817,6 +925,205 @@ async function assertFinalReport(page: Page, playerPlans: PlayerPlan[]) {
     await reportPage.close()
   }
 }
+
+test('admin RHF forms validate, recover, reset and submit structured state', async ({
+  page,
+}) => {
+  const requests = trackGraphQLRequests(page)
+  const gameName = `Admin forms ${Date.now()}`
+
+  await page.goto('/admin/games', { waitUntil: 'domcontentloaded' })
+  const name = page.getByTestId('game-name')
+  const playerCount = page.getByTestId('game-player-count')
+  const create = page.getByRole('button', { name: 'Create Game' })
+
+  await name.fill('')
+  await playerCount.fill('')
+  await create.click()
+  const nameErrorIds = await expectLinkedError(page, name)
+  const playerCountErrorIds = await expectLinkedError(page, playerCount)
+  expect(operationRequests(requests, 'CreateGame')).toHaveLength(0)
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 })
+    await page.screenshot({
+      path: test.info().outputPath(`admin-errors-${width}.png`),
+      animations: 'disabled',
+    })
+  }
+
+  await name.fill(gameName)
+  await playerCount.fill('1.5')
+  await create.click()
+  await expectLinkedError(page, playerCount)
+  expect(operationRequests(requests, 'CreateGame')).toHaveLength(0)
+  await playerCount.fill('2')
+  await expectRecovered(name, nameErrorIds)
+  await expectRecovered(playerCount, playerCountErrorIds)
+
+  const [createRequest] = await Promise.all([
+    page.waitForRequest((request) => isGraphQLOperation(request, 'CreateGame')),
+    create.click(),
+  ])
+  const createBody = createRequest.postDataJSON() as {
+    variables: { name: string; playerCount: number }
+  }
+  expect(createBody.variables).toMatchObject({
+    name: gameName,
+    playerCount: 2,
+  })
+  await expect(name).toHaveValue('')
+  await expect(playerCount).toHaveValue('1')
+  expect(operationRequests(requests, 'CreateGame')).toHaveLength(1)
+
+  await page.getByRole('link', { name: new RegExp(gameName) }).click()
+  await expect(page.getByTestId('game-detail')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Add period' }).click()
+  let dialog = page.getByRole('dialog', { name: 'Add Period' })
+  const segmentCount = dialog.getByTestId('segmentCount')
+  const segmentCountDefault = await segmentCount.inputValue()
+
+  await segmentCount.fill('')
+  await dialog.getByRole('button', { name: 'Submit' }).click()
+  await expect(dialog).toBeVisible()
+  const segmentCountErrorIds = await expectLinkedError(dialog, segmentCount)
+  expect(operationRequests(requests, 'AddGamePeriod')).toHaveLength(0)
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 })
+    await page.screenshot({
+      path: test.info().outputPath(`period-errors-${width}.png`),
+      animations: 'disabled',
+    })
+  }
+
+  await segmentCount.fill('1')
+  await expectRecovered(segmentCount, segmentCountErrorIds)
+  const releasePeriod = await holdGraphQLOperation(page, 'AddGamePeriod')
+  const [periodRequest] = await Promise.all([
+    page.waitForRequest((request) =>
+      isGraphQLOperation(request, 'AddGamePeriod')
+    ),
+    dialog.getByRole('button', { name: 'Submit' }).click(),
+  ])
+  const periodBody = periodRequest.postDataJSON() as {
+    variables: {
+      segmentCount: number
+      facts: { scenario: Record<string, unknown> }
+    }
+  }
+  expect(periodBody.variables).toMatchObject({
+    segmentCount: 1,
+    facts: {
+      scenario: {
+        seed: expect.any(Number),
+        interestBank: expect.any(Number),
+        trendBonds: expect.any(Number),
+        gapBonds: expect.any(Number),
+        trendStocks: expect.any(Number),
+        gapStocks: expect.any(Number),
+      },
+    },
+  })
+  await expect(dialog.getByRole('button', { name: 'Submit' })).toBeDisabled()
+  await releasePeriod()
+  await expect(dialog).toBeHidden()
+  await expect(page.getByTestId('period-0')).toBeVisible()
+  expect(operationRequests(requests, 'AddGamePeriod')).toHaveLength(1)
+
+  await page.getByRole('button', { name: 'Add segment' }).click()
+  dialog = page.getByRole('dialog', { name: 'Add Segment', exact: true })
+  const storyId = await selectFirstMultiSelectOption(dialog, 'Story Elements')
+  const learningId = await selectFirstMultiSelectOption(
+    dialog,
+    'Learning Elements'
+  )
+  await expect(
+    dialog.getByRole('button', { name: `Remove ${storyId}`, exact: true })
+  ).toBeVisible()
+  await expect(
+    dialog.getByRole('button', { name: `Remove ${learningId}`, exact: true })
+  ).toBeVisible()
+  await dialog.getByRole('button', { name: 'Discard' }).click()
+  await expect(dialog).toBeHidden()
+
+  await page.getByRole('button', { name: 'Add segment' }).click()
+  dialog = page.getByRole('dialog', { name: 'Add Segment', exact: true })
+  await expect(dialog.getByRole('button', { name: /^Remove / })).toHaveCount(0)
+  expect(await selectFirstMultiSelectOption(dialog, 'Story Elements')).toBe(
+    storyId
+  )
+  expect(await selectFirstMultiSelectOption(dialog, 'Learning Elements')).toBe(
+    learningId
+  )
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 })
+    await page.screenshot({
+      path: test.info().outputPath(`segment-${width}.png`),
+      animations: 'disabled',
+    })
+  }
+  const releaseSegment = await holdGraphQLOperation(page, 'AddPeriodSegment')
+  const [segmentRequest] = await Promise.all([
+    page.waitForRequest((request) =>
+      isGraphQLOperation(request, 'AddPeriodSegment')
+    ),
+    dialog.getByRole('button', { name: 'Submit' }).click(),
+  ])
+  const segmentBody = segmentRequest.postDataJSON() as {
+    variables: {
+      periodIx: number
+      storyElements: string[]
+      learningElements: string[]
+    }
+  }
+  expect(segmentBody.variables).toMatchObject({
+    periodIx: 0,
+    storyElements: [storyId],
+    learningElements: [learningId],
+  })
+  await expect(dialog.getByRole('button', { name: 'Submit' })).toBeDisabled()
+  await releaseSegment()
+  await expect(dialog).toBeHidden()
+  await expect(page.getByTestId('period-0-segment-0')).toBeVisible()
+  expect(operationRequests(requests, 'AddPeriodSegment')).toHaveLength(1)
+
+  await page.getByRole('button', { name: 'Add period' }).click()
+  dialog = page.getByRole('dialog', { name: 'Add Period' })
+  await expect(dialog.getByTestId('segmentCount')).toHaveValue(
+    segmentCountDefault
+  )
+  await dialog.getByRole('button', { name: 'Discard' }).click()
+  await expect(dialog).toBeHidden()
+
+  const countdown = page
+    .getByTestId('countdown-seconds')
+    .getByRole('textbox', { name: 'Countdown in seconds' })
+  const setCountdownButton = page.getByRole('button', {
+    name: 'Set Countdown',
+  })
+  await countdown.fill('')
+  await setCountdownButton.click()
+  const countdownErrorIds = await expectLinkedError(page, countdown)
+  expect(operationRequests(requests, 'AddCountdown')).toHaveLength(0)
+
+  await countdown.fill('90.5')
+  await setCountdownButton.click()
+  await expectLinkedError(page, countdown)
+  expect(operationRequests(requests, 'AddCountdown')).toHaveLength(0)
+  await countdown.fill('120')
+  await expectRecovered(countdown, countdownErrorIds)
+  const [countdownRequest] = await Promise.all([
+    page.waitForRequest((request) =>
+      isGraphQLOperation(request, 'AddCountdown')
+    ),
+    setCountdownButton.click(),
+  ])
+  const countdownBody = countdownRequest.postDataJSON() as {
+    variables: { seconds: number }
+  }
+  expect(countdownBody.variables).toMatchObject({ seconds: 120 })
+  expect(operationRequests(requests, 'AddCountdown')).toHaveLength(1)
+})
 
 test('cockpit allocation controls, navigation, and decimal persistence', async ({
   page,
@@ -1077,92 +1384,99 @@ async function tradeSubmissions(page: Page) {
   )
 }
 
-test('trading actions submit one validated modifier and reset after success', async ({
-  page,
-}) => {
-  await page.addInitScript(() => {
-    const submissions: TradeSubmission[] = []
-    Object.defineProperty(window, '__tradingFormSubmissions', {
-      value: submissions,
+test.describe('packed trading form', () => {
+  test.use({ storageState: { cookies: [], origins: [] } })
+  test('trading actions submit one validated modifier and reset after success', async ({
+    page,
+  }) => {
+    test.skip(
+      !process.env.GBL_UI_CONSUMER_URL,
+      'The shared form runs in the packed UI consumer fixture'
+    )
+    await page.addInitScript(() => {
+      const submissions: TradeSubmission[] = []
+      Object.defineProperty(window, '__tradingFormSubmissions', {
+        value: submissions,
+      })
+
+      const originalLog = console.log
+      console.log = (...args) => {
+        const [value] = args
+        if (
+          args.length === 1 &&
+          typeof value === 'object' &&
+          value !== null &&
+          'volume' in value &&
+          'modifier' in value
+        ) {
+          submissions.push(value as TradeSubmission)
+        }
+        originalLog(...args)
+      }
     })
 
-    const originalLog = console.log
-    console.log = (...args) => {
-      const [value] = args
-      if (
-        args.length === 1 &&
-        typeof value === 'object' &&
-        value !== null &&
-        'volume' in value &&
-        'modifier' in value
-      ) {
-        submissions.push(value as TradeSubmission)
-      }
-      originalLog(...args)
+    await page.goto(process.env.GBL_UI_CONSUMER_URL!)
+
+    const volume = page.getByRole('spinbutton', { name: 'Volume' })
+    const buy = page.getByRole('button', { name: 'Buy' })
+    const sell = page.getByRole('button', { name: 'Sell' })
+    const volumeId = await volume.getAttribute('id')
+
+    if (!volumeId) {
+      throw new Error('Volume input must expose an ID for its label')
     }
+
+    await expect(page.locator(`label[for="${volumeId}"]`)).toHaveText('Volume')
+
+    await expect(volume).toHaveValue('0')
+    await expect(buy).toBeDisabled()
+    await expect(sell).toBeDisabled()
+    await expect.poll(() => tradeSubmissions(page)).toEqual([])
+
+    await volume.fill('-1')
+    await expect(buy).toBeDisabled()
+    await expect(sell).toBeDisabled()
+    await expect(volume).toHaveAttribute('aria-invalid', 'true')
+    const errorId = await volume.getAttribute('aria-errormessage')
+
+    if (!errorId) {
+      throw new Error('Invalid volume input must reference its error message')
+    }
+
+    await expect(volume).toHaveAttribute(
+      'aria-describedby',
+      new RegExp(`(^|\\s)${errorId}(\\s|$)`)
+    )
+    await expect(page.locator(`[id="${errorId}"]`)).toHaveRole('alert')
+    await expect.poll(() => tradeSubmissions(page)).toEqual([])
+
+    await volume.fill('2')
+    await expect(volume).not.toHaveAttribute('aria-invalid')
+    await expect(volume).not.toHaveAttribute('aria-errormessage')
+    await volume.press('Enter')
+    await expect.poll(() => tradeSubmissions(page)).toEqual([])
+
+    await buy.click()
+    await expect
+      .poll(() => tradeSubmissions(page))
+      .toEqual([{ volume: 2, modifier: 1 }])
+    await expect(volume).toHaveValue('0')
+
+    await volume.fill('')
+    await expect(volume).toHaveValue('')
+    await expect(buy).toBeDisabled()
+    await expect(sell).toBeDisabled()
+
+    await volume.fill('3')
+    await sell.click()
+    await expect
+      .poll(() => tradeSubmissions(page))
+      .toEqual([
+        { volume: 2, modifier: 1 },
+        { volume: 3, modifier: -1 },
+      ])
+    await expect(volume).toHaveValue('0')
   })
-
-  await page.goto('/')
-
-  const volume = page.getByRole('spinbutton', { name: 'Volume' })
-  const buy = page.getByRole('button', { name: 'Buy' })
-  const sell = page.getByRole('button', { name: 'Sell' })
-  const volumeId = await volume.getAttribute('id')
-
-  if (!volumeId) {
-    throw new Error('Volume input must expose an ID for its label')
-  }
-
-  await expect(page.locator(`label[for="${volumeId}"]`)).toHaveText('Volume')
-
-  await expect(volume).toHaveValue('0')
-  await expect(buy).toBeDisabled()
-  await expect(sell).toBeDisabled()
-  await expect.poll(() => tradeSubmissions(page)).toEqual([])
-
-  await volume.fill('-1')
-  await expect(buy).toBeDisabled()
-  await expect(sell).toBeDisabled()
-  await expect(volume).toHaveAttribute('aria-invalid', 'true')
-  const errorId = await volume.getAttribute('aria-errormessage')
-
-  if (!errorId) {
-    throw new Error('Invalid volume input must reference its error message')
-  }
-
-  await expect(volume).toHaveAttribute(
-    'aria-describedby',
-    new RegExp(`(^|\\s)${errorId}(\\s|$)`)
-  )
-  await expect(page.locator(`[id="${errorId}"]`)).toHaveRole('alert')
-  await expect.poll(() => tradeSubmissions(page)).toEqual([])
-
-  await volume.fill('2')
-  await expect(volume).not.toHaveAttribute('aria-invalid')
-  await expect(volume).not.toHaveAttribute('aria-errormessage')
-  await volume.press('Enter')
-  await expect.poll(() => tradeSubmissions(page)).toEqual([])
-
-  await buy.click()
-  await expect
-    .poll(() => tradeSubmissions(page))
-    .toEqual([{ volume: 2, modifier: 1 }])
-  await expect(volume).toHaveValue('0')
-
-  await volume.fill('')
-  await expect(volume).toHaveValue('')
-  await expect(buy).toBeDisabled()
-  await expect(sell).toBeDisabled()
-
-  await volume.fill('3')
-  await sell.click()
-  await expect
-    .poll(() => tradeSubmissions(page))
-    .toEqual([
-      { volume: 2, modifier: 1 },
-      { volume: 3, modifier: -1 },
-    ])
-  await expect(volume).toHaveValue('0')
 })
 
 test('Market reveals the closed quarter before releasing results to two players', async ({
@@ -2610,7 +2924,13 @@ test('countdown notifications match player notices across tabs and viewport size
     let seconds = 600
     for (const width of [320, 390, 784]) {
       await player.setViewportSize({ width, height: 1000 })
-      await player.getByRole('link', { name: 'Decisions', exact: true }).click()
+      const navigation = player.getByRole('navigation', {
+        name: width >= 641 ? 'Cockpit navigation' : 'Player navigation',
+      })
+      await expect(navigation).toBeVisible()
+      await navigation
+        .getByRole('link', { name: 'Decisions', exact: true })
+        .click()
       const allocation = player
         .getByRole('status')
         .filter({ hasText: 'Allocation submitted' })
@@ -2625,7 +2945,7 @@ test('countdown notifications match player notices across tabs and viewport size
       for (const tab of width >= 641
         ? ['Decisions', 'History']
         : ['Decisions', 'Market', 'History', 'Team']) {
-        await player.getByRole('link', { name: tab, exact: true }).click()
+        await navigation.getByRole('link', { name: tab, exact: true }).click()
         await setCountdown(admin, String(seconds++))
         const notification = player
           .getByRole('region', { name: 'Notifications (F8)' })
@@ -2755,9 +3075,19 @@ test('Decisions forecast matches Market and handles unavailable scenarios', asyn
       ).toHaveText(values)
     for (const width of [784, 390, 320]) {
       await player.setViewportSize({ width, height: 1024 })
-      await forecast.scrollIntoViewIfNeeded()
+      if (width >= 641) {
+        await expect(forecast).toBeHidden()
+        for (const { asset, values } of fixtures)
+          await expect(
+            player
+              .getByTestId(`market-${asset.toLowerCase()}`)
+              .locator('strong')
+          ).toHaveText(values)
+      } else {
+        await forecast.scrollIntoViewIfNeeded()
+        await expect(forecast).toBeInViewport()
+      }
       await expectNoPageOverflow(player)
-      await expect(forecast).toBeInViewport()
       await capturePlayerScreenshot(player, {
         path: testInfo.outputPath(`decisions-forecast-${width}.png`),
       })
