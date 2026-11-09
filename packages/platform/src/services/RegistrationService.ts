@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid'
 import { createHash } from 'node:crypto'
 import { parseCookies, setCookie } from 'nookies'
 import type * as yup from 'yup'
-import { Prisma, type PrismaClient } from '../generated/prisma/client.js'
+import type { Prisma, PrismaClient } from '../generated/prisma/client.js'
 import type { CtxWithPrisma } from '../types.js'
 import { isSecureRequest, loginAsTeam } from './AccountService.js'
 import * as EventService from './EventService.js'
@@ -61,13 +61,16 @@ export async function lockGame(
   where: { id: number } | { registrationToken: string },
   mode: 'UPDATE' | 'SHARE' = 'UPDATE'
 ) {
-  const lock = Prisma.raw(mode === 'SHARE' ? 'FOR SHARE' : 'FOR UPDATE')
-  const rows =
-    'id' in where
+  // Each game embeds its own generated Prisma client, which does not recognize
+  // a Prisma.raw fragment built by the platform's client; keep the SQL literal.
+  const rows = !('id' in where)
+    ? await tx.$queryRaw<{ id: number }[]>`
+        SELECT id FROM "Game" WHERE "registrationToken" = ${where.registrationToken} FOR UPDATE`
+    : mode === 'SHARE'
       ? await tx.$queryRaw<{ id: number }[]>`
-          SELECT id FROM "Game" WHERE id = ${where.id} ${lock}`
+          SELECT id FROM "Game" WHERE id = ${where.id} FOR SHARE`
       : await tx.$queryRaw<{ id: number }[]>`
-          SELECT id FROM "Game" WHERE "registrationToken" = ${where.registrationToken} ${lock}`
+          SELECT id FROM "Game" WHERE id = ${where.id} FOR UPDATE`
   return rows[0]?.id ?? null
 }
 
