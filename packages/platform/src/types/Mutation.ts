@@ -225,13 +225,14 @@ export function generateBaseMutations<
         args: {
           gameId: nonNull(intArg()),
         },
-        async resolve(_, args, ctx) {
-          const results = await GameService.activateNextPeriod(args, ctx, {
-            services,
-          })
-          if (!results) return
-          return results[0] as any
-        },
+        resolve: (_, args, ctx) =>
+          GameService.activateNextPeriod(args, ctx, { services }),
+      })
+
+      t.nonNull.field('finishGame', {
+        type: 'Game',
+        args: { gameId: nonNull(intArg()) },
+        resolve: (_, { gameId }, ctx) => GameService.finishGame(gameId, ctx),
       })
 
       t.field('activateNextSegment', {

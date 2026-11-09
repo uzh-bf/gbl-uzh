@@ -110,10 +110,13 @@ export function pendingMarketReveal(
 export function currentMarketReview(
   game: ResultQuery['result']['currentGame']
 ) {
-  if (!game || !['PAUSED', 'CONSOLIDATION', 'RESULTS'].includes(game.status))
+  if (
+    !game ||
+    !['PAUSED', 'CONSOLIDATION', 'RESULTS', 'COMPLETED'].includes(game.status)
+  )
     return null
   const period =
-    game.status === 'RESULTS'
+    game.status === 'RESULTS' || game.status === 'COMPLETED'
       ? [...game.periods]
           .filter((item) => item.activeSegmentIx >= 0)
           .sort((a, b) => b.index - a.index)[0]
@@ -137,7 +140,7 @@ export function marketPeriod(game: ResultQuery['result']['currentGame']) {
   // it over result.currentGame's server-side fallback. Period history remains.
   return (
     game?.activePeriod ??
-    (game?.status === 'RESULTS'
+    (game?.status === 'RESULTS' || game?.status === 'COMPLETED'
       ? [...game.periods].sort((a, b) => b.index - a.index)[0]
       : null)
   )
