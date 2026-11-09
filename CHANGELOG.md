@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.1](https://github.com/uzh-bf/gbl-uzh/compare/v0.5.0...v0.5.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* **platform:** release SSE subscriptions when clients disconnect ([#240](https://github.com/uzh-bf/gbl-uzh/issues/240)) ([5888aa1](https://github.com/uzh-bf/gbl-uzh/commit/5888aa1b3ffedcc7efcdcb8d6c51e591ea4b1098))
+* **playwright:** wait for settled layout and closed story dialog in demo-game specs ([#239](https://github.com/uzh-bf/gbl-uzh/issues/239)) ([9f48884](https://github.com/uzh-bf/gbl-uzh/commit/9f48884cb384145844ce285d62e2763056ea0c08))
+
+
+### Other
+
+* **deploy:** set explicit demo-game heap limit for stg and prd ([#241](https://github.com/uzh-bf/gbl-uzh/issues/241)) ([30f7537](https://github.com/uzh-bf/gbl-uzh/commit/30f75377ceb866d525eafd3027d13d3dda09df41))
+
+
+### Deployment
+
+* **demo-game:** pin stg images to 3ca50fa [skip ci] ([131eb10](https://github.com/uzh-bf/gbl-uzh/commit/131eb107791aab80c52994c1c597e20e40cc56b2))
+* **demo-game:** pin stg images to 5888aa1 [skip ci] ([4c18e00](https://github.com/uzh-bf/gbl-uzh/commit/4c18e009cc8a8c7888eec0ef6cea6881edb9db58))
+* **demo-game:** pin stg images to 91274b0 [skip ci] ([8e3dfaa](https://github.com/uzh-bf/gbl-uzh/commit/8e3dfaa0c58d480ab5d5ac3bffbed4f7b0dece4b))
+
 ## [0.5.0](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.51...v0.5.0) (2026-11-09)
 
 
