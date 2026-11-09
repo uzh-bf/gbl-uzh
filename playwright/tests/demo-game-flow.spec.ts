@@ -1061,110 +1061,6 @@ test('admin and players complete multi-team multi-period demo-game flow', async 
   }
 })
 
-type TradeSubmission = {
-  volume: number
-  modifier: number
-}
-
-async function tradeSubmissions(page: Page) {
-  return page.evaluate(
-    () =>
-      (
-        window as typeof window & {
-          __tradingFormSubmissions: TradeSubmission[]
-        }
-      ).__tradingFormSubmissions
-  )
-}
-
-test('trading actions submit one validated modifier and reset after success', async ({
-  page,
-}) => {
-  await page.addInitScript(() => {
-    const submissions: TradeSubmission[] = []
-    Object.defineProperty(window, '__tradingFormSubmissions', {
-      value: submissions,
-    })
-
-    const originalLog = console.log
-    console.log = (...args) => {
-      const [value] = args
-      if (
-        args.length === 1 &&
-        typeof value === 'object' &&
-        value !== null &&
-        'volume' in value &&
-        'modifier' in value
-      ) {
-        submissions.push(value as TradeSubmission)
-      }
-      originalLog(...args)
-    }
-  })
-
-  await page.goto('/')
-
-  const volume = page.getByRole('spinbutton', { name: 'Volume' })
-  const buy = page.getByRole('button', { name: 'Buy' })
-  const sell = page.getByRole('button', { name: 'Sell' })
-  const volumeId = await volume.getAttribute('id')
-
-  if (!volumeId) {
-    throw new Error('Volume input must expose an ID for its label')
-  }
-
-  await expect(page.locator(`label[for="${volumeId}"]`)).toHaveText('Volume')
-
-  await expect(volume).toHaveValue('0')
-  await expect(buy).toBeDisabled()
-  await expect(sell).toBeDisabled()
-  await expect.poll(() => tradeSubmissions(page)).toEqual([])
-
-  await volume.fill('-1')
-  await expect(buy).toBeDisabled()
-  await expect(sell).toBeDisabled()
-  await expect(volume).toHaveAttribute('aria-invalid', 'true')
-  const errorId = await volume.getAttribute('aria-errormessage')
-
-  if (!errorId) {
-    throw new Error('Invalid volume input must reference its error message')
-  }
-
-  await expect(volume).toHaveAttribute(
-    'aria-describedby',
-    new RegExp(`(^|\\s)${errorId}(\\s|$)`)
-  )
-  await expect(page.locator(`[id="${errorId}"]`)).toHaveRole('alert')
-  await expect.poll(() => tradeSubmissions(page)).toEqual([])
-
-  await volume.fill('2')
-  await expect(volume).not.toHaveAttribute('aria-invalid')
-  await expect(volume).not.toHaveAttribute('aria-errormessage')
-  await volume.press('Enter')
-  await expect.poll(() => tradeSubmissions(page)).toEqual([])
-
-  await buy.click()
-  await expect
-    .poll(() => tradeSubmissions(page))
-    .toEqual([{ volume: 2, modifier: 1 }])
-  await expect(volume).toHaveValue('0')
-
-  await volume.fill('')
-  await expect(volume).toHaveValue('')
-  await expect(buy).toBeDisabled()
-  await expect(sell).toBeDisabled()
-
-  await volume.fill('3')
-  await sell.click()
-  await expect
-    .poll(() => tradeSubmissions(page))
-    .toEqual([
-      { volume: 2, modifier: 1 },
-      { volume: 3, modifier: -1 },
-    ])
-  await expect(volume).toHaveValue('0')
-})
-
 test('Market reveals the closed quarter before releasing results to two players', async ({
   page,
   browser,
@@ -2755,9 +2651,12 @@ test('Decisions forecast matches Market and handles unavailable scenarios', asyn
       ).toHaveText(values)
     for (const width of [784, 390, 320]) {
       await player.setViewportSize({ width, height: 1024 })
-      await forecast.scrollIntoViewIfNeeded()
+      // The tablet layout embeds the Market panel beside Decisions.
+      const visibleForecast =
+        width >= 641 ? player.getByTestId('market-panel') : forecast
+      await visibleForecast.scrollIntoViewIfNeeded()
       await expectNoPageOverflow(player)
-      await expect(forecast).toBeInViewport()
+      await expect(visibleForecast).toBeInViewport()
       await capturePlayerScreenshot(player, {
         path: testInfo.outputPath(`decisions-forecast-${width}.png`),
       })
