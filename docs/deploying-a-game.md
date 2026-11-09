@@ -138,6 +138,36 @@ selects Infisical's `prd` environment. Do not run `prisma:setup:stg` to repair a
 existing database: it begins with `migrate reset`. See
 `apps/demo-game/package.json:scripts` and `apps/demo-game/prisma.config.ts`.
 
+### Upgrading a game to shared registration
+
+Every game that upgrades `@gbl-uzh/platform` to the shared-registration release
+needs one database migration, even if it keeps fixed player counts. The platform
+reads the new `Game` columns on every game lookup, so the upgraded code fails on a
+database that has not been migrated.
+
+1. Bump `@gbl-uzh/platform` (and the platform submodule, if the game uses one).
+2. Copy the platform schema and generate the migration in the game:
+   ```bash
+   pnpm prisma:copy
+   pnpm prisma migrate dev --name shared_registration --schema=prisma/schema
+   ```
+   It adds `registrationToken`, `registrationOpen` and `maxPlayers` to `Game`,
+   `enrollmentKey` to `Player`, and two unique indexes. All are nullable or have
+   a default, so existing rows stay valid. Prisma generates the same SQL as
+   `apps/demo-game/prisma/schema/migrations/20261007000000_shared_registration`.
+3. Regenerate the GraphQL schema (`build:nexus`) before running codegen, because
+   the platform adds registration fields and operations.
+4. Run `prisma migrate deploy` over the direct (non-pooled) connection, then
+   deploy the new code.
+
+Existing games have no registration token, so they stay `FIXED` and keep their
+private player links. Starting a game requires at least one player and a
+configured first period. Any admin or master can manage a game.
+
+To offer the shared link in a game, pass `schemas.RegistrationSchema` to
+`generateBaseMutations`, and keep `req` and `res` in the GraphQL context: the
+browser enrollment cookie is read and set there.
+
 ## Step 5 - Auth for a real deployment
 
 The one-click mock OIDC login is **local-only** (the devcontainer's `mock-oauth2-server` sidecar). All in-repo games use the shared `resolveAdminOidcConfig()` resolver (`packages/platform/src/lib/auth.ts:resolveAdminOidcConfig`). Starter, devrouter, and CI use mock OIDC through `GBL_AUTH_MODE=mock` and `GBL_MOCK_OIDC_*`. Native host real-tenant opt-in requires explicit `GBL_AUTH_MODE=auth0` with ignored `AUTH0_*` values; production defaults to real `AUTH0_*` and forbids mock mode.

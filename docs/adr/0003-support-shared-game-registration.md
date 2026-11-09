@@ -13,9 +13,9 @@ timestamp: "2026-10-27T00:00:00Z"
 
 Admins need to invite a class without knowing the final player count or distributing individual links. A shared invitation must create separate player entries; it must not log everyone into the same player.
 
-Keep two enrollment methods in `Game.registrationMode`: `FIXED` creates players up front, and `SHARED_LINK` creates a player only after completed setup is submitted. The admin UI defaults to `SHARED_LINK`; existing games and API callers that omit the mode retain `FIXED` behavior.
+Keep two enrollment methods, exposed as `Game.registrationMode`: `FIXED` creates players up front, and `SHARED_LINK` creates a player only after completed setup is submitted. The mode is not stored; a game is `SHARED_LINK` exactly when it has a `registrationToken`. The admin UI defaults to `SHARED_LINK`; existing games and API callers that omit the mode retain `FIXED` behavior.
 
-Keep `registrationOpen` separate from the mode. A shared-link game remains a shared-link game when the instructor closes registration. The owner or a master can close and reopen registration while the game is `SCHEDULED`. New enrollment stops when the game starts. Optional `maxPlayers` limits capacity; null means unlimited.
+Keep `registrationOpen` separate from the mode. A shared-link game remains a shared-link game when the instructor closes registration. Any admin or master can close and reopen registration while the game is `SCHEDULED`. New enrollment stops when the game starts. Optional `maxPlayers` limits capacity; null means unlimited.
 
 Participants use `/join/game/[token]` and the existing introduction → bank setup → review flow. Server validation must succeed before a player is created. The QR code encodes exactly the shared URL shown in the admin copy control.
 
@@ -35,7 +35,7 @@ Fixed-count creation and private links remain compatible. One additive migration
 ## References
 
 - [Game model](../game-model.md) and [registration glossary](../glossary.md).
-- `packages/platform/public/schema.prisma:RegistrationMode` and `Game`.
+- `packages/platform/public/schema.prisma:Game` and `packages/platform/src/types/Game.ts:RegistrationMode`.
 - `packages/platform/src/services/GameService.ts:createGame`.
 - `packages/platform/src/services/RegistrationService.ts:registrationInfo`, `registerPlayer`, and `setRegistrationOpen`.
 - `apps/demo-game/src/components/admin/RegistrationPanel.tsx:RegistrationPanel`.

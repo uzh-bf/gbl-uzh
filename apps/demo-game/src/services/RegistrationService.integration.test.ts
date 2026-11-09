@@ -43,7 +43,6 @@ describe.skipIf(process.env.REGISTRATION_DATABASE_TESTS !== '1')(
           name: `Registration test ${randomUUID()}`,
           facts: {},
           ownerId: userId,
-          registrationMode: 'SHARED_LINK',
           registrationOpen: true,
           registrationToken: randomUUID(),
           maxPlayers,
@@ -191,7 +190,6 @@ describe.skipIf(process.env.REGISTRATION_DATABASE_TESTS !== '1')(
           where: { gameId: row.id, type: 'INITIALIZED' },
         })
       ).toBe(players.length)
-      expect(players.every((p) => !p.setupEventPending)).toBe(true)
       expect(
         (await prisma.game.findUniqueOrThrow({ where: { id: row.id } }))
           .registrationOpen
@@ -240,9 +238,6 @@ describe.skipIf(process.env.REGISTRATION_DATABASE_TESTS !== '1')(
       expect(
         await prisma.playerAction.count({ where: { gameId: row.id } })
       ).toBe(0)
-      expect(
-        await prisma.player.findFirstOrThrow({ where: { gameId: row.id } })
-      ).toMatchObject({ setupEventPending: true })
       await expect(join(row.registrationToken!)).resolves.toBe(true)
     })
 
@@ -251,13 +246,14 @@ describe.skipIf(process.env.REGISTRATION_DATABASE_TESTS !== '1')(
       await expect(
         Registration.setRegistrationOpen(row.id, false, context())
       ).rejects.toThrow('FORBIDDEN')
+      // Any instructor may manage a game, not only its owner.
       await expect(
         Registration.setRegistrationOpen(
           row.id,
-          false,
+          true,
           context(undefined, { sub: randomUUID(), role: 'ADMIN' })
         )
-      ).rejects.toThrow('FORBIDDEN')
+      ).resolves.toMatchObject({ registrationOpen: true })
       await expect(
         join(row.registrationToken!, context(), 'x')
       ).rejects.toThrow()
