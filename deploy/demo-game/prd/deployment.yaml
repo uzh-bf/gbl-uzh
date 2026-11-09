@@ -42,6 +42,9 @@ spec:
             - configMapRef:
                 name: demo-game-config
           env:
+            # Cap the V8 heap at 75% of the 512Mi limit; Node's default stops near 256 MB.
+            - name: NODE_OPTIONS
+              value: --max-old-space-size=384
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
