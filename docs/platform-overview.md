@@ -38,7 +38,7 @@ The platform (`packages/platform`) provides generically, with no game code requi
 
 - The relational data model and all DB writes/transactions (`public/schema.prisma`, services)
 - The game state machine and its transitions (`src/services/GameService.ts:activateNextPeriod` / `activateNextSegment`)
-- Player action processing with serializable transactions and retries (`src/services/PlayService.ts:performAction`)
+- Player action processing under row locks, so a whole class can submit at once while ending a segment waits for in-flight actions (`src/services/PlayService.ts:performAction`)
 - XP, levels, achievements: a generic event-driven engine (`src/services/EventService.ts`) — games only seed `Event`/`Achievement` rows and emit events
 - Learning elements (auto-scored multiple-choice quizzes) and story elements (markdown narrative popups), attachable per segment
 - Player readiness flags, countdown timers, a global on/off switch on game facts

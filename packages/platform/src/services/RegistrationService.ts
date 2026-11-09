@@ -46,19 +46,28 @@ export async function registrationTransaction<T>(
   }
 }
 
-// Serializes all roster changes of one game: enrollment, opening or closing
-// registration, and the initial start. Take it as the first statement of a
-// registrationTransaction so every later read sees the latest committed roster.
+// Exclusive lock: serializes changes to one game's roster and lifecycle
+// (enrollment, registration controls, the initial start, ending a segment).
+// Shared lock: player actions, which may run side by side but must not
+// interleave with a lifecycle change. Take it as the first statement of a
+// read-committed transaction so every later read sees the latest commit.
 export async function lockGame(
   tx: Prisma.TransactionClient,
-  where: { id: number } | { registrationToken: string }
+  where: { id: number } | { registrationToken: string },
+  mode: 'UPDATE' | 'SHARE' = 'UPDATE'
 ) {
-  const rows =
-    'id' in where
-      ? await tx.$queryRaw<{ id: number }[]>`
-          SELECT id FROM "Game" WHERE id = ${where.id} FOR UPDATE`
-      : await tx.$queryRaw<{ id: number }[]>`
-          SELECT id FROM "Game" WHERE "registrationToken" = ${where.registrationToken} FOR UPDATE`
+  // Each game embeds its own generated Prisma client, which does not recognize
+  // a Prisma.raw fragment built by the platform's client; keep the SQL literal.
+  let rows: { id: number }[]
+  if (!('id' in where))
+    rows = await tx.$queryRaw`
+      SELECT id FROM "Game" WHERE "registrationToken" = ${where.registrationToken} FOR UPDATE`
+  else if (mode === 'SHARE')
+    rows = await tx.$queryRaw`
+      SELECT id FROM "Game" WHERE id = ${where.id} FOR SHARE`
+  else
+    rows = await tx.$queryRaw`
+      SELECT id FROM "Game" WHERE id = ${where.id} FOR UPDATE`
   return rows[0]?.id ?? null
 }
 

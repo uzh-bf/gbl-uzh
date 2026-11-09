@@ -164,6 +164,11 @@ Existing games have no registration token, so they stay `FIXED` and keep their
 private player links. Starting a game requires at least one player and a
 configured first period. Any admin or master can manage a game.
 
+Player actions are accepted only while the game is `RUNNING` and for its active
+period and segment; others fail with `ACTIONS_NOT_ALLOWED`. Each action holds a
+shared lock on its game row, so an `Actions.updateDBAfterApply` hook must not
+update that `Game` row: simultaneous actions would deadlock.
+
 To offer the shared link in a game, pass `schemas.RegistrationSchema` to
 `generateBaseMutations`, and keep `req` and `res` in the GraphQL context: the
 browser enrollment cookie is read and set there.

@@ -533,6 +533,9 @@ export async function activateNextPeriod(
 
       updatedGame = await ctx.prisma.$transaction(
         async (tx) => {
+          // Waits for in-flight player actions (shared lock) and keeps new ones
+          // out until the segment's results are computed and committed.
+          await lockGame(tx, { id: gameId })
           if (services.Segment.updateDBBeforeActivation) {
             await services.Segment.updateDBBeforeActivation(tx, {
               gameId,
@@ -1063,6 +1066,9 @@ export async function activateNextSegment(
 
       finalTransactionResult = await ctx.prisma.$transaction(
         async (tx) => {
+          // Waits for in-flight player actions (shared lock) and keeps new ones
+          // out until the segment's results are computed and committed.
+          await lockGame(tx, { id: gameId })
           if (services.Segment.updateDBBeforeActivation) {
             await services.Segment.updateDBBeforeActivation(tx, {
               gameId,
