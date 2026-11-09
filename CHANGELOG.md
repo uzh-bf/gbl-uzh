@@ -2,6 +2,76 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.5.0](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.51...v0.5.0) (2026-11-09)
+
+
+### Features
+
+* **central-bank:** example monetary-policy game ([#165](https://github.com/uzh-bf/gbl-uzh/issues/165)) ([dc29418](https://github.com/uzh-bf/gbl-uzh/commit/dc2941822ec813bad2ef41f30d9fbd014020cf3e))
+* **demo-game:** deploy STG and PRD from GitOps overlays pinned by CI ([#233](https://github.com/uzh-bf/gbl-uzh/issues/233)) ([3813b54](https://github.com/uzh-bf/gbl-uzh/commit/3813b549a37783a987e9189a4225ce45fdb4b6fb))
+* **demo-game:** dice roll before result reveal on next segment ([#218](https://github.com/uzh-bf/gbl-uzh/issues/218)) ([a0ce9f9](https://github.com/uzh-bf/gbl-uzh/commit/a0ce9f99b031c52bf0e1b0b4581e67c912adb78c))
+* **demo-game:** migrate from GraphQL to tRPC v11 ([#188](https://github.com/uzh-bf/gbl-uzh/issues/188)) ([464890d](https://github.com/uzh-bf/gbl-uzh/commit/464890de4685cd87e072e32c01369158a1467608))
+* **demo-game:** mobile redesign - no rewards yet ([#211](https://github.com/uzh-bf/gbl-uzh/issues/211)) ([1c91222](https://github.com/uzh-bf/gbl-uzh/commit/1c912221763357ebd4d61510db0f42831fc2fccf))
+* **demo-game:** slider improvements, admin reports, roll and sign in ([#214](https://github.com/uzh-bf/gbl-uzh/issues/214)) ([ffaf3a0](https://github.com/uzh-bf/gbl-uzh/commit/ffaf3a02fb9339f8b00689a787343c5c1eb2f008))
+* **demo-game:** support English and Swiss Standard German with next-intl ([#234](https://github.com/uzh-bf/gbl-uzh/issues/234)) ([063fd46](https://github.com/uzh-bf/gbl-uzh/commit/063fd4690669d345bf2fc6492de275c627c0f022))
+* **devcontainer:** non-technical onboarding with starter config, guide, and doctor skill ([#157](https://github.com/uzh-bf/gbl-uzh/issues/157)) ([d539fd8](https://github.com/uzh-bf/gbl-uzh/commit/d539fd8ed6321f98c3858f822be0895007a96429))
+* **platform, demo-game:** finish period without a next period and finish game button ([#232](https://github.com/uzh-bf/gbl-uzh/issues/232)) ([17f33eb](https://github.com/uzh-bf/gbl-uzh/commit/17f33eb78cd9ca6befc167e28870114f30d0e384))
+* **platform:** Add shared game registration with QR codes and private return links ([#227](https://github.com/uzh-bf/gbl-uzh/issues/227)) ([864c070](https://github.com/uzh-bf/gbl-uzh/commit/864c070a2662870a85547c864f451a2238c05adc))
+* **platform:** add tRPC kernel with procedures, DTOs and tests ([#187](https://github.com/uzh-bf/gbl-uzh/issues/187)) ([3067e43](https://github.com/uzh-bf/gbl-uzh/commit/3067e439a28c3ef79eaa697fb4cf4f8874bb398c))
+* **ui:** extract shared UI and prepare public package ([6159395](https://github.com/uzh-bf/gbl-uzh/commit/615939598fbd9a85e25ea515004b9a5acfa6d6c9))
+
+
+### Bug Fixes
+
+* **demo-game:** adding missing migration for achievments ([#213](https://github.com/uzh-bf/gbl-uzh/issues/213)) ([198238c](https://github.com/uzh-bf/gbl-uzh/commit/198238c39b7f65a89ad217a88c84e9f0e043b083))
+* **demo-game:** fixed navigation bar, more compact ([#215](https://github.com/uzh-bf/gbl-uzh/issues/215)) ([a8a109e](https://github.com/uzh-bf/gbl-uzh/commit/a8a109eb9188df6cdecf866979613c0e3ee36ffa))
+* **platform:** let a whole class submit actions at once ([#236](https://github.com/uzh-bf/gbl-uzh/issues/236)) ([3ca50fa](https://github.com/uzh-bf/gbl-uzh/commit/3ca50fa36e944fdb6edbb95c8bf28cd6106ef0c3))
+* **playwright:** repair the two demo-game specs failing on dev ([#237](https://github.com/uzh-bf/gbl-uzh/issues/237)) ([a116254](https://github.com/uzh-bf/gbl-uzh/commit/a116254862c146fa5ca22172b976d9f581e39ea1))
+
+
+### Documentation
+
+* add llm wiki and game-building agent skills ([#156](https://github.com/uzh-bf/gbl-uzh/issues/156)) ([0543bc8](https://github.com/uzh-bf/gbl-uzh/commit/0543bc8456107511308139083b8a6ee2f41adeab))
+* **demo-game:** update auth setup guide ([#155](https://github.com/uzh-bf/gbl-uzh/issues/155)) ([668372c](https://github.com/uzh-bf/gbl-uzh/commit/668372c2db68ef5b2261be3e2214f4299a8fc19e))
+* deploy guide, scaffold decontamination, and playwright refinements from dogfooding ([#164](https://github.com/uzh-bf/gbl-uzh/issues/164)) ([e8eb03b](https://github.com/uzh-bf/gbl-uzh/commit/e8eb03bcd94467865fe6fffe3fe2e5070e5d9471))
+* improve onboarding and skills ([#159](https://github.com/uzh-bf/gbl-uzh/issues/159)) ([4b00d75](https://github.com/uzh-bf/gbl-uzh/commit/4b00d756948b24c5972f4da17ffe2d1758d6de54))
+* **wiki:** external coding-agent onboarding path and first-game brief ([#158](https://github.com/uzh-bf/gbl-uzh/issues/158)) ([b9ec717](https://github.com/uzh-bf/gbl-uzh/commit/b9ec717c3729ae19f13d3e51a4ab48e11bc3970c))
+
+
+### Build and CI
+
+* add isolated Startinvest ARM staging image ([#207](https://github.com/uzh-bf/gbl-uzh/issues/207)) ([ccf9043](https://github.com/uzh-bf/gbl-uzh/commit/ccf904332bd7482e585c027b95e7ccd8df444eb1))
+* **demo-game:** upgrade to React 19 / Next 16 / Tailwind 4 / design-system v4 ([#150](https://github.com/uzh-bf/gbl-uzh/issues/150)) ([f4948b1](https://github.com/uzh-bf/gbl-uzh/commit/f4948b1ede92dcf5b4aea5854ee039309efbfcee))
+* **demo-game:** use native hosted ARM builds ([#183](https://github.com/uzh-bf/gbl-uzh/issues/183)) ([85d7bae](https://github.com/uzh-bf/gbl-uzh/commit/85d7bae06cc7cf1ed7df6aae9c6e7b33c5b2fac8))
+* **format:** standardize Prettier 3 toolchain ([#177](https://github.com/uzh-bf/gbl-uzh/issues/177)) ([4976927](https://github.com/uzh-bf/gbl-uzh/commit/49769271b37d6b3aaa4ba1ac3981389addb24876))
+* **prisma:** migrate platform and games to Prisma 7 ([#181](https://github.com/uzh-bf/gbl-uzh/issues/181)) ([ca9e403](https://github.com/uzh-bf/gbl-uzh/commit/ca9e40388196c793dc9a0c41b087a27d927c89e3))
+* **typescript:** enable TypeScript 7 native checks ([#182](https://github.com/uzh-bf/gbl-uzh/issues/182)) ([254606c](https://github.com/uzh-bf/gbl-uzh/commit/254606cdaff86254387a5a9193a0d35a1cf72d76))
+* **typescript:** prepare workspace for native compiler ([#178](https://github.com/uzh-bf/gbl-uzh/issues/178)) ([b02a356](https://github.com/uzh-bf/gbl-uzh/commit/b02a356382dd46f5c8b64651e5e1e6a2088b6d79))
+* **website:** upgrade to React 19 and Next.js 16 ([#180](https://github.com/uzh-bf/gbl-uzh/issues/180)) ([8e5e663](https://github.com/uzh-bf/gbl-uzh/commit/8e5e66366c1aa151cb1638175a6a9bce3567d523))
+
+
+### Enhancements
+
+* **auth:** standardize all dev mode variants ([#185](https://github.com/uzh-bf/gbl-uzh/issues/185)) ([5852341](https://github.com/uzh-bf/gbl-uzh/commit/5852341dc3db37bfd6b2501116124a5f20e9a60b))
+* **demo-game:** some improvements, like charts, login, namings etc. ([#216](https://github.com/uzh-bf/gbl-uzh/issues/216)) ([18a744e](https://github.com/uzh-bf/gbl-uzh/commit/18a744ec0258a13834c66aa25d89fad78c54c90e))
+* **devcontainer:** adopt managed devrouter workspaces ([#169](https://github.com/uzh-bf/gbl-uzh/issues/169)) ([5cac12c](https://github.com/uzh-bf/gbl-uzh/commit/5cac12cfc2813e7b68b10649a43a1fd942e2dd79))
+* **dev:** run a game natively with `pnpm dev [game]` ([#206](https://github.com/uzh-bf/gbl-uzh/issues/206)) ([6bab3ed](https://github.com/uzh-bf/gbl-uzh/commit/6bab3ed73b6a60f6ae9f1c2eaed8e0dd28acac99))
+* **platform:** integrate stakeholder fixes, skills improvements, and rate-wars example ([#160](https://github.com/uzh-bf/gbl-uzh/issues/160)) ([e6879fc](https://github.com/uzh-bf/gbl-uzh/commit/e6879fc97b53b5e7d70f64302bdb4f483769e28a))
+
+
+### Other
+
+* add basic AGENTS.md ([c9a6f75](https://github.com/uzh-bf/gbl-uzh/commit/c9a6f757cdeba67f42a6096629c8abe2d7555eb9))
+* **ci:** add CI type gate, devcontainer/devrouter updates and migration docs ([#189](https://github.com/uzh-bf/gbl-uzh/issues/189)) ([e0daac9](https://github.com/uzh-bf/gbl-uzh/commit/e0daac96d0eb8ac4e7ea7e49d801b89673427c20))
+* **demo-game:** add Playwright game-flow coverage ([66ed4e0](https://github.com/uzh-bf/gbl-uzh/commit/66ed4e01c00c525ae0cc1921fc3c63eb4a59a445))
+* **demo-game:** adjusting design, style and layout to tablet screen ([#217](https://github.com/uzh-bf/gbl-uzh/issues/217)) ([07f296f](https://github.com/uzh-bf/gbl-uzh/commit/07f296f389192f352026f651c295bd9ce840f4bb))
+* lockfile maintenance ([934835b](https://github.com/uzh-bf/gbl-uzh/commit/934835be5ec812973d7b2020e9d161562a9cd369))
+
+
+### Deployment
+
+* **demo-game:** pin stg images to 3813b54 [skip ci] ([1a5d12f](https://github.com/uzh-bf/gbl-uzh/commit/1a5d12f32a9cfc05d158e812b7d8e08f619e507d))
+
 ### [0.4.51](https://github.com/uzh-bf/gbl-uzh/compare/v0.4.50...v0.4.51) (2026-04-14)
 
 
