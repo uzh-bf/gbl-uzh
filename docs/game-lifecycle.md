@@ -68,7 +68,7 @@ Independent of status: story elements attached to a newly activated segment appe
 
 ## Registration concurrency
 
-`RegistrationService.ts:registrationTransaction` runs enrollment, registration controls, and initial start at serializable isolation with bounded conflict retries. Each writes the game row; initial start reads players and creates results/actions inside that same transaction. A concurrent join either receives initial results or is rejected as closed. Capacity and per-browser uniqueness are enforced server-side. Registration changes publish `REGISTRATION_CHANGED` after commit; the admin's existing event subscription refetches its roster, with polling as fallback. Later lifecycle transitions retain the dice-reveal gates below.
+`RegistrationService.ts:registrationTransaction` runs enrollment, registration controls, and initial start at read-committed isolation. Each first locks the game row (`lockGame`), so simultaneous joins queue instead of failing; initial start reads players and creates results/actions inside that same transaction. A concurrent join either receives initial results or is rejected as closed. Capacity and per-browser uniqueness are enforced server-side. Registration changes publish `REGISTRATION_CHANGED` after commit; the admin's existing event subscription refetches its roster, with polling as fallback. Later lifecycle transitions retain the dice-reveal gates below.
 
 ## Coordination mechanics
 

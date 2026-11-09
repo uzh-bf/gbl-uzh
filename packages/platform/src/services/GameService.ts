@@ -15,6 +15,7 @@ import {
 import * as EventService from './EventService.js'
 import {
   assertGameManager,
+  lockGame,
   registrationTransaction,
 } from './RegistrationService.js'
 
@@ -442,6 +443,7 @@ export async function activateNextPeriod(
     // - Done: the game facts are updated on user interaction in PlayService
     case DB.GameStatus.SCHEDULED: {
       const started = await registrationTransaction(ctx.prisma, async (tx) => {
+        await lockGame(tx, { id: gameId })
         const fresh = await tx.game.findUnique({
           where: { id: gameId },
           include: {

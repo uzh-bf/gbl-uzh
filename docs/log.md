@@ -1,5 +1,9 @@
 # Log
 
+## 2026-11-09
+
+**Update**: [ADR-0005](adr/0005-serialize-enrollment-with-initial-game-start.md), [Game lifecycle](game-lifecycle.md) - roster changes now lock the game row at read-committed isolation instead of relying on serializable retries, so a whole class joining at once queues instead of failing.
+
 ## 2026-10-27
 
 **Creation**: [Shared registration ADRs](adr/0003-support-shared-game-registration.md), [browser identity and recovery](adr/0004-identify-browser-enrollment-and-protect-return-links.md), [atomic enrollment/start](adr/0005-serialize-enrollment-with-initial-game-start.md), and a [registration glossary](glossary.md) - recorded the agreed design, alternatives, and consequences and linked the decision records from the wiki index.
