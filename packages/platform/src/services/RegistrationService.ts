@@ -63,14 +63,16 @@ export async function lockGame(
 ) {
   // Each game embeds its own generated Prisma client, which does not recognize
   // a Prisma.raw fragment built by the platform's client; keep the SQL literal.
-  const rows = !('id' in where)
-    ? await tx.$queryRaw<{ id: number }[]>`
-        SELECT id FROM "Game" WHERE "registrationToken" = ${where.registrationToken} FOR UPDATE`
-    : mode === 'SHARE'
-      ? await tx.$queryRaw<{ id: number }[]>`
-          SELECT id FROM "Game" WHERE id = ${where.id} FOR SHARE`
-      : await tx.$queryRaw<{ id: number }[]>`
-          SELECT id FROM "Game" WHERE id = ${where.id} FOR UPDATE`
+  let rows: { id: number }[]
+  if (!('id' in where))
+    rows = await tx.$queryRaw`
+      SELECT id FROM "Game" WHERE "registrationToken" = ${where.registrationToken} FOR UPDATE`
+  else if (mode === 'SHARE')
+    rows = await tx.$queryRaw`
+      SELECT id FROM "Game" WHERE id = ${where.id} FOR SHARE`
+  else
+    rows = await tx.$queryRaw`
+      SELECT id FROM "Game" WHERE id = ${where.id} FOR UPDATE`
   return rows[0]?.id ?? null
 }
 
