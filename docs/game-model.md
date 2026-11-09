@@ -65,7 +65,7 @@ Unique per `(periodIx, segmentIx, playerId, type)`. The **current** `SEGMENT_END
 
 Two different input channels — do not confuse them:
 
-- **`PlayerAction`** (+ the `Actions` reducer): what players do **while a segment is RUNNING**. Every `performAction` call runs the game's `Actions.apply` reducer inside a serializable transaction, optionally updates the current `SEGMENT_END` result facts, and always appends a `PlayerAction` audit row (`PlayService.ts:performAction`). The demo game uses a single action type whose payload is the bank/bonds/stocks allocation.
+- **`PlayerAction`** (+ the `Actions` reducer): what players do **while a segment is RUNNING**. Every `performAction` call runs the game's `Actions.apply` reducer inside a read-committed transaction that holds a shared lock on the game row and a lock on the player's own result, optionally updates the current `SEGMENT_END` result facts, and always appends a `PlayerAction` audit row (`PlayService.ts:performAction`). The demo game uses a single action type whose payload is the bank/bonds/stocks allocation.
 - **`PlayerDecision`**: explicit choices captured **outside running segments**, with `type` `PREPARATION` or `CONSOLIDATION` (must match the game's current status; unique per player+period+type; `PlayService.ts:saveDecisions`). They are handed to `PeriodResult.end` as `consolidationDecisions` when a period is finalized. The demo game does not use this channel — it is available for games with explicit planning/closing phases.
 
 ## Gamification: XP, levels, achievements

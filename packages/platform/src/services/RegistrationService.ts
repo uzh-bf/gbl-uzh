@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid'
 import { createHash } from 'node:crypto'
 import { parseCookies, setCookie } from 'nookies'
 import type * as yup from 'yup'
-import type { Prisma, PrismaClient } from '../generated/prisma/client.js'
+import { Prisma, type PrismaClient } from '../generated/prisma/client.js'
 import type { CtxWithPrisma } from '../types.js'
 import { isSecureRequest, loginAsTeam } from './AccountService.js'
 import * as EventService from './EventService.js'
@@ -51,19 +51,23 @@ export async function registrationTransaction<T>(
   }
 }
 
-// Serializes all roster changes of one game: enrollment, opening or closing
-// registration, and the initial start. Take it as the first statement of a
-// registrationTransaction so every later read sees the latest committed roster.
+// Exclusive lock: serializes changes to one game's roster and lifecycle
+// (enrollment, registration controls, the initial start, ending a segment).
+// Shared lock: player actions, which may run side by side but must not
+// interleave with a lifecycle change. Take it as the first statement of a
+// read-committed transaction so every later read sees the latest commit.
 export async function lockGame(
   tx: Prisma.TransactionClient,
-  where: { id: number } | { registrationToken: string }
+  where: { id: number } | { registrationToken: string },
+  mode: 'UPDATE' | 'SHARE' = 'UPDATE'
 ) {
+  const lock = Prisma.raw(mode === 'SHARE' ? 'FOR SHARE' : 'FOR UPDATE')
   const rows =
     'id' in where
       ? await tx.$queryRaw<{ id: number }[]>`
-          SELECT id FROM "Game" WHERE id = ${where.id} FOR UPDATE`
+          SELECT id FROM "Game" WHERE id = ${where.id} ${lock}`
       : await tx.$queryRaw<{ id: number }[]>`
-          SELECT id FROM "Game" WHERE "registrationToken" = ${where.registrationToken} FOR UPDATE`
+          SELECT id FROM "Game" WHERE "registrationToken" = ${where.registrationToken} ${lock}`
   return rows[0]?.id ?? null
 }
 

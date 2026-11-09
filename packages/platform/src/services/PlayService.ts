@@ -9,6 +9,7 @@ import {
   BaseUserNotificationType as UserNotificationType,
 } from '../types.js'
 import * as EventService from './EventService.js'
+import { lockGame } from './RegistrationService.js'
 
 type Context = CtxWithPrisma<DB.PrismaClient>
 
@@ -40,12 +41,21 @@ export async function performAction<ActionTypes>(
   // All reads and writes are now in a single atomic transaction.
   const res = ctx.prisma.$transaction(
     async (tx) => {
+      // Players act side by side under the shared game lock; ending a segment
+      // takes the exclusive lock, so an action commits wholly before or after it.
+      await lockGame(tx, { id: args.gameId }, 'SHARE')
+      // Two submissions by the same player apply one after the other.
+      await tx.$queryRaw`
+        SELECT id FROM "PlayerResult"
+        WHERE "periodIx" = ${args.periodIx} AND "segmentIx" = ${args.segmentIx}
+          AND "playerId" = ${args.playerId}::uuid AND type = 'SEGMENT_END'
+        FOR UPDATE`
       const previousResult = await tx.playerResult.findUnique({
         where: {
           periodIx_segmentIx_playerId_type,
         },
         include: {
-          game: true,
+          game: { include: { activePeriod: true } },
           segment: true,
           period: true,
           player: true,
@@ -62,7 +72,13 @@ export async function performAction<ActionTypes>(
         return null
       }
 
-      if (previousResult.game.status !== DB.GameStatus.RUNNING) {
+      // The caller read the active round before taking the lock; reject the
+      // action if a segment change committed in between.
+      if (
+        previousResult.game.status !== DB.GameStatus.RUNNING ||
+        previousResult.game.activePeriodIx !== args.periodIx ||
+        previousResult.game.activePeriod?.activeSegmentIx !== args.segmentIx
+      ) {
         throw new Error('ACTIONS_NOT_ALLOWED')
       }
 
@@ -190,9 +206,11 @@ export async function performAction<ActionTypes>(
       return updatedResult
     },
     {
-      // Use Serializable isolation level for the strongest guarantees
-      // This prevents phantom reads and other concurrency issues.
-      isolationLevel: DB.Prisma.TransactionIsolationLevel.Serializable,
+      // Row locks above replace serializable snapshots, which aborted most
+      // submissions when a whole class submitted within the same second.
+      isolationLevel: DB.Prisma.TransactionIsolationLevel.ReadCommitted,
+      // A class-sized burst queues for pooled connections.
+      maxWait: 30000,
       // Set an appropriate timeout
       // Prevents long-running transactions from blocking other operations.
       timeout: 10000, // 10 seconds
@@ -226,15 +244,10 @@ export async function performActionWithRetry<ActionTypes>(
     try {
       return await performAction(args, ctx, { services })
     } catch (error: any) {
-      if (
-        error.isPrismaError &&
-        (error.code === 'P2025' || error.code === 'P2034')
-      ) {
-        retries++
-        // Wait a bit before retrying
-        await new Promise((res) => setTimeout(res, 50 + Math.random() * 50))
-      }
-      throw error // Re-throw if it's not a concurrency issue
+      // P2034 is a write conflict or deadlock, which a fresh attempt resolves.
+      if (error?.code !== 'P2034' || retries + 1 >= maxRetries) throw error
+      retries++
+      await new Promise((res) => setTimeout(res, 50 + Math.random() * 50))
     }
   }
   throw new Error('Failed to perform action after multiple retries')
