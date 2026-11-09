@@ -11,7 +11,7 @@ resources:
 images:
   - name: demo-game
     newName: ghcr.io/uzh-bf/gbl-uzh/demo-game
-    digest: sha256:706c2e2e5c123d2aee188d502b00d0137c7eba16d7fd31835505425efa522c97
+    digest: sha256:425b771cfc5391a86ad01bd4863e2150f06b27f40392ca887f4bd918920cb381
   - name: demo-game-migration
     newName: ghcr.io/uzh-bf/gbl-uzh/demo-game
-    digest: sha256:f7ce154c8b72e497747189a59a84ad1f4f6697a9ae26f7abee4af88ae013d227
+    digest: sha256:8fa0c4badc9b22f325ddf30d7aeed2c9c1170c89485982c1a80c7ed35b07812b
