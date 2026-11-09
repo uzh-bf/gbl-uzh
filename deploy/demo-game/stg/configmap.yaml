@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-game-config
+  labels:
+    app.kubernetes.io/name: demo-game
+data:
+  NODE_ENV: production
+  NEXTAUTH_URL: https://startinvest.stg.df-app.ch
+  GBL_AUTH_MODE: auth0
