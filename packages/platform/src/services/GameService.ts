@@ -24,7 +24,7 @@ type Context = CtxWithPrisma<PrismaClient>
 interface CreateGameArgs<T> {
   name: string
   playerCount?: number | null
-  registrationMode?: DB.RegistrationMode | null
+  registrationMode?: 'FIXED' | 'SHARED_LINK' | null
   maxPlayers?: number | null
   facts: T
 }
@@ -61,7 +61,6 @@ export async function createGame<TFacts>(
   return ctx.prisma.game.create({
     data: {
       name,
-      registrationMode: mode,
       registrationToken: mode === 'SHARED_LINK' ? nanoid() : null,
       registrationOpen: mode === 'SHARED_LINK',
       maxPlayers: mode === 'SHARED_LINK' ? maxPlayers : null,
@@ -452,12 +451,11 @@ export async function activateNextPeriod(
           },
         })
         if (!fresh) throw new Error('GAME_NOT_FOUND')
-        assertGameManager(ctx, fresh.ownerId)
+        assertGameManager(ctx)
         if (fresh.status !== 'SCHEDULED')
           throw new Error('GAME_ALREADY_STARTED')
         if (!fresh.players.length) throw new Error('NO_PLAYERS')
-        if (!fresh.periods[0]?.segments.length)
-          throw new Error('GAME_NOT_CONFIGURED')
+        if (!fresh.periods[0]) throw new Error('GAME_NOT_CONFIGURED')
         const updatedGame_ = await tx.game.update({
           where: { id: gameId },
           data: {
@@ -487,7 +485,7 @@ export async function activateNextPeriod(
         await Promise.all(extras)
         const notifications: Array<() => void> = []
         for (const player of fresh.players.filter(
-          (player) => player.setupEventPending
+          (player) => player.enrollmentKey != null
         )) {
           await EventService.receiveEvents({
             events: [
@@ -509,10 +507,6 @@ export async function activateNextPeriod(
                 EventService.publishUserNotification(target, events)
               )
             },
-          })
-          await tx.player.update({
-            where: { id: player.id },
-            data: { setupEventPending: false },
           })
         }
         return { game: updatedGame_, notifications }
@@ -877,9 +871,9 @@ export async function finishGame(gameId: number, ctx: Context) {
   const { game, changed } = await ctx.prisma.$transaction(async (tx) => {
     const current = await tx.game.findUniqueOrThrow({
       where: { id: gameId },
-      select: { ownerId: true, status: true, version: true },
+      select: { status: true, version: true },
     })
-    assertGameManager(ctx, current.ownerId)
+    assertGameManager(ctx)
     if (current.status !== 'RESULTS' && current.status !== 'COMPLETED')
       throw new Error('Game can only be finished from period results.')
 

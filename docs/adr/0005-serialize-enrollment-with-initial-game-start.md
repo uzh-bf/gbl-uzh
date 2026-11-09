@@ -18,7 +18,7 @@ Run registration, registration controls, and the first `SCHEDULED → PREPARATIO
 
 A whole class may join within the same second after scanning the QR code. The row lock makes these joins wait in a short queue; each holds the lock for a few milliseconds. Transactions wait up to 30 seconds for a pooled database connection so that such a burst queues instead of failing.
 
-Initial start reads the current roster and period configuration inside its transaction. It requires at least one player and a configured first period with a segment, closes registration, initializes every accepted player's results and associated actions, and advances the game status atomically. A new join racing with start either commits first and receives complete starting results, or is rejected as closed. Failed initialization rolls back the start, including its registration change.
+Initial start reads the current roster and period configuration inside its transaction. It requires at least one player and a configured first period, closes registration, initializes every accepted player's results and associated actions, and advances the game status atomically. A new join racing with start either commits first and receives complete starting results, or is rejected as closed. Failed initialization rolls back the start, including its registration change.
 
 Publish registration and lifecycle notifications after commit. The existing admin subscription refetches on matching events and retains polling as a fallback.
 
@@ -34,7 +34,7 @@ Publish registration and lifecycle notifications after commit. The existing admi
 
 Joins to the same game queue on its row lock instead of failing; 500 simultaneous joins completed in a local load test. A deadlock or serialization error still retries a few times. The enrollment identity makes client retries safe even when the original request committed but its response was lost.
 
-Completed registration sets `setupEventPending`. Setup achievements require a period relation, but registration may happen before periods exist. Initial start therefore processes the pending setup event using period zero and clears the flag in the same transaction; reward notifications are also deferred until commit. Profile edits recognize registered players as already set up.
+Setup achievements require a period relation, but registration may happen before periods exist. Initial start therefore processes the setup event of every player who enrolled through the shared link (`Player.enrollmentKey` is set) using period zero, in the same transaction; reward notifications are also deferred until commit. Profile edits recognize registered players as already set up.
 
 This transaction change is limited to initial start. Later transitions keep their existing `Segment.validateAdvance` checks and dice-reveal requirements.
 

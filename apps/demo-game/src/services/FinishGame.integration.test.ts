@@ -61,7 +61,6 @@ test.skipIf(process.env.FINISH_GAME_DATABASE_TESTS !== '1')(
       for (const user of [
         undefined,
         { sub: owner.id, role: 'PLAYER' },
-        { sub: randomUUID(), role: 'ADMIN' },
       ]) {
         await expect(
           finishGame(game.id, { prisma, user } as never)

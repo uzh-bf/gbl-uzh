@@ -27,6 +27,6 @@ These terms describe the shared-registration decisions in [ADR-0003](adr/0003-su
 | Private return link                | `/join/[token]`, using `Player.token` to sign into an existing player. It is a bearer credential and can be used on another browser or device.                                                           |
 | Resume                             | Recover the existing player session without creating another entry or changing its profile. Closure and capacity do not block recognized players from resuming.                                          |
 | Starting roster                    | The accepted players read inside the initial start transaction; each receives starting results and associated initialization actions.                                                                    |
-| Pending setup event                | `Player.setupEventPending` records completed registration whose setup rewards will be processed when period zero starts.                                                                                 |
+| Pending setup event                | Setup completed through the shared link, recognized by `Player.enrollmentKey`; its rewards are processed when period zero starts.                                                                        |
 
 Source: `packages/platform/public/schema.prisma`, `packages/platform/src/services/RegistrationService.ts:registrationInfo`, `registerPlayer`, and `resumeRegistration`; see [Game model](game-model.md) and [Game lifecycle](game-lifecycle.md) for the full contracts.
