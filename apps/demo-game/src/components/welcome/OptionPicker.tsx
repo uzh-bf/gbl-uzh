@@ -4,7 +4,6 @@ import { Check } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useState, type ReactElement } from 'react'
-import { LanguageSwitch } from '~/i18n/Language'
 import {
   WelcomeActionButton,
   WelcomeTextButton,
@@ -62,7 +61,6 @@ export default function OptionPicker({
                 {t('shared.actions.cancel')}
               </WelcomeTextButton>
             </Dialog.Close>
-            <LanguageSwitch />
           </div>
           <Dialog.Description className="sr-only">
             {t('player.setup.pickerHint')}
