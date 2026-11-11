@@ -1,0 +1,40 @@
+name: OCR final review
+
+on:
+  pull_request_target:
+    types:
+      [
+        opened,
+        synchronize,
+        reopened,
+        closed,
+        ready_for_review,
+        converted_to_draft,
+      ]
+  issue_comment:
+    types: [created]
+
+# Newer events for the same pull request replace obsolete runs. Other
+# comments get a unique group so they never cancel a running review.
+concurrency:
+  group: >-
+    final-ai-review-${{ (github.event_name == 'pull_request_target' &&
+    format('pr-{0}', github.event.pull_request.number)) ||
+    (github.event_name == 'issue_comment' &&
+    github.event.comment.body == '/final-review' &&
+    format('cmd-{0}', github.event.issue.number)) || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  checks: write
+  contents: read
+  issues: read
+  pull-requests: write
+  statuses: write
+
+jobs:
+  final:
+    uses: uzh-bf/ocr-review/.github/workflows/final-review.yml@6dcd396eb0a74a3949a2b027f91e6f8a589f9418
+    secrets:
+      MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}

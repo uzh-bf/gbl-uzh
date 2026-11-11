@@ -1,0 +1,15 @@
+{
+  "schema": "ocr-review-config/v1",
+  "context_roots": ["AGENTS.md", "README.md", "docs", ".agents/skills"],
+  "docs_libraries": [
+    "/vercel/next.js",
+    "/reactjs/react.dev",
+    "/microsoft/typescript",
+    "/prisma/web",
+    "/apollographql/apollo-client",
+    "/graphql-nexus/nexus",
+    "/nextauthjs/next-auth"
+  ],
+  "plan_globs": ["project/**/*-plan.md"],
+  "exclude": ["cypress/**", "playwright/**", "docs/**", "project/**"]
+}
