@@ -15,7 +15,7 @@ import { twMerge } from 'tailwind-merge'
 import RegistrationPanel from '~/components/admin/RegistrationPanel'
 import { contentText } from '~/i18n/content'
 import { statusKeys } from '~/i18n/labels'
-import { MessageText, useLanguage } from '~/i18n/Language'
+import { LanguageSwitch, MessageText, useLanguage } from '~/i18n/Language'
 import { NUM_MONTHS_PER_SEGMENT } from '~/lib/constants'
 
 import { useMutation, useQuery, useSubscription } from '@apollo/client'
@@ -1000,40 +1000,43 @@ function ManageGame() {
           </div>
         </div>
 
-        <form
-          hidden={game.status === GameStatus.Completed}
-          onSubmit={handleCountdownSubmit(onCountdownSubmit)}
-        >
-          <Card className="flex flex-col">
-            <CardHeader>
-              <CardTitle>{t('manage.controls.countdown')}</CardTitle>
-              <CardDescription>
-                {t('manage.controls.countdownHint')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div data-cy="countdown-seconds">
-                <AdminInputField
-                  label={t('manage.controls.countdownSeconds')}
-                  name="countdownSeconds"
-                  type="number"
-                  register={registerCountdown}
-                  error={errorsCountdown.countdownSeconds}
-                  required
-                />
-              </div>
-              {/* TODO(JJ): @RS Do we want to show the following? If no we
+        <div className="flex flex-col gap-4" data-cy="admin-countdown-controls">
+          <LanguageSwitch showLabel />
+          <form
+            hidden={game.status === GameStatus.Completed}
+            onSubmit={handleCountdownSubmit(onCountdownSubmit)}
+          >
+            <Card className="flex flex-col">
+              <CardHeader>
+                <CardTitle>{t('manage.controls.countdown')}</CardTitle>
+                <CardDescription>
+                  {t('manage.controls.countdownHint')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div data-cy="countdown-seconds">
+                  <AdminInputField
+                    label={t('manage.controls.countdownSeconds')}
+                    name="countdownSeconds"
+                    type="number"
+                    register={registerCountdown}
+                    error={errorsCountdown.countdownSeconds}
+                    required
+                  />
+                </div>
+                {/* TODO(JJ): @RS Do we want to show the following? If no we
                 we can remove the refetchQueries.
               */}
-              {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
-            </CardContent>
-            <CardFooter>
-              <Button type="submit">
-                {t('manage.controls.startCountdown')}
-              </Button>
-            </CardFooter>
-          </Card>
-        </form>
+                {data.game?.activePeriod?.activeSegment?.countdownExpiresAt}
+              </CardContent>
+              <CardFooter>
+                <Button type="submit">
+                  {t('manage.controls.startCountdown')}
+                </Button>
+              </CardFooter>
+            </Card>
+          </form>
+        </div>
       </div>
     </div>
   )

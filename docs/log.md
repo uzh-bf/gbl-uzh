@@ -1,5 +1,11 @@
 # Log
 
+## 2026-11-11
+
+**Update**: [Developing a Game](developing-a-game.md) - consolidated language selection into the main player locations and a single control above the admin game countdown, retained after completion; removed duplicate selectors from dialogs and pickers.
+
+**Update**: [Game Lifecycle](game-lifecycle.md), [ADR-0005](adr/0005-serialize-enrollment-with-initial-game-start.md) - separated exclusive/shared game lock helpers from registration, removed the old lockGame export, and added a registration wrapper enforcing lock-before-read ordering. Clarified registration versus gameplay coordination and acquisition versus execution timeouts; expanded database tests to controlled join/start races, lock release, and 100/300/500-player bursts.
+
 ## 2026-11-09
 
 **Update**: [Game Model](game-model.md), [Platform Overview](platform-overview.md) - player actions now run under row locks instead of serializable transactions, so a whole class submitting at once no longer fails, and ending a segment waits for in-flight actions.

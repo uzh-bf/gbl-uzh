@@ -3,7 +3,6 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef, type ReactNode } from 'react'
-import { LanguageSwitch } from '~/i18n/Language'
 import { sourceSansPro } from '~/lib/fonts'
 
 export const sheetPadding =
@@ -63,7 +62,6 @@ export default function ContentSheet({
           >
             <div className="text-player-muted mobile:gap-app-3 mobile:app-caption tablet:app-caption flex flex-wrap items-center gap-[12px] font-semibold tracking-[1px] uppercase min-[641px]:text-[22px]">
               {label}
-              <LanguageSwitch />
             </div>
             <button
               type="button"

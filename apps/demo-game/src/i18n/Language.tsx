@@ -118,7 +118,7 @@ export function LanguageLayout({ children }: { children: ReactNode }) {
           </title>
         )}
       </Head>
-      {pathname !== '/play/cockpit' && (
+      {pathname !== '/play/cockpit' && pathname !== '/admin/games/[id]' && (
         <div className="mx-auto flex h-[36px] max-w-[1440px] items-center justify-end px-[12px]">
           <LanguageSwitch />
         </div>

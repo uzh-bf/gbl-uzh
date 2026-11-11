@@ -9,7 +9,7 @@ import {
   BaseUserNotificationType as UserNotificationType,
 } from '../types.js'
 import * as EventService from './EventService.js'
-import { lockGame } from './RegistrationService.js'
+import { lockGameForShare } from './GameTransaction.js'
 
 type Context = CtxWithPrisma<DB.PrismaClient>
 
@@ -43,7 +43,7 @@ export async function performAction<ActionTypes>(
     async (tx) => {
       // Players act side by side under the shared game lock; ending a segment
       // takes the exclusive lock, so an action commits wholly before or after it.
-      await lockGame(tx, { id: args.gameId }, 'SHARE')
+      await lockGameForShare(tx, args.gameId)
       // Two submissions by the same player apply one after the other.
       await tx.$queryRaw`
         SELECT id FROM "PlayerResult"
