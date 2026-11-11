@@ -67,7 +67,7 @@ The GBL platform is an elegant, modular framework for building learning games, u
 * **Skill Gap**: Neither `gbl-backend-computations` nor `gbl-frontend-game-ui` warned about this. The Prisma client is a server-only dependency — any shared code path that uses its enums at runtime will crash the frontend.
 
 ### Volta EACCES Error (Host Toolchain)
-* **Symptom**: `ERROR: spawn /Users/…/.volta/tools/image/pnpm/11.6.0/bin/pnpm.cjs EACCES` when running `pnpm run dev` or `pnpm run build` on the host.
+* **Symptom**: `ERROR: spawn ~/.volta/tools/image/pnpm/11.6.0/bin/pnpm.cjs EACCES` when running `pnpm run dev` or `pnpm run build` on the host.
 * **Root Cause**: `npm-run-all` (`run-s`) spawns pnpm sub-commands, but Volta's shim path is not executable by the child process.
 * **Workaround**: Run commands inside the Docker container, or execute the sub-commands from the `run-s` sequence directly.
 * **Doc Gap**: `building-with-an-agent.md` had no troubleshooting section for host-toolchain issues.
