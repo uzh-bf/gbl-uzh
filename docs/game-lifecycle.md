@@ -6,7 +6,7 @@ tags:
   - lifecycle
   - state-machine
   - admin
-timestamp: "2026-11-02T13:20:00Z"
+timestamp: "2026-11-11T00:00:00Z"
 ---
 
 # Game Lifecycle
@@ -72,7 +72,17 @@ Independent of status: story elements attached to a newly activated segment appe
 
 ## Registration concurrency
 
-`RegistrationService.ts:registrationTransaction` runs enrollment, registration controls, and initial start at read-committed isolation. Each first locks the game row (`lockGame`), so simultaneous joins queue instead of failing; initial start reads players and creates results/actions inside that same transaction. A concurrent join either receives initial results or is rejected as closed. Capacity and per-browser uniqueness are enforced server-side. Registration changes publish `REGISTRATION_CHANGED` after commit; the admin's existing event subscription refetches its roster, with polling as fallback. Later lifecycle transitions retain the dice-reveal gates below.
+`RegistrationService.ts:withRegistrationLock` runs enrollment, registration controls, and initial start through `registrationTransaction` at read-committed isolation, taking `GameTransaction.ts:lockGameForUpdate` before invoking the transaction callback. Simultaneous joins queue on the game row; initial start reads players and creates results/actions inside that same transaction. A concurrent join either receives initial results or is rejected as closed. Capacity and per-browser uniqueness are enforced server-side. Registration changes publish `REGISTRATION_CHANGED` after commit; the admin's existing event subscription refetches its roster, with polling as fallback.
+
+The registration transaction allows 30 seconds to acquire a transaction/pooled connection (`maxWait`). Its separate 15-second execution limit (`timeout`) includes waiting for the game row lock and performing the work. These limits do not guarantee that an arbitrarily large burst succeeds. `registrationTransaction` retries `P2034` conflicts up to five total attempts.
+
+## Player actions and segment-ending locks
+
+After initial start, the game locks serve gameplay coordination, not enrollment. `PlayService.ts:performAction` takes `GameTransaction.ts:lockGameForShare` on the game row and an exclusive lock on the player's result. Different players can act concurrently. The `RUNNING → PAUSED` branch of `activateNextSegment` and the `RUNNING → CONSOLIDATION` branch of `activateNextPeriod` take `lockGameForUpdate`, waiting for actions to finish before calculating final results. An action that acquires its lock after the transition rereads the state and is rejected as no longer allowed. Later transitions retain the dice-reveal gates below.
+
+Both helpers hold their locks until transaction commit or rollback and return the game ID or `null` if it is absent. They must run before the state reads they protect. A lock on the game row does not automatically protect custom mutations of orders or player results: those mutations must follow the same game-lock protocol and separately protect the rows they read and change.
+
+The former `RegistrationService.ts:lockGame` export has been removed. Import `lockGameForUpdate(tx, { id })` (or `{ registrationToken }`) and `lockGameForShare(tx, gameId)` from `GameTransaction` instead; no compatibility adapter remains. Enrollment and initial start should use `withRegistrationLock` to enforce lock-before-read ordering.
 
 ## Coordination mechanics
 

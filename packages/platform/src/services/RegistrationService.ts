@@ -6,6 +6,7 @@ import type { Prisma, PrismaClient } from '../generated/prisma/client.js'
 import type { CtxWithPrisma } from '../types.js'
 import { isSecureRequest, loginAsTeam } from './AccountService.js'
 import * as EventService from './EventService.js'
+import { lockGameForUpdate, type GameLookup } from './GameTransaction.js'
 
 type Context = CtxWithPrisma<PrismaClient>
 const COOKIE = 'gbl-enrollment'
@@ -26,7 +27,7 @@ export async function registrationTransaction<T>(
 ): Promise<T> {
   for (let attempt = 0; ; attempt++) {
     try {
-      // Callers take the game row lock first (lockGame). Under read committed,
+      // withRegistrationLock takes the game row lock first. Under read committed,
       // concurrent enrollments and the initial start then queue on that row and
       // each sees the roster committed before it, instead of aborting each other
       // as serializable snapshots do when a whole class joins at once. maxWait
@@ -46,29 +47,17 @@ export async function registrationTransaction<T>(
   }
 }
 
-// Exclusive lock: serializes changes to one game's roster and lifecycle
-// (enrollment, registration controls, the initial start, ending a segment).
-// Shared lock: player actions, which may run side by side but must not
-// interleave with a lifecycle change. Take it as the first statement of a
-// read-committed transaction so every later read sees the latest commit.
-export async function lockGame(
-  tx: Prisma.TransactionClient,
-  where: { id: number } | { registrationToken: string },
-  mode: 'UPDATE' | 'SHARE' = 'UPDATE'
-) {
-  // Each game embeds its own generated Prisma client, which does not recognize
-  // a Prisma.raw fragment built by the platform's client; keep the SQL literal.
-  let rows: { id: number }[]
-  if (!('id' in where))
-    rows = await tx.$queryRaw`
-      SELECT id FROM "Game" WHERE "registrationToken" = ${where.registrationToken} FOR UPDATE`
-  else if (mode === 'SHARE')
-    rows = await tx.$queryRaw`
-      SELECT id FROM "Game" WHERE id = ${where.id} FOR SHARE`
-  else
-    rows = await tx.$queryRaw`
-      SELECT id FROM "Game" WHERE id = ${where.id} FOR UPDATE`
-  return rows[0]?.id ?? null
+// Enrollment, registration controls and initial start share this policy.
+// Lock before invoking work so its state reads cannot precede the lock.
+export function withRegistrationLock<T>(
+  prisma: PrismaClient,
+  where: GameLookup,
+  work: (tx: Prisma.TransactionClient) => Promise<T>
+): Promise<T> {
+  return registrationTransaction(prisma, async (tx) => {
+    await lockGameForUpdate(tx, where)
+    return work(tx)
+  })
 }
 
 function browserIdentity(ctx: Context) {
@@ -165,45 +154,48 @@ export async function registerPlayer(
   }
 ) {
   if (!browserIdentity(ctx)) throw new Error('REGISTRATION_SESSION_REQUIRED')
-  const result = await registrationTransaction(ctx.prisma, async (tx) => {
-    await lockGame(tx, { registrationToken: token })
-    const game = await tx.game.findUnique({
-      where: { registrationToken: token },
-    })
-    if (!game) throw new Error('INVALID_REGISTRATION_LINK')
-    const existing = await existingPlayer(ctx, game.id, tx)
-    if (existing)
-      return {
-        player: existing,
-        created: false,
-      }
-    if (game.status !== 'SCHEDULED' || !game.registrationOpen)
-      throw new Error('REGISTRATION_CLOSED')
-    const count = await tx.player.count({ where: { gameId: game.id } })
-    if (game.maxPlayers !== null && count >= game.maxPlayers)
-      throw new Error('REGISTRATION_FULL')
-    const validated = schema.validateSync(
-      { name, facts },
-      { abortEarly: false, stripUnknown: true }
-    )
-    await tx.game.update({
-      where: { id: game.id },
-      data: { version: { increment: 1 } },
-    })
-    const player = await tx.player.create({
-      data: {
-        gameId: game.id,
-        name: validated.name,
-        facts: validated.facts,
-        number: count + 1,
-        token: nanoid(),
-        enrollmentKey: enrollmentKey(ctx, game.id),
-        levelIx: 0,
-        role: roleAssigner?.(count, game.facts),
-      },
-    })
-    return { player, created: true }
-  })
+  const result = await withRegistrationLock(
+    ctx.prisma,
+    { registrationToken: token },
+    async (tx) => {
+      const game = await tx.game.findUnique({
+        where: { registrationToken: token },
+      })
+      if (!game) throw new Error('INVALID_REGISTRATION_LINK')
+      const existing = await existingPlayer(ctx, game.id, tx)
+      if (existing)
+        return {
+          player: existing,
+          created: false,
+        }
+      if (game.status !== 'SCHEDULED' || !game.registrationOpen)
+        throw new Error('REGISTRATION_CLOSED')
+      const count = await tx.player.count({ where: { gameId: game.id } })
+      if (game.maxPlayers !== null && count >= game.maxPlayers)
+        throw new Error('REGISTRATION_FULL')
+      const validated = schema.validateSync(
+        { name, facts },
+        { abortEarly: false, stripUnknown: true }
+      )
+      await tx.game.update({
+        where: { id: game.id },
+        data: { version: { increment: 1 } },
+      })
+      const player = await tx.player.create({
+        data: {
+          gameId: game.id,
+          name: validated.name,
+          facts: validated.facts,
+          number: count + 1,
+          token: nanoid(),
+          enrollmentKey: enrollmentKey(ctx, game.id),
+          levelIx: 0,
+          role: roleAssigner?.(count, game.facts),
+        },
+      })
+      return { player, created: true }
+    }
+  )
   if (result.created) publishRegistrationChanged(result.player.gameId)
   await loginAsTeam({ token: result.player.token }, ctx)
   return true
@@ -221,18 +213,21 @@ export async function setRegistrationOpen(
   open: boolean,
   ctx: Context
 ) {
-  const game = await registrationTransaction(ctx.prisma, async (tx) => {
-    await lockGame(tx, { id: gameId })
-    const game = await tx.game.findUnique({ where: { id: gameId } })
-    if (!game) throw new Error('GAME_NOT_FOUND')
-    assertGameManager(ctx)
-    if (!game.registrationToken || game.status !== 'SCHEDULED')
-      throw new Error('REGISTRATION_CLOSED')
-    return tx.game.update({
-      where: { id: gameId },
-      data: { registrationOpen: open, version: { increment: 1 } },
-    })
-  })
+  const game = await withRegistrationLock(
+    ctx.prisma,
+    { id: gameId },
+    async (tx) => {
+      const game = await tx.game.findUnique({ where: { id: gameId } })
+      if (!game) throw new Error('GAME_NOT_FOUND')
+      assertGameManager(ctx)
+      if (!game.registrationToken || game.status !== 'SCHEDULED')
+        throw new Error('REGISTRATION_CLOSED')
+      return tx.game.update({
+        where: { id: gameId },
+        data: { registrationOpen: open, version: { increment: 1 } },
+      })
+    }
+  )
   publishRegistrationChanged(gameId)
   return game
 }

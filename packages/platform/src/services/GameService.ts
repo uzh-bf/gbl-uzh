@@ -13,10 +13,10 @@ import {
   UpdatePlayerDataArgs,
 } from '../types.js'
 import * as EventService from './EventService.js'
+import { lockGameForUpdate } from './GameTransaction.js'
 import {
   assertGameManager,
-  lockGame,
-  registrationTransaction,
+  withRegistrationLock,
 } from './RegistrationService.js'
 
 type Context = CtxWithPrisma<PrismaClient>
@@ -441,76 +441,82 @@ export async function activateNextPeriod(
     //   period or segment
     // - Done: the game facts are updated on user interaction in PlayService
     case DB.GameStatus.SCHEDULED: {
-      const started = await registrationTransaction(ctx.prisma, async (tx) => {
-        await lockGame(tx, { id: gameId })
-        const fresh = await tx.game.findUnique({
-          where: { id: gameId },
-          include: {
-            players: true,
-            periods: { orderBy: { index: 'asc' }, include: { segments: true } },
-          },
-        })
-        if (!fresh) throw new Error('GAME_NOT_FOUND')
-        assertGameManager(ctx)
-        if (fresh.status !== 'SCHEDULED')
-          throw new Error('GAME_ALREADY_STARTED')
-        if (!fresh.players.length) throw new Error('NO_PLAYERS')
-        if (!fresh.periods[0]) throw new Error('GAME_NOT_CONFIGURED')
-        const updatedGame_ = await tx.game.update({
-          where: { id: gameId },
-          data: {
-            status: DB.GameStatus.PREPARATION,
-            registrationOpen: false,
-            activePeriodIx: 0,
-            activePeriod: { connect: { gameId_index: { gameId, index: 0 } } },
-            version: { increment: 1 },
-          },
-          include: gameInclude,
-        })
-        const { results, extras } = computePeriodStartResults(
-          {
-            results: undefined,
-            players: fresh.players,
-            activePeriodIx: -1,
-            game: fresh,
-            periodFacts: fresh.periods[0].facts,
-          },
-          { ...ctx, prisma: tx },
-          { services }
-        )
-        await tx.period.update({
-          where: { gameId_index: { gameId, index: 0 } },
-          data: { results: { create: results } },
-        })
-        await Promise.all(extras)
-        const notifications: Array<() => void> = []
-        for (const player of fresh.players.filter(
-          (player) => player.enrollmentKey != null
-        )) {
-          await EventService.receiveEvents({
-            events: [
-              {
-                type: 'COMPANY_SETUP_COMPLETED',
-                facts: { hasName: 1, hasColor: 1 },
+      const started = await withRegistrationLock(
+        ctx.prisma,
+        { id: gameId },
+        async (tx) => {
+          const fresh = await tx.game.findUnique({
+            where: { id: gameId },
+            include: {
+              players: true,
+              periods: {
+                orderBy: { index: 'asc' },
+                include: { segments: true },
               },
-            ],
-            ctx: {
-              user: { sub: player.id },
-              args: { gameId, periodIx: 0, playerId: player.id },
-              achievements: player.achievementKeys,
-              experience: player.experience,
-              currentLevelIx: player.levelIx,
-            },
-            prisma: tx,
-            notify: (target, events) => {
-              notifications.push(() =>
-                EventService.publishUserNotification(target, events)
-              )
             },
           })
+          if (!fresh) throw new Error('GAME_NOT_FOUND')
+          assertGameManager(ctx)
+          if (fresh.status !== 'SCHEDULED')
+            throw new Error('GAME_ALREADY_STARTED')
+          if (!fresh.players.length) throw new Error('NO_PLAYERS')
+          if (!fresh.periods[0]) throw new Error('GAME_NOT_CONFIGURED')
+          const updatedGame_ = await tx.game.update({
+            where: { id: gameId },
+            data: {
+              status: DB.GameStatus.PREPARATION,
+              registrationOpen: false,
+              activePeriodIx: 0,
+              activePeriod: { connect: { gameId_index: { gameId, index: 0 } } },
+              version: { increment: 1 },
+            },
+            include: gameInclude,
+          })
+          const { results, extras } = computePeriodStartResults(
+            {
+              results: undefined,
+              players: fresh.players,
+              activePeriodIx: -1,
+              game: fresh,
+              periodFacts: fresh.periods[0].facts,
+            },
+            { ...ctx, prisma: tx },
+            { services }
+          )
+          await tx.period.update({
+            where: { gameId_index: { gameId, index: 0 } },
+            data: { results: { create: results } },
+          })
+          await Promise.all(extras)
+          const notifications: Array<() => void> = []
+          for (const player of fresh.players.filter(
+            (player) => player.enrollmentKey != null
+          )) {
+            await EventService.receiveEvents({
+              events: [
+                {
+                  type: 'COMPANY_SETUP_COMPLETED',
+                  facts: { hasName: 1, hasColor: 1 },
+                },
+              ],
+              ctx: {
+                user: { sub: player.id },
+                args: { gameId, periodIx: 0, playerId: player.id },
+                achievements: player.achievementKeys,
+                experience: player.experience,
+                currentLevelIx: player.levelIx,
+              },
+              prisma: tx,
+              notify: (target, events) => {
+                notifications.push(() =>
+                  EventService.publishUserNotification(target, events)
+                )
+              },
+            })
+          }
+          return { game: updatedGame_, notifications }
         }
-        return { game: updatedGame_, notifications }
-      })
+      )
       updatedGame = started.game
       started.notifications.forEach((notify) => notify())
 
@@ -535,7 +541,7 @@ export async function activateNextPeriod(
         async (tx) => {
           // Waits for in-flight player actions (shared lock) and keeps new ones
           // out until the segment's results are computed and committed.
-          await lockGame(tx, { id: gameId })
+          await lockGameForUpdate(tx, { id: gameId })
           if (services.Segment.updateDBBeforeActivation) {
             await services.Segment.updateDBBeforeActivation(tx, {
               gameId,
@@ -1068,7 +1074,7 @@ export async function activateNextSegment(
         async (tx) => {
           // Waits for in-flight player actions (shared lock) and keeps new ones
           // out until the segment's results are computed and committed.
-          await lockGame(tx, { id: gameId })
+          await lockGameForUpdate(tx, { id: gameId })
           if (services.Segment.updateDBBeforeActivation) {
             await services.Segment.updateDBBeforeActivation(tx, {
               gameId,

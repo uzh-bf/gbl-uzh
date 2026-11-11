@@ -1,10 +1,15 @@
 import { activateNextPeriod } from '@gbl-uzh/platform/dist/services/GameService'
+import {
+  lockGameForShare,
+  lockGameForUpdate,
+} from '@gbl-uzh/platform/dist/services/GameTransaction'
 import * as Registration from '@gbl-uzh/platform/dist/services/RegistrationService'
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest'
 import { AVATARS } from '../lib/constants'
 import prisma from '../lib/prisma'
 import { RegistrationSchema } from '../lib/registration'
+import { gameLockOperation, waitForBlocker } from './testing/gameLockOperation'
 
 // Explicit opt-in: uses the configured local DB and deletes only its own games.
 describe.skipIf(process.env.REGISTRATION_DATABASE_TESTS !== '1')(
@@ -16,11 +21,12 @@ describe.skipIf(process.env.REGISTRATION_DATABASE_TESTS !== '1')(
     const schema = RegistrationSchema
     function context(
       identity = randomUUID().replaceAll('-', ''),
-      user?: { sub: string; role: string; gameId?: number }
+      user?: { sub: string; role: string; gameId?: number },
+      client = prisma
     ) {
       const headers = new Map<string, unknown>()
       return {
-        prisma,
+        prisma: client,
         user,
         req: {
           headers: {
@@ -36,7 +42,8 @@ describe.skipIf(process.env.REGISTRATION_DATABASE_TESTS !== '1')(
         },
       } as never
     }
-    const admin = () => context(undefined, { sub: userId, role: 'ADMIN' })
+    const admin = (client = prisma) =>
+      context(undefined, { sub: userId, role: 'ADMIN' }, client)
     async function game(maxPlayers: number | null = null) {
       const row = await prisma.game.create({
         data: {
@@ -113,20 +120,31 @@ describe.skipIf(process.env.REGISTRATION_DATABASE_TESTS !== '1')(
       expect(await prisma.player.count({ where: { gameId: row.id } })).toBe(1)
     })
 
-    test('a whole class joining at once is enrolled without failures', async () => {
-      const row = await game()
-      const outcomes = await Promise.allSettled(
-        Array.from({ length: 100 }, (_, ix) =>
-          join(row.registrationToken!, context(), `Bank ${ix}`)
+    test.each([100, 300, 500])(
+      '%i simultaneous registrations succeed',
+      { timeout: 60_000 },
+      async (size) => {
+        const row = await game(size)
+        const outcomes = await Promise.allSettled(
+          Array.from({ length: size }, (_, ix) =>
+            join(row.registrationToken!, context(), `Bank ${ix}`)
+          )
         )
-      )
-      expect(outcomes.filter((r) => r.status === 'rejected')).toEqual([])
-      const players = await prisma.player.findMany({
-        where: { gameId: row.id },
-        select: { number: true },
-      })
-      expect(new Set(players.map((player) => player.number)).size).toBe(100)
-    })
+        expect(outcomes.filter((r) => r.status === 'rejected')).toEqual([])
+        const players = await prisma.player.findMany({
+          where: { gameId: row.id },
+          select: { number: true },
+          orderBy: { number: 'asc' },
+        })
+        expect(players).toHaveLength(size)
+        expect(players.map((player) => player.number)).toEqual(
+          Array.from({ length: size }, (_, ix) => ix + 1)
+        )
+        await expect(join(row.registrationToken!)).rejects.toThrow(
+          'REGISTRATION_FULL'
+        )
+      }
+    )
 
     test('manual closure and concurrent enrollment commit a consistent roster', async () => {
       const row = await game()
@@ -146,57 +164,177 @@ describe.skipIf(process.env.REGISTRATION_DATABASE_TESTS !== '1')(
       )
     })
 
-    test('joining versus starting includes every accepted player and initial action', async () => {
-      const row = await game()
-      await join(row.registrationToken!)
-      const period = await prisma.period.create({
-        data: { gameId: row.id, index: 0, facts: {}, segmentCount: 1 },
-      })
-      await prisma.periodSegment.create({
-        data: {
-          gameId: row.id,
-          periodId: period.id,
-          periodIx: 0,
-          index: 0,
-          facts: {},
-        },
-      })
-      const services = {
-        PeriodResult: {
-          initialize: () => ({
-            resultFacts: { balance: 100 },
-            actions: [{ type: 'INITIALIZED', facts: {} }],
+    test.each(['registration', 'start'] as const)(
+      '%s acquires the lock first in the join/start race',
+      { timeout: 30_000 },
+      async (first) => {
+        const row = await game()
+        await join(row.registrationToken!)
+        const period = await prisma.period.create({
+          data: { gameId: row.id, index: 0, facts: {}, segmentCount: 1 },
+        })
+        await prisma.periodSegment.create({
+          data: {
+            gameId: row.id,
+            periodId: period.id,
+            periodIx: 0,
+            index: 0,
+            facts: {},
+          },
+        })
+        const services = {
+          PeriodResult: {
+            initialize: () => ({
+              resultFacts: { balance: 100 },
+              actions: [{ type: 'INITIALIZED', facts: {} }],
+            }),
+          },
+        }
+        const operations = {
+          registration: (client: typeof prisma) =>
+            join(row.registrationToken!, context(undefined, undefined, client)),
+          start: (client: typeof prisma) =>
+            activateNextPeriod({ gameId: row.id }, admin(client), {
+              services,
+            } as never),
+        }
+        const winner = gameLockOperation(prisma, operations[first])
+        let loser: ReturnType<typeof gameLockOperation> | undefined
+        try {
+          const holderPid = await winner.acquired()
+          loser = gameLockOperation(
+            prisma,
+            operations[first === 'registration' ? 'start' : 'registration'],
+            false
+          )
+          await waitForBlocker(prisma, await loser.attempted(), [holderPid])
+        } finally {
+          winner.release()
+          await Promise.all([winner.result, loser?.result])
+        }
+        expect(await winner.result).toMatchObject({ status: 'fulfilled' })
+        expect(await loser!.result).toMatchObject(
+          first === 'registration'
+            ? { status: 'fulfilled' }
+            : { status: 'rejected', reason: { message: 'REGISTRATION_CLOSED' } }
+        )
+        const players = await prisma.player.findMany({
+          where: { gameId: row.id },
+          select: { id: true },
+          orderBy: { id: 'asc' },
+        })
+        expect(players).toHaveLength(first === 'registration' ? 2 : 1)
+        const [results, actions] = await Promise.all([
+          prisma.playerResult.findMany({
+            where: { gameId: row.id, type: 'PERIOD_START' },
+            select: { playerId: true },
+            orderBy: { playerId: 'asc' },
           }),
-        },
+          prisma.playerAction.findMany({
+            where: { gameId: row.id, type: 'INITIALIZED' },
+            select: { playerId: true },
+            orderBy: { playerId: 'asc' },
+          }),
+        ])
+        const playerIds = players.map((player) => player.id)
+        expect(results.map((result) => result.playerId)).toEqual(playerIds)
+        expect(actions.map((action) => action.playerId)).toEqual(playerIds)
+        expect(
+          (await prisma.game.findUniqueOrThrow({ where: { id: row.id } }))
+            .registrationOpen
+        ).toBe(false)
+        await expect(
+          Registration.setRegistrationOpen(row.id, true, admin())
+        ).rejects.toThrow('REGISTRATION_CLOSED')
       }
-      const [joined, started] = await Promise.allSettled([
-        join(row.registrationToken!),
-        activateNextPeriod({ gameId: row.id }, admin(), { services } as never),
-      ])
-      expect(started.status).toBe('fulfilled')
-      if (joined.status === 'rejected')
-        expect(joined.reason.message).toBe('REGISTRATION_CLOSED')
-      const players = await prisma.player.findMany({
-        where: { gameId: row.id },
+    )
+
+    test.each([
+      ['SHARE', 'commit'],
+      ['SHARE', 'rollback'],
+      ['UPDATE', 'commit'],
+      ['UPDATE', 'rollback'],
+    ] as const)(
+      '%s locks block exclusive requests until %s',
+      { timeout: 30_000 },
+      async (mode, ending) => {
+        const row = await game()
+        const rollback = new Error('Intentional lock-test rollback')
+        // Two shared holders must both acquire their locks before either releases.
+        const holders = Array.from({ length: mode === 'SHARE' ? 2 : 1 }, () =>
+          gameLockOperation(prisma, (client) =>
+            client.$transaction(
+              async (tx) => {
+                const id =
+                  mode === 'SHARE'
+                    ? await lockGameForShare(tx as never, row.id)
+                    : await lockGameForUpdate(tx as never, { id: row.id })
+                if (ending === 'rollback') throw rollback
+                return id
+              },
+              { isolationLevel: 'ReadCommitted', timeout: 15000 }
+            )
+          )
+        )
+        let exclusive: ReturnType<typeof gameLockOperation> | undefined
+        try {
+          const holderPids = await Promise.all(
+            holders.map((holder) => holder.acquired())
+          )
+          exclusive = gameLockOperation(
+            prisma,
+            (client) =>
+              client.$transaction(
+                (tx) => lockGameForUpdate(tx as never, { id: row.id }),
+                { isolationLevel: 'ReadCommitted', timeout: 15000 }
+              ),
+            false
+          )
+          const waiterPid = await exclusive.attempted()
+          // PostgreSQL can wait on shared holders one at a time.
+          const blocker = await waitForBlocker(prisma, waiterPid, holderPids)
+          const holder = holders[holderPids.indexOf(blocker)]!
+          holder.release()
+          await holder.result
+          // Releasing just one shared holder must not unblock the exclusive lock.
+          const remaining = holderPids.filter((pid) => pid !== blocker)
+          if (remaining.length)
+            await waitForBlocker(prisma, waiterPid, remaining)
+        } finally {
+          holders.forEach((holder) => holder.release())
+          await Promise.all([
+            ...holders.map((holder) => holder.result),
+            exclusive?.result,
+          ])
+        }
+        for (const holder of holders) {
+          expect(await holder.result).toEqual(
+            ending === 'commit'
+              ? { status: 'fulfilled', value: row.id }
+              : { status: 'rejected', reason: rollback }
+          )
+        }
+        expect(await exclusive!.result).toEqual({
+          status: 'fulfilled',
+          value: row.id,
+        })
+        // The contender's exclusive lock must also release after commit.
+        await expect(
+          prisma.$transaction((tx) => lockGameForShare(tx as never, row.id))
+        ).resolves.toBe(row.id)
+      }
+    )
+
+    test('lock lookups return null for missing games', async () => {
+      await prisma.$transaction(async (tx) => {
+        expect(await lockGameForUpdate(tx as never, { id: -1 })).toBeNull()
+        expect(
+          await lockGameForUpdate(tx as never, {
+            registrationToken: randomUUID(),
+          })
+        ).toBeNull()
+        expect(await lockGameForShare(tx as never, -1)).toBeNull()
       })
-      expect(players).toHaveLength(joined.status === 'fulfilled' ? 2 : 1)
-      expect(
-        await prisma.playerResult.count({
-          where: { gameId: row.id, type: 'PERIOD_START' },
-        })
-      ).toBe(players.length)
-      expect(
-        await prisma.playerAction.count({
-          where: { gameId: row.id, type: 'INITIALIZED' },
-        })
-      ).toBe(players.length)
-      expect(
-        (await prisma.game.findUniqueOrThrow({ where: { id: row.id } }))
-          .registrationOpen
-      ).toBe(false)
-      await expect(
-        Registration.setRegistrationOpen(row.id, true, admin())
-      ).rejects.toThrow('REGISTRATION_CLOSED')
     })
 
     test('failed initialization rolls back the start and leaves registration usable', async () => {
